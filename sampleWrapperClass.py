@@ -1322,7 +1322,7 @@ class sampleWrapperClass:
                                          
              self.mass_ungroomedjet_vbf_j1_[0]  = mass_top_veto.M();
 
-             mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt_pr")[0],getattr(self.InputTree_, prefix+"_eta")[0],getattr(self.InputTree_, prefix+"_phi_pr")[0],
+             mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt_pr")[0],getattr(self.InputTree_, prefix+"_eta_pr")[0],getattr(self.InputTree_, prefix+"_phi_pr")[0],
                                           getattr(self.InputTree_, prefix+"_mass_pr")[0]);
 
              mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
@@ -1331,7 +1331,7 @@ class sampleWrapperClass:
              self.mass_ungroomedjet_vbf_j1_pr_[0]  = mass_top_veto.M();
 
              mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt")[0],getattr(self.InputTree_, prefix+"_eta")[0],getattr(self.InputTree_, prefix+"_phi")[0],
-                                          getattr(self.InputTree_, prefix+"_mass")[0]);
+                                           getattr(self.InputTree_, prefix+"_mass")[0]);
 
              mass_top_veto_j2.SetPtEtaPhiM(getattr(self.InputTree_,  "vbf_maxpt_j2_pt"),getattr(self.InputTree_, "vbf_maxpt_j2_eta"),getattr(self.InputTree_, "vbf_maxpt_j2_phi"),
                                           getattr(self.InputTree_,   "vbf_maxpt_j2_m"));
@@ -1341,8 +1341,8 @@ class sampleWrapperClass:
                                          
              self.mass_ungroomedjet_vbf_j2_[0]  = mass_top_veto.M();
 
-             mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt_pr")[0],getattr(self.InputTree_, prefix+"_eta")[0],getattr(self.InputTree_, prefix+"_phi_pr")[0],
-                                          getattr(self.InputTree_, prefix+"_mass_pr")[0]);
+             mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt_pr")[0],getattr(self.InputTree_, prefix+"_eta_pr")[0],getattr(self.InputTree_, prefix+"_phi_pr")[0],
+                                           getattr(self.InputTree_, prefix+"_mass_pr")[0]);
 
              mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
 
@@ -1371,10 +1371,12 @@ class sampleWrapperClass:
                         if dR_jj < 0.8 : continue ;
                         if(dR_jj < dR_jj_min):
                             ijet_index = i;
+                            dR_jj_min = dR_jj ;
                         dR_jj_pr = math.sqrt( (ca8_eta_pr-j_ak5_eta)**2 + (ca8_phi_pr-j_ak5_phi)**2 );
                         if dR_jj_pr < 0.8 : continue ;
                         if(dR_jj_pr < dR_jj_pr_min):                                
                             ijet_index_pr = i;
+                            dR_jj_pr_min = dR_jj_pr ;
 
 
              for i in range(6):
@@ -1393,21 +1395,23 @@ class sampleWrapperClass:
                         if dR_jj < 0.8 : continue ;
                         if(dR_jj < dR_jj_min):
                             ijet_index = i+7;
+                            dR_jj_min = dR_jj ;
                         dR_jj_pr = math.sqrt( (ca8_eta_pr-j_ak5_eta)**2 + (ca8_phi_pr-j_ak5_phi)**2 );
                         if dR_jj_pr < 0.8 : continue ;
                         if(dR_jj_pr < dR_jj_pr_min):                                
                             ijet_index_pr = i+7;
+                            dR_jj_pr_min = dR_jj_pr ;
 
 
              if(ijet_index < 7 and ijet_index !=-1):
 
               mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt")[0],getattr(self.InputTree_, prefix+"_eta")[0],getattr(self.InputTree_, prefix+"_phi")[0],
-                                           getattr(self.InputTree_, prefix+"_mass")[0]);
+                                            getattr(self.InputTree_, prefix+"_mass")[0]);
 
               mass_top_veto_j2.SetPtEtaPhiM(getattr(self.InputTree_, "JetPFCor_Pt")[ijet_index],
-                                           getattr(self.InputTree_, "JetPFCor_Eta")[ijet_index],
-                                           getattr(self.InputTree_, "JetPFCor_Phi")[ijet_index],
-                                           getattr(self.InputTree_, "JetPFCor_Mass")[ijet_index]);
+                                            getattr(self.InputTree_, "JetPFCor_Eta")[ijet_index],
+                                            getattr(self.InputTree_, "JetPFCor_Phi")[ijet_index],
+                                            getattr(self.InputTree_, "JetPFCor_Mass")[ijet_index]);
     
               mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
                                          
@@ -1415,7 +1419,7 @@ class sampleWrapperClass:
               self.mass_ungroomedjet_closerjet_[0]  = mass_top_veto.M();
 
               mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt_pr")[0],getattr(self.InputTree_, prefix+"_eta_pr")[0],getattr(self.InputTree_, prefix+"_phi_pr")[0],
-                                           getattr(self.InputTree_, prefix+"_mass_pr")[0]);
+                                            getattr(self.InputTree_, prefix+"_mass_pr")[0]);
 
               mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
                                          
@@ -1427,17 +1431,17 @@ class sampleWrapperClass:
               mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt")[0],getattr(self.InputTree_, prefix+"_eta")[0],getattr(self.InputTree_, prefix+"_phi")[0],
                                            getattr(self.InputTree_, prefix+"_mass")[0]);
 
-              mass_top_veto_j2.SetPtEtaPhiM(getattr(self.InputTree_, "JetPFCor_Pt")[ijet_index-7],
-                                           getattr(self.InputTree_, "JetPFCor_Eta")[ijet_index-7],
-                                           getattr(self.InputTree_, "JetPFCor_Phi")[ijet_index-7],
-                                           getattr(self.InputTree_, "JetPFCor_Mass")[ijet_index-7]);
+              mass_top_veto_j2.SetPtEtaPhiM(getattr(self.InputTree_, "JetPFCorVBFTag_Pt")[ijet_index-7],
+                                            getattr(self.InputTree_,  "JetPFCorVBFTag_Eta")[ijet_index-7],
+                                            getattr(self.InputTree_,  "JetPFCorVBFTag_Phi")[ijet_index-7],
+                                            getattr(self.InputTree_,  "JetPFCorVBFTag_Mass")[ijet_index-7]);
     
               mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
                                          
               self.mass_ungroomedjet_closerjet_[0]  = mass_top_veto.M();
 
               mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt_pr")[0],getattr(self.InputTree_, prefix+"_eta_pr")[0],getattr(self.InputTree_, prefix+"_phi_pr")[0],
-                                           getattr(self.InputTree_, prefix+"_mass_pr")[0]);
+                                            getattr(self.InputTree_, prefix+"_mass_pr")[0]);
 
               mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
                                          
