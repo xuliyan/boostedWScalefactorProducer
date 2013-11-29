@@ -42,8 +42,7 @@ from ROOT import draw_error_band, draw_error_band_extendPdf, draw_error_band_Dec
 
 ##### Point of Mass to be Analyzed 
 mass          = [1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,800,900]
-GammaOverMass = [0.05]
-#,0.10,0.15,0.20,0.25,0.30,0.35,0.40]
+GammaOverMass = [0.001,0.05,0.10,0.15,0.20,0.25,0.30,0.35,0.40]
 
 
 ### how to run it: python g1_doDatacard_width.py wwlvj_BulkG_WW_inclusive_c0p2 -b  --datacardPath cards_em_EXO_allCat_v2_ExpTail_g1_rereco_c0p5/ --channel em 
@@ -100,9 +99,10 @@ if __name__ == '__main__':
 
         datacard_old = open("%s/%s/%s"%(options.inPath,options.datacardPath,datacard),"r");        
         datacardfile = open("%s/%s/%s"%(options.inPath,options.datacardPath,newdatacard),"a");
+        
         for line_old in datacard_old:
           if line_old.find("workspace")!=-1:
-            newworkspace = TString(list_of_workspace[idatacard]).ReplaceAll(".root","_w%.3f.root"%gammaVal);
+            newworkspace = TString(list_of_workspace[idatacard]).ReplaceAll(".root","_W%.3f.root"%gammaVal);
             newworkspace.ReplaceAll("0.","_");
             newworkspace.ReplaceAll("_root",".root");
             if line_old.split()[1].find("Bulk")!=-1:
@@ -111,15 +111,19 @@ if __name__ == '__main__':
              datasetname = line_old.split()[1]; 
              datacardfile.write("\n%s %s %s %s %s\n"%(line_old.split()[0],line_old.split()[1],line_old.split()[2],newworkspace,line_old.split()[4]));
             else:
-             datacardfile.write("\n%s %s %s %s %s"%(line_old.split()[0],line_old.split()[1],line_old.split()[2],newworkspace,line_old.split()[4]));              
+             datacardfile.write("\n%s %s %s %s %s"%(line_old.split()[0],line_old.split()[1],line_old.split()[2],newworkspace,line_old.split()[4]));
+          elif line_old.find("rate")!=-1:
+            datacardfile.write("rate 1 %s %s %s %s\n"%(line_old.split()[2],line_old.split()[3],line_old.split()[4],line_old.split()[5]));          
+          elif line_old.find("lumi_8TeV")!=-1:
+            datacardfile.write("CMS_eff_width lnN 1.15 - - - -\n");
+            datacardfile.write(line_old);            
           else:  
             datacardfile.write(line_old);
-        datacardfile.write("\nCMS_eff_width lnN 1.15 - - - -");
     idatacard = idatacard+1;
 
   ### make the new workspaces --> loop on the old, create empty new ones  
-  iMass = 0 ;
   for workspace in list_of_workspace :
+    iMass = 0 ;
     for gammaVal in GammaOverMass:
 
         newfilename = TString(workspace).ReplaceAll(".root","_W%.3f.root"%gammaVal);
@@ -151,7 +155,9 @@ if __name__ == '__main__':
         getattr(new_workspace,"import")(old_workspace.data(datasetname+"_xww_"+options.channel+"_"+options.category));
 
         ### make the Breit Wigner core
-        rrv_mean_BW = RooRealVar("rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,"rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,mass[iMass]);
+        RooDoubleCrystalBall.SetName("model_pdf_DoubleCB_BulkG_WW_"+options.channel+"_"+options.category+"_mlvj"); 
+
+        rrv_mean_BW = RooRealVar("rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,"rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,0.);
         rrv_width_BW = RooRealVar("rrv_width_BW_BulkG_WW_"+options.channel+"_"+options.category,"rrv_width_BW_BulkG_WW_"+options.channel+"_"+options.category,mass[iMass]*gammaVal);
 
         rrv_mean_BW.setConstant(kTRUE);
@@ -160,7 +166,7 @@ if __name__ == '__main__':
         bw = RooBreitWigner("bw_BulkWW_xww_"+options.channel,"bw_BulkG_WW_"+options.channel,old_workspace.var("rrv_mass_lvj"),rrv_mean_BW,rrv_width_BW);
 
         ### FFT ConvPdf
-        model_pdf = RooFFTConvPdf("model_pdf_BulkWW_xww_"+options.channel+"_mlvj","model_pdf_BulkWW_xww_"+options.channel+"_mlvj",old_workspace.var("rrv_mass_lvj"),bw,RooDoubleCrystalBall);
+        model_pdf = RooFFTConvPdf("BulkWW_xww_%s_%s"%(options.channel,options.category),"BulkWW_xww_%s_%s"%(options.channel,options.category),old_workspace.var("rrv_mass_lvj"),RooDoubleCrystalBall,bw);
         model_pdf.setBufferFraction(1.0)
         getattr(new_workspace,"import")(model_pdf);
                           
