@@ -153,18 +153,6 @@ if __name__ == '__main__':
             RooDoubleCrystalBall = param;
           param=par.Next()
 
-        ## cycle on DoubleCB parameters
-        sig_parameters = RooDoubleCrystalBall.getParameters(old_workspace.data(datasetname+"_xww_"+options.channel+"_"+options.category));
-        sig_par = sig_parameters.createIterator();
-        sig_par.Reset();
-        sig_param = sig_par.Next();
-
-        while (sig_param):
-          if TString(sig_param.GetName()).Contains("rrv_mean_CB_BulkG_WW"):
-           rrv_mean_BW = RooRealVar("rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,"rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,sig_param.getVal());
-           sig_param.setRange(-100,100);
-           sig_param.setVal(0.);
-          sig_param = sig_par.Next();
                                       
         ### copy all the datasets
         getattr(new_workspace,"import")(old_workspace.data(datasetname+"_xww_"+options.channel+"_"+options.category));
@@ -172,6 +160,7 @@ if __name__ == '__main__':
         ### make the Breit Wigner core
         RooDoubleCrystalBall.SetName("model_pdf_DoubleCB_BulkG_WW_"+options.channel+"_"+options.category+"_mlvj"); 
 
+        rrv_mean_BW = RooRealVar("rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,"rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,0.);
         rrv_width_BW = RooRealVar("rrv_width_BW_BulkG_WW_"+options.channel+"_"+options.category,"rrv_width_BW_BulkG_WW_"+options.channel+"_"+options.category,mass[iMass]*gammaVal);
 
         rrv_mean_BW.setConstant(kTRUE);
@@ -181,7 +170,7 @@ if __name__ == '__main__':
         print "rrv_mean_BW ",rrv_mean_BW.getVal()," mass[iMass] ",mass[iMass]," gammaVal ",gammaVal," old_workspace Name ",old_file.GetName()," new file ",new_file;
 
         ### FFT ConvPdf
-        model_pdf = RooFFTConvPdf("BulkWW_xww_%s_%s"%(options.channel,options.category),"BulkWW_xww_%s_%s"%(options.channel,options.category),old_workspace.var("rrv_mass_lvj"),bw,RooDoubleCrystalBall);
+        model_pdf = RooFFTConvPdf("BulkWW_xww_%s_%s"%(options.channel,options.category),"BulkWW_xww_%s_%s"%(options.channel,options.category),old_workspace.var("rrv_mass_lvj"),RooDoubleCrystalBall,bw);
         model_pdf.SetName("BulkWW_xww_%s_%s"%(options.channel,options.category));
         getattr(new_workspace,"import")(model_pdf);
                           
