@@ -113,7 +113,8 @@ if __name__ == '__main__':
             else:
              datacardfile.write("\n%s %s %s %s %s"%(line_old.split()[0],line_old.split()[1],line_old.split()[2],newworkspace,line_old.split()[4]));
           elif line_old.find("rate")!=-1:
-            datacardfile.write("rate 1 %s %s %s %s\n"%(line_old.split()[2],line_old.split()[3],line_old.split()[4],line_old.split()[5]));          
+            datacardfile.write("rate 1 %s %s %s %s\n"%(line_old.split()[2],line_old.split()[3],line_old.split()[4],line_old.split()[5]));
+            continue ;
           elif line_old.find("lumi_8TeV")!=-1:
             datacardfile.write("CMS_eff_width lnN 1.15 - - - -\n");
             datacardfile.write(line_old);            
@@ -139,6 +140,7 @@ if __name__ == '__main__':
         new_file.cd();
 
         ### copy all the pdfs + parameter
+        old_workspace.Print();
         pdf_workspace = old_workspace.allPdfs();
         par = pdf_workspace.createIterator();
         par.Reset();
@@ -151,27 +153,38 @@ if __name__ == '__main__':
             RooDoubleCrystalBall = param;
           param=par.Next()
 
+        ## cycle on DoubleCB parameters
+        sig_parameters = RooDoubleCrystalBall.getParameters(old_workspace.data(datasetname+"_xww_"+options.channel+"_"+options.category));
+        sig_par = sig_parameters.createIterator();
+        sig_par.Reset();
+        sig_param = sig_par.Next();
+
+        while (sig_param):
+          if TString(sig_param.GetName()).Contains("rrv_mean_CB_BulkG_WW"):
+           rrv_mean_BW = RooRealVar("rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,"rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,sig_param.getVal());
+           sig_param.setRange(-100,100);
+           sig_param.setVal(0.);
+          sig_param = sig_par.Next();
+                                      
         ### copy all the datasets
         getattr(new_workspace,"import")(old_workspace.data(datasetname+"_xww_"+options.channel+"_"+options.category));
 
         ### make the Breit Wigner core
         RooDoubleCrystalBall.SetName("model_pdf_DoubleCB_BulkG_WW_"+options.channel+"_"+options.category+"_mlvj"); 
 
-        rrv_mean_BW = RooRealVar("rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,"rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,0.);
         rrv_width_BW = RooRealVar("rrv_width_BW_BulkG_WW_"+options.channel+"_"+options.category,"rrv_width_BW_BulkG_WW_"+options.channel+"_"+options.category,mass[iMass]*gammaVal);
 
         rrv_mean_BW.setConstant(kTRUE);
         rrv_width_BW.setConstant(kTRUE);
 
         bw = RooBreitWigner("bw_BulkWW_xww_"+options.channel,"bw_BulkG_WW_"+options.channel,old_workspace.var("rrv_mass_lvj"),rrv_mean_BW,rrv_width_BW);
+        print "rrv_mean_BW ",rrv_mean_BW.getVal()," mass[iMass] ",mass[iMass]," gammaVal ",gammaVal," old_workspace Name ",old_file.GetName()," new file ",new_file;
 
         ### FFT ConvPdf
-        model_pdf = RooFFTConvPdf("BulkWW_xww_%s_%s"%(options.channel,options.category),"BulkWW_xww_%s_%s"%(options.channel,options.category),old_workspace.var("rrv_mass_lvj"),RooDoubleCrystalBall,bw);
-        model_pdf.setBufferFraction(1.0)
+        model_pdf = RooFFTConvPdf("BulkWW_xww_%s_%s"%(options.channel,options.category),"BulkWW_xww_%s_%s"%(options.channel,options.category),old_workspace.var("rrv_mass_lvj"),bw,RooDoubleCrystalBall);
+        model_pdf.SetName("BulkWW_xww_%s_%s"%(options.channel,options.category));
         getattr(new_workspace,"import")(model_pdf);
                           
-        iMass = iMass +1 ;                              
-
         ### iterate on the workspace element parameters
         print "----------- Parameter Workspace -------------";
         parameters_workspace = new_workspace.allVars();
@@ -186,6 +199,8 @@ if __name__ == '__main__':
                                                                                   
         new_workspace.writeToFile(new_file.GetName());
         new_file.Close();
+
+    iMass = iMass +1 ;                              
 
 
   os.system("rm %s/%s/temp_datacard_list.txt"%(options.inPath,options.datacardPath));
