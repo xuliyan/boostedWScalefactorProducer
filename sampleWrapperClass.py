@@ -1305,7 +1305,7 @@ class sampleWrapperClass:
              listOfVarArray2[1][0] = self.jet_tau2tau1_[0];
 
 
-             ## top mass veto selection
+             ## top mass veto selection  -- > hadronic leg
              mass_top_veto_j1  = ROOT.TLorentzVector();
              mass_top_veto_j2  = ROOT.TLorentzVector();
              mass_top_veto     = ROOT.TLorentzVector();
@@ -1446,8 +1446,87 @@ class sampleWrapperClass:
               mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
                                          
               self.mass_ungroomedjet_closerjet_pr_[0]  = mass_top_veto.M();
-              
 
+              ### top mass veto --> leptonic leg
+
+             dR_lj_min = 100 ;
+             ijet_index = -1 ;
+
+             leptonic_W = ROOT.TLorentzVector();
+             leptonic_W.SetPxPyPzE(getattr(self.InputTree_, "W_"+lepLabel+"_px")+getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Cos(getattr(self.InputTree_,"event_met_pfmetPhi")),
+                                   getattr(self.InputTree_, "W_"+lepLabel+"_py")+getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Sin(getattr(self.InputTree_,"event_met_pfmetPhi")),
+                                   getattr(self.InputTree_, "W_"+lepLabel+"_pz")+getattr( self.InputTree_, "W_nu1_pz_type0_met" ),
+                                   getattr(self.InputTree_, "W_"+lepLabel+"_e")+ROOT.TMath.Sqrt(getattr(self.InputTree_, "event_met_pfmet")*getattr(self.InputTree_,"event_met_pfmet")+
+                                   getattr(self.InputTree_, "W_nu1_pz_type0_met")*getattr( self.InputTree_,"W_nu1_pz_type0_met")));
+
+             for i in range(6):
+                    if getattr( self.InputTree_, "JetPFCor_Pt" )[i] < 0 : break ;                        
+                    if getattr( self.InputTree_, "JetPFCor_Pt" )[i] > 30:
+                        j_ak5_eta = getattr( self.InputTree_, "JetPFCor_Eta" )[i];
+                        j_ak5_phi = getattr( self.InputTree_, "JetPFCor_Phi" )[i];
+                                                                                
+                        l_eta = getattr( self.InputTree_, "W_"+lepLabel+"_eta" );
+                        l_phi = getattr( self.InputTree_, "W_"+lepLabel+"_phi" );                
+
+                        ca8_eta = getattr(self.InputTree_, prefix+"_eta")[0];
+                        ca8_phi = getattr(self.InputTree_, prefix+"_phi")[0];                
+
+                        dR_jj = math.sqrt( (j_ak5_eta-ca8_eta)**2 + (j_ak5_phi-ca8_phi)**2 );
+                        dR_lj = math.sqrt( (j_ak5_eta-leptonic_W.Eta())**2 + (j_ak5_phi-leptonic_W.Phi())**2 );
+
+                        if dR_jj < 0.8 : continue ;
+                        if(dR_lj < dR_lj_min):
+                            ijet_index = i;
+                            dR_lj_min = dR_lj ;
+
+
+             for i in range(6):
+                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[i] < 0 : break ;                        
+                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[i] > 30:
+                        j_ak5_eta = getattr( self.InputTree_, "JetPFCorVBFTag_Eta" )[i];
+                        j_ak5_phi = getattr( self.InputTree_, "JetPFCorVBFTag_Phi" )[i];
+                                                                                
+                        ca8_eta = getattr(self.InputTree_, prefix+"_eta")[0];
+                        ca8_phi = getattr(self.InputTree_, prefix+"_phi")[0];                
+
+                        l_eta = getattr( self.InputTree_, "W_"+lepLabel+"_eta" );
+                        l_phi = getattr( self.InputTree_, "W_"+lepLabel+"_phi" );                
+
+                        dR_jj = math.sqrt( (j_ak5_eta-ca8_eta)**2 + (j_ak5_phi-ca8_phi)**2 );
+                        dR_lj = math.sqrt( (j_ak5_eta-leptonic_W.Eta())**2 + (j_ak5_phi-leptonic_W.Phi())**2 );
+
+                        if dR_jj < 0.8 : continue ;
+                        if(dR_lj < dR_lj_min):
+                            ijet_index = i;
+                            dR_lj_min = dR_lj ;
+
+             if(ijet_index < 7 and ijet_index !=-1):
+
+
+              mass_top_veto_j2.SetPtEtaPhiM(getattr(self.InputTree_, "JetPFCor_Pt")[ijet_index],
+                                            getattr(self.InputTree_, "JetPFCor_Eta")[ijet_index],
+                                            getattr(self.InputTree_, "JetPFCor_Phi")[ijet_index],
+                                            getattr(self.InputTree_, "JetPFCor_Mass")[ijet_index]);
+    
+              mass_top_veto = leptonic_W + mass_top_veto_j2;
+                                         
+
+              self.mass_leptonic_closerjet_[0]  = mass_top_veto.M();
+
+
+             elif (ijet_index !=-1 and ijet_index >= 7) :
+
+
+              mass_top_veto_j2.SetPtEtaPhiM(getattr(self.InputTree_, "JetPFCorVBFTag_Pt")[ijet_index-7],
+                                            getattr(self.InputTree_,  "JetPFCorVBFTag_Eta")[ijet_index-7],
+                                            getattr(self.InputTree_,  "JetPFCorVBFTag_Phi")[ijet_index-7],
+                                            getattr(self.InputTree_,  "JetPFCorVBFTag_Mass")[ijet_index-7]);
+    
+              mass_top_veto = leptonic_W + mass_top_veto_j2;
+                                         
+              self.mass_leptonic_closerjet_[0]  = mass_top_veto.M();
+
+              
              ### Fill the output tree
 
              self.otree.Fill();
@@ -1646,7 +1725,9 @@ class sampleWrapperClass:
         self.mass_ungroomedjet_vbf_j2_pr_  = array( 'f', [0.] );
         self.mass_ungroomedjet_closerjet_  = array( 'f', [0.] );
         self.mass_ungroomedjet_closerjet_pr_ = array( 'f', [0.] );
-        
+
+        self.mass_leptonic_closerjet_  = array( 'f', [0.] );
+
         ###### vbf variables
         self.vbf_maxpt_jj_m_   = array( 'f', [ 0. ] );                                
         self.vbf_maxpt_jj_pt_  = array( 'f', [ 0. ] );                                
@@ -2009,6 +2090,8 @@ class sampleWrapperClass:
         self.otree.Branch("mass_ungroomedjet_vbf_j2_pr", self.mass_ungroomedjet_vbf_j2_pr_ , "mass_ungroomedjet_vbf_j2_pr/F");
         self.otree.Branch("mass_ungroomedjet_closerjet", self.mass_ungroomedjet_closerjet_ , "mass_ungroomedjet_closerjet/F");
         self.otree.Branch("mass_ungroomedjet_closerjet_pr", self.mass_ungroomedjet_closerjet_pr_ , "mass_ungroomedjet_closerjet_pr/F");
+
+        self.otree.Branch("mass_leptonic_closerjet", self.mass_leptonic_closerjet_ , "mass_leptonic_closerjet/F");
 
         ########### Leptonic W, Lepton and Nueutrino
         
