@@ -46,6 +46,98 @@ GammaOverMass = [0.001,0.05,0.10,0.15,0.20,0.25,0.30,0.35,0.40]
 
 
 ### how to run it: python g1_doDatacard_width.py wwlvj_BulkG_WW_inclusive_c0p2 -b  --datacardPath cards_em_EXO_allCat_v2_ExpTail_g1_rereco_c0p5/ --channel em 
+ 
+##### Get Lumi for banner title
+def GetLumi():
+
+   if options.channel=="el": return 19.7;
+   elif options.channel=="mu": return 19.7;
+   elif options.channel=="em": return 19.7;
+
+
+#### in order to make the banner on the plots
+def banner4Plot(iswithpull=0):
+     
+ print "############### draw the banner ########################"
+
+ if iswithpull:
+    if options.channel=="el":
+       banner = TLatex(0.3,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow e #nu "%(GetLumi())));
+    elif options.channel=="mu":
+       banner = TLatex(0.3,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu #nu "%(GetLumi())));
+    elif options.channel=="em":
+       banner = TLatex(0.3,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu,e #nu "%(GetLumi())));
+    banner.SetNDC(); banner.SetTextSize(0.04);
+ else:
+    if options.channel=="el":
+       banner = TLatex(0.22,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow e #nu "%(GetLumi())));
+    if options.channel=="mu":
+       banner = TLatex(0.22,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu #nu "%(GetLumi())));
+    if options.channel=="em":
+       banner = TLatex(0.22,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu,e #nu "%(GetLumi())));
+    banner.SetNDC(); banner.SetTextSize(0.033);
+                                                                                                         
+ return banner;
+
+
+#### just drawing canvas with no pull
+def draw_canvas(in_obj,in_directory, in_file_name, is_range=0, logy=0, frompull=0):
+
+     print "############### draw the canvas without pull ########################"
+     cMassFit = TCanvas("cMassFit","cMassFit", 600,600);
+
+     if frompull and logy :
+            in_obj.GetYaxis().SetRangeUser(1e-2,in_obj.GetMaximum()/100)
+     elif not frompull and logy :
+            in_obj.GetYaxis().SetRangeUser(0.00001,in_obj.GetMaximum())
+            
+     if is_range:
+        h2=TH2D("h2","",100,400,1400,4,0.00001,4);
+        h2.Draw();
+        in_obj.Draw("same")
+     else :
+        in_obj.Draw()
+
+     in_obj.GetXaxis().SetTitleSize(0.035);
+     in_obj.GetXaxis().SetTitleOffset(1.15);
+     in_obj.GetXaxis().SetLabelSize(0.03);
+     in_obj.GetXaxis().SetRangeUser(700,2900);
+
+     in_obj.GetYaxis().SetTitleSize(0.035);
+     in_obj.GetYaxis().SetTitleOffset(1.2);
+     in_obj.GetYaxis().SetLabelSize(0.03);
+
+     banner = banner4Plot();
+     banner.Draw();
+        
+     Directory=TString(in_directory);
+     if not Directory.EndsWith("/"):Directory=Directory.Append("/");
+     if not os.path.isdir(Directory.Data()):
+         os.system("mkdir -p "+Directory.Data());
+
+     rlt_file = TString();
+     rlt_file.Form("%s_%s"%(Directory,in_file_name));
+     if rlt_file.EndsWith(".root"):
+            rlt_file.ReplaceAll(".root","_rlt_without_pull_and_paramters.png");
+     else:
+            rlt_file.ReplaceAll(".root","");
+            rlt_file = rlt_file.Append(".png");
+
+     cMassFit.SaveAs(rlt_file.Data());
+
+     rlt_file.ReplaceAll(".png",".root");
+     cMassFit.SaveAs(rlt_file.Data());
+
+     if logy:
+         in_obj.GetYaxis().SetRangeUser(1e-3,in_obj.GetMaximum());
+         cMassFit.SetLogy() ;
+         cMassFit.Update();
+         rlt_file.ReplaceAll(".root","_log.root");
+         cMassFit.SaveAs(rlt_file.Data());
+         rlt_file.ReplaceAll(".root",".png");
+         cMassFit.SaveAs(rlt_file.Data());
+
+
 
 #### Main Code
 if __name__ == '__main__':
@@ -123,8 +215,8 @@ if __name__ == '__main__':
     idatacard = idatacard+1;
 
   ### make the new workspaces --> loop on the old, create empty new ones  
+  iMass = 0 ;
   for workspace in list_of_workspace :
-    iMass = 0 ;
     for gammaVal in GammaOverMass:
 
         newfilename = TString(workspace).ReplaceAll(".root","_W%.3f.root"%gammaVal);
@@ -231,6 +323,8 @@ if __name__ == '__main__':
 
         ### FFT ConvPdf
         model_pdf = RooFFTConvPdf("BulkWW_xww_%s_%s"%(options.channel,options.category),"BulkWW_xww_%s_%s"%(options.channel,options.category),old_workspace.var("rrv_mass_lvj"),bw,new_signal);
+        model_pdf.setBufferFraction(1.0);
+        
         model_pdf.SetName("BulkWW_xww_%s_%s"%(options.channel,options.category));
         getattr(new_workspace,"import")(model_pdf);
                           
@@ -246,11 +340,58 @@ if __name__ == '__main__':
         print "---------------------------------------------";
 
                                                                                   
+        ## create a frame with data
+        mplot = old_workspace.var("rrv_mass_lvj").frame(RooFit.Title("check_%s_%s"%(mass[iMass],gammaVal)), RooFit.Bins(int(old_workspace.var("rrv_mass_lvj").getBins()/10)),RooFit.Range(700,3000));
+
+        old_workspace.data(datasetname+"_xww_"+options.channel+"_"+options.category).plotOn(mplot,RooFit.Name("data_invisible"),RooFit.MarkerSize(1.5),RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0));
+   
+        rrv_number_WJets = old_workspace.var("rate_WJets_xww_for_unbin");
+        rrv_number_VV = old_workspace.var("rate_VV_xww_for_unbin");
+        rrv_number_TTbar = old_workspace.var("rate_TTbar_xww_for_unbin");
+        rrv_number_STop = old_workspace.var("rate_STop_xww_for_unbin");
+        rrv_number_signal = old_workspace.var("rate_BulkWW_xww_for_unbin");
+        
+        rrv_number_Total_background_MC = RooRealVar("rrv_number_Total_background_MC_xww","rrv_number_Total_background_MC_xww",
+                rrv_number_WJets.getVal()+
+                rrv_number_VV.getVal()+
+                rrv_number_TTbar.getVal()+
+                rrv_number_STop.getVal());
+
+        rrv_number_Total_background_MC.setError(TMath.Sqrt(
+                rrv_number_WJets.getError()* rrv_number_WJets.getError()+
+                rrv_number_VV.getError()* rrv_number_VV.getError()+
+                rrv_number_TTbar.getError()* rrv_number_TTbar.getError()+
+                rrv_number_STop.getError() *rrv_number_STop.getError()
+                ));
+
+        model_Total_background_MC = RooAddPdf("model_Total_background_MC_xww","model_Total_background_MC_xww",RooArgList(old_workspace.pdf("WJets_xww_%s_%s"%(options.channel,options.category)), old_workspace.pdf("VV_xww_%s_%s"%(options.channel,options.category)),old_workspace.pdf("TTbar_xww_%s_%s"%(options.channel,options.category)),old_workspace.pdf("STop_xww_%s_%s"%(options.channel,options.category))),RooArgList(rrv_number_WJets,rrv_number_VV,rrv_number_TTbar,rrv_number_STop));
+
+        rrv_number_signal.setVal(rrv_number_signal.getVal()*6.25);
+
+        #### scale factor in order to scale MC to data in the final plot -> in order to avoid the normalization to data which is done by default in rooFit
+        scale_number_Total_background_MC = rrv_number_Total_background_MC.getVal()/old_workspace.data(datasetname+"_xww_"+options.channel+"_"+options.category).sumEntries();
+        scale_number_signal = rrv_number_signal.getVal()/old_workspace.data(datasetname+"_xww_"+options.channel+"_"+options.category).sumEntries();
+
+        model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Name("total_MC"),RooFit.Components("WJets_xww_%s_%s,VV_xww_%s_%s,TTbar_xww_%s_%s,STop_xww_%s_%s"%(options.channel,options.category,options.channel,options.category,options.channel,options.category,options.channel,options.category)),RooFit.DrawOption("L"), RooFit.LineColor(kRed), RooFit.VLines(),RooFit.LineWidth(2));
+
+            
+        model_signal_background_MC = RooAddPdf("model_signal_background_MC_xww","model_signal_background_MC_xww",RooArgList(model_pdf,model_Total_background_MC),RooArgList(rrv_number_signal,rrv_number_Total_background_MC));
+
+        model_signal_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC+scale_number_signal),RooFit.Name("total_SpB_MC"),RooFit.Components("BulkWW_xww_%s_%s,model_Total_background_MC_xww"%(options.channel,options.category)),RooFit.DrawOption("L"), RooFit.LineColor(kBlue), RooFit.VLines(),RooFit.LineWidth(2),RooFit.LineStyle(7));
+
+        model_pdf.plotOn(mplot,RooFit.Name("total_S_MC"),RooFit.Normalization(scale_number_signal),RooFit.DrawOption("L"), RooFit.LineColor(kGreen+2), RooFit.VLines(),RooFit.LineWidth(2),RooFit.LineStyle(kDashed));
+
+        #bw.plotOn(mplot,RooFit.Name("total_S_MC"),RooFit.Normalization(scale_number_signal),RooFit.DrawOption("L"), RooFit.LineColor(kGreen+2), RooFit.VLines(),RooFit.LineWidth(2),RooFit.LineStyle(kDashed));
+
+        os.system("mkdir ./plots_signal_width");
+        name = TString("check_%.3f_%.3f"%(mass[iMass],gammaVal));
+        name.ReplaceAll("0.","0_");
+        draw_canvas(mplot,"plots_signal_width/",name,0,1,0);
+
         new_workspace.writeToFile(new_file.GetName());
         new_file.Close();
 
     iMass = iMass +1 ;                              
-
 
   os.system("rm %s/%s/temp_datacard_list.txt"%(options.inPath,options.datacardPath));
   os.system("rm %s/%s/temp_workspace_list.txt"%(options.inPath,options.datacardPath));
