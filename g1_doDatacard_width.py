@@ -381,7 +381,6 @@ if __name__ == '__main__':
 
         model_pdf.plotOn(mplot,RooFit.Name("total_S_MC"),RooFit.Normalization(scale_number_signal),RooFit.DrawOption("L"), RooFit.LineColor(kGreen+2), RooFit.VLines(),RooFit.LineWidth(2),RooFit.LineStyle(kDashed));
 
-        #bw.plotOn(mplot,RooFit.Name("total_S_MC"),RooFit.Normalization(scale_number_signal),RooFit.DrawOption("L"), RooFit.LineColor(kGreen+2), RooFit.VLines(),RooFit.LineWidth(2),RooFit.LineStyle(kDashed));
 
         os.system("mkdir ./plots_signal_width");
         name = TString("check_%.3f_%.3f"%(mass[iMass],gammaVal));
