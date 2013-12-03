@@ -113,7 +113,8 @@ if __name__ == '__main__':
             else:
              datacardfile.write("\n%s %s %s %s %s"%(line_old.split()[0],line_old.split()[1],line_old.split()[2],newworkspace,line_old.split()[4]));
           elif line_old.find("rate")!=-1:
-            datacardfile.write("rate 1 %s %s %s %s\n"%(line_old.split()[2],line_old.split()[3],line_old.split()[4],line_old.split()[5]));          
+            datacardfile.write("rate 1 %s %s %s %s\n"%(line_old.split()[2],line_old.split()[3],line_old.split()[4],line_old.split()[5]));
+            continue ;
           elif line_old.find("lumi_8TeV")!=-1:
             datacardfile.write("CMS_eff_width lnN 1.15 - - - -\n");
             datacardfile.write(line_old);            
@@ -139,6 +140,7 @@ if __name__ == '__main__':
         new_file.cd();
 
         ### copy all the pdfs + parameter
+        old_workspace.Print();
         pdf_workspace = old_workspace.allPdfs();
         par = pdf_workspace.createIterator();
         par.Reset();
@@ -151,27 +153,87 @@ if __name__ == '__main__':
             RooDoubleCrystalBall = param;
           param=par.Next()
 
+        ## cycle on DoubleCB parameters -> copy them in a new set
+        sig_parameters = RooDoubleCrystalBall.getParameters(old_workspace.data(datasetname+"_xww_"+options.channel+"_"+options.category));
+        sig_par = sig_parameters.createIterator();
+        sig_par.Reset();
+        sig_param = sig_par.Next();
+
+        while (sig_param):
+          if TString(sig_param.GetName()).Contains("rrv_mean_CB_BulkG_WW"): ## copy the mean value for the DoubleCB and BW
+           rrv_mean_BW = RooRealVar("rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,"rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,sig_param.getVal());
+           rrv_mean_CB = sig_param;           
+           rrv_mean_CB.setRange(-100,100);
+           rrv_mean_CB.setVal(0.);
+          elif TString(sig_param.GetName()).Contains("rrv_sigma_CB_BulkG_WW"):
+           rrv_sigma_CB = sig_param;
+          elif TString(sig_param.GetName()).Contains("rrv_alpha1_CB_BulkG_WW"):
+           rrv_alpha1_CB = sig_param;
+          elif TString(sig_param.GetName()).Contains("rrv_alpha2_CB_BulkG_WW"):
+           rrv_alpha2_CB = sig_param;
+          elif TString(sig_param.GetName()).Contains("rrv_n1_CB_BulkG_WW"):
+           rrv_n1_CB = sig_param;
+          elif TString(sig_param.GetName()).Contains("rrv_n2_CB_BulkG_WW"):
+           rrv_n2_CB = sig_param;
+          sig_param = sig_par.Next();
+
         ### copy all the datasets
         getattr(new_workspace,"import")(old_workspace.data(datasetname+"_xww_"+options.channel+"_"+options.category));
 
-        ### make the Breit Wigner core
-        RooDoubleCrystalBall.SetName("model_pdf_DoubleCB_BulkG_WW_"+options.channel+"_"+options.category+"_mlvj"); 
-
-        rrv_mean_BW = RooRealVar("rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,"rrv_mean_BW_BulkG_WW_"+options.channel+"_"+options.category,0.);
+        ## Breit Wigner Core  --> mean and the resolution fixed
         rrv_width_BW = RooRealVar("rrv_width_BW_BulkG_WW_"+options.channel+"_"+options.category,"rrv_width_BW_BulkG_WW_"+options.channel+"_"+options.category,mass[iMass]*gammaVal);
 
         rrv_mean_BW.setConstant(kTRUE);
         rrv_width_BW.setConstant(kTRUE);
 
-        bw = RooBreitWigner("bw_BulkWW_xww_"+options.channel,"bw_BulkG_WW_"+options.channel,old_workspace.var("rrv_mass_lvj"),rrv_mean_BW,rrv_width_BW);
+        ## Breit Wigner Core  --> mean sys are to be applied on the mean of BW
+        rrv_mean_scale_p1 = RooRealVar("CMS_sig_p1_jes","CMS_sig_p1_jes",0);
+        rrv_mean_scale_p1.setConstant(kTRUE);
+        rrv_mean_scale_p1.setError(1);
+         
+        rrv_mean_scale_p2 = RooRealVar("CMS_sig_p1_scale_em","CMS_sig_p1_scale_em",0);
+        rrv_mean_scale_p2.setConstant(kTRUE);
+        rrv_mean_scale_p2.setError(1);
+                                    
+        rrv_mean_scale_X1 = RooRealVar("rrv_mean_shift_scale_lep_BW_"+options.channel+"_"+options.category,"rrv_mean_shift_scale_lep_BW_"+options.channel+"_"+options.category,float(0.001));
+        rrv_mean_scale_X1.setConstant(kTRUE);
+        rrv_mean_scale_X2 = RooRealVar("rrv_mean_shift_scale_jes_BW_"+options.channel+"_"+options.category,"rrv_mean_shift_scale_jes_BW_"+options.channel+"_"+options.category,float(0.033));
+        rrv_mean_scale_X2.setConstant(kTRUE);
+
+        rrv_total_mean_CB = RooFormulaVar("rrv_total_mean_BW_"+options.channel,"@0*(1+@1*@2)*(1+@3*@4)", RooArgList(rrv_mean_BW,rrv_mean_scale_p1,rrv_mean_scale_X1,rrv_mean_scale_p2,rrv_mean_scale_X2));
+
+        bw = RooBreitWigner("bw_BulkWW_xww_"+options.channel,"bw_BulkG_WW_"+options.channel,old_workspace.var("rrv_mass_lvj"),rrv_total_mean_CB,rrv_width_BW);
+
+
+        ### make resolution DoubleCB
+        rrv_sigma_scale_p1 = RooRealVar("CMS_sig_p2_scale_em","CMS_sig_p2_scale_em",0);
+        rrv_sigma_scale_p1.setConstant(kTRUE);
+        rrv_sigma_scale_p1.setError(1);
+        
+        rrv_sigma_scale_p2 = RooRealVar("CMS_sig_p2_jer","CMS_sig_p2_jer",0);
+        rrv_sigma_scale_p3 = RooRealVar("CMS_sig_p2_jes","CMS_sig_p2_jes",0);        
+        rrv_sigma_scale_p2.setConstant(kTRUE);
+        rrv_sigma_scale_p3.setConstant(kTRUE);
+        rrv_sigma_scale_p2.setError(1);
+        rrv_sigma_scale_p3.setError(1);
+
+        rrv_mean_sigma_X1 = RooRealVar("rrv_sigma_shift_lep_scale_CB"+options.channel+"_"+options.category,"rrv_sigma_shift_scale_CB"+options.channel+"_"+options.category,float(0.005));
+        rrv_mean_sigma_X2 = RooRealVar("rrv_sigma_shift_jes_CB"+options.channel+"_"+options.category,"rrv_sigma_shift_scale_CB"+options.channel+"_"+options.category,float(0.033));
+        rrv_mean_sigma_X3 = RooRealVar("rrv_sigma_shift_res_CB"+options.channel+"_"+options.category,"rrv_sigma_shift_res_CB"+options.channel+"_"+options.category,float(0.030));
+        rrv_mean_sigma_X1.setConstant(kTRUE);
+        rrv_mean_sigma_X2.setConstant(kTRUE);
+        rrv_mean_sigma_X3.setConstant(kTRUE);
+
+        rrv_total_sigma_CB = RooFormulaVar("rrv_total_sigma_CB"+options.channel+"_"+options.category,"@0*(1+@1*@2)*(1+@3*@4)*(1+@5*@6)", RooArgList(rrv_sigma_CB,rrv_sigma_scale_p1,rrv_mean_sigma_X1,rrv_sigma_scale_p2,rrv_mean_sigma_X2,rrv_sigma_scale_p3,rrv_mean_sigma_X3));
+
+        new_signal = ROOT.RooDoubleCrystalBall("DoubleCB_BulkG_WW_"+options.channel+"_"+options.category+"_mlvj","DoubleCB_BulkG_WW_"+options.channel+"_"+options.category+"_mlvj",old_workspace.var("rrv_mass_lvj"),rrv_mean_CB,rrv_total_sigma_CB,rrv_alpha1_CB,rrv_n1_CB,rrv_alpha2_CB,rrv_n2_CB); 
+
 
         ### FFT ConvPdf
-        model_pdf = RooFFTConvPdf("BulkWW_xww_%s_%s"%(options.channel,options.category),"BulkWW_xww_%s_%s"%(options.channel,options.category),old_workspace.var("rrv_mass_lvj"),RooDoubleCrystalBall,bw);
-        model_pdf.setBufferFraction(1.0)
+        model_pdf = RooFFTConvPdf("BulkWW_xww_%s_%s"%(options.channel,options.category),"BulkWW_xww_%s_%s"%(options.channel,options.category),old_workspace.var("rrv_mass_lvj"),bw,new_signal);
+        model_pdf.SetName("BulkWW_xww_%s_%s"%(options.channel,options.category));
         getattr(new_workspace,"import")(model_pdf);
                           
-        iMass = iMass +1 ;                              
-
         ### iterate on the workspace element parameters
         print "----------- Parameter Workspace -------------";
         parameters_workspace = new_workspace.allVars();
@@ -186,6 +248,8 @@ if __name__ == '__main__':
                                                                                   
         new_workspace.writeToFile(new_file.GetName());
         new_file.Close();
+
+    iMass = iMass +1 ;                              
 
 
   os.system("rm %s/%s/temp_datacard_list.txt"%(options.inPath,options.datacardPath));
