@@ -46,6 +46,109 @@ GammaOverMass = [0.001,0.05,0.10,0.15,0.20,0.25,0.30,0.35,0.40]
 
 
 ### how to run it: python g1_doDatacard_width.py wwlvj_BulkG_WW_inclusive_c0p2 -b  --datacardPath cards_em_EXO_allCat_v2_ExpTail_g1_rereco_c0p5/ --channel em 
+
+    ## Set basic TDR style for canvas, pad ..etc ..
+def setTDRStyle():
+
+ gStyle.SetCanvasBorderMode(0);
+ gStyle.SetCanvasColor(kWhite);
+ gStyle.SetCanvasDefH(600); #Height of canvas
+ gStyle.SetCanvasDefW(600); #Width of canvas
+ gStyle.SetCanvasDefX(0); #POsition on screen
+ gStyle.SetCanvasDefY(0);
+      
+ #For the Pad:
+ gStyle.SetPadBorderMode(0);
+ gStyle.SetPadColor(kWhite);
+ gStyle.SetPadGridX(False);
+ gStyle.SetPadGridY(False);
+ gStyle.SetGridColor(0);
+ gStyle.SetGridStyle(3);
+ gStyle.SetGridWidth(1);
+      
+ #For the frame:
+ gStyle.SetFrameBorderMode(0);
+ gStyle.SetFrameBorderSize(1);
+ gStyle.SetFrameFillColor(0);
+ gStyle.SetFrameFillStyle(0);
+ gStyle.SetFrameLineColor(1);
+ gStyle.SetFrameLineStyle(1);
+ gStyle.SetFrameLineWidth(1);
+      
+ #For the histo:
+ gStyle.SetHistLineColor(1);
+ gStyle.SetHistLineStyle(0);
+ gStyle.SetHistLineWidth(1);
+ gStyle.SetEndErrorSize(2);
+ gStyle.SetErrorX(0.);
+ gStyle.SetMarkerStyle(20);
+      
+ #For the fit/function:
+ gStyle.SetOptFit(1);
+ gStyle.SetFitFormat("5.4g");
+ gStyle.SetFuncColor(2);
+ gStyle.SetFuncStyle(1);
+ gStyle.SetFuncWidth(1);
+      
+ #For the date:
+ gStyle.SetOptDate(0);
+      
+ #For the statistics box:
+ gStyle.SetOptFile(0);
+ gStyle.SetOptStat(0); #To display the mean and RMS:
+ gStyle.SetStatColor(kWhite);
+ gStyle.SetStatFont(42);
+ gStyle.SetStatFontSize(0.025);
+ gStyle.SetStatTextColor(1);
+ gStyle.SetStatFormat("6.4g");
+ gStyle.SetStatBorderSize(1);
+ gStyle.SetStatH(0.1);
+ gStyle.SetStatW(0.15);
+      
+ #Margins:
+ gStyle.SetPadTopMargin(0.05);
+ gStyle.SetPadBottomMargin(0.13);
+ gStyle.SetPadLeftMargin(0.18);
+ gStyle.SetPadRightMargin(0.06);
+      
+ #For the Global title:
+ gStyle.SetOptTitle(0);
+ gStyle.SetTitleFont(42);
+ gStyle.SetTitleColor(1);
+ gStyle.SetTitleTextColor(1);
+ gStyle.SetTitleFillColor(10);
+ gStyle.SetTitleFontSize(0.05);
+      
+ #For the axis titles:
+ gStyle.SetTitleColor(1, "XYZ");
+ gStyle.SetTitleFont(42, "XYZ");
+ gStyle.SetTitleSize(0.03, "XYZ");
+ gStyle.SetTitleXOffset(0.9);
+ gStyle.SetTitleYOffset(1.5);
+      
+ #For the axis labels:
+ gStyle.SetLabelColor(1, "XYZ");
+ gStyle.SetLabelFont(42, "XYZ");
+ gStyle.SetLabelOffset(0.007, "XYZ");
+ gStyle.SetLabelSize(0.03, "XYZ");
+      
+ #For the axis:
+ gStyle.SetAxisColor(1, "XYZ");
+ gStyle.SetStripDecimals(kTRUE);
+ gStyle.SetTickLength(0.03, "XYZ");
+ gStyle.SetNdivisions(510, "XYZ");
+ gStyle.SetPadTickX(1); #To get tick marks on the opposite side of the frame
+ gStyle.SetPadTickY(1);
+      
+ #Change for log plots:
+ gStyle.SetOptLogx(0);
+ gStyle.SetOptLogy(0);
+ gStyle.SetOptLogz(0);
+      
+ #Postscript options:
+ gStyle.SetPaperSize(20.,20.);
+ gStyle.cd();
+
  
 ##### Get Lumi for banner title
 def GetLumi():
@@ -81,61 +184,161 @@ def banner4Plot(iswithpull=0):
 
 
 #### just drawing canvas with no pull
-def draw_canvas(in_obj,in_directory, in_file_name, is_range=0, logy=0, frompull=0):
+def draw_canvas(in_obj,in_directory,in_file_name,is_range=0,logy=0):
 
-     print "############### draw the canvas without pull ########################"
-     cMassFit = TCanvas("cMassFit","cMassFit", 600,600);
+  cMassFit = TCanvas("cMassFit","cMassFit", 600,600);
 
-     if frompull and logy :
-            in_obj.GetYaxis().SetRangeUser(1e-2,in_obj.GetMaximum()/100)
-     elif not frompull and logy :
-            in_obj.GetYaxis().SetRangeUser(0.00001,in_obj.GetMaximum())
-            
-     if is_range:
-        h2=TH2D("h2","",100,400,1400,4,0.00001,4);
-        h2.Draw();
-        in_obj.Draw("same")
-     else :
-        in_obj.Draw()
+  if is_range:
+    h2=TH2D("h2","",100,400,1400,4,0.00001,4);
+    h2.Draw();
+    in_obj.Draw("same")
+  else :
+    in_obj.Draw()
 
-     in_obj.GetXaxis().SetTitleSize(0.035);
-     in_obj.GetXaxis().SetTitleOffset(1.15);
-     in_obj.GetXaxis().SetLabelSize(0.03);
-     in_obj.GetXaxis().SetRangeUser(700,2900);
+  in_obj.GetXaxis().SetTitleSize(0.045);
+  in_obj.GetXaxis().SetTitleOffset(1.15);
+  in_obj.GetXaxis().SetLabelSize(0.04);
 
-     in_obj.GetYaxis().SetTitleSize(0.035);
-     in_obj.GetYaxis().SetTitleOffset(1.2);
-     in_obj.GetYaxis().SetLabelSize(0.03);
+  in_obj.GetYaxis().SetTitleSize(0.045);
+  in_obj.GetYaxis().SetTitleOffset(1.40);
+  in_obj.GetYaxis().SetLabelSize(0.04);
 
-     banner = banner4Plot();
-     banner.Draw();
+  banner = banner4Plot();
+  banner.Draw();
         
-     Directory=TString(in_directory);
-     if not Directory.EndsWith("/"):Directory=Directory.Append("/");
-     if not os.path.isdir(Directory.Data()):
-         os.system("mkdir -p "+Directory.Data());
+  Directory=TString(in_directory);
+  if not Directory.EndsWith("/"):Directory=Directory.Append("/");
+  if not os.path.isdir(Directory.Data()):
+    os.system("mkdir -p "+Directory.Data());
 
-     rlt_file = TString();
-     rlt_file.Form("%s_%s"%(Directory,in_file_name));
-     if rlt_file.EndsWith(".root"):
-            rlt_file.ReplaceAll(".root","_rlt_without_pull_and_paramters.png");
-     else:
-            rlt_file.ReplaceAll(".root","");
-            rlt_file = rlt_file.Append(".png");
+  rlt_file = TString();
+  rlt_file.Form("%s_%s"%(Directory,in_file_name));
+  if rlt_file.EndsWith(".root"):
+     rlt_file.ReplaceAll(".root","_rlt_without_pull_and_paramters.png");
+  else:
+     rlt_file.ReplaceAll(".root","");
+     rlt_file = rlt_file.Append(".png");
 
-     cMassFit.SaveAs(rlt_file.Data());
+  cMassFit.SaveAs(rlt_file.Data());
 
-     rlt_file.ReplaceAll(".png",".root");
-     cMassFit.SaveAs(rlt_file.Data());
+  rlt_file.ReplaceAll(".png",".pdf");
+  cMassFit.SaveAs(rlt_file.Data());
 
-     if logy:
-         in_obj.GetYaxis().SetRangeUser(1e-3,in_obj.GetMaximum());
-         cMassFit.SetLogy() ;
-         cMassFit.Update();
-         rlt_file.ReplaceAll(".root","_log.root");
-         cMassFit.SaveAs(rlt_file.Data());
-         rlt_file.ReplaceAll(".root",".png");
-         cMassFit.SaveAs(rlt_file.Data());
+  rlt_file.ReplaceAll(".pdf",".root");
+  cMassFit.SaveAs(rlt_file.Data());
+
+  if logy:
+    cMassFit.SetLogy() ;
+    cMassFit.Update();
+    rlt_file.ReplaceAll(".root","_log.root");
+    cMassFit.SaveAs(rlt_file.Data());
+    rlt_file.ReplaceAll(".root",".pdf");
+    cMassFit.SaveAs(rlt_file.Data());
+    rlt_file.ReplaceAll(".pdf",".png");
+    cMassFit.SaveAs(rlt_file.Data());
+
+
+#### draw canvas with plots with pull
+def draw_canvas_with_pull(mplot, mplot_pull,in_directory, in_file_name, in_model_name="",logy=0):# mplot + pull
+
+ mplot.GetXaxis().SetTitleOffset(1.1);
+ mplot.GetYaxis().SetTitleOffset(1.3);
+ mplot.GetXaxis().SetTitleSize(0.05);
+ mplot.GetYaxis().SetTitleSize(0.05);
+ mplot.GetXaxis().SetLabelSize(0.045);
+ mplot.GetYaxis().SetLabelSize(0.045);
+ mplot_pull.GetXaxis().SetLabelSize(0.15);
+ mplot_pull.GetYaxis().SetLabelSize(0.15);
+ mplot_pull.GetYaxis().SetTitleSize(0.15);
+ mplot_pull.GetYaxis().SetNdivisions(205);
+
+                                                                          
+ cMassFit = TCanvas("cMassFit","cMassFit", 600,600);
+ pad1=TPad("pad1","pad1",0.,0. ,0.99,0.24);
+ pad2=TPad("pad2","pad2",0.,0.24,0.99,1. );
+ pad1.Draw();
+ pad2.Draw();
+                                                                                                                                                                              
+ pad2.cd();
+ mplot.Draw();
+ banner = banner4Plot(1);
+ banner.Draw();
+
+ pad1.cd();
+ mplot_pull.Draw();
+
+
+ ## create the directory where store the plots
+ Directory = TString(in_directory);
+ if not Directory.EndsWith("/"):Directory = Directory.Append("/");
+ if not os.path.isdir(Directory.Data()):
+   os.system("mkdir -p "+Directory.Data());
+
+ rlt_file = TString();
+ rlt_file.Form("%s_%s"%(Directory,in_file_name));
+ if rlt_file.EndsWith(".root"):
+    TString(in_model_name).ReplaceAll(".root","");
+    rlt_file.ReplaceAll(".root","_"+in_model_name+"_with_pull.png");
+ else:
+   TString(in_model_name).ReplaceAll(".root","");
+   rlt_file.ReplaceAll(".root","");
+   rlt_file=rlt_file.Append("_"+in_model_name+"_with_pull.png");
+
+ cMassFit.SaveAs(rlt_file.Data());
+
+ rlt_file.ReplaceAll(".png",".pdf");
+ cMassFit.SaveAs(rlt_file.Data());
+        
+ rlt_file.ReplaceAll(".pdf",".root");
+ cMassFit.SaveAs(rlt_file.Data());
+
+ string_file_name = TString(in_file_name);
+
+ if string_file_name.EndsWith(".root"):
+   string_file_name.ReplaceAll(".root","_"+in_model_name);
+ else:
+   string_file_name.ReplaceAll(".root","");
+   string_file_name.Append("_"+in_model_name);
+
+ if logy:
+   pad2.SetLogy() ;
+   pad2.Update();
+   cMassFit.Update();
+   rlt_file.ReplaceAll(".root","_log.root");
+   cMassFit.SaveAs(rlt_file.Data());
+   rlt_file.ReplaceAll(".root",".pdf");
+   cMassFit.SaveAs(rlt_file.Data());
+   rlt_file.ReplaceAll(".pdf",".png");
+   cMassFit.SaveAs(rlt_file.Data());
+
+ draw_canvas(mplot,in_directory,string_file_name.Data(),0,logy);
+
+
+### in order to get the pull
+def get_pull(rrv_x, mplot_orig):
+
+  hpull = mplot_orig.pullHist();
+  x = ROOT.Double(0.); y = ROOT.Double(0) ;
+  for ipoint in range(0,hpull.GetN()):
+    hpull.GetPoint(ipoint,x,y);
+    if(y == 0): hpull.SetPoint(ipoint,x,10)
+       
+  mplot_pull = rrv_x.frame(RooFit.Title("Pull Distribution"), RooFit.Bins(int(rrv_x.getBins())));
+  medianLine = TLine(rrv_x.getMin(),0.,rrv_x.getMax(),0); medianLine.SetLineWidth(2); medianLine.SetLineColor(kRed);
+  mplot_pull.addObject(medianLine);
+  mplot_pull.addPlotable(hpull,"P");
+  mplot_pull.SetTitle("PULL");
+  mplot_pull.GetXaxis().SetTitle("");
+  mplot_pull.GetYaxis().SetRangeUser(-5,5);
+  mplot_pull.GetYaxis().SetTitleSize(0.10);
+  mplot_pull.GetYaxis().SetLabelSize(0.10);
+  mplot_pull.GetXaxis().SetTitleSize(0.10);
+  mplot_pull.GetXaxis().SetLabelSize(0.10);
+  mplot_pull.GetYaxis().SetTitleOffset(0.40);
+  mplot_pull.GetYaxis().SetTitle("#frac{data-fit}{#sigma_{data}}");
+  mplot_pull.GetYaxis().CenterTitle();
+
+  return mplot_pull;
 
 
 
@@ -155,6 +358,7 @@ if __name__ == '__main__':
   print command ;
   os.system(command);
 
+  setTDRStyle();
 
   ## list of datacard and workspaces
   list_of_datacard = [] ;
@@ -341,7 +545,7 @@ if __name__ == '__main__':
 
                                                                                   
         ## create a frame with data
-        mplot = old_workspace.var("rrv_mass_lvj").frame(RooFit.Title("check_%s_%s"%(mass[iMass],gammaVal)), RooFit.Bins(int(old_workspace.var("rrv_mass_lvj").getBins()/10)),RooFit.Range(700,3000));
+        mplot = old_workspace.var("rrv_mass_lvj").frame(RooFit.Title(""), RooFit.Bins(int(old_workspace.var("rrv_mass_lvj").getBins()/10)),RooFit.Range(700,3000));
 
         old_workspace.data(datasetname+"_xww_"+options.channel+"_"+options.category).plotOn(mplot,RooFit.Name("data_invisible"),RooFit.MarkerSize(1.5),RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0));
    
@@ -381,15 +585,93 @@ if __name__ == '__main__':
 
         model_pdf.plotOn(mplot,RooFit.Name("total_S_MC"),RooFit.Normalization(scale_number_signal),RooFit.DrawOption("L"), RooFit.LineColor(kGreen+2), RooFit.VLines(),RooFit.LineWidth(2),RooFit.LineStyle(kDashed));
 
-
-        os.system("mkdir ./plots_signal_width");
+        os.system("mkdir -p ./plots_signal_width");
         name = TString("check_%.3f_%.3f"%(mass[iMass],gammaVal));
         name.ReplaceAll("0.","0_");
-        draw_canvas(mplot,"plots_signal_width/",name,0,1,0);
-
+        mplot.GetYaxis().SetRangeUser(1e-3,mplot.GetMaximum()*1.2);
+#        draw_canvas(mplot,"plots_signal_width/",name,0,1);
+        
         new_workspace.writeToFile(new_file.GetName());
-        new_file.Close();
 
+        if ( (mass[iMass] == 1000 and gammaVal == 0.05) or (mass[iMass] == 1000 and gammaVal == 0.15) or (mass[iMass] == 1000 and gammaVal == 0.30) or
+             (mass[iMass] == 1500 and gammaVal == 0.05) or (mass[iMass] == 1500 and gammaVal == 0.15) or (mass[iMass] == 1500 and gammaVal == 0.30) or
+             (mass[iMass] == 2100 and gammaVal == 0.05) or (mass[iMass] == 2100 and gammaVal == 0.15) or (mass[iMass] == 2100 and gammaVal == 0.30) ):
+
+           signal_file_name = ("treeEDBR_BulkG_WW_inclusive_M%3d_W%d_xww.root"%(mass[iMass],int(mass[iMass]*gammaVal)));
+           print "#### making plot for ",signal_file_name;               
+           file_Directory = "AnaSigTree_new/";
+           fileIn_name = TString(options.inPath+"/"+file_Directory+signal_file_name);
+
+           if gammaVal == 0.05   : sf = 5 ;
+           elif gammaVal == 0.15 : sf = 3 ;
+           elif gammaVal == 0.30 : sf = 1.5 ;
+
+           if gammaVal == 0.05 or mass[iMass] == 1000 : binWidth = 20;
+           elif gammaVal == 0.15 or mass[iMass] == 1500 : binWidth = 30;
+           elif gammaVal == 0.30 or mass[iMass] == 1500 : binWidth = 50;
+           elif gammaVal == 0.15 or mass[iMass] == 2000 : binWidth = 50;
+           elif gammaVal == 0.30 or mass[iMass] == 2000 : binWidth = 75;
+           else:
+             binWidth = 20;
+             
+           rrv_mass_lvj = RooRealVar("rrv_mass_lvj_plot","M_{WW}",float(mass[iMass]),float(mass[iMass]-mass[iMass]*gammaVal*sf),float(mass[iMass]+mass[iMass]*gammaVal*sf),"GeV/c^{2}");
+           rrv_mass_lvj.setBins(int((rrv_mass_lvj.getMax()-rrv_mass_lvj.getMin())/binWidth));
+           rrv_weight   = RooRealVar("rrv_weight","rrv_weight",0. ,10000000.);
+
+           ## open the signal file 
+           fileIn = TFile(fileIn_name.Data());
+           treeIn = fileIn.Get("SelectedCandidatesPlain");
+
+
+           rdataset4fit_mlvj = RooDataSet("rdataset4fit_BulkG_WW_inclusive_M%3d_W%d_%s_mlvj"%(int(mass[iMass]),int(mass[iMass]*gammaVal),options.channel),"rdataset4fit_BulkG_WW_inclusive_M%3d_W%d_%s_mlvj"%(int(mass[iMass]),int(mass[iMass]*gammaVal),options.channel),RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight));
+                   
+           luminosity = 19700;
+
+           for iEvent in range(treeIn.GetEntries()):
+
+            if iEvent % 1000 == 0: print "iEvent: ",iEvent;
+            treeIn.GetEntry(iEvent);
+
+            if iEvent==0:
+                tmp_scale_to_lumi = getattr(treeIn,"LumiWeight")*luminosity;
+    
+            tmp_jet_mass=getattr(treeIn,"mJJNoKinFit");
+            isGoodEvent = 0 ;
+            
+            ## event in the whole range
+            if options.channel == "em" :
+             if (getattr(treeIn,"categories")==1 or getattr(treeIn,"categories")==3) and getattr(treeIn,"mZZ")> rrv_mass_lvj.getMin() and getattr(treeIn,"mZZ")<rrv_mass_lvj.getMax() and tmp_jet_mass>=65 and tmp_jet_mass<=105 and options.category == "HP" :
+              isGoodEvent = 1 ;
+             if (getattr(treeIn,"categories")==0 or getattr(treeIn,"categories")==2) and getattr(treeIn,"mZZ")> rrv_mass_lvj.getMin() and getattr(treeIn,"mZZ")<rrv_mass_lvj.getMax() and tmp_jet_mass>=65 and tmp_jet_mass<=130 and options.category == "LP" :
+              isGoodEvent = 1 ;
+
+            if isGoodEvent == 1:
+                ### weigh MC events
+                tmp_event_weight = getattr(treeIn,"weight")*luminosity;
+                rrv_mass_lvj.setVal(getattr(treeIn,"mZZ"));
+                rdataset4fit_mlvj.add(RooArgSet(rrv_mass_lvj),tmp_event_weight);
+
+           ### signal over convolution plot
+           mplot_sig = rrv_mass_lvj.frame(RooFit.Title(""),RooFit.Bins(rrv_mass_lvj.getBins()));
+
+           rdataset4fit_mlvj.plotOn(mplot_sig,RooFit.Name("data_invisible"),RooFit.MarkerSize(1.5),RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0));
+
+
+           doubleCB_sig = ROOT.RooDoubleCrystalBall("DoubleCB_BulkG_WW_mlvj","DoubleCB_BulkG_WW_mlvj",rrv_mass_lvj,rrv_mean_CB,rrv_total_sigma_CB,rrv_alpha1_CB,rrv_n1_CB,rrv_alpha2_CB,rrv_n2_CB); 
+           bw_sig = RooBreitWigner("bw_"+options.channel,"bw_"+options.channel,rrv_mass_lvj,rrv_total_mean_CB,rrv_width_BW);
+           model_pdf_sig = RooFFTConvPdf("sig_xww_%s_%s"%(options.channel,options.category),"sigxww_%s_%s"%(options.channel,options.category),rrv_mass_lvj,bw_sig,doubleCB_sig);
+           model_pdf_sig.setBufferFraction(1.0);
+
+
+           model_pdf_sig.plotOn(mplot_sig,RooFit.Name("total_MC"),RooFit.Normalization(rrv_number_signal.getVal()/(6.25*rdataset4fit_mlvj.sumEntries())),RooFit.DrawOption("L"), RooFit.LineColor(kBlue), RooFit.VLines(),RooFit.LineWidth(2),RooFit.LineStyle(1));
+
+           mplot_pull = get_pull(rrv_mass_lvj,mplot_sig);
+           mplot_sig.GetYaxis().SetRangeUser(1e-3,mplot_sig.GetMaximum()*1.2);
+
+           draw_canvas_with_pull(mplot_sig,mplot_pull,"plots_signal_width/","signal_width_plot_%d_W%d"%(mass[iMass],mass[iMass]*gammaVal),"",0);
+                   
+        new_file.Close();
+                          
     iMass = iMass +1 ;                              
 
   os.system("rm %s/%s/temp_datacard_list.txt"%(options.inPath,options.datacardPath));
