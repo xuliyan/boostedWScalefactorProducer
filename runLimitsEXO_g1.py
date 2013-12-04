@@ -9,7 +9,7 @@ import time
 from array import array
 
 import ROOT
-from ROOT import gROOT, gStyle, gSystem, TLatex, TH1D
+from ROOT import gROOT, gStyle, gSystem, TLatex, TH1D, TString, TPaveText, TGaxis
 import subprocess
 from subprocess import Popen
 from optparse import OptionParser
@@ -58,35 +58,36 @@ parser.add_option('--signalWidth', action='store',type="int", default=0, dest='s
 ### mass point for signal to be fitted
 #mass      = [600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500]
 mass       = [800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500]
-mass_width = [1000,1500,2100]
+mass_width = [800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500]
+bw_width   = [0.001,0.05,0.1,0.15,0.20,0.25,0.30,0.35,0.40]
 
 ### mass window for couting analysis
 ccmlo = [700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400]
 ccmhi = [900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,3000]
 
-ccmlo_width = [850,1300,1600]
-ccmhi_width = [1150,1700,2800]
+ccmlo_width = [700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400]
+ccmhi_width = [900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,3000]
 
 ### jet mass range
 mjlo = [ 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40]
 mjhi = [ 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130]
 
-mjlo_width = [40,40,40]
-mjhi_width = [130,130,130]
+mjlo_width = [ 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40]
+mjhi_width = [ 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130, 130]
 
 ### mlvj range min and max used when run with option --makeCards
 mlo = [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,700]
 mhi = [ 3000, 3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000]
 
-mlo_width = [ 700, 700, 700]
-mhi_width = [ 3000, 3000,3000]
+mlo_width = [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,700]
+mhi_width = [ 3000, 3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000]
 
 ### mlvj range min and max used when run with option --fitSignal
-mlo_sig = [ 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1800, 1800, 1900, 2000]
-mhi_sig = [ 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2600, 2700, 2900, 3000]
+mlo_sig = [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,700]
+mhi_sig = [ 3000, 3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000]
 
-mlo_sig_width = [ 500, 800, 1000]
-mhi_sig_width = [ 1500, 2200, 3200]
+mlo_sig_width = [ 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700, 700,700]
+mhi_sig_width = [ 3000, 3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000]
 
 ### shape to be used for bkg when --makeCards
 shapeAlt = ["ExpN","ExpN","ExpN","ExpN","ExpN","ExpN","ExpN","ExpN","ExpN","ExpN","ExpN","ExpN","ExpN","ExpN","ExpN","ExpN","ExpN","ExpN"]
@@ -102,7 +103,7 @@ shape_sig_narrow = ["DoubleCB_v1","DoubleCB_v1","DoubleCB_v1","DoubleCB_v1","Dou
 
 
 ### signal mass fraction for non narrow samples
-mass_fraction = [0.05,0.15,0.3]
+mass_fraction = [0.15,0.05,0.3]
 
 BRnew  = [00];
 cprime = [10];
@@ -128,6 +129,78 @@ xsDict = {600:0.052087,700:0.019006,800:0.0079064,
           1800:2.0367e-05,1900:1.2723e-05,2000:8.0046e-06,
           2100:5.0566e-06,2200:3.2608e-06,2300:2.0938e-06,
           2400:1.3566e-06,2500:8.8518e-07}
+
+################################
+## style setup for doUL plots ##
+################################
+def setStyle():
+
+  gStyle.SetPadBorderMode(0);
+  gStyle.SetFrameBorderMode(0);
+  gStyle.SetPadBottomMargin(0.12);
+  gStyle.SetPadLeftMargin(0.12);
+  gStyle.SetCanvasColor(ROOT.kWhite);
+  gStyle.SetCanvasDefH(600); #Height of canvas
+  gStyle.SetCanvasDefW(600); #Width of canvas
+  gStyle.SetCanvasDefX(0);   #POsition on screen
+  gStyle.SetCanvasDefY(0);
+
+  gStyle.SetPadTopMargin(0.05);
+  gStyle.SetPadBottomMargin(0.15);#0.13);
+  gStyle.SetPadLeftMargin(0.15);#0.16);
+  gStyle.SetPadRightMargin(0.05);#0.02);
+
+
+
+ # For the Pad:
+  gStyle.SetPadBorderMode(0);
+  # gStyle.SetPadBorderSize(Width_t size = 1);
+  gStyle.SetPadColor(ROOT.kWhite);
+  gStyle.SetPadGridX(ROOT.kFALSE);
+  gStyle.SetPadGridY(ROOT.kFALSE);
+  gStyle.SetGridColor(0);
+  gStyle.SetGridStyle(3);
+  gStyle.SetGridWidth(1);
+
+  # For the frame:
+  gStyle.SetFrameBorderMode(0);
+  gStyle.SetFrameBorderSize(1);
+  gStyle.SetFrameFillColor(0);
+  gStyle.SetFrameFillStyle(0);
+  gStyle.SetFrameLineColor(1);
+  gStyle.SetFrameLineStyle(1);
+  gStyle.SetFrameLineWidth(1);
+
+  gStyle.SetAxisColor(1, "XYZ");
+  gStyle.SetStripDecimals(ROOT.kTRUE);
+  gStyle.SetTickLength(0.03, "XYZ");
+  gStyle.SetNdivisions(505, "XYZ");
+  gStyle.SetPadTickX(1);  # To get tick marks on the opposite side of the frame
+  gStyle.SetPadTickY(1);
+  gStyle.SetGridColor(0);
+  gStyle.SetGridStyle(3);
+  gStyle.SetGridWidth(1);
+
+
+  gStyle.SetTitleColor(1, "XYZ");
+  gStyle.SetTitleFont(42, "XYZ");
+  gStyle.SetTitleSize(0.05, "XYZ");
+  # gStyle.SetTitleXSize(Float_t size = 0.02); # Another way to set the size?
+  # gStyle.SetTitleYSize(Float_t size = 0.02);
+  gStyle.SetTitleXOffset(1.15);#0.9);
+  gStyle.SetTitleYOffset(1.3); # => 1.15 if exponents
+  gStyle.SetLabelColor(1, "XYZ");
+  gStyle.SetLabelFont(42, "XYZ");
+  gStyle.SetLabelOffset(0.007, "XYZ");
+  gStyle.SetLabelSize(0.045, "XYZ");
+
+  gStyle.SetPadBorderMode(0);
+  gStyle.SetFrameBorderMode(0);
+  gStyle.SetTitleTextColor(1);
+  gStyle.SetTitleFillColor(10);
+  gStyle.SetTitleFontSize(0.05);
+
+
 
 
 ###########################################################
@@ -179,7 +252,7 @@ def submitBatchJob( command, fn ):
 ##################################################################
 
 
-def submitBatchJobCombine( command, fn, channel, mass, cprime, BRnew, purity, isReReco ):
+def submitBatchJobCombine( command, fn, channel, mass, cprime, BRnew, purity, isReReco, datacard =""):
 
     currentDir = os.getcwd();
     #### create a dummy bash/csh
@@ -203,27 +276,40 @@ def submitBatchJobCombine( command, fn, channel, mass, cprime, BRnew, purity, is
         
     outScript.close();
 
-    if not purity=="combo" :
+    if datacard == "" :
+     if not purity=="combo" :
         if isReReco == 0:
          file1 = "wwlvj_BulkG_WW_lvjj_c0p2_M%03d_%s_10_00_%s_unbin.txt"%(mass,channel,purity);
          file2 = "wwlvj_BulkG_WW_lvjj_c0p2_M%03d_%s_10_00_%s_workspace.root"%(mass,channel,purity);
         else: 
          file1 = "wwlvj_BulkG_WW_inclusive_c0p2_M%03d_%s_10_00_%s_unbin.txt"%(mass,channel,purity);
          file2 = "wwlvj_BulkG_WW_inclusive_c0p2_M%03d_%s_10_00_%s_workspace.root"%(mass,channel,purity);
-    else:
-       if isReReco == 0: 
+     else:
+       if isReReco == 0 : 
           file1 = "wwlvj_BulkG_WW_lvjj_c0p2_M%03d_%s_10_00_unbin.txt"%(mass,purity);
           file2 = "wwlvj_BulkG_WW_lvjj_c0p2_M%03d_mu_10_00_HP_workspace.root"%(mass);
           file3 = "wwlvj_BulkG_WW_lvjj_c0p2_M%03d_el_10_00_HP_workspace.root"%(mass);
           file4 = "wwlvj_BulkG_WW_lvjj_c0p2_M%03d_mu_10_00_LP_workspace.root"%(mass);
           file5 = "wwlvj_BulkG_WW_lvjj_c0p2_M%03d_el_10_00_LP_workspace.root"%(mass);
-       else:   
+       else:
           file1 = "wwlvj_BulkG_WW_inclusive_c0p2_M%03d_%s_10_00_unbin.txt"%(mass,purity);
           file2 = "wwlvj_BulkG_WW_inclusive_c0p2_M%03d_mu_10_00_HP_workspace.root"%(mass);
           file3 = "wwlvj_BulkG_WW_inclusive_c0p2_M%03d_el_10_00_HP_workspace.root"%(mass);
           file4 = "wwlvj_BulkG_WW_inclusive_c0p2_M%03d_mu_10_00_LP_workspace.root"%(mass);
           file5 = "wwlvj_BulkG_WW_inclusive_c0p2_M%03d_el_10_00_LP_workspace.root"%(mass);
-        
+
+    else:
+        if isReReco == 0:
+          file1 = datacard;
+          datacard.ReplaceAll("unbin","workspace");
+          datacard.ReplaceAll("txt","root");
+          file2 = datacard
+        else:
+          file1 = datacard;
+          datacard.ReplaceAll("unbin","workspace");
+          datacard.ReplaceAll("txt","root");
+          file2 = datacard
+                                                      
     # link a condor script to your shell script
     condorScript=open("subCondor_"+fn,"w");
     condorScript.write('universe = vanilla')
@@ -306,12 +392,12 @@ def getPValueFromCard( file ):
 def doULPlot( suffix ):
 
     
-    xbins = array('d', [])
+    xbins     = array('d', [])
     xbins_env = array('d', [])
     ybins_exp = array('d', [])
     ybins_obs = array('d', [])
-    ybins_1s = array('d', [])
-    ybins_2s = array('d', [])
+    ybins_1s  = array('d', [])
+    ybins_2s  = array('d', [])
     ybins_xs_02 = array('d', [])
     ybins_xs_05 = array('d', [])
     
@@ -326,8 +412,8 @@ def doULPlot( suffix ):
         ybins_obs.append( curAsymLimits[0]*sf2 );
         ybins_2s.append( curAsymLimits[1]*sf2 );
         ybins_1s.append( curAsymLimits[2]*sf2 );
-        ybins_xs_02.append(sf);
-        ybins_xs_05.append(sf2);
+        ybins_xs_02.append(sf*0.25);
+        ybins_xs_05.append(sf2*0.25);
     
     for i in range( len(mass)-1, -1, -1 ):
         curFile = "higgsCombine_lim_%03d%s.Asymptotic.mH%03d.root"%(mass[i],suffix,mass[i]);
@@ -339,97 +425,156 @@ def doULPlot( suffix ):
         ybins_1s.append( curAsymLimits[4]*sf2 );
     
     
-    curGraph_exp = ROOT.TGraph(nPoints,xbins,ybins_exp);
-    curGraph_obs = ROOT.TGraph(nPoints,xbins,ybins_obs);
+    curGraph_exp = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_exp);
+    curGraph_obs = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_obs);
     curGraph_xs_02 = ROOT.TGraph(nPoints,xbins,ybins_xs_02);
     curGraph_xs_05 = ROOT.TGraph(nPoints,xbins,ybins_xs_05);
-    curGraph_1s = ROOT.TGraph(nPoints*2,xbins_env,ybins_1s);
-    curGraph_2s = ROOT.TGraph(nPoints*2,xbins_env,ybins_2s);
+    curGraph_1s = ROOT.TGraphAsymmErrors(nPoints*2,xbins_env,ybins_1s);
+    curGraph_2s = ROOT.TGraphAsymmErrors(nPoints*2,xbins_env,ybins_2s);
     
     curGraph_obs.SetMarkerStyle(20);
-    curGraph_exp.SetLineStyle(2);
-    curGraph_xs_02.SetLineStyle(2);
-    curGraph_xs_05.SetLineStyle(1);
-    curGraph_exp.SetLineWidth(2);
-    curGraph_obs.SetLineWidth(2);
-    curGraph_xs_02.SetLineWidth(3);
-    curGraph_xs_02.SetLineWidth(3);
-    curGraph_exp.SetMarkerSize(2);
-    curGraph_xs_02.SetMarkerSize(2);
-    curGraph_xs_05.SetMarkerSize(2);
-    curGraph_obs.SetMarkerSize(2);
-    curGraph_xs_02.SetLineColor(ROOT.kRed+1);
-    curGraph_xs_05.SetLineColor(ROOT.kRed+1);
-    curGraph_1s.SetFillColor(ROOT.kGreen);
-    curGraph_2s.SetFillColor(ROOT.kYellow);
+    curGraph_obs.SetLineWidth(3);
+    curGraph_obs.SetLineStyle(1);
+    curGraph_obs.SetMarkerSize(1.6);
+    curGraph_exp.SetMarkerSize(1.3);
+    curGraph_exp.SetMarkerColor(ROOT.kBlack);
 
-    if suffix =="_el_HP" :
-        banner = TLatex(0.31,0.91,("CMS Preliminary, 19.5 fb^{-1} at #sqrt{s}=8TeV, W#rightarrow e#nu HP"));
-        banner.SetNDC(); banner.SetTextSize(0.032);
-    if suffix =="_el_LP" :
-        banner = TLatex(0.31,0.91,("CMS Preliminary, 19.5 fb^{-1} at #sqrt{s}=8TeV, W#rightarrow e#nu LP"));
-        banner.SetNDC(); banner.SetTextSize(0.032);
-    if suffix =="_mu_HP" :
-        banner = TLatex(0.31,0.91,("CMS Preliminary, 19.5 fb^{-1} at #sqrt{s}=8TeV, W#rightarrow #mu#nu HP"));
-        banner.SetNDC(); banner.SetTextSize(0.032);
-    if suffix =="_mu_LP" :
-        banner = TLatex(0.31,0.91,("CMS Preliminary, 19.5 fb^{-1} at #sqrt{s}=8TeV, W#rightarrow #mu#nu LP"));
-        banner.SetNDC(); banner.SetTextSize(0.032); 
-    if suffix =="_combo" :
-        banner = TLatex(0.31,0.91,("CMS Preliminary, 19.5 fb^{-1} at #sqrt{s}=8TeV, e+#mu combined"));
-        banner.SetNDC(); banner.SetTextSize(0.032);
-    if suffix =="_em_HP" :
-        banner = TLatex(0.31,0.91,("CMS Preliminary, 19.5 fb^{-1} at #sqrt{s}=8TeV, e+#mu"));
-        banner.SetNDC(); banner.SetTextSize(0.032);
+    curGraph_exp.SetLineStyle(2);
+    curGraph_exp.SetLineWidth(3);
+    curGraph_exp.SetMarkerSize(2);
+    curGraph_exp.SetMarkerStyle(24);
+    curGraph_exp.SetMarkerColor(ROOT.kBlack);
+
+    curGraph_xs_02.SetLineStyle(ROOT.kDashed);
+    curGraph_xs_02.SetFillStyle(3344);
+    curGraph_xs_02.SetLineWidth(2);
+    curGraph_xs_02.SetMarkerSize(2);
+    curGraph_xs_02.SetLineColor(ROOT.kRed);
+
+    curGraph_xs_05.SetLineStyle(ROOT.kSolid);
+    curGraph_xs_05.SetFillStyle(3344);
+    curGraph_xs_05.SetLineWidth(2);
+    curGraph_xs_05.SetMarkerSize(2);
+    curGraph_xs_05.SetLineColor(ROOT.kRed);
+
+
+    curGraph_1s.SetFillColor(ROOT.kGreen);
+    curGraph_1s.SetFillStyle(1001);
+    curGraph_1s.SetLineStyle(ROOT.kDashed);
+    curGraph_1s.SetLineWidth(3);
+
+    curGraph_2s.SetFillColor(ROOT.kYellow);
+    curGraph_2s.SetFillStyle(1001);
+    curGraph_2s.SetLineStyle(ROOT.kDashed);
+    curGraph_2s.SetLineWidth(3);
+    
         
     oneLine = ROOT.TF1("oneLine","1",799,1001);
     oneLine.SetLineColor(ROOT.kRed);
     oneLine.SetLineWidth(3);
 
-    can_SM = ROOT.TCanvas("can_SM","can_SM",1000,800);
-    hrl_SM = can_SM.DrawFrame(799,1e-5,2501,5.0);
-    hrl_SM.GetYaxis().SetTitle("#sigma_{95%} #times BR_{WW} (pb)");
-    hrl_SM.GetYaxis().SetTitleOffset(1.2);
-    hrl_SM.GetXaxis().SetTitle("m_{WW} (GeV)");
-    hrl_SM.GetXaxis().SetTitleSize(0.036);
-    hrl_SM.GetXaxis().SetTitleSize(0.036);
-    hrl_SM.GetXaxis().SetLabelSize(0.036);
-    hrl_SM.GetYaxis().SetRangeUser(0.0001,10);
-    hrl_SM.GetYaxis().SetNdivisions(504);
-    can_SM.SetGrid();
+    setStyle();
+
+    can_SM = ROOT.TCanvas("can_SM","can_SM",630,600);
+    hrl_SM = can_SM.DrawFrame(750,0.0005,2550,1);
+
+    hrl_SM.GetYaxis().SetTitle("#sigma_{95%} #times BR(G* #rightarrow WW) (pb)");
+    hrl_SM.GetYaxis().SetTitleOffset(1.35);
+    hrl_SM.GetYaxis().SetTitleSize(0.045);
+    hrl_SM.GetYaxis().SetTitleFont(42);
+
+    hrl_SM.GetXaxis().SetTitle("M_{G*} (GeV)");
+    hrl_SM.GetXaxis().SetTitleSize(0.045);
+    hrl_SM.GetXaxis().SetTitleFont(42);
+
+    hrl_SM.GetYaxis().SetNdivisions(505);
+    can_SM.SetGridx(1);
+    can_SM.SetGridy(1);
 
     curGraph_2s.Draw("F");
-    curGraph_1s.Draw("F");
-    curGraph_obs.Draw("PL");
-    curGraph_exp.Draw("PL");
-    curGraph_xs_02.Draw("PL");
-    curGraph_xs_05.Draw("PL");
-
+    curGraph_1s.Draw("Fsame");
+    curGraph_obs.Draw("PCsame");
+    curGraph_exp.Draw("Csame");
+    curGraph_xs_02.Draw("Csame");
+    curGraph_xs_05.Draw("Csame");
        
-    leg2 = ROOT.TLegend(0.52,0.60,0.88,0.85);
+    leg2 = ROOT.TLegend(0.43,0.60,0.89,0.85);
+
     leg2.SetFillColor(0);
-    leg2.SetBorderSize(0);
-    leg2.SetFillStyle(3001);
-    leg2.AddEntry(curGraph_obs,"Observed","LP")
-    leg2.AddEntry(curGraph_exp,"Expected","L")
-    leg2.AddEntry(curGraph_1s,"Expected, #pm 1#sigma","F")
-    leg2.AddEntry(curGraph_2s,"Expected, #pm 2#sigma","F")
-    leg2.AddEntry(curGraph_xs_02,"#sigma_{Bulk}#times BR(G#rightarrow WW), #tilde{k}=0.2","L")
-    leg2.AddEntry(curGraph_xs_05,"#sigma_{Bulk}#times BR(G#rightarrow WW), #tilde{k}=0.5","L")
+    leg2.SetShadowColor(0);
+    leg2.SetTextFont(42);
+    leg2.SetTextSize(0.028);
+
+    leg2.AddEntry(curGraph_obs,"Asympt. CL_{S} Observed","LP")
+    leg2.AddEntry(curGraph_1s,"Asympt. CL_{S}  Expected #pm 1#sigma","LF")
+    leg2.AddEntry(curGraph_2s,"Asympt. CL_{S}  Expected #pm 2#sigma","LF")
+    leg2.AddEntry(curGraph_xs_05,"#sigma_{TH} x BR(G* #rightarrow WW), #tilde{k}=0.50","L")
+    leg2.AddEntry(curGraph_xs_02,"#sigma_{TH} x BR(G* #rightarrow WW), #tilde{k}=0.20","L")
+
+    xaxis2 = TGaxis(790.0,0.005,810,0.005,699.0,701.0,100,"UI");
+    xaxis2.Draw();
+    t800 =  TPaveText(0.135,0.108,0.18,0.108,"brNDC");
+    t800.SetFillColor(ROOT.kWhite);
+    t800.SetTextSize(0.045);
+    t800.SetTextAlign(11);
+    t800.SetTextFont(42);
+    t800.SetBorderSize(0);
+    t800.AddText("800");
+    t800.Draw();
+                    
+
 
     ROOT.gPad.SetLogy();
+
     can_SM.Update();
     can_SM.RedrawAxis();
     can_SM.RedrawAxis("g");
     can_SM.Update();
 
     leg2.Draw();
-    banner.Draw();
 
-    can_SM.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/Lim%s.png"%(suffix));
-    can_SM.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/Lim%s.pdf"%(suffix));
-    can_SM.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/Lim%s.root"%(suffix));
-    can_SM.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/Lim%s.C"%(suffix));
+    if suffix =="_el_HP" :
+        banner = TLatex(0.31,0.91,("CMS Preliminary, 19.5 fb^{-1} at #sqrt{s}=8TeV, W#rightarrow e#nu HP"));
+        banner.SetNDC(); banner.SetTextSize(0.032); banner.Draw();
+    if suffix =="_el_LP" :
+        banner = TLatex(0.31,0.91,("CMS Preliminary, 19.5 fb^{-1} at #sqrt{s}=8TeV, W#rightarrow e#nu LP"));
+        banner.SetNDC(); banner.SetTextSize(0.032); banner.Draw();
+    if suffix =="_mu_HP" :
+        banner = TLatex(0.31,0.91,("CMS Preliminary, 19.5 fb^{-1} at #sqrt{s}=8TeV, W#rightarrow #mu#nu HP"));
+        banner.SetNDC(); banner.SetTextSize(0.032); banner.Draw();
+    if suffix =="_mu_LP" :
+        banner = TLatex(0.31,0.91,("CMS Preliminary, 19.5 fb^{-1} at #sqrt{s}=8TeV, W#rightarrow #mu#nu LP"));
+        banner.SetNDC(); banner.SetTextSize(0.032); banner.Draw();
+    if suffix =="_combo" :
+        banner = TPaveText( 0.145, 0.953, 0.6, 0.975, "brNDC");
+        banner.SetFillColor(ROOT.kWhite);
+        banner.SetTextSize(0.038);
+        banner.SetTextAlign(11);
+        banner.SetTextFont(62);
+        banner.SetBorderSize(0);
+        leftText = "CMS";
+        banner.AddText(leftText);
+        banner.Draw();
+        
+        label_sqrt = TPaveText(0.4,0.953,0.96,0.975, "brNDC");
+        label_sqrt.SetFillColor(ROOT.kWhite);
+        label_sqrt.SetBorderSize(0);
+        label_sqrt.SetTextSize(0.038);
+        label_sqrt.SetTextFont(62);
+        label_sqrt.SetTextAlign(31); # align right
+        label_sqrt.AddText("L = 19.7 fb^{-1} at #sqrt{s} = 8 TeV");
+        label_sqrt.Draw();        
+    if suffix =="_em_HP" :
+        banner = TLatex(0.31,0.91,("CMS Preliminary, 19.5 fb^{-1} at #sqrt{s}=8TeV, e+#mu"));
+        banner.SetNDC(); banner.SetTextSize(0.032); banner.Draw();
+
+    os.system("mkdir -p %s/LimitResult/"%(os.getcwd()));
+    os.system("mkdir -p %s/LimitResult/Limit_ExpTail/"%(os.getcwd()));
+
+    can_SM.SaveAs("./LimitResult/Limit_ExpTail/Lim%s.png"%(suffix));
+    can_SM.SaveAs("./LimitResult/Limit_ExpTail/Lim%s.pdf"%(suffix));
+    can_SM.SaveAs("./LimitResult/Limit_ExpTail/Lim%s.root"%(suffix));
+    can_SM.SaveAs("./LimitResult/Limit_ExpTail/Lim%s.C"%(suffix));
 
 
 #################
@@ -445,8 +590,8 @@ if __name__ == '__main__':
 
     ### Set the working directory
         
-    if (options.computeLimits or options.plotLimits) and options.limitMode == 2 : os.chdir("cards_em_EXO_allCat_v2_ExpTail_g1_rereco_c0p5_modelIndependent");
-    elif (options.computeLimits or options.plotLimits) : os.chdir("cards_em_EXO_allCat_v2_ExpTail_g1_rereco_c0p5_modelIndependent");
+    if (options.computeLimits or options.plotLimits) and options.limitMode == 2 : os.chdir("cards_em_EXO_allCat_v2_ExpTail_g1_rereco_c0p5");
+    elif (options.computeLimits or options.plotLimits) : os.chdir("cards_em_EXO_allCat_v2_ExpTail_g1_rereco_c0p5");
 
     
     ### put in functionality to test just one mass point or just one cprime
@@ -523,11 +668,11 @@ if __name__ == '__main__':
                 time.sleep(0.3);
                 if options.isReReco == 1 :
                  if int(mass_width[i]*mass_fraction[k]) < 100:
-                  command = "python g1_exo_doFit_class.py %s BulkG_WW_inclusive_M%03d_W%02d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew 00 --inPath %s --category %s --closuretest %01d"%(CHAN, mass_width[i], mass_width[i]*mass_fraction[k],ccmlo_width[i], ccmhi_width[i], mjlo_width[i], mjhi_width[i], mlo_width[i], mhi_width[i], shape[i], shapeAlt[i], cprime[j], os.getcwd(), options.category,options.closuretest);
+                  command = "python g1_exo_doFit_class.py %s BulkG_WW_inclusive_M%03d_W%02d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew 00 --inPath %s --category %s --closuretest %01d"%(CHAN, mass_width[i], int(mass_width[i]*mass_fraction[k]),ccmlo_width[i], ccmhi_width[i], mjlo_width[i], mjhi_width[i], mlo_width[i], mhi_width[i], shape[i], shapeAlt[i], cprime[j], os.getcwd(), options.category,options.closuretest);
                  elif int(mass_width[i]*mass_fraction[k]) >= 100 and int(mass_width[i]*mass_fraction[k]) < 1000:
-                  command = "python g1_exo_doFit_class.py %s BulkG_WW_inclusive_M%03d_W03%d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew 00 --inPath %s --category %s --closuretest %01d"%(CHAN, mass_width[i], mass_width[i]*mass_fraction[k],ccmlo_width[i], ccmhi_width[i], mjlo_width[i], mjhi_width[i], mlo_width[i], mhi_width[i], shape[i], shapeAlt[i], cprime[j], os.getcwd(), options.category,options.closuretest);
+                  command = "python g1_exo_doFit_class.py %s BulkG_WW_inclusive_M%03d_W%03d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew 00 --inPath %s --category %s --closuretest %01d"%(CHAN, mass_width[i], int(mass_width[i]*mass_fraction[k]),ccmlo_width[i], ccmhi_width[i], mjlo_width[i], mjhi_width[i], mlo_width[i], mhi_width[i], shape[i], shapeAlt[i], cprime[j], os.getcwd(), options.category,options.closuretest);
                  else:
-                  command = "python g1_exo_doFit_class.py %s BulkG_WW_inclusive_M%03d_W%04d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew 00 --inPath %s --category %s --closuretest %01d"%(CHAN, mass_width[i], mass_width[i]*mass_fraction[k],ccmlo_width[i], ccmhi_width[i], mjlo_width[i], mjhi_width[i], mlo_width[i], mhi_width[i], shape[i], shapeAlt[i], cprime[j], os.getcwd(), options.category,options.closuretest);
+                  command = "python g1_exo_doFit_class.py %s BulkG_WW_inclusive_M%03d_W%04d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew 00 --inPath %s --category %s --closuretest %01d"%(CHAN, mass_width[i], int(mass_width[i]*mass_fraction[k]),ccmlo_width[i], ccmhi_width[i], mjlo_width[i], mjhi_width[i], mlo_width[i], mhi_width[i], shape[i], shapeAlt[i], cprime[j], os.getcwd(), options.category,options.closuretest);
 
                 print command ;
 
@@ -573,21 +718,21 @@ if __name__ == '__main__':
         for i in range(mLo_width,mHi_width):
             for j in range(cpLo,cpHi):
                 
-                print "###################################################";
-                print "###################################################";
-                print "####### R U N N I N G F I T S   W I D T H #########";
+                print "###################################";
+                print "###################################";
+                print "####### FIT SIGNAL SHAPES #########";
                 print "mass = ",mass_width[i],", cprime = ",cprime[j]," mass_fraction = ",mass_fraction[k];
-                print "##################################################";
-                print "##################################################";
+                print "###################################";
+                print "###################################";
                 
                 time.sleep(0.3);
                 if options.isReReco == 1 :
                  if int(mass_width[i]*mass_fraction[k]) < 100:
-                  command = "python g1_exo_doFit_class.py %s BulkG_WW_inclusive_M%03d_W%02d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew 00 --inPath %s --category %s --closuretest %01d --fitSignal 1"%(CHAN, mass_width[i], mass_width[i]*mass_fraction[k],ccmlo_width[i], ccmhi_width[i], mjlo_width[i], mjhi_width[i], mlo_sig_width[i], mhi_sig_width[i], shape_sig_narrow[i], shape_sig_width[i], cprime[j], os.getcwd(), options.category,options.closuretest);
+                  command = "python g1_exo_doFit_class.py %s BulkG_WW_inclusive_M%03d_W%02d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew 00 --inPath %s --category %s --closuretest %01d --fitSignal 1"%(CHAN, mass_width[i], int(mass_width[i]*mass_fraction[k]),ccmlo_width[i], ccmhi_width[i], mjlo_width[i], mjhi_width[i], mlo_sig_width[i], mhi_sig_width[i], shape_sig_narrow[i], shape_sig_width[i], cprime[j], os.getcwd(), options.category,options.closuretest);
                  elif int(mass_width[i]*mass_fraction[k]) >= 100 and int(mass_width[i]*mass_fraction[k]) <= 1000:
-                  command = "python g1_exo_doFit_class.py %s BulkG_WW_inclusive_M%03d_W%03d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew 00 --inPath %s --category %s --closuretest %01d --fitSignal 1"%(CHAN, mass_width[i], mass_width[i]*mass_fraction[k],ccmlo_width[i], ccmhi_width[i], mjlo_width[i], mjhi_width[i], mlo_sig_width[i], mhi_sig_width[i], shape_sig_narrow[i], shape_sig_width[i], cprime[j], os.getcwd(), options.category,options.closuretest);
+                  command = "python g1_exo_doFit_class.py %s BulkG_WW_inclusive_M%03d_W%03d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew 00 --inPath %s --category %s --closuretest %01d --fitSignal 1"%(CHAN, mass_width[i], int(mass_width[i]*mass_fraction[k]),ccmlo_width[i], ccmhi_width[i], mjlo_width[i], mjhi_width[i], mlo_sig_width[i], mhi_sig_width[i], shape_sig_narrow[i], shape_sig_width[i], cprime[j], os.getcwd(), options.category,options.closuretest);
                  else :
-                  command = "python g1_exo_doFit_class.py %s BulkG_WW_inclusive_M%03d_W%04d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew 00 --inPath %s --category %s --closuretest %01d --fitSignal 1"%(CHAN, mass_width[i], mass_width[i]*mass_fraction[k],ccmlo_width[i], ccmhi_width[i], mjlo_width[i], mjhi_width[i], mlo_sig_width[i], mhi_sig_width[i], shape_sig_narrow[i], shape_sig_width[i], cprime[j], os.getcwd(), options.category,options.closuretest);
+                  command = "python g1_exo_doFit_class.py %s BulkG_WW_inclusive_M%03d_W%04d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew 00 --inPath %s --category %s --closuretest %01d --fitSignal 1"%(CHAN, mass_width[i], int(mass_width[i]*mass_fraction[k]),ccmlo_width[i], ccmhi_width[i], mjlo_width[i], mjhi_width[i], mlo_sig_width[i], mhi_sig_width[i], shape_sig_narrow[i], shape_sig_width[i], cprime[j], os.getcwd(), options.category,options.closuretest);
 
                 print command ;
 
@@ -598,30 +743,30 @@ if __name__ == '__main__':
                  os.system(command);
 
 
+    ##########################################################################################################################
                   
     ### Compute Limits
     if options.computeLimits:
 
+     if options.channel != "em" :
         for i in range(mLo,mHi):
             print "##################"+str(mass[i])+"#####################";
-
             time.sleep(0.3);
-
             ### combine different categories HP and LP
-            if options.channel != "em" :
-             if options.isReReco == 0 :
+            if options.isReReco == 0 :
               combineCmmd = "combineCards.py wwlvj_BulkG_WW_lvjj_c0p2_M%03d_el_10_00_HP_unbin.txt wwlvj_BulkG_WW_lvjj_c0p2_M%03d_mu_10_00_HP_unbin.txt wwlvj_BulkG_WW_lvjj_c0p2_M%03d_el_10_00_LP_unbin.txt wwlvj_BulkG_WW_lvjj_c0p2_M%03d_mu_10_00_LP_unbin.txt > wwlvj_BulkG_WW_lvjj_c0p2_M%03d_combo_10_00_unbin.txt"%(mass[i],mass[i],mass[i],mass[i],mass[i]);
-             elif options.isReReco == 1 and options.channel != "em" : 
+            elif options.isReReco == 1 and not options.signalWidth: 
               combineCmmd = "combineCards.py wwlvj_BulkG_WW_inclusive_c0p2_M%03d_el_10_00_HP_unbin.txt wwlvj_BulkG_WW_inclusive_c0p2_M%03d_mu_10_00_HP_unbin.txt wwlvj_BulkG_WW_inclusive_c0p2_M%03d_el_10_00_LP_unbin.txt wwlvj_BulkG_WW_inclusive_c0p2_M%03d_mu_10_00_LP_unbin.txt > wwlvj_BulkG_WW_inclusive_c0p2_M%03d_combo_10_00_unbin.txt"%(mass[i],mass[i],mass[i],mass[i],mass[i]);
+#               combineCmmd = "combineCards.py wwlvj_BulkG_WW_inclusive_c0p2_M%03d_el_10_00_HP_unbin.txt wwlvj_BulkG_WW_inclusive_c0p2_M%03d_mu_10_00_HP_unbin.txt > wwlvj_BulkG_WW_inclusive_c0p2_M%03d_combo_10_00_unbin.txt"%(mass[i],mass[i],mass[i]);
+            elif options.isReReco == 1 and options.signalWidth: 
+              combineCmmd = "combineCards.py wwlvj_BulkG_WW_inclusive_M%03d_W%d_el_10_00_HP_unbin.txt wwlvj_BulkG_WW_inclusive_M%03d_W%d_mu_10_00_HP_unbin.txt wwlvj_BulkG_WW_inclusive_M%03d_W%d_el_10_00_LP_unbin.txt wwlvj_BulkG_WW_inclusive_M%03d_W%d_mu_10_00_LP_unbin.txt > wwlvj_BulkG_WW_inclusive_c0p2_M%03d_W%d_combo_10_00_unbin.txt"%(mass[i],mass[i],mass[i],mass[i],mass[i]);
 
-             print combineCmmd
-             os.system(combineCmmd);
+            print combineCmmd
+            os.system(combineCmmd);
             
             ### Asymptotic Limit + profileLikelihood to have an hint of the r value
+            ## ele HP
             if options.limitMode==0:
-
-             ## ele HP
-             if options.channel != "em":   
               if options.isReReco == 0 and not options.noSys:
                runCmmd2 = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -H ProfileLikelihood -m %03d -n _lim_%03d_%s_HP -d wwlvj_BulkG_WW_lvjj_c0p2_M%03d_%s_10_00_HP_unbin.txt -v 2"%(mass[i],mass[i],"el",mass[i],"el");
               elif options.isReReco == 0 and options.noSys:
@@ -709,28 +854,48 @@ if __name__ == '__main__':
               else:  
                os.system(runCmmd2);
 
-             elif options.channel == "em" :
-              ## combined
-              if options.isReReco == 0 and not options.noSys:
-               runCmmd2 = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -H ProfileLikelihood -m %03d -n _lim_%03d_%s_HP -d wwlvj_BulkG_WW_lvjj_c0p2_M%03d_%s_10_00_HP_unbin.txt -v 2"%(mass[i],mass[i],"em",mass[i],"em");
-              elif options.isReReco == 0 and options.noSys:
-               runCmmd2 = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -H ProfileLikelihood -S 0 -m %03d -n _lim_%03d_%s_HP -d wwlvj_BulkG_WW_lvjj_c0p2_M%03d_%s_10_00_HP_unbin.txt -v 2"%(mass[i],mass[i],"em",mass[i],"em");
-              elif options.isReReco == 1 and not  options.noSys:
-               runCmmd2 = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -H ProfileLikelihood -m %03d -n _lim_%03d_%s_HP -d wwlvj_BulkG_WW_inclusive_c0p2_M%03d_%s_10_00_HP_unbin.txt -v 2"%(mass[i],mass[i],"em",mass[i],"em");
-              elif options.isReReco == 1 and options.noSys:
-               runCmmd2 = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -H ProfileLikelihood -S 0 -m %03d -n _lim_%03d_%s_HP -d wwlvj_BulkG_WW_inclusive_c0p2_M%03d_%s_10_00_HP_unbin.txt -v 2"%(mass[i],mass[i],"em",mass[i],"em");
+     if options.channel == "em" :
+        for i in range(mLo_width,mHi_width):
+
+              for iwidth in bw_width :               
+               if options.isReReco == 0 and not options.noSys:
+                datacard = TString();
+                datacard.Form("wwlvj_BulkG_WW_inclusive_c0p2_M%03d_%s_10_00_HP_unbin_W%.3f.txt"%(mass[i],"em",iwidth));
+                datacard.ReplaceAll("0.","_");
+                datacard.ReplaceAll("_txt","txt");                
+                runCmmd2 = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -H ProfileLikelihood -m %03d -n _lim_%03d_%s_HP_W_%s -d %s -v 2"%(mass[i],mass[i],"em",iwidth,datacard);
+               elif options.isReReco == 0 and options.noSys:
+                datacard = TString();
+                datacard.Form("wwlvj_BulkG_WW_inclusive_c0p2_M%03d_%s_10_00_HP_unbin_W%.3f.txt"%(mass[i],"em",iwidth));
+                datacard.ReplaceAll("0.","_");
+                datacard.ReplaceAll("_txt","txt");                
+                runCmmd2 = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -H ProfileLikelihood -S 0 -m %03d -n _lim_%03d_%s_HP_W_%s -d %s -v 2"%(mass[i],mass[i],"em",iwidth,datacard);
+               elif options.isReReco == 1 and not  options.noSys:
+                datacard = TString();
+                datacard.Form("wwlvj_BulkG_WW_inclusive_c0p2_M%03d_%s_10_00_HP_unbin_W%.3f.txt"%(mass[i],"em",iwidth));
+                datacard.ReplaceAll("0.","_");
+                datacard.ReplaceAll("_txt",".txt");                
+                runCmmd2 = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -H ProfileLikelihood -m %03d -n _lim_%03d_%s_HP_%s -d %s -v 2"%(mass[i],mass[i],"em",iwidth,datacard);
+               elif options.isReReco == 1 and options.noSys:
+                datacard = TString();
+                datacard.Form("wwlvj_BulkG_WW_inclusive_c0p2_M%03d_%s_10_00_HP_unbin_W%.3f.txt"%(mass[i],"em",iwidth));
+                datacard.ReplaceAll("0.","_");
+                datacard.ReplaceAll("_txt",".txt");                
+                runCmmd2 = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -H ProfileLikelihood -S 0 -m %03d -n _lim_%03d_%s_HP_%s -d %s -v 2"%(mass[i],mass[i],"em",iwidth,datacard);
               
-              if options.batchMode:
-               fn = "combineScript_Asymptotic_%s_%03d%s_%02d_%02d_%s"%("em",mass[i],"",cprime[0],BRnew[0],"HP");
-               submitBatchJobCombine(runCmmd2,fn,"em",mass[i],cprime[0],BRnew[0],"HP",options.isReReco);
-              else:  
-               os.system(runCmmd2);
+               print runCmmd2;
+               if options.batchMode:
+                fn = "combineScript_Asymptotic_%s_%03d%s_%02d_%02d_%s_W_%s"%("em",mass[i],"",cprime[0],BRnew[0],"HP",datacard);
+                submitBatchJobCombine(runCmmd2,fn,"em",mass[i],cprime[0],BRnew[0],"HP",options.isReReco,datacard);
+               else:  
+                os.system(runCmmd2);
 
-              time.sleep(0.1);
+               time.sleep(0.1);
 
-             ### pvalue evaluation
-            if options.limitMode == 1 :
-             if options.channel != "em":
+     if options.channel != "em" :
+      if options.limitMode == 1 :
+        for i in range(mLo,mHi):            
+            ### pvalue evaluation
                 
               ## mu HP
               print "##################### mu HP #####################";   
@@ -820,7 +985,10 @@ if __name__ == '__main__':
               else:  
                os.system(runCmmd);
 
-             elif options.channel == "em":
+
+     if options.channel == "em" :
+      if options.limitMode == 1:
+        for i in range(mLo_width,mHi_width):
 
               ## semplified for el+mu
               runCmmd ="";
@@ -836,6 +1004,9 @@ if __name__ == '__main__':
                submitBatchJobCombine(runCmmd,fn,"em",mass[i],cprime[0], BRnew[0],"HP",options.isReReco);
               else:  
                os.system(runCmmd);
+
+     if options.channel != "em" :
+        for i in range(mLo,mHi):
 
 
             ### Full CLs -> naive setup
@@ -1226,10 +1397,10 @@ if __name__ == '__main__':
           ban2s.Draw();
           ban3s.Draw();
           ban4s.Draw();
-          can.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_el_HP.pdf","pdf");
-          can.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_el_HP.png","png");
-          can.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_el_HP.root","root");
-          can.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_el_HP.C","C");
+          can.SaveAs("~/LimitResult/Limit_ExpTail/pvals_el_HP.pdf","pdf");
+          can.SaveAs("~/LimitResult/Limit_ExpTail/pvals_el_HP.png","png");
+          can.SaveAs("~/LimitResult/Limit_ExpTail/pvals_el_HP.root","root");
+          can.SaveAs("~/LimitResult/Limit_ExpTail/pvals_el_HP.C","C");
 
           can2 = ROOT.TCanvas("can2","can2",800,800);
           hrl2 = can2.DrawFrame(799,1e-3,2500,0.6);
@@ -1249,10 +1420,10 @@ if __name__ == '__main__':
           ban2s.Draw();
           ban3s.Draw();
           ban4s.Draw();
-          can2.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_mu_HP.pdf","pdf");
-          can2.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_mu_HP.png","png");
-          can2.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_mu_HP.root","root");
-          can2.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_mu_HP.C","C");
+          can2.SaveAs("~/LimitResult/Limit_ExpTail/pvals_mu_HP.pdf","pdf");
+          can2.SaveAs("~/LimitResult/Limit_ExpTail/pvals_mu_HP.png","png");
+          can2.SaveAs("~/LimitResult/Limit_ExpTail/pvals_mu_HP.root","root");
+          can2.SaveAs("~/LimitResult/Limit_ExpTail/pvals_mu_HP.C","C");
 
           can3 = ROOT.TCanvas("can3","can3",800,800);
           hrl3 = can3.DrawFrame(799,1e-3,2500,0.6);
@@ -1272,10 +1443,10 @@ if __name__ == '__main__':
           ban2s.Draw();
           ban3s.Draw();
           ban4s.Draw();
-          can3.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_el_LP.pdf","pdf");
-          can3.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_el_LP.png","png");
-          can3.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_el_LP.root","root");
-          can3.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_el_LP.C","C");
+          can3.SaveAs("~/LimitResult/Limit_ExpTail/pvals_el_LP.pdf","pdf");
+          can3.SaveAs("~/LimitResult/Limit_ExpTail/pvals_el_LP.png","png");
+          can3.SaveAs("~/LimitResult/Limit_ExpTail/pvals_el_LP.root","root");
+          can3.SaveAs("~/LimitResult/Limit_ExpTail/pvals_el_LP.C","C");
 
           can4 = ROOT.TCanvas("can4","can4",800,800);
           hrl4 = can4.DrawFrame(799,1e-3,2500,0.6);
@@ -1295,10 +1466,10 @@ if __name__ == '__main__':
           ban2s.Draw();
           ban3s.Draw();
           ban4s.Draw();
-          can4.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_mu_LP.pdf","pdf");
-          can4.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_mu_LP.png","png");
-          can4.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_mu_LP.root","root");
-          can4.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_mu_LP.C","C");
+          can4.SaveAs("~/LimitResult/Limit_ExpTail/pvals_mu_LP.pdf","pdf");
+          can4.SaveAs("~/LimitResult/Limit_ExpTail/pvals_mu_LP.png","png");
+          can4.SaveAs("~/LimitResult/Limit_ExpTail/pvals_mu_LP.root","root");
+          can4.SaveAs("~/LimitResult/Limit_ExpTail/pvals_mu_LP.C","C");
 
           can5 = ROOT.TCanvas("can5","can5",800,800);
           hrl5 = can5.DrawFrame(799,1e-3,2500,0.6);
@@ -1318,10 +1489,10 @@ if __name__ == '__main__':
           ban2s.Draw();
           ban3s.Draw();
           ban4s.Draw();
-          can5.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_combo.pdf","pdf");
-          can5.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_combo.png","png");
-          can5.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_combo.root","root");
-          can5.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_combo.C","C");
+          can5.SaveAs("~/LimitResult/Limit_ExpTail/pvals_combo.pdf","pdf");
+          can5.SaveAs("~/LimitResult/Limit_ExpTail/pvals_combo.png","png");
+          can5.SaveAs("~/LimitResult/Limit_ExpTail/pvals_combo.root","root");
+          can5.SaveAs("~/LimitResult/Limit_ExpTail/pvals_combo.C","C");
 
 
          doULPlot("_el_HP");
@@ -1404,9 +1575,9 @@ if __name__ == '__main__':
           ban2s.Draw();
           ban3s.Draw();
           ban4s.Draw();
-          can.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_em_HP.pdf","pdf");
-          can.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_em_HP.png","png");
-          can.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_em_HP.root","root");
-          can.SaveAs("~/LimitResult/Limit_ExpTail_modelIndependent/pvals_em_HP.C","C");
+          can.SaveAs("~/LimitResult/Limit_ExpTail/pvals_em_HP.pdf","pdf");
+          can.SaveAs("~/LimitResult/Limit_ExpTail/pvals_em_HP.png","png");
+          can.SaveAs("~/LimitResult/Limit_ExpTail/pvals_em_HP.root","root");
+          can.SaveAs("~/LimitResult/Limit_ExpTail/pvals_em_HP.C","C");
 
          doULPlot("_em_HP");
