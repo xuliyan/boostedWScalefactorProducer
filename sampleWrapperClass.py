@@ -85,10 +85,10 @@ class sampleWrapperClass:
 
         # ---------- Set up jet corrections on the fly of R >= 0.7 jets
         fDir = "JECs/"      
-        jecUncStr       = ROOT.std.string(fDir + "GR_R_53_V10_Uncertainty_AK7PFchs.txt")
-        self.jecUnc_    = ROOT.JetCorrectionUncertainty(jecUncStr)
-        jecUncStrAK5    = ROOT.std.string(fDir + "GR_R_53_V10_Uncertainty_AK5PFchs.txt")
-        self.jecUncAK5_ = ROOT.JetCorrectionUncertainty(jecUncStr)
+        jecUncStr       = ROOT.std.string(fDir + "GR_R_53_V10_Uncertainty_AK7PFchs.txt");
+        self.jecUnc_    = ROOT.JetCorrectionUncertainty(jecUncStr);
+        jecUncStrAK5    = ROOT.std.string(fDir + "GR_R_53_V10_Uncertainty_AK5PFchs.txt");
+        self.jecUncAK5_ = ROOT.JetCorrectionUncertainty(jecUncStrAK5);
 
             
     def getLabel(self):
@@ -877,9 +877,52 @@ class sampleWrapperClass:
              self.pfMET_Phi_[0] = getattr( self.InputTree_, "event_met_pfmetPhi" );        
 
              ######## VBF jet Stuff
+             if self.numberJetBin_[0] ==0 :
+
+              self.vbf_maxpt_j1_m_[0]     = 0;   self.vbf_maxpt_j2_m_[0]   = 0;                               
+              self.vbf_maxpt_j1_pt_[0]    = 0;   self.vbf_maxpt_j2_pt_[0]  = 0;                               
+              self.vbf_maxpt_j1_eta_[0]   = 0;   self.vbf_maxpt_j2_eta_[0] = 0;                               
+              self.vbf_maxpt_j1_phi_[0]   = 0;   self.vbf_maxpt_j2_phi_[0] = 0;                               
+
+              self.vbf_maxpt_j1_QGLikelihood_[0] = 0; self.vbf_maxpt_j2_QGLikelihood_[0] = 0;                                
+ 
+              self.vbf_maxpt_j1_isPileUpMedium_[0]  = 0;  self.vbf_maxpt_j2_isPileUpMedium_[0]  = 0;                             
+              self.vbf_maxpt_j1_isPileUpTight_[0]   = 0;  self.vbf_maxpt_j2_isPileUpTight_[0]   = 0;                               
+
+              self.vbf_maxpt_j1_bDiscriminatorCSV_[0] = 0; self.vbf_maxpt_j2_bDiscriminatorCSV_[0] = 0; 
+
+              if self.numberJetBinGen_[0] ==0 and not self.IsData_:
+
+               self.vbf_maxpt_j1_m_gen_[0]     = 0; self.vbf_maxpt_j2_m_gen_[0]    = 0;                              
+               self.vbf_maxpt_j1_pt_gen_[0]    = 0; self.vbf_maxpt_j2_pt_gen_[0]   = 0;                              
+               self.vbf_maxpt_j1_eta_gen_[0]   = 0; self.vbf_maxpt_j2_eta_gen_[0]  = 0;                              
+               self.vbf_maxpt_j1_phi_gen_[0]   = 0; self.vbf_maxpt_j2_phi_gen_[0]  = 0;                              
+
+               self.vbf_maxpt_j1_bDiscriminatorCSV_gen_[0]  = 0; self.vbf_maxpt_j2_bDiscriminatorCSV_gen_[0]  = 0;
+
+              self.vbf_maxpt_j1_m_up_[0]   = 0;                                
+              self.vbf_maxpt_j1_pt_up_[0]  = 0;                              
+              self.vbf_maxpt_j1_eta_up_[0] = 0;                                
+              self.vbf_maxpt_j1_phi_up_[0] = 0;                                
+
+              self.vbf_maxpt_j1_m_dn_[0]   = 0;                                
+              self.vbf_maxpt_j1_pt_dn_[0]  = 0;                              
+              self.vbf_maxpt_j1_eta_dn_[0] = 0;                                
+              self.vbf_maxpt_j1_phi_dn_[0] = 0;                                
+
+              self.vbf_maxpt_j2_m_dn_[0]   = 0;                                
+              self.vbf_maxpt_j2_pt_dn_[0]  = 0;                              
+              self.vbf_maxpt_j2_eta_dn_[0] = 0;                                
+              self.vbf_maxpt_j2_phi_dn_[0] = 0;                                
+
+              self.vbf_maxpt_j2_m_up_[0]   = 0;                                
+              self.vbf_maxpt_j2_pt_up_[0]  = 0;                              
+              self.vbf_maxpt_j2_eta_up_[0] = 0;                                
+              self.vbf_maxpt_j2_phi_up_[0] = 0;                                
+
+             ### one jet bin
              if self.numberJetBin_[0] ==1 :
 
- 
               self.vbf_maxpt_j1_m_[0]     = getattr(self.InputTree_, "vbf_maxpt_j1_m");                               
               self.vbf_maxpt_j1_pt_[0]    = getattr(self.InputTree_, "vbf_maxpt_j1_pt");                               
               self.vbf_maxpt_j1_eta_[0]   = getattr(self.InputTree_, "vbf_maxpt_j1_eta");                               
@@ -892,6 +935,19 @@ class sampleWrapperClass:
 
               self.vbf_maxpt_j1_bDiscriminatorCSV_[0]  = getattr(self.InputTree_, "vbf_maxpt_j1_bDiscriminatorCSV");
 
+              self.vbf_maxpt_j2_m_[0]     = 0;                              
+              self.vbf_maxpt_j2_pt_[0]    = 0;                               
+              self.vbf_maxpt_j2_eta_[0]   = 0;                              
+              self.vbf_maxpt_j2_phi_[0]   = 0;                               
+ 
+              self.vbf_maxpt_j2_QGLikelihood_[0] = 0;                                
+ 
+              self.vbf_maxpt_j2_isPileUpMedium_[0]  = 0;                               
+              self.vbf_maxpt_j2_isPileUpTight_[0]   = 0;                               
+
+              self.vbf_maxpt_j2_bDiscriminatorCSV_[0]  = 0;
+
+
               if self.numberJetBinGen_[0] ==1 and not self.IsData_:
 
                self.vbf_maxpt_j1_m_gen_[0]     = getattr(self.InputTree_, "vbf_maxpt_j1_m_gen");                               
@@ -901,7 +957,58 @@ class sampleWrapperClass:
 
                self.vbf_maxpt_j1_bDiscriminatorCSV_gen_[0]  = getattr(self.InputTree_, "vbf_maxpt_j1_bDiscriminatorCSV_gen");
 
-                  
+               self.vbf_maxpt_j2_m_gen_[0]     = 0;                               
+               self.vbf_maxpt_j2_pt_gen_[0]    = 0;                               
+               self.vbf_maxpt_j2_eta_gen_[0]   = 0;                               
+               self.vbf_maxpt_j2_phi_gen_[0]   = 0;                               
+
+               self.vbf_maxpt_j2_bDiscriminatorCSV_gen_[0]  = 0;
+
+              ## scale the hardest jet  
+
+              j_jecfactorAK5_up_ = array('f',[0.]);
+              j_jecfactorAK5_dn_ = array('f',[0.]);
+              self.jecUncAK5_.setJetEta(getattr(self.InputTree_, "vbf_maxpt_j1_eta" ));
+              self.jecUncAK5_.setJetPt( getattr(self.InputTree_, "vbf_maxpt_j1_pt" ));                        
+              j_jecfactorAK5_up_[0] = self.jecUncAK5_.getUncertainty( True );
+
+              self.jecUncAK5_.setJetEta(getattr( self.InputTree_, "vbf_maxpt_j1_eta" ));
+              self.jecUncAK5_.setJetPt(getattr( self.InputTree_, "vbf_maxpt_j1_pt" ));               
+              j_jecfactorAK5_dn_[0] = self.jecUncAK5_.getUncertainty( False ) ;
+
+              self.vbf_maxpt_j1 = ROOT.TLorentzVector();
+              self.vbf_maxpt_j1.SetPtEtaPhiM(self.vbf_maxpt_j1_pt_[0],self.vbf_maxpt_j1_eta_[0],self.vbf_maxpt_j1_phi_[0],self.vbf_maxpt_j1_m_[0]); 
+              vbf_maxpt_j1_up = ROOT.TLorentzVector(self.vbf_maxpt_j1.Px()*(1+j_jecfactorAK5_up_[0]),
+                                                    self.vbf_maxpt_j1.Py()*(1+j_jecfactorAK5_up_[0]),
+                                                    self.vbf_maxpt_j1.Pz()*(1+j_jecfactorAK5_up_[0]),
+                                                    self.vbf_maxpt_j1.E()*(1+j_jecfactorAK5_up_[0]));
+                                                   
+
+              vbf_maxpt_j1_dn = ROOT.TLorentzVector(self.vbf_maxpt_j1.Px()*(1-j_jecfactorAK5_dn_[0]),
+                                                    self.vbf_maxpt_j1.Py()*(1-j_jecfactorAK5_dn_[0]),
+                                                    self.vbf_maxpt_j1.Pz()*(1-j_jecfactorAK5_dn_[0]),
+                                                    self.vbf_maxpt_j1.E()*(1-j_jecfactorAK5_dn_[0]));
+                                                    
+              self.vbf_maxpt_j1_m_up_[0]   = vbf_maxpt_j1_up.M();                                
+              self.vbf_maxpt_j1_pt_up_[0]  = vbf_maxpt_j1_up.Pt();                              
+              self.vbf_maxpt_j1_eta_up_[0] = vbf_maxpt_j1_up.Eta();                                
+              self.vbf_maxpt_j1_phi_up_[0] = vbf_maxpt_j1_up.Phi();                                
+
+              self.vbf_maxpt_j1_m_dn_[0]   = vbf_maxpt_j1_dn.M();                                
+              self.vbf_maxpt_j1_pt_dn_[0]  = vbf_maxpt_j1_dn.Pt();                              
+              self.vbf_maxpt_j1_eta_dn_[0] = vbf_maxpt_j1_dn.Eta();                                
+              self.vbf_maxpt_j1_phi_dn_[0] = vbf_maxpt_j1_dn.Phi();                                
+
+              self.vbf_maxpt_j2_m_up_[0]   = 0;                                
+              self.vbf_maxpt_j2_pt_up_[0]  = 0;                              
+              self.vbf_maxpt_j2_eta_up_[0] = 0;                                
+              self.vbf_maxpt_j2_phi_up_[0] = 0;                                
+
+              self.vbf_maxpt_j2_m_dn_[0]   = 0;                                
+              self.vbf_maxpt_j2_pt_dn_[0]  = 0;                              
+              self.vbf_maxpt_j2_eta_dn_[0] = 0;                                
+              self.vbf_maxpt_j2_phi_dn_[0] = 0;                                
+ 
              if self.numberJetBin_[0] >=2 :
 
               self.vbf_maxpt_jj_m_[0]     = getattr(self.InputTree_, "vbf_maxpt_jj_m");                               
@@ -975,15 +1082,16 @@ class sampleWrapperClass:
               self.vbf_maxpt_j1_eta_up_[0] = vbf_maxpt_j1_up.Eta();                                
               self.vbf_maxpt_j1_phi_up_[0] = vbf_maxpt_j1_up.Phi();                                
 
-              vbf_maxpt_j1_dn = ROOT.TLorentzVector(self.vbf_maxpt_j1.Px()*(1+j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j1.Py()*(1+j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j1.Pz()*(1+j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j1.E()*(1+j_jecfactorAK5_dn_[0]));
+              vbf_maxpt_j1_dn = ROOT.TLorentzVector(self.vbf_maxpt_j1.Px()*(1-j_jecfactorAK5_dn_[0]),
+                                                    self.vbf_maxpt_j1.Py()*(1-j_jecfactorAK5_dn_[0]),
+                                                    self.vbf_maxpt_j1.Pz()*(1-j_jecfactorAK5_dn_[0]),
+                                                    self.vbf_maxpt_j1.E()*(1-j_jecfactorAK5_dn_[0]));
                                                     
 
               self.vbf_maxpt_j1_m_dn_[0]   = vbf_maxpt_j1_dn.M();                                
               self.vbf_maxpt_j1_pt_dn_[0]  = vbf_maxpt_j1_dn.Pt();                              
               self.vbf_maxpt_j1_eta_dn_[0] = vbf_maxpt_j1_dn.Eta();                                
+              self.vbf_maxpt_j1_phi_dn_[0] = vbf_maxpt_j1_dn.Phi();                                
  
               self.jecUncAK5_.setJetEta( getattr( self.InputTree_, "vbf_maxpt_j2_eta" ));
               self.jecUncAK5_.setJetPt( getattr( self.InputTree_, "vbf_maxpt_j2_pt" ));                        
@@ -1006,14 +1114,15 @@ class sampleWrapperClass:
               self.vbf_maxpt_j2_eta_up_[0] = vbf_maxpt_j2_up.Eta();                                
               self.vbf_maxpt_j2_phi_up_[0] = vbf_maxpt_j2_up.Phi();                                
 
-              vbf_maxpt_j2_dn = ROOT.TLorentzVector(self.vbf_maxpt_j2.Px()*(1+j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j2.Py()*(1+j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j2.Pz()*(1+j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j2.E()*(1+j_jecfactorAK5_dn_[0]));
+              vbf_maxpt_j2_dn = ROOT.TLorentzVector(self.vbf_maxpt_j2.Px()*(1-j_jecfactorAK5_dn_[0]),
+                                                    self.vbf_maxpt_j2.Py()*(1-j_jecfactorAK5_dn_[0]),
+                                                    self.vbf_maxpt_j2.Pz()*(1-j_jecfactorAK5_dn_[0]),
+                                                    self.vbf_maxpt_j2.E()*(1-j_jecfactorAK5_dn_[0]));
 
               self.vbf_maxpt_j2_m_dn_[0]   = vbf_maxpt_j2_dn.M();                                
               self.vbf_maxpt_j2_pt_dn_[0]  = vbf_maxpt_j2_dn.Pt();                              
               self.vbf_maxpt_j2_eta_dn_[0] = vbf_maxpt_j2_dn.Eta();                                
+              self.vbf_maxpt_j2_phi_dn_[0] = vbf_maxpt_j2_dn.Phi();                                
 
 
               self.vbf_maxDeta_jj_m_[0]     = getattr(self.InputTree_, "vbf_maxDeta_jj_m");                               
