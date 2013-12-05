@@ -498,6 +498,7 @@ if __name__ == '__main__':
 
         rrv_total_mean_CB = RooFormulaVar("rrv_total_mean_BW_"+options.channel,"@0*(1+@1*@2)*(1+@3*@4)", RooArgList(rrv_mean_BW,rrv_mean_scale_p1,rrv_mean_scale_X1,rrv_mean_scale_p2,rrv_mean_scale_X2));
 
+        
         bw = RooBreitWigner("bw_BulkWW_xww_"+options.channel,"bw_BulkG_WW_"+options.channel,old_workspace.var("rrv_mass_lvj"),rrv_total_mean_CB,rrv_width_BW);
 
 
@@ -592,7 +593,7 @@ if __name__ == '__main__':
         name = TString("check_%.3f_%.3f"%(mass[iMass],gammaVal));
         name.ReplaceAll("0.","0_");
         mplot.GetYaxis().SetRangeUser(1e-3,mplot.GetMaximum()*1.2);
-#        draw_canvas(mplot,"plots_signal_width/",name,0,1);
+        draw_canvas(mplot,"plots_signal_width/",name,0,1);
         
         new_workspace.writeToFile(new_file.GetName());
 
