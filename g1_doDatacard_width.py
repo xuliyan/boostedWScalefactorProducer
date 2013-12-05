@@ -526,8 +526,11 @@ if __name__ == '__main__':
 
 
         ### FFT ConvPdf
+        original_binnning =  old_workspace.var("rrv_mass_lvj").getBin();
+        old_workspace.var("rrv_mass_lvj").setBins(1000,"cache");
         model_pdf = RooFFTConvPdf("BulkWW_xww_%s_%s"%(options.channel,options.category),"BulkWW_xww_%s_%s"%(options.channel,options.category),old_workspace.var("rrv_mass_lvj"),bw,new_signal);
         model_pdf.setBufferFraction(1.0);
+        old_workspace.var("rrv_mass_lvj").setBins(int(original_binnning));
         
         model_pdf.SetName("BulkWW_xww_%s_%s"%(options.channel,options.category));
         getattr(new_workspace,"import")(model_pdf);
@@ -613,9 +616,10 @@ if __name__ == '__main__':
            elif gammaVal == 0.30 or mass[iMass] == 2000 : binWidth = 75;
            else:
              binWidth = 20;
-             
+
            rrv_mass_lvj = RooRealVar("rrv_mass_lvj_plot","M_{WW}",float(mass[iMass]),float(mass[iMass]-mass[iMass]*gammaVal*sf),float(mass[iMass]+mass[iMass]*gammaVal*sf),"GeV/c^{2}");
            rrv_mass_lvj.setBins(int((rrv_mass_lvj.getMax()-rrv_mass_lvj.getMin())/binWidth));
+           rrv_mass_lvj.setMax(rrv_mass_lvj.getMin()+rrv_mass_lvj.getBins()*binWidth);           
            rrv_weight   = RooRealVar("rrv_weight","rrv_weight",0. ,10000000.);
 
            ## open the signal file 
@@ -626,6 +630,7 @@ if __name__ == '__main__':
            rdataset4fit_mlvj = RooDataSet("rdataset4fit_BulkG_WW_inclusive_M%3d_W%d_%s_mlvj"%(int(mass[iMass]),int(mass[iMass]*gammaVal),options.channel),"rdataset4fit_BulkG_WW_inclusive_M%3d_W%d_%s_mlvj"%(int(mass[iMass]),int(mass[iMass]*gammaVal),options.channel),RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight));
                    
            luminosity = 19700;
+           tmp_scale_lumi = 0 ;
 
            for iEvent in range(treeIn.GetEntries()):
 
@@ -648,8 +653,9 @@ if __name__ == '__main__':
             if isGoodEvent == 1:
                 ### weigh MC events
                 tmp_event_weight = getattr(treeIn,"weight")*luminosity;
+                                                
                 rrv_mass_lvj.setVal(getattr(treeIn,"mZZ"));
-                rdataset4fit_mlvj.add(RooArgSet(rrv_mass_lvj),tmp_event_weight);
+                rdataset4fit_mlvj.add(RooArgSet(rrv_mass_lvj),tmp_event_weight/tmp_scale_to_lumi);
 
            ### signal over convolution plot
            mplot_sig = rrv_mass_lvj.frame(RooFit.Title(""),RooFit.Bins(rrv_mass_lvj.getBins()));
@@ -659,14 +665,17 @@ if __name__ == '__main__':
 
            doubleCB_sig = ROOT.RooDoubleCrystalBall("DoubleCB_BulkG_WW_mlvj","DoubleCB_BulkG_WW_mlvj",rrv_mass_lvj,rrv_mean_CB,rrv_total_sigma_CB,rrv_alpha1_CB,rrv_n1_CB,rrv_alpha2_CB,rrv_n2_CB); 
            bw_sig = RooBreitWigner("bw_"+options.channel,"bw_"+options.channel,rrv_mass_lvj,rrv_total_mean_CB,rrv_width_BW);
+           original_bin = rrv_mass_lvj.getBins();
+           rrv_mass_lvj.setBins(1000,"cache");
            model_pdf_sig = RooFFTConvPdf("sig_xww_%s_%s"%(options.channel,options.category),"sigxww_%s_%s"%(options.channel,options.category),rrv_mass_lvj,bw_sig,doubleCB_sig);
            model_pdf_sig.setBufferFraction(1.0);
+           rrv_mass_lvj.setBins(int(original_bin));
 
 
-           model_pdf_sig.plotOn(mplot_sig,RooFit.Name("total_MC"),RooFit.Normalization(rrv_number_signal.getVal()/(6.25*rdataset4fit_mlvj.sumEntries())),RooFit.DrawOption("L"), RooFit.LineColor(kBlue), RooFit.VLines(),RooFit.LineWidth(2),RooFit.LineStyle(1));
+           model_pdf_sig.plotOn(mplot_sig,RooFit.Name("total_MC"),RooFit.Normalization((rrv_number_signal.getVal()/tmp_scale_to_lumi)/(6.25*rdataset4fit_mlvj.sumEntries())),RooFit.DrawOption("L"), RooFit.LineColor(kBlue), RooFit.VLines(),RooFit.LineWidth(2),RooFit.LineStyle(1));
 
            mplot_pull = get_pull(rrv_mass_lvj,mplot_sig);
-           mplot_sig.GetYaxis().SetRangeUser(1e-3,mplot_sig.GetMaximum()*1.2);
+           mplot_sig.GetYaxis().SetRangeUser(0.,mplot_sig.GetMaximum()*1.2);
 
            draw_canvas_with_pull(mplot_sig,mplot_pull,"plots_signal_width/","signal_width_plot_%d_W%d"%(mass[iMass],mass[iMass]*gammaVal),"",0);
                    
