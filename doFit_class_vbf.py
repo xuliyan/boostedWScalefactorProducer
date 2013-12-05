@@ -81,6 +81,10 @@ class doFit_wj_and_wlvj:
         ### Set the mj binning for plots
         self.BinWidth_mj = 5.;
 
+        ## set the model used for the background parametrization
+        self.MODEL_4_mlvj=fit_model;
+        self.MODEL_4_mlvj_alter=fit_model_alter;
+
         ### Set the binning for mlvj plots as a function of the model
         if not options.fitsignal:
          if self.MODEL_4_mlvj=="ErfPowExp_v1" or self.MODEL_4_mlvj=="ErfPow2_v1" or self.MODEL_4_mlvj=="ErfExp_v1":
@@ -115,9 +119,6 @@ class doFit_wj_and_wlvj:
         rrv_mass_lvj= RooRealVar("rrv_mass_lvj","m_{WW}",(in_mlvj_min+in_mlvj_max)/2.,in_mlvj_min,in_mlvj_max,"GeV/c^{2}");
         rrv_mass_lvj.setBins(nbins_mlvj);
 
-        ## set the model used for the background parametrization
-        self.MODEL_4_mlvj=fit_model;
-        self.MODEL_4_mlvj_alter=fit_model_alter;
 
         ## create the workspace and import them
         if input_workspace is None:
@@ -165,10 +166,7 @@ class doFit_wj_and_wlvj:
         rrv_mass_lvj.setRange("signal_region",self.mlvj_signal_min,self.mlvj_signal_max);
 
         #prepare the data and mc files --> set the working directory and the files name
-	if options.fitwtagger or options.fitwtaggersim:
-            self.file_Directory="trainingtrees_%s/"%(self.channel);
-	else:
-            self.file_Directory="trainingtrees_%s/"%(self.channel);
+        self.file_Directory="trainingtrees_%s/"%(self.channel);
 
         self.PS_model= options.psmodel
         
@@ -257,7 +255,7 @@ class doFit_wj_and_wlvj:
 
         #correct the W-jet mass peak difference between data and MC
         self.mean_shift=1.36; self.sigma_scale=1.102;
-        print " mean correction for the W peak : ",self.mean_shift," Resolution correction : ",self.sigma_scale
+        print "mean correction for the W peak : ",self.mean_shift," Resolution correction : ",self.sigma_scale
 
         
         #result files: The event number, parameters and error write into a txt file. The dataset and pdfs write into a root file
@@ -308,7 +306,8 @@ class doFit_wj_and_wlvj:
             self.lpt_cut   = 35;        
         #deltaPhi_METj cut
         self.deltaPhi_METj_cut = 2.0;
-        self.top_veto = 208 ;
+        self.top_veto_had = 210 ;
+        self.top_veto_lep = 200 ;
         self.dEta_cut = 3 ;
         self.Mjj_cut  = 250 ;
 
@@ -1674,8 +1673,10 @@ class doFit_wj_and_wlvj:
 
 
          #jet mass uncertainty on WJets normalization
-         self.WJets_normlization_uncertainty_from_jet_mass = (TMath.Abs(rrv_WJetsmassup.getVal()-rrv_WJets0.getVal())+TMath.Abs(rrv_WJetsmassdn.getVal()-rrv_WJets0.getVal() ) )/2./rrv_WJets0.getVal();
-         self.WJets_normlization_uncertainty_from_vbf_jet_mass = (TMath.Abs(rrv_WJetsmassvbfup.getVal()-rrv_WJets0.getVal())+TMath.Abs(rrv_WJetsmassvbfdn.getVal()-rrv_WJets0.getVal() ) )/2./rrv_WJets0.getVal();         
+         if(self.workspace4fit_.var("rrv_number_WJetsmassup_in_mj_signal_region_from_fitting_%s"%(self.channel)) and self.workspace4fit_.var("rrv_number_WJetsmassdn_in_mj_signal_region_from_fitting_%s"%(self.channel))):
+            self.WJets_normlization_uncertainty_from_jet_mass = (TMath.Abs(rrv_WJetsmassup.getVal()-rrv_WJets0.getVal())+TMath.Abs(rrv_WJetsmassdn.getVal()-rrv_WJets0.getVal() ) )/2./rrv_WJets0.getVal();
+         if(self.workspace4fit_.var("rrv_number_WJetsmassvbfup_in_mj_signal_region_from_fitting_%s"%(self.channel)) and self.workspace4fit_.var("rrv_number_WJetsmassvbfdn_in_mj_signal_region_from_fitting_%s"%(self.channel))):    
+            self.WJets_normlization_uncertainty_from_vbf_jet_mass = (TMath.Abs(rrv_WJetsmassvbfup.getVal()-rrv_WJets0.getVal())+TMath.Abs(rrv_WJetsmassvbfdn.getVal()-rrv_WJets0.getVal() ) )/2./rrv_WJets0.getVal();         
 
          #jet mass uncertainty on sTop normalization
          rrv_STop       = self.workspace4fit_.var("rrv_number_dataset_signal_region_STop_%s_mj"%(self.channel))
@@ -1684,8 +1685,10 @@ class doFit_wj_and_wlvj:
          rrv_STopmassvbfup = self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbfup_%s_mj"%(self.channel))
          rrv_STopmassvbfdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbfdn_%s_mj"%(self.channel))        
 
-         self.STop_normlization_uncertainty_from_jet_mass = ( TMath.Abs(rrv_STopmassup.getVal()-rrv_STop.getVal())+TMath.Abs(rrv_STopmassdn.getVal()-rrv_STop.getVal() ) )/2./rrv_STop.getVal();
-         self.STop_normlization_uncertainty_from_vbf_jet_mass=( TMath.Abs(rrv_STopmassvbfup.getVal()-rrv_STop.getVal())+TMath.Abs(rrv_STopmassvbfdn.getVal()-rrv_STop.getVal() ) )/2./rrv_STop.getVal();          
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassup_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassdn_%s_mj"%(self.channel))):
+          self.STop_normlization_uncertainty_from_jet_mass = ( TMath.Abs(rrv_STopmassup.getVal()-rrv_STop.getVal())+TMath.Abs(rrv_STopmassdn.getVal()-rrv_STop.getVal() ) )/2./rrv_STop.getVal();
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbfup_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbfdn_%s_mj"%(self.channel))):
+          self.STop_normlization_uncertainty_from_vbf_jet_mass=( TMath.Abs(rrv_STopmassvbfup.getVal()-rrv_STop.getVal())+TMath.Abs(rrv_STopmassvbfdn.getVal()-rrv_STop.getVal() ) )/2./rrv_STop.getVal();          
 
          #jet mass uncertainty on ttbar normalization
          rrv_TTbar       = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbar_%s_mj"%(self.channel))
@@ -1694,8 +1697,10 @@ class doFit_wj_and_wlvj:
          rrv_TTbarmassvbfup = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbfup_%s_mj"%(self.channel))
          rrv_TTbarmassvbfdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbfdn_%s_mj"%(self.channel))        
 
-         self.TTbar_normlization_uncertainty_from_jet_mass = ( TMath.Abs(rrv_TTbarmassup.getVal()-rrv_TTbar.getVal())+TMath.Abs(rrv_TTbarmassdn.getVal()-rrv_TTbar.getVal() ) )/2./rrv_TTbar.getVal();
-         self.TTbar_normlization_uncertainty_from_vbf_jet_mass = ( TMath.Abs(rrv_TTbarmassvbfup.getVal()-rrv_TTbar.getVal())+TMath.Abs(rrv_TTbarmassvbfdn.getVal()-rrv_TTbar.getVal() ) )/2./rrv_TTbar.getVal();          
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassup_%s_mj"%(self.channel)) and  self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassdn_%s_mj"%(self.channel))):
+          self.TTbar_normlization_uncertainty_from_jet_mass = ( TMath.Abs(rrv_TTbarmassup.getVal()-rrv_TTbar.getVal())+TMath.Abs(rrv_TTbarmassdn.getVal()-rrv_TTbar.getVal() ) )/2./rrv_TTbar.getVal();
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbfup_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbfdn_%s_mj"%(self.channel))):
+          self.TTbar_normlization_uncertainty_from_vbf_jet_mass = ( TMath.Abs(rrv_TTbarmassvbfup.getVal()-rrv_TTbar.getVal())+TMath.Abs(rrv_TTbarmassvbfdn.getVal()-rrv_TTbar.getVal() ) )/2./rrv_TTbar.getVal();          
 
          #jet mass uncertainty on VV normalization
          rrv_VV       = self.workspace4fit_.var("rrv_number_dataset_signal_region_VV_%s_mj"%(self.channel))
@@ -1704,25 +1709,33 @@ class doFit_wj_and_wlvj:
          rrv_VVmassvbfup = self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbfup_%s_mj"%(self.channel))
          rrv_VVmassvbfdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbfdn_%s_mj"%(self.channel))        
 
-         self.VV_normlization_uncertainty_from_jet_mass=( TMath.Abs(rrv_VVmassup.getVal()-rrv_VV.getVal())+TMath.Abs(rrv_VVmassdn.getVal()-rrv_VV.getVal() ) )/2./rrv_VV.getVal();
-         self.VV_normlization_uncertainty_from_vbf_jet_mass=( TMath.Abs(rrv_VVmassvbfup.getVal()-rrv_VV.getVal())+TMath.Abs(rrv_VVmassvbfdn.getVal()-rrv_VV.getVal() ) )/2./rrv_VV.getVal();
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassup_%s_mj"%(self.channel)) and  self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassdn_%s_mj"%(self.channel))):
+          self.VV_normlization_uncertainty_from_jet_mass=( TMath.Abs(rrv_VVmassup.getVal()-rrv_VV.getVal())+TMath.Abs(rrv_VVmassdn.getVal()-rrv_VV.getVal() ) )/2./rrv_VV.getVal();
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbfup_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbfdn_%s_mj"%(self.channel))):
+          self.VV_normlization_uncertainty_from_vbf_jet_mass=( TMath.Abs(rrv_VVmassvbfup.getVal()-rrv_VV.getVal())+TMath.Abs(rrv_VVmassvbfdn.getVal()-rrv_VV.getVal() ) )/2./rrv_VV.getVal();
 
          #jet mass uncertainty on ggH normalization
          rrv_ggH       = self.workspace4fit_.var("rrv_number_dataset_signal_region_%s_%s_mj"%(self.higgs_sample, self.channel))
          rrv_ggHmassup = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassup_%s_mj"%(self.higgs_sample, self.channel))
          rrv_ggHmassdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassdn_%s_mj"%(self.higgs_sample, self.channel))
          rrv_ggHmassvbfup = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfup_%s_mj"%(self.higgs_sample, self.channel))
-         rrv_ggHmassvbfdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfdn_%s_mj"%(self.higgs_sample, self.channel))        
-         self.ggH_normlization_uncertainty_from_jet_mass = (TMath.Abs(rrv_ggHmassup.getVal()-rrv_ggH.getVal())+TMath.Abs(rrv_ggHmassdn.getVal()-rrv_ggH.getVal()))/2./rrv_ggH.getVal();
-         self.ggH_normlization_uncertainty_from_vbf_jet_mass = (TMath.Abs(rrv_ggHmassvbfup.getVal()-rrv_ggH.getVal())+TMath.Abs(rrv_ggHmassvbfdn.getVal()-rrv_ggH.getVal()))/2./rrv_ggH.getVal();
+         rrv_ggHmassvbfdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfdn_%s_mj"%(self.higgs_sample, self.channel))
+
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassup_%s_mj"%(self.higgs_sample, self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassdn_%s_mj"%(self.higgs_sample, self.channel))):            
+          self.ggH_normlization_uncertainty_from_jet_mass = (TMath.Abs(rrv_ggHmassup.getVal()-rrv_ggH.getVal())+TMath.Abs(rrv_ggHmassdn.getVal()-rrv_ggH.getVal()))/2./rrv_ggH.getVal();
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfup_%s_mj"%(self.higgs_sample, self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfdn_%s_mj"%(self.higgs_sample, self.channel))):
+          self.ggH_normlization_uncertainty_from_vbf_jet_mass = (TMath.Abs(rrv_ggHmassvbfup.getVal()-rrv_ggH.getVal())+TMath.Abs(rrv_ggHmassvbfdn.getVal()-rrv_ggH.getVal()))/2./rrv_ggH.getVal();
 
          rrv_vbf       = self.workspace4fit_.var("rrv_number_dataset_signal_region_%s_%s_mj"%(self.vbfhiggs_sample, self.channel))
          rrv_vbfmassup = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassup_%s_mj"%(self.vbfhiggs_sample, self.channel))
          rrv_vbfmassdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassdn_%s_mj"%(self.vbfhiggs_sample, self.channel))
          rrv_vbfmassvbfup = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfup_%s_mj"%(self.vbfhiggs_sample, self.channel))
-         rrv_vbfmassvbfdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfdn_%s_mj"%(self.vbfhiggs_sample, self.channel))        
-         self.vbf_normlization_uncertainty_from_jet_mass = (TMath.Abs(rrv_vbfmassup.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassdn.getVal()-rrv_vbf.getVal() ) )/2./rrv_vbf.getVal();
-         self.vbf_normlization_uncertainty_from_vbf_jet_mass = (TMath.Abs(rrv_vbfmassvbfup.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassvbfdn.getVal()-rrv_vbf.getVal() ) )/2./rrv_vbf.getVal();                          
+         rrv_vbfmassvbfdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfdn_%s_mj"%(self.vbfhiggs_sample, self.channel))
+
+         if( self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassup_%s_mj"%(self.vbfhiggs_sample, self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassdn_%s_mj"%(self.vbfhiggs_sample, self.channel))):
+          self.vbf_normlization_uncertainty_from_jet_mass = (TMath.Abs(rrv_vbfmassup.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassdn.getVal()-rrv_vbf.getVal() ) )/2./rrv_vbf.getVal();
+         if( self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfup_%s_mj"%(self.vbfhiggs_sample, self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfdn_%s_mj"%(self.vbfhiggs_sample, self.channel))): 
+          self.vbf_normlization_uncertainty_from_vbf_jet_mass = (TMath.Abs(rrv_vbfmassvbfup.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassvbfdn.getVal()-rrv_vbf.getVal() ) )/2./rrv_vbf.getVal();                          
 
 
     #### make the mj sideband fit on data ti get the Wjets normaliztion
@@ -2451,7 +2464,7 @@ class doFit_wj_and_wlvj:
 
 
     ##### Method used to cycle on the events and for the dataset to be fitted
-    def get_mj_and_mlvj_dataset(self,in_file_name, label, jet_mass="jet_mass_pr",vbf_mass = "",isscaled_mass = 0):# to get the shape of m_lvj
+    def get_mj_and_mlvj_dataset(self,in_file_name, label, jet_mass="jet_mass_pr",vbf_mass = "",is_scaled_mass = 0):# to get the shape of m_lvj
 
         # read in tree
         fileIn_name=TString(options.inPath+"/"+self.file_Directory+in_file_name);
@@ -2483,11 +2496,9 @@ class doFit_wj_and_wlvj:
         combData=RooDataSet("combData"+label+"_"+self.channel,"combData"+label+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
         combData4fit=RooDataSet("combData4fit"+label+"_"+self.channel,"combData4fit"+label+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
 
-
         print "N entries: ", treeIn.GetEntries()
         hnum_4region=TH1D("hnum_4region"+label+"_"+self.channel,"hnum_4region"+label+"_"+self.channel,4,-1.5,2.5);# m_j   -1: sb_lo; 0:signal_region; 1: sb_hi; 2:total
         hnum_2region=TH1D("hnum_2region"+label+"_"+self.channel,"hnum_2region"+label+"_"+self.channel,2,-0.5,1.5);# m_lvj  0: signal_region; 1: total
-
 
         for i in range(treeIn.GetEntries()):
 
@@ -2502,20 +2513,23 @@ class doFit_wj_and_wlvj:
             discriminantCut=True;
           else:
             discriminantCut=False;
-
-          jet_1 = ROOT.TlorentzVector();
-          jet_2 = ROOT.TlorentzVector();
+        
+          tmp_scale_to_lumi=treeIn.wSampleWeight;
+                                
+          jet_1 = ROOT.TLorentzVector();
+          jet_2 = ROOT.TLorentzVector();
 
           njet = 0. ; tmp_vbf_dEta =0.; tmp_vbf_Mjj = 0.; 
 
           #jet mass, jet mass up, jet mass down
           tmp_jet_mass=getattr(treeIn, jet_mass);
-          if(vbf_mass == "" and isscaled_mass == 0):
+
+          if(vbf_mass == "" and is_scaled_mass == 0):
            tmp_vbf_dEta = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta")-getattr(treeIn,"vbf_maxpt_j2_eta"));
            tmp_vbf_Mjj  = getattr(treeIn, "vbf_maxpt_jj_m");
            njet = getattr(treeIn,"numberJetBin");
-           
-          elif(vbf_mass == "vbf_up" and isscaled_mass == 1):
+
+          elif(vbf_mass == "vbf_up" and is_scaled_mass == 1):
            tmp_vbf_dEta = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_up")-getattr(treeIn,"vbf_maxpt_j2_eta_up"));
            tmp_vbf_Mjj  = (jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_up"),getattr(treeIn,"vbf_maxpt_j1_eta_up"),getattr(treeIn,"vbf_maxpt_j1_phi_up"),getattr(treeIn,"vbf_maxpt_j1_m_up"))+jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_up"),getattr(treeIn,"vbf_maxpt_j2_eta_up"),getattr(treeIn,"vbf_maxpt_j2_phi_up"),getattr(treeIn,"vbf_maxpt_j2_m_up"))).M();
            if(getattr(treeIn,"vbf_maxpt_j1_pt_up") > 30.):
@@ -2523,169 +2537,173 @@ class doFit_wj_and_wlvj:
            if(getattr(treeIn,"vbf_maxpt_j2_pt_up") > 30.):
                njet = njet +1 ;
            
-          elif(vbf_mass == "vbf_dn" and isscaled_mass == 1):
+
+          elif(vbf_mass == "vbf_dn" and is_scaled_mass == 1):
            tmp_vbf_dEta = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_dn")-getattr(treeIn,"vbf_maxpt_j2_eta_dn"));
            tmp_vbf_Mjj  = (jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_dn"),getattr(treeIn,"vbf_maxpt_j1_eta_dn"),getattr(treeIn,"vbf_maxpt_j1_phi_dn"),getattr(treeIn,"vbf_maxpt_j1_m_dn"))+jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_dn"),getattr(treeIn,"vbf_maxpt_j2_eta_dn"),getattr(treeIn,"vbf_maxpt_j2_phi_dn"),getattr(treeIn,"vbf_maxpt_j2_m_dn"))).M();
            if(getattr(treeIn,"vbf_maxpt_j1_pt_dn") > 30.):
                njet = njet +1 ;
            if(getattr(treeIn,"vbf_maxpt_j2_pt_dn") > 30.):
                njet = njet +1 ;
+               
 
-          if getattr(treeIn,"ungroomed_jet_pt") > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and getattr(treeIn,"mass_lvj_type0") >= rrv_mass_lvj.getMin() and getattr(treeIn,"mass_lvj_type0")<=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and tmp_vbf_dEta > self.dEta_cut and tmp_vbf_Mjj > self.Mjj_cut and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto and njet >=2:
+          if getattr(treeIn,"ungroomed_jet_pt") > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and getattr(treeIn,"mass_lvj_type0") >= rrv_mass_lvj.getMin() and getattr(treeIn,"mass_lvj_type0")<=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and tmp_vbf_dEta > self.dEta_cut and tmp_vbf_Mjj > self.Mjj_cut and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet >=2:
 
-            tmp_event_weight = getattr(treeIn,"totalEventWeight");
-            tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight");
-            tmp_interference_weight_H600 = getattr(treeIn,"interference_Weight_H600");
-            tmp_interference_weight_H700 = getattr(treeIn,"interference_Weight_H700");
-            tmp_interference_weight_H800 = getattr(treeIn,"interference_Weight_H800");
-            tmp_interference_weight_H900 = getattr(treeIn,"interference_Weight_H900");
-            tmp_interference_weight_H1000 = getattr(treeIn,"interference_Weight_H1000");
+#             print "jet pt ",getattr(treeIn,"ungroomed_jet_pt")," tau2/tau1 ",discriminantCut," jet mass ",tmp_jet_mass," btag j1 ", getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV")," btag j2 ", getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")," mass_lvj ",getattr(treeIn,"mass_lvj_type0")," v_pt ",getattr(treeIn,"v_pt")," pfMET ",getattr(treeIn,"pfMET")," l_pt ",getattr(treeIn,"l_pt")," issignal ",getattr(treeIn,"issignal")," tmp_vbf_dEta ",tmp_vbf_dEta," tmp_vbf_Mjj ",tmp_vbf_Mjj," top had ",getattr(treeIn,"mass_ungroomedjet_closerjet")," top lep ",getattr(treeIn,"mass_leptonic_closerjet")," njet ",njet;
 
-            ## added by Nhan, getting additional BSM weight
-            bsmWeightName = "bsmReweight_cPrime%02d_brNew%02d"%(options.cprime,options.BRnew);
-            tmp_bsmWeight = getattr(treeIn, bsmWeightName);
-            if tmp_bsmWeight < 0: tmp_bsmWeight = 1;
+             tmp_event_weight = getattr(treeIn,"totalEventWeight");
+             tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight");
+             tmp_interference_weight_H600 = getattr(treeIn,"interference_Weight_H600");
+             tmp_interference_weight_H700 = getattr(treeIn,"interference_Weight_H700");
+             tmp_interference_weight_H800 = getattr(treeIn,"interference_Weight_H800");
+             tmp_interference_weight_H900 = getattr(treeIn,"interference_Weight_H900");
+             tmp_interference_weight_H1000 = getattr(treeIn,"interference_Weight_H1000");
 
-            if TString(label).Contains("ggH600"):
-               tmp_event_weight = tmp_event_weight*tmp_interference_weight_H600
-               tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H600
-            if TString(label).Contains("ggH700"):
-               tmp_event_weight = tmp_event_weight*tmp_interference_weight_H700
-               tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H700
-            if TString(label).Contains("ggH800"):
-               tmp_event_weight = tmp_event_weight*tmp_interference_weight_H800
-               tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H800
-            if TString(label).Contains("ggH900"):
-               tmp_event_weight = tmp_event_weight*tmp_interference_weight_H900
-               tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H900
-            if TString(label).Contains("ggH1000"):
-               tmp_event_weight = tmp_event_weight*tmp_interference_weight_H1000
-               tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H1000
+             ## added by Nhan, getting additional BSM weight
+             bsmWeightName = "bsmReweight_cPrime%02d_brNew%02d"%(options.cprime,options.BRnew);
+             tmp_bsmWeight = getattr(treeIn, bsmWeightName);
+             if tmp_bsmWeight < 0: tmp_bsmWeight = 1;
 
-            if TString(label).Contains("vbfH600"):
-               tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H600;
-               tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H600;
-            if TString(label).Contains("vbfH700"):
-               tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H700;
-               tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H700;
-            if TString(label).Contains("vbfH800"):
-               tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H800;
-               tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H800;
-            if TString(label).Contains("vbfH900"):
-               tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H900;
-               tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H900;
-            if TString(label).Contains("vbfH1000"):
-               tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H1000;
-               tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H1000;
+             if TString(label).Contains("ggH600"):
+                tmp_event_weight = tmp_event_weight*tmp_interference_weight_H600
+                tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H600
+             if TString(label).Contains("ggH700"):
+                tmp_event_weight = tmp_event_weight*tmp_interference_weight_H700
+                tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H700
+             if TString(label).Contains("ggH800"):
+                tmp_event_weight = tmp_event_weight*tmp_interference_weight_H800
+                tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H800
+             if TString(label).Contains("ggH900"):
+                tmp_event_weight = tmp_event_weight*tmp_interference_weight_H900
+                tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H900
+             if TString(label).Contains("ggH1000"):
+                tmp_event_weight = tmp_event_weight*tmp_interference_weight_H1000
+                tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H1000
+
+             if TString(label).Contains("vbfH600"):
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H600;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H600;
+             if TString(label).Contains("vbfH700"):
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H700;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H700;
+             if TString(label).Contains("vbfH800"):
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H800;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H800;
+             if TString(label).Contains("vbfH900"):
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H900;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H900;
+             if TString(label).Contains("vbfH1000"):
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H1000;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H1000;
  
-            # for multi-sample, like STop and VV. There are two sample, and two wSampleWeight_value.Use the least wSampleWeight as scale.
-            tmp_event_weight4fit = tmp_event_weight4fit*treeIn.wSampleWeight/tmp_scale_to_lumi
+             # for multi-sample, like STop and VV. There are two sample, and two wSampleWeight_value.Use the least wSampleWeight as scale.
+             tmp_event_weight4fit = tmp_event_weight4fit*treeIn.wSampleWeight/tmp_scale_to_lumi;
 
-            if TString(label).Contains("ggH") or TString(label).Contains("vbfH"):
-                tmp_event_weight = tmp_event_weight/self.higgs_xs_scale;
-                tmp_event_weight4fit = tmp_event_weight4fit/self.higgs_xs_scale;
-                ## added by Nhan
-                tmp_event_weight = tmp_event_weight*tmp_bsmWeight;
-                tmp_event_weight4fit=tmp_event_weight4fit*tmp_bsmWeight;
+             if TString(label).Contains("ggH") or TString(label).Contains("vbfH"):
+                 tmp_event_weight = tmp_event_weight/self.higgs_xs_scale;
+                 tmp_event_weight4fit = tmp_event_weight4fit/self.higgs_xs_scale;
+                 ## added by Nhan
+                 tmp_event_weight = tmp_event_weight*tmp_bsmWeight;
+                 tmp_event_weight4fit=tmp_event_weight4fit*tmp_bsmWeight;
 
-            if not label=="_data":
-                    if TString(label).Contains("_TTbar") or TString(label).Contains("_STop") :
-                        tmp_event_weight = tmp_event_weight*self.rrv_wtagger_eff_reweight_forT.getVal();
-                    else:
-                        tmp_event_weight = tmp_event_weight*self.rrv_wtagger_eff_reweight_forV.getVal();
-                    tmp_event_weight = tmp_event_weight*self.btag_scale;
+             if not label=="_data":
+                     if TString(label).Contains("_TTbar") or TString(label).Contains("_STop") :
+                         tmp_event_weight = tmp_event_weight*self.rrv_wtagger_eff_reweight_forT.getVal();
+                     else:
+                         tmp_event_weight = tmp_event_weight*self.rrv_wtagger_eff_reweight_forV.getVal();
+                     tmp_event_weight = tmp_event_weight*self.btag_scale;
       
 
-            rrv_mass_lvj.setVal(treeIn.mass_lvj);
+             rrv_mass_lvj.setVal(getattr(treeIn,"mass_lvj_type0"));
+             rrv_mass_j.setVal(tmp_jet_mass);
 
-            if tmp_jet_mass >= self.mj_sideband_lo_min and tmp_jet_mass < self.mj_sideband_lo_max:
-                rdataset_sb_lo_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
-                rdataset4fit_sb_lo_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
-                data_category.setLabel("sideband");
-                combData.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
-                combData4fit.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+             if tmp_jet_mass >= self.mj_sideband_lo_min and tmp_jet_mass < self.mj_sideband_lo_max:
+                 rdataset_sb_lo_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_lo_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("sideband");
+                 combData.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
 
-            if tmp_jet_mass >= self.mj_signal_min and tmp_jet_mass < self.mj_signal_max:
-                rdataset_signal_region_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
-                rdataset4fit_signal_region_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
-                data_category.setLabel("signal_region");
-                combData.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
-                combData4fit.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
-                hnum_2region.Fill(1,tmp_event_weight);
-                if treeIn.mass_lvj >=self.mlvj_signal_min and treeIn.mass_lvj <self.mlvj_signal_max: 
-                  hnum_2region.Fill(0,tmp_event_weight);
+             if tmp_jet_mass >= self.mj_signal_min and tmp_jet_mass < self.mj_signal_max:
+                 rdataset_signal_region_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_signal_region_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("signal_region");
+                 combData.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+                 hnum_2region.Fill(1,tmp_event_weight);
+                 if getattr(treeIn,"mass_lvj_type0") >=self.mlvj_signal_min and getattr(treeIn,"mass_lvj_type0") <self.mlvj_signal_max: 
+                   hnum_2region.Fill(0,tmp_event_weight);
 
-            if tmp_jet_mass >= self.mj_sideband_hi_min and tmp_jet_mass < self.mj_sideband_hi_max:
-                rdataset_sb_hi_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
-                rdataset4fit_sb_hi_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+             if tmp_jet_mass >= self.mj_sideband_hi_min and tmp_jet_mass < self.mj_sideband_hi_max:
+                 rdataset_sb_hi_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_hi_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
 
-            rrv_mass_j.setVal( tmp_jet_mass );
-            rdataset_mj.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
-            rdataset4fit_mj.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
-            if tmp_jet_mass >=self.mj_sideband_lo_min and tmp_jet_mass <self.mj_sideband_lo_max: 
-               hnum_4region.Fill(-1,tmp_event_weight );
-            if tmp_jet_mass >=self.mj_signal_min and tmp_jet_mass <self.mj_signal_max : 
-               hnum_4region.Fill(0,tmp_event_weight);
-            if tmp_jet_mass >=self.mj_sideband_hi_min and tmp_jet_mass <self.mj_sideband_hi_max: 
-               hnum_4region.Fill(1,tmp_event_weight);
-            hnum_4region.Fill(2,tmp_event_weight);
+             rdataset_mj.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+             rdataset4fit_mj.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+             if tmp_jet_mass >=self.mj_sideband_lo_min and tmp_jet_mass <self.mj_sideband_lo_max: 
+                hnum_4region.Fill(-1,tmp_event_weight );
+             if tmp_jet_mass >=self.mj_signal_min and tmp_jet_mass <self.mj_signal_max : 
+                hnum_4region.Fill(0,tmp_event_weight);
+             if tmp_jet_mass >=self.mj_sideband_hi_min and tmp_jet_mass <self.mj_sideband_hi_max: 
+                hnum_4region.Fill(1,tmp_event_weight);
+             hnum_4region.Fill(2,tmp_event_weight);
 
-          if not label=="_data":
-            if TString(label).Contains("_TTbar") or TString(label).Contains("_STop") :
-                tmp_scale_to_lumi = tmp_scale_to_lumi*self.rrv_wtagger_eff_reweight_forT.getVal();
-            else:
-                tmp_scale_to_lumi = tmp_scale_to_lumi*self.rrv_wtagger_eff_reweight_forV.getVal();
-            tmp_scale_to_lumi = tmp_scale_to_lumi*self.btag_scale;
+        if not label=="_data":
+          if TString(label).Contains("_TTbar") or TString(label).Contains("_STop") :
+             tmp_scale_to_lumi = tmp_scale_to_lumi*self.rrv_wtagger_eff_reweight_forT.getVal();
+          else:
+             tmp_scale_to_lumi = tmp_scale_to_lumi*self.rrv_wtagger_eff_reweight_forV.getVal();
+          tmp_scale_to_lumi = tmp_scale_to_lumi*self.btag_scale;
 
-          rrv_scale_to_lumi = RooRealVar("rrv_scale_to_lumi"+label+"_"+self.channel,"rrv_scale_to_lumi"+label+"_"+self.channel,tmp_scale_to_lumi);
-          rrv_scale_to_lumi.Print();
-          getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi);                 
+        rrv_scale_to_lumi = RooRealVar("rrv_scale_to_lumi"+label+"_"+self.channel,"rrv_scale_to_lumi"+label+"_"+self.channel,tmp_scale_to_lumi);
+        rrv_scale_to_lumi.Print();
+        getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi);                 
 
-          rrv_number_dataset_signal_region_mlvj = RooRealVar("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mlvj",hnum_2region.GetBinContent(1));       
-          rrv_number_dataset_AllRange_mlvj = RooRealVar("rrv_number_dataset_AllRange"+label+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"_"+self.channel+"_mlvj",hnum_2region.GetBinContent(2));
+        rrv_number_dataset_signal_region_mlvj = RooRealVar("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mlvj",hnum_2region.GetBinContent(1));       
+        rrv_number_dataset_AllRange_mlvj = RooRealVar("rrv_number_dataset_AllRange"+label+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"_"+self.channel+"_mlvj",hnum_2region.GetBinContent(2));
                
-          getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj)
-          getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj)
                
-          getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj);
-          getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj);
-          getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj);
-          getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj);
-          getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj);
-          getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj);
-          getattr(self.workspace4fit_,"import")(combData);
-          getattr(self.workspace4fit_,"import")(combData4fit);
-          self.file_out.write("\n%s events number in m_lvj from dataset: %s"%(label,rdataset_signal_region_mlvj.sumEntries()))
-          #prepare m_j dataset
-        
-          rrv_number_dataset_sb_lo_mj = RooRealVar("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj",hnum_4region.GetBinContent(1));
-          rrv_number_dataset_signal_region_mj = RooRealVar("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj",hnum_4region.GetBinContent(2));        
-          rrv_number_dataset_sb_hi_mj = RooRealVar("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj",hnum_4region.GetBinContent(3));
+        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj);
+        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj);
+        getattr(self.workspace4fit_,"import")(combData);
+        getattr(self.workspace4fit_,"import")(combData4fit);
+        self.file_out.write("\n%s events number in m_lvj from dataset: %s"%(label,rdataset_signal_region_mlvj.sumEntries()))
 
-          getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj)
-          getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj)
-          getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj)
+        #prepare m_j dataset        
+        rrv_number_dataset_sb_lo_mj = RooRealVar("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj",hnum_4region.GetBinContent(1));
+        rrv_number_dataset_signal_region_mj = RooRealVar("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj",hnum_4region.GetBinContent(2));        
+        rrv_number_dataset_sb_hi_mj = RooRealVar("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj",hnum_4region.GetBinContent(3));
+
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj)
                 
-          print "N_rdataset_mj: "
-          getattr(self.workspace4fit_,"import")(rdataset_mj)
-          getattr(self.workspace4fit_,"import")(rdataset4fit_mj)
+        print "N_rdataset_mj: "
+        getattr(self.workspace4fit_,"import")(rdataset_mj)
+        getattr(self.workspace4fit_,"import")(rdataset4fit_mj)
 
-          rdataset_sb_lo_mlvj.Print();
-          rdataset_signal_region_mlvj.Print();
-          rdataset_sb_hi_mlvj.Print();
-          rdataset_mj.Print();
-          rdataset4fit_sb_lo_mlvj.Print();
-          rdataset4fit_signal_region_mlvj.Print();
-          rdataset4fit_sb_hi_mlvj.Print();
-          rdataset4fit_mj.Print();
-          rrv_number_dataset_signal_region_mlvj.Print()
-          rrv_number_dataset_AllRange_mlvj.Print()
-          rrv_number_dataset_sb_lo_mj.Print()
-          rrv_number_dataset_signal_region_mj.Print()
-          rrv_number_dataset_sb_hi_mj.Print()
-          print rdataset_signal_region_mlvj.sumEntries()
-          print rrv_number_dataset_signal_region_mlvj.getVal()
-          print rrv_number_dataset_AllRange_mlvj.getVal()
+        rdataset_sb_lo_mlvj.Print();
+        rdataset_signal_region_mlvj.Print();
+        rdataset_sb_hi_mlvj.Print();
+        rdataset_mj.Print();
+        rdataset4fit_sb_lo_mlvj.Print();
+        rdataset4fit_signal_region_mlvj.Print();
+        rdataset4fit_sb_hi_mlvj.Print();
+        rdataset4fit_mj.Print();
+        rrv_number_dataset_signal_region_mlvj.Print()
+        rrv_number_dataset_AllRange_mlvj.Print()
+        rrv_number_dataset_sb_lo_mj.Print()
+        rrv_number_dataset_signal_region_mj.Print()
+        rrv_number_dataset_sb_hi_mj.Print()
+        print rdataset_signal_region_mlvj.sumEntries()
+        print rrv_number_dataset_signal_region_mlvj.getVal()
+        print rrv_number_dataset_AllRange_mlvj.getVal()
 
         
     ##### Prepare the workspace for the limit and to store info to be printed in the datacard
@@ -3162,10 +3180,14 @@ class doFit_wj_and_wlvj:
          datacard_out.write( "\nbtagger_%s lnN     %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f"%(self.channel, 1+self.btag_scale_uncertainty, 1+self.btag_scale_uncertainty, 1+self.btag_scale_uncertainty, 1+self.btag_scale_uncertainty, 1+self.btag_scale_uncertainty ) );
 
          ## jet mass systematic scaling up and down ca8 jets
-         datacard_out.write( "\nJetMass_%s lnN     %0.3f     %0.3f      %0.3f    %0.3f   %0.3f   %0.3f"%(self.channel, 1+self.ggH_normlization_uncertainty_from_jet_mass, 1+self.vbf_normlization_uncertainty_from_jet_mass, 1+self.WJets_normlization_uncertainty_from_jet_mass, 1+self.TTbar_normlization_uncertainty_from_jet_mass, 1+self.STop_normlization_uncertainty_from_jet_mass, 1+self.VV_normlization_uncertainty_from_jet_mass ) )
+         if self.ggH_normlization_uncertainty_from_jet_mass!=0 and self.vbf_normlization_uncertainty_from_jet_mass!=0 and self.WJets_normlization_uncertainty_from_jet_mass!=0 and self.TTbar_normlization_uncertainty_from_jet_mass!=0 and self.STop_normlization_uncertainty_from_jet_mass!=0 and self.VV_normlization_uncertainty_from_jet_mass!=0 : 
+
+          datacard_out.write( "\nJetMass_%s lnN     %0.3f     %0.3f      %0.3f    %0.3f   %0.3f   %0.3f"%(self.channel, 1+self.ggH_normlization_uncertainty_from_jet_mass, 1+self.vbf_normlization_uncertainty_from_jet_mass, 1+self.WJets_normlization_uncertainty_from_jet_mass, 1+self.TTbar_normlization_uncertainty_from_jet_mass, 1+self.STop_normlization_uncertainty_from_jet_mass, 1+self.VV_normlization_uncertainty_from_jet_mass ) )
 
          ## jet mass systematic scaling up and down vbf jets detajj, mjj, and pt selection effect
-         datacard_out.write( "\nJetVbfMass_%s lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f"%(self.channel, 1+self.ggH_normlization_uncertainty_from_jet_mass, 1+self.vbf_normlization_uncertainty_from_jet_mass, 1+self.WJets_normlization_uncertainty_from_vbf_jet_mass, 1+self.TTbar_normlization_uncertainty_from_vbf_jet_mass, 1+self.STop_normlization_uncertainty_from_vbf_jet_mass, 1+self.VV_normlization_uncertainty_from_vbf_jet_mass ) )        
+         if self.ggH_normlization_uncertainty_from_vbf_jet_mass!=0 and self.vbf_normlization_uncertainty_from_vbf_jet_mass!=0 and self.WJets_normlization_uncertainty_from_vbf_jet_mass!=0 and self.TTbar_normlization_uncertainty_from_vbf_jet_mass!=0 and self.STop_normlization_uncertainty_from_vbf_jet_mass!=0 and self.VV_normlization_uncertainty_from_vbf_jet_mass!=0 : 
+
+          datacard_out.write( "\nJetVbfMass_%s lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f"%(self.channel, 1+self.ggH_normlization_uncertainty_from_jet_mass, 1+self.vbf_normlization_uncertainty_from_jet_mass, 1+self.WJets_normlization_uncertainty_from_vbf_jet_mass, 1+self.TTbar_normlization_uncertainty_from_vbf_jet_mass, 1+self.STop_normlization_uncertainty_from_vbf_jet_mass, 1+self.VV_normlization_uncertainty_from_vbf_jet_mass ) )        
 
          datacard_out.write( "\ntrigger_%s lnN     %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f"%(self.channel, 1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty ) );
 
@@ -3390,7 +3412,8 @@ class doFit_wj_and_wlvj:
                                                                                                          
       return banner;
 
-    ### in order to make the legend
+
+   ### in order to make the legend
     def legend4Plot(self, plot, left=1, isFill=1, x_offset_low=0., y_offset_low=0., x_offset_high =0., y_offset_high =0., TwoCoulum =1.):
         print "############### draw the legend ########################"
         if left==-1:
@@ -3412,12 +3435,13 @@ class doFit_wj_and_wlvj:
         theLeg.SetLineWidth(0);
         theLeg.SetLineStyle(0);
         theLeg.SetTextSize(0.040);
+        theLeg.SetTextFont(42);
 
         entryCnt = 0;
         objName_before = "";
         objName_signal_graviton = "";
         objNameLeg_signal_graviton = "";
-
+        
         for obj in range(int(plot.numItems()) ):
             objName = plot.nameOf(obj);
             print objName;
@@ -3433,13 +3457,77 @@ class doFit_wj_and_wlvj:
                 else:
                     if TString(objName).Data()=="STop" : theLeg.AddEntry(theObj, "Single Top","F");
                     elif TString(objName).Data()=="TTbar" : theLeg.AddEntry(theObj, "t#bar{t}","F");
-                    elif TString(objName).Data()=="VV" : theLeg.AddEntry(theObj, "WW/WZ/ZZ","F");
+                    elif TString(objName).Data()=="VV" : theLeg.AddEntry(theObj, "WW/WZ","F");
                     elif TString(objName).Data()=="WJets" : theLeg.AddEntry(theObj, "W+jets","F");
                     elif TString(objName).Contains("vbfH"): theLeg.AddEntry(theObj, (TString(objName).ReplaceAll("vbfH","qqH")).Data() ,"L");
+                    elif TString(objName).Data()=="data" : theLeg.AddEntry(theObj, "CMS Data"+legHeader,"PE");
                     elif TString(objName).Contains("Uncertainty"): theLeg.AddEntry(theObj, objTitle,drawoption);
+                    elif TString(objName).Contains("Bulk"):
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M600") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M600"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.6 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M700") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M700"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.7 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M800") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M800"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.8 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M900") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M900"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.9 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1000") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1000"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1100") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1100"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.1 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1200") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1200"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.2 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1300") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1300"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.3 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1400") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1400"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.4 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1500") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1500"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.5 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1600") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1600"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.6 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1700") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1700"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.7 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1800") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1800"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.8 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1900") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1900"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.9 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2000") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2000"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=2 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2100") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2100"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.1 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2200") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2200"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.2 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2300") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2300"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.3 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2400") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2400"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.4 TeV #tilde{k}=0.5 (#times100)";
+                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2500") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2500"):
+                           objName_signal_graviton = theObj ;
+                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.5 TeV #tilde{k}=0.5 (#times100)";
                     else : theLeg.AddEntry(theObj, objTitle,drawoption);
                 entryCnt=entryCnt+1;
             objName_before=objName;
+        if objName_signal_graviton !="" :
+           theLeg.AddEntry(objName_signal_graviton, TString(objNameLeg_signal_graviton).Data() ,"L");
         return theLeg;
 
     #### draw canvas with plots with pull
@@ -3448,12 +3536,12 @@ class doFit_wj_and_wlvj:
         print "############### draw the canvas with pull ########################"
         mplot.GetXaxis().SetTitleOffset(1.1);
         mplot.GetYaxis().SetTitleOffset(1.3);
-        mplot.GetXaxis().SetTitleSize(0.05);
-        mplot.GetYaxis().SetTitleSize(0.05);
+        mplot.GetXaxis().SetTitleSize(0.055);
+        mplot.GetYaxis().SetTitleSize(0.055);
         mplot.GetXaxis().SetLabelSize(0.045);
         mplot.GetYaxis().SetLabelSize(0.045);
-        mplot_pull.GetXaxis().SetLabelSize(0.15);
-        mplot_pull.GetYaxis().SetLabelSize(0.15);
+        mplot_pull.GetXaxis().SetLabelSize(0.14);
+        mplot_pull.GetYaxis().SetLabelSize(0.14);
         mplot_pull.GetYaxis().SetTitleSize(0.15);
         mplot_pull.GetYaxis().SetNdivisions(205);
 
@@ -3535,7 +3623,7 @@ class doFit_wj_and_wlvj:
             string_file_name.Append("_"+in_model_name);
 
         if logy:
-            mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*100);
+            mplot.GetYaxis().SetRangeUser(1e-3,mplot.GetMaximum()*200);
             pad2.SetLogy() ;
             pad2.Update();
             cMassFit.Update();
@@ -3555,7 +3643,7 @@ class doFit_wj_and_wlvj:
         cMassFit = TCanvas("cMassFit","cMassFit", 600,600);
 
         if frompull and logy :
-            in_obj.GetYaxis().SetRangeUser(1e-2,in_obj.GetMaximum()/100)
+            in_obj.GetYaxis().SetRangeUser(1e-2,in_obj.GetMaximum()/200)
         elif not frompull and logy :
             in_obj.GetYaxis().SetRangeUser(0.00001,in_obj.GetMaximum())
             
@@ -3571,9 +3659,11 @@ class doFit_wj_and_wlvj:
         in_obj.GetXaxis().SetTitleOffset(1.15);
         in_obj.GetXaxis().SetLabelSize(0.04);
 
-        in_obj.GetYaxis().SetTitleSize(0.045);
+        in_obj.GetYaxis().SetTitleSize(0.055);
         in_obj.GetYaxis().SetTitleOffset(1.40);
         in_obj.GetYaxis().SetLabelSize(0.04);
+
+        self.leg.SetTextSize(0.031);
 
         banner = self.banner4Plot();
         banner.Draw();
@@ -3599,7 +3689,7 @@ class doFit_wj_and_wlvj:
         cMassFit.SaveAs(rlt_file.Data());
 
         if logy:
-            in_obj.GetYaxis().SetRangeUser(1e-2,in_obj.GetMaximum()*100);
+            in_obj.GetYaxis().SetRangeUser(1e-3,in_obj.GetMaximum()*200);
             cMassFit.SetLogy() ;
             cMassFit.Update();
             rlt_file.ReplaceAll(".root","_log.root");
@@ -3609,6 +3699,7 @@ class doFit_wj_and_wlvj:
             rlt_file.ReplaceAll(".pdf",".png");
             cMassFit.SaveAs(rlt_file.Data());
        
+
 
     ##### Get Lumi for banner title
     def GetLumi(self):
@@ -3632,65 +3723,65 @@ class doFit_wj_and_wlvj:
         self.get_mj_and_mlvj_dataset(self.file_ggH,"_%s"%(self.higgs_sample));
 #        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%smassup"%(self.higgs_sample), "jet_mass_pr_up", "", 1);
 #        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%smassdn"%(self.higgs_sample), "jet_mass_pr_dn", "", 1);
-        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%smassup"%(self.higgs_sample),"jet_mass_pr_up", "vbf_up",1);
-        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%smassdn"%(self.higgs_sample),"jet_mass_pr_dn", "vbf_dn",1);
+#        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%smassup_vbf"%(self.higgs_sample),"jet_mass_pr_up", "vbf_up",1);
+#        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%smassdn_vbf"%(self.higgs_sample),"jet_mass_pr_dn", "vbf_dn",1);
 
         # for VBF sample
-        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%s"%(self.vbfhiggs_sample));
+#        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%s"%(self.vbfhiggs_sample));
 #        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%smassup"%(self.vbfhiggs_sample), "jet_mass_pr_up", "", 1);
 #        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%smassdn"%(self.vbfhiggs_sample), "jet_mass_pr_dn", "", 1);
-        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%smassup"%(self.vbfhiggs_sample),"jet_mass_pr_up", "vbf_up",1);
-        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%smassdn"%(self.vbfhiggs_sample),"jet_mass_pr_dn", "vbf_dn",1);
+#        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%smassup"%(self.vbfhiggs_sample),"jet_mass_pr_up", "vbf_up",1);
+#        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%smassdn"%(self.vbfhiggs_sample),"jet_mass_pr_dn", "vbf_dn",1);
 
         if self.higgs_sample=="ggH600":
+             print " ############################# ";
+#            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
+#            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup_vbf"%(self.higgs_sample),"_signal_region","CB_v1");
+#            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn_vbf"%(self.higgs_sample),"_signal_region","CB_v1");
 
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn"%(self.higgs_sample),"_signal_region","CB_v1");
-
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");            
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");             
+#            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");            
+#            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+#            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");             
 
         elif self.higgs_sample=="ggH700":
 
             self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup_vbf"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn_vbf"%(self.higgs_sample),"_signal_region","CB_v1");
 
             self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");            
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");             
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");             
 
         elif self.higgs_sample=="ggH800":
 
             self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn"%(self.higgs_sample),"_signal_region","CB_v1");            
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup_vbf"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn_vbf"%(self.higgs_sample),"_signal_region","CB_v1");            
 
             self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn"%(self.vbfhiggs_sample),"_signal_region","CB_v1"); 
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1"); 
 
         elif self.higgs_sample=="ggH900":
 
             self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn"%(self.higgs_sample),"_signal_region","CB_v1");                        
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup_vbf"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn_vbf"%(self.higgs_sample),"_signal_region","CB_v1");                        
 
             self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");             
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");             
 
         elif self.higgs_sample=="ggH1000":
 
             self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn"%(self.higgs_sample),"_signal_region","CB_v1");                        
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup_vbf"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn_vbf"%(self.higgs_sample),"_signal_region","CB_v1");                        
 
             self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");             
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");             
 
         else:
             self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_sb_lo","BW_v1");
@@ -3820,10 +3911,10 @@ class doFit_wj_and_wlvj:
     def fit_AllSamples_Mj_and_Mlvj(self):
         print "################### fit_AllSamples_Mj_and_Mlvj #####################"
         self.fit_Signal()
-        self.fit_WJets()
-        self.fit_TTbar()
-        self.fit_VV()
-        self.fit_STop()
+#        self.fit_WJets()
+#        self.fit_TTbar()
+#        self.fit_VV()
+#        self.fit_STop()
         print "________________________________________________________________________"
 
                                                                     
@@ -3834,16 +3925,16 @@ class doFit_wj_and_wlvj:
       ### Fit all MC components in both mj and mlvj
       self.fit_AllSamples_Mj_and_Mlvj()
       ### take the real data
-      self.get_data()
+#      self.get_data()
       ### fit the WJets Normalization into the signal region -> no jet mass fluctuation has been done
-      self.fit_WJetsNorm();
+#      self.fit_WJetsNorm();
       ### fit data in the mlvj low sideband with two different models
-      self.fit_mlvj_in_Mj_sideband("_WJets01","_sb_lo", self.MODEL_4_mlvj_alter,1)
-      self.fit_mlvj_in_Mj_sideband("_WJets0","_sb_lo", self.MODEL_4_mlvj,1)
+#      self.fit_mlvj_in_Mj_sideband("_WJets01","_sb_lo", self.MODEL_4_mlvj_alter,1)
+#      self.fit_mlvj_in_Mj_sideband("_WJets0","_sb_lo", self.MODEL_4_mlvj,1)
 
       ### Prepare the workspace and datacards
-      self.prepare_limit("sideband_correction_method1")
-      self.read_workspace(1)
+#      self.prepare_limit("sideband_correction_method1")
+#      self.read_workspace(1)
 
     ####### +++++++++++++++
     def analysis_sideband_correction_method1_without_shape_and_psmodel_systermatic(self):
@@ -3857,14 +3948,18 @@ class doFit_wj_and_wlvj:
 
 ### funtion to run the analysis without systematics
 def pre_limit_sb_correction_without_systermatic( channel, higgs_sample="HWWMH600", in_mlvj_signal_region_min=500, in_mlvj_signal_region_max=700, in_mj_min=30, in_mj_max=140, in_mlvj_min=400, in_mlvj_max=1400, fit_model="ErfExp_v1", fit_model_alter="ErfPow_v1"): # the WJets M_lvj shape and normalization are from sb_correction
-    print "#################### pre_limit_sb_correction_without_systermatic: channel %s, signal %s, max and min signal region %f-%f, max and min mJ %f-%f, max and min mlvj %f-f, fit model %s and alternate %s ######################"%(channel,signal_sample,in_mlvj_signal_region_min,in_mlvj_signal_region_max,in_mj_min,in_mj_max,in_mlvj_mi,in_mlvj_max,fit_model,fit_model_alter);
+
+    print "#################### pre_limit_sb_correction_without_systermatic: channel %s, signal %s, max and min signal region %f-%f, max and min mJ %f-%f, max and min mlvj %f-f, fit model %s and alternate %s ######################"%(channel,higgs_sample,in_mlvj_signal_region_min,in_mlvj_signal_region_max,in_mj_min,in_mj_max,in_mlvj_mi,in_mlvj_max,fit_model,fit_model_alter);
+
     boostedW_fitter=doFit_wj_and_wlvj(channel, higgs_sample, in_mlvj_signal_region_min, in_mlvj_signal_region_max, in_mj_min, in_mj_max, in_mlvj_min, in_mlvj_max,fit_model, fit_model_alter);
     boostedW_fitter.analysis_sideband_correction_method1_without_shape_and_psmodel_systermatic();
+
 
 ### funtion to run the complete alpha analysis
 def pre_limit_sb_correction(method, channel, higgs_sample="HWWMH600", in_mlvj_signal_region_min=500, in_mlvj_signal_region_max=700, in_mj_min=30, in_mj_max=140, in_mlvj_min=400, in_mlvj_max=1400, fit_model="ErfExp_v1", fit_model_alter="ErfPow_v1"): # the WJets M_lvj shape and normalization are from sb_correction
 
-    print "#################### pre_limit_sb_correction: channel %s, signal %s, max and min signal region %f-%f, max and min mJ %f-%f, max and min mlvj %f-%f, fit model %s and alternate %s ######################"%(channel,signal_sample,in_mlvj_signal_region_min,in_mlvj_signal_region_max,in_mj_min,in_mj_max,in_mlvj_min,in_mlvj_max,fit_model,fit_model_alter);
+    print "#################### pre_limit_sb_correction: channel %s, signal %s, max and min signal region %f-%f, max and min mJ %f-%f, max and min mlvj %f-%f, fit model %s and alternate %s ######################"%(channel,higgs_sample,in_mlvj_signal_region_min,in_mlvj_signal_region_max,in_mj_min,in_mj_max,in_mlvj_min,in_mlvj_max,fit_model,fit_model_alter);
+
     boostedW_fitter=doFit_wj_and_wlvj(channel, higgs_sample, in_mlvj_signal_region_min, in_mlvj_signal_region_max, in_mj_min, in_mj_max, in_mlvj_min, in_mlvj_max,fit_model, fit_model_alter);
     getattr(boostedW_fitter,"analysis_sideband_correction_%s"%(method) )();
 
