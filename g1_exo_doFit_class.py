@@ -3742,8 +3742,13 @@ class doFit_wj_and_wlvj:
         datacard_out.write( "\nCMS_xww_Top_norm_%s_%s lnN - - %0.3f %0.3f -"%(self.channel, self.wtagger_label, 1+self.rrv_wtagger_eff_reweight_forT.getError()/self.rrv_wtagger_eff_reweight_forT.getVal(), 1+self.rrv_wtagger_eff_reweight_forT.getError()/self.rrv_wtagger_eff_reweight_forT.getVal() ) );
 
         ### V-Tagger SF nouisance
-        datacard_out.write( "\nCMS_eff_vtag_tau21_sf lnN %0.3f/%0.3f - - - %0.3f/%0.3f"%(1+self.rrv_wtagger_eff_reweight_forV.getError(),self.rrv_wtagger_eff_reweight_forV.getVal(), 1+self.rrv_wtagger_eff_reweight_forV.getError(),self.rrv_wtagger_eff_reweight_forV.getVal() ) );
-
+        if self.wtagger_label == "HP":
+         datacard_out.write( "\nCMS_eff_vtag_tau21_sf lnN %0.3f/%0.3f - - - %0.3f/%0.3f"%(1+self.rrv_wtagger_eff_reweight_forV.getError(),1-self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(),1-self.rrv_wtagger_eff_reweight_forV.getError()));
+        elif self.wtagger_label == "LP":
+         datacard_out.write( "\nCMS_eff_vtag_tau21_sf lnN %0.3f/%0.3f - - - %0.3f/%0.3f"%(1-self.rrv_wtagger_eff_reweight_forV.getError(),1+self.rrv_wtagger_eff_reweight_forV.getError(), 1-self.rrv_wtagger_eff_reweight_forV.getError(),1+self.rrv_wtagger_eff_reweight_forV.getError()));
+        else:
+         datacard_out.write( "\nCMS_eff_vtag_tau21_sf lnN %0.3f/%0.3f - - - %0.3f/%0.3f"%(1+self.rrv_wtagger_eff_reweight_forV.getError(),1-self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(),1-self.rrv_wtagger_eff_reweight_forV.getError()));
+            
         ### btag scale factor on the MC background
 #        datacard_out.write( "\nCMS_xww_btagger lnN - - %0.3f %0.3f %0.3f"%(self.channel, 1+self.btag_scale_uncertainty, 1+self.btag_scale_uncertainty, 1+self.btag_scale_uncertainty ) );
 
