@@ -1389,8 +1389,15 @@ class sampleWrapperClass:
              met_vector_type0_met_up = ROOT.TLorentzVector();
              met_vector_type0_met_dn = ROOT.TLorentzVector();
              met_vector_type0_met_up.SetPxPyPzE(getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Cos(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Sin(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr( self.InputTree_, "W_nu1_pz_type0_met" ),+ROOT.TMath.Sqrt(getattr(self.InputTree_, "event_met_pfmet")*getattr(self.InputTree_,"event_met_pfmet")+getattr(self.InputTree_, "W_nu1_pz_type0_met")*getattr( self.InputTree_,"W_nu1_pz_type0_met")));
+
+             met_vector_type2_met_up = ROOT.TLorentzVector();
+             met_vector_type2_met_dn = ROOT.TLorentzVector();
+             met_vector_type2_met_up.SetPxPyPzE(getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Cos(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Sin(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr( self.InputTree_, "W_nu1_pz_type2_met" ),+ROOT.TMath.Sqrt(getattr(self.InputTree_, "event_met_pfmet")*getattr(self.InputTree_,"event_met_pfmet")+getattr(self.InputTree_, "W_nu1_pz_type2_met")*getattr( self.InputTree_,"W_nu1_pz_type2_met")));
+
           
              met_vector_type0_met_dn = met_vector_type0_met_up ;
+             met_vector_type2_met_dn = met_vector_type2_met_up ;
+
 
              for iJet in range(6):
 
@@ -1420,6 +1427,9 @@ class sampleWrapperClass:
                 met_vector_type0_met_up = met_vector_type0_met_up + (jet_vector - jet_vector_up)  ;
                 met_vector_type0_met_dn = met_vector_type0_met_dn + (jet_vector - jet_vector_dn)  ;
 
+                met_vector_type2_met_up = met_vector_type2_met_up + (jet_vector - jet_vector_up)  ;
+                met_vector_type2_met_dn = met_vector_type2_met_dn + (jet_vector - jet_vector_dn)  ;
+
                if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet] > 0. :
                    
                 jet_vector = ROOT.TLorentzVector();
@@ -1445,6 +1455,9 @@ class sampleWrapperClass:
 
                 met_vector_type0_met_up = met_vector_type0_met_up + (jet_vector - jet_vector_up)  ;
                 met_vector_type0_met_dn = met_vector_type0_met_dn + (jet_vector - jet_vector_dn)  ;
+
+                met_vector_type2_met_up = met_vector_type2_met_up + (jet_vector - jet_vector_up)  ;
+                met_vector_type2_met_dn = met_vector_type2_met_dn + (jet_vector - jet_vector_dn)  ;
 
               
              self.pfMET_up_[0] = met_vector_type0_met_up.Pt(); 
@@ -1476,17 +1489,9 @@ class sampleWrapperClass:
 
              self.mass_lvj_type0_met_up_[0] = (lepton_vector + jet_up + met_vector_type0_met_up).M();
              self.mass_lvj_type0_met_dn_[0] = (lepton_vector + jet_dn + met_vector_type0_met_dn).M();
-
-             met_vector_type2_met_up = ROOT.TLorentzVector();
-             met_vector_type2_met_dn = ROOT.TLorentzVector();
-             met_vector_type2_met_up.SetPxPyPzE(getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Cos(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Sin(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr( self.InputTree_, "W_nu1_pz_type2_met" ),+ROOT.TMath.Sqrt(getattr(self.InputTree_, "event_met_pfmet")*getattr(self.InputTree_,"event_met_pfmet")+getattr(self.InputTree_, "W_nu1_pz_type2_met")*getattr( self.InputTree_,"W_nu1_pz_type2_met")));
-
-             met_vector_type2_met_dn = met_vector_type2_met_up ;
-             met_vector_type2_met_up = met_vector_type2_met_up + (jet_vector - jet_vector_up) + (vbf_maxpt_j1-vbf_maxpt_j1_up) + (vbf_maxpt_j2-vbf_maxpt_j2_up);
-             met_vector_type2_met_dn = met_vector_type2_met_dn + (jet_vector - jet_vector_dn) + (vbf_maxpt_j1-vbf_maxpt_j1_dn) + (vbf_maxpt_j2-vbf_maxpt_j2_dn);
-
-             self.mass_lvj_type2_met_up_[0] = (lepton_vector + jet_vector_up + met_vector_type2_met_up).M();
-             self.mass_lvj_type2_met_dn_[0] = (lepton_vector + jet_vector_dn + met_vector_type2_met_dn).M();
+  
+             self.mass_lvj_type2_met_up_[0] = (lepton_vector + jet_up + met_vector_type2_met_up).M();
+             self.mass_lvj_type2_met_dn_[0] = (lepton_vector + jet_dn + met_vector_type2_met_dn).M();
 
 
              ######### btag stuff  
