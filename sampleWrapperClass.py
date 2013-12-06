@@ -673,7 +673,23 @@ class sampleWrapperClass:
                     for i in range(len(self.cprimeVals)): 
                         for j in range(len(self.brnewVals)): 
                             self.bsmReweights[i][j][0] = -1;
-            
+
+             ### lepton and met side                
+             if self.Channel_ == "mu" :
+                    self.l_pt_[0]     = getattr( self.InputTree_, "W_muon_pt" );
+                    self.l_eta_[0]    = getattr( self.InputTree_, "W_muon_eta" );
+                    self.l_phi_[0]    = getattr( self.InputTree_, "W_muon_phi" );
+                    self.l_charge_[0] = getattr( self.InputTree_, "W_muon_charge" );
+                    
+             elif self.Channel_ == "el":
+                    self.l_pt_[0]     = getattr( self.InputTree_, "W_electron_pt" );
+                    self.l_eta_[0]    = getattr( self.InputTree_, "W_electron_eta" );
+                    self.l_phi_[0]    = getattr( self.InputTree_, "W_electron_phi" );
+                    self.l_charge_[0] = getattr( self.InputTree_, "W_electron_charge" );
+
+             self.pfMET_[0]     = getattr( self.InputTree_, "event_met_pfmet" );        
+             self.pfMET_Phi_[0] = getattr( self.InputTree_, "event_met_pfmetPhi" );        
+
                 
              ################# Other basic Observables
                             
@@ -748,7 +764,7 @@ class sampleWrapperClass:
              self.jet_grsens_tr_[0]   = getattr( self.InputTree_, prefix + "_mass_tr" )[0] / getattr( self.InputTree_, prefix + "_mass" )[0];
              self.jet_massdrop_pr_[0] = getattr( self.InputTree_, prefix + "_massdrop_pr" )[0];    
 
-             ### CA8 jet collection
+             ### CA8 jet collection -> scale up and down
              self.jecUnc_.setJetEta( getattr( self.InputTree_, prefix+"_eta" )[0]);
              self.jecUnc_.setJetPt( getattr( self.InputTree_, prefix+"_pt" )[0]);                        
              self.j_jecfactor_up_[0] = self.jecUnc_.getUncertainty( True );
@@ -759,6 +775,7 @@ class sampleWrapperClass:
 
              self.j_jecfactor_up_[0] = math.sqrt( self.j_jecfactor_up_[0]**2 + 0.02**2 );
              self.j_jecfactor_dn_[0] = math.sqrt( self.j_jecfactor_dn_[0]**2 + 0.02**2 );
+
              self.curjes_up = 1 + self.j_jecfactor_up_[0]
              self.curjes_dn = 1 - self.j_jecfactor_dn_[0]
 
@@ -766,6 +783,7 @@ class sampleWrapperClass:
              jorig_eta = getattr( self.InputTree_, prefix + "_eta_pr" )[0];    
              jorig_phi = getattr( self.InputTree_, prefix + "_phi_pr" )[0];    
              jorig_e   = getattr( self.InputTree_, prefix + "_e_pr" )[0];                        
+
              jdef_ptetaphie = ROOT.TLorentzVector();
              jdef_ptetaphie.SetPtEtaPhiE(jorig_pt, jorig_eta, jorig_phi, jorig_e)
 
@@ -774,11 +792,21 @@ class sampleWrapperClass:
              jdef_dn = ROOT.TLorentzVector(jdef_ptetaphie.Px() * self.curjes_dn, jdef_ptetaphie.Py() * self.curjes_dn,
                                            jdef_ptetaphie.Pz() * self.curjes_dn, jdef_ptetaphie.E() * self.curjes_dn);
 
+
              self.jet_mass_pr_up_[0] = jdef_up.M();  
              self.jet_mass_pr_dn_[0] = jdef_dn.M();
               
              self.jet_ungroomed_jet_pt_up_[0] = jdef_up.Pt();
              self.jet_ungroomed_jet_pt_dn_[0] = jdef_dn.Pt();
+
+
+             ##### change in the total invariant mass
+             self.nu_pz_type0_[0] = getattr( self.InputTree_, "W_nu1_pz_type0" );
+             self.nu_pz_type2_[0] = getattr( self.InputTree_, "W_nu1_pz_type2" );
+
+             self.nu_pz_type0_met_[0] = getattr( self.InputTree_, "W_nu1_pz_type0_met" );
+             self.nu_pz_type2_met_[0] = getattr( self.InputTree_, "W_nu1_pz_type2_met" );
+             
 
              qjetmassdistribution = getattr( self.InputTree_, prefix+"_qjetmass" );
              qjetvol              = getListRMS(qjetmassdistribution)/getListMean(qjetmassdistribution);
@@ -860,24 +888,21 @@ class sampleWrapperClass:
 
 #              self.gen_jet_sjdr_[0] = getattr( self.InputTree_,"Gen"+prefix + "_prsubjet1subjet2_deltaR" );       
 
-             ### lepton and met side                
-             if self.Channel_ == "mu" :
-                    self.l_pt_[0]     = getattr( self.InputTree_, "W_muon_pt" );
-                    self.l_eta_[0]    = getattr( self.InputTree_, "W_muon_eta" );
-                    self.l_phi_[0]    = getattr( self.InputTree_, "W_muon_phi" );
-                    self.l_charge_[0] = getattr( self.InputTree_, "W_muon_charge" );
-                    
-             elif self.Channel_ == "el":
-                    self.l_pt_[0]     = getattr( self.InputTree_, "W_electron_pt" );
-                    self.l_eta_[0]    = getattr( self.InputTree_, "W_electron_eta" );
-                    self.l_phi_[0]    = getattr( self.InputTree_, "W_electron_phi" );
-                    self.l_charge_[0] = getattr( self.InputTree_, "W_electron_charge" );
-
-             self.pfMET_[0]     = getattr( self.InputTree_, "event_met_pfmet" );        
-             self.pfMET_Phi_[0] = getattr( self.InputTree_, "event_met_pfmetPhi" );        
 
              ######## VBF jet Stuff
+             vbf_maxpt_j1 = ROOT.TLorentzVector(0,0,0,0);
+             vbf_maxpt_j2 = ROOT.TLorentzVector(0,0,0,0);
+             vbf_maxpt_j1_up = ROOT.TLorentzVector(0,0,0,0);
+             vbf_maxpt_j2_up = ROOT.TLorentzVector(0,0,0,0);
+             vbf_maxpt_j1_dn = ROOT.TLorentzVector(0,0,0,0);
+             vbf_maxpt_j2_dn = ROOT.TLorentzVector(0,0,0,0);
+
              if self.numberJetBin_[0] ==0 :
+
+              self.vbf_maxpt_jj_m_[0]     = 0;                               
+              self.vbf_maxpt_jj_pt_[0]    = 0;                               
+              self.vbf_maxpt_jj_eta_[0]   = 0;                               
+              self.vbf_maxpt_jj_phi_[0]   = 0;                               
 
               self.vbf_maxpt_j1_m_[0]     = 0;   self.vbf_maxpt_j2_m_[0]   = 0;                               
               self.vbf_maxpt_j1_pt_[0]    = 0;   self.vbf_maxpt_j2_pt_[0]  = 0;                               
@@ -892,6 +917,11 @@ class sampleWrapperClass:
               self.vbf_maxpt_j1_bDiscriminatorCSV_[0] = 0; self.vbf_maxpt_j2_bDiscriminatorCSV_[0] = 0; 
 
               if self.numberJetBinGen_[0] ==0 and not self.IsData_:
+
+               self.vbf_maxpt_jj_m_gen_[0]     = 0;                               
+               self.vbf_maxpt_jj_pt_gen_[0]    = 0;                               
+               self.vbf_maxpt_jj_eta_gen_[0]   = 0;                               
+               self.vbf_maxpt_jj_phi_gen_[0]   = 0;                               
 
                self.vbf_maxpt_j1_m_gen_[0]     = 0; self.vbf_maxpt_j2_m_gen_[0]    = 0;                              
                self.vbf_maxpt_j1_pt_gen_[0]    = 0; self.vbf_maxpt_j2_pt_gen_[0]   = 0;                              
@@ -923,6 +953,11 @@ class sampleWrapperClass:
              ### one jet bin
              if self.numberJetBin_[0] ==1 :
 
+              self.vbf_maxpt_jj_m_[0]     = 0;                               
+              self.vbf_maxpt_jj_pt_[0]    = 0;                               
+              self.vbf_maxpt_jj_eta_[0]   = 0;                               
+              self.vbf_maxpt_jj_phi_[0]   = 0;                               
+
               self.vbf_maxpt_j1_m_[0]     = getattr(self.InputTree_, "vbf_maxpt_j1_m");                               
               self.vbf_maxpt_j1_pt_[0]    = getattr(self.InputTree_, "vbf_maxpt_j1_pt");                               
               self.vbf_maxpt_j1_eta_[0]   = getattr(self.InputTree_, "vbf_maxpt_j1_eta");                               
@@ -950,6 +985,11 @@ class sampleWrapperClass:
 
               if self.numberJetBinGen_[0] ==1 and not self.IsData_:
 
+               self.vbf_maxpt_jj_m_gen_[0]     = 0;                               
+               self.vbf_maxpt_jj_pt_gen_[0]    = 0;                               
+               self.vbf_maxpt_jj_eta_gen_[0]   = 0;                               
+               self.vbf_maxpt_jj_phi_gen_[0]   = 0;                               
+
                self.vbf_maxpt_j1_m_gen_[0]     = getattr(self.InputTree_, "vbf_maxpt_j1_m_gen");                               
                self.vbf_maxpt_j1_pt_gen_[0]    = getattr(self.InputTree_, "vbf_maxpt_j1_pt_gen");                               
                self.vbf_maxpt_j1_eta_gen_[0]   = getattr(self.InputTree_, "vbf_maxpt_j1_eta_gen");                               
@@ -976,18 +1016,18 @@ class sampleWrapperClass:
               self.jecUncAK5_.setJetPt(getattr( self.InputTree_, "vbf_maxpt_j1_pt" ));               
               j_jecfactorAK5_dn_[0] = self.jecUncAK5_.getUncertainty( False ) ;
 
-              self.vbf_maxpt_j1 = ROOT.TLorentzVector();
-              self.vbf_maxpt_j1.SetPtEtaPhiM(self.vbf_maxpt_j1_pt_[0],self.vbf_maxpt_j1_eta_[0],self.vbf_maxpt_j1_phi_[0],self.vbf_maxpt_j1_m_[0]); 
-              vbf_maxpt_j1_up = ROOT.TLorentzVector(self.vbf_maxpt_j1.Px()*(1+j_jecfactorAK5_up_[0]),
-                                                    self.vbf_maxpt_j1.Py()*(1+j_jecfactorAK5_up_[0]),
-                                                    self.vbf_maxpt_j1.Pz()*(1+j_jecfactorAK5_up_[0]),
-                                                    self.vbf_maxpt_j1.E()*(1+j_jecfactorAK5_up_[0]));
+              vbf_maxpt_j1.SetPtEtaPhiM(self.vbf_maxpt_j1_pt_[0],self.vbf_maxpt_j1_eta_[0],self.vbf_maxpt_j1_phi_[0],self.vbf_maxpt_j1_m_[0]); 
+
+              vbf_maxpt_j1_up.SetPxPyPzE(vbf_maxpt_j1.Px()*(1+j_jecfactorAK5_up_[0]),
+                                         vbf_maxpt_j1.Py()*(1+j_jecfactorAK5_up_[0]),
+                                         vbf_maxpt_j1.Pz()*(1+j_jecfactorAK5_up_[0]),
+                                         vbf_maxpt_j1.E()*(1+j_jecfactorAK5_up_[0]));
                                                    
 
-              vbf_maxpt_j1_dn = ROOT.TLorentzVector(self.vbf_maxpt_j1.Px()*(1-j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j1.Py()*(1-j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j1.Pz()*(1-j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j1.E()*(1-j_jecfactorAK5_dn_[0]));
+              vbf_maxpt_j1_dn.SetPxPyPzE(vbf_maxpt_j1.Px()*(1-j_jecfactorAK5_dn_[0]),
+                                         vbf_maxpt_j1.Py()*(1-j_jecfactorAK5_dn_[0]),
+                                         vbf_maxpt_j1.Pz()*(1-j_jecfactorAK5_dn_[0]),
+                                         vbf_maxpt_j1.E()*(1-j_jecfactorAK5_dn_[0]));
                                                     
               self.vbf_maxpt_j1_m_up_[0]   = vbf_maxpt_j1_up.M();                                
               self.vbf_maxpt_j1_pt_up_[0]  = vbf_maxpt_j1_up.Pt();                              
@@ -1069,12 +1109,11 @@ class sampleWrapperClass:
               self.jecUncAK5_.setJetPt(getattr( self.InputTree_, "vbf_maxpt_j1_pt" ));               
               j_jecfactorAK5_dn_[0] = self.jecUncAK5_.getUncertainty( False ) ;
 
-              self.vbf_maxpt_j1 = ROOT.TLorentzVector();
-              self.vbf_maxpt_j1.SetPtEtaPhiM(self.vbf_maxpt_j1_pt_[0],self.vbf_maxpt_j1_eta_[0],self.vbf_maxpt_j1_phi_[0],self.vbf_maxpt_j1_m_[0]); 
-              vbf_maxpt_j1_up = ROOT.TLorentzVector(self.vbf_maxpt_j1.Px()*(1+j_jecfactorAK5_up_[0]),
-                                                    self.vbf_maxpt_j1.Py()*(1+j_jecfactorAK5_up_[0]),
-                                                    self.vbf_maxpt_j1.Pz()*(1+j_jecfactorAK5_up_[0]),
-                                                    self.vbf_maxpt_j1.E()*(1+j_jecfactorAK5_up_[0]));
+              vbf_maxpt_j1.SetPtEtaPhiM(self.vbf_maxpt_j1_pt_[0],self.vbf_maxpt_j1_eta_[0],self.vbf_maxpt_j1_phi_[0],self.vbf_maxpt_j1_m_[0]); 
+              vbf_maxpt_j1_up.SetPxPyPzE(vbf_maxpt_j1.Px()*(1+j_jecfactorAK5_up_[0]),
+                                         vbf_maxpt_j1.Py()*(1+j_jecfactorAK5_up_[0]),
+                                         vbf_maxpt_j1.Pz()*(1+j_jecfactorAK5_up_[0]),
+                                         vbf_maxpt_j1.E()*(1+j_jecfactorAK5_up_[0]));
                                                    
 
               self.vbf_maxpt_j1_m_up_[0]   = vbf_maxpt_j1_up.M();                                
@@ -1082,10 +1121,10 @@ class sampleWrapperClass:
               self.vbf_maxpt_j1_eta_up_[0] = vbf_maxpt_j1_up.Eta();                                
               self.vbf_maxpt_j1_phi_up_[0] = vbf_maxpt_j1_up.Phi();                                
 
-              vbf_maxpt_j1_dn = ROOT.TLorentzVector(self.vbf_maxpt_j1.Px()*(1-j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j1.Py()*(1-j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j1.Pz()*(1-j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j1.E()*(1-j_jecfactorAK5_dn_[0]));
+              vbf_maxpt_j1_dn.SetPxPyPzE(vbf_maxpt_j1.Px()*(1-j_jecfactorAK5_dn_[0]),
+                                         vbf_maxpt_j1.Py()*(1-j_jecfactorAK5_dn_[0]),
+                                         vbf_maxpt_j1.Pz()*(1-j_jecfactorAK5_dn_[0]),
+                                         vbf_maxpt_j1.E()*(1-j_jecfactorAK5_dn_[0]));
                                                     
 
               self.vbf_maxpt_j1_m_dn_[0]   = vbf_maxpt_j1_dn.M();                                
@@ -1101,12 +1140,11 @@ class sampleWrapperClass:
               self.jecUncAK5_.setJetPt( getattr( self.InputTree_, "vbf_maxpt_j2_pt" ));               
               j_jecfactorAK5_dn_[0] = self.jecUncAK5_.getUncertainty( False ) ;
 
-              self.vbf_maxpt_j2 = ROOT.TLorentzVector();
-              self.vbf_maxpt_j2.SetPtEtaPhiM(self.vbf_maxpt_j2_pt_[0],self.vbf_maxpt_j2_eta_[0],self.vbf_maxpt_j2_phi_[0],self.vbf_maxpt_j2_m_[0]); 
-              vbf_maxpt_j2_up = ROOT.TLorentzVector(self.vbf_maxpt_j2.Px()*(1+j_jecfactorAK5_up_[0]),
-                                                    self.vbf_maxpt_j2.Py()*(1+j_jecfactorAK5_up_[0]),
-                                                    self.vbf_maxpt_j2.Pz()*(1+j_jecfactorAK5_up_[0]),
-                                                    self.vbf_maxpt_j2.E()*(1+j_jecfactorAK5_up_[0]));
+              vbf_maxpt_j2.SetPtEtaPhiM(self.vbf_maxpt_j2_pt_[0],self.vbf_maxpt_j2_eta_[0],self.vbf_maxpt_j2_phi_[0],self.vbf_maxpt_j2_m_[0]); 
+              vbf_maxpt_j2_up.SetPxPyPzE(vbf_maxpt_j2.Px()*(1+j_jecfactorAK5_up_[0]),
+                                         vbf_maxpt_j2.Py()*(1+j_jecfactorAK5_up_[0]),
+                                         vbf_maxpt_j2.Pz()*(1+j_jecfactorAK5_up_[0]),
+                                         vbf_maxpt_j2.E()*(1+j_jecfactorAK5_up_[0]));
                                                    
 
               self.vbf_maxpt_j2_m_up_[0]   = vbf_maxpt_j2_up.M();                                
@@ -1114,10 +1152,10 @@ class sampleWrapperClass:
               self.vbf_maxpt_j2_eta_up_[0] = vbf_maxpt_j2_up.Eta();                                
               self.vbf_maxpt_j2_phi_up_[0] = vbf_maxpt_j2_up.Phi();                                
 
-              vbf_maxpt_j2_dn = ROOT.TLorentzVector(self.vbf_maxpt_j2.Px()*(1-j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j2.Py()*(1-j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j2.Pz()*(1-j_jecfactorAK5_dn_[0]),
-                                                    self.vbf_maxpt_j2.E()*(1-j_jecfactorAK5_dn_[0]));
+              vbf_maxpt_j2_dn.SetPxPyPzE(vbf_maxpt_j2.Px()*(1-j_jecfactorAK5_dn_[0]),
+                                         vbf_maxpt_j2.Py()*(1-j_jecfactorAK5_dn_[0]),
+                                         vbf_maxpt_j2.Pz()*(1-j_jecfactorAK5_dn_[0]),
+                                         vbf_maxpt_j2.E()*(1-j_jecfactorAK5_dn_[0]));
 
               self.vbf_maxpt_j2_m_dn_[0]   = vbf_maxpt_j2_dn.M();                                
               self.vbf_maxpt_j2_pt_dn_[0]  = vbf_maxpt_j2_dn.Pt();                              
@@ -1195,10 +1233,10 @@ class sampleWrapperClass:
               self.vbf_maxDeta_j1_eta_up_[0] = vbf_maxDeta_j1_up.Eta();                                
               self.vbf_maxDeta_j1_phi_up_[0] = vbf_maxDeta_j1_up.Phi();                                
 
-              vbf_maxDeta_j1_dn = ROOT.TLorentzVector(self.vbf_maxDeta_j1.Px()*(1+j_jecfactorAK5_dn_[0]),
-                                                      self.vbf_maxDeta_j1.Py()*(1+j_jecfactorAK5_dn_[0]),
-                                                      self.vbf_maxDeta_j1.Pz()*(1+j_jecfactorAK5_dn_[0]),
-                                                      self.vbf_maxDeta_j1.E()*(1+j_jecfactorAK5_dn_[0]));
+              vbf_maxDeta_j1_dn = ROOT.TLorentzVector(self.vbf_maxDeta_j1.Px()*(1-j_jecfactorAK5_dn_[0]),
+                                                      self.vbf_maxDeta_j1.Py()*(1-j_jecfactorAK5_dn_[0]),
+                                                      self.vbf_maxDeta_j1.Pz()*(1-j_jecfactorAK5_dn_[0]),
+                                                      self.vbf_maxDeta_j1.E()*(1-j_jecfactorAK5_dn_[0]));
                                                     
               self.vbf_maxDeta_j1_m_dn_[0]   = vbf_maxDeta_j1_dn.M();                                
               self.vbf_maxDeta_j1_pt_dn_[0]  = vbf_maxDeta_j1_dn.Pt();                              
@@ -1225,10 +1263,10 @@ class sampleWrapperClass:
               self.vbf_maxDeta_j2_eta_up_[0] = vbf_maxDeta_j2_up.Eta();                                
               self.vbf_maxDeta_j2_phi_up_[0] = vbf_maxDeta_j2_up.Phi();                                
 
-              vbf_maxDeta_j2_dn = ROOT.TLorentzVector(self.vbf_maxDeta_j2.Px()*(1+j_jecfactorAK5_dn_[0]),
-                                                      self.vbf_maxDeta_j2.Py()*(1+j_jecfactorAK5_dn_[0]),
-                                                      self.vbf_maxDeta_j2.Pz()*(1+j_jecfactorAK5_dn_[0]),
-                                                      self.vbf_maxDeta_j2.E()*(1+j_jecfactorAK5_dn_[0]));
+              vbf_maxDeta_j2_dn = ROOT.TLorentzVector(self.vbf_maxDeta_j2.Px()*(1-j_jecfactorAK5_dn_[0]),
+                                                      self.vbf_maxDeta_j2.Py()*(1-j_jecfactorAK5_dn_[0]),
+                                                      self.vbf_maxDeta_j2.Pz()*(1-j_jecfactorAK5_dn_[0]),
+                                                      self.vbf_maxDeta_j2.E()*(1-j_jecfactorAK5_dn_[0]));
                                                    
 
               self.vbf_maxDeta_j2_m_dn_[0]   = vbf_maxDeta_j2_dn.M();                                
@@ -1304,10 +1342,10 @@ class sampleWrapperClass:
               self.vbf_maxMjj_j1_eta_up_[0] = vbf_maxMjj_j1_up.Eta();                                
               self.vbf_maxMjj_j1_phi_up_[0] = vbf_maxMjj_j1_up.Phi();                                
  
-              vbf_maxMjj_j1_dn = ROOT.TLorentzVector(self.vbf_maxMjj_j1.Px()*(1+j_jecfactorAK5_dn_[0]),
-                                                     self.vbf_maxMjj_j1.Py()*(1+j_jecfactorAK5_dn_[0]),
-                                                     self.vbf_maxMjj_j1.Pz()*(1+j_jecfactorAK5_dn_[0]),
-                                                     self.vbf_maxMjj_j1.E()*(1+j_jecfactorAK5_dn_[0]));
+              vbf_maxMjj_j1_dn = ROOT.TLorentzVector(self.vbf_maxMjj_j1.Px()*(1-j_jecfactorAK5_dn_[0]),
+                                                     self.vbf_maxMjj_j1.Py()*(1-j_jecfactorAK5_dn_[0]),
+                                                     self.vbf_maxMjj_j1.Pz()*(1-j_jecfactorAK5_dn_[0]),
+                                                     self.vbf_maxMjj_j1.E()*(1-j_jecfactorAK5_dn_[0]));
                                                    
               self.vbf_maxMjj_j1_m_dn_[0]   = vbf_maxMjj_j1_dn.M();                                
               self.vbf_maxMjj_j1_pt_dn_[0]  = vbf_maxMjj_j1_dn.Pt();                              
@@ -1334,15 +1372,121 @@ class sampleWrapperClass:
               self.vbf_maxMjj_j2_eta_up_[0] = vbf_maxMjj_j2_up.Eta();                                
               self.vbf_maxMjj_j2_phi_up_[0] = vbf_maxMjj_j2_up.Phi();                                
 
-              vbf_maxMjj_j2_dn = ROOT.TLorentzVector(self.vbf_maxMjj_j2.Px()*(1+j_jecfactorAK5_dn_[0]),
-                                                     self.vbf_maxMjj_j2.Py()*(1+j_jecfactorAK5_dn_[0]),
-                                                     self.vbf_maxMjj_j2.Pz()*(1+j_jecfactorAK5_dn_[0]),
-                                                     self.vbf_maxMjj_j2.E()*(1+j_jecfactorAK5_dn_[0]));
+              vbf_maxMjj_j2_dn = ROOT.TLorentzVector(self.vbf_maxMjj_j2.Px()*(1-j_jecfactorAK5_dn_[0]),
+                                                     self.vbf_maxMjj_j2.Py()*(1-j_jecfactorAK5_dn_[0]),
+                                                     self.vbf_maxMjj_j2.Pz()*(1-j_jecfactorAK5_dn_[0]),
+                                                     self.vbf_maxMjj_j2.E()*(1-j_jecfactorAK5_dn_[0]));
                                                    
 
               self.vbf_maxMjj_j2_m_dn_[0]   = vbf_maxMjj_j2_dn.M();                                
               self.vbf_maxMjj_j2_pt_dn_[0]  = vbf_maxMjj_j2_dn.Pt();                              
               self.vbf_maxMjj_j2_eta_dn_[0] = vbf_maxMjj_j2_dn.Eta();                                
+
+
+
+             ####### build met and lepton -> scale up and down the met according to the jet -> buld the final invariant mass
+             
+             met_vector_type0_met_up = ROOT.TLorentzVector();
+             met_vector_type0_met_dn = ROOT.TLorentzVector();
+             met_vector_type0_met_up.SetPxPyPzE(getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Cos(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Sin(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr( self.InputTree_, "W_nu1_pz_type0_met" ),+ROOT.TMath.Sqrt(getattr(self.InputTree_, "event_met_pfmet")*getattr(self.InputTree_,"event_met_pfmet")+getattr(self.InputTree_, "W_nu1_pz_type0_met")*getattr( self.InputTree_,"W_nu1_pz_type0_met")));
+          
+             met_vector_type0_met_dn = met_vector_type0_met_up ;
+
+             for iJet in range(6):
+
+               if getattr( self.InputTree_, "JetPFCor_Pt" )[iJet] > 0. :
+                   
+                jet_vector = ROOT.TLorentzVector();
+                jet_vector.SetPtEtaPhiE(getattr( self.InputTree_,"JetPFCor_Pt")[iJet],
+                                       getattr( self.InputTree_,"JetPFCor_Eta")[iJet],
+                                       getattr( self.InputTree_,"JetPFCor_Phi")[iJet],
+                                       getattr( self.InputTree_,"JetPFCor_E")[iJet]);
+
+                self.jecUncAK5_.setJetEta( getattr(self.InputTree_, "JetPFCor_Eta")[iJet]);
+                self.jecUncAK5_.setJetPt(  getattr(self.InputTree_, "JetPFCor_Pt" )[iJet]);                        
+                j_jecfactorAK5_up = self.jecUncAK5_.getUncertainty( True );
+
+                self.jecUncAK5_.setJetEta( getattr(self.InputTree_, "JetPFCor_Eta")[iJet]);
+                self.jecUncAK5_.setJetPt(  getattr(self.InputTree_, "JetPFCor_Pt")[iJet]);               
+                j_jecfactorAK5_dn = self.jecUncAK5_.getUncertainty( False ) ;
+
+
+                jet_vector_up = ROOT.TLorentzVector(jet_vector.Px() * (1+j_jecfactorAK5_up), jet_vector.Py() * (1+j_jecfactorAK5_up),
+                                                    jet_vector.Pz() * (1+j_jecfactorAK5_up), jet_vector.E() * (1+j_jecfactorAK5_up)); 
+
+                jet_vector_dn = ROOT.TLorentzVector(jet_vector.Px() * (1-j_jecfactorAK5_dn), jet_vector.Py() * (1-j_jecfactorAK5_dn),
+                                                    jet_vector.Pz() * (1-j_jecfactorAK5_dn), jet_vector.E() * (1-j_jecfactorAK5_dn));
+
+                met_vector_type0_met_up = met_vector_type0_met_up + (jet_vector - jet_vector_up)  ;
+                met_vector_type0_met_dn = met_vector_type0_met_dn + (jet_vector - jet_vector_dn)  ;
+
+               if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet] > 0. :
+                   
+                jet_vector = ROOT.TLorentzVector();
+                jet_vector.SetPtEtaPhiE(getattr( self.InputTree_,"JetPFCorVBFTag_Pt")[iJet],
+                                        getattr( self.InputTree_,"JetPFCorVBFTag_Eta")[iJet],
+                                        getattr( self.InputTree_,"JetPFCorVBFTag_Phi")[iJet],
+                                        getattr( self.InputTree_,"JetPFCor_E")[iJet]);
+  
+                self.jecUncAK5_.setJetEta( getattr(self.InputTree_, "JetPFCorVBFTag_Eta")[iJet]);
+                self.jecUncAK5_.setJetPt(  getattr(self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet]);                        
+                j_jecfactorAK5_up = self.jecUncAK5_.getUncertainty( True );
+
+                self.jecUncAK5_.setJetEta( getattr(self.InputTree_, "JetPFCorVBFTag_Eta")[iJet]);
+                self.jecUncAK5_.setJetPt(  getattr(self.InputTree_, "JetPFCorVBFTag_Pt")[iJet]);               
+                j_jecfactorAK5_dn = self.jecUncAK5_.getUncertainty( False ) ;
+
+
+                jet_vector_up = ROOT.TLorentzVector(jet_vector.Px() * (1+j_jecfactorAK5_up), jet_vector.Py() * (1+j_jecfactorAK5_up),
+                                                    jet_vector.Pz() * (1+j_jecfactorAK5_up), jet_vector.E() * (1+j_jecfactorAK5_up));
+
+                jet_vector_dn = ROOT.TLorentzVector(jet_vector.Px() * (1-j_jecfactorAK5_dn), jet_vector.Py() * (1-j_jecfactorAK5_dn),
+                                                    jet_vector.Pz() * (1-j_jecfactorAK5_dn), jet_vector.E() * (1-j_jecfactorAK5_dn));
+
+                met_vector_type0_met_up = met_vector_type0_met_up + (jet_vector - jet_vector_up)  ;
+                met_vector_type0_met_dn = met_vector_type0_met_dn + (jet_vector - jet_vector_dn)  ;
+
+              
+             self.pfMET_up_[0] = met_vector_type0_met_up.Pt(); 
+             self.pfMET_Phi_up_[0] = met_vector_type0_met_up.Phi(); 
+
+             self.pfMET_dn_[0] = met_vector_type0_met_dn.Pt(); 
+             self.pfMET_Phi_dn_[0] = met_vector_type0_met_dn.Phi(); 
+
+             lepton_vector = ROOT.TLorentzVector();
+             lepton_vector.SetPxPyPzE(getattr(self.InputTree_, "W_"+lepLabel+"_px"),
+                                      getattr(self.InputTree_, "W_"+lepLabel+"_py"),
+                                      getattr(self.InputTree_, "W_"+lepLabel+"_pz"),
+                                      getattr(self.InputTree_, "W_"+lepLabel+"_e"));
+
+
+             jet_pt  = getattr( self.InputTree_, prefix + "_pt" )[0];    
+             jet_eta = getattr( self.InputTree_, prefix + "_eta" )[0];    
+             jet_phi = getattr( self.InputTree_, prefix + "_phi" )[0];    
+             jet_e   = getattr( self.InputTree_, prefix + "_e" )[0];                        
+
+             jet_ptetaphie = ROOT.TLorentzVector();
+             jet_ptetaphie.SetPtEtaPhiE(jet_pt, jet_eta, jet_phi, jet_e)
+
+             jet_up = ROOT.TLorentzVector(jet_ptetaphie.Px() * self.curjes_up, jet_ptetaphie.Py() * self.curjes_up,
+                                          jet_ptetaphie.Pz() * self.curjes_up, jet_ptetaphie.E() * self.curjes_up);
+             jet_dn = ROOT.TLorentzVector(jet_ptetaphie.Px() * self.curjes_dn, jet_ptetaphie.Py() * self.curjes_dn,
+                                          jet_ptetaphie.Pz() * self.curjes_dn, jet_ptetaphie.E() * self.curjes_dn);
+
+
+             self.mass_lvj_type0_met_up_[0] = (lepton_vector + jet_up + met_vector_type0_met_up).M();
+             self.mass_lvj_type0_met_dn_[0] = (lepton_vector + jet_dn + met_vector_type0_met_dn).M();
+
+             met_vector_type2_met_up = ROOT.TLorentzVector();
+             met_vector_type2_met_dn = ROOT.TLorentzVector();
+             met_vector_type2_met_up.SetPxPyPzE(getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Cos(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Sin(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr( self.InputTree_, "W_nu1_pz_type2_met" ),+ROOT.TMath.Sqrt(getattr(self.InputTree_, "event_met_pfmet")*getattr(self.InputTree_,"event_met_pfmet")+getattr(self.InputTree_, "W_nu1_pz_type2_met")*getattr( self.InputTree_,"W_nu1_pz_type2_met")));
+
+             met_vector_type2_met_dn = met_vector_type2_met_up ;
+             met_vector_type2_met_up = met_vector_type2_met_up + (jet_vector - jet_vector_up) + (vbf_maxpt_j1-vbf_maxpt_j1_up) + (vbf_maxpt_j2-vbf_maxpt_j2_up);
+             met_vector_type2_met_dn = met_vector_type2_met_dn + (jet_vector - jet_vector_dn) + (vbf_maxpt_j1-vbf_maxpt_j1_dn) + (vbf_maxpt_j2-vbf_maxpt_j2_dn);
+
+             self.mass_lvj_type2_met_up_[0] = (lepton_vector + jet_vector_up + met_vector_type2_met_up).M();
+             self.mass_lvj_type2_met_dn_[0] = (lepton_vector + jet_vector_dn + met_vector_type2_met_dn).M();
 
 
              ######### btag stuff  
@@ -1358,7 +1502,6 @@ class sampleWrapperClass:
              self.nbjets_csvl_veto_[0] = 0. ;
              self.nbjets_csvm_veto_[0] = 0. ;
              self.nbjets_csvt_veto_[0] = 0. ;
-
                  
 
              ## take the delta R between leading CA8 jet and the lepton 
@@ -1702,6 +1845,12 @@ class sampleWrapperClass:
         self.pfMET_     = array( 'f', [ 0. ] );
         self.pfMET_Phi_ = array( 'f', [ 0. ] );
 
+        self.pfMET_up_     = array( 'f', [ 0. ] );
+        self.pfMET_Phi_up_ = array( 'f', [ 0. ] );
+
+        self.pfMET_dn_     = array( 'f', [ 0. ] );
+        self.pfMET_Phi_dn_ = array( 'f', [ 0. ] );
+
         self.nu_pz_type0_ = array( 'f', [ 0. ] );
         self.nu_pz_type2_ = array( 'f', [ 0. ] );
 
@@ -1715,6 +1864,7 @@ class sampleWrapperClass:
         self.W_pz_type2_met_ = array( 'f', [ 0. ] );
 
         self.nu_pz_gen_   = array( 'f', [ 0. ] );
+
         self.W_pz_gen_    = array( 'f', [ 0. ] );
         self.W_pt_gen_    = array( 'f', [ 0. ] );
 
@@ -1725,6 +1875,12 @@ class sampleWrapperClass:
 
         self.mass_lvj_type0_    = array( 'f', [ 0. ] );
         self.mass_lvj_type2_    = array( 'f', [ 0. ] );
+
+        self.mass_lvj_type0_met_up_  = array( 'f', [ 0. ] );
+        self.mass_lvj_type2_met_up_  = array( 'f', [ 0. ] );
+
+        self.mass_lvj_type0_met_dn_  = array( 'f', [ 0. ] );
+        self.mass_lvj_type2_met_dn_  = array( 'f', [ 0. ] );
 
         self.mass_lv_subj_type0_met_    = array( 'f', [ 0. ] );
         self.mass_lv_subj_type2_met_    = array( 'f', [ 0. ] );
@@ -2185,6 +2341,12 @@ class sampleWrapperClass:
         self.otree.Branch("mass_lvj_type0", self.mass_lvj_type0_ , "mass_lvj_type0/F");
         self.otree.Branch("mass_lvj_type2", self.mass_lvj_type2_ , "mass_lvj_type2/F");
 
+        self.otree.Branch("mass_lvj_type0_met_up", self.mass_lvj_type0_met_up_ , "mass_lvj_type0_met_up/F");
+        self.otree.Branch("mass_lvj_type2_met_up", self.mass_lvj_type2_met_up_ , "mass_lvj_type2_met_up/F");
+
+        self.otree.Branch("mass_lvj_type0_met_dn", self.mass_lvj_type0_met_dn_ , "mass_lvj_type0_met_dn/F");
+        self.otree.Branch("mass_lvj_type2_met_dn", self.mass_lvj_type2_met_dn_ , "mass_lvj_type2_met_dn/F");
+
         self.otree.Branch("mass_lv_subj_type0_met", self.mass_lv_subj_type0_met_ , "mass_lv_subj_type0_met/F");
         self.otree.Branch("mass_lv_subj_type2_met", self.mass_lv_subj_type2_met_ , "mass_lv_subj_type2_met/F");
 
@@ -2211,6 +2373,12 @@ class sampleWrapperClass:
 
         self.otree.Branch("pfMET", self.pfMET_ , "pfMET/F");
         self.otree.Branch("pfMET_Phi", self.pfMET_Phi_ , "pfMET_Phi/F");
+
+        self.otree.Branch("pfMET_up", self.pfMET_up_ , "pfMET_up/F");
+        self.otree.Branch("pfMET_Phi_up", self.pfMET_Phi_up_ , "pfMET_Phi_up/F");
+
+        self.otree.Branch("pfMET_dn", self.pfMET_dn_ , "pfMET_dn/F");
+        self.otree.Branch("pfMET_Phi_dn", self.pfMET_Phi_dn_ , "pfMET_Phi_dn/F");
 
         self.otree.Branch("nu_pz_type0", self.nu_pz_type0_ , "nu_pz_type0/F");
         self.otree.Branch("nu_pz_type2", self.nu_pz_type2_ , "nu_pz_type2/F");
