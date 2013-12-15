@@ -1681,10 +1681,9 @@ class doFit_wj_and_wlvj:
 
         self.draw_canvas_with_pull( mplot, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/m_lvj_fitting/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj"+label+in_range+mlvj_model, show_constant_parameter, logy);
 
-        if(rdataset_relaxed):
-            
+        if(rdataset_relaxed):            
          ## make the extended pdf model
-         model_relaxed = self.make_Model(label+in_range,mlvj_model,"_mlvj_relxed",constrainslist_relaxed,ismc);
+         model_relaxed = self.make_Model(label+in_range,mlvj_model,"_mlvj_relaxed",constrainslist_relaxed,ismc);
 
          ## make the fit
          rfresult_relaxed = model_relaxed.fitTo( rdataset_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE) ,RooFit.Extended(kTRUE) );
@@ -1745,8 +1744,8 @@ class doFit_wj_and_wlvj:
 
          ## plot the error band but don't store the canvas (only plotted without -b option
 	 draw_error_band_extendPdf(rdataset, model_relaxed, rfresult_relaxed,mplot_same,2,"L")
-         rdataset_relaxed.plotOn( mplot_same, RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
-         model.plotOn( mplot_same)#, RooFit.VLines()); in order to have the right pull
+         rdataset.plotOn( mplot_same, RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+         model_relaxed.plotOn(mplot_same)#, RooFit.VLines()); in order to have the right pull
 
          ## get the pull
 	 mplot_pull_same      = self.get_pull(rrv_mass_lvj,mplot_same);
