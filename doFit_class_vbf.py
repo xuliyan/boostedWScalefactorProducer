@@ -898,7 +898,7 @@ class doFit_wj_and_wlvj:
             elif label_tstring.Contains("H1000"):
                 rrv_offset_ErfExp = RooRealVar("rrv_offset_ErfExp"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfExp"+label+"_"+self.channel+mass_spectrum,1000.,800.,1150.);       
 
-            rrv_width_ErfExp = RooRealVar("rrv_width_ErfExp"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfExp"+label+"_"+self.channel+mass_spectrum,70.,5,600.);
+            rrv_width_ErfExp = RooRealVar("rrv_width_ErfExp"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfExp"+label+"_"+self.channel+mass_spectrum,200.,10,400.);
             model_pdf        = ROOT.RooErfExpPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c_ErfExp,rrv_offset_ErfExp,rrv_width_ErfExp);
 
 
@@ -1462,7 +1462,7 @@ class doFit_wj_and_wlvj:
       print "###############################################"
       print " "
 
-      rrv_number = RooRealVar("rrv_number"+label+"_"+self.channel+mass_spectrum,"rrv_number"+label+"_"+self.channel+mass_spectrum,area_init_value,0.,1e4);
+      rrv_number = RooRealVar("rrv_number"+label+"_"+self.channel+mass_spectrum,"rrv_number"+label+"_"+self.channel+mass_spectrum,area_init_value,0.,1e7);
       ## call the make RooAbsPdf method
       model_pdf = self.make_Pdf(label,in_model_name,mass_spectrum,ConstraintsList,ismc_wjet)
       print "######## Model Pdf ########"
@@ -1688,6 +1688,7 @@ class doFit_wj_and_wlvj:
          ## make the fit
          rfresult_relaxed = model_relaxed.fitTo( rdataset_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE) ,RooFit.Extended(kTRUE) );
          rfresult_relaxed = model_relaxed.fitTo( rdataset_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE) ,RooFit.Extended(kTRUE), RooFit.Minimizer("Minuit2") );
+         rfresult_relaxed = model_relaxed.fitTo( rdataset_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE) ,RooFit.Extended(kTRUE), RooFit.Minimizer("Minuit2") );
          rfresult_relaxed.Print();
 
          ## plot the result
@@ -1740,7 +1741,7 @@ class doFit_wj_and_wlvj:
 
          ## set the name of the result of the fit and put it in the workspace
          rfresult_relaxed.SetName("rfresult_relaxed"+label+in_range+"_"+self.channel+"_mlvj")
-         getattr(self.workspace4fit_,"import")(rfresult)
+         getattr(self.workspace4fit_,"import")(rfresult_relaxed)
 
          ## plot the error band but don't store the canvas (only plotted without -b option
 	 draw_error_band_extendPdf(rdataset, model_relaxed, rfresult_relaxed,mplot_same,2,"L")
@@ -4243,19 +4244,19 @@ class doFit_wj_and_wlvj:
         self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STopmassdn_vbf","jet_mass_pr_dn","vbf_dn",1)
 
         self.fit_mj_single_MC(self.file_STop_mc,"_STop","ErfExp");
-        self.fit_mj_single_MC(self.file_STop_mc,"_STopmassup_vbf","ErfExp");
-        self.fit_mj_single_MC(self.file_STop_mc,"_STopmassdn_vbf","ErfExp");
+#        self.fit_mj_single_MC(self.file_STop_mc,"_STopmassup_vbf","ErfExp");
+#        self.fit_mj_single_MC(self.file_STop_mc,"_STopmassdn_vbf","ErfExp");
 
         if self.MODEL_4_mlvj=="ErfPowExp_v1":
            self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_sb_lo","ErfExp_v1");
            self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_signal_region","ErfExp_v1");
-           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STopmassup_vbf","_signal_region","ErfExp_v1");
-           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STopmassdn_vbf","_signal_region","ErfExp_v1");
+#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STopmassup_vbf","_signal_region","ErfExp_v1");
+#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STopmassdn_vbf","_signal_region","ErfExp_v1");
         else:
            self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_sb_lo",self.MODEL_4_mlvj);
            self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_signal_region",self.MODEL_4_mlvj);                                                              
-           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STopmassup_vbf","_signal_region",self.MODEL_4_mlvj);                                                              
-           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STopmassdn_vbf","_signal_region",self.MODEL_4_mlvj);                                                              
+#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STopmassup_vbf","_signal_region",self.MODEL_4_mlvj);                                                              
+#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STopmassdn_vbf","_signal_region",self.MODEL_4_mlvj);                                                              
         
         print "________________________________________________________________________"  
 
