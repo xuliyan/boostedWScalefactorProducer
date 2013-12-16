@@ -10,7 +10,7 @@ import subprocess
 from subprocess import Popen
 from optparse import OptionParser
 
-from ROOT import gROOT, TPaveLabel, gStyle, gSystem, TGaxis, TStyle, TLatex, TString, TF1,TFile,TLine, TLegend, TH1D,TH2D,THStack,TChain, TCanvas, TMatrixDSym, TMath, TText, TPad, RooFit, RooArgSet, RooArgList, RooArgSet, RooAbsData, RooAbsPdf, RooAddPdf, RooWorkspace, RooExtendPdf,RooCBShape, RooLandau, RooFFTConvPdf, RooGaussian, RooBifurGauss, RooArgusBG,RooDataSet,RooExponential,RooBreitWigner, RooVoigtian, RooNovosibirsk, RooRealVar,RooFormulaVar, RooDataHist, RooHistPdf,RooCategory, RooChebychev, RooSimultaneous, RooGenericPdf,RooConstVar, RooKeysPdf, RooHistPdf, RooEffProd, RooProdPdf, TIter, kTRUE, kFALSE, kGray, kRed, kDashed, kGreen,kAzure, kOrange, kBlack,kBlue,kYellow,kCyan, kMagenta, kWhite
+from ROOT import gROOT, TPaveLabel, gStyle, gSystem, TGaxis, TStyle, TLatex, TString, TF1,TFile,TLine, TLegend, TH1D,TH2D,THStack,TChain, TCanvas, TMatrixDSym, TMath, TText, TPad, RooFit, RooArgSet, RooArgList, RooArgSet, RooAbsData, RooAbsPdf, RooAddPdf, RooWorkspace, RooExtendPdf,RooCBShape, RooLandau, RooFFTConvPdf, RooGaussian, RooBifurGauss, RooArgusBG,RooDataSet,RooExponential,RooBreitWigner, RooVoigtian, RooNovosibirsk, RooRealVar,RooFormulaVar, RooDataHist, RooHistPdf,RooCategory, RooChebychev, RooSimultaneous, RooGenericPdf,RooConstVar, RooKeysPdf, RooHistPdf, RooEffProd, RooProdPdf, TIter, kTRUE, kFALSE, kGray, kRed, kDashed, kGreen,kAzure, kOrange, kBlack,kBlue,kYellow,kCyan, kMagenta, kWhite, TGraph
 
 
 ############################################
@@ -1554,18 +1554,23 @@ class doFit_wj_and_wlvj:
                  param.setError(param.getError()*self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal());
                  param.Print();
              param=par.Next()
-
-         result_param = rfresult_relaxed.floatParsFinal();
-         
-         for iresult in range(result_param.getSize()) :
-             if TString(result_param.at(iresult).GetName()).Contains("number"):
-                 result_param.at(iresult).setVal(result_param.at(iresult).getVal()*self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal());
-                 result_param.at(iresult).setError(result_param.at(iresult).getError()*self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal());
                  
- 	 ## draw the error band for an extend pdf
-         rfresult_relaxed.Print();             
-         draw_error_band_extendPdf(rdataset_mj,model_relaxed,rfresult_relaxed,mplot_same,2,"L");
          ## re-draw the dataset
+         band_up = TGraph(); band_dn = TGraph();         
+         band_up = mplot_relaxed.findObject("error_up");
+         band_dn = mplot_relaxed.findObject("error_dn");
+         
+         for ipoint in range(0,band_up.GetN()) and range(0,band_dn.GetN()):
+             x1 = ROOT.Double(0.) ; y1 = ROOT.Double(0.) ;
+             band_up.GetPoint(ipoint,x1,y1);
+             band_up.SetPoint(ipoint,x1,y1*self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal());
+             x2 = ROOT.Double(0.) ; y2 = ROOT.Double(0.) ;
+             band_dn.GetPoint(ipoint,x2,y2);
+             band_dn.SetPoint(ipoint,x2,y2*self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal());
+             
+         mplot_same.addObject(band_up,"L");
+         mplot_same.addObject(band_dn,"L"); 
+        
          rdataset_mj.plotOn(mplot_same,RooFit.MarkerSize(1.5),RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0));
          ## draw the function
          model_relaxed.plotOn(mplot_same);# remove RooFit.VLines() in order to get right pull in the 1st bin
@@ -1730,11 +1735,11 @@ class doFit_wj_and_wlvj:
              param=par.Next()
 
          result_param = rfresult_relaxed.floatParsFinal();
-         
+
          for iresult in range(result_param.getSize()) :
-             if TString(result_param.at(iresult).GetName()).Contains("number"):
-                 result_param.at(iresult).setVal(result_param.at(iresult).getVal()*normalization);
-                 result_param.at(iresult).setError(result_param.at(iresult).getError()*normalization);
+           if TString(result_param.at(iresult).GetName()).Contains("number"):
+              result_param.at(iresult).setVal(result_param.at(iresult).getVal()*normalization);
+              result_param.at(iresult).setError(result_param.at(iresult).getError()*normalization);
                  
  	 ## draw the error band for an extend pdf
          rfresult_relaxed.Print();             
@@ -1743,10 +1748,25 @@ class doFit_wj_and_wlvj:
          rfresult_relaxed.SetName("rfresult_relaxed"+label+in_range+"_"+self.channel+"_mlvj")
          getattr(self.workspace4fit_,"import")(rfresult_relaxed)
 
-         ## plot the error band but don't store the canvas (only plotted without -b option
-	 draw_error_band_extendPdf(rdataset, model_relaxed, rfresult_relaxed,mplot_same,2,"L")
-         rdataset.plotOn( mplot_same, RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
-         model_relaxed.plotOn(mplot_same)#, RooFit.VLines()); in order to have the right pull
+         ## re-draw the dataset
+         band_up = TGraph(); band_dn = TGraph();         
+         band_up = mplot_relaxed.findObject("error_up");
+         band_dn = mplot_relaxed.findObject("error_dn");
+         
+         for ipoint in range(0,band_up.GetN()) and range(0,band_dn.GetN()):
+             x1 = ROOT.Double(0.) ; y1 = ROOT.Double(0.) ;
+             band_up.GetPoint(ipoint,x1,y1);
+             band_up.SetPoint(ipoint,x1,y1*normalization);
+             x2 = ROOT.Double(0.) ; y2 = ROOT.Double(0.) ;
+             band_dn.GetPoint(ipoint,x2,y2);
+             band_dn.SetPoint(ipoint,x2,y2*normalization);
+             
+         mplot_same.addObject(band_up,"L");
+         mplot_same.addObject(band_dn,"L"); 
+        
+         rdataset.plotOn(mplot_same,RooFit.MarkerSize(1.5),RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0));
+         ## draw the function
+         model_relaxed.plotOn(mplot_same);# remove RooFit.VLines() in order to get right pull in the 1st bin
 
          ## get the pull
 	 mplot_pull_same      = self.get_pull(rrv_mass_lvj,mplot_same);
