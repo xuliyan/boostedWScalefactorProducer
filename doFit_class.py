@@ -11,7 +11,7 @@ import subprocess
 from subprocess import Popen
 from optparse import OptionParser
 
-#from sampleWrapperClass import *
+
 #from trainingClass      import *
 #from BoostedWSamples    import * 
 #from mvaApplication     import *
