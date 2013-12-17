@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /Usr/bin/env python
 import os
 import glob
 import math
@@ -42,9 +42,9 @@ parser.add_option('--category', action="store",type="string",dest="category",def
 
 (options, args) = parser.parse_args()
 
-ROOT.gSystem.Load(options.inPath+"/PDFs/HWWLVJRooPdfs_cxx.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/PdfDiagonalizer_cc.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/Util_cxx.so")
+ROOT.gSystem.Load(options.inPath+"/PDFs/HWWLVJRooPdfs_cxx.so")
 
 from ROOT import draw_error_band, draw_error_band_extendPdf, draw_error_band_Decor, draw_error_band_shape_Decor, Calc_error_extendPdf, Calc_error, RooErfExpPdf, RooAlpha, RooAlpha4ErfPowPdf, RooAlpha4ErfPow2Pdf, RooAlpha4ErfPowExpPdf, PdfDiagonalizer, RooPowPdf, RooPow2Pdf, RooErfPowExpPdf, RooErfPowPdf, RooErfPow2Pdf, RooQCDPdf, RooUser1Pdf, RooBWRunPdf, RooAnaExpNPdf,RooExpNPdf, RooAlpha4ExpNPdf, RooExpTailPdf, RooAlpha4ExpTailPdf, Roo2ExpPdf, RooAlpha42ExpPdf
 
@@ -100,7 +100,7 @@ class doFit_wj_and_wlvj:
 
         self.leg = TLegend();
         
-        self.narrow_factor = 10.;
+        self.narrow_factor = 1.;
 
         ## correct the binning of mj
         self.BinWidth_mj = self.BinWidth_mj/self.narrow_factor;
@@ -167,7 +167,7 @@ class doFit_wj_and_wlvj:
         rrv_mass_lvj.setRange("signal_region",self.mlvj_signal_min,self.mlvj_signal_max);
 
         #prepare the data and mc files --> set the working directory and the files name
-        self.file_Directory="trainingtrees_%s/"%(self.channel);
+        self.file_Directory="../TREES/trainingtrees_%s/"%(self.channel);
 
         self.PS_model= options.psmodel
         
@@ -1227,7 +1227,7 @@ class doFit_wj_and_wlvj:
             rrv_c0 = RooRealVar("rrv_c0_ErfPowExp"+label+"_"+self.channel+mass_spectrum,"rrv_c0_ErfPowExp"+label+"_"+self.channel+mass_spectrum,13,5,40);
             rrv_c1 = RooRealVar("rrv_c1_ErfPowExp"+label+"_"+self.channel+mass_spectrum,"rrv_c1_ErfPowExp"+label+"_"+self.channel+mass_spectrum, 2,0,4);
             rrv_offset = RooRealVar("rrv_offset_ErfPowExp"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfPowExp"+label+"_"+self.channel+mass_spectrum, 450,400,600);
-            rrv_width  = RooRealVar("rrv_width_ErfPowExp"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfPowExp"+label+"_"+self.channel+mass_spectrum,50,15,80);
+            rrv_width  = RooRealVar("rrv_width_ErfPowExp"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfPowExp"+label+"_"+self.channel+mass_spectrum,30,5,150);
             model_pdf  = RooErfPowExpPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c0,rrv_c1,rrv_offset,rrv_width);
 
         if in_model_name == "ErfPowExp_v1_sr":#can replace erf*exp 
@@ -1511,6 +1511,27 @@ class doFit_wj_and_wlvj:
         mplot_pull = self.get_pull(rrv_mass_j, mplot);
         mplot.GetYaxis().SetRangeUser(1e-5,mplot.GetMaximum()*1.2);
 
+        ##CALCULATE CHI2
+        datahist=rdataset_mj.binnedClone(rdataset_mj.GetName()+"_binnedClone",rdataset_mj.GetName()+"_binnedClone")
+        Nbin = int(rrv_mass_j.getBins()); 
+        rresult_param = rfresult.floatParsFinal();        
+        nparameters =  rresult_param.getSize()                                         
+        ChiSquare = model.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE));
+        ChiSquare.getVal();
+        chi_over_ndf= ChiSquare.getVal()/(Nbin - nparameters);
+   #     print ChiSquare.getVal();
+   #     print Nbin;
+   #     print nparameters;
+   #     print chi_over_ndf;
+   #     raw_input("ENTER");        
+
+        ##Add Chisquare to mplot_pull
+        cs = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf)));
+        cs.SetNDC();
+        cs.SetTextSize(0.12);
+        cs.AppendPad("same");
+        mplot_pull.addObject(cs)
+
         parameters_list = model.getParameters(rdataset_mj);
         self.draw_canvas_with_pull( mplot, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/m_j_fitting%s_wtaggercut%s/"%(options.additioninformation, self.channel,self.PS_model, self.wtagger_label, additioninformation, self.wtagger_label), label+in_file_name, in_model_name)
 
@@ -1536,6 +1557,26 @@ class doFit_wj_and_wlvj:
          ## Get the pull
          mplot_pull_relaxed = self.get_pull(rrv_mass_j, mplot_relaxed);
          mplot_relaxed.GetYaxis().SetRangeUser(1e-5,mplot_relaxed.GetMaximum()*1.2);
+
+        ##CALCULATE CHI2
+         datahist_relaxed=rdataset_mj_relaxed.binnedClone(rdataset_mj_relaxed.GetName()+"_binnedClone",rdataset_mj_relaxed.GetName()+"_binnedClone")
+         Nbin_relaxed = int(rrv_mass_j.getBins()); 
+         rresult_relaxed_param = rfresult_relaxed.floatParsFinal();        
+         nparameters_relaxed =  rresult_relaxed_param.getSize()                                         
+         ChiSquare_relaxed = model_relaxed.createChi2(datahist_relaxed,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE));
+         chi_over_ndf_relaxed= ChiSquare_relaxed.getVal()/(Nbin_relaxed - nparameters_relaxed);
+   #     print ChiSquare.getVal();
+   #     print Nbin;
+   #     print nparameters;
+   #     print chi_over_ndf;
+   #     raw_input("ENTER");        
+
+        ##Add Chisquare to mplot_pull
+         cs2 = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf_relaxed)));
+         cs2.SetNDC();
+         cs2.SetTextSize(0.12);
+         cs2.AppendPad("same");
+         mplot_pull_relaxed.addObject(cs2)
 
          parameters_list_relaxed = model_relaxed.getParameters(rdataset_mj_relaxed);
          self.draw_canvas_with_pull( mplot_relaxed, mplot_pull_relaxed,parameters_list_relaxed,"plots_%s_%s_%s_%s_g1/m_j_fitting%s_wtaggercut%s_relaxed/"%(options.additioninformation, self.channel,self.PS_model, self.wtagger_label, additioninformation, self.wtagger_label), label+in_file_name, in_model_name)
@@ -1577,6 +1618,24 @@ class doFit_wj_and_wlvj:
          ## Get the pull
          mplot_pull_same = self.get_pull(rrv_mass_j, mplot_same);
          mplot_same.GetYaxis().SetRangeUser(1e-5,mplot_same.GetMaximum()*1.2);
+
+        ##CALCULATE CHI2
+#         datahist=rdataset_mj.binnedClone(rdataset_mj.GetName()+"_binnedClone",rdataset_mj.GetName()+"_binnedClone")
+         Nbin = int(rrv_mass_j.getBins()); 
+         ChiSquare_same = model_relaxed.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE));
+         ChiSquare_same.getVal();
+         chi_over_ndf_same= ChiSquare_same.getVal()/(Nbin - nparameters_relaxed);
+     #    print Nbin;
+     #    print nparameters_relaxed;
+     #    print ChiSquare_same.getVal();
+     #    raw_input("ENTER");
+                  
+        ##Add Chisquare to mplot_pull
+         cs3 = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf_same)));
+         cs3.SetNDC();
+         cs3.SetTextSize(0.12);
+         cs3.AppendPad("same");
+         mplot_pull_same.addObject(cs3)
 
          parameters_list_same = model_relaxed.getParameters(rdataset_mj);
          self.draw_canvas_with_pull( mplot_same, mplot_pull_same,parameters_list_same,"plots_%s_%s_%s_%s_g1/m_j_fitting%s_wtaggercut%s_same/"%(options.additioninformation, self.channel,self.PS_model, self.wtagger_label, additioninformation, self.wtagger_label), label+in_file_name, in_model_name)
@@ -1665,6 +1724,7 @@ class doFit_wj_and_wlvj:
         rfresult = model.fitTo( rdataset, RooFit.Save(1), RooFit.SumW2Error(kTRUE) ,RooFit.Extended(kTRUE) );
         rfresult = model.fitTo( rdataset, RooFit.Save(1), RooFit.SumW2Error(kTRUE) ,RooFit.Extended(kTRUE), RooFit.Minimizer("Minuit2") );
         rfresult.Print();
+     #   raw_input("ENTER");
 
         ## set the name of the result of the fit and put it in the workspace
         rfresult.SetName("rfresult"+label+in_range+"_"+self.channel+"_mlvj")
@@ -1683,6 +1743,27 @@ class doFit_wj_and_wlvj:
         parameters_list = model.getParameters(rdataset);
         mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.2);
 
+        ##CALCULATE CHI2
+        datahist=rdataset.binnedClone(rdataset.GetName()+"_binnedClone",rdataset.GetName()+"_binnedClone")
+        Nbin = int(rrv_mass_lvj.getBins()); 
+        rresult_param = rfresult.floatParsFinal();        
+        nparameters =  rresult_param.getSize()                                         
+        ChiSquare = model.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE));
+        ChiSquare.getVal();
+        chi_over_ndf= ChiSquare.getVal()/(Nbin - nparameters);
+   #     print ChiSquare.getVal();
+   #     print Nbin;
+   #     print nparameters;
+   #     print chi_over_ndf;
+   #     raw_input("ENTER");        
+
+        ##Add Chisquare to mplot_pull
+        cs = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf)));
+        cs.SetNDC();
+        cs.SetTextSize(0.12);
+        cs.AppendPad("same");
+        mplot_pull.addObject(cs)
+
         self.draw_canvas_with_pull( mplot, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/m_lvj_fitting/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj"+label+in_range+mlvj_model, show_constant_parameter, logy);
 
         ### Number of the event in the dataset and lumi scale factor --> set the proper number for bkg extraction or for signal region
@@ -1693,6 +1774,7 @@ class doFit_wj_and_wlvj:
 
         self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj").Print();
 
+
         if(rdataset_relaxed):            
          ## make the extended pdf model
          model_relaxed = self.make_Model(label+in_range,mlvj_model,"_mlvj_relaxed",constrainslist_relaxed,ismc);
@@ -1702,6 +1784,7 @@ class doFit_wj_and_wlvj:
          rfresult_relaxed = model_relaxed.fitTo( rdataset_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE) ,RooFit.Extended(kTRUE), RooFit.Minimizer("Minuit2") );
          rfresult_relaxed = model_relaxed.fitTo( rdataset_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE) ,RooFit.Extended(kTRUE), RooFit.Minimizer("Minuit2") );
          rfresult_relaxed.Print();
+    #     raw_input("ENTER");
 
          ## plot the result
 	 mplot_relaxed = rrv_mass_lvj.frame(RooFit.Title("M_{lvj"+in_range+"} fitted by "+mlvj_model), RooFit.Bins(int(rrv_mass_lvj.getBins()/self.narrow_factor)));
@@ -1715,6 +1798,23 @@ class doFit_wj_and_wlvj:
 	 mplot_pull_relaxed      = self.get_pull(rrv_mass_lvj,mplot_relaxed);
          parameters_list_relaxed = model_relaxed.getParameters(rdataset_relaxed);
          mplot_relaxed.GetYaxis().SetRangeUser(1e-5,mplot_relaxed.GetMaximum()*1.2);
+
+
+        ##CALCULATE CHI2
+         datahist_relaxed=rdataset_relaxed.binnedClone(rdataset_relaxed.GetName()+"_binnedClone",rdataset_relaxed.GetName()+"_binnedClone")
+         Nbin_relaxed = int(rrv_mass_lvj.getBins()); 
+         rresult_relaxed_param = rfresult_relaxed.floatParsFinal();        
+         nparameters_relaxed =  rresult_relaxed_param.getSize()                                         
+         ChiSquare_relaxed = model_relaxed.createChi2(datahist_relaxed,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE));
+         ChiSquare_relaxed.getVal();
+         chi_over_ndf_relaxed= ChiSquare_relaxed.getVal()/(Nbin_relaxed - nparameters_relaxed);
+
+        ##Add Chisquare to mplot_pull
+         cs2 = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf_relaxed)));
+         cs2.SetNDC();
+         cs2.SetTextSize(0.12);
+         cs2.AppendPad("same");
+         mplot_pull_relaxed.addObject(cs2)
 
          self.draw_canvas_with_pull( mplot_relaxed, mplot_pull_relaxed,parameters_list_relaxed,"plots_%s_%s_%s_%s_g1/m_lvj_fitting_relaxed/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj"+label+in_range+mlvj_model, show_constant_parameter, logy);
 
@@ -1744,7 +1844,7 @@ class doFit_wj_and_wlvj:
          result_param = rfresult_relaxed.floatParsFinal();
 
          for iresult in range(result_param.getSize()) :
-           if TString(result_param.at(iresult).GetName()).Contains("number"):
+             if TString(result_param.at(iresult).GetName()).Contains("number"):
               result_param.at(iresult).setVal(result_param.at(iresult).getVal()*normalization);
               result_param.at(iresult).setError(result_param.at(iresult).getError()*normalization);
                  
@@ -1779,6 +1879,20 @@ class doFit_wj_and_wlvj:
 	 mplot_pull_same      = self.get_pull(rrv_mass_lvj,mplot_same);
          parameters_list_same = model_relaxed.getParameters(rdataset);
          mplot_same.GetYaxis().SetRangeUser(1e-5,mplot_same.GetMaximum()*1.2);
+
+        ##CALCULATE CHI2
+         datahist=rdataset.binnedClone(rdataset.GetName()+"_binnedClone",rdataset.GetName()+"_binnedClone")
+         Nbin = int(rrv_mass_lvj.getBins()); 
+         ChiSquare_same = model_relaxed.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE));
+         ChiSquare_same.getVal();
+         chi_over_ndf_same= ChiSquare_same.getVal()/(Nbin - nparameters_relaxed);
+
+        ##Add Chisquare to mplot_pull
+         cs3 = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf_same)));
+         cs3.SetNDC();
+         cs3.SetTextSize(0.12);
+         cs3.AppendPad("same");
+         mplot_pull_same.addObject(cs3)
 
          self.draw_canvas_with_pull( mplot_same, mplot_pull_same,parameters_list_same,"plots_%s_%s_%s_%s_g1/m_lvj_fitting_same/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj"+label+in_range+mlvj_model, show_constant_parameter, logy);
 
@@ -4256,25 +4370,25 @@ class doFit_wj_and_wlvj:
         self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0")# to get the shape of m_lvj
         self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets01")# to get the shape of m_lvj
 
-        self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJetsmassup_vbf","jet_mass_pr_up","vbf_up",1)# to get the shape of m_lvj
-        self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJetsmassdn_vbf","jet_mass_pr_dn","vbf_dn",1)# to get the shape of m_lvj
+  #      self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJetsmassup_vbf","jet_mass_pr_up","vbf_up",1)# to get the shape of m_lvj
+  #      self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJetsmassdn_vbf","jet_mass_pr_dn","vbf_dn",1)# to get the shape of m_lvj
 
         self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","User1");# use for estimating the PS model uncertainty
         self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets01","ErfExp");# use for estimating the fitting model uncertainty
 
-        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJetsmassup_vbf","User1");
-        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJetsmassdn_vbf","User1");        
+  #      self.fit_mj_single_MC(self.file_WJets0_mc,"_WJetsmassup_vbf","User1");
+  #      self.fit_mj_single_MC(self.file_WJets0_mc,"_WJetsmassdn_vbf","User1");        
 
         self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
         self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
-        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets01","_sb_lo",self.MODEL_4_mlvj_alter,0,0,1,1);
-        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets01","_signal_region",self.MODEL_4_mlvj_alter,0,0,1,1);
+#        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets01","_sb_lo",self.MODEL_4_mlvj_alter,0,0,1,1);
+#        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets01","_signal_region",self.MODEL_4_mlvj_alter,0,0,1,1);
 
-        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJetsmassup_vbf","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
-        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJetsmassup_vbf","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+  #      self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJetsmassup_vbf","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
+  #      self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJetsmassup_vbf","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
 
-        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJetsmassdn_vbf","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
-        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJetsmassdn_vbf","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+  #      self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJetsmassdn_vbf","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
+  #      self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJetsmassdn_vbf","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
 
         print "________________________________________________________________________"
 
@@ -4285,34 +4399,34 @@ class doFit_wj_and_wlvj:
         ### Build the dataset        
         self.get_mj_and_mlvj_dataset(self.file_VV_mc,"_VV","jet_mass_pr")# to get the shape of m_lvj
         #jet vbf dn and up
-        self.get_mj_and_mlvj_dataset(self.file_VV_mc,"_VVmassup_vbf","jet_mass_pr_up","vbf_up",1)
-        self.get_mj_and_mlvj_dataset(self.file_VV_mc,"_VVmassdn_vbf","jet_mass_pr_dn","vbf_dn",1)
+#        self.get_mj_and_mlvj_dataset(self.file_VV_mc,"_VVmassup_vbf","jet_mass_pr_up","vbf_up",1)
+#        self.get_mj_and_mlvj_dataset(self.file_VV_mc,"_VVmassdn_vbf","jet_mass_pr_dn","vbf_dn",1)
 
         self.fit_mj_single_MC(self.file_VV_mc,"_VV","2_2Gaus");                        
-        self.fit_mj_single_MC(self.file_VV_mc,"_VVmassup_vbf","2_2Gaus");
-        self.fit_mj_single_MC(self.file_VV_mc,"_VVmassdn_vbf","2_2Gaus");        
+#        self.fit_mj_single_MC(self.file_VV_mc,"_VVmassup_vbf","2_2Gaus");
+#        self.fit_mj_single_MC(self.file_VV_mc,"_VVmassdn_vbf","2_2Gaus");        
 
         if self.MODEL_4_mlvj=="ErfPowExp_v1":
                                           
          self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_sb_lo","ErfExp_v1",0,0,1);
          self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_signal_region",self.MODEL_4_mlvj,1,0,1);     
 
-         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassup_vbf","_sb_lo","ErfExp_v1",0,0,1);
-         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassup_vbf","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+#         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassup_vbf","_sb_lo","ErfExp_v1",0,0,1);
+#         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassup_vbf","_signal_region",self.MODEL_4_mlvj,1,0,1);     
  
-         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassdn_vbf","_sb_lo","ErfExp_v1",0,0,1);
-         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassdn_vbf","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+#         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassdn_vbf","_sb_lo","ErfExp_v1",0,0,1);
+#         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassdn_vbf","_signal_region",self.MODEL_4_mlvj,1,0,1);     
 
         else:
 
          self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_sb_lo",self.MODEL_4_mlvj,0,0,1);
          self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_signal_region",self.MODEL_4_mlvj,1,0,1);     
 
-         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassup_vbf","_sb_lo",self.MODEL_4_mlvj,0,0,1);
-         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassup_vbf","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+ #        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassup_vbf","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+ #        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassup_vbf","_signal_region",self.MODEL_4_mlvj,1,0,1);     
  
-         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassdn_vbf","_sb_lo",self.MODEL_4_mlvj,0,0,1);
-         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassdn_vbf","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+ #        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassdn_vbf","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+ #        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassdn_vbf","_signal_region",self.MODEL_4_mlvj,1,0,1);     
 
         print "________________________________________________________________________"
 
@@ -4323,37 +4437,37 @@ class doFit_wj_and_wlvj:
         ### Build the dataset
 
         self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbar")# to get the shape of m_lvj
-        self.get_mj_and_mlvj_dataset(self.file_TTbar_matchDn_mc,"_TTbar_matchDn")# to get the shape of m_lvj
-        self.get_mj_and_mlvj_dataset(self.file_TTbar_matchUp_mc,"_TTbar_matchUp")# to get the shape of m_lvj
-        self.get_mj_and_mlvj_dataset(self.file_TTbar_scaleDn_mc,"_TTbar_scaleDn")# to get the shape of m_lvj
-        self.get_mj_and_mlvj_dataset(self.file_TTbar_scaleUp_mc,"_TTbar_scaleUp")# to get the shape of m_lvj
-        self.get_mj_and_mlvj_dataset(self.file_TTbar_MG_mc,"_TTbar_MG")# to get the shape of m_lvj
+  #      self.get_mj_and_mlvj_dataset(self.file_TTbar_matchDn_mc,"_TTbar_matchDn")# to get the shape of m_lvj
+  #      self.get_mj_and_mlvj_dataset(self.file_TTbar_matchUp_mc,"_TTbar_matchUp")# to get the shape of m_lvj
+  #      self.get_mj_and_mlvj_dataset(self.file_TTbar_scaleDn_mc,"_TTbar_scaleDn")# to get the shape of m_lvj
+  #      self.get_mj_and_mlvj_dataset(self.file_TTbar_scaleUp_mc,"_TTbar_scaleUp")# to get the shape of m_lvj
+  #      self.get_mj_and_mlvj_dataset(self.file_TTbar_MG_mc,"_TTbar_MG")# to get the shape of m_lvj
 
 
-        self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbarmassup_vbf","jet_mass_pr_up","vbf_up",1)
-        self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbarmassdn_vbf","jet_mass_pr_dn","vbf_dn",1)        
+  #      self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbarmassup_vbf","jet_mass_pr_up","vbf_up",1)
+  #      self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbarmassdn_vbf","jet_mass_pr_dn","vbf_dn",1)        
 
         self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","2Gaus_ErfExp");
-        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbarmassup_vbf","2Gaus_ErfExp");
-        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbarmassdn_vbf","2Gaus_ErfExp");
+  #      self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbarmassup_vbf","2Gaus_ErfExp");
+  #      self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbarmassdn_vbf","2Gaus_ErfExp");
 
         if self.MODEL_4_mlvj=="ErfPowExp_v1":
            self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_sb_lo","ErfExp_v1");
-           self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassup_vbf","_sb_lo","ErfExp_v1");
-           self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassdn_vbf","_sb_lo","ErfExp_v1");
+  #         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassup_vbf","_sb_lo","ErfExp_v1");
+  #         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassdn_vbf","_sb_lo","ErfExp_v1");
         else:
            self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_sb_lo",self.MODEL_4_mlvj);
-           self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassup_vbf","_sb_lo",self.MODEL_4_mlvj);
-           self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassdn_vbf","_sb_lo",self.MODEL_4_mlvj);
+  #         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassup_vbf","_sb_lo",self.MODEL_4_mlvj);
+  #         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassdn_vbf","_sb_lo",self.MODEL_4_mlvj);
 
         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_signal_region",self.MODEL_4_mlvj);
-        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassup_vbf","_signal_region",self.MODEL_4_mlvj);
-        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassdn_vbf","_signal_region",self.MODEL_4_mlvj);
-        self.fit_mlvj_model_single_MC(self.file_TTbar_matchDn_mc,"_TTbar_matchDn","_signal_region",self.MODEL_4_mlvj);
-        self.fit_mlvj_model_single_MC(self.file_TTbar_matchUp_mc,"_TTbar_matchUp","_signal_region",self.MODEL_4_mlvj);
-        self.fit_mlvj_model_single_MC(self.file_TTbar_scaleDn_mc,"_TTbar_scaleDn","_signal_region",self.MODEL_4_mlvj);
-        self.fit_mlvj_model_single_MC(self.file_TTbar_scaleUp_mc,"_TTbar_scaleUp","_signal_region",self.MODEL_4_mlvj);
-        self.fit_mlvj_model_single_MC(self.file_TTbar_MG_mc,"_TTbar_MG","_signal_region",self.MODEL_4_mlvj);
+  #      self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassup_vbf","_signal_region",self.MODEL_4_mlvj);
+  #      self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassdn_vbf","_signal_region",self.MODEL_4_mlvj);
+  #      self.fit_mlvj_model_single_MC(self.file_TTbar_matchDn_mc,"_TTbar_matchDn","_signal_region",self.MODEL_4_mlvj);
+  #      self.fit_mlvj_model_single_MC(self.file_TTbar_matchUp_mc,"_TTbar_matchUp","_signal_region",self.MODEL_4_mlvj);
+  #      self.fit_mlvj_model_single_MC(self.file_TTbar_scaleDn_mc,"_TTbar_scaleDn","_signal_region",self.MODEL_4_mlvj);
+  #      self.fit_mlvj_model_single_MC(self.file_TTbar_scaleUp_mc,"_TTbar_scaleUp","_signal_region",self.MODEL_4_mlvj);
+  #      self.fit_mlvj_model_single_MC(self.file_TTbar_MG_mc,"_TTbar_MG","_signal_region",self.MODEL_4_mlvj);
 
                                             
         print "________________________________________________________________________"
@@ -4365,8 +4479,8 @@ class doFit_wj_and_wlvj:
         print "############################### fit_STop #########################################"
         ### Build the dataset
         self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STop")# to get the shape of m_lvj
-        self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STopmassup_vbf","jet_mass_pr_up","vbf_up",1)
-        self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STopmassdn_vbf","jet_mass_pr_dn","vbf_dn",1)
+#        self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STopmassup_vbf","jet_mass_pr_up","vbf_up",1)
+#        self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STopmassdn_vbf","jet_mass_pr_dn","vbf_dn",1)
 
         self.fit_mj_single_MC(self.file_STop_mc,"_STop","ErfExp");
 #        self.fit_mj_single_MC(self.file_STop_mc,"_STopmassup_vbf","ErfExp");
@@ -4390,10 +4504,10 @@ class doFit_wj_and_wlvj:
     def fit_AllSamples_Mj_and_Mlvj(self):
         print "################### fit_AllSamples_Mj_and_Mlvj #####################"
 #        self.fit_Signal();
-#        self.fit_WJets();
-#        self.fit_TTbar();
-#        self.fit_VV();
-        self.fit_STop();
+ #       self.fit_WJets();
+        self.fit_TTbar();
+ #       self.fit_VV();
+ #       self.fit_STop();
         print "________________________________________________________________________"
 
                                                                     
