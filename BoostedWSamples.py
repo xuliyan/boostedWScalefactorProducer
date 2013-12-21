@@ -43,7 +43,8 @@ class Samples:
               self.filenames["TTbar_Powheg"]    = self.filepath + "RD_mu_TTbar_powheg_CMSSW532.root"
               self.filenames["TTbar_scaleUp"]   = self.filepath + "RD_mu_TTbar_scaleup_CMSSW532.root"
               self.filenames["TTbar_scaleDn"]   = self.filepath + "RD_mu_TTbar_scaledown_CMSSW532.root"
-              self.filenames["WJets_Pythia"] = self.filepath + "RD_mu_WJets_madgraph_CMSSW532.root";
+              self.filenames["TTbar_mcanlo"]    = self.filepath + "RD_mu_TTbar_mcatnlo_CMSSW532.root"
+              self.filenames["WJets_Pythia"]    = self.filepath + "RD_mu_WJets_madgraph_CMSSW532.root";
               self.filenames["WJets_Pythia_matchUp"] = self.filepath + "RD_mu_WJets_matchingup_madgraph_CMSSW532.root";
               self.filenames["WJets_Pythia_matchDw"] = self.filepath + "RD_mu_WJets_matchingdown_madgraph_CMSSW532.root";
               self.filenames["WJets_Pythia_scaleUp"] = self.filepath + "RD_mu_WJets_scaleup_madgraph_CMSSW532.root";
@@ -57,6 +58,9 @@ class Samples:
               self.filenames["W4Jets_Pythia"]    = self.filepath + "RD_mu_W4Jets_CMSSW532.root";
               self.filenames["ZJets"] = self.filepath + "RD_mu_ZpJ_CMSSW532.root"
               self.filenames["WW"]    = self.filepath + "RD_mu_WW_CMSSW532.root"
+              self.filenames["WW_mcanlo"]    = self.filepath + "RD_mu_WW_amcnlo_pt150_CMSSW532.root"
+              self.filenames["WW2jet_madgraph"]    = self.filepath + "RD_mu_WW_2jet_madgraph_EWK_CMSSW532.root"
+              self.filenames["WW2jet_phantom"]    = self.filepath + "RD_mu_WW_2jet_phantom_EWK_CMSSW532.root"
               self.filenames["WZ"]    = self.filepath + "RD_mu_WZ_CMSSW532.root"
               self.filenames["ZZ"]    = self.filepath + "RD_mu_ZZ_CMSSW532.root"
               self.filenames["tch"]      = self.filepath + "RD_mu_STopT_T_CMSSW532.root"
@@ -109,7 +113,8 @@ class Samples:
               self.filenames["TTbar_Powheg"]  = self.filepath + "RD_el_TTbar_powheg_CMSSW532.root"
               self.filenames["TTbar_scaleDn"] = self.filepath + "RD_el_TTbar_scaleup_CMSSW532.root"
               self.filenames["TTbar_scaleUp"] = self.filepath + "RD_el_TTbar_scaledown_CMSSW532.root"              
-              self.filenames["WJets_Pythia"] = self.filepath + "RD_el_WJets_madgraph_CMSSW532.root";
+              self.filenames["TTbar_mcanlo"]  = self.filepath + "RD_el_TTbar_mcatnlo_CMSSW532.root"
+              self.filenames["WJets_Pythia"]  = self.filepath + "RD_el_WJets_madgraph_CMSSW532.root";
               self.filenames["WJets_Pythia_matchUp"] = self.filepath + "RD_el_WJets_matchingup_madgraph_CMSSW532.root";
               self.filenames["WJets_Pythia_matchDw"] = self.filepath + "RD_el_WJets_matchingdown_madgraph_CMSSW532.root";
               self.filenames["WJets_Pythia_scaleUp"] = self.filepath + "RD_el_WJets_scaleup_madgraph_CMSSW532.root";
@@ -123,6 +128,9 @@ class Samples:
               self.filenames["W4Jets_Pythia"]    = self.filepath + "RD_el_W4Jets_CMSSW532.root";
               self.filenames["ZJets"] = self.filepath + "RD_el_ZpJ_CMSSW532.root"
               self.filenames["WW"]    = self.filepath + "RD_el_WW_CMSSW532.root"
+              self.filenames["WW_mcanlo"]    = self.filepath + "RD_el_WW_amcnlo_pt150_CMSSW532.root"
+              self.filenames["WW2jet_madgraph"]    = self.filepath + "RD_el_WW_2jet_madgraph_EWK_CMSSW532.root"
+              self.filenames["WW2jet_phantom"]    = self.filepath + "RD_el_WW_2jet_phantom_EWK_CMSSW532.root"
               self.filenames["WZ"]    = self.filepath + "RD_el_WZ_CMSSW532.root"
               self.filenames["ZZ"]    = self.filepath + "RD_el_ZZ_CMSSW532.root"
               self.filenames["tch"]   = self.filepath + "RD_el_STopT_T_CMSSW532.root"
