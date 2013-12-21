@@ -53,6 +53,16 @@ WZ  0.003320906 1.0
 #(NLO 17.65 pb xs)
 ZZ  0.001801445 1.0
 
+#### WW amc@nlo
+#(NLO xs  0.2222038*2*1.636 pb )
+WW_mcanlo 0.006074348  1.0
+### WW+2jet EWK
+#(LO 39.07 pb)
+WW2jet_madgraph 0.094152973 1.0
+#(LO 232,8 pb)
+WW2jet_phantom 0.698971059 1.0
+
+
 ##### Wjets inclusive #######
 #(NNLO 37509 pb xs LO value from madgraph 30400.0 pb xs  -> k-factor = 1.233)
 WJets_Pythia         0.492871535 1.0
@@ -115,4 +125,7 @@ TTbar_scaleUp 0.049109851  1.0
 #(NNLO xs 245.8 pb)
 TTbar_Powheg 0.011339746  1.0
 
+#### TTbar mc@nlo
+#(NNLO xs 245.8 pb)
+TTbar_mcanlo 0.010162908  1.0
 
