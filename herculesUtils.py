@@ -58,22 +58,23 @@ if __name__ == '__main__':
     all = [ "data",
             "ggH600","ggH700","ggH800","ggH900","ggH1000",
             "vbfH600","vbfH700","vbfH800","vbfH900","vbfH1000",
-#           "rsg1000_kMpl01_py","rsg1000_kMpl01_hw","rsg1500_kMpl01_py","rsg1500_kMpl01_hw","rsg2000_kmpl01_py",
-            "BulkG_c0p2_M600","BulkG_c0p2_M700","BulkG_c0p2_M800","BulkG_c0p2_M900","BulkG_c0p2_M1000","BulkG_c0p2_M1100","BulkG_c0p2_M1200","BulkG_c0p2_M1300",
-            "BulkG_c0p2_M1400","BulkG_c0p2_M1500","BulkG_c0p2_M1600","BulkG_c0p2_M1700","BulkG_c0p2_M1800","BulkG_c0p2_M1900","BulkG_c0p2_M2000","BulkG_c0p2_M2100",
-            "BulkG_c0p2_M2200","BulkG_c0p2_M2300","BulkG_c0p2_M2400","BulkG_c0p2_M2500",
-            "WJets_Pythia","WJets_Pythia_matchDw","WJets_Pythia_matchUp","WJets_Pythia_scaleUp","WJets_Pythia_scaleDw",
+#            "rsg1000_kMpl01_py","rsg1000_kMpl01_hw","rsg1500_kMpl01_py","rsg1500_kMpl01_hw","rsg2000_kmpl01_py",
+#            "BulkG_c0p2_M600","BulkG_c0p2_M700","BulkG_c0p2_M800","BulkG_c0p2_M900","BulkG_c0p2_M1000","BulkG_c0p2_M1100","BulkG_c0p2_M1200","BulkG_c0p2_M1300",
+#            "BulkG_c0p2_M1400","BulkG_c0p2_M1500","BulkG_c0p2_M1600","BulkG_c0p2_M1700","BulkG_c0p2_M1800","BulkG_c0p2_M1900","BulkG_c0p2_M2000","BulkG_c0p2_M2100",
+#            "BulkG_c0p2_M2200","BulkG_c0p2_M2300","BulkG_c0p2_M2400","BulkG_c0p2_M2500",
+#            "WJets_Pythia","WJets_Pythia_matchDw","WJets_Pythia_matchUp","WJets_Pythia_scaleUp","WJets_Pythia_scaleDw",
             "WJets_Herwig","WJets_Pythia180","WJets_Pythia100",
-            "ZJets","WW","WZ","ZZ",
-            "TTbar","TTbar_Powheg","TTbar_matchDn","TTbar_matchUp","TTbar_scaleDn","TTbar_scaleUp","TTbar_mcatnlo",
+            "W1Jets_Pythia","W2Jets_Pythia","W3Jets_Pythia","W4Jets_Pythia",
+            "ZJets","WW","WZ","ZZ","WW_mcanlo","WW2jet_phantom","WW2jet_madgraph",
+            "TTbar","TTbar_Powheg","TTbar_matchDn","TTbar_matchUp","TTbar_scaleDn","TTbar_scaleUp","TTbar_mcanlo",
             "tch","tWch","sch","tch_bar","tWch_bar","sch_bar",
-             "X_WW_lvjj_PS1000m","X_WW_lvjj_PS2000m","X_WW_lvjj_PS600m","X_WW_lvjj_PS600p",
-             "X_WW_lvjj_SM1000m","X_WW_lvjj_SM2000m","X_WW_lvjj_SM600m","X_WW_lvjj_SM600p"
+#            "X_WW_lvjj_PS1000m","X_WW_lvjj_PS2000m","X_WW_lvjj_PS600m","X_WW_lvjj_PS600p",
+#            "X_WW_lvjj_SM1000m","X_WW_lvjj_SM2000m","X_WW_lvjj_SM600m","X_WW_lvjj_SM600p"
            ]
 
 
-    sourcefiledirectory = "/gwteray/users/gerosa/VBF_Trees/VBF_Trees_v1/";
-    outputfiledirectory = "/gwteray/users/gerosa/otrees/otrees_VBF_v1/";
+    sourcefiledirectory = "/gwteray/users/gerosa/VBF_Trees/VBF_Trees_v4/";
+    outputfiledirectory = "/gwteray/users/gerosa/otrees/otrees_VBF_v4/";
 
     os.system("rm lancia_%s.sh"%options.channel);
     os.system("touch lancia_%s.sh"%options.channel);
