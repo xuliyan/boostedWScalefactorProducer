@@ -130,7 +130,7 @@ class doFit_wj_and_wlvj:
 
         self.file_VV_mc=("ofile_VV.root");# WW+WZ
         self.file_TTbar_mc=("ofile_TTbar_Powheg.root"); ## powheg TTbar
-        self.file_TTbar_herwig=("ofile_TTbar_mcatnlo.root"); ## mc@nlo TTbar
+        self.file_TTbar_herwig=("ofile_TTbar_mcanlo.root"); ## mc@nlo TTbar
         self.file_TTbar_matchDn_mc=("ofile_TTbar_matchDn.root"); ## madgraph matching down
         self.file_TTbar_matchUp_mc=("ofile_TTbar_matchUp.root"); ## madgraph matching up
         self.file_TTbar_scaleDn_mc=("ofile_TTbar_scaleDn.root"); ## madgraph qcd scale down
@@ -1052,7 +1052,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
       mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.2);
       
       parameters_list = model.getParameters(rdataset_mj);
-      self.draw_canvas_with_pull( mplot,mplot_pull,parameters_list,"plots_%s_%s_%s/m_j_fitting%s_wtaggercut%s_nearbyJets/"%(options.additioninformation,self.channel,self.wtagger_label,additioninformation, self.wtagger_label),label+in_file_name+"_"+str(self.ca8_ungroomed_pt_min)+"_"+str(self.ca8_ungroomed_pt_max), in_model_name)
+      self.draw_canvas_with_pull( mplot,mplot_pull,parameters_list,"plots_%s_%s_%s/m_j_fitting%s_wtaggercut%s_dRbjet_mass/"%(options.additioninformation,self.channel,self.wtagger_label,additioninformation, self.wtagger_label),label+in_file_name+"_"+str(self.ca8_ungroomed_pt_min)+"_"+str(self.ca8_ungroomed_pt_max), in_model_name)
       
       #normalize the number of total events to lumi
       if options.ttbarMC == 0 :
@@ -1350,8 +1350,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
 
         if TString(label).Contains("herwig"):
          simPdf_TotalMC.plotOn(xframe_data,RooFit.Name("totL MC fit"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.LineStyle(kDashed),RooFit.Color(2))
-         simPdf_TotalMC.plotOn(xframe_data,RooFit.Name("MC fit bkg"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%(model_bkg_TotalMC.GetName(),model_STop.GetName(),model_VV.GetName(),model_WJets.GetName()) ), RooFit.LineColor(kOrange), RooFit.LineStyle(kDashed))
-    
+         simPdf_TotalMC.plotOn(xframe_data,RooFit.Name("MC fit bkg"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%(model_bkg_TotalMC.GetName(),model_STop.GetName(),model_VV.GetName(),model_WJets.GetName()) ), RooFit.LineColor(kOrange), RooFit.LineStyle(kDashed))    
         else:
          simPdf_TotalMC.plotOn(xframe_data,RooFit.Name("total MC fit"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.LineStyle(kDashed))
          simPdf_TotalMC.plotOn(xframe_data,RooFit.Name("MC fit bkg"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%(model_bkg_TotalMC.GetName(),model_STop.GetName(),model_VV.GetName(),model_WJets.GetName()) ), RooFit.LineColor(kRed), RooFit.LineStyle(kDashed))
@@ -1362,8 +1361,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
         if TString(label).Contains("herwig"):
          simPdf_data.plotOn(xframe_data,RooFit.Name("total data fit"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"),RooFit.Color(2))
          simPdf_data.plotOn(xframe_data,RooFit.Name("data fit invisi"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"),RooFit.Color(2))
-         simPdf_data.plotOn(xframe_data,RooFit.Name("data fit BKG"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%(model_bkg_data.GetName(),model_STop.GetName(),model_VV.GetName(),model_WJets.GetName())), RooFit.LineColor(kOrange))
-            
+         simPdf_data.plotOn(xframe_data,RooFit.Name("data fit BKG"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%(model_bkg_data.GetName(),model_STop.GetName(),model_VV.GetName(),model_WJets.GetName())), RooFit.LineColor(kOrange))           
         else:
          simPdf_data.plotOn(xframe_data,RooFit.Name("total data fit"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"))
          simPdf_data.plotOn(xframe_data,RooFit.Name("data fit bkg"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%(model_bkg_data.GetName(),model_STop.GetName(),model_VV.GetName(),model_WJets.GetName())), RooFit.LineColor(kRed))
@@ -1376,9 +1374,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
 
         if TString(label).Contains("herwig"):
          simPdf_TotalMC.plotOn(xframe_data_fail,RooFit.Name("total MC fit"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.LineStyle(kDashed),RooFit.Color(2))
-         simPdf_TotalMC.plotOn(xframe_data_fail,RooFit.Name("MC fit bkg"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%(model_bkg_TotalMC_fail.GetName(),model_STop_fail.GetName(),model_VV_fail.GetName(),model_WJets_fail.GetName())), RooFit.LineColor(kOrange), RooFit.LineStyle(kDashed))
-            
-
+         simPdf_TotalMC.plotOn(xframe_data_fail,RooFit.Name("MC fit bkg"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%(model_bkg_TotalMC_fail.GetName(),model_STop_fail.GetName(),model_VV_fail.GetName(),model_WJets_fail.GetName())), RooFit.LineColor(kOrange), RooFit.LineStyle(kDashed))            
         else:
          simPdf_TotalMC.plotOn(xframe_data_fail,RooFit.Name("total MC fit"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.LineStyle(kDashed))
          simPdf_TotalMC.plotOn(xframe_data_fail,RooFit.Name("MC fit bkg"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%(model_bkg_TotalMC_fail.GetName(),model_STop_fail.GetName(),model_VV_fail.GetName(),model_WJets_fail.GetName())), RooFit.LineColor(kRed), RooFit.LineStyle(kDashed))
@@ -1441,8 +1437,8 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
         xframe_data_fail.GetYaxis().SetRangeUser(1e-2,xframe_data_fail.GetMaximum()*1.4);
 
 
-        self.draw_canvas(xframe_data,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_nearbyJets/"%(options.additioninformation, self.channel, self.wtagger_label, self.wtagger_label),"control%s_%s_%s_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
-        self.draw_canvas(xframe_data_fail,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_nearbyJets/"%(options.additioninformation, self.channel, self.wtagger_label,self.wtagger_label),"control%s_%s_%s_fail_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
+        self.draw_canvas(xframe_data,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_dRbjet_mass/"%(options.additioninformation, self.channel, self.wtagger_label, self.wtagger_label),"control%s_%s_%s_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
+        self.draw_canvas(xframe_data_fail,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_dRbjet_mass/"%(options.additioninformation, self.channel, self.wtagger_label,self.wtagger_label),"control%s_%s_%s_fail_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
 
 
         self.ShowParam_Pdf(simPdf_data,RooArgSet(rrv_mass_j,category_p_f));
@@ -1587,7 +1583,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
         leg_data_extremefail = self.legend4Plot(xframe_data_extremefail,0,1, 0.15)
         xframe_data_extremefail.addObject(leg_data_extremefail)
 
-        self.draw_canvas(xframe_data_extremefail,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_nearbyJets/"%(options.additioninformation, self.channel, self.wtagger_label,self.wtagger_label),"control%s_%s_%s_extremefail_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
+        self.draw_canvas(xframe_data_extremefail,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_dRbjet_mass/"%(options.additioninformation, self.channel, self.wtagger_label,self.wtagger_label),"control%s_%s_%s_extremefail_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
                                                                   
 
   
@@ -1732,8 +1728,6 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
         if TString(label).Contains("herwig"):
          simPdf_TotalMC.plotOn(xframe_data,RooFit.Name("total MC fit"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.LineStyle(kDashed),RooFit.Color(2))
          simPdf_TotalMC.plotOn(xframe_data,RooFit.Name("MC fit bkg"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC), RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%("model_bkg_TotalMC_%s_mj"%(self.channel),"model_STop_%s_mj"%(self.channel),"model_VV_%s_mj"%(self.channel),"model_WJets0_%s_mj"%(self.channel)) ), RooFit.LineColor(kOrange), RooFit.LineStyle(kDashed))
-
-
         else:
          simPdf_TotalMC.plotOn(xframe_data,RooFit.Name("total MC fit"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.LineStyle(kDashed))
          simPdf_TotalMC.plotOn(xframe_data,RooFit.Name("MC fit bkg"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC), RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%("model_bkg_TotalMC_%s_mj"%(self.channel),"model_STop_%s_mj"%(self.channel),"model_VV_%s_mj"%(self.channel),"model_WJets0_%s_mj"%(self.channel)) ), RooFit.LineColor(kRed), RooFit.LineStyle(kDashed))
@@ -1745,8 +1739,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
         if TString(label).Contains("herwig"):
          simPdf_data.plotOn(xframe_data,RooFit.Name("total data fit"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"),RooFit.Color(2))
          simPdf_data.plotOn(xframe_data,RooFit.Name("data fit invisi"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"),RooFit.Color(2))
-         simPdf_data.plotOn(xframe_data,RooFit.Name("data fit bkg"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%("model_bkg_data_%s_mj"%(self.channel),"model_STop_%s_mj"%(self.channel),"model_VV_%s_mj"%(self.channel),"model_WJets0_%s_mj"%(self.channel))), RooFit.LineColor(kOrange))
-         
+         simPdf_data.plotOn(xframe_data,RooFit.Name("data fit bkg"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%("model_bkg_data_%s_mj"%(self.channel),"model_STop_%s_mj"%(self.channel),"model_VV_%s_mj"%(self.channel),"model_WJets0_%s_mj"%(self.channel))), RooFit.LineColor(kOrange))         
         else:
          simPdf_data.plotOn(xframe_data,RooFit.Name("total data fit"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"))
          simPdf_data.plotOn(xframe_data,RooFit.Name("data fit invisi"),RooFit.Slice(category_p_f,"pass"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"))
@@ -1757,9 +1750,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
 
         if TString(label).Contains("herwig"):
          simPdf_TotalMC.plotOn(xframe_data_fail,RooFit.Name("total MC fit"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.LineStyle(kDashed),RooFit.Color(2))
-         simPdf_TotalMC.plotOn(xframe_data_fail,RooFit.Name("MC fit bkg"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%("model_bkg_TotalMC_failtau2tau1cut_%s_mj"%(self.channel),"model_STop_failtau2tau1cut_%s_mj"%(self.channel),"model_VV_failtau2tau1cut_%s_mj"%(self.channel),"model_WJets0_failtau2tau1cut_%s_mj"%(self.channel))), RooFit.LineColor(kOrange), RooFit.LineStyle(kDashed))
-
-            
+         simPdf_TotalMC.plotOn(xframe_data_fail,RooFit.Name("MC fit bkg"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%("model_bkg_TotalMC_failtau2tau1cut_%s_mj"%(self.channel),"model_STop_failtau2tau1cut_%s_mj"%(self.channel),"model_VV_failtau2tau1cut_%s_mj"%(self.channel),"model_WJets0_failtau2tau1cut_%s_mj"%(self.channel))), RooFit.LineColor(kOrange), RooFit.LineStyle(kDashed))            
         else:
          simPdf_TotalMC.plotOn(xframe_data_fail,RooFit.Name("total MC fit"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.LineStyle(kDashed))
          simPdf_TotalMC.plotOn(xframe_data_fail,RooFit.Name("MC fit bkg"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_TotalMC),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%("model_bkg_TotalMC_failtau2tau1cut_%s_mj"%(self.channel),"model_STop_failtau2tau1cut_%s_mj"%(self.channel),"model_VV_failtau2tau1cut_%s_mj"%(self.channel),"model_WJets0_failtau2tau1cut_%s_mj"%(self.channel))), RooFit.LineColor(kRed), RooFit.LineStyle(kDashed))
@@ -1770,8 +1761,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
         if TString(label).Contains("herwig"):
          simPdf_data.plotOn(xframe_data_fail,RooFit.Name("total data fit"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"),RooFit.Color(2))
          simPdf_data.plotOn(xframe_data_fail,RooFit.Name("data fit invisi"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"),RooFit.Color(2))
-         simPdf_data.plotOn(xframe_data_fail,RooFit.Name("data fit bkg"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%("model_bkg_data_failtau2tau1cut_%s_mj"%(self.channel),"model_STop_failtau2tau1cut_%s_mj"%(self.channel),"model_VV_failtau2tau1cut_%s_mj"%(self.channel),"model_WJets0_failtau2tau1cut_%s_mj"%(self.channel))), RooFit.LineColor(kOrange))
-            
+         simPdf_data.plotOn(xframe_data_fail,RooFit.Name("data fit bkg"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"), RooFit.Components("%s,%s,%s,%s"%("model_bkg_data_failtau2tau1cut_%s_mj"%(self.channel),"model_STop_failtau2tau1cut_%s_mj"%(self.channel),"model_VV_failtau2tau1cut_%s_mj"%(self.channel),"model_WJets0_failtau2tau1cut_%s_mj"%(self.channel))), RooFit.LineColor(kOrange))            
         else:
          simPdf_data.plotOn(xframe_data_fail,RooFit.Name("total data fit"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"))
          simPdf_data.plotOn(xframe_data_fail,RooFit.Name("data fit invisi"),RooFit.Slice(category_p_f,"fail"),RooFit.ProjWData(RooArgSet(category_p_f),combData_p_f_data),RooFit.NormRange("controlsample_fitting_range"))
@@ -1821,8 +1811,8 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
         xframe_data.GetYaxis().SetRangeUser(1e-2,xframe_data.GetMaximum()*1.2);
         xframe_data_fail.GetYaxis().SetRangeUser(1e-2,xframe_data_fail.GetMaximum()*1.2);
 
-        self.draw_canvas(xframe_data,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_nearbyJets/"%(options.additioninformation, self.channel,self.wtagger_label, self.wtagger_label),"control%s_%s_%s_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
-        self.draw_canvas(xframe_data_fail,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_nearbyJets/"%(options.additioninformation, self.channel, self.wtagger_label,self.wtagger_label),"control%s_%s_%s_fail_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
+        self.draw_canvas(xframe_data,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_dRbjet_mass/"%(options.additioninformation, self.channel,self.wtagger_label, self.wtagger_label),"control%s_%s_%s_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
+        self.draw_canvas(xframe_data_fail,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_dRbjet_mass/"%(options.additioninformation, self.channel, self.wtagger_label,self.wtagger_label),"control%s_%s_%s_fail_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
 
 
 
@@ -1929,8 +1919,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
 
 
             ### Cut for the HP category
-            if discriminantCut ==2 and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_jet_closer") > 1.0 :
-                #and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
+            if discriminantCut ==2 and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0 and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
 
 
                 if TString(label).Contains("herwig") and not TString(label).Contains("data") :
@@ -1960,8 +1949,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
                 combData_p_f.add(RooArgSet(rrv_mass_j,category_p_f),tmp_event_weight);
 
             ### Cut for the Total category
-            if getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_jet_closer") > 1.0:
-                #and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjDDet") > 130) :
+            if getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0 and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
 
 
                 if TString(label).Contains("herwig") and not TString(label).Contains("data") :
@@ -1981,8 +1969,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
                 combData4cut.add(RooArgSet(rrv_mass_j,category_cut),tmp_event_weight4fit);
 
             ### 1-HP category
-            if (discriminantCut==1 or discriminantCut==0) and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_jet_closer") > 1.0:
-                #and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_lep1tonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
+            if (discriminantCut==1 or discriminantCut==0) and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0 and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
 
 
                 if TString(label).Contains("herwig") and not TString(label).Contains("data") :
@@ -1998,8 +1985,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
                 combData_p_f.add(RooArgSet(rrv_mass_j,category_p_f),tmp_event_weight);
 
             ### extreme fail category
-            if discriminantCut==0 and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_jet_closer") > 1.0:
-                #and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
+            if discriminantCut==0 and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0 and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
 
                 if TString(label).Contains("herwig") and not TString(label).Contains("data") :
                    tmp_event_weight = tmp_event_weight*treeIn.event_weight;
