@@ -1,6 +1,5 @@
 # A class which takes histograms and plots them in a versatile way
 # inputs are file names which can be "data" or "MC"
-
 import ROOT
 import os
 import sys
@@ -34,7 +33,6 @@ ROOT.gSystem.Load('libFWCoreFWLite');
 ROOT.gSystem.Load('libFWCoreUtilities');  
 
 ### ------------ h e l p e r s --------------------
-
 def deltaphi(phi1,phi2):
     if math.fabs(phi1-phi2) > ROOT.TMath.Pi() :
        return (2*ROOT.TMath.Pi()-math.fabs(phi1-phi2)); 
@@ -44,8 +42,10 @@ def deltaphi(phi1,phi2):
 def getListRMS(list):
     mean = sum(list)/float(len(list));
     return math.sqrt(sum((n-mean)*(n-mean) for n in list)/len(list));
+
 def getListMean(list):
     return sum(list)/float(len(list));
+
 ### ----------- class implementation -----------
 
 class sampleWrapperClass:
@@ -53,9 +53,9 @@ class sampleWrapperClass:
     ### ------------------------------------------------
     def __init__(self, label, file, channel, sampleEffLumi, lumi, treename, isData,outputfiledirectory):
 
-        self.IsData_ = isData; ### flag when running on data
-        self.FileName_ = file; ### input file name 
-        self.File_ = ROOT.TFile(file); ## get the root file
+        self.IsData_    = isData; ### flag when running on data
+        self.FileName_  = file; ### input file name 
+        self.File_      = ROOT.TFile(file); ## get the root file
         self.InputTree_ = self.File_.Get(treename); ## get the input tree
         
         self.SampleWeight_ = lumi/sampleEffLumi; ## take the lumi re-weight factor
@@ -65,30 +65,30 @@ class sampleWrapperClass:
         self.Channel_ = channel
         self.OFileName_ = outputfiledirectory+"trainingtrees_"+channel+"/ofile_"+label+".root";
     
-        # initialization for doing BSM reweighting
+        # initialization for doing BSM reweighting --> set Higgs properties when running on higgs samples
         self.SignalMass_ = -1;
-        
-        if file.find("HWW") > 0 and file.find("600") > 0: self.SignalMass_ = 600;
-        if file.find("HWW") > 0 and file.find("700") > 0: self.SignalMass_ = 700;
-        if file.find("HWW") > 0 and file.find("800") > 0: self.SignalMass_ = 800;
-        if file.find("HWW") > 0 and file.find("900") > 0: self.SignalMass_ = 900;    
-        if file.find("HWW") > 0 and file.find("1000") > 0: self.SignalMass_ = 1000;   
+      
+        if TString(self.FileName_).Contains("HWW")  and TString(self.FileName_).Contains("600") : self.SignalMass_ = 600;
+        if TString(self.FileName_).Contains("HWW")  and TString(self.FileName_).Contains("700") : self.SignalMass_ = 700;
+        if TString(self.FileName_).Contains("HWW")  and TString(self.FileName_).Contains("800") : self.SignalMass_ = 800;
+        if TString(self.FileName_).Contains("HWW")  and TString(self.FileName_).Contains("900") : self.SignalMass_ = 900;    
+        if TString(self.FileName_).Contains("HWW")  and TString(self.FileName_).Contains("1000") : self.SignalMass_ = 1000;   
 
         self.FitSMSignal = False;
         self.FitSMSignal_mean = -1;
         self.FitSMSignal_gamma = -1;
         self.isVBF_ = False;
+        if TString(self.FileName_).Contains("VBFHWW") : self.isVBF_ = True;
 
-        if file.find("VBF") > 0: self.isVBF_ = True;
-
-        ###### reweight file
+        ###### reweight file --> open the root file for cps re-weighting at posteriori
         if self.SignalMass_ > 0:
-            self.rwName = "H_CPSrw_%03d"%(self.SignalMass_);
-            self.rwF = ROOT.TFile("CPSrw/"+self.rwName+".root");
+            
+            self.rwName  = "H_CPSrw_%03d"%(self.SignalMass_);
+            self.rwF     = ROOT.TFile("CPSrw/"+self.rwName+".root");
             self.h_rwCPS = self.rwF.Get(self.rwName);
             self.x_rwCPS = self.h_rwCPS.GetXaxis();
 
-        # ---------- Set up jet corrections on the fly of R >= 0.7 jets
+        ############ ---------- Set up jet corrections on the fly of R >= 0.7 jets
         fDir = "JECs/"      
         jecUncStr       = ROOT.std.string(fDir + "GR_R_53_V10_Uncertainty_AK7PFchs.txt");
         self.jecUnc_    = ROOT.JetCorrectionUncertainty(jecUncStr);
@@ -104,7 +104,7 @@ class sampleWrapperClass:
     def getSampleLabel(self):
         return self.Label_
 
-
+    ### main function used to create the final otree
     def createTrainingTree(self):
         
         print self.FileName_
@@ -138,114 +138,49 @@ class sampleWrapperClass:
         self.File_.Close();
 
 
-    ### produce weights for alternative models
-    def GetInteferenceWeights(self, mass, Cprime, BRnew=0):
+    ### produce weights for alternative models --> input are the generator mass value for a given event, c' and BRnew
+    def GetInteferenceWeights(self, mass, Cprime, BRnew=0, rwCPS=1):
         
         massin = self.SignalMass_;
         if massin < 0: return;
-        
+
+        ## define the fit range min and max as a function of the higgs mass 
         massmin = {600:200,700:200,800:400,900:400,1000:400};
         massmax = {600:1200,700:1200,800:1500,900:1600,1000:1800};
 
-        # read in original file and get lineshape from fit
+        #### read in original file and get lineshape from fit --> just for the first event, the file is read again and the lineshape is fitted just one time, taking
+        #### the generated value, max and min range --> mean and gamma for BWRunning fit is returned from the function     
         if not self.FitSMSignal: 
-            fitSM = FitMassPoint(self.FileName_, massin, massmin[massin], massmax[massin]);
+            fitSM = FitMassPoint(self.FileName_, massin, massmin[massin], massmax[massin],rwCPS);
             self.FitSMSignal_mean  = fitSM[0];
             self.FitSMSignal_gamma = fitSM[1];
             self.FitSMSignal = True;
     
-        # create a weight for the given event after switch is turned
-        weight_width = lineshapeWidthReweight(mass, self.FitSMSignal_mean, self.FitSMSignal_gamma, Cprime/(1.-BRnew), massmin[massin], massmax[massin]);
-        weight_xs = Cprime*(1-BRnew);   
-        return (weight_width*weight_xs);
+        #### create a weight for the given event after switch is turned --> taking the fitted mean, Gamma and the factor realted to c' and BRnew
+        weight_width = lineshapeWidthReweight(mass, self.FitSMSignal_mean, self.FitSMSignal_gamma, Cprime/(1.-BRnew), massmin[massin], massmax[massin]); ## new gamma
+        weight_xs = Cprime*(1-BRnew);    ## new xs
+        return (weight_width*weight_xs); ## the weight is the product of the two
 
     ### ------------------------------------------------
     def createBRDTree(self):
 
-        reader1_ = ROOT.TMVA.Reader("!Color:!Silent")
-        reader2_ = ROOT.TMVA.Reader("!Color:!Silent")
-        ungroomed_reader1_ = ROOT.TMVA.Reader("!Color:!Silent")
-        ungroomed_reader2_ = ROOT.TMVA.Reader("!Color:!Silent")
-
+        #### Output file --> create
         fname = self.OFileName_;        
         self.OFile_ = ROOT.TFile(fname,"RECREATE");        
         self.otree = ROOT.TTree("otree","otree");
 
-        ########## Initialize Variables
+        ########## Initialize Variables 
         self.InitializeVariables();
-
-        ########## bsm branches for ewk signlet 
-
-        self.cprimeVals   = [1,2,3,4,5,6,7,8,9,10] ;
-        self.brnewVals    = [00, 01, 02, 03, 04, 05] ;
-        self.bsmReweights = [];
-        
-        for i in range(len(self.cprimeVals)): 
-          col_bsmReweights = [];
-          for j in range(len(self.brnewVals)): 
-            col_bsmReweights.append( array( 'f', [ 0. ] ) );
-            self.bsmReweights.append( col_bsmReweights );
 
         ########## Create Output branches
         self.createBranches();
         
         ###### loop preparation
         prefix = self.JetPrefix_;        
-        NLoop = min(self.NTree_,1e9);
+        NLoop  = min(self.NTree_,10e9);
         NLoopWeight = self.NTree_/NLoop;
         
         wSampleWeight = NLoopWeight*self.SampleWeight_;
-
-        wjettaggervariables = []
-        wjettaggervariables.append("jet_qjetvol")
-        wjettaggervariables.append("jet_tau2tau1")
-        listOfVarArray1 = []
-        listOfVarArray2 = []
-        for i in range(len(wjettaggervariables)):
-            listOfVarArray1.append( array('f',[0.]) )
-            listOfVarArray2.append( array('f',[0.]) )
-            varString = wjettaggervariables[i] + " := " + wjettaggervariables[i]
-            reader1_.AddVariable(varString, listOfVarArray1[i])
-            reader2_.AddVariable(varString, listOfVarArray2[i])
-            ungroomed_reader1_.AddVariable(varString, listOfVarArray1[i])
-            ungroomed_reader2_.AddVariable(varString, listOfVarArray2[i])
-        
-        spec11 = array('f',[0.])
-        spec12 = array('f',[0.])
-        spec13 = array('f',[0.])
-        spec14 = array('f',[0.])
-        spec21 = array('f',[0.])
-        spec22 = array('f',[0.])
-        spec23 = array('f',[0.])
-        spec24 = array('f',[0.])
-         
-        ungroomed_spec11 = array('f',[0.])
-        ungroomed_spec12 = array('f',[0.])
-        ungroomed_spec13 = array('f',[0.])
-        ungroomed_spec14 = array('f',[0.])
-        ungroomed_spec21 = array('f',[0.])
-        ungroomed_spec22 = array('f',[0.])
-        ungroomed_spec23 = array('f',[0.])
-        ungroomed_spec24 = array('f',[0.])
-        reader1_.AddSpectator( "jet_pt_pr", spec11 )
-        reader1_.AddSpectator( "jet_mass_pr", spec12 )
-        reader1_.AddSpectator( "nPV", spec13 )
-        reader1_.AddSpectator( "jet_massdrop_pr", spec14 )
-        reader2_.AddSpectator( "jet_pt_pr", spec21 )
-        reader2_.AddSpectator( "jet_mass_pr", spec22 )
-        reader2_.AddSpectator( "nPV", spec23 )
-        reader2_.AddSpectator( "jet_massdrop_pr", spec24 )
-
-        ungroomed_reader1_.AddSpectator( "ungroomed_jet_pt", ungroomed_spec11 )
-        ungroomed_reader1_.AddSpectator( "jet_mass_pr", ungroomed_spec12 )
-        ungroomed_reader1_.AddSpectator( "nPV", ungroomed_spec13 )
-        ungroomed_reader1_.AddSpectator( "jet_massdrop_pr", ungroomed_spec14 )
-        ungroomed_reader2_.AddSpectator( "ungroomed_jet_pt", ungroomed_spec21 )
-        ungroomed_reader2_.AddSpectator( "jet_mass_pr", ungroomed_spec22 )
-        ungroomed_reader2_.AddSpectator( "nPV", ungroomed_spec23 )
-        ungroomed_reader2_.AddSpectator( "jet_massdrop_pr", ungroomed_spec24 )
-
-        TMVAMethod = "Likelihood" 
 
         RooTrace.active(ROOT.kTRUE);
         RooTrace.mark();
@@ -254,39 +189,38 @@ class sampleWrapperClass:
         ########## Start Loop On the Evvents ###########
         ################################################
         
-        for i in range(NLoop) :
-            
-            if i % 100000 == 0: print "iEvent = ", i
+        for iEvent in range(NLoop) :
+            if iEvent % 100000 == 0: print "iEvent = ", iEvent
 
-            self.InputTree_.GetEntry(i);
-
-            ########## Fill TTbar Control Region Info
-
-            ttbarlike  = 0;
+            self.InputTree_.GetEntry(iEvent);
 
             if self.Channel_ == 'mu': lepLabel = "muon";
             if self.Channel_ == 'el': lepLabel = "electron";
 
+            ########## Fill TTbar Control Region Info
+            ttbarlike  = 0;
             index_ca8_in_oppoHemi = [];
             
-            for i in range(6):
-                if getattr( self.InputTree_, "GroomedJet_CA8_pt" )[i] > 200 and math.fabs(getattr( self.InputTree_, "GroomedJet_CA8_eta" )[i])<2.4:
-                    j_ca8_eta = getattr( self.InputTree_, "GroomedJet_CA8_eta" )[i];
-                    j_ca8_phi = getattr( self.InputTree_, "GroomedJet_CA8_phi" )[i];
+            for iJet in range(6): ### loop on ca8 jet over pt > 200, take dR(jet,lep) > Pi/2 --> opposite hemisphere 
+                if getattr( self.InputTree_, "GroomedJet_CA8_pt" )[iJet] > 200 and math.fabs(getattr( self.InputTree_, "GroomedJet_CA8_eta" )[iJet])<2.4:
+                    j_ca8_eta = getattr( self.InputTree_, "GroomedJet_CA8_eta" )[iJet];
+                    j_ca8_phi = getattr( self.InputTree_, "GroomedJet_CA8_phi" )[iJet];
                     l_eta = getattr( self.InputTree_, "W_"+lepLabel+"_eta" );
                     l_phi = getattr( self.InputTree_, "W_"+lepLabel+"_phi" );
                     l_charge = getattr( self.InputTree_, "W_"+lepLabel+"_charge" );
                     dR_lj = math.sqrt( (l_eta - j_ca8_eta)**2 + deltaphi(l_phi,j_ca8_phi)**2 ); ## delta R between lepton and hadronic W candidate over 200 GeV
-                    if dR_lj > ROOT.TMath.Pi()/2.: index_ca8_in_oppoHemi.append(i); ## opposite hemishpere
+                    if dR_lj > ROOT.TMath.Pi()/2.: index_ca8_in_oppoHemi.append(iJet);             ## opposite hemishpere
 
             minMass = -1;
             theca8Index = -1;
-            for i in range(len(index_ca8_in_oppoHemi)):
-                curmass = getattr( self.InputTree_, "GroomedJet_CA8_mass_pr" )[index_ca8_in_oppoHemi[i]]; ## search for the jet with mass closer to the W
+            ## loop on the vector of opposite hemisphere and take the jet with the mass closer to the nominal W mass
+            for iJet in range(len(index_ca8_in_oppoHemi)):
+                curmass = getattr( self.InputTree_, "GroomedJet_CA8_mass_pr" )[index_ca8_in_oppoHemi[iJet]]; ## search for the jet with mass closer to the W
                 if math.fabs(curmass-80.385) < math.fabs(minMass-80.385): 
                     minMass = curmass;
-                    theca8Index = index_ca8_in_oppoHemi[i];
+                    theca8Index = index_ca8_in_oppoHemi[iJet];
 
+            ### count ak5 jets
             index_ak5_in_sameHemi = [];
             index_ak5_in_oppoHemi = [];
             index_ak5_in_sameHemi_vetoca8 = [];
@@ -307,111 +241,102 @@ class sampleWrapperClass:
             index_ak5_in_sameHemi_vetoca8_csvt = [];
             index_ak5_in_oppoHemi_vetoca8_csvt = [];
 
+            ## HT of the event --> pt scalar sum 
             ttb_ht = getattr( self.InputTree_, "W_"+lepLabel+"_pt" );
             ttb_ht += getattr( self.InputTree_, "event_met_pfmet" ); 
 
             dR_ca8_bjet = -999 ;
             dR_ca8_jet  = -999 ;
             
-            if theca8Index >= 0: ## if a W candidate is found 
-                for i in range(6):
-                    if getattr( self.InputTree_, "JetPFCor_Pt" )[i] < 0 : break ;                        
-                    if getattr( self.InputTree_, "JetPFCor_Pt" )[i] > 30: ## loop on the ak5 with pt > 30 only central jets 
-                        ttb_ht += getattr( self.InputTree_, "JetPFCor_Pt" )[i];
+            if theca8Index >= 0: ## if a W candidate is found --> loop on ak5 jet in the JetPFCor collection -> central jets
+                for iJet in range(6):
+                    if getattr( self.InputTree_, "JetPFCor_Pt" )[iJet] < 0 : break ;                        
+                    if getattr( self.InputTree_, "JetPFCor_Pt" )[iJet] > 30: ## loop on the ak5 with pt > 30 only central jets 
+                        ttb_ht += getattr( self.InputTree_, "JetPFCor_Pt" )[iJet];
                         j_ca8_eta = getattr( self.InputTree_, "GroomedJet_CA8_eta" )[theca8Index];
                         j_ca8_phi = getattr( self.InputTree_, "GroomedJet_CA8_phi" )[theca8Index];
-                        j_ak5_eta = getattr( self.InputTree_, "JetPFCor_Eta" )[i];
-                        j_ak5_phi = getattr( self.InputTree_, "JetPFCor_Phi" )[i];
+                        j_ak5_eta = getattr( self.InputTree_, "JetPFCor_Eta" )[iJet];
+                        j_ak5_phi = getattr( self.InputTree_, "JetPFCor_Phi" )[iJet];
                         l_eta = getattr( self.InputTree_, "W_"+lepLabel+"_eta" );
                         l_phi = getattr( self.InputTree_, "W_"+lepLabel+"_phi" );               
-                        dR_jj = math.sqrt( (j_ak5_eta - j_ca8_eta)**2 + deltaphi(j_ak5_phi,j_ca8_phi)**2 ); ## delta R jet jet 
-                        dR_lj = math.sqrt( (l_eta - j_ak5_eta)**2 + deltaphi(l_phi,j_ak5_phi)**2 ); ## delta R jet lep
+                        dR_jj = math.sqrt( (j_ak5_eta - j_ca8_eta)**2 + deltaphi(j_ak5_phi,j_ca8_phi)**2 ); ## delta R W-jet jet 
+                        dR_lj = math.sqrt( (l_eta - j_ak5_eta)**2 + deltaphi(l_phi,j_ak5_phi)**2 );         ## delta R jet lep
                         
-                        if dR_lj < ROOT.TMath.Pi()/2. :  ## same hemisphere wrt to jet and cleaned wrt to the fat jet
-                            index_ak5_in_sameHemi.append( i );
-                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.244: index_ak5_in_sameHemi_csvl.append(i);
-                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.679: index_ak5_in_sameHemi_csvm.append(i);                        
-                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.898: index_ak5_in_sameHemi_csvt.append(i);
+                        if dR_lj < ROOT.TMath.Pi()/2. :  ## same hemisphere wrt to the lepton, no cleaning with W-jet --> same hemisphere -> btag counting
+                            index_ak5_in_sameHemi.append( iJet );
+                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.244: index_ak5_in_sameHemi_csvl.append(iJet);
+                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.679: index_ak5_in_sameHemi_csvm.append(iJet);                        
+                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.898: index_ak5_in_sameHemi_csvt.append(iJet);
                                                                  
-                        elif dR_lj > ROOT.TMath.Pi()/2. : 
-                            index_ak5_in_oppoHemi.append( i );    
-                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.244: index_ak5_in_oppoHemi_csvl.append(i);
-                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.679: index_ak5_in_oppoHemi_csvm.append(i);                                            
-                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.898: index_ak5_in_oppoHemi_csvt.append(i);                                            
-
-                        if dR_lj > ROOT.TMath.Pi()/2. and dR_jj > 0.8: 
-                            index_ak5_in_oppoHemi_vetoca8.append( i );
-                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.244: index_ak5_in_oppoHemi_vetoca8_csvl.append(i);
-                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.679: index_ak5_in_oppoHemi_vetoca8_csvm.append(i);
-                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.898: index_ak5_in_oppoHemi_vetoca8_csvt.append(i);
-
-                        elif dR_lj > ROOT.TMath.Pi()/2. and  dR_jj > 0.8:
-                            index_ak5_in_sameHemi_vetoca8.append( i );
-                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.244: index_ak5_in_sameHemi_vetoca8_csvl.append(i);
-                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.679: index_ak5_in_sameHemi_vetoca8_csvm.append(i);
-                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.898: index_ak5_in_sameHemi_vetoca8_csvt.append(i);
-
-                        if dR_jj > 0.8 : 
-                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.679 and dR_jj < math.fabs(dR_ca8_bjet) :
-                                dR_ca8_bjet = dR_jj ;
-                                dR_ca8_jet = dR_jj ;
-                            elif getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] <= 0.679 and dR_jj < math.fabs(dR_ca8_jet) :
-                                dR_ca8_jet = dR_jj ;
-                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.679 and dR_jj < math.fabs(dR_ca8_bjet) :
-                                dR_ca8_bjet = dR_jj ;
-                                dR_ca8_jet = dR_jj ;
-                            elif getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] <= 0.679 and dR_jj < math.fabs(dR_ca8_jet) :
-                                dR_ca8_jet = dR_jj ;
-
-                for i in range(6):
-                        
-                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[i] < 0 : break ;                        
-                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[i] > 30: ## loop on the ak5 with pt > 30 only central jets 
-                        ttb_ht += getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[i];
-                        j_ca8_eta = getattr( self.InputTree_, "GroomedJet_CA8_eta" )[theca8Index];
-                        j_ca8_phi = getattr( self.InputTree_, "GroomedJet_CA8_phi" )[theca8Index];
-                        j_ak5_eta = getattr( self.InputTree_, "JetPFCorVBFTag_Eta" )[i];
-                        j_ak5_phi = getattr( self.InputTree_, "JetPFCorVBFTag_Phi" )[i];
-                        l_eta = getattr( self.InputTree_, "W_"+lepLabel+"_eta" );
-                        l_phi = getattr( self.InputTree_, "W_"+lepLabel+"_phi" );               
-                        dR_jj = math.sqrt( (j_ak5_eta - j_ca8_eta)**2 + deltaphi(j_ak5_phi,j_ca8_phi)**2 ); ## delta R jet jet 
-                        dR_lj = math.sqrt( (l_eta - j_ak5_eta)**2 + deltaphi(l_phi,j_ak5_phi)**2 ); ## delta R jet lep
-                        
-                        if dR_lj < ROOT.TMath.Pi()/2. :  ## same hemisphere wrt to jet and cleaned wrt to the fat jet
-                            index_ak5_in_sameHemi.append( i );
-                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] > 0.244: index_ak5_in_sameHemi_csvl.append(i);
-                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] > 0.679: index_ak5_in_sameHemi_csvm.append(i);                        
-                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] > 0.898: index_ak5_in_sameHemi_csvt.append(i);                        
-                        elif dR_lj > ROOT.TMath.Pi()/2. : 
-                            index_ak5_in_oppoHemi.append( i );    
-                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] > 0.244: index_ak5_in_oppoHemi_csvl.append(i);
-                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] > 0.679: index_ak5_in_oppoHemi_csvm.append(i);
-                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] > 0.898: index_ak5_in_oppoHemi_csvt.append(i);
-                        if dR_lj > ROOT.TMath.Pi()/2. and dR_jj > 0.8: 
-                            index_ak5_in_oppoHemi_vetoca8.append( i );
-                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] > 0.244: index_ak5_in_oppoHemi_vetoca8_csvl.append(i);
-                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] > 0.679: index_ak5_in_oppoHemi_vetoca8_csvm.append(i);
-                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] > 0.898: index_ak5_in_oppoHemi_vetoca8_csvt.append(i);
-
+                        elif dR_lj > ROOT.TMath.Pi()/2. : ## opposite hemisphere wrt to the lepton, no cleaning with W-jet --> opposite hemisphere -> btag counting
+                            index_ak5_in_oppoHemi.append( iJet );    
+                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.244: index_ak5_in_oppoHemi_csvl.append(iJet);
+                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.679: index_ak5_in_oppoHemi_csvm.append(iJet);
+                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.898: index_ak5_in_oppoHemi_csvt.append(iJet);
+                            
+                        if dR_lj > ROOT.TMath.Pi()/2. and dR_jj > 0.8: ### veto ca8 counter --> cleaning inside W-jet -> a W never go to b, but some btag fake rate is possible 
+                            index_ak5_in_oppoHemi_vetoca8.append( iJet );
+                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.244: index_ak5_in_oppoHemi_vetoca8_csvl.append(iJet);
+                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.679: index_ak5_in_oppoHemi_vetoca8_csvm.append(iJet);
+                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.898: index_ak5_in_oppoHemi_vetoca8_csvt.append(iJet);
 
                         elif dR_lj < ROOT.TMath.Pi()/2. and  dR_jj > 0.8:
-                            index_ak5_in_sameHemi_vetoca8.append( i );
-                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] > 0.244: index_ak5_in_sameHemi_vetoca8_csvl.append(i);
-                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] > 0.679: index_ak5_in_sameHemi_vetoca8_csvm.append(i);
-                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] > 0.898: index_ak5_in_sameHemi_vetoca8_csvt.append(i);
+                            index_ak5_in_sameHemi_vetoca8.append( iJet );
+                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.244: index_ak5_in_sameHemi_vetoca8_csvl.append(iJet);
+                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.679: index_ak5_in_sameHemi_vetoca8_csvm.append(iJet);
+                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.898: index_ak5_in_sameHemi_vetoca8_csvt.append(iJet);
 
+                        ### other topological info dR between W-jet and closer jet or bjet outside its cone
+                        if dR_jj > 0.8 : 
+                            if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.679 and dR_jj < math.fabs(dR_ca8_bjet) :
+                                dR_ca8_bjet = dR_jj ;
+                                dR_ca8_jet  = dR_jj ;
+                            elif getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] <= 0.679 and dR_jj < math.fabs(dR_ca8_jet) :
+                                dR_ca8_jet = dR_jj ;
+
+                for iJet in range(6): ## same loop on forward jets
+                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet] < 0 : break ;                        
+                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet] > 30: ## loop on the ak5 with pt > 30 only central jets 
+                        ttb_ht += getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet];
+
+                        j_ca8_eta = getattr( self.InputTree_, "GroomedJet_CA8_eta" )[theca8Index];
+                        j_ca8_phi = getattr( self.InputTree_, "GroomedJet_CA8_phi" )[theca8Index];
+                        j_ak5_eta = getattr( self.InputTree_, "JetPFCorVBFTag_Eta" )[iJet];
+                        j_ak5_phi = getattr( self.InputTree_, "JetPFCorVBFTag_Phi" )[iJet];
+                        l_eta = getattr( self.InputTree_, "W_"+lepLabel+"_eta" );
+                        l_phi = getattr( self.InputTree_, "W_"+lepLabel+"_phi" );               
+
+                        dR_jj = math.sqrt( (j_ak5_eta - j_ca8_eta)**2 + deltaphi(j_ak5_phi,j_ca8_phi)**2 ); ## delta R W-jet jet 
+                        dR_lj = math.sqrt( (l_eta - j_ak5_eta)**2 + deltaphi(l_phi,j_ak5_phi)**2 );         ## delta R jet lep
+                        
+                        if dR_lj < ROOT.TMath.Pi()/2. :  ## same hemisphere wrt to lepton --> no cleaning with ak5 inside W-jet cone  
+                            index_ak5_in_sameHemi.append( iJet );
+                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] > 0.244: index_ak5_in_sameHemi_csvl.append(iJet);
+                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] > 0.679: index_ak5_in_sameHemi_csvm.append(iJet);                        
+                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] > 0.898: index_ak5_in_sameHemi_csvt.append(iJet);                        
+                        elif dR_lj > ROOT.TMath.Pi()/2. : ## opposite hemisphere wrt to lepton --> no cleaning with ak5 inside W-jet cone
+                            index_ak5_in_oppoHemi.append( iJet );    
+                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] > 0.244: index_ak5_in_oppoHemi_csvl.append(iJet);
+                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] > 0.679: index_ak5_in_oppoHemi_csvm.append(iJet);
+                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] > 0.898: index_ak5_in_oppoHemi_csvt.append(iJet);
+
+                        if dR_lj > ROOT.TMath.Pi()/2. and dR_jj > 0.8: ## same hemisphere wrt to lepton -->  cleaning with ak5 inside W-jet cone 
+                            index_ak5_in_oppoHemi_vetoca8.append( iJet );
+                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] > 0.244: index_ak5_in_oppoHemi_vetoca8_csvl.append(iJet);
+                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] > 0.679: index_ak5_in_oppoHemi_vetoca8_csvm.append(iJet);
+                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] > 0.898: index_ak5_in_oppoHemi_vetoca8_csvt.append(iJet);
+                        elif dR_lj < ROOT.TMath.Pi()/2. and  dR_jj > 0.8:
+                            index_ak5_in_sameHemi_vetoca8.append( iJet );
+                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] > 0.244: index_ak5_in_sameHemi_vetoca8_csvl.append(iJet);
+                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] > 0.679: index_ak5_in_sameHemi_vetoca8_csvm.append(iJet);
+                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] > 0.898: index_ak5_in_sameHemi_vetoca8_csvt.append(iJet);
+
+                        ### other topological info dR between W-jet and closer jet or bjet outside its cone
                         if dR_jj > 0.8: 
-
-                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] > 0.679 and dR_jj < math.fabs(dR_ca8_bjet) :
+                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] > 0.679 and dR_jj < math.fabs(dR_ca8_bjet) :
                                 dR_ca8_bjet = dR_jj ;
-                                dR_ca8_jet = dR_jj ;
-                            elif getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] <= 0.679 and dR_jj < math.fabs(dR_ca8_jet) :
-                                dR_ca8_jet = dR_jj ;
-
-                            if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] > 0.679 and dR_jj < math.fabs(dR_ca8_bjet) :
-                                dR_ca8_bjet = dR_jj ;
-                                dR_ca8_jet = dR_jj ;
-                            elif getattr( self.InputTree_,"JetPFCorVBFTag_bDiscriminatorCSV" )[i] <= 0.679 and dR_jj < math.fabs(dR_ca8_jet) :
+                                dR_ca8_jet  = dR_jj ;
+                            elif getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] <= 0.679 and dR_jj < math.fabs(dR_ca8_jet) :
                                 dR_ca8_jet = dR_jj ;
 
 
@@ -423,22 +348,29 @@ class sampleWrapperClass:
                 self.ttb_nak5_same_csvm_[0] = int(len(index_ak5_in_sameHemi_csvm));
                 ### number of jets in the same emisphere of the lepton passing csvt                                                 
                 self.ttb_nak5_same_csvt_[0] = int(len(index_ak5_in_sameHemi_csvt));
+
                 ### number of jets in the opposite emisphere of the lepton                 
                 self.ttb_nak5_oppo_[0] = int(len(index_ak5_in_oppoHemi));
+                ### number of jets in the opposite emisphere of the lepton passing csvl                
                 self.ttb_nak5_oppo_csvl_[0] = int(len(index_ak5_in_oppoHemi_csvl));
+                ### number of jets in the opposite emisphere of the lepton passing csvm                
                 self.ttb_nak5_oppo_csvm_[0] = int(len(index_ak5_in_oppoHemi_csvm));
+                ### number of jets in the opposite emisphere of the lepton passing csvt                
                 self.ttb_nak5_oppo_csvt_[0] = int(len(index_ak5_in_oppoHemi_csvt));
+
                 ### number of jets in the opposite emisphere of the lepton cleaned wrt to the hadronic candidate                                
                 self.ttb_nak5_oppoveto_[0] = int(len(index_ak5_in_oppoHemi_vetoca8));
                 self.ttb_nak5_oppoveto_csvl_[0] = int(len(index_ak5_in_oppoHemi_vetoca8_csvl));
                 self.ttb_nak5_oppoveto_csvm_[0] = int(len(index_ak5_in_oppoHemi_vetoca8_csvm));
                 self.ttb_nak5_oppoveto_csvt_[0] = int(len(index_ak5_in_oppoHemi_vetoca8_csvt));
+
                 ### number of jets in the same emisphere of the lepton cleaned wrt to the hadronic candidate                                
                 self.ttb_nak5_sameveto_[0] = int(len(index_ak5_in_sameHemi_vetoca8));
                 self.ttb_nak5_sameveto_csvl_[0] = int(len(index_ak5_in_sameHemi_vetoca8_csvl));
                 self.ttb_nak5_sameveto_csvm_[0] = int(len(index_ak5_in_sameHemi_vetoca8_csvm));
                 self.ttb_nak5_sameveto_csvt_[0] = int(len(index_ak5_in_sameHemi_vetoca8_csvt));
-                
+
+                ### jet quantities 
                 self.ttb_ht_[0] = ttb_ht;
                 self.ttb_ca8_mass_pr_[0]       = getattr( self.InputTree_, "GroomedJet_CA8_mass_pr" )[theca8Index];
                 self.ttb_ca8_ungroomed_pt_[0]  = getattr( self.InputTree_, "GroomedJet_CA8_pt" )[theca8Index];
@@ -446,9 +378,11 @@ class sampleWrapperClass:
                 self.ttb_ca8_ungroomed_phi_[0] = getattr( self.InputTree_, "GroomedJet_CA8_phi" )[theca8Index];
                 self.ttb_ca8_ungroomed_e_[0]   = getattr( self.InputTree_, "GroomedJet_CA8_e" )[theca8Index];
 
+                ### dR between W-jet and closer jet or bjet outside its cone
                 self.ttb_dR_ca8_bjet_closer_[0] = dR_ca8_bjet ;
-                self.ttb_dR_ca8_jet_closer_[0] = dR_ca8_jet ;
-                
+                self.ttb_dR_ca8_jet_closer_[0]  = dR_ca8_jet ;
+
+                ### some generator info
                 if not self.IsData_ :
                  self.ttb_ca8_ungroomed_gen_pt_[0]  = getattr( self.InputTree_, "GenGroomedJet_CA8_pt" )[theca8Index];
                  self.ttb_ca8_ungroomed_gen_eta_[0] = getattr( self.InputTree_, "GenGroomedJet_CA8_eta" )[theca8Index];
@@ -466,6 +400,7 @@ class sampleWrapperClass:
                 self.ttb_ca8_GeneralizedECF_[0] = getattr( self.InputTree_, "GroomedJet_CA8_jetGeneralizedECF" )[theca8Index];
                 self.ttb_ca8_mu_[0]             = getattr( self.InputTree_, "GroomedJet_CA8_massdrop_pr" )[theca8Index];
 
+                ### invariant mass of the full system
                 ttb_ca8J_p4  = ROOT.TLorentzVector();        
                 ttb_ca8J_pt  = getattr( self.InputTree_, "GroomedJet_CA8_pt" )[theca8Index];    
                 ttb_ca8J_eta = getattr( self.InputTree_, "GroomedJet_CA8_eta" )[theca8Index];    
@@ -476,11 +411,13 @@ class sampleWrapperClass:
 
                 ttb_V_p4 = ROOT.TLorentzVector(getattr(self.InputTree_,"W_px"),getattr(self.InputTree_,"W_py"),getattr(self.InputTree_,"W_pz_type0"),getattr(self.InputTree_,"W_e")); 
                 self.ttb_ca8_mlvj_type0_[0] = (ttb_V_p4+ttb_ca8J_p4).M();
+
                 ttb_V_p4.SetPtEtaPhiE(getattr(self.InputTree_,"W_px"),getattr(self.InputTree_,"W_py"),getattr(self.InputTree_,"W_pz_type2"),getattr(self.InputTree_,"W_e")); 
                 self.ttb_ca8_mlvj_type2_[0] = (ttb_V_p4+ttb_ca8J_p4).M();
 
                 ttb_V_p4.SetPtEtaPhiE(getattr(self.InputTree_,"W_px"),getattr(self.InputTree_,"W_py"),getattr(self.InputTree_,"W_pz_type0_met"),getattr(self.InputTree_,"W_e")); 
                 self.ttb_ca8_mlvj_type0_met_[0] = (ttb_V_p4+ttb_ca8J_p4).M();
+
                 ttb_V_p4.SetPtEtaPhiE(getattr(self.InputTree_,"W_px"),getattr(self.InputTree_,"W_py"),getattr(self.InputTree_,"W_pz_type2_met"),getattr(self.InputTree_,"W_e")); 
                 self.ttb_ca8_mlvj_type2_met_[0] = (ttb_V_p4+ttb_ca8J_p4).M();
 
@@ -488,15 +425,15 @@ class sampleWrapperClass:
                 self.ttb_ca8_py_[0] = ttb_ca8J_p4.Py();
                 self.ttb_ca8_pz_[0] = ttb_ca8J_p4.Pz();
                 self.ttb_ca8_e_[0] =  ttb_ca8J_p4.E();
-                ## preselection for the ttbar control region selection: at least one btag loose same or opposite
+
+                ## preselection for the ttbar control region selection: at least one btag loose same or opposite hemisphere wrt to the lepton
                 oppo1same1 = (self.ttb_nak5_same_csvl_[0] > 0  or self.ttb_nak5_oppo_csvl_[0] > 0) or (self.ttb_nak5_sameveto_csvl_[0]>0 or self.ttb_nak5_oppoveto_csvl_[0]>0);
                 oppo2same0 = (self.ttb_nak5_same_csvl_[0] == 0 and self.ttb_nak5_oppo_csvl_[0] > 1) or (self.ttb_nak5_sameveto_csvl_[0]==0 or self.ttb_nak5_oppoveto_csvl_[0] > 1);
 
                 if oppo1same1 or oppo2same0:
                     self.isttbar_[0] = 1 ;
 
-                    
-            else:
+            else: ## default value for non ttbar events
 
                 self.ttb_nak5_same_[0] = -1;
                 self.ttb_nak5_same_csvl_[0] = -1;
@@ -554,18 +491,16 @@ class sampleWrapperClass:
                 self.ttb_ca8_pz_[0] = -999;
                 self.ttb_ca8_e_[0] =  -999;
                                
-            ##################### Cuts And divinding event in SR and TTbar Control Region
-            
-            leptonCut = 30; ## basic lepton thresolds
+            ##################### Cuts used to define flag for final signal region and ttbar control region definition
+            leptonCut = 30 ; 
             leptonCutString = "W_muon_pt";
             metCut = 40;
             if self.Channel_ == "el": 
                 leptonCut = 35;    
                 leptonCutString = "W_electron_pt";
-                metCut = 40;
+                metCut    = 40;
 
             signallike = 0;
-            
             if ( getattr( self.InputTree_, "W_pt" ) > 200 and
                  getattr( self.InputTree_, "GroomedJet_CA8_pt" )[0] > 200 and
                  math.fabs(getattr( self.InputTree_, "GroomedJet_CA8_eta" )[0]) < 2.4 and
@@ -575,7 +510,7 @@ class sampleWrapperClass:
 
                 if ( self.Channel_ == "mu" and
                      math.fabs(getattr( self.InputTree_, "W_muon_dz000")) < 0.02 and
-                     math.fabs(getattr( self.InputTree_, "W_muon_dzPV")) < 0.5   and
+                     math.fabs(getattr( self.InputTree_, "W_muon_dzPV"))  < 0.5  and
                      math.fabs( getattr( self.InputTree_, "W_muon_eta" )) < 2.1 ) :
                     signallike = 1 ; 
                 elif self.Channel_ == "el" : signallike = 1 ; 
@@ -584,11 +519,11 @@ class sampleWrapperClass:
             if self.isttbar_[0] == 1 and getattr( self.InputTree_, "event_met_pfmet" ) > metCut and getattr( self.InputTree_, leptonCutString ) > leptonCut:
                 ttbarlike = 1;
 
-            ### store the info just for ttbar like or signal like events
+
+            ##################### store the info just for ttbar like or signal like events
             if ttbarlike == 1 or signallike == 1 :
               
              ############### Fill Event property only for interesting events
-                             
              self.event_[0]            = getattr( self.InputTree_, "event_evtNo");
              self.event_runNo_[0]      = getattr( self.InputTree_, "event_runNo" );
              self.event_lumi_[0]       = getattr( self.InputTree_, "event_lumi" );
@@ -630,8 +565,7 @@ class sampleWrapperClass:
               self.event_weight_[0] = getattr( self.InputTree_, "event_weight" )/math.fabs(getattr( self.InputTree_, "event_weight" )) ;
              else: self.event_weight_[0] = 1.;
 
-
-             #### CPS part -> take value from histos
+             #### CPS part -> take value from histos external file
              rwCPS = 1;
              if self.SignalMass_ > 0:
                  binVal = self.x_rwCPS.FindBin(getattr(self.InputTree_,"W_H_mass_gen"));
@@ -639,7 +573,7 @@ class sampleWrapperClass:
                  if binVal < 1: binVal = 1;
                  rwCPS = self.h_rwCPS.GetBinContent( binVal );
 
-             #interference weight
+             ############## interference weight and cps weight
              self.complexpolewtggH600    = getattr(self.InputTree_,"complexpolewtggH600")*rwCPS;
              self.interferencewtggH600   = getattr(self.InputTree_,"interferencewtggH600");
              self.avecomplexpolewtggH600 = getattr(self.InputTree_,"avecomplexpolewtggH600"); 
@@ -675,35 +609,38 @@ class sampleWrapperClass:
         
              if self.SignalMass_ > 0:
 
-                curIntfRw = getattr(self.InputTree_,"interferencewtggH%03d"%(self.SignalMass_));  ## take the interference value
+                curIntfRw = getattr(self.InputTree_,"interferencewtggH%03d"%(self.SignalMass_));  ## take the interference value filled in the tree for the right mass
                 
                 self.genHMass_[0] = getattr(self.InputTree_,"W_H_mass_gen");
                 self.genHphi_[0]  = getattr(self.InputTree_,"W_H_phi_gen");
                 self.genHeta_[0]  = getattr(self.InputTree_,"W_H_eta_gen");
-                self.genHpt_[0]   = getattr(self.InputTree_,"W_H_pt_gen");
+                self.genHpt_[0]   = getattr(self.InputTree_,"W_H_pt_gen"); ## generator level higgs properties will be stored in the otree
                
-                if self.isVBF_:
+                if self.isVBF_: ## if is vbf signal, also tag jet quark info stored 
                  self.genTagQuark1E_[0]    = getattr(self.InputTree_,"W_TagQuark_E")[0];
                  self.genTagQuark1eta_[0]  = getattr(self.InputTree_,"W_TagQuark_eta")[0];
                  self.genTagQuark1phi_[0]  = getattr(self.InputTree_,"W_TagQuark_phi")[0];
                  self.genTagQuark1pt_[0]   = getattr(self.InputTree_,"W_TagQuark_pt")[0];
+
                  self.genTagQuark2E_[0]    = getattr(self.InputTree_,"W_TagQuark_E")[1];
                  self.genTagQuark2eta_[0]  = getattr(self.InputTree_,"W_TagQuark_eta")[1];
                  self.genTagQuark2phi_[0]  = getattr(self.InputTree_,"W_TagQuark_phi")[1];
                  self.genTagQuark2pt_[0]   = getattr(self.InputTree_,"W_TagQuark_pt")[1];
                                                              
 
-                for i in range(len(self.cprimeVals)): ## run over the possible value of the new couplig constant and BR
-                 for j in range(len(self.brnewVals)): 
-                  curCprime = float(self.cprimeVals[i])/10.;
-                  curBRnew = float(self.brnewVals[j])/10.;
-                  if self.isVBF_: 
-                    self.bsmReweights[i][j][0] = self.GetInteferenceWeights( getattr(self.InputTree_,"W_H_mass_gen"), curCprime, curBRnew );  
+                for iPar in range(len(self.cprimeVals)): ## run over the possible value of the new couplig constant and BR
+                 for jPar in range(len(self.brnewVals)): 
+                  curCprime = float(self.cprimeVals[iPar])/10.; ## take the c' value
+                  curBRnew  = float(self.brnewVals[jPar])/10.;   ## take the BRnew value
+                  if self.isVBF_:
+                    ### for VBF signal the bsmReweights is given just by the value returned by GetInteferenceWeights
+                    self.bsmReweights[iPar][jPar][0] = self.GetInteferenceWeights( getattr(self.InputTree_,"W_H_mass_gen"), curCprime, curBRnew, rwCPS);  
                   else:
-                   self.bsmReweights[i][j][0] = self.GetInteferenceWeights( getattr(self.InputTree_,"W_H_mass_gen"), curCprime, curBRnew )*IntfRescale(curIntfRw,curCprime,curBRnew);
-                
-             else:   
-                    self.genHMass_[0] = -1;
+                    ### for ggH signal the bsmReweights is given by the value returned by GetInteferenceWeights * IntfRescale  
+                    self.bsmReweights[iPar][jPar][0] = self.GetInteferenceWeights( getattr(self.InputTree_,"W_H_mass_gen"), curCprime, curBRnew, rwCPS)*IntfRescale(curIntfRw,curCprime,curBRnew);
+             else:
+                    ### default values for generator info 
+                    self.genHMass_[0] = -1; 
                     self.genHphi_[0]  = -999;
                     self.genHeta_[0]  = -999;
                     self.genHpt_[0]   = -1;
@@ -716,11 +653,12 @@ class sampleWrapperClass:
                     self.genTagQuark2phi_  = -999.;
                     self.genTagQuark2pt_   = -1.;
                                                              
-                    for i in range(len(self.cprimeVals)): 
-                        for j in range(len(self.brnewVals)): 
-                            self.bsmReweights[i][j][0] = -1;
+                    for iPar in range(len(self.cprimeVals)):  ## set to -1
+                        for jPar in range(len(self.brnewVals)): 
+                            self.bsmReweights[iPar][jPar][0] = -1;
 
-             ### lepton and met side                
+
+             ################ lepton and met side                
              if self.Channel_ == "mu" :
                     self.l_pt_[0]     = getattr( self.InputTree_, "W_muon_pt" );
                     self.l_eta_[0]    = getattr( self.InputTree_, "W_muon_eta" );
@@ -736,9 +674,8 @@ class sampleWrapperClass:
              self.pfMET_[0]     = getattr( self.InputTree_, "event_met_pfmet" );        
              self.pfMET_Phi_[0] = getattr( self.InputTree_, "event_met_pfmetPhi" );        
 
-                
+               
              ################# Other basic Observables
-                            
              self.mass_lvj_type0_[0] = getattr( self.InputTree_, "boostedW_lvj_m_type0" );
              self.mass_lvj_type2_[0] = getattr( self.InputTree_, "boostedW_lvj_m_type2" );
 
@@ -791,8 +728,7 @@ class sampleWrapperClass:
                      self.W_pt_gen_[0]  =  W_Lepton_gen.Pt();
 
                  
-                 
-             ######## jet stuff
+             ######## Jet stuff
              self.ungroomed_jet_pt_[0]  = getattr( self.InputTree_, prefix+"_pt" )[0];
              self.ungroomed_jet_eta_[0] = getattr( self.InputTree_, prefix+"_eta" )[0];
              self.ungroomed_jet_phi_[0] = getattr( self.InputTree_, prefix+"_phi" )[0];
@@ -809,50 +745,6 @@ class sampleWrapperClass:
              self.jet_grsens_ft_[0]   = getattr( self.InputTree_, prefix + "_mass_ft" )[0] / getattr( self.InputTree_, prefix + "_mass" )[0];
              self.jet_grsens_tr_[0]   = getattr( self.InputTree_, prefix + "_mass_tr" )[0] / getattr( self.InputTree_, prefix + "_mass" )[0];
              self.jet_massdrop_pr_[0] = getattr( self.InputTree_, prefix + "_massdrop_pr" )[0];    
-
-             ### CA8 jet collection -> scale up and down
-             self.jecUnc_.setJetEta( getattr( self.InputTree_, prefix+"_eta" )[0]);
-             self.jecUnc_.setJetPt( getattr( self.InputTree_, prefix+"_pt" )[0]);                        
-             self.j_jecfactor_up_[0] = self.jecUnc_.getUncertainty( True );
-
-             self.jecUnc_.setJetEta( getattr( self.InputTree_, prefix+"_eta" )[0]);
-             self.jecUnc_.setJetPt( getattr( self.InputTree_, prefix+"_pt" )[0]);               
-             self.j_jecfactor_dn_[0] = self.jecUnc_.getUncertainty( False ) ;
-
-             self.j_jecfactor_up_[0] = math.sqrt( self.j_jecfactor_up_[0]**2 + 0.02**2 );
-             self.j_jecfactor_dn_[0] = math.sqrt( self.j_jecfactor_dn_[0]**2 + 0.02**2 );
-
-             self.curjes_up = 1 + self.j_jecfactor_up_[0]
-             self.curjes_dn = 1 - self.j_jecfactor_dn_[0]
-
-             jorig_pt  = getattr( self.InputTree_, prefix + "_pt_pr" )[0];    
-             jorig_eta = getattr( self.InputTree_, prefix + "_eta_pr" )[0];    
-             jorig_phi = getattr( self.InputTree_, prefix + "_phi_pr" )[0];    
-             jorig_e   = getattr( self.InputTree_, prefix + "_e_pr" )[0];                        
-
-             jdef_ptetaphie = ROOT.TLorentzVector();
-             jdef_ptetaphie.SetPtEtaPhiE(jorig_pt, jorig_eta, jorig_phi, jorig_e)
-
-             jdef_up = ROOT.TLorentzVector(jdef_ptetaphie.Px() * self.curjes_up, jdef_ptetaphie.Py() * self.curjes_up,
-                                           jdef_ptetaphie.Pz() * self.curjes_up, jdef_ptetaphie.E() * self.curjes_up);
-             jdef_dn = ROOT.TLorentzVector(jdef_ptetaphie.Px() * self.curjes_dn, jdef_ptetaphie.Py() * self.curjes_dn,
-                                           jdef_ptetaphie.Pz() * self.curjes_dn, jdef_ptetaphie.E() * self.curjes_dn);
-
-
-             self.jet_mass_pr_up_[0] = jdef_up.M();  
-             self.jet_mass_pr_dn_[0] = jdef_dn.M();
-              
-             self.jet_ungroomed_jet_pt_up_[0] = jdef_up.Pt();
-             self.jet_ungroomed_jet_pt_dn_[0] = jdef_dn.Pt();
-
-
-             ##### change in the total invariant mass
-             self.nu_pz_type0_[0] = getattr( self.InputTree_, "W_nu1_pz_type0" );
-             self.nu_pz_type2_[0] = getattr( self.InputTree_, "W_nu1_pz_type2" );
-
-             self.nu_pz_type0_met_[0] = getattr( self.InputTree_, "W_nu1_pz_type0_met" );
-             self.nu_pz_type2_met_[0] = getattr( self.InputTree_, "W_nu1_pz_type2_met" );
-             
 
              qjetmassdistribution = getattr( self.InputTree_, prefix+"_qjetmass" );
              qjetvol              = getListRMS(qjetmassdistribution)/getListMean(qjetmassdistribution);
@@ -882,15 +774,14 @@ class sampleWrapperClass:
 
              self.jet_sjdr_[0] = getattr( self.InputTree_, prefix + "_prsubjet1subjet2_deltaR" );       
                 
-             self.deltaR_lca8jet_[0] = getattr( self.InputTree_, prefix + "_deltaR_lca8jet" );       
-
+             self.deltaR_lca8jet_[0]         = getattr( self.InputTree_, prefix + "_deltaR_lca8jet" );       
              self.deltaphi_METca8jet_[0]     = getattr( self.InputTree_, prefix + "_deltaphi_METca8jet_type2" );       
              self.deltaphi_Vca8jet_[0]       = getattr( self.InputTree_, prefix + "_deltaphi_Vca8jet_type2" );       
              self.deltaphi_METca8jet_met_[0] = getattr( self.InputTree_, prefix + "_deltaphi_METca8jet_type2_met" );       
              self.deltaphi_Vca8jet_met_[0]   = getattr( self.InputTree_, prefix + "_deltaphi_Vca8jet_type2_met" );       
 
+             #### some generator information
              if not self.IsData_ :
-
               self.ungroomed_gen_jet_pt_[0]  = getattr( self.InputTree_, "Gen"+prefix+"_pt" )[0];
               self.ungroomed_gen_jet_eta_[0] = getattr( self.InputTree_, "Gen"+prefix+"_eta" )[0];
               self.ungroomed_gen_jet_phi_[0] = getattr( self.InputTree_, "Gen"+prefix+"_phi" )[0];
@@ -919,16 +810,62 @@ class sampleWrapperClass:
 #              self.gen_jet_rcore7_[0] = getattr( self.InputTree_, "Gen"+prefix + "_rcores")[6*6 + 0];
  
 
-             ######## VBF jet Stuff
-             vbf_maxpt_j1 = ROOT.TLorentzVector(0,0,0,0);
-             vbf_maxpt_j2 = ROOT.TLorentzVector(0,0,0,0);
+             ### CA8 jet collection -> scale up and down
+             self.jecUnc_.setJetEta( getattr( self.InputTree_, prefix+"_eta" )[0]);
+             self.jecUnc_.setJetPt( getattr( self.InputTree_, prefix+"_pt" )[0]);                        
+             self.j_jecfactor_up_[0] = self.jecUnc_.getUncertainty( True );
+
+             self.jecUnc_.setJetEta( getattr( self.InputTree_, prefix+"_eta" )[0]);
+             self.jecUnc_.setJetPt( getattr( self.InputTree_, prefix+"_pt" )[0]);               
+             self.j_jecfactor_dn_[0] = self.jecUnc_.getUncertainty( False ) ;
+
+             self.j_jecfactor_up_[0] = math.sqrt( self.j_jecfactor_up_[0]**2 + 0.02**2 ); ## inflate the uncertainty for the difference between ca8 and ak7
+             self.j_jecfactor_dn_[0] = math.sqrt( self.j_jecfactor_dn_[0]**2 + 0.02**2 );
+
+             self.curjes_up = 1 + self.j_jecfactor_up_[0];
+             self.curjes_dn = 1 - self.j_jecfactor_dn_[0];
+
+             jorig_pt  = getattr( self.InputTree_, prefix + "_pt_pr" )[0];    
+             jorig_eta = getattr( self.InputTree_, prefix + "_eta_pr" )[0];    
+             jorig_phi = getattr( self.InputTree_, prefix + "_phi_pr" )[0];    
+             jorig_e   = getattr( self.InputTree_, prefix + "_e_pr" )[0];                        
+
+             jdef_ptetaphie = ROOT.TLorentzVector();
+             jdef_ptetaphie.SetPtEtaPhiE(jorig_pt, jorig_eta, jorig_phi, jorig_e); ## original jet 4V after pruning
+
+             jdef_up = ROOT.TLorentzVector(jdef_ptetaphie.Px() * self.curjes_up, jdef_ptetaphie.Py() * self.curjes_up,
+                                           jdef_ptetaphie.Pz() * self.curjes_up, jdef_ptetaphie.E()  * self.curjes_up); ## scaled up jet
+             jdef_dn = ROOT.TLorentzVector(jdef_ptetaphie.Px() * self.curjes_dn, jdef_ptetaphie.Py() * self.curjes_dn,
+                                           jdef_ptetaphie.Pz() * self.curjes_dn, jdef_ptetaphie.E()  * self.curjes_dn); ## scaled down jet
+
+
+             self.jet_mass_pr_up_[0] = jdef_up.M();  ## mass pruned up
+             self.jet_mass_pr_dn_[0] = jdef_dn.M();  ## mass pruned dwon
+
+             jorig_pt  = getattr( self.InputTree_, prefix + "_pt" )[0];    
+             jorig_eta = getattr( self.InputTree_, prefix + "_eta" )[0];    
+             jorig_phi = getattr( self.InputTree_, prefix + "_phi" )[0];    
+             jorig_e   = getattr( self.InputTree_, prefix + "_e" )[0];                        
+
+             jdef_ptetaphie.SetPtEtaPhiE(jorig_pt, jorig_eta, jorig_phi, jorig_e); ## original jet 4V after pruning
+
+             jdef_up.SetPxPyPzE(jdef_ptetaphie.Px() * self.curjes_up, jdef_ptetaphie.Py() * self.curjes_up,
+                                jdef_ptetaphie.Pz() * self.curjes_up, jdef_ptetaphie.E()  * self.curjes_up); ## scaled up jet
+             jdef_dn.SetPxPyPzE(jdef_ptetaphie.Px() * self.curjes_dn, jdef_ptetaphie.Py() * self.curjes_dn,
+                                jdef_ptetaphie.Pz() * self.curjes_dn, jdef_ptetaphie.E()  * self.curjes_dn); ## scaled down jet
+
+             self.jet_ungroomed_jet_pt_up_[0] = jdef_up.Pt(); ## ungroomed pt up
+             self.jet_ungroomed_jet_pt_dn_[0] = jdef_dn.Pt(); ## ungroomed pt down
+
+             ######## VBF jet Stuff --> maxpt pair
+             vbf_maxpt_j1    = ROOT.TLorentzVector(0,0,0,0);
+             vbf_maxpt_j2    = ROOT.TLorentzVector(0,0,0,0);
              vbf_maxpt_j1_up = ROOT.TLorentzVector(0,0,0,0);
              vbf_maxpt_j2_up = ROOT.TLorentzVector(0,0,0,0);
              vbf_maxpt_j1_dn = ROOT.TLorentzVector(0,0,0,0);
              vbf_maxpt_j2_dn = ROOT.TLorentzVector(0,0,0,0);
 
-             if self.numberJetBin_[0] ==0 :
-
+             if self.numberJetBin_[0] ==0 : ### no extra hard emission --> fill j1 and j2 with default values
               self.vbf_maxpt_jj_m_[0]     = 0;                               
               self.vbf_maxpt_jj_pt_[0]    = 0;                               
               self.vbf_maxpt_jj_eta_[0]   = 0;                               
@@ -939,8 +876,7 @@ class sampleWrapperClass:
               self.vbf_maxpt_j1_eta_[0]   = 0;   self.vbf_maxpt_j2_eta_[0] = 0;                               
               self.vbf_maxpt_j1_phi_[0]   = 0;   self.vbf_maxpt_j2_phi_[0] = 0;                               
 
-              self.vbf_maxpt_j1_QGLikelihood_[0] = 0; self.vbf_maxpt_j2_QGLikelihood_[0] = 0;                                
- 
+              self.vbf_maxpt_j1_QGLikelihood_[0]    = 0;  self.vbf_maxpt_j2_QGLikelihood_[0]    = 0;                                
               self.vbf_maxpt_j1_isPileUpMedium_[0]  = 0;  self.vbf_maxpt_j2_isPileUpMedium_[0]  = 0;                             
               self.vbf_maxpt_j1_isPileUpTight_[0]   = 0;  self.vbf_maxpt_j2_isPileUpTight_[0]   = 0;                               
 
@@ -980,7 +916,7 @@ class sampleWrapperClass:
               self.vbf_maxpt_j2_eta_up_[0] = 0;                                
               self.vbf_maxpt_j2_phi_up_[0] = 0;                                
 
-             ### one jet bin
+             ### one jet bin category --> fill j1 with the full information
              if self.numberJetBin_[0] ==1 :
 
               self.vbf_maxpt_jj_m_[0]     = 0;                               
@@ -1034,7 +970,7 @@ class sampleWrapperClass:
 
                self.vbf_maxpt_j2_bDiscriminatorCSV_gen_[0]  = 0;
 
-              ## scale the hardest jet  
+              ## scale the hardest jet up and down for JES systematic  
 
               j_jecfactorAK5_up_ = array('f',[0.]);
               j_jecfactorAK5_dn_ = array('f',[0.]);
@@ -1046,18 +982,18 @@ class sampleWrapperClass:
               self.jecUncAK5_.setJetPt(getattr( self.InputTree_, "vbf_maxpt_j1_pt" ));               
               j_jecfactorAK5_dn_[0] = self.jecUncAK5_.getUncertainty( False ) ;
 
-              vbf_maxpt_j1.SetPtEtaPhiM(self.vbf_maxpt_j1_pt_[0],self.vbf_maxpt_j1_eta_[0],self.vbf_maxpt_j1_phi_[0],self.vbf_maxpt_j1_m_[0]); 
+              vbf_maxpt_j1.SetPtEtaPhiM(self.vbf_maxpt_j1_pt_[0],self.vbf_maxpt_j1_eta_[0],self.vbf_maxpt_j1_phi_[0],self.vbf_maxpt_j1_m_[0]); ## original 4V
 
-              vbf_maxpt_j1_up.SetPxPyPzE(vbf_maxpt_j1.Px()*(1+j_jecfactorAK5_up_[0]),
+              vbf_maxpt_j1_up.SetPxPyPzE(vbf_maxpt_j1.Px()*(1+j_jecfactorAK5_up_[0]), 
                                          vbf_maxpt_j1.Py()*(1+j_jecfactorAK5_up_[0]),
                                          vbf_maxpt_j1.Pz()*(1+j_jecfactorAK5_up_[0]),
-                                         vbf_maxpt_j1.E()*(1+j_jecfactorAK5_up_[0]));
+                                         vbf_maxpt_j1.E()*(1+j_jecfactorAK5_up_[0])); ## scaled up
                                                    
 
               vbf_maxpt_j1_dn.SetPxPyPzE(vbf_maxpt_j1.Px()*(1-j_jecfactorAK5_dn_[0]),
                                          vbf_maxpt_j1.Py()*(1-j_jecfactorAK5_dn_[0]),
                                          vbf_maxpt_j1.Pz()*(1-j_jecfactorAK5_dn_[0]),
-                                         vbf_maxpt_j1.E()*(1-j_jecfactorAK5_dn_[0]));
+                                         vbf_maxpt_j1.E()*(1-j_jecfactorAK5_dn_[0])); ## scaled down
                                                     
               self.vbf_maxpt_j1_m_up_[0]   = vbf_maxpt_j1_up.M();                                
               self.vbf_maxpt_j1_pt_up_[0]  = vbf_maxpt_j1_up.Pt();                              
@@ -1079,7 +1015,7 @@ class sampleWrapperClass:
               self.vbf_maxpt_j2_eta_dn_[0] = 0;                                
               self.vbf_maxpt_j2_phi_dn_[0] = 0;                                
  
-             if self.numberJetBin_[0] >=2 :
+             if self.numberJetBin_[0] >=2 : ## 2 jet bin or vbf category
 
               self.vbf_maxpt_jj_m_[0]     = getattr(self.InputTree_, "vbf_maxpt_jj_m");                               
               self.vbf_maxpt_jj_pt_[0]    = getattr(self.InputTree_, "vbf_maxpt_jj_pt");                               
@@ -1139,11 +1075,11 @@ class sampleWrapperClass:
               self.jecUncAK5_.setJetPt(getattr( self.InputTree_, "vbf_maxpt_j1_pt" ));               
               j_jecfactorAK5_dn_[0] = self.jecUncAK5_.getUncertainty( False ) ;
 
-              vbf_maxpt_j1.SetPtEtaPhiM(self.vbf_maxpt_j1_pt_[0],self.vbf_maxpt_j1_eta_[0],self.vbf_maxpt_j1_phi_[0],self.vbf_maxpt_j1_m_[0]); 
+              vbf_maxpt_j1.SetPtEtaPhiM(self.vbf_maxpt_j1_pt_[0],self.vbf_maxpt_j1_eta_[0],self.vbf_maxpt_j1_phi_[0],self.vbf_maxpt_j1_m_[0]); ## original 4V
               vbf_maxpt_j1_up.SetPxPyPzE(vbf_maxpt_j1.Px()*(1+j_jecfactorAK5_up_[0]),
                                          vbf_maxpt_j1.Py()*(1+j_jecfactorAK5_up_[0]),
                                          vbf_maxpt_j1.Pz()*(1+j_jecfactorAK5_up_[0]),
-                                         vbf_maxpt_j1.E()*(1+j_jecfactorAK5_up_[0]));
+                                         vbf_maxpt_j1.E()*(1+j_jecfactorAK5_up_[0])); ## scaled up
                                                    
 
               self.vbf_maxpt_j1_m_up_[0]   = vbf_maxpt_j1_up.M();                                
@@ -1154,7 +1090,7 @@ class sampleWrapperClass:
               vbf_maxpt_j1_dn.SetPxPyPzE(vbf_maxpt_j1.Px()*(1-j_jecfactorAK5_dn_[0]),
                                          vbf_maxpt_j1.Py()*(1-j_jecfactorAK5_dn_[0]),
                                          vbf_maxpt_j1.Pz()*(1-j_jecfactorAK5_dn_[0]),
-                                         vbf_maxpt_j1.E()*(1-j_jecfactorAK5_dn_[0]));
+                                         vbf_maxpt_j1.E()*(1-j_jecfactorAK5_dn_[0])); ## scaled down 
                                                     
 
               self.vbf_maxpt_j1_m_dn_[0]   = vbf_maxpt_j1_dn.M();                                
@@ -1170,11 +1106,11 @@ class sampleWrapperClass:
               self.jecUncAK5_.setJetPt( getattr( self.InputTree_, "vbf_maxpt_j2_pt" ));               
               j_jecfactorAK5_dn_[0] = self.jecUncAK5_.getUncertainty( False ) ;
 
-              vbf_maxpt_j2.SetPtEtaPhiM(self.vbf_maxpt_j2_pt_[0],self.vbf_maxpt_j2_eta_[0],self.vbf_maxpt_j2_phi_[0],self.vbf_maxpt_j2_m_[0]); 
+              vbf_maxpt_j2.SetPtEtaPhiM(self.vbf_maxpt_j2_pt_[0],self.vbf_maxpt_j2_eta_[0],self.vbf_maxpt_j2_phi_[0],self.vbf_maxpt_j2_m_[0]); ## orginal 4V 
               vbf_maxpt_j2_up.SetPxPyPzE(vbf_maxpt_j2.Px()*(1+j_jecfactorAK5_up_[0]),
                                          vbf_maxpt_j2.Py()*(1+j_jecfactorAK5_up_[0]),
                                          vbf_maxpt_j2.Pz()*(1+j_jecfactorAK5_up_[0]),
-                                         vbf_maxpt_j2.E()*(1+j_jecfactorAK5_up_[0]));
+                                         vbf_maxpt_j2.E()*(1+j_jecfactorAK5_up_[0])); ## scaled up
                                                    
 
               self.vbf_maxpt_j2_m_up_[0]   = vbf_maxpt_j2_up.M();                                
@@ -1185,14 +1121,14 @@ class sampleWrapperClass:
               vbf_maxpt_j2_dn.SetPxPyPzE(vbf_maxpt_j2.Px()*(1-j_jecfactorAK5_dn_[0]),
                                          vbf_maxpt_j2.Py()*(1-j_jecfactorAK5_dn_[0]),
                                          vbf_maxpt_j2.Pz()*(1-j_jecfactorAK5_dn_[0]),
-                                         vbf_maxpt_j2.E()*(1-j_jecfactorAK5_dn_[0]));
+                                         vbf_maxpt_j2.E()*(1-j_jecfactorAK5_dn_[0])); ## scaled down
 
               self.vbf_maxpt_j2_m_dn_[0]   = vbf_maxpt_j2_dn.M();                                
               self.vbf_maxpt_j2_pt_dn_[0]  = vbf_maxpt_j2_dn.Pt();                              
               self.vbf_maxpt_j2_eta_dn_[0] = vbf_maxpt_j2_dn.Eta();                                
               self.vbf_maxpt_j2_phi_dn_[0] = vbf_maxpt_j2_dn.Phi();                                
 
-
+              ## max Deta pair --> same game repeated
               self.vbf_maxDeta_jj_m_[0]     = getattr(self.InputTree_, "vbf_maxDeta_jj_m");                               
               self.vbf_maxDeta_jj_pt_[0]    = getattr(self.InputTree_, "vbf_maxDeta_jj_pt");                               
               self.vbf_maxDeta_jj_eta_[0]   = getattr(self.InputTree_, "vbf_maxDeta_jj_eta");                               
@@ -1303,7 +1239,7 @@ class sampleWrapperClass:
               self.vbf_maxDeta_j2_pt_dn_[0]  = vbf_maxDeta_j2_dn.Pt();                              
               self.vbf_maxDeta_j2_eta_dn_[0] = vbf_maxDeta_j2_dn.Eta();                                
 
-
+              #### maxMjj --> same game repeated
               self.vbf_maxMjj_jj_m_[0]     = getattr(self.InputTree_, "vbf_maxMjj_jj_m");                               
               self.vbf_maxMjj_jj_pt_[0]    = getattr(self.InputTree_, "vbf_maxMjj_jj_pt");                               
               self.vbf_maxMjj_jj_eta_[0]   = getattr(self.InputTree_, "vbf_maxMjj_jj_eta");                               
@@ -1412,32 +1348,25 @@ class sampleWrapperClass:
               self.vbf_maxMjj_j2_pt_dn_[0]  = vbf_maxMjj_j2_dn.Pt();                              
               self.vbf_maxMjj_j2_eta_dn_[0] = vbf_maxMjj_j2_dn.Eta();                                
 
-
-
              ####### build met and lepton -> scale up and down the met according to the jet -> buld the final invariant mass
-             
              met_vector_type0_met_up = ROOT.TLorentzVector();
              met_vector_type0_met_dn = ROOT.TLorentzVector();
-             met_vector_type0_met_up.SetPxPyPzE(getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Cos(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Sin(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr( self.InputTree_, "W_nu1_pz_type0_met" ),+ROOT.TMath.Sqrt(getattr(self.InputTree_, "event_met_pfmet")*getattr(self.InputTree_,"event_met_pfmet")+getattr(self.InputTree_, "W_nu1_pz_type0_met")*getattr( self.InputTree_,"W_nu1_pz_type0_met")));
+             met_vector_type0_met_up.SetPxPyPzE(getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Cos(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Sin(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr( self.InputTree_, "W_nu1_pz_type0_met" ),+ROOT.TMath.Sqrt(getattr(self.InputTree_, "event_met_pfmet")*getattr(self.InputTree_,"event_met_pfmet")+getattr(self.InputTree_, "W_nu1_pz_type0_met")*getattr( self.InputTree_,"W_nu1_pz_type0_met"))); ## original met 4V
+             met_vector_type0_met_dn = met_vector_type0_met_up ;
 
              met_vector_type2_met_up = ROOT.TLorentzVector();
              met_vector_type2_met_dn = ROOT.TLorentzVector();
-             met_vector_type2_met_up.SetPxPyPzE(getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Cos(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Sin(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr( self.InputTree_, "W_nu1_pz_type2_met" ),+ROOT.TMath.Sqrt(getattr(self.InputTree_, "event_met_pfmet")*getattr(self.InputTree_,"event_met_pfmet")+getattr(self.InputTree_, "W_nu1_pz_type2_met")*getattr( self.InputTree_,"W_nu1_pz_type2_met")));
-
-          
-             met_vector_type0_met_dn = met_vector_type0_met_up ;
+             met_vector_type2_met_up.SetPxPyPzE(getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Cos(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Sin(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr( self.InputTree_, "W_nu1_pz_type2_met" ),+ROOT.TMath.Sqrt(getattr(self.InputTree_, "event_met_pfmet")*getattr(self.InputTree_,"event_met_pfmet")+getattr(self.InputTree_, "W_nu1_pz_type2_met")*getattr( self.InputTree_,"W_nu1_pz_type2_met"))); ## original met 4V, different pZ solution
              met_vector_type2_met_dn = met_vector_type2_met_up ;
 
+             for iJet in range(6): ## loop on all the ak5 jet central collection
 
-             for iJet in range(6):
-
-               if getattr( self.InputTree_, "JetPFCor_Pt" )[iJet] > 0. :
-                   
+               if getattr( self.InputTree_, "JetPFCor_Pt" )[iJet] > 0. : ## loop on the central collection
                 jet_vector = ROOT.TLorentzVector();
                 jet_vector.SetPtEtaPhiE(getattr( self.InputTree_,"JetPFCor_Pt")[iJet],
-                                       getattr( self.InputTree_,"JetPFCor_Eta")[iJet],
-                                       getattr( self.InputTree_,"JetPFCor_Phi")[iJet],
-                                       getattr( self.InputTree_,"JetPFCor_E")[iJet]);
+                                        getattr( self.InputTree_,"JetPFCor_Eta")[iJet],
+                                        getattr( self.InputTree_,"JetPFCor_Phi")[iJet],
+                                        getattr( self.InputTree_,"JetPFCor_E")[iJet]); ## original 4V
 
                 self.jecUncAK5_.setJetEta( getattr(self.InputTree_, "JetPFCor_Eta")[iJet]);
                 self.jecUncAK5_.setJetPt(  getattr(self.InputTree_, "JetPFCor_Pt" )[iJet]);                        
@@ -1449,24 +1378,24 @@ class sampleWrapperClass:
 
 
                 jet_vector_up = ROOT.TLorentzVector(jet_vector.Px() * (1+j_jecfactorAK5_up), jet_vector.Py() * (1+j_jecfactorAK5_up),
-                                                    jet_vector.Pz() * (1+j_jecfactorAK5_up), jet_vector.E() * (1+j_jecfactorAK5_up)); 
+                                                    jet_vector.Pz() * (1+j_jecfactorAK5_up), jet_vector.E() * (1+j_jecfactorAK5_up)); ## vector up
 
                 jet_vector_dn = ROOT.TLorentzVector(jet_vector.Px() * (1-j_jecfactorAK5_dn), jet_vector.Py() * (1-j_jecfactorAK5_dn),
-                                                    jet_vector.Pz() * (1-j_jecfactorAK5_dn), jet_vector.E() * (1-j_jecfactorAK5_dn));
+                                                    jet_vector.Pz() * (1-j_jecfactorAK5_dn), jet_vector.E() * (1-j_jecfactorAK5_dn)); ## vector down
 
-                met_vector_type0_met_up = met_vector_type0_met_up + (jet_vector - jet_vector_up)  ;
-                met_vector_type0_met_dn = met_vector_type0_met_dn + (jet_vector - jet_vector_dn)  ;
+                met_vector_type0_met_up = met_vector_type0_met_up + (jet_vector - jet_vector_up)  ; ## new met 4V up
+                met_vector_type0_met_dn = met_vector_type0_met_dn + (jet_vector - jet_vector_dn)  ; ## new met 4V dn
 
                 met_vector_type2_met_up = met_vector_type2_met_up + (jet_vector - jet_vector_up)  ;
                 met_vector_type2_met_dn = met_vector_type2_met_dn + (jet_vector - jet_vector_dn)  ;
 
-               if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet] > 0. :
+               if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet] > 0. : ## loop on the forward collection
                    
                 jet_vector = ROOT.TLorentzVector();
                 jet_vector.SetPtEtaPhiE(getattr( self.InputTree_,"JetPFCorVBFTag_Pt")[iJet],
                                         getattr( self.InputTree_,"JetPFCorVBFTag_Eta")[iJet],
                                         getattr( self.InputTree_,"JetPFCorVBFTag_Phi")[iJet],
-                                        getattr( self.InputTree_,"JetPFCor_E")[iJet]);
+                                        getattr( self.InputTree_,"JetPFCorVBFTag_E")[iJet]); ## original 4V 
   
                 self.jecUncAK5_.setJetEta( getattr(self.InputTree_, "JetPFCorVBFTag_Eta")[iJet]);
                 self.jecUncAK5_.setJetPt(  getattr(self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet]);                        
@@ -1478,10 +1407,10 @@ class sampleWrapperClass:
 
 
                 jet_vector_up = ROOT.TLorentzVector(jet_vector.Px() * (1+j_jecfactorAK5_up), jet_vector.Py() * (1+j_jecfactorAK5_up),
-                                                    jet_vector.Pz() * (1+j_jecfactorAK5_up), jet_vector.E() * (1+j_jecfactorAK5_up));
+                                                    jet_vector.Pz() * (1+j_jecfactorAK5_up), jet_vector.E() * (1+j_jecfactorAK5_up)); ## scaled up
 
                 jet_vector_dn = ROOT.TLorentzVector(jet_vector.Px() * (1-j_jecfactorAK5_dn), jet_vector.Py() * (1-j_jecfactorAK5_dn),
-                                                    jet_vector.Pz() * (1-j_jecfactorAK5_dn), jet_vector.E() * (1-j_jecfactorAK5_dn));
+                                                    jet_vector.Pz() * (1-j_jecfactorAK5_dn), jet_vector.E() * (1-j_jecfactorAK5_dn)); ## scaled down
 
                 met_vector_type0_met_up = met_vector_type0_met_up + (jet_vector - jet_vector_up)  ;
                 met_vector_type0_met_dn = met_vector_type0_met_dn + (jet_vector - jet_vector_dn)  ;
@@ -1490,12 +1419,13 @@ class sampleWrapperClass:
                 met_vector_type2_met_dn = met_vector_type2_met_dn + (jet_vector - jet_vector_dn)  ;
 
               
-             self.pfMET_up_[0] = met_vector_type0_met_up.Pt(); 
+             self.pfMET_up_[0] = met_vector_type0_met_up.Pt();  ## scaled up met
              self.pfMET_Phi_up_[0] = met_vector_type0_met_up.Phi(); 
 
-             self.pfMET_dn_[0] = met_vector_type0_met_dn.Pt(); 
+             self.pfMET_dn_[0] = met_vector_type0_met_dn.Pt(); ## scaled down met
              self.pfMET_Phi_dn_[0] = met_vector_type0_met_dn.Phi(); 
 
+             ### final invariant mass --> shape and normalization sys 
              lepton_vector = ROOT.TLorentzVector();
              lepton_vector.SetPxPyPzE(getattr(self.InputTree_, "W_"+lepLabel+"_px"),
                                       getattr(self.InputTree_, "W_"+lepLabel+"_py"),
@@ -1509,24 +1439,22 @@ class sampleWrapperClass:
              jet_e   = getattr( self.InputTree_, prefix + "_e" )[0];                        
 
              jet_ptetaphie = ROOT.TLorentzVector();
-             jet_ptetaphie.SetPtEtaPhiE(jet_pt, jet_eta, jet_phi, jet_e)
+             jet_ptetaphie.SetPtEtaPhiE(jet_pt, jet_eta, jet_phi, jet_e) ## original ungroomed W-jet 4V
 
              jet_up = ROOT.TLorentzVector(jet_ptetaphie.Px() * self.curjes_up, jet_ptetaphie.Py() * self.curjes_up,
-                                          jet_ptetaphie.Pz() * self.curjes_up, jet_ptetaphie.E() * self.curjes_up);
+                                          jet_ptetaphie.Pz() * self.curjes_up, jet_ptetaphie.E()  * self.curjes_up);
              jet_dn = ROOT.TLorentzVector(jet_ptetaphie.Px() * self.curjes_dn, jet_ptetaphie.Py() * self.curjes_dn,
-                                          jet_ptetaphie.Pz() * self.curjes_dn, jet_ptetaphie.E() * self.curjes_dn);
+                                          jet_ptetaphie.Pz() * self.curjes_dn, jet_ptetaphie.E()  * self.curjes_dn);
 
 
-             self.mass_lvj_type0_met_up_[0] = (lepton_vector + jet_up + met_vector_type0_met_up).M();
-             self.mass_lvj_type0_met_dn_[0] = (lepton_vector + jet_dn + met_vector_type0_met_dn).M();
+             self.mass_lvj_type0_met_up_[0] = (lepton_vector + jet_up + met_vector_type0_met_up).M(); ## final invariant mass up
+             self.mass_lvj_type0_met_dn_[0] = (lepton_vector + jet_dn + met_vector_type0_met_dn).M(); ## final invariant mass dn
   
              self.mass_lvj_type2_met_up_[0] = (lepton_vector + jet_up + met_vector_type2_met_up).M();
              self.mass_lvj_type2_met_dn_[0] = (lepton_vector + jet_dn + met_vector_type2_met_dn).M();
 
 
              ######### btag stuff  
-
-             dR_lj = 0. ;
              index_ak5_cvst = array( 'f', [0.] );
              index_ak5_cvsm = array( 'f', [0.] );
              index_ak5_cvsl = array( 'f', [0.] );
@@ -1538,102 +1466,92 @@ class sampleWrapperClass:
              self.nbjets_csvm_veto_[0] = 0. ;
              self.nbjets_csvt_veto_[0] = 0. ;
                  
-
              ## take the delta R between leading CA8 jet and the lepton 
-             for i in range(6):
-                    if getattr( self.InputTree_, "JetPFCor_Pt" )[i] < 0 : break ;                        
-                    if getattr( self.InputTree_, "JetPFCor_Pt" )[i] > 30:
-                        j_ak5_eta = getattr( self.InputTree_, "JetPFCor_Eta" )[i]
-                        j_ak5_phi = getattr( self.InputTree_, "JetPFCor_Phi" )[i]
+             dR_lj = 0. ;
+             for iJet in range(6):
+                    if getattr( self.InputTree_, "JetPFCor_Pt" )[iJet] < 0 : break ;                        
+                    if getattr( self.InputTree_, "JetPFCor_Pt" )[iJet] > 30:
+
+                        j_ak5_eta = getattr( self.InputTree_, "JetPFCor_Eta" )[iJet];
+                        j_ak5_phi = getattr( self.InputTree_, "JetPFCor_Phi" )[iJet];
                                                                                 
-                        l_phi = getattr( self.InputTree_, "W_"+lepLabel+"_phi" )                
-                        l_eta = getattr( self.InputTree_, "W_"+lepLabel+"_eta" )                
+                        l_phi = getattr( self.InputTree_, "W_"+lepLabel+"_phi" );                
+                        l_eta = getattr( self.InputTree_, "W_"+lepLabel+"_eta" );                
+
                         dR_jj = math.sqrt( (j_ak5_eta - getattr(self.InputTree_, prefix+"_eta")[0])**2 + deltaphi(j_ak5_phi,getattr(self.InputTree_, prefix+"_phi")[0])**2 );
                         dR_lj = math.sqrt( (l_eta - j_ak5_eta)**2 + deltaphi(l_phi,j_ak5_phi)**2 );
-                        if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] >=0.244: self.nbjets_csvl_veto_[0] = self.nbjets_csvl_veto_[0]+1;
-                        if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] >=0.679: self.nbjets_csvm_veto_[0] = self.nbjets_csvm_veto_[0]+1;
-                        if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] >=0.898: self.nbjets_csvt_veto_[0] = self.nbjets_csvt_veto_[0]+1;
+
+                        if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] >=0.244: self.nbjets_csvl_veto_[0] = self.nbjets_csvl_veto_[0]+1;
+                        if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] >=0.679: self.nbjets_csvm_veto_[0] = self.nbjets_csvm_veto_[0]+1;
+                        if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] >=0.898: self.nbjets_csvt_veto_[0] = self.nbjets_csvt_veto_[0]+1;
                         
                         if dR_jj > 0.8: 
-                          if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] >=0.244: index_ak5_cvsl.append(i)
-                          if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] >=0.679: index_ak5_cvsm.append(i)
-                          if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.898: index_ak5_cvst.append(i);
+                          if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] >=0.244: index_ak5_cvsl.append(iJet);
+                          if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] >=0.679: index_ak5_cvsm.append(iJet);
+                          if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.898: index_ak5_cvst.append(iJet);
 
-             for i in range(6):
-                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[i] < 0 : break ;                        
-                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[i] > 30:
-                        j_ak5_eta = getattr( self.InputTree_, "JetPFCorVBFTag_Eta" )[i]
-                        j_ak5_phi = getattr( self.InputTree_, "JetPFCorVBFTag_Phi" )[i]
-                        l_phi = getattr( self.InputTree_, "W_"+lepLabel+"_phi" )                
-                        l_eta = getattr( self.InputTree_, "W_"+lepLabel+"_eta" )                
+             for iJet in range(6):
+                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet] < 0 : break ;                        
+                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet] > 30:
+                        
+                        j_ak5_eta = getattr( self.InputTree_, "JetPFCorVBFTag_Eta" )[iJet];
+                        j_ak5_phi = getattr( self.InputTree_, "JetPFCorVBFTag_Phi" )[iJet];
+
+                        l_phi = getattr( self.InputTree_, "W_"+lepLabel+"_phi" );                
+                        l_eta = getattr( self.InputTree_, "W_"+lepLabel+"_eta" );                
+
                         dR_jj = math.sqrt( (j_ak5_eta - getattr(self.InputTree_, prefix+"_eta")[0])**2 + deltaphi(j_ak5_phi,getattr(self.InputTree_, prefix+"_phi")[0])**2 );
                         dR_lj = math.sqrt( (l_eta - j_ak5_eta)**2 + deltaphi(l_phi,j_ak5_phi)**2 );
-                        if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] >=0.244: self.nbjets_csvl_veto_[0] = self.nbjets_csvl_veto_[0]+1;
-                        if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] >=0.679: self.nbjets_csvm_veto_[0] = self.nbjets_csvm_veto_[0]+1;
-                        if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[i] >=0.898: self.nbjets_csvt_veto_[0] = self.nbjets_csvt_veto_[0]+1;
+
+                        if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] >=0.244: self.nbjets_csvl_veto_[0] = self.nbjets_csvl_veto_[0]+1;
+                        if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] >=0.679: self.nbjets_csvm_veto_[0] = self.nbjets_csvm_veto_[0]+1;
+                        if getattr( self.InputTree_, "JetPFCorVBFTag_bDiscriminatorCSV" )[iJet] >=0.898: self.nbjets_csvt_veto_[0] = self.nbjets_csvt_veto_[0]+1;
+
                         if dR_jj > 0.8: 
-                          if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] >=0.244: index_ak5_cvsl.append(i)
-                          if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] >=0.679: index_ak5_cvsm.append(i)
-                          if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[i] > 0.898: index_ak5_cvst.append(i);
+                          if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] >=0.244: index_ak5_cvsl.append(iJet);
+                          if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] >=0.679: index_ak5_cvsm.append(iJet);
+                          if getattr( self.InputTree_, "JetPFCor_bDiscriminatorCSV" )[iJet] > 0.898: index_ak5_cvst.append(iJet);
 
                
-             self.nbjets_csvl_veto_cleaned_[0] = len(index_ak5_in_oppoHemi_csvl);
-             self.nbjets_csvm_veto_cleaned_[0] = len(index_ak5_in_oppoHemi_csvm);
-             self.nbjets_csvt_veto_cleaned_[0] = len(index_ak5_in_oppoHemi_csvt);
+             self.nbjets_csvl_veto_cleaned_[0] = len(index_ak5_cvsl);
+             self.nbjets_csvm_veto_cleaned_[0] = len(index_ak5_cvsm);
+             self.nbjets_csvt_veto_cleaned_[0] = len(index_ak5_cvst);
 
              self.nbjets_ssvhem_veto_  = getattr( self.InputTree_, "numPFCorJetBTags");
-
              self.njets_[0] = getattr( self.InputTree_, "numPFCorJets" ) + getattr( self.InputTree_, "numPFCorVBFTagJets" ) ;
                
-             listOfVarArray1[0][0] = self.jet_qjetvol_[0];
-             listOfVarArray1[1][0] = self.jet_tau2tau1_[0];
-
-             listOfVarArray2[0][0] = self.jet_qjetvol_[0];
-             listOfVarArray2[1][0] = self.jet_tau2tau1_[0];
-
-
-             ## top mass veto selection  -- > hadronic leg
+             ############## top mass veto selection  -- > hadronic leg
              mass_top_veto_j1  = ROOT.TLorentzVector();
              mass_top_veto_j2  = ROOT.TLorentzVector();
              mass_top_veto     = ROOT.TLorentzVector();
 
              
              mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt")[0],getattr(self.InputTree_, prefix+"_eta")[0],getattr(self.InputTree_, prefix+"_phi")[0],
-                                          getattr(self.InputTree_, prefix+"_mass")[0]);
-
-             mass_top_veto_j2.SetPtEtaPhiM(getattr(self.InputTree_,  "vbf_maxpt_j1_pt"),getattr(self.InputTree_, "vbf_maxpt_j1_eta"),getattr(self.InputTree_, "vbf_maxpt_j1_phi"),
-                                          getattr(self.InputTree_,   "vbf_maxpt_j1_m"));
-
-
-             mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
-                                         
-             self.mass_ungroomedjet_vbf_j1_[0]  = mass_top_veto.M();
-
-             mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt_pr")[0],getattr(self.InputTree_, prefix+"_eta_pr")[0],getattr(self.InputTree_, prefix+"_phi_pr")[0],
-                                          getattr(self.InputTree_, prefix+"_mass_pr")[0]);
-
-             mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
-
-
-             self.mass_ungroomedjet_vbf_j1_pr_[0]  = mass_top_veto.M();
-
-             mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt")[0],getattr(self.InputTree_, prefix+"_eta")[0],getattr(self.InputTree_, prefix+"_phi")[0],
                                            getattr(self.InputTree_, prefix+"_mass")[0]);
 
-             mass_top_veto_j2.SetPtEtaPhiM(getattr(self.InputTree_,  "vbf_maxpt_j2_pt"),getattr(self.InputTree_, "vbf_maxpt_j2_eta"),getattr(self.InputTree_, "vbf_maxpt_j2_phi"),
-                                          getattr(self.InputTree_,   "vbf_maxpt_j2_m"));
-
-
+             mass_top_veto_j2.SetPtEtaPhiM(getattr(self.InputTree_,  "vbf_maxpt_j1_pt"),getattr(self.InputTree_, "vbf_maxpt_j1_eta"),getattr(self.InputTree_, "vbf_maxpt_j1_phi"),
+                                           getattr(self.InputTree_,   "vbf_maxpt_j1_m"));
              mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
-                                         
-             self.mass_ungroomedjet_vbf_j2_[0]  = mass_top_veto.M();
+             self.mass_ungroomedjet_vbf_j1_[0]  = mass_top_veto.M();
+
 
              mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt_pr")[0],getattr(self.InputTree_, prefix+"_eta_pr")[0],getattr(self.InputTree_, prefix+"_phi_pr")[0],
                                            getattr(self.InputTree_, prefix+"_mass_pr")[0]);
-
              mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
+             self.mass_ungroomedjet_vbf_j1_pr_[0]  = mass_top_veto.M();
 
 
+             mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt")[0],getattr(self.InputTree_, prefix+"_eta")[0],getattr(self.InputTree_, prefix+"_phi")[0],
+                                           getattr(self.InputTree_, prefix+"_mass")[0]);
+             mass_top_veto_j2.SetPtEtaPhiM(getattr(self.InputTree_,  "vbf_maxpt_j2_pt"),getattr(self.InputTree_, "vbf_maxpt_j2_eta"),getattr(self.InputTree_, "vbf_maxpt_j2_phi"),
+                                           getattr(self.InputTree_,   "vbf_maxpt_j2_m"));
+             mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
+             self.mass_ungroomedjet_vbf_j2_[0]  = mass_top_veto.M();
+
+
+             mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt_pr")[0],getattr(self.InputTree_, prefix+"_eta_pr")[0],getattr(self.InputTree_, prefix+"_phi_pr")[0],
+                                           getattr(self.InputTree_, prefix+"_mass_pr")[0]);
+             mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
              self.mass_ungroomedjet_vbf_j2_pr_[0]  = mass_top_veto.M();
 
 
@@ -1642,11 +1560,12 @@ class sampleWrapperClass:
              ijet_index = -1 ;
              ijet_index_pr = -1 ;
 
-             for i in range(6):
-                    if getattr( self.InputTree_, "JetPFCor_Pt" )[i] < 0 : break ;                        
-                    if getattr( self.InputTree_, "JetPFCor_Pt" )[i] > 30:
-                        j_ak5_eta = getattr( self.InputTree_, "JetPFCor_Eta" )[i];
-                        j_ak5_phi = getattr( self.InputTree_, "JetPFCor_Phi" )[i];
+             for iJet in range(6): ## loop on central jets 
+                    if getattr( self.InputTree_, "JetPFCor_Pt" )[iJet] < 0 : break ;                        
+                    if getattr( self.InputTree_, "JetPFCor_Pt" )[iJet] > 30:
+
+                        j_ak5_eta = getattr( self.InputTree_, "JetPFCor_Eta" )[iJet];
+                        j_ak5_phi = getattr( self.InputTree_, "JetPFCor_Phi" )[iJet];
                                                                                 
                         ca8_eta = getattr(self.InputTree_, prefix+"_eta")[0];
                         ca8_phi = getattr(self.InputTree_, prefix+"_phi")[0];                
@@ -1655,22 +1574,23 @@ class sampleWrapperClass:
                         ca8_phi_pr = getattr(self.InputTree_, prefix+"_phi_pr")[0];
 
                         dR_jj = math.sqrt( (j_ak5_eta-ca8_eta)**2 + deltaphi(j_ak5_phi,ca8_phi)**2 );
-                        if dR_jj < 0.8 : continue ;
-                        if(dR_jj < dR_jj_min):
-                            ijet_index = i;
+
+                        if dR_jj < 0.8 : continue ; ## only jets outside ca8 cone
+                        if(dR_jj < dR_jj_min): ## take the closer to the W
+                            ijet_index = iJet;
                             dR_jj_min = dR_jj ;
+                            
                         dR_jj_pr = math.sqrt( (ca8_eta_pr-j_ak5_eta)**2 + deltaphi(ca8_phi_pr,j_ak5_phi)**2 );
                         if dR_jj_pr < 0.8 : continue ;
                         if(dR_jj_pr < dR_jj_pr_min):                                
-                            ijet_index_pr = i;
+                            ijet_index_pr = iJet;
                             dR_jj_pr_min = dR_jj_pr ;
 
-
-             for i in range(6):
-                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[i] < 0 : break ;                        
-                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[i] > 30:
-                        j_ak5_eta = getattr( self.InputTree_, "JetPFCorVBFTag_Eta" )[i];
-                        j_ak5_phi = getattr( self.InputTree_, "JetPFCorVBFTag_Phi" )[i];
+             for iJet in range(6): ## same thing looping on the forward jets
+                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet] < 0 : break ;                        
+                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet] > 30:
+                        j_ak5_eta = getattr( self.InputTree_, "JetPFCorVBFTag_Eta" )[iJet];
+                        j_ak5_phi = getattr( self.InputTree_, "JetPFCorVBFTag_Phi" )[iJet];
                                                                                 
                         ca8_eta = getattr(self.InputTree_, prefix+"_eta")[0];
                         ca8_phi = getattr(self.InputTree_, prefix+"_phi")[0];                
@@ -1679,18 +1599,20 @@ class sampleWrapperClass:
                         ca8_phi_pr = getattr(self.InputTree_, prefix+"_phi_pr")[0];
 
                         dR_jj = math.sqrt( (j_ak5_eta-ca8_eta)**2 + deltaphi(j_ak5_phi,ca8_phi)**2 );
+
                         if dR_jj < 0.8 : continue ;
                         if(dR_jj < dR_jj_min):
-                            ijet_index = i+7;
+                            ijet_index = iJet+7;
                             dR_jj_min = dR_jj ;
+
                         dR_jj_pr = math.sqrt( (ca8_eta_pr-j_ak5_eta)**2 + deltaphi(ca8_phi_pr,j_ak5_phi)**2 );
                         if dR_jj_pr < 0.8 : continue ;
                         if(dR_jj_pr < dR_jj_pr_min):                                
-                            ijet_index_pr = i+7;
+                            ijet_index_pr = iJet+7;
                             dR_jj_pr_min = dR_jj_pr ;
 
 
-             if(ijet_index < 7 and ijet_index !=-1):
+             if(ijet_index < 7 and ijet_index !=-1): ## found a good jet in the central region
 
               mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt")[0],getattr(self.InputTree_, prefix+"_eta")[0],getattr(self.InputTree_, prefix+"_phi")[0],
                                             getattr(self.InputTree_, prefix+"_mass")[0]);
@@ -1701,19 +1623,16 @@ class sampleWrapperClass:
                                             getattr(self.InputTree_, "JetPFCor_Mass")[ijet_index]);
     
               mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
-                                         
-
               self.mass_ungroomedjet_closerjet_[0]  = mass_top_veto.M();
+
 
               mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt_pr")[0],getattr(self.InputTree_, prefix+"_eta_pr")[0],getattr(self.InputTree_, prefix+"_phi_pr")[0],
                                             getattr(self.InputTree_, prefix+"_mass_pr")[0]);
-
               mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
-                                         
               self.mass_ungroomedjet_closerjet_pr_[0]  = mass_top_veto.M();
 
 
-             elif (ijet_index !=-1 and ijet_index >= 7) :
+             elif (ijet_index !=-1 and ijet_index >= 7) : ## found a good jet in the forward region
 
               mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt")[0],getattr(self.InputTree_, prefix+"_eta")[0],getattr(self.InputTree_, prefix+"_phi")[0],
                                            getattr(self.InputTree_, prefix+"_mass")[0]);
@@ -1724,18 +1643,15 @@ class sampleWrapperClass:
                                             getattr(self.InputTree_,  "JetPFCorVBFTag_Mass")[ijet_index-7]);
     
               mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
-                                         
               self.mass_ungroomedjet_closerjet_[0]  = mass_top_veto.M();
 
               mass_top_veto_j1.SetPtEtaPhiM(getattr(self.InputTree_, prefix+"_pt_pr")[0],getattr(self.InputTree_, prefix+"_eta_pr")[0],getattr(self.InputTree_, prefix+"_phi_pr")[0],
                                             getattr(self.InputTree_, prefix+"_mass_pr")[0]);
-
               mass_top_veto = mass_top_veto_j1 + mass_top_veto_j2;
-                                         
               self.mass_ungroomedjet_closerjet_pr_[0]  = mass_top_veto.M();
 
-              ### top mass veto --> leptonic leg
 
+             ### top mass veto --> leptonic leg
              dR_lj_min = 100 ;
              ijet_index = -1 ;
 
@@ -1746,11 +1662,11 @@ class sampleWrapperClass:
                                    getattr(self.InputTree_, "W_"+lepLabel+"_e")+ROOT.TMath.Sqrt(getattr(self.InputTree_, "event_met_pfmet")*getattr(self.InputTree_,"event_met_pfmet")+
                                    getattr(self.InputTree_, "W_nu1_pz_type0_met")*getattr( self.InputTree_,"W_nu1_pz_type0_met")));
 
-             for i in range(6):
-                    if getattr( self.InputTree_, "JetPFCor_Pt" )[i] < 0 : break ;                        
-                    if getattr( self.InputTree_, "JetPFCor_Pt" )[i] > 30:
-                        j_ak5_eta = getattr( self.InputTree_, "JetPFCor_Eta" )[i];
-                        j_ak5_phi = getattr( self.InputTree_, "JetPFCor_Phi" )[i];
+             for iJet in range(6): ## loop on central jets
+                    if getattr( self.InputTree_, "JetPFCor_Pt" )[iJet] < 0 : break ;                        
+                    if getattr( self.InputTree_, "JetPFCor_Pt" )[iJet] > 30:
+                        j_ak5_eta = getattr( self.InputTree_, "JetPFCor_Eta" )[iJet];
+                        j_ak5_phi = getattr( self.InputTree_, "JetPFCor_Phi" )[iJet];
                                                                                 
                         l_eta = getattr( self.InputTree_, "W_"+lepLabel+"_eta" );
                         l_phi = getattr( self.InputTree_, "W_"+lepLabel+"_phi" );                
@@ -1763,15 +1679,15 @@ class sampleWrapperClass:
 
                         if dR_jj < 0.8 : continue ;
                         if(dR_lj < dR_lj_min):
-                            ijet_index = i;
+                            ijet_index = iJet;
                             dR_lj_min = dR_lj ;
 
 
-             for i in range(6):
-                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[i] < 0 : break ;                        
-                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[i] > 30:
-                        j_ak5_eta = getattr( self.InputTree_, "JetPFCorVBFTag_Eta" )[i];
-                        j_ak5_phi = getattr( self.InputTree_, "JetPFCorVBFTag_Phi" )[i];
+             for iJet in range(6):
+                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet] < 0 : break ;                        
+                    if getattr( self.InputTree_, "JetPFCorVBFTag_Pt" )[iJet] > 30:
+                        j_ak5_eta = getattr( self.InputTree_, "JetPFCorVBFTag_Eta" )[iJet];
+                        j_ak5_phi = getattr( self.InputTree_, "JetPFCorVBFTag_Phi" )[iJet];
                                                                                 
                         ca8_eta = getattr(self.InputTree_, prefix+"_eta")[0];
                         ca8_phi = getattr(self.InputTree_, prefix+"_phi")[0];                
@@ -1784,38 +1700,29 @@ class sampleWrapperClass:
 
                         if dR_jj < 0.8 : continue ;
                         if(dR_lj < dR_lj_min):
-                            ijet_index = i;
+                            ijet_index = iJet;
                             dR_lj_min = dR_lj ;
 
              if(ijet_index < 7 and ijet_index !=-1):
-
 
               mass_top_veto_j2.SetPtEtaPhiM(getattr(self.InputTree_, "JetPFCor_Pt")[ijet_index],
                                             getattr(self.InputTree_, "JetPFCor_Eta")[ijet_index],
                                             getattr(self.InputTree_, "JetPFCor_Phi")[ijet_index],
                                             getattr(self.InputTree_, "JetPFCor_Mass")[ijet_index]);
-    
               mass_top_veto = leptonic_W + mass_top_veto_j2;
-                                         
-
               self.mass_leptonic_closerjet_[0]  = mass_top_veto.M();
 
 
              elif (ijet_index !=-1 and ijet_index >= 7) :
-
-
               mass_top_veto_j2.SetPtEtaPhiM(getattr(self.InputTree_, "JetPFCorVBFTag_Pt")[ijet_index-7],
                                             getattr(self.InputTree_,  "JetPFCorVBFTag_Eta")[ijet_index-7],
                                             getattr(self.InputTree_,  "JetPFCorVBFTag_Phi")[ijet_index-7],
                                             getattr(self.InputTree_,  "JetPFCorVBFTag_Mass")[ijet_index-7]);
-    
               mass_top_veto = leptonic_W + mass_top_veto_j2;
-                                         
               self.mass_leptonic_closerjet_[0]  = mass_top_veto.M();
 
               
              ### Fill the output tree
-
              self.otree.Fill();
 
         ### close the file 
@@ -1823,10 +1730,10 @@ class sampleWrapperClass:
         self.otree.Write();
         self.OFile_.Close();
 
+    ### Initialize the variables used to fill the output branches
     def InitializeVariables(self):
 
         ### event Property and weights
-
         self.nPV_               = array( 'f', [ 0. ] );                        
         self.event_runNo_       = array( 'i', [ 0 ] );
         self.event_lumi_        = array( 'i', [ 0 ] );
@@ -1837,7 +1744,7 @@ class sampleWrapperClass:
         self.wSampleWeight_     = array( 'f', [ 0. ] );
         self.event_weight_      = array( 'f', [ 0. ] );
         
-        self.btag_weight_ = array( 'f', [0.]); 
+        self.btag_weight_    = array( 'f', [0.]); 
         self.btag_weight_up_ = array( 'f', [0.]); 
         self.btag_weight_dn_ = array( 'f', [0.]); 
         self.btag_weight_up_dn_ = array( 'f', [0.]); 
@@ -1849,29 +1756,38 @@ class sampleWrapperClass:
         self.interference_Weight_H900_  = array( 'f', [ 0. ] );                                
         self.interference_Weight_H1000_ = array( 'f', [ 0. ] );                                
 
-        self.cps_Weight_H600_ = array( 'f', [ 0. ] );                                
-        self.cps_Weight_H700_ = array( 'f', [ 0. ] );                                
-        self.cps_Weight_H800_ = array( 'f', [ 0. ] );                                
-        self.cps_Weight_H900_ = array( 'f', [ 0. ] );                                
+        self.cps_Weight_H600_  = array( 'f', [ 0. ] );                                
+        self.cps_Weight_H700_  = array( 'f', [ 0. ] );                                
+        self.cps_Weight_H800_  = array( 'f', [ 0. ] );                                
+        self.cps_Weight_H900_  = array( 'f', [ 0. ] );                                
         self.cps_Weight_H1000_ = array( 'f', [ 0. ] );                                
 
-        ########## event topology variables
+        ########## bsm branches for ewk signlet 
+        self.cprimeVals   = [1,2,3,4,5,6,7,8,9,10] ;
+        self.brnewVals    = [00, 01, 02, 03, 04, 05] ;
+        self.bsmReweights = [];
+        
+        for iPar in range(len(self.cprimeVals)): 
+          col_bsmReweights = [];
+          for jPar in range(len(self.brnewVals)): 
+            col_bsmReweights.append( array( 'f', [ 0. ] ) );
+          self.bsmReweights.append( col_bsmReweights );
 
-        self.issignal_     = array( 'i', [ 0 ] );             
-        self.numberJetBin_ = array( 'i', [ 0 ] );
+        ########## event topology variables
+        self.issignal_      = array( 'i', [ 0 ] );             
+        self.numberJetBin_  = array( 'i', [ 0 ] );
         self.numberJetBin2_ = array( 'i', [ 0 ] );
         self.numberJetBin2_ = array( 'i', [ 0 ] );
         self.numberJetBin3_ = array( 'i', [ 0 ] );
         self.numberJetBin4_ = array( 'i', [ 0 ] );
 
-        self.numberJetBinGen_ = array( 'i', [ 0 ] );
+        self.numberJetBinGen_  = array( 'i', [ 0 ] );
         self.numberJetBinGen2_ = array( 'i', [ 0 ] );
         self.numberJetBinGen2_ = array( 'i', [ 0 ] );
         self.numberJetBinGen3_ = array( 'i', [ 0 ] );
         self.numberJetBinGen4_ = array( 'i', [ 0 ] );
 
         ### Leptonic W, Lepton and Nueutrino
-        
         self.l_pt_     = array( 'f', [ 0. ] );
         self.l_eta_    = array( 'f', [ 0. ] );
         self.l_phi_    = array( 'f', [ 0. ] );
@@ -1899,7 +1815,6 @@ class sampleWrapperClass:
         self.W_pz_type2_met_ = array( 'f', [ 0. ] );
 
         self.nu_pz_gen_   = array( 'f', [ 0. ] );
-
         self.W_pz_gen_    = array( 'f', [ 0. ] );
         self.W_pt_gen_    = array( 'f', [ 0. ] );
 
@@ -1930,7 +1845,6 @@ class sampleWrapperClass:
         self.v_phi_            = array( 'f', [ 0. ] );
 
         ######### Hadronic W Variables ###############
-
         self.ungroomed_jet_eta_ = array( 'f', [ 0. ] );
         self.ungroomed_jet_pt_  = array( 'f', [ 0. ] );
         self.ungroomed_jet_phi_ = array( 'f', [ 0. ] );
@@ -1948,8 +1862,8 @@ class sampleWrapperClass:
         self.jet_charge_k07_    = array( 'f', [ 0. ] );
         self.jet_charge_k10_    = array( 'f', [ 0. ] );
 
-        self.gen_jet_mass_pr_       = array( 'f', [ 0. ] );
-        self.gen_jet_pt_pr_         = array( 'f', [ 0. ] );
+        self.gen_jet_mass_pr_ = array( 'f', [ 0. ] );
+        self.gen_jet_pt_pr_   = array( 'f', [ 0. ] );
 
         self.jet_grsens_ft_   = array( 'f', [ 0. ] );
         self.jet_grsens_tr_   = array( 'f', [ 0. ] );
@@ -1961,17 +1875,17 @@ class sampleWrapperClass:
         self.gen_jet_massdrop_pr_ = array( 'f', [ 0. ] );    
         self.gen_jet_qjetvol_     = array( 'f', [ 0. ] ); 
 
-        self.jet_tau2tau1_ = array( 'f', [ 0. ] );     
-        self.jet_tau2tau1_exkT_ = array( 'f', [ 0. ] );     
-        self.jet_tau2tau1_pr_ = array( 'f', [ 0. ] );
+        self.jet_tau2tau1_       = array( 'f', [ 0. ] );     
+        self.jet_tau2tau1_exkT_  = array( 'f', [ 0. ] );     
+        self.jet_tau2tau1_pr_    = array( 'f', [ 0. ] );
         self.jet_GeneralizedECF_ = array( 'f', [ 0. ] );
 
-        self.gen_jet_tau2tau1_ = array( 'f', [ 0. ] );     
-        self.gen_jet_tau2tau1_exkT_ = array( 'f', [ 0. ] );     
-        self.gen_jet_tau2tau1_pr_ = array( 'f', [ 0. ] );
+        self.gen_jet_tau2tau1_       = array( 'f', [ 0. ] );     
+        self.gen_jet_tau2tau1_exkT_  = array( 'f', [ 0. ] );     
+        self.gen_jet_tau2tau1_pr_    = array( 'f', [ 0. ] );
         self.gen_jet_GeneralizedECF_ = array( 'f', [ 0. ] );
 
-        self.jet_jetconstituents_  = array( 'f', [ 0. ] );     
+        self.jet_jetconstituents_      = array( 'f', [ 0. ] );     
         self.gen_jet_jetconstituents_  = array( 'f', [ 0. ] );     
         
         self.jet_rcore4_ = array( 'f', [ 0. ] );
@@ -1984,12 +1898,10 @@ class sampleWrapperClass:
         self.gen_jet_rcore6_ = array( 'f', [ 0. ] );
         self.gen_jet_rcore7_ = array( 'f', [ 0. ] );
 
-
         self.jet_pt1frac_  = array ('f',[ 0. ]);
         self.jet_pt2frac_  = array ('f',[ 0. ]);
         self.jet_sjdr_     = array ('f',[ 0. ]);
         
-
         self.j_jecfactor_up_ = array( 'f', [ 0. ] );
         self.j_jecfactor_dn_ = array( 'f', [ 0. ] );
 
@@ -2005,9 +1917,9 @@ class sampleWrapperClass:
         self.jet_planarlow07_ = array( 'f', [0.] );
 
         ###### top mass veto variables
-        self.mass_ungroomedjet_vbf_j1_    = array( 'f', [0.] );
-        self.mass_ungroomedjet_vbf_j2_    = array( 'f', [0.] );
-        self.mass_ungroomedjet_vbf_j1_pr_ = array( 'f', [0.] );
+        self.mass_ungroomedjet_vbf_j1_     = array( 'f', [0.] );
+        self.mass_ungroomedjet_vbf_j2_     = array( 'f', [0.] );
+        self.mass_ungroomedjet_vbf_j1_pr_  = array( 'f', [0.] );
         self.mass_ungroomedjet_vbf_j2_pr_  = array( 'f', [0.] );
         self.mass_ungroomedjet_closerjet_  = array( 'f', [0.] );
         self.mass_ungroomedjet_closerjet_pr_ = array( 'f', [0.] );
@@ -2208,9 +2120,9 @@ class sampleWrapperClass:
         self.vbf_maxMjj_j2_bDiscriminatorCSV_gen_ = array( 'f', [ 0. ] );                                
 
         ###### btag counters
-        self.nbjets_csvl_veto_ = array( 'f', [ 0. ] );
-        self.nbjets_csvm_veto_ = array( 'f', [ 0. ] );
-        self.nbjets_csvt_veto_ = array( 'f', [ 0. ] );
+        self.nbjets_csvl_veto_   = array( 'f', [ 0. ] );
+        self.nbjets_csvm_veto_   = array( 'f', [ 0. ] );
+        self.nbjets_csvt_veto_   = array( 'f', [ 0. ] );
         self.nbjets_ssvhem_veto_ = array( 'f', [ 0. ] );
 
         self.nbjets_csvl_veto_cleaned_   = array( 'f', [ 0. ] );
@@ -2290,13 +2202,13 @@ class sampleWrapperClass:
         self.ttb_ca8_tau2tau1_exkT_   = array( 'f', [ 0. ] );                        
         self.ttb_ca8_tau2tau1_pr_     = array( 'f', [ 0. ] );                        
         self.ttb_ca8_GeneralizedECF_  = array( 'f', [ 0. ] );                        
-        self.ttb_ca8_mu_  = array( 'f', [ 0. ] );                        
+        self.ttb_ca8_mu_              = array( 'f', [ 0. ] );                        
 
-        self.ttb_ca8_mlvj_type0_    = array( 'f', [ 0. ] );                        
-        self.ttb_ca8_mlvj_type2_    = array( 'f', [ 0. ] );                        
+        self.ttb_ca8_mlvj_type0_  = array( 'f', [ 0. ] );                        
+        self.ttb_ca8_mlvj_type2_  = array( 'f', [ 0. ] );                        
 
-        self.ttb_ca8_mlvj_type0_met_    = array( 'f', [ 0. ] );                        
-        self.ttb_ca8_mlvj_type2_met_    = array( 'f', [ 0. ] );                        
+        self.ttb_ca8_mlvj_type0_met_  = array( 'f', [ 0. ] );                        
+        self.ttb_ca8_mlvj_type2_met_  = array( 'f', [ 0. ] );                        
 
         self.isttbar_ = array( 'i', [ 0 ] );            
 
@@ -2317,7 +2229,6 @@ class sampleWrapperClass:
     def createBranches(self):
 
         ################ Branch output Tree
-
         self.otree.Branch("nPV", self.nPV_,"nPV/F");
         self.otree.Branch("event", self.event_ , "event/I");
         self.otree.Branch("event_lumi", self.event_lumi_ , "event_lumi/I");
@@ -2334,10 +2245,10 @@ class sampleWrapperClass:
         self.otree.Branch("numberJetBinGen3", self.numberJetBinGen3_ , "numberJetBinGen3/I");
         self.otree.Branch("numberJetBinGen4", self.numberJetBinGen4_ , "numberJetBinGen4/I");
 
-        self.otree.Branch("totalEventWeight",  self.totalEventWeight_ , "totalEventWeight/F"); ## total xs * pile Up * trigger * lepton ID
+        self.otree.Branch("totalEventWeight",  self.totalEventWeight_ , "totalEventWeight/F");   ## total xs * pile Up * trigger * lepton ID
         self.otree.Branch("eff_and_pu_Weight", self.eff_and_pu_Weight_ , "eff_and_pu_Weight/F"); ## product of pileUp, trigger and lepton ID
-        self.otree.Branch("wSampleWeight",     self.wSampleWeight_ , "wSampleWeight/F"); ## only cross section weight
-        self.otree.Branch("event_weight",      self.event_weight_ , "event_weight/F"); ## in case the MC produce weighted events at LHE level
+        self.otree.Branch("wSampleWeight",     self.wSampleWeight_ , "wSampleWeight/F");         ## only cross section weight
+        self.otree.Branch("event_weight",      self.event_weight_ , "event_weight/F");           ## in case the MC produce weighted events at LHE level
 
         self.otree.Branch("btag_weight", self.btag_weight_ , "btag_weight/F"); ## btag weight according to btag pog recipe
         self.otree.Branch("btag_weight_up", self.btag_weight_up_ , "btag_weight_up/F"); 
@@ -2357,8 +2268,14 @@ class sampleWrapperClass:
         self.otree.Branch("cps_Weight_H900", self.cps_Weight_H900_ , "cps_Weight_H900/F");
         self.otree.Branch("cps_Weight_H1000", self.cps_Weight_H1000_ , "cps_Weight_H1000/F");
 
+        ### branches for bsm models 
+        for iPar in range(len(self.cprimeVals)): 
+            for jPar in range(len(self.brnewVals)): 
+                brname = "bsmReweight_cPrime%02d_brNew%02d"%(self.cprimeVals[iPar],self.brnewVals[jPar]);
+                self.otree.Branch(brname,self.bsmReweights[iPar][jPar],brname);        
+
+
         ##############
-        
         self.otree.Branch("mass_lvj_type0_met", self.mass_lvj_type0_met_ , "mass_lvj_type0_met/F");
         self.otree.Branch("mass_lvj_type2_met", self.mass_lvj_type2_met_ , "mass_lvj_type2_met/F");
 
@@ -2378,7 +2295,6 @@ class sampleWrapperClass:
         self.otree.Branch("mass_lv_subj_type2", self.mass_lv_subj_type2_ , "mass_lv_subj_type2/F");
 
         ###########
-        
         self.otree.Branch("mass_ungroomedjet_vbf_j1", self.mass_ungroomedjet_vbf_j1_ , "mass_ungroomedjet_vbf_j1/F");
         self.otree.Branch("mass_ungroomedjet_vbf_j2", self.mass_ungroomedjet_vbf_j2_ , "mass_ungroomedjet_vbf_j2/F");
         self.otree.Branch("mass_ungroomedjet_vbf_j1_pr", self.mass_ungroomedjet_vbf_j1_pr_ , "mass_ungroomedjet_vbf_j1_pr/F");
@@ -2389,7 +2305,6 @@ class sampleWrapperClass:
         self.otree.Branch("mass_leptonic_closerjet", self.mass_leptonic_closerjet_ , "mass_leptonic_closerjet/F");
 
         ########### Leptonic W, Lepton and Nueutrino
-        
         self.otree.Branch("l_pt", self.l_pt_ , "l_pt/F");
         self.otree.Branch("l_eta", self.l_eta_ , "l_eta/F");
         self.otree.Branch("l_charge", self.l_charge_ , "l_charge/F");
@@ -2426,7 +2341,6 @@ class sampleWrapperClass:
         self.otree.Branch("v_phi", self.v_phi_ , "v_phi/F");
 
         ###################
-
         self.otree.Branch("ungroomed_jet_eta", self.ungroomed_jet_eta_ , "ungroomed_jet_eta/F");
         self.otree.Branch("ungroomed_jet_phi", self.ungroomed_jet_phi_ , "ungroomed_jet_phi/F");
         self.otree.Branch("ungroomed_jet_pt", self.ungroomed_jet_pt_ , "ungroomed_jet_pt/F");
@@ -2500,7 +2414,6 @@ class sampleWrapperClass:
         self.otree.Branch("jet_planarlow07", self.jet_planarlow07_ , "jet_planarlow07/F");
 
         ########## vbf jets 
-        
         self.otree.Branch("vbf_maxpt_jj_m", self.vbf_maxpt_jj_m_ , "vbf_maxpt_jj_m/F");
         self.otree.Branch("vbf_maxpt_jj_pt", self.vbf_maxpt_jj_pt_ , "vbf_maxpt_jj_pt/F");
         self.otree.Branch("vbf_maxpt_jj_eta", self.vbf_maxpt_jj_eta_ , "vbf_maxpt_jj_eta/F");
@@ -2698,7 +2611,6 @@ class sampleWrapperClass:
         self.otree.Branch("vbf_maxMjj_j2_bDiscriminatorCSV_gen", self.vbf_maxMjj_j2_bDiscriminatorCSV_gen_ , "vbf_maxMjj_j2_bDiscriminatorCSV_gen/F");
 
         ###### btag counters
-
         self.otree.Branch("nbjets_csvl_veto", self.nbjets_csvl_veto_ , "nbjets_csvl_veto/F");
         self.otree.Branch("nbjets_csvm_veto", self.nbjets_csvm_veto_ , "nbjets_csvm_veto/F");
         self.otree.Branch("nbjets_csvt_veto", self.nbjets_csvt_veto_ , "nbjets_csvt_veto/F");
@@ -2800,10 +2712,4 @@ class sampleWrapperClass:
         self.otree.Branch("gen_parton2_pz_fromttbar",     self.gen_parton2_pz_fromttbar_ , "gen_parton2_pz_fromttbar/F")
         self.otree.Branch("gen_parton2_e_fromttbar",     self.gen_parton2_e_fromttbar_ , "gen_parton2_e_fromttbar/F")
         self.otree.Branch("gen_parton2_id_fromttbar",     self.gen_parton2_id_fromttbar_ , "gen_parton2_id_fromttbar/F")
-
-        ### branches for bsm models 
-        for i in range(len(self.cprimeVals)): 
-            for j in range(len(self.brnewVals)): 
-                brname = "bsmReweight_cPrime%02d_brNew%02d"%(self.cprimeVals[i],self.brnewVals[j]);
-                self.otree.Branch(brname, self.bsmReweights[i][j] , brname);        
 
