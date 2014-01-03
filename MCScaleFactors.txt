@@ -57,10 +57,10 @@ ZZ  0.001801445 1.0
 #(NLO xs  0.2222038*2*1.636 pb )
 WW_mcanlo 0.006074348  1.0
 ### WW+2jet EWK
-#(LO 39.07 pb)
-WW2jet_madgraph 0.094152973 1.0
-#(LO 232,8 pb)
-WW2jet_phantom 0.698971059 1.0
+#(LO 0.233 pb)
+WW2jet_madgraph 0.00056205 1.0
+#(LO 0.043 pb)
+WW2jet_phantom  0.000131057 1.0
 
 
 ##### Wjets inclusive #######
