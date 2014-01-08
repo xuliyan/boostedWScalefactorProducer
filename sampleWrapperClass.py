@@ -412,13 +412,13 @@ class sampleWrapperClass:
                 ttb_V_p4 = ROOT.TLorentzVector(getattr(self.InputTree_,"W_px"),getattr(self.InputTree_,"W_py"),getattr(self.InputTree_,"W_pz_type0"),getattr(self.InputTree_,"W_e")); 
                 self.ttb_ca8_mlvj_type0_[0] = (ttb_V_p4+ttb_ca8J_p4).M();
 
-                ttb_V_p4.SetPtEtaPhiE(getattr(self.InputTree_,"W_px"),getattr(self.InputTree_,"W_py"),getattr(self.InputTree_,"W_pz_type2"),getattr(self.InputTree_,"W_e")); 
+                ttb_V_p4.SetPxPyPzE(getattr(self.InputTree_,"W_px"),getattr(self.InputTree_,"W_py"),getattr(self.InputTree_,"W_pz_type2"),getattr(self.InputTree_,"W_e")); 
                 self.ttb_ca8_mlvj_type2_[0] = (ttb_V_p4+ttb_ca8J_p4).M();
 
-                ttb_V_p4.SetPtEtaPhiE(getattr(self.InputTree_,"W_px"),getattr(self.InputTree_,"W_py"),getattr(self.InputTree_,"W_pz_type0_met"),getattr(self.InputTree_,"W_e")); 
+                ttb_V_p4.SetPxPyPzE(getattr(self.InputTree_,"W_px"),getattr(self.InputTree_,"W_py"),getattr(self.InputTree_,"W_pz_type0_met"),getattr(self.InputTree_,"W_e")); 
                 self.ttb_ca8_mlvj_type0_met_[0] = (ttb_V_p4+ttb_ca8J_p4).M();
 
-                ttb_V_p4.SetPtEtaPhiE(getattr(self.InputTree_,"W_px"),getattr(self.InputTree_,"W_py"),getattr(self.InputTree_,"W_pz_type2_met"),getattr(self.InputTree_,"W_e")); 
+                ttb_V_p4.SetPxPyPzE(getattr(self.InputTree_,"W_px"),getattr(self.InputTree_,"W_py"),getattr(self.InputTree_,"W_pz_type2_met"),getattr(self.InputTree_,"W_e")); 
                 self.ttb_ca8_mlvj_type2_met_[0] = (ttb_V_p4+ttb_ca8J_p4).M();
 
                 self.ttb_ca8_px_[0] = ttb_ca8J_p4.Px();
