@@ -125,7 +125,9 @@ class doFit_wj_and_wlvj:
         self.file_pseudodata=("ofile_pseudodata4exo.root");
         self.file_pseudodata_herwig=("ofile_pseudodata4exo_herwig.root");
 
-        self.file_WJets0_mc=("ofile_WJets_Pythia180.root");
+        if self.channel!="merged": self.file_WJets0_mc=("ofile_WJets_Pythia180.root");
+        else: self.file_WJets0_mc=("ofile_WJets_Pythia100.root");
+
         self.file_WJets1_mc=("ofile_WJets_Herwig.root");
 
         self.file_VV_mc=("ofile_VV.root");# WW+WZ
@@ -143,8 +145,9 @@ class doFit_wj_and_wlvj:
         self.wtagger_label=options.category;
 
         if self.wtagger_label=="HP" :
-            if self.channel=="el":self.wtagger_cut=0.5 ; self.wtagger_cut_min=0. ;
-            if self.channel=="mu":self.wtagger_cut=0.5 ; self.wtagger_cut_min=0. ;
+            if self.channel=="el"    :self.wtagger_cut=0.5 ; self.wtagger_cut_min=0. ;
+            if self.channel=="mu"    :self.wtagger_cut=0.5 ; self.wtagger_cut_min=0. ;
+            if self.channel=="merged":self.wtagger_cut=0.5 ; self.wtagger_cut_min=0. ;
 
         if self.wtagger_label=="LP": self.wtagger_cut=0.75 ; self.wtagger_cut_min=0.5 ;
 
@@ -156,7 +159,10 @@ class doFit_wj_and_wlvj:
 
         if self.wtagger_label=="LP" and self.channel=="mu": self.categoryID=2;
         if self.wtagger_label=="HP" and self.channel=="mu": self.categoryID=3;
-                
+
+        if self.wtagger_label=="LP" and self.channel=="merged": self.categoryID=4;
+        if self.wtagger_label=="HP" and self.channel=="merged": self.categoryID=5;
+
         self.color_palet={ #color palet
             'data' : 1,
             'WJets' : 2,
@@ -191,7 +197,7 @@ class doFit_wj_and_wlvj:
 
         
         ## tighter cut for the electron channel
-        if self.channel=="el":
+        if self.channel=="el" or self.channel=="merged":
             self.pfMET_cut= 80; self.lpt_cut = 90;
 
         ## out txt file with info about fit and event couting
@@ -636,7 +642,7 @@ class doFit_wj_and_wlvj:
                 else:
                     rrv_mean1_gaus = RooRealVar("rrv_mean1_gaus"+label+"_"+self.channel,"rrv_mean1_gaus"+label+"_"+self.channel,mean1_tmp, mean1_tmp-4, mean1_tmp+4);
                     rrv_sigma1_gaus = RooRealVar("rrv_sigma1_gaus"+label+"_"+self.channel,"rrv_sigma1_gaus"+label+"_"+self.channel,sigma1_tmp, sigma1_tmp-4,sigma1_tmp+4);
-            if self.channel=="mu":
+            if self.channel=="mu" or self.channel == "merged":
                 if self.workspace4fit_.var("rrv_mean1_gaus%s_el"%(label)) and self.workspace4fit_.var("rrv_sigma1_gaus%s_el"%(label)):
                     rrv_mean1_gaus = self.workspace4fit_.var("rrv_mean1_gaus%s_el"%(label));
                     rrv_sigma1_gaus = self.workspace4fit_.var("rrv_sigma1_gaus%s_el"%(label));
@@ -1052,7 +1058,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
       mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.2);
       
       parameters_list = model.getParameters(rdataset_mj);
-      self.draw_canvas_with_pull( mplot,mplot_pull,parameters_list,"plots_%s_%s_%s/m_j_fitting%s_wtaggercut%s_dRbjet_mass/"%(options.additioninformation,self.channel,self.wtagger_label,additioninformation, self.wtagger_label),label+in_file_name+"_"+str(self.ca8_ungroomed_pt_min)+"_"+str(self.ca8_ungroomed_pt_max), in_model_name)
+      self.draw_canvas_with_pull( mplot,mplot_pull,parameters_list,"plots_%s_%s_%s/m_j_fitting%s_wtaggercut%s_nearbyJets_v3/"%(options.additioninformation,self.channel,self.wtagger_label,additioninformation, self.wtagger_label),label+in_file_name+"_"+str(self.ca8_ungroomed_pt_min)+"_"+str(self.ca8_ungroomed_pt_max), in_model_name)
       
       #normalize the number of total events to lumi
       if options.ttbarMC == 0 :
@@ -1423,8 +1429,8 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
         xframe_data_fail.GetYaxis().SetRangeUser(1e-2,xframe_data_fail.GetMaximum()*1.4);
 
 
-        self.draw_canvas(xframe_data,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_dRbjet_mass/"%(options.additioninformation, self.channel, self.wtagger_label, self.wtagger_label),"control%s_%s_%s_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
-        self.draw_canvas(xframe_data_fail,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_dRbjet_mass/"%(options.additioninformation, self.channel, self.wtagger_label,self.wtagger_label),"control%s_%s_%s_fail_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
+        self.draw_canvas(xframe_data,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_nearbyJets_v3/"%(options.additioninformation, self.channel, self.wtagger_label, self.wtagger_label),"control%s_%s_%s_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
+        self.draw_canvas(xframe_data_fail,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_nearbyJets_v3/"%(options.additioninformation, self.channel, self.wtagger_label,self.wtagger_label),"control%s_%s_%s_fail_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
 
 
         self.ShowParam_Pdf(simPdf_data,RooArgSet(rrv_mass_j,category_p_f));
@@ -1572,7 +1578,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
         leg_data_extremefail = self.legend4Plot(xframe_data_extremefail,0,1,0.12)
         xframe_data_extremefail.addObject(leg_data_extremefail)
 
-        self.draw_canvas(xframe_data_extremefail,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_dRbjet_mass/"%(options.additioninformation, self.channel, self.wtagger_label,self.wtagger_label),"control%s_%s_%s_extremefail_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
+        self.draw_canvas(xframe_data_extremefail,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_nearbyJets_v3/"%(options.additioninformation, self.channel, self.wtagger_label,self.wtagger_label),"control%s_%s_%s_extremefail_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
                                                                   
   
     ### function to be used for the simultaneous fit of electron and muon channel --> just drawing the results
@@ -1787,11 +1793,8 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
         xframe_data.GetYaxis().SetRangeUser(1e-2,xframe_data.GetMaximum()*1.2);
         xframe_data_fail.GetYaxis().SetRangeUser(1e-2,xframe_data_fail.GetMaximum()*1.2);
 
-        self.draw_canvas(xframe_data,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_dRbjet_mass/"%(options.additioninformation, self.channel,self.wtagger_label, self.wtagger_label),"control%s_%s_%s_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
-        self.draw_canvas(xframe_data_fail,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_dRbjet_mass/"%(options.additioninformation, self.channel, self.wtagger_label,self.wtagger_label),"control%s_%s_%s_fail_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
-
-
-
+        self.draw_canvas(xframe_data,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_nearbyJets_v3/"%(options.additioninformation, self.channel,self.wtagger_label, self.wtagger_label),"control%s_%s_%s_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
+        self.draw_canvas(xframe_data_fail,"plots_%s_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_nearbyJets_v3/"%(options.additioninformation, self.channel, self.wtagger_label,self.wtagger_label),"control%s_%s_%s_fail_pTbin_%d_%d"%(label,self.wtagger_label,self.channel,self.ca8_ungroomed_pt_min,self.ca8_ungroomed_pt_max));
 
 
     ## To build the dataset to be fitted
@@ -1895,7 +1898,10 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
 
 
             ### Cut for the HP category
-            if discriminantCut ==2 and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0 and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
+            if discriminantCut ==2 and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_jet_closer") > 1.3:
+
+            # and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0 and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
+
 
 
                 if TString(label).Contains("herwig") and not TString(label).Contains("data") :
@@ -1925,7 +1931,9 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
                 combData_p_f.add(RooArgSet(rrv_mass_j,category_p_f),tmp_event_weight);
 
             ### Cut for the Total category
-            if getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0 and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
+            if getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_jet_closer") > 1.3:
+
+#        and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0  and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
 
 
                 if TString(label).Contains("herwig") and not TString(label).Contains("data") :
@@ -1945,7 +1953,9 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
                 combData4cut.add(RooArgSet(rrv_mass_j,category_cut),tmp_event_weight4fit);
 
             ### 1-HP category
-            if (discriminantCut==1 or discriminantCut==0) and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0 and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
+            if (discriminantCut==1 or discriminantCut==0) and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_jet_closer") > 1.3:
+
+# and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0 and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130):
 
 
                 if TString(label).Contains("herwig") and not TString(label).Contains("data") :
@@ -1961,7 +1971,9 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
                 combData_p_f.add(RooArgSet(rrv_mass_j,category_p_f),tmp_event_weight);
 
             ### extreme fail category
-            if discriminantCut==0 and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0 and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
+            if discriminantCut==0 and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_jet_closer") > 1.3:
+
+# and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0 and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
 
                 if TString(label).Contains("herwig") and not TString(label).Contains("data") :
                    tmp_event_weight = tmp_event_weight*treeIn.event_weight;
@@ -2288,14 +2300,20 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
        elif self.channel=="mu":
 #        banner = TLatex(0.3,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu #nu "%(self.GetLumi())));
         banner = TLatex(0.187919,0.960069,"CMS                       L = %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu#nu "%(self.GetLumi()));                   
+       elif self.channel=="merged":
+#        banner = TLatex(0.3,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu #nu "%(self.GetLumi())));
+        banner = TLatex(0.187919,0.960069,"CMS                       L = %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu/e #nu "%(self.GetLumi()));                   
        banner.SetNDC(); banner.SetTextSize(0.04);
       else:
        if self.channel=="el":
 #        banner = TLatex(0.22,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow e #nu "%(self.GetLumi())));
         banner = TLatex(0.187919,0.960069,"CMS                       L = %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow e#nu "%(self.GetLumi()));                   
-       if self.channel=="mu":
+       elif self.channel=="mu":
 #        banner = TLatex(0.22,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu #nu "%(self.GetLumi())));
         banner = TLatex(0.187919,0.960069,"CMS                       L = %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu#nu "%(self.GetLumi()));                   
+       elif self.channel=="merged":
+#        banner = TLatex(0.22,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu #nu "%(self.GetLumi())));
+        banner = TLatex(0.187919,0.960069,"CMS                       L = %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu/e #nu "%(self.GetLumi()));                   
        banner.SetNDC(); banner.SetTextSize(0.033);
                                                                                                          
       return banner;
@@ -2522,6 +2540,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
 
         if self.channel=="el": return 19.5
         if self.channel=="mu": return 19.5
+        if self.channel=="merged": return 19.5
 
 
     #### defines two different way to fit depending on pythia or herwig analysis
