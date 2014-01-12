@@ -1,4 +1,3 @@
-
 #! /usr/bin/env python
 import os
 import glob
@@ -45,8 +44,8 @@ parser.add_option('--category', action="store",type="string",dest="category",def
 
 (options, args) = parser.parse_args()
 
-ROOT.gSystem.Load(options.inPath+"/PDFs/HWWLVJRooPdfs_cxx.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/PdfDiagonalizer_cc.so")
+ROOT.gSystem.Load(options.inPath+"/PDFs/HWWLVJRooPdfs_cxx.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/Util_cxx.so")
 
 from ROOT import draw_error_band, draw_error_band_extendPdf, draw_error_band_Decor, draw_error_band_shape_Decor, Calc_error_extendPdf, Calc_error, RooErfExpPdf, RooAlpha, RooAlpha4ErfPowPdf, RooAlpha4ErfPow2Pdf, RooAlpha4ErfPowExpPdf, PdfDiagonalizer, RooPowPdf, RooPow2Pdf, RooErfPowExpPdf, RooErfPowPdf, RooErfPow2Pdf, RooQCDPdf, RooUser1Pdf, RooBWRunPdf, RooAnaExpNPdf, RooExpNPdf, RooAlpha4ExpNPdf, RooExpTailPdf, RooAlpha4ExpTailPdf, Roo2ExpPdf, RooAlpha42ExpPdf
@@ -103,7 +102,7 @@ class doFit_wj_and_wlvj:
         in_mlvj_max=in_mlvj_min+nbins_mlvj*self.BinWidth_mlvj;
 
         ## define jet mass variable
-        rrv_mass_j = RooRealVar("rrv_mass_j","pruned m_{J}",(in_mj_min+in_mj_max)/2.,in_mj_min,in_mj_max,"GeV");
+        rrv_mass_j = RooRealVar("rrv_mass_j","Pruned jet mass",(in_mj_min+in_mj_max)/2.,in_mj_min,in_mj_max,"GeV");
         rrv_mass_j.setBins(nbins_mj);
 
         ## define invariant mass WW variable
@@ -3982,7 +3981,7 @@ class doFit_wj_and_wlvj:
         mplot_pull.GetXaxis().SetTitleSize(0.10);
         mplot_pull.GetXaxis().SetLabelSize(0.10);
         mplot_pull.GetYaxis().SetTitleOffset(0.40);
-        mplot_pull.GetYaxis().SetTitle("#frac{data-fit}{#sigma_{data}}");
+        mplot_pull.GetYaxis().SetTitle("#frac{Data-Fit}{#sigma_{data}}");
         mplot_pull.GetYaxis().CenterTitle();
 
         return mplot_pull;
@@ -4045,13 +4044,55 @@ class doFit_wj_and_wlvj:
         objName_signal_graviton = "";
         objNameLeg_signal_graviton = "";        
 
-        if self.categoryID==0:   legHeader="(e#nu 1JLP)";
-        elif self.categoryID==1: legHeader="(e#nu 1JHP)";
-        elif self.categoryID==2: legHeader="(#mu#nu 1JLP)";
-        elif self.categoryID==3: legHeader="(#mu#nu 1JHP)";
-        
+        if self.categoryID==0:   legHeader="(e#nu, 1JLP)";
+        elif self.categoryID==1: legHeader="(e#nu, 1JHP)";
+        elif self.categoryID==2: legHeader="(#mu#nu, 1JLP)";
+        elif self.categoryID==3: legHeader="(#mu#nu, 1JHP)";
+
+        for obj in range(int(plot.numItems()) ):
+          objName = plot.nameOf(obj);
+          if objName == "errorband" : objName = "Uncertainty";
+          print objName;
+          if not ( ( (plot.getInvisible(objName)) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisi") or TString(objName).Contains("TLine") or 
+objName ==objName_before ):
+            theObj = plot.getObject(obj);
+            objTitle = objName;
+            drawoption= plot.getDrawOptions(objName).Data()
+            if drawoption=="P":drawoption="PE"
+            if TString(objName).Contains("Uncertainty") or TString(objName).Contains("sigma"):  objName_before=objName; continue ;
+            elif TString(objName).Contains("Graph") :  objName_before=objName; continue ;
+            elif TString(objName).Data()=="data" : theLeg.AddEntry(theObj, "CMS Data "+legHeader,"PE");  objName_before=objName;                 
+            else: objName_before=objName; continue ;
+
+        entryCnt = 0;
+        objName_before = "";
+        objName_signal_graviton = "";
+        objNameLeg_signal_graviton = "";        
+                   
+        for obj in range(int(plot.numItems()) ):
+          objName = plot.nameOf(obj);
+          if objName == "errorband" : objName = "Uncertainty";
+          print objName;
+          if not ( ( (plot.getInvisible(objName)) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisi") or TString(objName).Contains("TLine") or 
+objName ==objName_before ):
+            theObj = plot.getObject(obj);
+            objTitle = objName;
+            drawoption= plot.getDrawOptions(objName).Data()
+            if drawoption=="P":drawoption="PE"
+            if TString(objName).Contains("Uncertainty") or TString(objName).Contains("sigma"):  objName_before=objName; continue ;
+            elif TString(objName).Contains("Graph") :  objName_before=objName; continue ;
+            elif TString(objName).Data()=="WJets" : theLeg.AddEntry(theObj, "W+jets","F");  objName_before=objName;                 
+            else:  objName_before=objName; continue ;
+
+        entryCnt = 0;
+        objName_before = "";
+        objName_signal_graviton = "";
+        objNameLeg_signal_graviton = "";        
+
+
         for obj in range(int(plot.numItems()) ):
             objName = plot.nameOf(obj);
+            if objName == "errorband" : objName = "Uncertainty";
             print objName;
             if not ( ( (plot.getInvisible(objName)) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisi") or TString(objName).Contains("TLine") or 
 objName ==objName_before ):
@@ -4067,9 +4108,9 @@ objName ==objName_before ):
                     if TString(objName).Data()=="STop" : theLeg.AddEntry(theObj, "Single Top","F");
                     elif TString(objName).Data()=="TTbar" : theLeg.AddEntry(theObj, "t#bar{t}","F");
                     elif TString(objName).Data()=="VV" : theLeg.AddEntry(theObj, "WW/WZ","F");
-                    elif TString(objName).Data()=="WJets" : theLeg.AddEntry(theObj, "W+jets","F");
+                    elif TString(objName).Data()=="data" :  objName_before=objName; entryCnt = entryCnt+1; continue ;
+                    elif TString(objName).Data()=="WJets" : objName_before=objName; entryCnt = entryCnt+1; continue;
                     elif TString(objName).Contains("vbfH"): theLeg.AddEntry(theObj, (TString(objName).ReplaceAll("vbfH","qqH")).Data() ,"L");
-                    elif TString(objName).Data()=="data" : theLeg.AddEntry(theObj, "CMS Data"+legHeader,"PE");                                           
                     elif TString(objName).Contains("Uncertainty"): theLeg.AddEntry(theObj, objTitle,drawoption);
                     elif TString(objName).Contains("Bulk"):
                        if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M600") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M600"):
