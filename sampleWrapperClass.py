@@ -96,17 +96,17 @@ class sampleWrapperClass:
         jecUncStrAK5    = ROOT.std.string(fDir + "GR_R_53_V10_Uncertainty_AK5PFchs.txt");
         self.jecUncAK5_ = ROOT.JetCorrectionUncertainty(jecUncStrAK5);
 
-        self.jerUncStr_       = ROOT.std.strign(fDir + "pfJetResolutionMCtoDataCorrLUT.root");
+        self.jerUncStr_       = ROOT.std.string(fDir + "pfJetResolutionMCtoDataCorrLUT.root");
         self.jerHistName_     = ROOT.std.string("pfJetResolutionMCtoDataCorrLUT");
-        self.inputJERCFile_   = ROOT.TFile(self.jerUncStr_);
-        self.histoJERC_       = self.inputJERCFile_.Get(self.jerHistName_);
+        self.inputJERCFile_   = ROOT.TFile(ROOT.TString(self.jerUncStr_).Data());
+        self.histoJERC_       = self.inputJERCFile_.Get(ROOT.TString(self.jerHistName_).Data());
 
         self.jetResolutionMC_CA8_  = [0.051,0.051,0.061,0.062,0.072,0.1]
         self.jetResolutionMC_AK5_  = [0.053,0.054,0.067,0.072,0.082,0.1]
         
-        
-        self.dRmaxGenJetMatch_ = ROOT.std.string('TMath::Min(0.5, 0.1 + 0.3*TMath::Exp(-0.05*(x - 10.)))');
-        self.dRmaxGenJetMatchFormula_ = ROOT.TFormula(ROOT.TString(self.dRmaxGenJetMatch_).Data());
+
+        self.Random_ = ROOT.TRandom3();
+        self.Random_.SetSeed();
         
         if self.Channel_ == "mu":
          self.LeptonScaleUnc_ = 0.002 ;
@@ -548,7 +548,6 @@ class sampleWrapperClass:
             if self.isttbar_[0] == 1 and getattr( self.InputTree_, "event_met_pfmet" ) > metCut and getattr( self.InputTree_, leptonCutString ) > leptonCut:
                 ttbarlike = 1;
 
-
             ##################### store the info just for ttbar like or signal like events
             if ttbarlike == 1 or signallike == 1 :
 
@@ -904,9 +903,9 @@ class sampleWrapperClass:
              x = math.fabs(jdef_ptetaphie.Eta());
              y = jdef_ptetaphie.Pt();
              if( x > self.histoJERC_.GetXaxis().GetXmin() and x < self.histoJERC_.GetXaxis().GetXmax() and
-                  y > self.histoJERC_.GetYaxis().GetXmin() and y < self.histoJERC_.GetYaxis().GetXmax()):
+                 y > self.histoJERC_.GetYaxis().GetXmin() and y < self.histoJERC_.GetYaxis().GetXmax()):
                   bin = self.histoJERC_.FindBin(x,y);
-                  smearFactor = self.histoJERC_.GetBinContent(bin)-1.;
+                  smearFactor += self.histoJERC_.GetBinContent(bin)-1.;
                   smearError  = self.histoJERC_.GetBinError(bin);
                   smearFactor_up = smearFactor+smearFactor*smearError ;
                   smearFactor_dn = smearFactor-smearFactor*smearError ;
@@ -915,31 +914,84 @@ class sampleWrapperClass:
              smearedEnergy_up = jdef_ptetaphie.E();
              smearedEnergy_dn = jdef_ptetaphie.E();
 
-             if(smearFactor > 1 ):
-              if(math.fabs(jdef_ptetaphie.Eta())<0.5):
-                  smearedEnergy    = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[0]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[0]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[0]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-              elif(math.fabs(jdef_ptetaphie.Eta())>= 0.5 and math.fabs(jdef_ptetaphie.Eta())<1.0):
-                  smearedEnergy = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[1]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[1]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[1]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-              elif(math.fabs(jdef_ptetaphie.Eta())>= 1.0 and math.fabs(jdef_ptetaphie.Eta())<1.5):
-                  smearedEnergy = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[2]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[2]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[2]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-              elif(math.fabs(jdef_ptetaphie.Eta())>= 1.5 and math.fabs(jdef_ptetaphie.Eta())<2.0):
-                  smearedEnergy = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[3]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[3]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[3]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-              elif(math.fabs(jdef_ptetaphie.Eta())>= 2.0 and math.fabs(jdef_ptetaphie.Eta())<2.5):
-                  smearedEnergy = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[4]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[4]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[4]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-              elif(math.fabs(jdef_ptetaphie.Eta())>= 2.5 and math.fabs(jdef_ptetaphie.Eta())<4.5):
-                  smearedEnergy = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[5]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[5]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jdef_ptetaphie.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_CA8_[5]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+             if(math.fabs(jdef_ptetaphie.Eta())<0.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[0]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[0]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[0]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[0]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[0]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[0]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+             elif(math.fabs(jdef_ptetaphie.Eta())>= 0.5 and math.fabs(jdef_ptetaphie.Eta())<1.0):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[1]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[1]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[1]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[1]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[1]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[1]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+             elif(math.fabs(jdef_ptetaphie.Eta())>= 1.0 and math.fabs(jdef_ptetaphie.Eta())<1.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[2]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[2]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[2]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[2]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[2]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[2]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+             elif(math.fabs(jdef_ptetaphie.Eta())>= 1.5 and math.fabs(jdef_ptetaphie.Eta())<2.0):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[3]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[3]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[3]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[3]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[3]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[3]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+             elif(math.fabs(jdef_ptetaphie.Eta())>= 2.0 and math.fabs(jdef_ptetaphie.Eta())<2.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[4]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[4]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[4]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[4]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[4]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[4]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+             elif(math.fabs(jdef_ptetaphie.Eta())>= 2.5 and math.fabs(jdef_ptetaphie.Eta())<4.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[5]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[5]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[5]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[5]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[5]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jdef_ptetaphie.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_CA8_[5]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
 
              jet_smeared_byJERC    = ROOT.TLorentzVector();
              jet_smeared_byJERC_up = ROOT.TLorentzVector();
@@ -949,10 +1001,7 @@ class sampleWrapperClass:
              jet_smeared_byJERC_up = jdef_ptetaphie*(smearedEnergy_up/jdef_ptetaphie.E());
              jet_smeared_byJERC_dn = jdef_ptetaphie*(smearedEnergy_dn/jdef_ptetaphie.E());
 
-             self.jet_mass_pr_jer_up_ = array( 'f', [ 0. ] );
-             self.jet_mass_pr_jer_dn_ = array( 'f', [ 0. ] );
-
-             self.jet_ungroomed_jet_pt_jer_ = jet_smeared_byJERC.Pt();
+             self.jet_ungroomed_jet_pt_jer_    = jet_smeared_byJERC.Pt();
              self.jet_ungroomed_jet_pt_jer_up_ = jet_smeared_byJERC_up.Pt();
              self.jet_ungroomed_jet_pt_jer_dn_ = jet_smeared_byJERC_dn.Pt();
 
@@ -1173,7 +1222,7 @@ class sampleWrapperClass:
               if( x > self.histoJERC_.GetXaxis().GetXmin() and x < self.histoJERC_.GetXaxis().GetXmax() and
                   y > self.histoJERC_.GetYaxis().GetXmin() and y < self.histoJERC_.GetYaxis().GetXmax()):
                   bin = self.histoJERC_.FindBin(x,y);
-                  smearFactor = self.histoJERC_.GetBinContent(bin)-1.;
+                  smearFactor +=  self.histoJERC_.GetBinContent(bin)-1.;
                   smearError  = self.histoJERC_.GetBinError(bin);
                   smearFactor_up = smearFactor+smearFactor*smearError ;
                   smearFactor_dn = smearFactor-smearFactor*smearError ;
@@ -1182,41 +1231,93 @@ class sampleWrapperClass:
               smearedEnergy_up = vbf_maxpt_j1.E();
               smearedEnergy_dn = vbf_maxpt_j1.E();
 
-              if(smearFactor > 1 ):
-               if(math.fabs(vbf_maxpt_j1.Eta())<0.5):
-                  smearedEnergy    = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+              if(math.fabs(vbf_maxpt_j1.Eta())<0.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j1.Eta())>= 0.5 and math.fabs(vbf_maxpt_j1.Eta())<1.0):
-                  smearedEnergy = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j1.Eta())>= 1.0 and math.fabs(vbf_maxpt_j1.Eta())<1.5):
-                  smearedEnergy = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j1.Eta())>= 1.5 and math.fabs(vbf_maxpt_j1.Eta())<2.0):
-                  smearedEnergy = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j1.Eta())>= 2.0 and math.fabs(vbf_maxpt_j1.Eta())<2.5):
-                  smearedEnergy = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j1.Eta())>= 2.5 and math.fabs(vbf_maxpt_j1.Eta())<4.5):
-                  smearedEnergy = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
 
               vbf_j1_smeared_byJERC    = vbf_maxpt_j1*(smearedEnergy/vbf_maxpt_j1.E());
               vbf_j1_smeared_byJERC_up = vbf_maxpt_j1*(smearedEnergy_up/vbf_maxpt_j1.E());
               vbf_j1_smeared_byJERC_dn = vbf_maxpt_j1*(smearedEnergy_dn/vbf_maxpt_j1.E());
 
-              self.vbf_maxpt_j1_m_jer_[0]   = vbf_j1_byJERC.M();                                
-              self.vbf_maxpt_j1_pt_jer_[0]  = vbf_j1_byJERC.Pt();                              
-              self.vbf_maxpt_j1_eta_jer_[0] = vbf_j1_byJERC.Eta();                                
-              self.vbf_maxpt_j1_phi_jer_[0] = vbf_j1_byJERC.Phi();                                
+              self.vbf_maxpt_j1_m_jer_[0]   = vbf_j1_smeared_byJERC.M();                                
+              self.vbf_maxpt_j1_pt_jer_[0]  = vbf_j1_smeared_byJERC.Pt();                              
+              self.vbf_maxpt_j1_eta_jer_[0] = vbf_j1_smeared_byJERC.Eta();                                
+              self.vbf_maxpt_j1_phi_jer_[0] = vbf_j1_smeared_byJERC.Phi();                                
 
               self.vbf_maxpt_j2_m_jer_[0]   = 0;                                
               self.vbf_maxpt_j2_pt_jer_[0]  = 0;                              
@@ -1370,7 +1471,7 @@ class sampleWrapperClass:
               if( x > self.histoJERC_.GetXaxis().GetXmin() and x < self.histoJERC_.GetXaxis().GetXmax() and
                   y > self.histoJERC_.GetYaxis().GetXmin() and y < self.histoJERC_.GetYaxis().GetXmax()):
                   bin = self.histoJERC_.FindBin(x,y);
-                  smearFactor = self.histoJERC_.GetBinContent(bin)-1.;
+                  smearFactor += self.histoJERC_.GetBinContent(bin)-1.;
                   smearError  = self.histoJERC_.GetBinError(bin);
                   smearFactor_up = smearFactor+smearFactor*smearError ;
                   smearFactor_dn = smearFactor-smearFactor*smearError ;
@@ -1379,41 +1480,94 @@ class sampleWrapperClass:
               smearedEnergy_up = vbf_maxpt_j1.E();
               smearedEnergy_dn = vbf_maxpt_j1.E();
 
-              if(smearFactor > 1 ):
-               if(math.fabs(vbf_maxpt_j1.Eta())<0.5):
-                  smearedEnergy    = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+              if(math.fabs(vbf_maxpt_j1.Eta())<0.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j1.Eta())>= 0.5 and math.fabs(vbf_maxpt_j1.Eta())<1.0):
-                  smearedEnergy = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j1.Eta())>= 1.0 and math.fabs(vbf_maxpt_j1.Eta())<1.5):
-                  smearedEnergy = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j1.Eta())>= 1.5 and math.fabs(vbf_maxpt_j1.Eta())<2.0):
-                  smearedEnergy = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j1.Eta())>= 2.0 and math.fabs(vbf_maxpt_j1.Eta())<2.5):
-                  smearedEnergy = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j1.Eta())>= 2.5 and math.fabs(vbf_maxpt_j1.Eta())<4.5):
-                  smearedEnergy = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j1.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j1.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
 
 
               vbf_j1_smeared_byJERC    = vbf_maxpt_j1*(smearedEnergy/vbf_maxpt_j1.E());
               vbf_j1_smeared_byJERC_up = vbf_maxpt_j1*(smearedEnergy_up/vbf_maxpt_j1.E());
               vbf_j1_smeared_byJERC_dn = vbf_maxpt_j1*(smearedEnergy_dn/vbf_maxpt_j1.E());
 
-              self.vbf_maxpt_j1_m_jer_[0]   = vbf_j1_byJERC.M();                                
-              self.vbf_maxpt_j1_pt_jer_[0]  = vbf_j1_byJERC.Pt();                              
-              self.vbf_maxpt_j1_eta_jer_[0] = vbf_j1_byJERC.Eta();                                
-              self.vbf_maxpt_j1_phi_jer_[0] = vbf_j1_byJERC.Phi();                                
+              self.vbf_maxpt_j1_m_jer_[0]   = vbf_j1_smeared_byJERC.M();                                
+              self.vbf_maxpt_j1_pt_jer_[0]  = vbf_j1_smeared_byJERC.Pt();                              
+              self.vbf_maxpt_j1_eta_jer_[0] = vbf_j1_smeared_byJERC.Eta();                                
+              self.vbf_maxpt_j1_phi_jer_[0] = vbf_j1_smeared_byJERC.Phi();                                
 
               self.vbf_maxpt_j1_m_jer_up_[0]   = vbf_j1_smeared_byJERC_up.M();                                
               self.vbf_maxpt_j1_pt_jer_up_[0]  = vbf_j1_smeared_byJERC_up.Pt();                              
@@ -1425,12 +1579,17 @@ class sampleWrapperClass:
               self.vbf_maxpt_j1_eta_jer_dn_[0] = vbf_j1_smeared_byJERC_dn.Eta();                                
               self.vbf_maxpt_j1_phi_jer_dn_[0] = vbf_j1_smeared_byJERC_dn.Phi();                                
 
+              smearFactor     = 1.;
+              smearError      = 0.;
+              smearFactor_up  = 1.;
+              smearFactor_dn  = 1.;
+
               x = math.fabs(vbf_maxpt_j2.Eta());
               y = vbf_maxpt_j2.Pt();
               if( x > self.histoJERC_.GetXaxis().GetXmin() and x < self.histoJERC_.GetXaxis().GetXmax() and
                   y > self.histoJERC_.GetYaxis().GetXmin() and y < self.histoJERC_.GetYaxis().GetXmax()):
                   bin = self.histoJERC_.FindBin(x,y);
-                  smearFactor = self.histoJERC_.GetBinContent(bin)-1.;
+                  smearFactor += self.histoJERC_.GetBinContent(bin)-1.;
                   smearError  = self.histoJERC_.GetBinError(bin);
                   smearFactor_up = smearFactor+smearFactor*smearError ;
                   smearFactor_dn = smearFactor-smearFactor*smearError ;
@@ -1439,41 +1598,94 @@ class sampleWrapperClass:
               smearedEnergy_up = vbf_maxpt_j2.E();
               smearedEnergy_dn = vbf_maxpt_j2.E();
 
-              if(smearFactor > 1 ):
-               if(math.fabs(vbf_maxpt_j2.Eta())<0.5):
-                  smearedEnergy    = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+              if(math.fabs(vbf_maxpt_j2.Eta())<0.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j2.Eta())>= 0.5 and math.fabs(vbf_maxpt_j2.Eta())<1.0):
-                  smearedEnergy = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j2.Eta())>= 1.0 and math.fabs(vbf_maxpt_j2.Eta())<1.5):
-                  smearedEnergy = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j2.Eta())>= 1.5 and math.fabs(vbf_maxpt_j2.Eta())<2.0):
-                  smearedEnergy = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j2.Eta())>= 2.0 and math.fabs(vbf_maxpt_j2.Eta())<2.5):
-                  smearedEnergy = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
               elif(math.fabs(vbf_maxpt_j2.Eta())>= 2.5 and math.fabs(vbf_maxpt_j2.Eta())<4.5):
-                  smearedEnergy = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = vbf_maxpt_j2.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = vbf_maxpt_j2.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
 
 
               vbf_j2_smeared_byJERC    = vbf_maxpt_j2*(smearedEnergy/vbf_maxpt_j2.E());
               vbf_j2_smeared_byJERC_up = vbf_maxpt_j2*(smearedEnergy_up/vbf_maxpt_j2.E());
               vbf_j2_smeared_byJERC_dn = vbf_maxpt_j2*(smearedEnergy_dn/vbf_maxpt_j2.E());
 
-              self.vbf_maxpt_j2_m_jer_[0]   = vbf_j2_byJERC.M();                                
-              self.vbf_maxpt_j2_pt_jer_[0]  = vbf_j2_byJERC.Pt();                              
-              self.vbf_maxpt_j2_eta_jer_[0] = vbf_j2_byJERC.Eta();                                
-              self.vbf_maxpt_j2_phi_jer_[0] = vbf_j2_byJERC.Phi();                                
+              self.vbf_maxpt_j2_m_jer_[0]   = vbf_j2_smeared_byJERC.M();                                
+              self.vbf_maxpt_j2_pt_jer_[0]  = vbf_j2_smeared_byJERC.Pt();                              
+              self.vbf_maxpt_j2_eta_jer_[0] = vbf_j2_smeared_byJERC.Eta();                                
+              self.vbf_maxpt_j2_phi_jer_[0] = vbf_j2_smeared_byJERC.Phi();                                
 
               self.vbf_maxpt_j2_m_jer_up_[0]   = vbf_j2_smeared_byJERC_up.M();                                
               self.vbf_maxpt_j2_pt_jer_up_[0]  = vbf_j2_smeared_byJERC_up.Pt();                              
@@ -1484,8 +1696,6 @@ class sampleWrapperClass:
               self.vbf_maxpt_j2_pt_jer_dn_[0]  = vbf_j2_smeared_byJERC_dn.Pt();                              
               self.vbf_maxpt_j2_eta_jer_dn_[0] = vbf_j2_smeared_byJERC_dn.Eta();                                
               self.vbf_maxpt_j2_phi_jer_dn_[0] = vbf_j2_smeared_byJERC_dn.Phi();                                
-
-
 
              ##############################################################################################################################  
              ####### build met and lepton -> scale up and down the met according to the jet energy -> buld the final invariant mass  ######
@@ -1562,10 +1772,10 @@ class sampleWrapperClass:
 
               
              self.pfMET_jes_up_[0] = met_vector_type0_met_up.Pt();  ## scaled up met
-             self.pfMET_jes_Phi_up_[0] = met_vector_type0_met_up.Phi(); 
+             self.pfMET_Phi_jes_up_[0] = met_vector_type0_met_up.Phi(); 
 
              self.pfMET_jes_dn_[0] = met_vector_type0_met_dn.Pt(); ## scaled down met
-             self.pfMET_jes_Phi_dn_[0] = met_vector_type0_met_dn.Phi(); 
+             self.pfMET_Phi_jes_dn_[0] = met_vector_type0_met_dn.Phi(); 
 
              ### final invariant mass --> shape and normalization sys 
              lepton_vector = ROOT.TLorentzVector();
@@ -1625,12 +1835,17 @@ class sampleWrapperClass:
                 jet_smeared_up = ROOT.TLorentzVector();
                 jet_smeared_dn = ROOT.TLorentzVector();
 
+                smearFactor     = 1.;
+                smearError      = 0.;
+                smearFactor_up  = 1.;
+                smearFactor_dn  = 1.;
+
                 x = math.fabs(jet_vector.Eta());
                 y = jet_vector.Pt();
                 if( x > self.histoJERC_.GetXaxis().GetXmin() and x < self.histoJERC_.GetXaxis().GetXmax() and
                     y > self.histoJERC_.GetYaxis().GetXmin() and y < self.histoJERC_.GetYaxis().GetXmax()):
                   bin = self.histoJERC_.FindBin(x,y);
-                  smearFactor = self.histoJERC_.GetBinContent(bin)-1.;
+                  smearFactor += self.histoJERC_.GetBinContent(bin)-1.;
                   smearError  = self.histoJERC_.GetBinError(bin);
                   smearFactor_up = smearFactor+smearFactor*smearError ;
                   smearFactor_dn = smearFactor-smearFactor*smearError ;
@@ -1639,31 +1854,84 @@ class sampleWrapperClass:
                 smearedEnergy_up = jet_vector.E();
                 smearedEnergy_dn = jet_vector.E();
 
-                if(smearFactor > 1 ):
-                 if(math.fabs(jet_vector.Eta())<0.5):
-                  smearedEnergy    = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-                 elif(math.fabs(jet_vector.Eta())>= 0.5 and math.fabs(jet_vector.Eta())<1.0):
-                  smearedEnergy = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-                 elif(math.fabs(jet_vector.Eta())>= 1.0 and math.fabs(jet_vector.Eta())<1.5):
-                  smearedEnergy = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-                 elif(math.fabs(jet_vector.Eta())>= 1.5 and math.fabs(jet_vector.Eta())<2.0):
-                  smearedEnergy = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-                 elif(math.fabs(jet_vector.Eta())>= 2.0 and math.fabs(jet_vector.Eta())<2.5):
-                  smearedEnergy = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-                 elif(math.fabs(jet_vector.Eta())>= 2.5 and math.fabs(jet_vector.Eta())<4.5):
-                  smearedEnergy = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
+                if(math.fabs(jet_vector.Eta())<0.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+                elif(math.fabs(jet_vector.Eta())>= 0.5 and math.fabs(jet_vector.Eta())<1.0):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+                elif(math.fabs(jet_vector.Eta())>= 1.0 and math.fabs(jet_vector.Eta())<1.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+                elif(math.fabs(jet_vector.Eta())>= 1.5 and math.fabs(jet_vector.Eta())<2.0):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+                elif(math.fabs(jet_vector.Eta())>= 2.0 and math.fabs(jet_vector.Eta())<2.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+                elif(math.fabs(jet_vector.Eta())>= 2.5 and math.fabs(jet_vector.Eta())<4.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
 
 
                 jet_smeared    = jet_vector*(smearedEnergy/jet_vector.E());
@@ -1690,12 +1958,17 @@ class sampleWrapperClass:
                 jet_smeared_up = ROOT.TLorentzVector();
                 jet_smeared_dn = ROOT.TLorentzVector();
 
+                smearFactor     = 1.;
+                smearError      = 0.;
+                smearFactor_up  = 1.;
+                smearFactor_dn  = 1.;
+
                 x = math.fabs(jet_vector.Eta());
                 y = jet_vector.Pt();
                 if( x > self.histoJERC_.GetXaxis().GetXmin() and x < self.histoJERC_.GetXaxis().GetXmax() and
                     y > self.histoJERC_.GetYaxis().GetXmin() and y < self.histoJERC_.GetYaxis().GetXmax()):
                   bin = self.histoJERC_.FindBin(x,y);
-                  smearFactor = self.histoJERC_.GetBinContent(bin)-1.;
+                  smearFactor += self.histoJERC_.GetBinContent(bin)-1.;
                   smearError  = self.histoJERC_.GetBinError(bin);
                   smearFactor_up = smearFactor+smearFactor*smearError ;
                   smearFactor_dn = smearFactor-smearFactor*smearError ;
@@ -1704,32 +1977,85 @@ class sampleWrapperClass:
                 smearedEnergy_up = jet_vector.E();
                 smearedEnergy_dn = jet_vector.E();
 
-                if(smearFactor > 1 ):
-                 if(math.fabs(jet_vector.Eta())<0.5):
-                  smearedEnergy    = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-                 elif(math.fabs(jet_vector.Eta())>= 0.5 and math.fabs(jet_vector.Eta())<1.0):
-                  smearedEnergy = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-                 elif(math.fabs(jet_vector.Eta())>= 1.0 and math.fabs(jet_vector.Eta())<1.5):
-                  smearedEnergy = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-                 elif(math.fabs(jet_vector.Eta())>= 1.5 and math.fabs(jet_vector.Eta())<2.0):
-                  smearedEnergy = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-                 elif(math.fabs(jet_vector.Eta())>= 2.0 and math.fabs(jet_vector.Eta())<2.5):
-                  smearedEnergy = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-                 elif(math.fabs(jet_vector.Eta())>= 2.5 and math.fabs(jet_vector.Eta())<4.5):
-                  smearedEnergy = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor*smearFactor-1)))
-                  smearedEnergy_up = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_up*smearFactor_up-1)))
-                  smearedEnergy_dn = jet_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_dn*smearFactor_dn-1)))
-
+                if(math.fabs(jet_vector.Eta())<0.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[0]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+                elif(math.fabs(jet_vector.Eta())>= 0.5 and math.fabs(jet_vector.Eta())<1.0):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[1]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+                elif(math.fabs(jet_vector.Eta())>= 1.0 and math.fabs(jet_vector.Eta())<1.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[2]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+                elif(math.fabs(jet_vector.Eta())>= 1.5 and math.fabs(jet_vector.Eta())<2.0):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[3]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+                elif(math.fabs(jet_vector.Eta())>= 2.0 and math.fabs(jet_vector.Eta())<2.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[4]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+                elif(math.fabs(jet_vector.Eta())>= 2.5 and math.fabs(jet_vector.Eta())<4.5):
+                  if(smearFactor > 1 ):
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor*smearFactor-1)));
+                  else : 
+                   smearedEnergy    = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor*smearFactor-1))));
+                  if(smearFactor_up > 1 ): 
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_up*smearFactor_up-1)));
+                  else :
+                   smearedEnergy_up = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor_up*smearFactor_up-1))));
+                  if(smearFactor_dn > 1 ): 
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(smearFactor_dn*smearFactor_dn-1)));
+                  else :
+                   smearedEnergy_dn = jet_vector.E()*(1+self.Random_.Gaus(0.,self.jetResolutionMC_AK5_[5]*math.sqrt(math.fabs(smearFactor_dn*smearFactor_dn-1))));
+                
 
                 jet_smeared    = jet_vector*(smearedEnergy/jet_vector.E());
                 jet_smeared_up = jet_vector*(smearedEnergy_up/jet_vector.E());
@@ -1745,13 +2071,13 @@ class sampleWrapperClass:
 
 
              self.pfMET_jer_[0] = met_vector_type0_met.Pt(); 
-             self.pfMET_jer_Phi_[0] = met_vector_type0_met.Phi(); 
+             self.pfMET_Phi_jer_[0] = met_vector_type0_met.Phi(); 
               
              self.pfMET_jer_up_[0] = met_vector_type0_met_up.Pt();  ## scaled up met
-             self.pfMET_jer_Phi_up_[0] = met_vector_type0_met_up.Phi(); 
+             self.pfMET_Phi_jer_up_[0] = met_vector_type0_met_up.Phi(); 
 
              self.pfMET_jer_dn_[0] = met_vector_type0_met_dn.Pt(); ## scaled down met
-             self.pfMET_jer_Phi_dn_[0] = met_vector_type0_met_dn.Phi(); 
+             self.pfMET_Phi_jer_dn_[0] = met_vector_type0_met_dn.Phi(); 
 
              ### final invariant mass --> shape and normalization sys 
 
@@ -1805,8 +2131,8 @@ class sampleWrapperClass:
              self.l_phi_scale_up_[0] = lepton_vector_scale_up.Phi(); 
              self.l_phi_scale_dn_[0] = lepton_vector_scale_dn.Phi(); 
 
-             self.l_m_scale_up_[0] = lepton_vector_scale_up.M(); 
-             self.l_m_scale_dn_[0] = lepton_vector_scale_dn.M(); 
+             self.l_e_scale_up_[0] = lepton_vector_scale_up.E(); 
+             self.l_e_scale_dn_[0] = lepton_vector_scale_dn.E(); 
 
              met_vector_type0_met_up = met_vector_type0_met_up + (lepton_vector - lepton_vector_scale_up)  ;
              met_vector_type0_met_dn = met_vector_type0_met_dn + (lepton_vector - lepton_vector_scale_dn)  ;
@@ -1815,10 +2141,10 @@ class sampleWrapperClass:
              met_vector_type2_met_dn = met_vector_type2_met_dn + (lepton_vector - lepton_vector_scale_dn)  ;
 
              self.pfMET_lep_scale_up_[0]     = met_vector_type0_met_up.Pt();  ## scaled up met
-             self.pfMET_lep_scale_Phi_up_[0] = met_vector_type0_met_up.Phi(); 
+             self.pfMET_Phi_lep_scale_up_[0] = met_vector_type0_met_up.Phi(); 
 
              self.pfMET_lep_scale_dn_[0]     = met_vector_type0_met_dn.Pt(); ## scaled down met
-             self.pfMET_lep_scale_Phi_dn_[0] = met_vector_type0_met_dn.Phi(); 
+             self.pfMET_Phi_lep_scale_dn_[0] = met_vector_type0_met_dn.Phi(); 
 
              self.mass_lvj_type0_met_lep_scale_up_[0] = (lepton_vector_scale_up + jet_ptetaphie + met_vector_type0_met_up).M(); ## final invariant mass up
              self.mass_lvj_type0_met_lep_scale_dn_[0] = (lepton_vector_scale_up + jet_ptetaphie + met_vector_type0_met_dn).M(); ## final invariant mass dn
@@ -1829,12 +2155,13 @@ class sampleWrapperClass:
              #####################################################################################################################################  
              ######## build met and lepton -> smear the lepton according to the lepton energy resolution -> buld the final invariant mass  ######
              ######################################################################################################################################
+
              met_vector_type0_met.SetPxPyPzE(getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Cos(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr(self.InputTree_,"event_met_pfmet")*ROOT.TMath.Sin(getattr(self.InputTree_,"event_met_pfmetPhi")),getattr( self.InputTree_, "W_nu1_pz_type0_met" ),+ROOT.TMath.Sqrt(getattr(self.InputTree_, "event_met_pfmet")*getattr(self.InputTree_,"event_met_pfmet")+getattr(self.InputTree_, "W_nu1_pz_type0_met")*getattr( self.InputTree_,"W_nu1_pz_type0_met"))); ## original met 4V
 
 
              lepton_vector_res = ROOT.TLorentzVector();
 
-             smearedEnergy    = lepton_vector.E()*(1+ROOT.TRandom3().Gaus(0.,self.LeptonResolutionUnc_));
+             smearedEnergy    = lepton_vector.E()*(1+self.Random_.Gaus(0.,self.LeptonResolutionUnc_));
              lepton_vector_res = lepton_vector*(smearedEnergy/lepton_vector.E());
              
              self.l_pt_res_[0] = lepton_vector_res.Pt(); 
@@ -1846,12 +2173,10 @@ class sampleWrapperClass:
              met_vector_type2_met = met_vector_type2_met + (lepton_vector - lepton_vector_res)  ;
 
              self.pfMET_lep_res_[0]     = met_vector_type0_met.Pt();  ## scaled up met
-             self.pfMET_lep_Phi_res_[0] = met_vector_type0_met.Phi(); 
-
+             self.pfMET_Phi_lep_res_[0] = met_vector_type0_met.Phi(); 
 
              self.mass_lvj_type0_met_lep_res_[0] = (lepton_vector_res + jet_ptetaphie + met_vector_type0_met).M(); ## final invariant mass up
              self.mass_lvj_type2_met_lep_res_[0] = (lepton_vector_res + jet_ptetaphie + met_vector_type2_met).M();
-         
 
              ######### btag stuff  
              index_ak5_cvst = array( 'f', [0.] );
@@ -1865,7 +2190,7 @@ class sampleWrapperClass:
              self.nbjets_csvm_veto_[0] = 0. ;
              self.nbjets_csvt_veto_[0] = 0. ;
                  
-             ## take the delta R between leading CA8 jet and the lepton 
+             ## take the delta R between leading AK5 jet and the lepton 
              dR_lj = 0. ;
              for iJet in range(6):
                     if getattr( self.InputTree_, "JetPFCor_Pt" )[iJet] < 0 : break ;                        
@@ -2365,7 +2690,7 @@ class sampleWrapperClass:
         self.jet_mass_pr_jer_up_ = array( 'f', [ 0. ] );
         self.jet_mass_pr_jer_dn_ = array( 'f', [ 0. ] );
 
-        self.jet_ungroomed_jet_pt_jer     = array( 'f', [ 0. ] );
+        self.jet_ungroomed_jet_pt_jer_    = array( 'f', [ 0. ] );
         self.jet_ungroomed_jet_pt_jer_up_ = array( 'f', [ 0. ] );
         self.jet_ungroomed_jet_pt_jer_dn_ = array( 'f', [ 0. ] );
 
