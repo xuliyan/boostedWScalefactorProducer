@@ -39,6 +39,7 @@ parser.add_option('--inPath', action="store",type="string",dest="inPath",default
 
 parser.add_option('--category', action="store",type="string",dest="category",default="HP")
 
+parser.add_option('--jet_bin', action="store", type="int", dest="jet_bin", default=2)
 
 (options, args) = parser.parse_args()
 
@@ -167,13 +168,12 @@ class doFit_wj_and_wlvj:
         rrv_mass_lvj.setRange("signal_region",self.mlvj_signal_min,self.mlvj_signal_max);
 
         #prepare the data and mc files --> set the working directory and the files name
-        self.file_Directory="../TREES/trainingtrees_%s/"%(self.channel);
+        self.file_Directory="/gwteray/users/brianza/otrees_VBF_v6/trainingtrees_%s/"%(self.channel);
 
         self.PS_model= options.psmodel
         
    #     self.file_data = ("ofile_data.root");
-   #     self.file_pseudodata = ("ofile_pseudodata4higgs.root");
-        self.file_data  = ("ofile_data.root");
+        self.file_data  = ("ofile_pseudodata4higgs.root");
         self.file_ggH   = ("ofile_%s.root"%(self.higgs_sample));
         self.file_vbfH  = ("ofile_%s.root"%(self.vbfhiggs_sample));
 
@@ -186,12 +186,13 @@ class doFit_wj_and_wlvj:
             self.file_WJets1_mc = ("ofile_WJets_exclusive_Pythia.root");
 
         self.file_VV_mc = ("ofile_VV.root");# WW+WZ
+        self.file_WW_EWK_mc = ("ofile_WW2jet_phantom.root");# WW+WZ        
         self.file_TTbar_mc = ("ofile_TTbar_Powheg.root");
         self.file_TTbar_matchDn_mc = ("ofile_TTbar_matchDn.root");
         self.file_TTbar_matchUp_mc = ("ofile_TTbar_matchUp.root");
         self.file_TTbar_scaleDn_mc = ("ofile_TTbar_scaleDn.root");
         self.file_TTbar_scaleUp_mc = ("ofile_TTbar_scaleUp.root");
-        self.file_TTbar_MG_mc = ("ofile_TTbar_MG.root");
+        self.file_TTbar_mcanlo_mc = ("ofile_TTbar_mcanlo.root");
         self.file_STop_mc     = ("ofile_STop.root");#single Top
                                                                        
         self.PS_model= options.psmodel
@@ -215,16 +216,16 @@ class doFit_wj_and_wlvj:
 
         #medium wtagger_eff reweight between data and mc #Wtagger_forV SF have be add to ntuple weight;
 	if self.channel=="mu" and self.wtagger_label=="HP":
-            self.rrv_wtagger_eff_reweight_forT=RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT", 0.975);
-            self.rrv_wtagger_eff_reweight_forT.setError(0.02*self.rrv_wtagger_eff_reweight_forT.getVal());
+            self.rrv_wtagger_eff_reweight_forT=RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT", 1);
+            self.rrv_wtagger_eff_reweight_forT.setError(0.0*self.rrv_wtagger_eff_reweight_forT.getVal());                        
             self.rrv_wtagger_eff_reweight_forV=RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.891);
-            self.rrv_wtagger_eff_reweight_forV.setError(0.0717773);
+            self.rrv_wtagger_eff_reweight_forV.setError(0.097);
 
         if self.channel=="el" and self.wtagger_label=="HP":
-            self.rrv_wtagger_eff_reweight_forT=RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.968);
-            self.rrv_wtagger_eff_reweight_forT.setError(0.03*self.rrv_wtagger_eff_reweight_forT.getVal());
+            self.rrv_wtagger_eff_reweight_forT=RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",1);
+            self.rrv_wtagger_eff_reweight_forT.setError(0.0*self.rrv_wtagger_eff_reweight_forT.getVal());            
             self.rrv_wtagger_eff_reweight_forV=RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.891);
-            self.rrv_wtagger_eff_reweight_forV.setError(0.0717773);
+            self.rrv_wtagger_eff_reweight_forV.setError(0.097);
 
         if self.channel=="mu" and self.wtagger_label=="LP":
             self.rrv_wtagger_eff_reweight_forT=RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",1.31);
@@ -256,7 +257,7 @@ class doFit_wj_and_wlvj:
 
 
         #correct the W-jet mass peak difference between data and MC
-        self.mean_shift=1.36; self.sigma_scale=1.102;
+        self.mean_shift=1.; self.sigma_scale=1.;
         print "mean correction for the W peak : ",self.mean_shift," Resolution correction : ",self.sigma_scale
 
         
@@ -264,19 +265,19 @@ class doFit_wj_and_wlvj:
         if not os.path.isdir("cards_%s"%(self.channel)): os.system("mkdir cards_%s"%(self.channel));
         self.rlt_DIR="cards_%s/"%(self.channel)
 
-        self.file_rlt_txt                   = self.rlt_DIR+"other_hwwlvj_%s_%s_%02d_%02d.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
-        self.file_rlt_root                  = self.rlt_DIR+"hwwlvj_%s_%s_%02d_%02d_workspace.root"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
-        self.file_datacard_unbin_ggHvbfH    = self.rlt_DIR+"hwwlvj_%s_%s_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
-        self.file_datacard_unbin_ggH        = self.rlt_DIR+"hwwlvj_%s_%s_ggH_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
-        self.file_datacard_unbin_vbfH       = self.rlt_DIR+"hwwlvj_%s_%s_vbfH_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
-        self.file_datacard_counting_ggHvbfH = self.rlt_DIR+"hwwlvj_%s_%s_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
-        self.file_datacard_counting_ggH     = self.rlt_DIR+"hwwlvj_%s_%s_ggH_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
-        self.file_datacard_counting_vbfH    = self.rlt_DIR+"hwwlvj_%s_%s_vbfH_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
+        self.file_rlt_txt                   = self.rlt_DIR+"other_hwwlvj_%s_%s_%sjet_%02d_%02d.txt"%(self.higgs_sample,self.channel,options.jet_bin,options.cprime,options.BRnew)
+        self.file_rlt_root                  = self.rlt_DIR+"hwwlvj_%s_%s_%sjet_%02d_%02d_workspace.root"%(self.higgs_sample,self.channel,options.jet_bin,options.cprime,options.BRnew)
+        self.file_datacard_unbin_ggHvbfH    = self.rlt_DIR+"hwwlvj_%s_%s_%sjet_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.jet_bin,options.cprime,options.BRnew)
+        self.file_datacard_unbin_ggH        = self.rlt_DIR+"hwwlvj_%s_%s_%sjet_ggH_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.jet_bin,options.cprime,options.BRnew)
+        self.file_datacard_unbin_vbfH       = self.rlt_DIR+"hwwlvj_%s_%s_%sjet_vbfH_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.jet_bin,options.cprime,options.BRnew)
+        self.file_datacard_counting_ggHvbfH = self.rlt_DIR+"hwwlvj_%s_%s_%sjet_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.jet_bin,options.cprime,options.BRnew)
+        self.file_datacard_counting_ggH     = self.rlt_DIR+"hwwlvj_%s_%s_%sjet_ggH_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.jet_bin,options.cprime,options.BRnew)
+        self.file_datacard_counting_vbfH    = self.rlt_DIR+"hwwlvj_%s_%s_%sjet_vbfH_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.jet_bin,options.cprime,options.BRnew)
         
-        self.file_out=open(self.file_rlt_txt,"w");
+        self.file_out = open(self.file_rlt_txt,"w");
         self.file_out.write("Welcome:\n");
         self.file_out.close()
-        self.file_out=open(self.file_rlt_txt,"a+");
+        self.file_out = open(self.file_rlt_txt,"a+");
 
         self.higgs_xs_scale=1.0; #higgs XS scale
         
@@ -285,6 +286,7 @@ class doFit_wj_and_wlvj:
             'data' : 1,
             'WJets' : 2,
             'VV' : 4,
+            'WW_EWK' : 6,
             'STop' : 7,
             'TTbar' : 210,
             'ggH' : 1,
@@ -321,12 +323,17 @@ class doFit_wj_and_wlvj:
         #uncertainty for datacard
         self.lumi_uncertainty    = 0.026;
         self.XS_STop_uncertainty = 0.30 ;
-        self.XS_VV_uncertainty   = 0.25 ;
+        self.XS_VV_uncertainty   = 0.30 ;
+        self.XS_WW_EWK_uncertainty   = 0.30 ;        
+        self.XS_TTbar_uncertainty= 0.07 ;
         self.XS_TTbar_NLO_uncertainty = 0.063 ;# from AN-12-368 table8
         self.XS_STop_NLO_uncertainty  = 0.05 ;# from AN-12-368 table8
         self.XS_VV_NLO_uncertainty    = 0.10 ;# from AN-12-368 table8
                                                         
-        self.QCDscale_ggH   = 0.30;
+        self.QCDscale_ggH   = 0.0;
+        self.QCDscale_ggH1in   = 0.0;
+        self.QCDscale_ggH2in   = 0.19;
+        
         self.QCDscale_vbfH  = 0.01;
         self.pdf_gg         = 0.0;
         self.pdf_vbf        = 0.0;
@@ -373,20 +380,32 @@ class doFit_wj_and_wlvj:
         self.interference_vbfH_uncertainty = 0.5;
 
         #normlization uncertainty from jet_mass
-        self.WJets_normlization_uncertainty_from_jet_mass = 0.;        
-        self.VV_normlization_uncertainty_from_jet_mass = 0.;
-        self.STop_normlization_uncertainty_from_jet_mass = 0.;
-        self.TTbar_normlization_uncertainty_from_jet_mass = 0.;
-        self.ggH_normlization_uncertainty_from_jet_mass = 0.;
-        self.vbf_normlization_uncertainty_from_jet_mass = 0.;        
+        self.WJets_normlization_uncertainty_from_jet_scale = 0.;        
+        self.VV_normlization_uncertainty_from_jet_scale = 0.;
+        self.WW_EWK_normlization_uncertainty_from_jet_scale = 0.;        
+        self.STop_normlization_uncertainty_from_jet_scale = 0.;
+        self.TTbar_normlization_uncertainty_from_jet_scale = 0.;
+        self.ggH_normlization_uncertainty_from_jet_scale = 0.;
+        self.vbf_normlization_uncertainty_from_jet_scale = 0.;
+
+        #normlization uncertainty from jet_res
+        self.WJets_normlization_uncertainty_from_jet_res  = 0.;        
+        self.VV_normlization_uncertainty_from_jet_res     = 0.;
+        self.WW_EWK_normlization_uncertainty_from_jet_res = 0.;        
+        self.STop_normlization_uncertainty_from_jet_res   = 0.;
+        self.TTbar_normlization_uncertainty_from_jet_res  = 0.;
+        self.ggH_normlization_uncertainty_from_jet_res    = 0.;
+        self.vbf_normlization_uncertainty_from_jet_res    = 0.;        
 
         #el and mu trigger and eff uncertainty, AN2012_368_v5 12.3
         self.lep_trigger_uncertainty = 0.01;
         self.lep_eff_uncertainty     = 0.02;
 
-        #b tag scale uncertainty
         self.btag_scale = 0.98;
         self.btag_scale_uncertainty = 0.025;
+
+        self.lep_scale_uncertainty = 0.0;
+        self.jet_res_uncertainty = 0.0;        
 
         #### increase shape uncertainty
         self.shape_para_error_WJets0=1.4;
@@ -394,7 +413,6 @@ class doFit_wj_and_wlvj:
         else: self.shape_para_error_alpha=2.;
         self.shape_para_error_TTbar=2.;
         
-
         # shape parameter uncertainty
         self.FloatingParams=RooArgList("floatpara_list");
 
@@ -1263,15 +1281,20 @@ class doFit_wj_and_wlvj:
      ConstraintsList.append(constrainpdf_x.GetName());
 
     ### get an mj model from the workspace givin the label
-    def get_mj_Model(self,label):
+    def get_mj_Model(self,label, relaxed = 0):
+       if relaxed == 0:  
         return self.workspace4fit_.pdf("model"+label+"_"+self.channel+"_mj")
-
+       else:
+        return self.workspace4fit_.pdf("model"+label+"_"+self.channel+"_mj_relaxed")
 
     ### take the dataset, the model , the parameters in order to fix them as constant --> for extended pdf
-    def get_General_mj_Model(self, label ):
+    def get_General_mj_Model(self, label, relaxed = 0 ):
         print "########### Fixing a general mj model  ############"
-        rdataset_General_mj = self.workspace4fit_.data("rdataset%s_%s_mj"%(label,self.channel))
-        model_General = self.get_mj_Model(label);
+        if relaxed = 0:
+         rdataset_General_mj = self.workspace4fit_.data("rdataset%s_%s_mj"%(label,self.channel))
+        else:
+         rdataset_General_mj = self.workspace4fit_.data("rdataset%s_%s_mj_relaxed"%(label,self.channel))            
+        model_General = self.get_mj_Model(label, relaxed);
         rdataset_General_mj.Print();
         model_General.Print();
         ## get the parameters and cycle on them
@@ -1280,33 +1303,43 @@ class doFit_wj_and_wlvj:
         par.Reset();
         param=par.Next()
         while (param):
-            if (TString(label).Contains("VV") or TString(label).Contains("STop") or TString(label).Contains("TTbar")):
+            if (TString(label).Contains("VV") or TString(label).Contains("VV") or TString(label).Contains("STop") or TString(label).Contains("TTbar")):
                 param.Print();
             param.setConstant(kTRUE);
             param=par.Next()
         ## return the pdf after having fixed the paramters
-        return self.workspace4fit_.pdf("model%s_%s_mj"%(label,self.channel))
+        return self.get_mj_Model(label,relaxed);
 
     ### fix only the ttbar component using the default label --> for extended pdf
-    def get_TTbar_mj_Model(self,label="_TTbar"):
+    def get_TTbar_mj_Model(self,label="_TTbar", relaxed = 0):
         print "########### Fixing only the TTbar mj Shape  ############"
-        return self.get_General_mj_Model(label);
+        return self.get_General_mj_Model(label,relaxed);
 
     ### fix only the stop component using the default label --> for extended pdf
-    def get_STop_mj_Model(self,label="_STop"):
+    def get_STop_mj_Model(self,label="_STop", relaxed = 0):
         print "########### Fixing only the Stop mj Shape  ############"
-        return self.get_General_mj_Model(label);
+        return self.get_General_mj_Model(label,relaxed);
 
     ### fix only the VV component using the default label --> for extended pdf
-    def get_VV_mj_Model(self,label="_VV"):
+    def get_VV_mj_Model(self,label="_VV",relaxed = 0):
         print "########### Fixing only the VV mj Shape  ############"
-        return self.get_General_mj_Model(label);
+        return self.get_General_mj_Model(label,relaxed);
+
+    ### fix only the WW_EWK component using the default label --> for extended pdf
+    def get_WW_EWK_mj_Model(self,label="_WW_EWK",relaxed = 0):
+        print "########### Fixing only the WW_EWK mj Shape  ############"
+        return self.get_General_mj_Model(label,relaxed);
+    
 
     ### fix only the WJets model --> for extended pdf (just fix shape parameters of width, offset of ErfExp and p1 of User1 function
-    def get_WJets_mj_Model(self,label):
+    def get_WJets_mj_Model(self,label, relaxed = 0):
         print "########### Fixing only the WJets mj Shape --> just the printed parameters  ############"
-        rdataset_WJets_mj = self.workspace4fit_.data("rdataset%s_%s_mj"%(label,self.channel))
-        model_WJets = self.get_mj_Model(label);
+        if relaxed = 0:
+         rdataset_WJets_mj = self.workspace4fit_.data("rdataset%s_%s_mj"%(label,self.channel))
+        else:
+         rdataset_WJets_mj = self.workspace4fit_.data("rdataset%s_%s_mj_relaxed"%(label,self.channel)) 
+
+        model_WJets = self.get_mj_Model(label, relaxed);
         rdataset_WJets_mj.Print();
         model_WJets.Print();
         parameters_WJets = model_WJets.getParameters(rdataset_WJets_mj);
@@ -1321,13 +1354,18 @@ class doFit_wj_and_wlvj:
             else:
              param.setConstant(0);
             param=par.Next()
-        return self.workspace4fit_.pdf("model%s_%s_mj"%(label,self.channel))
+        return self.get_mj_Model(label,relaxed);
 
     ### fix a given model taking the label, and the region --> for extended pdf --> all the parameter of the pdf + normalization
-    def fix_Model(self, label, mlvj_region="_signal_region",mass_spectrum="_mlvj"):
+    def fix_Model(self, label, mlvj_region="_signal_region",mass_spectrum="_mlvj", relaxed=0):
         print "########### Fixing an Extended Pdf for mlvj  ############"
-        rdataset = self.workspace4fit_.data("rdataset%s%s_%s%s"%(label,mlvj_region,self.channel,mass_spectrum))
-        model = self.get_mlvj_Model(label,mlvj_region);
+
+        if relaxed==0:
+          rdataset = self.workspace4fit_.data("rdataset%s%s_%s%s"%(label,mlvj_region,self.channel,mass_spectrum))
+        else:
+          rdataset = self.workspace4fit_.data("rdataset%s%s_%s%s_relaxed"%(label,mlvj_region,self.channel,mass_spectrum))
+
+        model = self.get_mlvj_Model(label,mlvj_region, relaxed);
         rdataset.Print();
         model.Print();
         parameters = model.getParameters(rdataset);
@@ -1364,14 +1402,18 @@ class doFit_wj_and_wlvj:
 
 
     #### get a generic mlvj model from the workspace
-    def get_mlvj_Model(self,label, mlvj_region):
+    def get_mlvj_Model(self,label, mlvj_region, relaxed=0):
+      if relaxed==0:
         return self.workspace4fit_.pdf("model"+label+mlvj_region+"_"+self.channel+"_mlvj");
+      else:
+        return self.workspace4fit_.pdf("model"+label+mlvj_region+"_"+self.channel+"_mlvj_relaxed");
 
     #### get a general mlvj model and fiz the paramters --> for extended pdf
-    def get_General_mlvj_Model(self, label, mlvj_region="_signal_region"):
+    def get_General_mlvj_Model(self, label, mlvj_region="_signal_region", relaxed=0):
         print "########### Fixing a general mlvj model  ############"
-        rdataset_General_mlvj = self.workspace4fit_.data("rdataset%s%s_%s_mlvj"%(label, mlvj_region,self.channel))
-        model_General = self.get_mlvj_Model(label,mlvj_region);
+        if relaxed==0: rdataset_General_mlvj = self.workspace4fit_.data("rdataset%s%s_%s_mlvj"%(label, mlvj_region,self.channel))
+        else: rdataset_General_mlvj = self.workspace4fit_.data("rdataset%s%s_%s_mlvj_relaxed"%(label, mlvj_region,self.channel))          
+        model_General = self.get_mlvj_Model(label,mlvj_region,relaxed);
         rdataset_General_mlvj.Print();
         model_General.Print();
         parameters_General = model_General.getParameters(rdataset_General_mlvj);
@@ -1381,23 +1423,27 @@ class doFit_wj_and_wlvj:
             param.setConstant(kTRUE);
             param.Print();
             param=par.Next()
-        return self.get_mlvj_Model(label,mlvj_region);
+        return self.get_mlvj_Model(label,mlvj_region,relaxed);
 
     ###### get TTbar model mlvj in a region
-    def get_TTbar_mlvj_Model(self, mlvj_region="_signal_region"):
+    def get_TTbar_mlvj_Model(self, mlvj_region="_signal_region", relaxed=0):
         print "########### Fixing TTbar mlvj model for the region",mlvj_region,"  ############"
-        return self.get_General_mlvj_Model("_TTbar",mlvj_region);
+        return self.get_General_mlvj_Model("_TTbar",mlvj_region,relaxed);
 
     ###### get Single Top model mlvj in a region
-    def get_STop_mlvj_Model(self, mlvj_region="_signal_region"):
+    def get_STop_mlvj_Model(self, mlvj_region="_signal_region", relaxed=0):
         print "########### Fixing Stop mlvj model for the region",mlvj_region,"  ############"
-        return self.get_General_mlvj_Model("_STop",mlvj_region);
-
+        return self.get_General_mlvj_Model("_STop",mlvj_region,relaxed);
 
     ###### get VV mlvj in a region
-    def get_VV_mlvj_Model(self, mlvj_region="_signal_region"):
+    def get_VV_mlvj_Model(self, mlvj_region="_signal_region", relaxed=0):
         print "########### Fixing VV mlvj for the region",mlvj_region,"  ############"
-        return self.get_General_mlvj_Model("_VV",mlvj_region);
+        return self.get_General_mlvj_Model("_VV",mlvj_region,relaxed);
+
+    ###### get WW_EWK mlvj in a region
+    def get_WW_EWK_mlvj_Model(self, mlvj_region="_signal_region", relaxed=0):
+        print "########### Fixing WW_EWK mlvj for the region",mlvj_region,"  ############"
+        return self.get_General_mlvj_Model("_WW_EWK",mlvj_region,relaxed);    
 
     ###### get ggH mlvj in a region
     def get_ggH_mlvj_Model(self, mlvj_region="_signal_region"):
@@ -1482,7 +1528,7 @@ class doFit_wj_and_wlvj:
       return self.workspace4fit_.pdf("model"+label+"_"+self.channel+mass_spectrum);
 
     ### Method for a single MC fit of the mj spectra giving: file name, label, model name
-    def fit_mj_single_MC(self,in_file_name, label, in_model_name, additioninformation=""):
+    def fit_mj_single_MC(self,in_file_name, label1, label, in_model_name, additioninformation=""):
 
         print "############### Fit mj single MC sample",in_file_name," ",label,"  ",in_model_name," ##################"
         ## import variable and dataset
@@ -1514,21 +1560,15 @@ class doFit_wj_and_wlvj:
         mplot_pull = self.get_pull(rrv_mass_j, mplot);
         mplot.GetYaxis().SetRangeUser(1e-5,mplot.GetMaximum()*1.2);
 
-        ##CALCULATE CHI2
-        datahist=rdataset_mj.binnedClone(rdataset_mj.GetName()+"_binnedClone",rdataset_mj.GetName()+"_binnedClone")
+        ## CALCULATE CHI2
+        datahist = rdataset_mj.binnedClone(rdataset_mj.GetName()+"_binnedClone",rdataset_mj.GetName()+"_binnedClone")
         Nbin = int(rrv_mass_j.getBins()); 
         rresult_param = rfresult.floatParsFinal();        
         nparameters =  rresult_param.getSize()                                         
-        ChiSquare = model.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE));
-        ChiSquare.getVal();
+        ChiSquare = model.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.DataError(RooAbsData.Poisson));
         chi_over_ndf= ChiSquare.getVal()/(Nbin - nparameters);
-   #     print ChiSquare.getVal();
-   #     print Nbin;
-   #     print nparameters;
-   #     print chi_over_ndf;
-   #     raw_input("ENTER");        
 
-        ##Add Chisquare to mplot_pull
+        ## Add Chisquare to mplot_pull
         cs = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf)));
         cs.SetNDC();
         cs.SetTextSize(0.12);
@@ -1561,20 +1601,15 @@ class doFit_wj_and_wlvj:
          mplot_pull_relaxed = self.get_pull(rrv_mass_j, mplot_relaxed);
          mplot_relaxed.GetYaxis().SetRangeUser(1e-5,mplot_relaxed.GetMaximum()*1.2);
 
-        ##CALCULATE CHI2
+         ##CALCULATE CHI2
          datahist_relaxed=rdataset_mj_relaxed.binnedClone(rdataset_mj_relaxed.GetName()+"_binnedClone",rdataset_mj_relaxed.GetName()+"_binnedClone")
          Nbin_relaxed = int(rrv_mass_j.getBins()); 
          rresult_relaxed_param = rfresult_relaxed.floatParsFinal();        
-         nparameters_relaxed =  rresult_relaxed_param.getSize()                                         
-         ChiSquare_relaxed = model_relaxed.createChi2(datahist_relaxed,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE));
-         chi_over_ndf_relaxed= ChiSquare_relaxed.getVal()/(Nbin_relaxed - nparameters_relaxed);
-   #     print ChiSquare.getVal();
-   #     print Nbin;
-   #     print nparameters;
-   #     print chi_over_ndf;
-   #     raw_input("ENTER");        
+         nparameters_relaxed  =  rresult_relaxed_param.getSize()                                         
+         ChiSquare_relaxed    = model_relaxed.createChi2(datahist_relaxed,RooFit.Extended(kTRUE),RooFit.DataError(RooAbsData.Poisson));
+         chi_over_ndf_relaxed = ChiSquare_relaxed.getVal()/(Nbin_relaxed - nparameters_relaxed);
 
-        ##Add Chisquare to mplot_pull
+         ##Add Chisquare to mplot_pull
          cs2 = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf_relaxed)));
          cs2.SetNDC();
          cs2.SetTextSize(0.12);
@@ -1593,8 +1628,8 @@ class doFit_wj_and_wlvj:
          param=par.Next()
          while (param):
              if TString(param.GetName()).Contains("number"):
-                 param.setVal(param.getVal()*self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal());
-                 param.setError(param.getError()*self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal());
+                 param.setVal(param.getVal()*self.workspace4fit_.var("rrv_vbf_cut_total"+label1+"_"+self.channel).getVal());
+                 param.setError(param.getError()*self.workspace4fit_.var("rrv_vbf_cut_total"+label1+"_"+self.channel).getVal());
                  param.Print();
              param=par.Next()
                  
@@ -1606,10 +1641,10 @@ class doFit_wj_and_wlvj:
          for ipoint in range(0,band_up.GetN()) and range(0,band_dn.GetN()):
              x1 = ROOT.Double(0.) ; y1 = ROOT.Double(0.) ;
              band_up.GetPoint(ipoint,x1,y1);
-             band_up.SetPoint(ipoint,x1,y1*self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal());
+             band_up.SetPoint(ipoint,x1,y1*self.workspace4fit_.var("rrv_vbf_cut_total"+label1+"_"+self.channel).getVal());
              x2 = ROOT.Double(0.) ; y2 = ROOT.Double(0.) ;
              band_dn.GetPoint(ipoint,x2,y2);
-             band_dn.SetPoint(ipoint,x2,y2*self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal());
+             band_dn.SetPoint(ipoint,x2,y2*self.workspace4fit_.var("rrv_vbf_cut_total"+label1+"_"+self.channel).getVal());
              
          mplot_same.addObject(band_up,"L");
          mplot_same.addObject(band_dn,"L"); 
@@ -1623,19 +1658,12 @@ class doFit_wj_and_wlvj:
          mplot_pull_same = self.get_pull(rrv_mass_j, mplot_same);
          mplot_same.GetYaxis().SetRangeUser(1e-5,mplot_same.GetMaximum()*1.2);
 
-
-        ##CALCULATE CHI2
-#         datahist=rdataset_mj.binnedClone(rdataset_mj.GetName()+"_binnedClone",rdataset_mj.GetName()+"_binnedClone")
+         ##CALCULATE CHI2
          Nbin = int(rrv_mass_j.getBins()); 
          ChiSquare_same = model_relaxed.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE));
-         ChiSquare_same.getVal();
          chi_over_ndf_same= ChiSquare_same.getVal()/(Nbin - nparameters_relaxed);
-     #    print Nbin;
-     #    print nparameters_relaxed;
-     #    print ChiSquare_same.getVal();
-     #    raw_input("ENTER");
                   
-        ##Add Chisquare to mplot_pull
+         ##Add Chisquare to mplot_pull
          cs3 = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf_same)));
          cs3.SetNDC();
          cs3.SetTextSize(0.12);
@@ -1650,11 +1678,14 @@ class doFit_wj_and_wlvj:
         self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").setVal(self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").getVal()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal() )
         self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").setError(self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").getError()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal() )
 
-        print "Normalization Factor in mJ "
+        print "####################################################";
+        print "######## Normalization Factor in mJ ################"
+        print "####################################################";
+
         self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").Print();
         
         if(self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed")):
-           self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed").setVal(self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed").getVal()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal()*self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal());
+           self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed").setVal(self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed").getVal()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal());
            self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed").setError(self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").getError());
            self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed").Print();
            
@@ -1663,7 +1694,7 @@ class doFit_wj_and_wlvj:
             self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").setError(self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").getError() )
             self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").Print();
             if self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed"):
-               self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed").setVal( self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed").getVal()*self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal());
+               self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed").setVal(self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed").getVal());
                self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed").setError(self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").getError());
                self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed").Print();
                
@@ -1672,8 +1703,7 @@ class doFit_wj_and_wlvj:
         par.Reset();
         param=par.Next()
         while (param):
-              if (TString(label).Contains("VV") or TString(label).Contains("STop") or TString(label).Contains("TTbar")):
-                #param.Print();
+              if (TString(label).Contains("VV") or TString(label).Contains("WW_EWK") or TString(label).Contains("STop") or TString(label).Contains("TTbar")):
                 if TString(param.GetName()).Contains("rrv_mean1_gaus"):
                     param.setRange(param.getMin()+self.mean_shift, param.getMax()+self.mean_shift);
                     param.setVal(param.getVal()+self.mean_shift);
@@ -1689,12 +1719,11 @@ class doFit_wj_and_wlvj:
               param=par.Next()
 
         if(rdataset_mj_relaxed):
-         par=parameters_list_relaxed.createIterator();
+         par = parameters_list_relaxed.createIterator();
          par.Reset();
          param=par.Next()
          while (param):
-              if (TString(label).Contains("VV") or TString(label).Contains("STop") or TString(label).Contains("TTbar")):
-                #param.Print();
+              if (TString(label).Contains("VV") or TString(label).Contains("WW_EWK") or TString(label).Contains("STop") or TString(label).Contains("TTbar")):
                 if TString(param.GetName()).Contains("rrv_mean1_gaus"):
                     param.setRange(param.getMin()+self.mean_shift, param.getMax()+self.mean_shift);
                     param.setVal(param.getVal()+self.mean_shift);
@@ -1712,7 +1741,7 @@ class doFit_wj_and_wlvj:
 
 
     ### Define the Extended Pdf for and mlvj fit giving: label, fit model name, list constraint, range to be fitted and do the decorrelation
-    def fit_mlvj_model_single_MC(self,in_file_name, label, in_range, mlvj_model, deco=0, show_constant_parameter=0, logy=0, ismc=0):
+    def fit_mlvj_model_single_MC(self,in_file_name, label1, label, in_range, mlvj_model, deco=0, show_constant_parameter=0, logy=0, ismc=0):
 
         print "############### Fit mlvj single MC sample ",in_file_name," ",label,"  ",mlvj_model,"  ",in_range," ##################"
         ## import variable and dataset
@@ -1729,7 +1758,6 @@ class doFit_wj_and_wlvj:
         rfresult = model.fitTo( rdataset, RooFit.Save(1), RooFit.SumW2Error(kTRUE) ,RooFit.Extended(kTRUE) );
         rfresult = model.fitTo( rdataset, RooFit.Save(1), RooFit.SumW2Error(kTRUE) ,RooFit.Extended(kTRUE), RooFit.Minimizer("Minuit2") );
         rfresult.Print();
-     #   raw_input("ENTER");
 
         ## set the name of the result of the fit and put it in the workspace
         rfresult.SetName("rfresult"+label+in_range+"_"+self.channel+"_mlvj")
@@ -1749,35 +1777,12 @@ class doFit_wj_and_wlvj:
         mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.2);
 
         ##CALCULATE CHI2
-        datahist=rdataset.binnedClone(rdataset.GetName()+"_binnedClone",rdataset.GetName()+"_binnedClone")
-        Nbin = int(rrv_mass_lvj.getBins()); 
+        datahist = rdataset.binnedClone(rdataset.GetName()+"_binnedClone",rdataset.GetName()+"_binnedClone")
+        Nbin     = int(rrv_mass_lvj.getBins()); 
         rresult_param = rfresult.floatParsFinal();        
         nparameters =  rresult_param.getSize()                                         
-        ChiSquare = model.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.Range(500,1100),RooFit.DataError(RooAbsData.SumW2));
-        ChiSquare.getVal();
+        ChiSquare = model.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.DataError(RooAbsData.Poisson));
         chi_over_ndf= ChiSquare.getVal()/(Nbin - nparameters);
-      #  print ChiSquare.getVal();
-      #  print Nbin;
-      #  print nparameters;
-      #  print chi_over_ndf;
-      #  raw_input("ENTER");
-        hist = datahist.createHistogram("histo_%s"%(rdataset.GetName()),rrv_mass_lvj, RooFit.Binning( Nbin ,rrv_mass_lvj.getMin(),rrv_mass_lvj.getMax())); 
-        bincenter = rrv_mass_lvj.getMin() + (((rrv_mass_lvj.getMax() - rrv_mass_lvj.getMin())/Nbin)/2);
-        chi2=0;
-        width = (rrv_mass_lvj.getMax() - rrv_mass_lvj.getMin())/Nbin;
-        for i in range (1,Nbin):
-         rrv_mass_lvj.setVal(bincenter);
-      #   print bincenter;
-      #   print hist.GetBinContent(i);
-      #   print hist.GetBinError(i);         
-      #   print model.expectedEvents(RooArgSet(rrv_mass_lvj))*model.getVal(RooArgSet(rrv_mass_lvj))*width;
-         if (hist.GetBinContent(i)==0):
-             chi2= chi2 + (hist.GetBinContent(i)-model.expectedEvents(RooArgSet(rrv_mass_lvj))*model.getVal(RooArgSet(rrv_mass_lvj))*width)*(hist.GetBinContent(i)-model.expectedEvents(RooArgSet(rrv_mass_lvj))*model.getVal(RooArgSet(rrv_mass_lvj))*width);
-         else:
-             chi2= chi2 + (hist.GetBinContent(i)-model.expectedEvents(RooArgSet(rrv_mass_lvj))*model.getVal(RooArgSet(rrv_mass_lvj))*width)*(hist.GetBinContent(i)-model.expectedEvents(RooArgSet(rrv_mass_lvj))*model.getVal(RooArgSet(rrv_mass_lvj))*width)/(hist.GetBinError(i)*hist.GetBinError(i));
-         bincenter = bincenter + width;
-     #    print chi2;
-     #    raw_input("ENTER");
 
         ##Add Chisquare to mplot_pull
         cs = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf)));
@@ -1790,23 +1795,21 @@ class doFit_wj_and_wlvj:
 
         ### Number of the event in the dataset and lumi scale factor --> set the proper number for bkg extraction or for signal region
         self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj").Print();
-        self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).Print()
-        self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj").setVal(self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj").getVal()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal())
-        self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj").setError(self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj").getError()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal() )
+        self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).Print();
+        self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj").setVal(self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj").getVal()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal());
+        self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj").setError(self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj").getError()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal() );
 
         self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj").Print();
 
-
         if(rdataset_relaxed):            
+
          ## make the extended pdf model
          model_relaxed = self.make_Model(label+in_range,mlvj_model,"_mlvj_relaxed",constrainslist_relaxed,ismc);
 
          ## make the fit
          rfresult_relaxed = model_relaxed.fitTo( rdataset_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE) ,RooFit.Extended(kTRUE) );
          rfresult_relaxed = model_relaxed.fitTo( rdataset_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE) ,RooFit.Extended(kTRUE), RooFit.Minimizer("Minuit2") );
-         rfresult_relaxed = model_relaxed.fitTo( rdataset_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE) ,RooFit.Extended(kTRUE), RooFit.Minimizer("Minuit2") );
          rfresult_relaxed.Print();
-    #     raw_input("ENTER");
 
          ## plot the result
 	 mplot_relaxed = rrv_mass_lvj.frame(RooFit.Title("M_{lvj"+in_range+"} fitted by "+mlvj_model), RooFit.Bins(int(rrv_mass_lvj.getBins()/self.narrow_factor)));
@@ -1821,17 +1824,15 @@ class doFit_wj_and_wlvj:
          parameters_list_relaxed = model_relaxed.getParameters(rdataset_relaxed);
          mplot_relaxed.GetYaxis().SetRangeUser(1e-5,mplot_relaxed.GetMaximum()*1.2);
 
-
-        ##CALCULATE CHI2
-         datahist_relaxed=rdataset_relaxed.binnedClone(rdataset_relaxed.GetName()+"_binnedClone",rdataset_relaxed.GetName()+"_binnedClone")
+         ##CALCULATE CHI2
+         datahist_relaxed = rdataset_relaxed.binnedClone(rdataset_relaxed.GetName()+"_binnedClone",rdataset_relaxed.GetName()+"_binnedClone")
          Nbin_relaxed = int(rrv_mass_lvj.getBins()); 
          rresult_relaxed_param = rfresult_relaxed.floatParsFinal();        
          nparameters_relaxed =  rresult_relaxed_param.getSize()                                         
-         ChiSquare_relaxed = model_relaxed.createChi2(datahist_relaxed,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE));
-         ChiSquare_relaxed.getVal();
-         chi_over_ndf_relaxed= ChiSquare_relaxed.getVal()/(Nbin_relaxed - nparameters_relaxed);
+         ChiSquare_relaxed = model_relaxed.createChi2(datahist_relaxed,RooFit.Extended(kTRUE),RooFit.DataError(RooAbsData.Poisson));
+         chi_over_ndf_relaxed = ChiSquare_relaxed.getVal()/(Nbin_relaxed - nparameters_relaxed);
 
-        ##Add Chisquare to mplot_pull
+         ##Add Chisquare to mplot_pull
          cs2 = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf_relaxed)));
          cs2.SetNDC();
          cs2.SetTextSize(0.12);
@@ -1851,11 +1852,11 @@ class doFit_wj_and_wlvj:
          elif TString(in_range).Contains("signal_region"):
              normalization = self.workspace4fit_.var("rrv_vbf_cut_signal_region"+label+"_"+self.channel).getVal();
          else:
-             normalization =  self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal();
+             normalization = self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal();
 
-         par=parameters_list_relaxed.createIterator();
+         par = parameters_list_relaxed.createIterator();
          par.Reset();
-         param=par.Next()
+         param = par.Next()
          while (param):
              if TString(param.GetName()).Contains("number"):
                  param.setVal(param.getVal()*normalization);
@@ -1903,15 +1904,13 @@ class doFit_wj_and_wlvj:
          parameters_list_same = model_relaxed.getParameters(rdataset);
          mplot_same.GetYaxis().SetRangeUser(1e-5,mplot_same.GetMaximum()*1.2);
 
-
-        ##CALCULATE CHI2
-         datahist=rdataset.binnedClone(rdataset.GetName()+"_binnedClone",rdataset.GetName()+"_binnedClone")
+         ##CALCULATE CHI2
+         datahist = rdataset.binnedClone(rdataset.GetName()+"_binnedClone",rdataset.GetName()+"_binnedClone")
          Nbin = int(rrv_mass_lvj.getBins()); 
          ChiSquare_same = model_relaxed.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE));
-         ChiSquare_same.getVal();
          chi_over_ndf_same= ChiSquare_same.getVal()/(Nbin - nparameters_relaxed);
 
-        ##Add Chisquare to mplot_pull
+         ##Add Chisquare to mplot_pull
          cs3 = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf_same)));
          cs3.SetNDC();
          cs3.SetTextSize(0.12);
@@ -1920,6 +1919,7 @@ class doFit_wj_and_wlvj:
 
          self.draw_canvas_with_pull( mplot_same, mplot_pull_same,parameters_list_same,"plots_%s_%s_%s_%s_g1/m_lvj_fitting_same/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj"+label+in_range+mlvj_model, show_constant_parameter, logy);
 
+         normalization = 1;
          ### Number of the event in the dataset and lumi scale factor --> set the proper number for bkg extraction or for signal region
          self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj_relaxed").Print();
          self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).Print()
@@ -1928,12 +1928,11 @@ class doFit_wj_and_wlvj:
 
          self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj_relaxed").Print();
 
-
         ## if the shape parameters has to be decorrelated
         if deco :
             print "################### Decorrelated mlvj single mc shape ################"
             model_pdf = self.workspace4fit_.pdf("model_pdf%s%s_%s_mlvj"%(label,in_range,self.channel)); ## take the pdf from the workspace
-            model_pdf.fitTo( rdataset, RooFit.Save(1), RooFit.SumW2Error(kTRUE) );
+            model_pdf.fitTo(rdataset, RooFit.Save(1), RooFit.SumW2Error(kTRUE) );
             rfresult_pdf = model_pdf.fitTo( rdataset, RooFit.Save(1), RooFit.SumW2Error(kTRUE), RooFit.Minimizer("Minuit2"));
             rfresult_pdf.Print();
 
@@ -1952,7 +1951,6 @@ class doFit_wj_and_wlvj:
             model_pdf.Print();
             print "##################### decorrelated pdf ";
             model_pdf_deco.Print();
-         #   raw_input("ENTRE");
 
             ## import in the workspace and print the diagonalizerd pdf
             getattr(self.workspace4fit_,"import")(model_pdf_deco);
@@ -1968,37 +1966,35 @@ class doFit_wj_and_wlvj:
                 mplot_deco.GetYaxis().SetRangeUser(1e-2,mplot_deco.GetMaximum()*1.2);
 
                 rrv_number_dataset = RooRealVar("rrv_number_dataset","rrv_number_dataset",rdataset.sumEntries());
-                rrv_number_dataset.setError(0.)
+                rrv_number_dataset.setError(0.); ## only shape uncertainty
                 draw_error_band(rdataset, model_pdf,rrv_number_dataset,rfresult_pdf,mplot_deco,self.color_palet["Uncertainty"],"F"); ## draw the error band with the area
                 self.workspace4fit_.var("rrv_number_TTbar_signal_region_%s_mlvj"%(self.channel)).Print();
 
-                self.workspace4fit_.pdf("model_TTbar_MG_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_MG"), RooFit.LineStyle(kDashed),RooFit.LineColor(kBlack));
+                self.workspace4fit_.pdf("model_TTbar_mcanlo_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_mcanlo"), RooFit.LineStyle(kDashed),RooFit.LineColor(kBlue);
                 self.workspace4fit_.pdf("model_TTbar_scaleUp_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_scaleUp"), RooFit.LineColor(kRed));
                 self.workspace4fit_.pdf("model_TTbar_scaleDn_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_scaleDn"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
-                self.workspace4fit_.pdf("model_TTbar_matchUp_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_matchUp"), RooFit.LineColor(kBlue));
-                self.workspace4fit_.pdf("model_TTbar_matchDn_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_matchDn"), RooFit.LineStyle(kDashed),RooFit.LineColor(kBlue));
+                self.workspace4fit_.pdf("model_TTbar_matchUp_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_matchUp"), RooFit.LineColor(kGreen+2));
+                self.workspace4fit_.pdf("model_TTbar_matchDn_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_matchDn"), RooFit.LineStyle(kDashed),RooFit.LineColor(kGreen+2));
                 self.workspace4fit_.var("rrv_number_TTbar_matchDn_signal_region_%s_mlvj"%(self.channel)).Print();
                 self.workspace4fit_.var("rrv_number_TTbar_matchUp_signal_region_%s_mlvj"%(self.channel)).Print();
                 self.workspace4fit_.var("rrv_number_TTbar_scaleDn_signal_region_%s_mlvj"%(self.channel)).Print();
                 self.workspace4fit_.var("rrv_number_TTbar_scaleUp_signal_region_%s_mlvj"%(self.channel)).Print();
-                self.workspace4fit_.var("rrv_number_TTbar_MG_signal_region_%s_mlvj"%(self.channel)).Print();
+                self.workspace4fit_.var("rrv_number_TTbar_mcanlo_signal_region_%s_mlvj"%(self.channel)).Print();
                 self.workspace4fit_.var("rrv_number_TTbar_signal_region_%s_mlvj"%(self.channel)).Print();
-
             else:
+
                 rdataset.plotOn(mplot_deco, RooFit.Name("Data"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
                 model_pdf_deco.plotOn(mplot_deco,RooFit.Name(label),RooFit.LineColor(kBlack));
 
                 mplot_deco.GetYaxis().SetRangeUser(1e-2,mplot_deco.GetMaximum()*1.2);
 
 	        rrv_number_dataset=RooRealVar("rrv_number_dataset","rrv_number_dataset",rdataset.sumEntries());
-                rrv_number_dataset.setError(0.)
+                rrv_number_dataset.setError(0.);
 	        draw_error_band(rdataset, model_pdf,rrv_number_dataset,rfresult_pdf,mplot_deco,self.color_palet["Uncertainty"],"F"); ## don't store the number in the workspace
 
             self.leg = self.legend4Plot(mplot_deco,0); ## add the legend
 	    mplot_deco.addObject(self.leg);
-
             self.draw_canvas( mplot_deco, "plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model, self.wtagger_label),"m_lvj"+label+in_range+in_range+mlvj_model+"_deco",0,logy)
-
 
         if deco and rdataset_relaxed :
 
@@ -2012,13 +2008,13 @@ class doFit_wj_and_wlvj:
             wsfit_tmp = RooWorkspace("wsfit_tmp"+label+in_range+"_"+self.channel+"_mlvj_relaxed");
 
             if TString(in_range).Contains("sb_lo"):
-             normalization = self.workspace4fit_.var("rrv_vbf_cut_sb_lo"+label+"_"+self.channel).getVal();
+             normalization = self.workspace4fit_.var("rrv_vbf_cut_sb_lo"+label1+"_"+self.channel).getVal();
             elif TString(in_range).Contains("sb_hi"):    
-             normalization = self.workspace4fit_.var("rrv_vbf_cut_sb_hi"+label+"_"+self.channel).getVal();
+             normalization = self.workspace4fit_.var("rrv_vbf_cut_sb_hi"+label1+"_"+self.channel).getVal();
             elif TString(in_range).Contains("signal_region"):
-             normalization = self.workspace4fit_.var("rrv_vbf_cut_signal_region"+label+"_"+self.channel).getVal();
+             normalization = self.workspace4fit_.var("rrv_vbf_cut_signal_region"+label1+"_"+self.channel).getVal();
             else:
-             normalization =  self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal();
+             normalization =  self.workspace4fit_.var("rrv_vbf_cut_total"+label1+"_"+self.channel).getVal();
 
             parameters_list_relaxed = model_relaxed.getParameters(rdataset_relaxed);
             par=parameters_list_relaxed.createIterator();
@@ -2039,9 +2035,8 @@ class doFit_wj_and_wlvj:
               result_param.at(iresult).setError(result_param.at(iresult).getError()*normalization);
                  
  	    ## draw the error band for an extend pdf
-            rfresult_relaxed.Print();             
-            
-            Deco      = PdfDiagonalizer("Deco"+label+in_range+"_"+self.channel+"_"+self.wtagger_label+"_mlvj",wsfit_tmp,rfresult_pdf_relaxed); ## in order to have a good name
+            rfresult_relaxed.Print();                         
+            Deco = PdfDiagonalizer("Deco"+label+in_range+"_"+self.channel+"_"+self.wtagger_label+"_mlvj_relaxed",wsfit_tmp,rfresult_pdf_relaxed); ## in order to have a good name
             print "##################### diagonalize ";
             model_pdf_deco_relaxed = Deco.diagonalize(model_pdf_relaxed); ## diagonalize
             print "##################### workspace for decorrelation ";
@@ -2071,20 +2066,21 @@ class doFit_wj_and_wlvj:
                 draw_error_band(rdataset, model_pdf_relaxed,rrv_number_dataset,rfresult_pdf_relaxed,mplot_deco_relaxed,self.color_palet["Uncertainty"],"F"); ## draw the error band with the area
                 self.workspace4fit_.var("rrv_number_TTbar_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
 
-                self.workspace4fit_.pdf("model_TTbar_MG_signal_region_%s_mlvj_relaxed"%(self.channel)).plotOn(mplot_deco_relaxed,RooFit.Name("TTbar_MG"), RooFit.LineStyle(kDashed),RooFit.LineColor(kBlack));
+                self.workspace4fit_.pdf("model_TTbar_mcanlo_signal_region_%s_mlvj_relaxed"%(self.channel)).plotOn(mplot_deco_relaxed,RooFit.Name("TTbar_mcanlo"), RooFit.LineStyle(kDashed),RooFit.LineColor(kBlue));
                 self.workspace4fit_.pdf("model_TTbar_scaleUp_signal_region_%s_mlvj_relaxed"%(self.channel)).plotOn(mplot_deco_relaxed,RooFit.Name("TTbar_scaleUp"), RooFit.LineColor(kRed));
                 self.workspace4fit_.pdf("model_TTbar_scaleDn_signal_region_%s_mlvj_relaxed"%(self.channel)).plotOn(mplot_deco_relaxed,RooFit.Name("TTbar_scaleDn"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
-                self.workspace4fit_.pdf("model_TTbar_matchUp_signal_region_%s_mlvj_relaxed"%(self.channel)).plotOn(mplot_deco_relaxed,RooFit.Name("TTbar_matchUp"), RooFit.LineColor(kBlue));
-                self.workspace4fit_.pdf("model_TTbar_matchDn_signal_region_%s_mlvj_relaxed"%(self.channel)).plotOn(mplot_deco_realxed,RooFit.Name("TTbar_matchDn"), RooFit.LineStyle(kDashed),RooFit.LineColor(kBlue));
+                self.workspace4fit_.pdf("model_TTbar_matchUp_signal_region_%s_mlvj_relaxed"%(self.channel)).plotOn(mplot_deco_relaxed,RooFit.Name("TTbar_matchUp"), RooFit.LineColor(kGreen+2));
+                self.workspace4fit_.pdf("model_TTbar_matchDn_signal_region_%s_mlvj_relaxed"%(self.channel)).plotOn(mplot_deco_relaxed,RooFit.Name("TTbar_matchDn"), RooFit.LineStyle(kDashed),RooFit.LineColor(kGreen+2));
+
                 self.workspace4fit_.var("rrv_number_TTbar_matchDn_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
                 self.workspace4fit_.var("rrv_number_TTbar_matchUp_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
                 self.workspace4fit_.var("rrv_number_TTbar_scaleDn_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
                 self.workspace4fit_.var("rrv_number_TTbar_scaleUp_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
-                self.workspace4fit_.var("rrv_number_TTbar_MG_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
+                self.workspace4fit_.var("rrv_number_TTbar_mcanlo_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
                 self.workspace4fit_.var("rrv_number_TTbar_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
 
             else:
-                rdataset.plotOn(mplot_deco_relaxed, RooFit.Name("Data"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+                rdataset.plotOn(mplot_deco_relaxed, RooFit.Name("Data"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0));
                 model_pdf_deco_relaxed.plotOn(mplot_deco_relaxed,RooFit.Name(label),RooFit.LineColor(kBlack));
 
                 mplot_deco_relaxed.GetYaxis().SetRangeUser(1e-2,mplot_deco_relaxed.GetMaximum()*1.2);
@@ -2100,113 +2096,177 @@ class doFit_wj_and_wlvj:
 
 
     #### method to fit the WJets normalization inside the mj signal region -> and write the jets mass sys if available
-    def fit_WJetsNorm(self, scaleJetMass = 0): # to get the normalization of WJets in signal_region
+    def fit_WJetsNorm(self, scaleJetMass = 0. relaxed = 0): # to get the normalization of WJets in signal_region
 
         print "############### Fit mj Normalization ##################"
         ## fit the two version of pdf for Wjets shape if available
                     
-        self.fit_WJetsNormalization_in_Mj_signal_region("_WJets0");
-        self.fit_WJetsNormalization_in_Mj_signal_region("_WJets1");
-        self.fit_WJetsNormalization_in_Mj_signal_region("_WJets01");
+        self.fit_WJetsNormalization_in_Mj_signal_region("_WJets0","",relaxed);
+        self.fit_WJetsNormalization_in_Mj_signal_region("_WJets01","",relaxed);
 
-        rrv_WJets0  = self.workspace4fit_.var("rrv_number_WJets0_in_mj_signal_region_from_fitting_%s"%(self.channel));
-        rrv_WJets01 = self.workspace4fit_.var("rrv_number_WJets01_in_mj_signal_region_from_fitting_%s"%(self.channel));
-        rrv_WJets1  = self.workspace4fit_.var("rrv_number_WJets1_in_mj_signal_region_from_fitting_%s"%(self.channel));
+        rrv_WJets0  = self.workspace4fit_.var("rrv_number_WJets0_in_mj_signal_region_from_fitting_%s"%(self.channel)); ## nominal parametrization for Wjets
+        rrv_WJets01 = self.workspace4fit_.var("rrv_number_WJets01_in_mj_signal_region_from_fitting_%s"%(self.channel)); ## alternate descrption
 
         rrv_WJets0.Print();
-        rrv_WJets1.Print();
         rrv_WJets01.Print();
 
-        total_uncertainty = TMath.Sqrt( TMath.Power(rrv_WJets0.getError(),2)+ TMath.Power(rrv_WJets1.getVal()-rrv_WJets0.getVal(),2)+ TMath.Power(rrv_WJets01.getVal()-rrv_WJets0.getVal(),2) );
+        total_uncertainty = TMath.Sqrt( TMath.Power(rrv_WJets0.getError(),2)+ TMath.Power(rrv_WJets01.getVal()-rrv_WJets0.getVal(),2) ); ## add in quadrature the difference
         rrv_WJets0.setError(total_uncertainty);
         rrv_WJets0.Print();
 
         if scaleJetMass :
 
-         self.fit_WJetsNormalization_in_Mj_signal_region("_WJetsmassup","massup"); ## scale jet mass up and down    -> jes 
-         self.fit_WJetsNormalization_in_Mj_signal_region("_WJetsmassdn","massdn"); ## scale jet mass up and down    -> jes
-         self.fit_WJetsNormalization_in_Mj_signal_region("_WJetsmassvbfup","massvbfup"); ## scale vbf jet mass up   -> jes
-         self.fit_WJetsNormalization_in_Mj_signal_region("_WJetsmassvbfdn","massvbfdn"); ## scale vbf jet mass down -> jes        
+         self.fit_WJetsNormalization_in_Mj_signal_region("_WJetsmassvbf_jes_up","massvbf_jes_up",relaxed); ## scale jet mass up   -> jes
+         self.fit_WJetsNormalization_in_Mj_signal_region("_WJetsmassvbf_jes_dn","massvbf_jes_dn",relaxed); ## scale jet mass down -> jes        
+         self.fit_WJetsNormalization_in_Mj_signal_region("_WJetsmassvbf_jer"   ,"massvbf_jer",relaxed); 
+         self.fit_WJetsNormalization_in_Mj_signal_region("_WJetsmassvbf_jer_up","massvbf_jer_up",relaxed);         
+         self.fit_WJetsNormalization_in_Mj_signal_region("_WJetsmassvbf_jer_dn","massvbf_jer_dn",relaxed);         
 
-         rrv_WJetsmassup    = self.workspace4fit_.var("rrv_number_WJetsmassup_in_mj_signal_region_from_fitting_%s"%(self.channel));
-         rrv_WJetsmassdn    = self.workspace4fit_.var("rrv_number_WJetsmassdn_in_mj_signal_region_from_fitting_%s"%(self.channel));
-         rrv_WJetsmassvbfup = self.workspace4fit_.var("rrv_number_WJetsmassvbfup_in_mj_signal_region_from_fitting_%s"%(self.channel));
-         rrv_WJetsmassvbfdn = self.workspace4fit_.var("rrv_number_WJetsmassvbfdn_in_mj_signal_region_from_fitting_%s"%(self.channel));        
+         rrv_WJetsmassvbf_jes_up = self.workspace4fit_.var("rrv_number_WJetsmassvbf_jes_up_in_mj_signal_region_from_fitting_%s"%(self.channel));
+         rrv_WJetsmassvbf_jes_dn = self.workspace4fit_.var("rrv_number_WJetsmassvbf_jes_dn_in_mj_signal_region_from_fitting_%s"%(self.channel));        
+         rrv_WJetsmassvbf_jer    = self.workspace4fit_.var("rrv_number_WJetsmassvbf_jer_in_mj_signal_region_from_fitting_%s"%(self.channel));
+         rrv_WJetsmassvbf_jer_up = self.workspace4fit_.var("rrv_number_WJetsmassvbf_jer_up_in_mj_signal_region_from_fitting_%s"%(self.channel));        
+         rrv_WJetsmassvbf_jer_dn = self.workspace4fit_.var("rrv_number_WJetsmassvbf_jer_dn_in_mj_signal_region_from_fitting_%s"%(self.channel));        
 
-         rrv_WJetsmassup.Print();
-         rrv_WJetsmassdn.Print();
-         rrv_WJetsmassvbfup.Print();
-         rrv_WJetsmassvbfdn.Print();        
-
+         rrv_WJetsmassvbf_jes_up.Print();
+         rrv_WJetsmassvbf_jes_dn.Print();        
+         rrv_WJetsmassvbf_jer.Print();        
+         rrv_WJetsmassvbf_jer_up.Print();        
+         rrv_WJetsmassvbf_jer_dn.Print();        
 
          #jet mass uncertainty on WJets normalization
-         if(self.workspace4fit_.var("rrv_number_WJetsmassup_in_mj_signal_region_from_fitting_%s"%(self.channel)) and self.workspace4fit_.var("rrv_number_WJetsmassdn_in_mj_signal_region_from_fitting_%s"%(self.channel))):
-            self.WJets_normlization_uncertainty_from_jet_mass = (TMath.Abs(rrv_WJetsmassup.getVal()-rrv_WJets0.getVal())+TMath.Abs(rrv_WJetsmassdn.getVal()-rrv_WJets0.getVal() ) )/2./rrv_WJets0.getVal();
-         if(self.workspace4fit_.var("rrv_number_WJetsmassvbfup_in_mj_signal_region_from_fitting_%s"%(self.channel)) and self.workspace4fit_.var("rrv_number_WJetsmassvbfdn_in_mj_signal_region_from_fitting_%s"%(self.channel))):    
-            self.WJets_normlization_uncertainty_from_vbf_jet_mass = (TMath.Abs(rrv_WJetsmassvbfup.getVal()-rrv_WJets0.getVal())+TMath.Abs(rrv_WJetsmassvbfdn.getVal()-rrv_WJets0.getVal() ) )/2./rrv_WJets0.getVal();         
+         if(self.workspace4fit_.var("rrv_number_WJetsmassvbf_jes_up_in_mj_signal_region_from_fitting_%s"%(self.channel)) and self.workspace4fit_.var("rrv_number_WJetsmassvbf_jes_dn_in_mj_signal_region_from_fitting_%s"%(self.channel)) and self.workspace4fit_.var("rrv_number_WJetsmassvbf_jer_in_mj_signal_region_from_fitting_%s"%(self.channel)) and self.workspace4fit_.var("rrv_number_WJetsmassvbf_jer_up_in_mj_signal_region_from_fitting_%s"%(self.channel)) and self.workspace4fit_.var("rrv_number_WJetsmassvbf_jer_dn_in_mj_signal_region_from_fitting_%s"%(self.channel))):    
 
+            self.WJets_normlization_uncertainty_from_jet_scale = (TMath.Abs(rrv_WJetsmassvbf_jes_up.getVal()-rrv_WJets0.getVal())+TMath.Abs(rrv_WJetsmassvbf_jes_dn.getVal()-rrv_WJets0.getVal() ) )/2./rrv_WJets0.getVal();         
+            self.WJets_normlization_uncertainty_from_jet_res   = (TMath.Abs(rrv_WJetsmassvbf_jer.getVal()-rrv_WJets0.getVal())+TMath.Abs(rrv_WJetsmassvbf_jer_up.getVal()-rrv_WJets0.getVal() )+TMath.Abs(rrv_WJetsmassvbf_jer_dn.getVal()-rrv_WJets0.getVal() ) )/3./rrv_WJets0.getVal();         
+         
          #jet mass uncertainty on sTop normalization
-         rrv_STop       = self.workspace4fit_.var("rrv_number_dataset_signal_region_STop_%s_mj"%(self.channel))
-         rrv_STopmassup = self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassup_%s_mj"%(self.channel))
-         rrv_STopmassdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassdn_%s_mj"%(self.channel))
-         rrv_STopmassvbfup = self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbfup_%s_mj"%(self.channel))
-         rrv_STopmassvbfdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbfdn_%s_mj"%(self.channel))        
+         rrv_STop                = self.workspace4fit_.var("rrv_number_dataset_signal_region_STop_%s_mj"%(self.channel))
+         rrv_STopmassvbf_jes_up  = self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbf_jes_up_%s_mj"%(self.channel))
+         rrv_STopmassvbf_jes_dn  = self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbf_jes_dn_%s_mj"%(self.channel))
+         rrv_STopmassvbf_jer     = self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbf_jer_%s_mj"%(self.channel))
+         rrv_STopmassvbf_jer_up  = self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbf_jer_up_%s_mj"%(self.channel))
+         rrv_STopmassvbf_jer_dn  = self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbf_jer_dn_%s_mj"%(self.channel))
 
-         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassup_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassdn_%s_mj"%(self.channel))):
-          self.STop_normlization_uncertainty_from_jet_mass = ( TMath.Abs(rrv_STopmassup.getVal()-rrv_STop.getVal())+TMath.Abs(rrv_STopmassdn.getVal()-rrv_STop.getVal() ) )/2./rrv_STop.getVal();
-         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbfup_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbfdn_%s_mj"%(self.channel))):
-          self.STop_normlization_uncertainty_from_vbf_jet_mass=( TMath.Abs(rrv_STopmassvbfup.getVal()-rrv_STop.getVal())+TMath.Abs(rrv_STopmassvbfdn.getVal()-rrv_STop.getVal() ) )/2./rrv_STop.getVal();          
+         rrv_STopmassvbf_jes_up.Print();
+         rrv_STopmassvbf_jes_dn.Print();        
+         rrv_STopmassvbf_jer.Print();        
+         rrv_STopmassvbf_jer_up.Print();        
+         rrv_STopmassvbf_jer_dn.Print();        
 
-         #jet mass uncertainty on ttbar normalization
-         rrv_TTbar       = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbar_%s_mj"%(self.channel))
-         rrv_TTbarmassup = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassup_%s_mj"%(self.channel))
-         rrv_TTbarmassdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassdn_%s_mj"%(self.channel))
-         rrv_TTbarmassvbfup = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbfup_%s_mj"%(self.channel))
-         rrv_TTbarmassvbfdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbfdn_%s_mj"%(self.channel))        
+         #jet mass uncertainty on STop normalization
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbf_jes_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbf_jes_dn_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbf_jer_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbf_jer_dn_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_STopmassvbf_jer_%s_mj"%(self.channel))):    
 
-         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassup_%s_mj"%(self.channel)) and  self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassdn_%s_mj"%(self.channel))):
-          self.TTbar_normlization_uncertainty_from_jet_mass = ( TMath.Abs(rrv_TTbarmassup.getVal()-rrv_TTbar.getVal())+TMath.Abs(rrv_TTbarmassdn.getVal()-rrv_TTbar.getVal() ) )/2./rrv_TTbar.getVal();
-         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbfup_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbfdn_%s_mj"%(self.channel))):
-          self.TTbar_normlization_uncertainty_from_vbf_jet_mass = ( TMath.Abs(rrv_TTbarmassvbfup.getVal()-rrv_TTbar.getVal())+TMath.Abs(rrv_TTbarmassvbfdn.getVal()-rrv_TTbar.getVal() ) )/2./rrv_TTbar.getVal();          
+            self.STop_normlization_uncertainty_from_jet_scale = (TMath.Abs(rrv_STopmassvbf_jes_up.getVal()-rrv_STop.getVal())+TMath.Abs(rrv_STopmassvbf_jes_dn.getVal()-rrv_STop.getVal() ) )/2./rrv_STop.getVal();         
+            self.STop_normlization_uncertainty_from_jet_res   = (TMath.Abs(rrv_STopmassvbf_jer.getVal()-rrv_STop.getVal())+TMath.Abs(rrv_STopmassvbf_jer_up.getVal()-rrv_STop.getVal() )+TMath.Abs(rrv_STopmassvbf_jer_dn.getVal()-rrv_STop.getVal() ) )/3./rrv_STop.getVal();         
+
+         #jet mass uncertainty on TTbar normalization
+         rrv_TTbar                 = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbar_%s_mj"%(self.channel))
+         rrv_TTbarmassvbf_jes_up   = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbf_jes_up_%s_mj"%(self.channel))
+         rrv_TTbarmassvbf_jes_dn   = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbf_jes_dn_%s_mj"%(self.channel))
+         rrv_TTbarmassvbf_jer      = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbf_jer_%s_mj"%(self.channel))
+         rrv_TTbarmassvbf_jer_dn   = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbf_jer_up_%s_mj"%(self.channel))
+         rrv_TTbarmassvbf_jer_up   = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbf_jer_dn_%s_mj"%(self.channel))
+
+         rrv_TTbarmassvbf_jes_up.Print();
+         rrv_TTbarmassvbf_jes_dn.Print();        
+         rrv_TTbarmassvbf_jer.Print();        
+         rrv_TTbarmassvbf_jer_up.Print();        
+         rrv_TTbarmassvbf_jer_dn.Print();        
+
+
+         #jet mass uncertainty on TTbar normalization
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbf_jes_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbf_jes_dn_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbf_jer_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbf_jer_dn_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbarmassvbf_jer_%s_mj"%(self.channel))):    
+
+            self.TTbar_normlization_uncertainty_from_jet_scale = (TMath.Abs(rrv_TTbarmassvbf_jes_up.getVal()-rrv_TTbar.getVal())+TMath.Abs(rrv_TTbarmassvbf_jes_dn.getVal()-rrv_TTbar.getVal() ) )/2./rrv_TTbar.getVal();         
+            self.TTbar_normlization_uncertainty_from_jet_res   = (TMath.Abs(rrv_TTbarmassvbf_jer.getVal()-rrv_TTbar.getVal())+TMath.Abs(rrv_TTbarmassvbf_jer_up.getVal()-rrv_TTbar.getVal() )+TMath.Abs(rrv_TTbarmassvbf_jer_dn.getVal()-rrv_TTbar.getVal() ) )/3./rrv_TTbar.getVal();         
+
 
          #jet mass uncertainty on VV normalization
-         rrv_VV       = self.workspace4fit_.var("rrv_number_dataset_signal_region_VV_%s_mj"%(self.channel))
-         rrv_VVmassup = self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassup_%s_mj"%(self.channel))
-         rrv_VVmassdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassdn_%s_mj"%(self.channel))
-         rrv_VVmassvbfup = self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbfup_%s_mj"%(self.channel))
-         rrv_VVmassvbfdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbfdn_%s_mj"%(self.channel))        
+         rrv_VV                 = self.workspace4fit_.var("rrv_number_dataset_signal_region_VV_%s_mj"%(self.channel))
+         rrv_VVmassvbf_jes_up   = self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbf_jes_up_%s_mj"%(self.channel))
+         rrv_VVmassvbf_jes_dn   = self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbf_jes_dn_%s_mj"%(self.channel))
+         rrv_VVmassvbf_jer      = self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbf_jer_%s_mj"%(self.channel))
+         rrv_VVmassvbf_jer_up   = self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbf_jer_up_%s_mj"%(self.channel))
+         rrv_VVmassvbf_jer_dn   = self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbf_jer_dn_%s_mj"%(self.channel))
 
-         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassup_%s_mj"%(self.channel)) and  self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassdn_%s_mj"%(self.channel))):
-          self.VV_normlization_uncertainty_from_jet_mass=( TMath.Abs(rrv_VVmassup.getVal()-rrv_VV.getVal())+TMath.Abs(rrv_VVmassdn.getVal()-rrv_VV.getVal() ) )/2./rrv_VV.getVal();
-         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbfup_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbfdn_%s_mj"%(self.channel))):
-          self.VV_normlization_uncertainty_from_vbf_jet_mass=( TMath.Abs(rrv_VVmassvbfup.getVal()-rrv_VV.getVal())+TMath.Abs(rrv_VVmassvbfdn.getVal()-rrv_VV.getVal() ) )/2./rrv_VV.getVal();
+         rrv_VVmassvbf_jes_up.Print();
+         rrv_VVmassvbf_jes_dn.Print();        
+         rrv_VVmassvbf_jer_up.Print();
+         rrv_VVmassvbf_jer_dn.Print();        
+         rrv_VVmassvbf_jer.Print();        
+
+
+         #jet mass uncertainty on VV normalization
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbf_jes_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbf_jes_dn_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbf_jer_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbf_jer_dn_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_VVmassvbf_jer_%s_mj"%(self.channel))):    
+
+            self.VV_normlization_uncertainty_from_jet_jes = (TMath.Abs(rrv_VVmassvbf_jes_up.getVal()-rrv_VV.getVal())+TMath.Abs(rrv_VVmassvbf_jes_dn.getVal()-rrv_VV.getVal() ) )/2./rrv_VV.getVal();         
+            self.VV_normlization_uncertainty_from_jet_jer = (TMath.Abs(rrv_VVmassvbf_jer_up.getVal()-rrv_VV.getVal())+TMath.Abs(rrv_VVmassvbf_jer_dn.getVal()-rrv_VV.getVal() )+TMath.Abs(rrv_VVjmassvbf_jer.getVal()-rrv_VV.getVal() ) )/3./rrv_VV.getVal();         
+ 
+         #jet mass uncertainty on WW_EWK normalization
+         rrv_WW_EWK                = self.workspace4fit_.var("rrv_number_dataset_signal_region_WW_EWK_%s_mj"%(self.channel))
+         rrv_WW_EWKmassvbf_jes_up  = self.workspace4fit_.var("rrv_number_dataset_signal_region_WW_EWKmassvbf_jes_up_%s_mj"%(self.channel))
+         rrv_WW_EWKmassvbf_jes_dn  = self.workspace4fit_.var("rrv_number_dataset_signal_region_WW_EWKmassvbf_jes_dn_%s_mj"%(self.channel))
+         rrv_WW_EWKmassvbf_jer     = self.workspace4fit_.var("rrv_number_dataset_signal_region_WW_EWKmassvbf_jer_%s_mj"%(self.channel))
+         rrv_WW_EWKmassvbf_jer_up  = self.workspace4fit_.var("rrv_number_dataset_signal_region_WW_EWKmassvbf_jer_up_%s_mj"%(self.channel))
+         rrv_WW_EWKmassvbf_jer_dn  = self.workspace4fit_.var("rrv_number_dataset_signal_region_WW_EWKmassvbf_jer_dn_%s_mj"%(self.channel))
+
+         rrv_WW_EWKmassvbf_jes_up.Print();
+         rrv_WW_EWKmassvbf_jes_dn.Print();
+         rrv_WW_EWKmassvbf_jer_up.Print();
+         rrv_WW_EWKmassvbf_jer_dn.Print();
+         rrv_WW_EWKmassvbf_jer.Print();
+
+         #jet mass uncertainty on WW_EWK normalization
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_WW_EWKmassvbf_jes_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_WW_EWKmassvbf_jes_dn_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_WW_EWKmassvbf_jer_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_WW_EWKmassvbf_jer_dn_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_WW_EWKmassvbf_jer_%s_mj"%(self.channel))):    
+
+            self.WW_EWK_normlization_uncertainty_from_jet_scale = (TMath.Abs(rrv_WW_EWKmassvbf_jes_up.getVal()-rrv_WW_EWK.getVal())+TMath.Abs(rrv_WW_EWKmassvbf_jes_dn.getVal()-rrv_WW_EWK.getVal() ) )/2./rrv_WW_EWK.getVal();         
+            self.WW_EWK_normlization_uncertainty_from_jer = (TMath.Abs(rrv_WW_EWKjetresup.getVal()-rrv_WW_EWK.getVal())+TMath.Abs(rrv_WW_EWKjetresdn.getVal()-rrv_WW_EWK.getVal() )+TMath.Abs(rrv_WW_EWKjetres.getVal()-rrv_WW_EWK.getVal() ) )/3./rrv_WW_EWK.getVal();         
+
 
          #jet mass uncertainty on ggH normalization
-         rrv_ggH       = self.workspace4fit_.var("rrv_number_dataset_signal_region_%s_%s_mj"%(self.higgs_sample, self.channel))
-         rrv_ggHmassup = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassup_%s_mj"%(self.higgs_sample, self.channel))
-         rrv_ggHmassdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassdn_%s_mj"%(self.higgs_sample, self.channel))
-         rrv_ggHmassvbfup = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfup_%s_mj"%(self.higgs_sample, self.channel))
-         rrv_ggHmassvbfdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfdn_%s_mj"%(self.higgs_sample, self.channel))
+         rrv_ggH                  = self.workspace4fit_.var("rrv_number_dataset_signal_region_ggH_%s_mj"%(self.channel))
+         rrv_ggHmassvbf_jes_up    = self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jes_up_%s_mj"%(self.channel))
+         rrv_ggHmassvbf_jes_dn    = self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jes_dn_%s_mj"%(self.channel))
+         rrv_ggHmassvbf_jer       = self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jer_%s_mj"%(self.channel))
+         rrv_ggHmassvbf_jer_up    = self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jer_up_%s_mj"%(self.channel))
+         rrv_ggHmassvbf_jer_dn    = self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jer_dn_%s_mj"%(self.channel))
 
-         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassup_%s_mj"%(self.higgs_sample, self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassdn_%s_mj"%(self.higgs_sample, self.channel))):            
-          self.ggH_normlization_uncertainty_from_jet_mass = (TMath.Abs(rrv_ggHmassup.getVal()-rrv_ggH.getVal())+TMath.Abs(rrv_ggHmassdn.getVal()-rrv_ggH.getVal()))/2./rrv_ggH.getVal();
-         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfup_%s_mj"%(self.higgs_sample, self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfdn_%s_mj"%(self.higgs_sample, self.channel))):
-          self.ggH_normlization_uncertainty_from_vbf_jet_mass = (TMath.Abs(rrv_ggHmassvbfup.getVal()-rrv_ggH.getVal())+TMath.Abs(rrv_ggHmassvbfdn.getVal()-rrv_ggH.getVal()))/2./rrv_ggH.getVal();
+         rrv_ggHmassvbf_jes_up.Print();
+         rrv_ggHmassvbf_jes_dn.Print();        
+         rrv_ggHmassvbf_jer.Print();        
+         rrv_ggHmassvbf_jer_up.Print();        
+         rrv_ggHmassvbf_jer_dn.Print();        
 
-         rrv_vbf       = self.workspace4fit_.var("rrv_number_dataset_signal_region_%s_%s_mj"%(self.vbfhiggs_sample, self.channel))
-         rrv_vbfmassup = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassup_%s_mj"%(self.vbfhiggs_sample, self.channel))
-         rrv_vbfmassdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassdn_%s_mj"%(self.vbfhiggs_sample, self.channel))
-         rrv_vbfmassvbfup = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfup_%s_mj"%(self.vbfhiggs_sample, self.channel))
-         rrv_vbfmassvbfdn = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfdn_%s_mj"%(self.vbfhiggs_sample, self.channel))
+         #jet mass uncertainty on ggH normalization
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jes_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jes_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jer_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jes_dn_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jer_%s_mj"%(self.channel))):    
 
-         if( self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassup_%s_mj"%(self.vbfhiggs_sample, self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassdn_%s_mj"%(self.vbfhiggs_sample, self.channel))):
-          self.vbf_normlization_uncertainty_from_jet_mass = (TMath.Abs(rrv_vbfmassup.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassdn.getVal()-rrv_vbf.getVal() ) )/2./rrv_vbf.getVal();
-         if( self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfup_%s_mj"%(self.vbfhiggs_sample, self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbfdn_%s_mj"%(self.vbfhiggs_sample, self.channel))): 
-          self.vbf_normlization_uncertainty_from_vbf_jet_mass = (TMath.Abs(rrv_vbfmassvbfup.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassvbfdn.getVal()-rrv_vbf.getVal() ) )/2./rrv_vbf.getVal();                          
+            self.ggH_normlization_uncertainty_from_jet_scale = (TMath.Abs(rrv_ggHmassvbf_jes_up.getVal()-rrv_ggH.getVal())+TMath.Abs(rrv_ggHmassvbf_jes_dn.getVal()-rrv_ggH.getVal() ) )/2./rrv_ggH.getVal();         
+            self.ggH_normlization_uncertainty_from_jet_res = (TMath.Abs(rrv_ggHmassvbf_jer_up.getVal()-rrv_ggH.getVal())+TMath.Abs(rrv_ggHmassvbf_jer_dn.getVal()-rrv_ggH.getVal() )+TMath.Abs(rrv_ggHmassvbf_jer.getVal()-rrv_ggH.getVal() ) )/3./rrv_ggH.getVal();         
 
+
+         #jet mass uncertainty on vbf normalization
+         rrv_vbf                = self.workspace4fit_.var("rrv_number_dataset_signal_region_vbf_%s_mj"%(self.channel))
+         rrv_vbfmassvbf_jes_up  = self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jes_up_%s_mj"%(self.channel))
+         rrv_vbfmassvbf_jes_dn  = self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jes_dn_%s_mj"%(self.channel))
+         rrv_vbfmassvbf_jer_up  = self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jer_up_%s_mj"%(self.channel))
+         rrv_vbfmassvbf_jer_dn  = self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jer_dn_%s_mj"%(self.channel))
+         rrv_vbfmassvbf_jer     = self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jer_%s_mj"%(self.channel))
+ 
+         rrv_vbfmassvbf_jes_up.Print();
+         rrv_vbfmassvbf_jes_dn.Print();        
+         rrv_vbfmassvbf_jer_up.Print();        
+         rrv_vbfmassvbf_jer_dn.Print();        
+         rrv_vbfmassvbf_jer.Print();        
+
+         #jet mass uncertainty on vbf normalization
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jes_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jes_dn_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jer_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jer_dn_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jer__%s_mj"%(self.channel))):
+             
+            self.vbf_normlization_uncertainty_from_jet_scale = (TMath.Abs(rrv_vbfmassvbf_jes_up.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassvbf_jes_dn.getVal()-rrv_vbf.getVal() ) )/2./rrv_vbf.getVal();         
+            self.vbf_normlization_uncertainty_from_jet_res   = (TMath.Abs(rrv_vbfmassvbf_jer_up.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassvbf_jer_dn.getVal()-rrv_vbf.getVal() )+TMath.Abs(rrv_vbfmassvbf_jer.getVal()-rrv_vbf.getVal() ) )/3./rrv_vbf.getVal();         
 
     #### make the mj sideband fit on data ti get the Wjets normaliztion
-    def fit_WJetsNormalization_in_Mj_signal_region(self,label,massscale=""):
+    def fit_WJetsNormalization_in_Mj_signal_region(self,label,massscale="",relaxed=0):
 
         print "############### Fit mj Normalization: ",label," ",massscale," ##################"
 	rrv_mass_j = self.workspace4fit_.var("rrv_mass_j")
@@ -2214,27 +2274,35 @@ class doFit_wj_and_wlvj:
 	rdataset_data_mj=self.workspace4fit_.data("rdataset_data_%s_mj"%(self.channel))
 
 	### Fix TTbar, VV and STop
-        model_TTbar = self.get_TTbar_mj_Model("_TTbar"+massscale);
-        model_STop  = self.get_STop_mj_Model("_STop"+massscale);
-        model_VV    = self.get_VV_mj_Model("_VV"+massscale);
+        if relaxed == 0:
+         model_TTbar  = self.get_TTbar_mj_Model("_TTbar"+massscale);
+         model_STop   = self.get_STop_mj_Model("_STop"+massscale);
+         model_VV     = self.get_VV_mj_Model("_VV"+massscale);
+         model_WW_EWK = self.get_WW_EWK_mj_Model("_WW_EWK"+massscale);
+        else :
+         model_TTbar  = self.get_TTbar_mj_Model("_TTbar"+massscale);
+         model_STop   = self.get_STop_mj_Model("_STop"+massscale+"_relaxed");
+         model_VV     = self.get_VV_mj_Model("_VV"+massscale+"_relaxed");
+         model_WW_EWK = self.get_WW_EWK_mj_Model("_WW_EWK"+massscale+"_relaxed");
+            
         ## only two parameters are fix, offset and width while the exp is floating , otherwise if shape different User1 or ErfExp everything is flaoting
         model_WJets = self.get_WJets_mj_Model(label);
 
 	## Total Pdf and fit only in sideband
-	model_data = RooAddPdf("model_data%s_%s_mj"%(massscale,self.channel),"model_data%s_%s_mj"%(massscale,self.channel),RooArgList(model_WJets,model_VV,model_TTbar,model_STop));
-        rfresult = model_data.fitTo( rdataset_data_mj, RooFit.Save(1) , RooFit.Range("sb_lo,sb_hi") ,RooFit.Extended(kTRUE), RooFit.NumCPU(2) );
-        rfresult = model_data.fitTo( rdataset_data_mj, RooFit.Save(1) , RooFit.Range("sb_lo,sb_hi") ,RooFit.Extended(kTRUE), RooFit.NumCPU(2), RooFit.Minimizer("Minuit2") );
+	model_data = RooAddPdf("model_data%s_%s_mj"%(massscale,self.channel),"model_data%s_%s_mj"%(massscale,self.channel),RooArgList(model_WJets,model_VV,model_WW_EWK,model_TTbar,model_STop));
+        rfresult = model_data.fitTo( rdataset_data_mj, RooFit.Save(1) , RooFit.Range("sb_lo,sb_hi") ,RooFit.Extended(kTRUE), RooFit.NumCPU(4) );
+        rfresult = model_data.fitTo( rdataset_data_mj, RooFit.Save(1) , RooFit.Range("sb_lo,sb_hi") ,RooFit.Extended(kTRUE), RooFit.NumCPU(4), RooFit.Minimizer("Minuit2") );
         rfresult.Print();
 	rfresult.covarianceMatrix().Print();
         getattr(self.workspace4fit_,"import")(model_data);
 
-
 	## Total numver of event
         rrv_number_data_mj = RooRealVar("rrv_number_data%s_%s_mj"%(massscale,self.channel),"rrv_number_data%s_%s_mj"%(massscale,self.channel),
-                                         self.workspace4fit_.var("rrv_number_TTbar%s_%s_mj"%(massscale,self.channel)).getVal()+
-                                         self.workspace4fit_.var("rrv_number_STop%s_%s_mj"%(massscale,self.channel)).getVal()+
-                                         self.workspace4fit_.var("rrv_number_VV%s_%s_mj"%(massscale,self.channel)).getVal()+
-                                         self.workspace4fit_.var("rrv_number%s_%s_mj"%(label,self.channel)).getVal());
+                                         self.workspace4fit_.var("rrv_number_TTbar%s_%s_mj"%(massscale,self.channel)).getVal()+ ## TTbar
+                                         self.workspace4fit_.var("rrv_number_STop%s_%s_mj"%(massscale,self.channel)).getVal()+  ## STop
+                                         self.workspace4fit_.var("rrv_number_VV%s_%s_mj"%(massscale,self.channel)).getVal()+    ## VV
+                                         self.workspace4fit_.var("rrv_number_WW_EWK%s_%s_mj"%(massscale,self.channel)).getVal()+ ## WW_EWK
+                                         self.workspace4fit_.var("rrv_number%s_%s_mj"%(label,self.channel)).getVal());  ## WJets
 
         rrv_number_data_mj.setError(TMath.Sqrt(self.workspace4fit_.var("rrv_number_TTbar%s_%s_mj"%(massscale,self.channel)).getError()*
                                                self.workspace4fit_.var("rrv_number_TTbar%s_%s_mj"%(massscale,self.channel)).getError()+
@@ -2242,11 +2310,20 @@ class doFit_wj_and_wlvj:
                                                self.workspace4fit_.var("rrv_number_STop%s_%s_mj"%(massscale,self.channel)).getError()+
                                                self.workspace4fit_.var("rrv_number_VV%s_%s_mj"%(massscale,self.channel)).getError()*
                                                self.workspace4fit_.var("rrv_number_VV%s_%s_mj"%(massscale,self.channel)).getError()+
+                                               self.workspace4fit_.var("rrv_number_WW_EWK%s_%s_mj"%(massscale,self.channel)).getError()*
+                                               self.workspace4fit_.var("rrv_number_WW_EWK%s_%s_mj"%(massscale,self.channel)).getError()+       
                                                self.workspace4fit_.var("rrv_number%s_%s_mj"%(label,self.channel)).getError()*
                                                self.workspace4fit_.var("rrv_number%s_%s_mj"%(label,self.channel)).getError()));
         getattr(self.workspace4fit_,"import")(rrv_number_data_mj);
 
-        ## if fit on Wjets default with the default shape
+        print self.workspace4fit_.var("rrv_number_TTbar%s_%s_mj"%(massscale,self.channel)).getVal();
+        print self.workspace4fit_.var("rrv_number_STop%s_%s_mj"%(massscale,self.channel)).getVal();
+        print self.workspace4fit_.var("rrv_number_VV%s_%s_mj"%(massscale,self.channel)).getVal();
+        print self.workspace4fit_.var("rrv_number_WW_EWK%s_%s_mj"%(massscale,self.channel)).getVal();
+        print self.workspace4fit_.var("rrv_number%s_%s_mj"%(label,self.channel)).getVal();
+        print self.workspace4fit_.var("rrv_number_data%s_%s_mj"%(massscale,self.channel)).getVal();
+
+        ## draw the plot for the default WJets Shape
         if TString(label).Contains("_WJets0"):
 
             ## make the final plot
@@ -2254,6 +2331,8 @@ class doFit_wj_and_wlvj:
             rdataset_data_mj.plotOn(mplot, RooFit.Name("data_invisible"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
 
             ## plot solid style
+            model_data.plotOn(mplot,RooFit.Name("WW_EWK"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WW_EWK"]), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            
             model_data.plotOn(mplot,RooFit.Name("VV"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["VV"]), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
             model_data.plotOn(mplot,RooFit.Name("TTbar"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj"%(label,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["TTbar"]), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
@@ -2263,12 +2342,13 @@ class doFit_wj_and_wlvj:
             model_data.plotOn(mplot,RooFit.Name("WJets"), RooFit.Components("model%s_%s_mj"%(label,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WJets"]), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
             ## plot "dashed" style area
+            model_data.plotOn(mplot,RooFit.Name("WW_EWK_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WW_EWK"]), RooFit.LineColor(kBlack),RooFit.FillStyle(3003),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+
             model_data.plotOn(mplot,RooFit.Name("VV_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["VV"]), RooFit.LineColor(kBlack),RooFit.FillStyle(3003),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
             model_data.plotOn(mplot,RooFit.Name("TTbar_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj"%(label,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["TTbar"]), RooFit.LineColor(kBlack),RooFit.FillStyle(3003),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
             model_data.plotOn(mplot,RooFit.Name("STop_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj"%(label,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["STop"]), RooFit.LineColor(kBlack),RooFit.FillStyle(3003),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
-
             model_data.plotOn(mplot,RooFit.Name("WJets_invisible"), RooFit.Components("model%s_%s_mj"%(label,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WJets"]),RooFit.FillStyle(3003),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
             ### solid line
@@ -2280,6 +2360,8 @@ class doFit_wj_and_wlvj:
 
             model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel)),RooFit.LineColor(kBlack), RooFit.LineWidth(2) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
+            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel,self.channel)),RooFit.LineColor(kBlack), RooFit.LineWidth(2) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());            
+
             ### dash line
             model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj"%(label,self.channel)), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
@@ -2289,7 +2371,7 @@ class doFit_wj_and_wlvj:
 
             model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel)),RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel)),RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"));
+            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel,self.channel)),RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
             rdataset_data_mj.plotOn(mplot, RooFit.Name("data"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
 
@@ -2311,21 +2393,45 @@ class doFit_wj_and_wlvj:
             mplot.addObject(self.leg);
             mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.5);
 
+            ## CALCULATE CHI2
+            datahist = rdataset_mj.binnedClone(rdataset_mj.GetName()+"_binnedClone",rdataset_mj.GetName()+"_binnedClone")
+            Nbin = int(rrv_mass_j.getBins()); 
+            rresult_param = rfresult.floatParsFinal();        
+            nparameters =  rresult_param.getSize()                                         
+            ChiSquare = model.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.DataError(RooAbsData.Poisson));
+            chi_over_ndf= ChiSquare.getVal()/(Nbin - nparameters);
+
+            ## Add Chisquare to mplot_pull
+            cs = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf)));
+            cs.SetNDC();
+            cs.SetTextSize(0.12);
+            cs.AppendPad("same");
+            mplot_pull.addObject(cs)
+
             parameters_list = model_data.getParameters(rdataset_data_mj);
             self.draw_canvas_with_pull( mplot, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/m_j_fitting_wtaggercut%s/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label, self.wtagger_label), "m_j_sideband%s"%(label),"",1)
 
             ### call the function for getting the normalizatio in signal region for data, TTbar, STop, VV and W+jets = label -> store in a output txt file
-            self.get_mj_normalization_insignalregion("_data");
-            self.get_mj_normalization_insignalregion("_TTbar");
-            self.get_mj_normalization_insignalregion("_STop");
-            self.get_mj_normalization_insignalregion("_VV");
-            self.get_mj_normalization_insignalregion(label);
-
+            if relaxed = 0:
+               self.get_mj_normalization_insignalregion("_data");
+               self.get_mj_normalization_insignalregion("_TTbar");
+               self.get_mj_normalization_insignalregion("_STop");
+               self.get_mj_normalization_insignalregion("_VV");
+               self.get_mj_normalization_insignalregion("_WW_EWK");
+               self.get_mj_normalization_insignalregion(label);
+            else:
+               self.get_mj_normalization_insignalregion("_data");
+               self.get_mj_normalization_insignalregion("_TTbar");
+               self.get_mj_normalization_insignalregion("_STop",relaxed);
+               self.get_mj_normalization_insignalregion("_VV",relaxed);
+               self.get_mj_normalization_insignalregion("_WW_EWK",relaxed);
+               self.get_mj_normalization_insignalregion(label);
+                                                                                                                                                                                
         #### to calculate the WJets's normalization and error in M_J signal_region. The error must contain the shape error: model_WJets have new parameters fitting data
         fullInt   = model_WJets.createIntegral(RooArgSet(rrv_mass_j),RooArgSet(rrv_mass_j) );
         signalInt = model_WJets.createIntegral(RooArgSet(rrv_mass_j),RooArgSet(rrv_mass_j),("signal_region"));
-        fullInt_val = fullInt.getVal()
-        signalInt_val = signalInt.getVal()/fullInt_val
+        fullInt_val = fullInt.getVal();
+        signalInt_val = signalInt.getVal()/fullInt_val;
         ## take the value from the fit (normalization) and multiply it from the ratio of the integrals
         rrv_number_WJets_in_mj_signal_region_from_fitting = RooRealVar("rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel),"rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel),self.workspace4fit_.var("rrv_number%s_%s_mj"%(label,self.channel)).getVal()*signalInt_val);
 
@@ -2337,11 +2443,14 @@ class doFit_wj_and_wlvj:
 
 
     ##### Counting of the events of each component in the signal region taking the lavel for the model
-    def get_mj_normalization_insignalregion(self, label):
+    def get_mj_normalization_insignalregion(self, label, relaxed = 0):
         print "################## get mj normalization ",label," ################## ";
         rrv_mass_j = self.workspace4fit_.var("rrv_mass_j");
-	model      = self.workspace4fit_.pdf("model"+label+"_"+self.channel+"_mj");
-
+        if relaxed == 0 :
+         model = self.workspace4fit_.pdf("model"+label+"_"+self.channel+"_mj");
+        else :
+         model = self.workspace4fit_.pdf("model"+label+"_"+self.channel+"_mj_relaxed");
+                                  
 	fullInt   = model.createIntegral(RooArgSet(rrv_mass_j),RooArgSet(rrv_mass_j) );
 	sb_loInt  = model.createIntegral(RooArgSet(rrv_mass_j),RooArgSet(rrv_mass_j),("sb_lo"));
         signalInt = model.createIntegral(RooArgSet(rrv_mass_j),RooArgSet(rrv_mass_j),("signal_region"));
@@ -2353,102 +2462,161 @@ class doFit_wj_and_wlvj:
         signalInt_val = signalInt.getVal()/fullInt_val
 
         print "########### Events Number in MC Dataset: #############"
-        self.workspace4fit_.var("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj").Print();
-        self.workspace4fit_.var("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj").Print();
-        self.workspace4fit_.var("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj").Print();
-
+        if relaxed == 0:    
+         self.workspace4fit_.var("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj").Print();
+         self.workspace4fit_.var("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj").Print();
+         self.workspace4fit_.var("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj").Print();
+        else:
+         self.workspace4fit_.var("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj_relaxed").Print();
+         self.workspace4fit_.var("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj_relaxed").Print();
+         self.workspace4fit_.var("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj_relaxed").Print();
+            
         print "########### Events Number get from fit: ##############"
-        rrv_tmp = self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj");
-        rrv_tmp.Print();
+        if relaxed == 0:
+         rrv_tmp = self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj");
+         rrv_tmp.Print();
+        else:
+         rrv_tmp = self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj_relaxed");
+         rrv_tmp.Print();
+
         print "Events Number in sideband_low :%s"%(rrv_tmp.getVal()*sb_loInt_val)
         print "Events Number in Signal Region:%s"%(rrv_tmp.getVal()*signalInt_val)
         print "Events Number in sideband_high:%s"%(rrv_tmp.getVal()*sb_hiInt_val)
         print "Total Number in sidebands :%s"%(rrv_tmp.getVal()*(sb_loInt_val+sb_hiInt_val) )
         print "Ratio signal_region/sidebands :%s"%(signalInt_val/(sb_loInt_val+sb_hiInt_val) )
 
-       ##### Save numbers in the output text file
-        self.file_out.write( "\n%s++++++++++++++++++++++++++++++++++++"%(label) )
-        self.file_out.write( "\nEvents Number in sideband_low from dataset:%s"%(self.workspace4fit_.var("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj").getVal() ) )
-        self.file_out.write( "\nEvents Number in Signal Region from dataset:%s"%(self.workspace4fit_.var("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj").getVal() ) )
-        self.file_out.write( "\nEvents Number in sideband_high from dataset:%s"%(self.workspace4fit_.var("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj").getVal() ) )
-        self.file_out.write( "\nTotal Number in sidebands from dataset:%s"%(self.workspace4fit_.var("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj").getVal()+ self.workspace4fit_.var("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj").getVal() ) )
-        self.file_out.write( "\nRatio signal_region/sidebands from dataset:%s"%(self.workspace4fit_.var("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj").getVal()/(self.workspace4fit_.var("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj").getVal()+ self.workspace4fit_.var("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj").getVal()) ) )
+        ##### Save numbers in the output text file
+        self.file_out.write( "\n%s++++++++++++++++++++++++++++++++++++"%(label) );
+        self.file_out.write( "\nEvents Number in sideband_low from dataset:%s"%(self.workspace4fit_.var("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj").getVal() ) );
+        self.file_out.write( "\nEvents Number in Signal Region from dataset:%s"%(self.workspace4fit_.var("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj").getVal() ) );
+        self.file_out.write( "\nEvents Number in sideband_high from dataset:%s"%(self.workspace4fit_.var("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj").getVal() ) );
+        self.file_out.write( "\nTotal Number in sidebands from dataset:%s"%(self.workspace4fit_.var("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj").getVal()+ self.workspace4fit_.var("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj").getVal() ) );
+        self.file_out.write( "\nRatio signal_region/sidebands from dataset:%s"%(self.workspace4fit_.var("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj").getVal()/(self.workspace4fit_.var("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj").getVal()+ self.workspace4fit_.var("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj").getVal()) ) );
 
-        self.file_out.write( "\nEvents Number in sideband_low from fitting:%s"%(rrv_tmp.getVal()*sb_loInt_val) )
-        self.file_out.write( "\nEvents Number in Signal Region from fitting:%s"%(rrv_tmp.getVal()*signalInt_val) )
-        self.file_out.write( "\nEvents Number in sideband_high from fitting:%s"%(rrv_tmp.getVal()*sb_hiInt_val) )
-        self.file_out.write( "\nTotal Number in sidebands from fitting:%s"%(rrv_tmp.getVal()*(sb_loInt_val+sb_hiInt_val) ) )
-        self.file_out.write( "\nRatio signal_region/sidebands from fitting:%s"%(signalInt_val/(sb_loInt_val+sb_hiInt_val) ) )
 
+        self.file_out.write( "\nEvents Number in sideband_low from fitting:%s"%(rrv_tmp.getVal()*sb_loInt_val) );
+        self.file_out.write( "\nEvents Number in Signal Region from fitting:%s"%(rrv_tmp.getVal()*signalInt_val) );
+        self.file_out.write( "\nEvents Number in sideband_high from fitting:%s"%(rrv_tmp.getVal()*sb_hiInt_val) );
+        self.file_out.write( "\nTotal Number in sidebands from fitting:%s"%(rrv_tmp.getVal()*(sb_loInt_val+sb_hiInt_val) ) );
+        self.file_out.write( "\nRatio signal_region/sidebands from fitting:%s"%(signalInt_val/(sb_loInt_val+sb_hiInt_val) ) );
 
     ##### Method to fit data mlvj shape in the sideband -> first step for the background extraction of the shape
-    def fit_mlvj_in_Mj_sideband(self, label, mlvj_region, mlvj_model,logy=0):
+    def fit_mlvj_in_Mj_sideband(self, label, mlvj_region, mlvj_model,logy = 0,relaxed = 0):
 
         print "############### Fit mlvj in mj sideband: ",label," ",mlvj_region,"  ",mlvj_model," ##################"
         rrv_mass_j   = self.workspace4fit_.var("rrv_mass_j")
         rrv_mass_lvj = self.workspace4fit_.var("rrv_mass_lvj")
         rdataset_data_mlvj = self.workspace4fit_.data("rdataset_data%s_%s_mlvj"%(mlvj_region,self.channel))
-
+        rdataset_data_mlvj.Print();
+          
 	## get the minor component shapes in the sb low
-        model_VV_backgrounds    = self.get_VV_mlvj_Model("_sb_lo");
-        number_VV_sb_lo_mlvj    = self.workspace4fit_.var("rrv_number_VV_sb_lo_%s_mlvj"%(self.channel))
-        model_TTbar_backgrounds = self.get_TTbar_mlvj_Model("_sb_lo");
-        number_TTbar_sb_lo_mlvj = self.workspace4fit_.var("rrv_number_TTbar_sb_lo_%s_mlvj"%(self.channel))
-        model_STop_backgrounds  = self.get_STop_mlvj_Model("_sb_lo");
-        number_STop_sb_lo_mlvj  = self.workspace4fit_.var("rrv_number_STop_sb_lo_%s_mlvj"%(self.channel))
+        model_VV_backgrounds      = self.get_VV_mlvj_Model("_sb_lo",relaxed);
+        model_WW_EWK_backgrounds  = self.get_WW_EWK_mlvj_Model("_sb_lo",relaxed);
+        model_TTbar_backgrounds   = self.get_TTbar_mlvj_Model("_sb_lo",relaxed);
+        model_STop_backgrounds    = self.get_STop_mlvj_Model("_sb_lo",relaxed);
 
-        self.workspace4fit_.var("rrv_number_TTbar_sb_lo_%s_mlvj"%(self.channel)).Print();
-        self.workspace4fit_.var("rrv_number_STop_sb_lo_%s_mlvj"%(self.channel)).Print();
-        self.workspace4fit_.var("rrv_number_VV_sb_lo_%s_mlvj"%(self.channel)).Print();
+        if relaxed==0:
+          number_VV_sb_lo_mlvj     = self.workspace4fit_.var("rrv_number_VV_sb_lo_%s_mlvj"%(self.channel))
+          number_WW_EWK_sb_lo_mlvj = self.workspace4fit_.var("rrv_number_WW_EWK_sb_lo_%s_mlvj"%(self.channel))        
+          number_TTbar_sb_lo_mlvj  = self.workspace4fit_.var("rrv_number_TTbar_sb_lo_%s_mlvj"%(self.channel))
+          number_STop_sb_lo_mlvj   = self.workspace4fit_.var("rrv_number_STop_sb_lo_%s_mlvj"%(self.channel))
+
+          self.workspace4fit_.var("rrv_number_TTbar_sb_lo_%s_mlvj"%(self.channel)).Print();
+          self.workspace4fit_.var("rrv_number_STop_sb_lo_%s_mlvj"%(self.channel)).Print();
+          self.workspace4fit_.var("rrv_number_VV_sb_lo_%s_mlvj"%(self.channel)).Print();
+          self.workspace4fit_.var("rrv_number_WW_EWK_sb_lo_%s_mlvj"%(self.channel)).Print();        
+
+        else:
+          number_VV_sb_lo_mlvj      = self.workspace4fit_.var("rrv_number_VV_sb_lo_%s_mlvj_relaxed"%(self.channel))
+          number_WW_EWK_sb_lo_mlvj  = self.workspace4fit_.var("rrv_number_WW_EWK_sb_lo_%s_mlvj_relaxed"%(self.channel))        
+          number_TTbar_sb_lo_mlvj   = self.workspace4fit_.var("rrv_number_TTbar_sb_lo_%s_mlvj_relaxed"%(self.channel))
+          number_STop_sb_lo_mlvj    = self.workspace4fit_.var("rrv_number_STop_sb_lo_%s_mlvj_relaxed"%(self.channel))
+          
+          self.workspace4fit_.var("rrv_number_TTbar_sb_lo_%s_mlvj_relaxed"%(self.channel)).Print();
+          self.workspace4fit_.var("rrv_number_STop_sb_lo_%s_mlvj_relaxed"%(self.channel)).Print();
+          self.workspace4fit_.var("rrv_number_VV_sb_lo_%s_mlvj_relaxed"%(self.channel)).Print();
+          self.workspace4fit_.var("rrv_number_WW_EWK_sb_lo_%s_mlvj_relaxed"%(self.channel)).Print();        
+     
 
         ### Make the Pdf for the WJets
         model_pdf_WJets = self.make_Pdf("%s_sb_lo_from_fitting"%(label), mlvj_model,"_mlvj");
         model_pdf_WJets.Print();
         ### inititalize the value to what was fitted with the mc in the sideband
-        number_WJets_sb_lo = self.workspace4fit_.var("rrv_number%s_sb_lo_%s_mlvj"%(label,self.channel)).clone("rrv_number%s_sb_lo_from_fitting_%s_mlvj"%(label,self.channel));
-        model_WJets =RooExtendPdf("model%s_sb_lo_from_fitting_%s_mlvj"%(label,self.channel),"model%s_sb_lo_from_fitting_%s_mlvj"%(label,self.channel),model_pdf_WJets,number_WJets_sb_lo);
-        model_pdf_WJets.Print();
-        number_WJets_sb_lo.Print()
+        if relaxed==0:
+          number_WJets_sb_lo = self.workspace4fit_.var("rrv_number%s_sb_lo_%s_mlvj"%(label,self.channel)).clone("rrv_number%s_sb_lo_from_fitting_%s_mlvj"%(label,self.channel));
+        else:
+          number_WJets_sb_lo = self.workspace4fit_.var("rrv_number%s_sb_lo_%s_mlvj_relaxed"%(label,self.channel)).clone("rrv_number%s_sb_lo_from_fitting_%s_mlvj"%(label,self.channel));          
+        model_WJets = RooExtendPdf("model%s_sb_lo_from_fitting_%s_mlvj"%(label,self.channel),"model%s_sb_lo_from_fitting_%s_mlvj"%(label,self.channel),model_pdf_WJets,number_WJets_sb_lo);
+        number_WJets_sb_lo.Print();
 
         ## Add the other bkg component fixed to the total model
-        model_data = RooAddPdf("model_data%s%s_mlvj"%(label,mlvj_region),"model_data%s%s_mlvj"%(label,mlvj_region),RooArgList(model_WJets,model_VV_backgrounds, model_TTbar_backgrounds, model_STop_backgrounds));
+        model_data = RooAddPdf("model_data%s%s_mlvj"%(label,mlvj_region),"model_data%s%s_mlvj"%(label,mlvj_region),RooArgList(model_WJets,model_VV_backgrounds, model_TTbar_backgrounds, model_STop_backgrounds, model_WW_EWK_backgrounds));
 
         rfresult = model_data.fitTo( rdataset_data_mlvj, RooFit.Save(1) ,RooFit.Extended(kTRUE));
         rfresult = model_data.fitTo( rdataset_data_mlvj, RooFit.Save(1) ,RooFit.Extended(kTRUE), RooFit.Minimizer("Minuit2"));
         rfresult.Print();
+
         rfresult.covarianceMatrix().Print();
-        getattr(self.workspace4fit_,"import")(model_data)
+        getattr(self.workspace4fit_,"import")(model_data);
 
         model_WJets.Print();
         model_WJets.getParameters(rdataset_data_mlvj).Print("v");
         self.workspace4fit_.pdf("model_pdf%s_sb_lo_%s_mlvj"%(label,self.channel)).getParameters(rdataset_data_mlvj).Print("v");
 
         ### data in the sideband plus error from fit
-        rrv_number_data_sb_lo_mlvj = RooRealVar("rrv_number_data_sb_lo_%s_mlvj"%(self.channel),"rrv_number_data_sb_lo_%s_mlvj"%(self.channel),
+        if relaxed ==0 :
+          rrv_number_data_sb_lo_mlvj = RooRealVar("rrv_number_data_sb_lo_%s_mlvj"%(self.channel),"rrv_number_data_sb_lo_%s_mlvj"%(self.channel),
                                                  self.workspace4fit_.var("rrv_number_TTbar_sb_lo_%s_mlvj"%(self.channel)).getVal()+
                                                  self.workspace4fit_.var("rrv_number_STop_sb_lo_%s_mlvj"%(self.channel)).getVal()+
                                                  self.workspace4fit_.var("rrv_number_VV_sb_lo_%s_mlvj"%(self.channel)).getVal()+
+                                                 self.workspace4fit_.var("rrv_number_WW_EWK_sb_lo_%s_mlvj"%(self.channel)).getVal()+                 
                                                  self.workspace4fit_.var("rrv_number%s_sb_lo_from_fitting_%s_mlvj"%(label,self.channel)).getVal() );
 
-        rrv_number_data_sb_lo_mlvj.setError( TMath.Sqrt(self.workspace4fit_.var("rrv_number%s_sb_lo_from_fitting_%s_mlvj"%(label,self.channel)).getError()*
+          rrv_number_data_sb_lo_mlvj.setError( TMath.Sqrt(self.workspace4fit_.var("rrv_number%s_sb_lo_from_fitting_%s_mlvj"%(label,self.channel)).getError()*
                                                         self.workspace4fit_.var("rrv_number%s_sb_lo_from_fitting_%s_mlvj"%(label,self.channel)).getError()+
                                                         self.workspace4fit_.var("rrv_number_TTbar_sb_lo_%s_mlvj"%(self.channel)).getError()*
                                                         self.workspace4fit_.var("rrv_number_TTbar_sb_lo_%s_mlvj"%(self.channel)).getError()+
                                                         self.workspace4fit_.var("rrv_number_STop_sb_lo_%s_mlvj"%(self.channel)).getError()*
                                                         self.workspace4fit_.var("rrv_number_STop_sb_lo_%s_mlvj"%(self.channel)).getError()+
                                                         self.workspace4fit_.var("rrv_number_VV_sb_lo_%s_mlvj"%(self.channel)).getError()*
-                                                        self.workspace4fit_.var("rrv_number_VV_sb_lo_%s_mlvj"%(self.channel)).getError()));
+                                                        self.workspace4fit_.var("rrv_number_VV_sb_lo_%s_mlvj"%(self.channel)).getError()+
+                                                        self.workspace4fit_.var("rrv_number_WW_EWK_sb_lo_%s_mlvj"%(self.channel)).getError()*
+                                                        self.workspace4fit_.var("rrv_number_WW_EWK_sb_lo_%s_mlvj"%(self.channel)).getError()));        
 
-        getattr(self.workspace4fit_,"import")(rrv_number_data_sb_lo_mlvj)
+        else:
+          rrv_number_data_sb_lo_mlvj = RooRealVar("rrv_number_data_sb_lo_%s_mlvj"%(self.channel),"rrv_number_data_sb_lo_%s_mlvj"%(self.channel),
+                                                 self.workspace4fit_.var("rrv_number_TTbar_sb_lo_%s_mlvj_relaxed"%(self.channel)).getVal()+
+                                                 self.workspace4fit_.var("rrv_number_STop_sb_lo_%s_mlvj_relaxed"%(self.channel)).getVal()+
+                                                 self.workspace4fit_.var("rrv_number_VV_sb_lo_%s_mlvj_relaxed"%(self.channel)).getVal()+
+                                                 self.workspace4fit_.var("rrv_number_WW_EWK_sb_lo_%s_mlvj_relaxed"%(self.channel)).getVal()+                 
+                                                 self.workspace4fit_.var("rrv_number%s_sb_lo_from_fitting_%s_mlvj"%(label,self.channel)).getVal() );
+
+          rrv_number_data_sb_lo_mlvj.setError( TMath.Sqrt(self.workspace4fit_.var("rrv_number%s_sb_lo_from_fitting_%s_mlvj"%(label,self.channel)).getError()*
+                                                        self.workspace4fit_.var("rrv_number%s_sb_lo_from_fitting_%s_mlvj"%(label,self.channel)).getError()+
+                                                        self.workspace4fit_.var("rrv_number_TTbar_sb_lo_%s_mlvj_relaxed"%(self.channel)).getError()*
+                                                        self.workspace4fit_.var("rrv_number_TTbar_sb_lo_%s_mlvj_relaxed"%(self.channel)).getError()+
+                                                        self.workspace4fit_.var("rrv_number_STop_sb_lo_%s_mlvj_relaxed"%(self.channel)).getError()*
+                                                        self.workspace4fit_.var("rrv_number_STop_sb_lo_%s_mlvj_relaxed"%(self.channel)).getError()+
+                                                        self.workspace4fit_.var("rrv_number_VV_sb_lo_%s_mlvj_relaxed"%(self.channel)).getError()*
+                                                        self.workspace4fit_.var("rrv_number_VV_sb_lo_%s_mlvj_relaxed"%(self.channel)).getError()+
+                                                        self.workspace4fit_.var("rrv_number_WW_EWK_sb_lo_%s_mlvj_relaxed"%(self.channel)).getError()*
+                                                        self.workspace4fit_.var("rrv_number_WW_EWK_sb_lo_%s_mlvj_relaxed"%(self.channel)).getError()));        
+
+
+        getattr(self.workspace4fit_,"import")(rrv_number_data_sb_lo_mlvj);
 
         ### plot for WJets default + default shape
         if TString(label).Contains("_WJets0"):
 
-            mplot = rrv_mass_lvj.frame(RooFit.Title("M_lvj fitted in M_j sideband "), RooFit.Bins(int(rrv_mass_lvj.getBins()/self.narrow_factor)));
+          mplot = rrv_mass_lvj.frame(RooFit.Title("M_lvj fitted in M_j sideband "), RooFit.Bins(int(rrv_mass_lvj.getBins()/self.narrow_factor)));
 
-            rdataset_data_mlvj.plotOn( mplot , RooFit.Invisible(), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+          rdataset_data_mlvj.plotOn( mplot , RooFit.Invisible(), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
 
-            model_data.plotOn(mplot, RooFit.Components("model%s_sb_lo_from_fitting_%s_mlvj,model_TTbar_sb_lo_%s_mlvj,model_STop_sb_lo_%s_mlvj,model_VV_sb_lo_%s_mlvj"%(label,self.channel,self.channel,self.channel,self.channel)), RooFit.Name("WJets"),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WJets"]), RooFit.LineColor(kBlack), RooFit.VLines());
+          if relaxed==0:
+
+            model_data.plotOn(mplot, RooFit.Components("model%s_sb_lo_from_fitting_%s_mlvj,model_TTbar_sb_lo_%s_mlvj,model_STop_sb_lo_%s_mlvj,model_VV_sb_lo_%s_mlvj,model_WW_EWK_sb_lo_%s_mlvj"%(label,self.channel,self.channel,self.channel,self.channel,self.channel)), RooFit.Name("WJets"),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WJets"]), RooFit.LineColor(kBlack), RooFit.VLines());
+
+            model_data.plotOn(mplot, RooFit.Components("model_TTbar_sb_lo_%s_mlvj,model_STop_sb_lo_%s_mlvj,model_VV_sb_lo_%s_mlvj,model_WW_EWK_sb_lo_%s_mlvj"%(self.channel,self.channel,self.channel,self.channel)), RooFit.Name("WW_EWK"),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WW_EWK"]), RooFit.LineColor(kBlack), RooFit.VLines());
 
             model_data.plotOn(mplot, RooFit.Components("model_TTbar_sb_lo_%s_mlvj,model_STop_sb_lo_%s_mlvj,model_VV_sb_lo_%s_mlvj"%(self.channel,self.channel,self.channel)),RooFit.Name("VV"),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["VV"]), RooFit.LineColor(kBlack), RooFit.VLines()) ;
 
@@ -2457,41 +2625,76 @@ class doFit_wj_and_wlvj:
             model_data.plotOn(mplot, RooFit.Components("model_STop_sb_lo_%s_mlvj"%(self.channel)), RooFit.Name("STop"), RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["STop"]), RooFit.LineColor(kBlack), RooFit.VLines());
 
             #solid line
-            model_data.plotOn(mplot, RooFit.Components("model%s_sb_lo_from_fitting_%s_mlvj,model_TTbar_sb_lo_%s_mlvj,model_STop_sb_lo_%s_mlvj,model_VV_sb_lo_%s_mlvj"%(label,self.channel,self.channel,self.channel,self.channel)), RooFit.Name("WJets_line_invisible"), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines()) ;
+            model_data.plotOn(mplot, RooFit.Components("model%s_sb_lo_from_fitting_%s_mlvj,model_TTbar_sb_lo_%s_mlvj,model_STop_sb_lo_%s_mlvj,model_VV_sb_lo_%s_mlvj,model_WW_EWK_sb_lo_%s_mlvj"%(label,self.channel,self.channel,self.channel,self.channel,self.channel)), RooFit.Name("WJets_line_invisible"), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines()) ;
+
+            model_data.plotOn(mplot, RooFit.Components("model_TTbar_sb_lo_%s_mlvj,model_STop_sb_lo_%s_mlvj,model_VV_sb_lo_%s_mlvj,model_WW_EWK_sb_lo_%s_mlvj"%(self.channel,self.channel,self.channel,self.channel)), RooFit.Name("WW_EWK_line_invisible"), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines()) ;
 
             model_data.plotOn(mplot, RooFit.Components("model_TTbar_sb_lo_%s_mlvj,model_STop_sb_lo_%s_mlvj,model_VV_sb_lo_%s_mlvj"%(self.channel,self.channel,self.channel)),RooFit.Name("VV_line_invisible"), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines()) ;
 
+            model_data.plotOn(mplot, RooFit.Components("model_TTbar_sb_lo_%s_mlvj,model_STop_sb_lo_%s_mlvj"%(self.channel,self.channel)),RooFit.Name("TTbar_line_invisible"), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines()) ;
          
             model_data.plotOn(mplot, RooFit.Components("model_STop_sb_lo_%s_mlvj"%(self.channel)), RooFit.Name("STop_line_invisible"), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines());
 
 
-            rdataset_data_mlvj.plotOn(mplot,RooFit.Name("data"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
-            ### draw the error band
-            draw_error_band(rdataset_data_mlvj, model_data,self.workspace4fit_.var("rrv_number_data_sb_lo_%s_mlvj"%(self.channel)) ,rfresult,mplot,self.color_palet["Uncertainty"],"F");
-            model_data.plotOn( mplot , RooFit.VLines(), RooFit.Invisible());
-            model_data.plotOn( mplot , RooFit.Invisible());
-            rdataset_data_mlvj.plotOn(mplot,RooFit.Name("data_invisible1"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+          else:
 
-            mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.2);
+            model_data.plotOn(mplot, RooFit.Components("model%s_sb_lo_from_fitting_%s_mlvj,model_TTbar_sb_lo_%s_mlvj_relaxed,model_STop_sb_lo_%s_mlvj_relaxed,model_VV_sb_lo_%s_mlvj_relaxed,model_WW_EWK_sb_lo_%s_mlvj_relaxed"%(label,self.channel,self.channel,self.channel,self.channel,self.channel)), RooFit.Name("WJets"),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WJets"]), RooFit.LineColor(kBlack), RooFit.VLines());
 
-            ### Add the legend to the plot
-            self.leg=self.legend4Plot(mplot,0,1,0., 0.06, 0.16, 0.);
-            mplot.addObject(self.leg)
+            model_data.plotOn(mplot, RooFit.Components("model_TTbar_sb_lo_%s_mlvj_relaxed,model_STop_sb_lo_%s_mlvj_relaxed,model_VV_sb_lo_%s_mlvj_relaxed,model_WW_EWK_sb_lo_%s_mlvj_relaxed"%(self.channel,self.channel,self.channel,self.channel)), RooFit.Name("WW_EWK"),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WW_EWK"]), RooFit.LineColor(kBlack), RooFit.VLines());
 
-            ### calculate the chi2
-            self.nPar_float_in_fitTo = rfresult.floatParsFinal().getSize();
-            nBinX = mplot.GetNbinsX();
-            ndof  = nBinX-self.nPar_float_in_fitTo;
-            print mplot.chiSquare();
-            print "#################### nPar=%s, chiSquare=%s/%s"%(self.nPar_float_in_fitTo ,mplot.chiSquare(self.nPar_float_in_fitTo)*ndof, ndof );
-            ### write the result in the output
-            self.file_out.write("\n fit_mlvj_in_Mj_sideband: nPar=%s, chiSquare=%s/%s"%(self.nPar_float_in_fitTo, mplot.chiSquare( self.nPar_float_in_fitTo )*ndof, ndof ) );
+            model_data.plotOn(mplot, RooFit.Components("model_TTbar_sb_lo_%s_mlvj_relaxed,model_STop_sb_lo_%s_mlvj_relaxed,model_VV_sb_lo_%s_mlvj_relaxed"%(self.channel,self.channel,self.channel)),RooFit.Name("VV"),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["VV"]), RooFit.LineColor(kBlack), RooFit.VLines()) ;
 
-            ### get the pull plot and store the canvas
-            mplot_pull = self.get_pull(rrv_mass_lvj,mplot);
-            parameters_list = model_data.getParameters(rdataset_data_mlvj);
+            model_data.plotOn(mplot, RooFit.Components("model_TTbar_sb_lo_%s_mlvj_relaxed,model_STop_sb_lo_%s_mlvj_relaxed"%(self.channel,self.channel)), RooFit.Name("TTbar"),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["TTbar"]), RooFit.LineColor(kBlack), RooFit.VLines());
 
-            self.draw_canvas_with_pull( mplot, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/m_lvj_fitting/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label), "m_lvj_sb_lo%s"%(label),"",1,1)
+            model_data.plotOn(mplot, RooFit.Components("model_STop_sb_lo_%s_mlvj_relaxed"%(self.channel)), RooFit.Name("STop"), RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["STop"]), RooFit.LineColor(kBlack), RooFit.VLines());
+
+            #solid line
+            model_data.plotOn(mplot, RooFit.Components("model%s_sb_lo_from_fitting_%s_mlvj,model_TTbar_sb_lo_%s_mlvj_relaxed,model_STop_sb_lo_%s_mlvj_relaxed,model_VV_sb_lo_%s_mlvj_relaxed,model_WW_EWK_sb_lo_%s_mlvj_relaxed"%(label,self.channel,self.channel,self.channel,self.channel,self.channel)), RooFit.Name("WJets_line_invisible"), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines()) ;
+
+            model_data.plotOn(mplot, RooFit.Components("model_TTbar_sb_lo_%s_mlvj_relaxed,model_STop_sb_lo_%s_mlvj_relaxed,model_VV_sb_lo_%s_mlvj_relaxed,model_WW_EWK_sb_lo_%s_mlvj_relaxed"%(self.channel,self.channel,self.channel,self.channel)), RooFit.Name("WW_EWK_line_invisible"), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines()) ;
+
+            model_data.plotOn(mplot, RooFit.Components("model_TTbar_sb_lo_%s_mlvj_relaxed,model_STop_sb_lo_%s_mlvj_relaxed,model_VV_sb_lo_%s_mlvj_relaxed"%(self.channel,self.channel,self.channel)),RooFit.Name("VV_line_invisible"), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines()) ;
+
+            model_data.plotOn(mplot, RooFit.Components("model_TTbar_sb_lo_%s_mlvj_relaxed,model_STop_sb_lo_%s_mlvj_relaxed"%(self.channel,self.channel)),RooFit.Name("TTbar_line_invisible"), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines()) ;
+         
+            model_data.plotOn(mplot, RooFit.Components("model_STop_sb_lo_%s_mlvj_relaxed"%(self.channel)), RooFit.Name("STop_line_invisible"), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines());
+
+
+          rdataset_data_mlvj.plotOn(mplot,RooFit.Name("data"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+
+          ### draw the error band
+          draw_error_band(rdataset_data_mlvj, model_data,self.workspace4fit_.var("rrv_number_data_sb_lo_%s_mlvj"%(self.channel)) ,rfresult,mplot,self.color_palet["Uncertainty"],"F");
+          model_data.plotOn( mplot , RooFit.VLines(), RooFit.Invisible());
+          model_data.plotOn( mplot , RooFit.Invisible());
+          rdataset_data_mlvj.plotOn(mplot,RooFit.Name("data_invisible1"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+
+          mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.2);
+
+          ### Add the legend to the plot
+          self.leg = self.legend4Plot(mplot,0,1,0., 0.06, 0.16, 0.);
+          mplot.addObject(self.leg)
+
+          ### get the pull plot and store the canvas
+          mplot_pull = self.get_pull(rrv_mass_lvj,mplot);
+          parameters_list = model_data.getParameters(rdataset_data_mlvj);
+
+          ## CALCULATE CHI2
+          datahist = rdataset_data_mlvj.binnedClone(rdataset_data_mlvj.GetName()+"_binnedClone",rdataset_data_mlvj.GetName()+"_binnedClone")
+          Nbin = int(rrv_mass_mlvj.getBins()); 
+          rresult_param = rfresult.floatParsFinal();        
+          nparameters =  rresult_param.getSize()                                         
+          ChiSquare = model.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.DataError(RooAbsData.Poisson));
+          chi_over_ndf= ChiSquare.getVal()/(Nbin - nparameters);
+
+          ## Add Chisquare to mplot_pull
+          cs = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf)));
+          cs.SetNDC();
+          cs.SetTextSize(0.12);
+          cs.AppendPad("same");
+          mplot_pull.addObject(cs)
+
+          self.file_out.write("\n fit_mlvj_in_Mj_sideband: nPar=%s, chiSquare=%s/%s"%(nparameters, ChiSquare.getVal(), Nbin - nparameters) );
+          self.draw_canvas_with_pull( mplot, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/m_lvj_fitting/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label), "m_lvj_sb_lo%s"%(label),"",1,1)
 
  
         #### Decorrelate the parameters in order to have a proper shape in the workspace
@@ -2505,49 +2708,61 @@ class doFit_wj_and_wlvj:
         getattr(self.workspace4fit_,"import")(model_pdf_WJets_deco);
 
         #### Call the alpha evaluation in automatic
-        self.get_WJets_mlvj_correction_sb_lo_to_signal_region(label,mlvj_model);
+        self.get_WJets_mlvj_correction_sb_lo_to_signal_region(label,mlvj_model,"_mlvj");
 
         ### Fix the pdf of signal, TTbar, STop and VV in the signal region
-        self.fix_Model("_%s"%(self.higgs_sample),"_signal_region","_mlvj")
-        self.fix_Model("_%s"%(self.vbfhiggs_sample),"_signal_region","_mlvj")
-        self.fix_Model("_TTbar","_signal_region","_mlvj")
-        self.fix_Model("_STop","_signal_region","_mlvj")
-        self.fix_Model("_VV","_signal_region","_mlvj")
+        self.fix_Model("_%s"%(self.higgs_sample),"_signal_region","_mlvj");
+        self.fix_Model("_%s"%(self.vbfhiggs_sample),"_signal_region","_mlvj");
+        self.fix_Model("_TTbar","_signal_region","_mlvj",relaxed);
+        self.fix_Model("_STop","_signal_region","_mlvj",relaxed);
+        self.fix_Model("_VV","_signal_region","_mlvj",relaxed);
+        self.fix_Model("_WW_EWK","_signal_region","_mlvj",relaxed);        
 
         ### Call the evaluation of the normalization in the signal region for signal, TTbar, VV, STop, and WJets after the extrapolation via alpha
         self.get_mlvj_normalization_insignalregion("_%s"%(self.higgs_sample));
         self.get_mlvj_normalization_insignalregion("_%s"%(self.vbfhiggs_sample));
-        self.get_mlvj_normalization_insignalregion("_TTbar");
-        self.get_mlvj_normalization_insignalregion("_STop");
-        self.get_mlvj_normalization_insignalregion("_VV");
-        self.get_mlvj_normalization_insignalregion(label,"model_pdf%s_signal_region_%s_after_correct_mlvj"%(label,self.channel));
+        self.get_mlvj_normalization_insignalregion("_TTbar",relaxed);
+        self.get_mlvj_normalization_insignalregion("_STop",relaxed);
+        self.get_mlvj_normalization_insignalregion("_VV",relaxed);
+        self.get_mlvj_normalization_insignalregion("_WW_EWK",relaxed);        
+    
+        self.get_mlvj_normalization_insignalregion(label,"model_pdf%s_signal_region_%s_after_correct_mlvj"%(label,self.channel),relaxed);  
 
     ##### Function that calculate the normalization inside the mlvj signal region (mass window around the resonance in order to fill datacards)
-    def get_mlvj_normalization_insignalregion(self, label, model_name=""):
+    def get_mlvj_normalization_insignalregion(self, label, model_name="", relaxed = 0):
 
 	print "############### get mlvj normalization inside SR ",label," ",model_name," ##################"
-        if model_name == "":
-            model = self.workspace4fit_.pdf("model"+label+"_signal_region"+"_"+self.channel+"_mlvj");
-	else:
-            model = self.workspace4fit_.pdf(model_name);
+
+        if model_name == "" and relaxed == 0:
+         model = self.workspace4fit_.pdf("model"+label+"_signal_region"+"_"+self.channel+"_mlvj");
+        elif model_name == "" and relaxed == 1:
+         model = self.workspace4fit_.pdf("model"+label+"_signal_region"+"_"+self.channel+"_mlvj_relaxed");            
+	elif model_name != "" and relaxed == 0:
+         model = self.workspace4fit_.pdf(model_name);
+	elif model_name != "" and relaxed == 1:
+         model = self.workspace4fit_.pdf(model_name+"_relaxed");
 
         rrv_mass_lvj = self.workspace4fit_.var("rrv_mass_lvj");
 
-	fullInt   = model.createIntegral(RooArgSet(rrv_mass_lvj),RooArgSet(rrv_mass_lvj) );
+	fullInt   = model.createIntegral(RooArgSet(rrv_mass_lvj),RooArgSet(rrv_mass_lvj));
         signalInt = model.createIntegral(RooArgSet(rrv_mass_lvj),RooArgSet(rrv_mass_lvj),("signal_region"));
 
-        fullInt_val = fullInt.getVal()
-        signalInt_val = signalInt.getVal()/fullInt_val
+        fullInt_val = fullInt.getVal();
+        signalInt_val = signalInt.getVal()/fullInt_val;
 
         ## integal in the signal region
-        print "######### integral in SR: ",label+"signalInt=%s"%(signalInt_val)
+        print "######### integral in SR: ",label+"signalInt=%s"%(signalInt_val);
 
-        print "####### Events Number in MC Dataset:"
+        print "####### Events Number in MC Dataset:";
         self.workspace4fit_.var("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mlvj").Print();
         self.workspace4fit_.var("rrv_number_dataset_AllRange"+label+"_"+self.channel+"_mlvj").Print();
 
         print "########## Events Number get from fit:"
-        rrv_tmp=self.workspace4fit_.var("rrv_number"+label+"_signal_region"+"_"+self.channel+"_mlvj");
+        if relaxed == 0:
+         rrv_tmp = self.workspace4fit_.var("rrv_number"+label+"_signal_region"+"_"+self.channel+"_mlvj");
+        else :
+         rrv_tmp = self.workspace4fit_.var("rrv_number"+label+"_signal_region"+"_"+self.channel+"_mlvj_relaxed");
+            
         print "Events Number in Signal Region from fitting: %s"%(rrv_tmp.getVal()*signalInt_val)
 
         #### store the info in the output file
@@ -2560,14 +2775,12 @@ class doFit_wj_and_wlvj:
         self.file_out.write( "\nRatio signal_region/all_range from fitting :%s"%(signalInt_val ) )
 
         if not self.workspace4fit_.var("rrv_number_fitting_signal_region"+label+"_"+self.channel+"_mlvj"):
-            rrv_number_fitting_signal_region_mlvj = RooRealVar("rrv_number_fitting_signal_region"+label+"_"+self.channel+"_mlvj","rrv_number_fitting_signal_region"+label+"_"+
-                                                                self.channel+"_mlvj", rrv_tmp.getVal()*signalInt_val );
-            getattr(self.workspace4fit_,"import")(rrv_number_fitting_signal_region_mlvj);
+         rrv_number_fitting_signal_region_mlvj = RooRealVar("rrv_number_fitting_signal_region"+label+"_"+self.channel+"_mlvj","rrv_number_fitting_signal_region"+label+"_"+self.channel+"_mlvj", rrv_tmp.getVal()*signalInt_val );
+         getattr(self.workspace4fit_,"import")(rrv_number_fitting_signal_region_mlvj);
         else :
             self.workspace4fit_.var("rrv_number_fitting_signal_region"+label+"_"+self.channel+"_mlvj").setVal(rrv_tmp.getVal()*signalInt_val);
 
         self.workspace4fit_.var("rrv_number_fitting_signal_region"+label+"_"+self.channel+"_mlvj").Print();
-
 
     ### method to get the alpha function to extrapolate the wjets in the signal region
     def get_WJets_mlvj_correction_sb_lo_to_signal_region(self,label, mlvj_model, mass_spectrum="_mlvj"):
@@ -2588,25 +2801,20 @@ class doFit_wj_and_wlvj:
         mplot.GetYaxis().SetTitle("arbitrary units");
 
         ### model used for Higgs analysis --> parameters in the SR has to be fitted, not yet done in order to take into account correlations between mj and mlvj
-        ###ONLY ERFEXP_v1, ERFPOWEXP_v1 AND EXP WORK WITH RELAXED SHAPES!
         
-        if mlvj_model=="ErfExp_v1":
+        if mlvj_model == "ErfExp_v1":
 
             rrv_c_sb       = self.workspace4fit_.var("rrv_c_ErfExp%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
-            rrv_offset_sb  = self.workspace4fit_.var("rrv_offset_ErfExp%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
-            
+            rrv_offset_sb  = self.workspace4fit_.var("rrv_offset_ErfExp%s_sb_lo_%s"%(label,self.channel+mass_spectrum));            
             if mass_spectrum == "_mlvj_relaxed":
-                rrv_width_sb   = self.workspace4fit_.var("rrv_width_ErfExp%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+              rrv_width_sb   = self.workspace4fit_.var("rrv_width_ErfExp%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
             else:
-                rrv_width_sb   = self.workspace4fit_.var("rrv_width_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum));
-                rrv_width_sb.setConstant(kTRUE);               
+              rrv_width_sb   = self.workspace4fit_.var("rrv_width_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum));
+              rrv_width_sb.setConstant(kTRUE);               
 
-            rrv_delta_c      = RooRealVar("rrv_delta_c_ErfExp%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_c_ErfExp%s_%s"%(label,self.channel+mass_spectrum),self.workspace4fit_.var("rrv_c_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c_sb.getVal(),
-                                          self.workspace4fit_.var("rrv_c_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c_sb.getVal() -4*rrv_c_sb.getError(), self.workspace4fit_.var("rrv_c_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c_sb.getVal()+4*rrv_c_sb.getError());
-            rrv_delta_offset = RooRealVar("rrv_delta_offset_ErfExp%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_offset_ErfExp%s_%s"%(label,self.channel+mass_spectrum),self.workspace4fit_.var("rrv_offset_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_offset_sb.getVal(),
-                                          self.workspace4fit_.var("rrv_offset_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_offset_sb.getVal()-4*rrv_offset_sb.getError(), self.workspace4fit_.var("rrv_offset_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_offset_sb.getVal()+rrv_offset_sb.getError());
-            rrv_delta_width = RooRealVar("rrv_delta_width_ErfExp%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_width_ErfExp%s_%s"%(label,self.channel+mass_spectrum),self.workspace4fit_.var("rrv_width_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_width_sb.getVal(),
-                                         self.workspace4fit_.var("rrv_width_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_width_sb.getVal() -1000000*rrv_width_sb.getError(),self.workspace4fit_.var("rrv_width_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_width_sb.getVal()+1000000*rrv_width_sb.getError());
+            rrv_delta_c = RooRealVar("rrv_delta_c_ErfExp%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_c_ErfExp%s_%s"%(label,self.channel+mass_spectrum),self.workspace4fit_.var("rrv_c_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c_sb.getVal(),self.workspace4fit_.var("rrv_c_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c_sb.getVal() -4*rrv_c_sb.getError(), self.workspace4fit_.var("rrv_c_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c_sb.getVal()+4*rrv_c_sb.getError());
+            rrv_delta_offset = RooRealVar("rrv_delta_offset_ErfExp%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_offset_ErfExp%s_%s"%(label,self.channel+mass_spectrum),self.workspace4fit_.var("rrv_offset_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_offset_sb.getVal(),self.workspace4fit_.var("rrv_offset_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_offset_sb.getVal()-4*rrv_offset_sb.getError(), self.workspace4fit_.var("rrv_offset_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_offset_sb.getVal()+rrv_offset_sb.getError());
+            rrv_delta_width = RooRealVar("rrv_delta_width_ErfExp%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_width_ErfExp%s_%s"%(label,self.channel+mass_spectrum),self.workspace4fit_.var("rrv_width_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_width_sb.getVal(),self.workspace4fit_.var("rrv_width_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_width_sb.getVal() -4*rrv_width_sb.getError(),self.workspace4fit_.var("rrv_width_ErfExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_width_sb.getVal()+4*rrv_width_sb.getError());
 
             rrv_c_sr      = RooFormulaVar("rrv_c_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_c_sb, rrv_delta_c ) );
             rrv_offset_sr = RooFormulaVar("rrv_offset_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_offset_sb, rrv_delta_offset ) );
@@ -2614,46 +2822,50 @@ class doFit_wj_and_wlvj:
 
             correct_factor_pdf = RooAlpha("correct_factor_pdf","correct_factor_pdf", rrv_x, rrv_c_sr, rrv_offset_sr,rrv_width_sr, rrv_c_sb, rrv_offset_sb, rrv_width_sb, rrv_x.getMin(), rrv_x.getMax());
 
-        if mlvj_model=="ErfPow_v1":
+        if mlvj_model == "ErfPow_v1":
 
-            rrv_c_sb      = self.workspace4fit_.var("rrv_c_ErfPow%s_sb_lo_%s"%(label,self.channel));
-            rrv_offset_sb = self.workspace4fit_.var("rrv_offset_ErfPow%s_sb_lo_%s"%(label,self.channel));
-            rrv_width_sb  = self.workspace4fit_.var("rrv_width_ErfPow%s_sb_lo_%s"%(label,self.channel));
+            rrv_c_sb      = self.workspace4fit_.var("rrv_c_ErfPow%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            rrv_offset_sb = self.workspace4fit_.var("rrv_offset_ErfPow%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            rrv_width_sb  = self.workspace4fit_.var("rrv_width_ErfPow%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
 
-            rrv_delta_c      = RooRealVar("rrv_delta_c_ErfPow%s_%s"%(label,self.channel),"rrv_delta_c_ErfPow%s_%s"%(label,self.channel),0.,
-                                          -100*rrv_c_sb.getError(),100*rrv_c_sb.getError());
-            rrv_delta_offset = RooRealVar("rrv_delta_offset_ErfPow%s_%s"%(label,self.channel),"rrv_delta_offset_ErfPow%s_%s"%(label,self.channel),0.,
-                                          -100*rrv_offset_sb.getError(),100*rrv_offset_sb.getError());
+            rrv_delta_c      = RooRealVar("rrv_delta_c_ErfPow%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_c_ErfPow%s_%s"%(label,self.channel+mass_spectrum),0.,-100*rrv_c_sb.getError(),100*rrv_c_sb.getError());
+            rrv_delta_offset = RooRealVar("rrv_delta_offset_ErfPow%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_offset_ErfPow%s_%s"%(label,self.channel+mass_spectrum),0.,-100*rrv_offset_sb.getError(),100*rrv_offset_sb.getError());
  
-            rrv_delta_width  = RooRealVar("rrv_delta_width_ErfPow%s_%s"%(label,self.channel),"rrv_delta_width_ErfPow%s_%s"%(label,self.channel),0.,
-                                          -100*rrv_width_sb.getError(),100*rrv_width_sb.getError());
+            rrv_delta_width  = RooRealVar("rrv_delta_width_ErfPow%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_width_ErfPow%s_%s"%(label,self.channel+mass_spectrum),0.,-100*rrv_width_sb.getError(),100*rrv_width_sb.getError());
 
-            rrv_c_sr      = RooFormulaVar("rrv_c_sr%s_%s"%(label,self.channel), "@0+@1",RooArgList(rrv_c_sb, rrv_delta_c ) );
-            rrv_offset_sr = RooFormulaVar("rrv_offset_sr%s_%s"%(label,self.channel), "@0+@1",RooArgList(rrv_offset_sb, rrv_delta_offset ) );
-            rrv_width_sr  = RooFormulaVar("rrv_width_sr%s_%s"%(label,self.channel), "@0+@1",RooArgList(rrv_width_sb, rrv_delta_width ) );
+            rrv_c_sr      = RooFormulaVar("rrv_c_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_c_sb, rrv_delta_c ) );
+            rrv_offset_sr = RooFormulaVar("rrv_offset_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_offset_sb, rrv_delta_offset ) );
+            rrv_width_sr  = RooFormulaVar("rrv_width_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_width_sb, rrv_delta_width ) );
 
             correct_factor_pdf = RooAlpha4ErfPowPdf("correct_factor_pdf","correct_factor_pdf", rrv_x, rrv_c_sr, rrv_offset_sr,rrv_width_sr, rrv_c_sb, rrv_offset_sb, rrv_width_sb);
 
-        if mlvj_model=="ErfPow2_v1":
+        if mlvj_model == "ErfPow2_v1":
 
-            rrv_c0_sb     = self.workspace4fit_.var("rrv_c0_ErfPow2%s_sb_lo_%s"%(label,self.channel));
-            rrv_c1_sb     = self.workspace4fit_.var("rrv_c1_ErfPow2%s_sb_lo_%s"%(label,self.channel));
-            rrv_offset_sb = self.workspace4fit_.var("rrv_offset_ErfPow2%s_sb_lo_%s"%(label,self.channel));
-            rrv_width_sb  = self.workspace4fit_.var("rrv_width_ErfPow2%s_sb_lo_%s"%(label,self.channel));
+            rrv_c0_sb     = self.workspace4fit_.var("rrv_c0_ErfPow2%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            rrv_c1_sb     = self.workspace4fit_.var("rrv_c1_ErfPow2%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            rrv_offset_sb = self.workspace4fit_.var("rrv_offset_ErfPow2%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            if mass_spectrum == "_mlvj_relaxed":
+                rrv_width_sb   = self.workspace4fit_.var("rrv_width_ErfPow2%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            else:
+                rrv_width_sb   = self.workspace4fit_.var("rrv_width_ErfPow2%s_signal_region_%s"%(label,self.channel+mass_spectrum));
+                rrv_width_sb.setConstant(kTRUE);
 
-            rrv_delta_c0      = RooRealVar("rrv_delta_c0_ErfPow2%s_%s"%(label,self.channel),"rrv_delta_c0_ErfPow2%s_%s"%(label,self.channel),-8, -20 ,0);
-            rrv_delta_c1      = RooRealVar("rrv_delta_c1_ErfPow2%s_%s"%(label,self.channel),"rrv_delta_c1_ErfPow2%s_%s"%(label,self.channel),0., -5, 5);
-            rrv_delta_offset  = RooRealVar("rrv_delta_offset_ErfPow2%s_%s"%(label,self.channel),"rrv_delta_offset_ErfPow2%s_%s"%(label,self.channel),30., 1.,80 );
-            rrv_delta_width   = RooRealVar("rrv_delta_width_ErfPow2%s_%s"%(label,self.channel),"rrv_delta_width_ErfPow2%s_%s"%(label,self.channel),15,1.,100*rrv_width_sb.getError());
+            rrv_delta_c0      = RooRealVar("rrv_delta_c0_ErfPow2%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_c0_ErfPow2%s_%s"%(label,self.channel+mass_spectrum),self.workspace4fit_.var("rrv_c0_ErfPow2%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c0_sb.getVal(),self.workspace4fit_.var("rrv_c0_ErfPow2%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c0_sb.getVal() -4*rrv_c0_sb.getError(), self.workspace4fit_.var("rrv_c0_ErfPow2%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c0_sb.getVal()+4*rrv_c0_sb.getError());
 
-            rrv_c0_sr     = RooFormulaVar("rrv_c0_sr%s_%s"%(label,self.channel), "@0+@1",RooArgList(rrv_c0_sb, rrv_delta_c0 ) );
-            rrv_c1_sr     = RooFormulaVar("rrv_c1_sr%s_%s"%(label,self.channel), "@0+@1",RooArgList(rrv_c1_sb, rrv_delta_c1 ) );
-            rrv_offset_sr = RooFormulaVar("rrv_offset_sr%s_%s"%(label,self.channel), "@0+@1",RooArgList(rrv_offset_sb, rrv_delta_offset ) );
-            rrv_width_sr  = RooFormulaVar("rrv_width_sr%s_%s"%(label,self.channel), "@0+@1",RooArgList(rrv_width_sb, rrv_delta_width ) );
+            rrv_delta_c1      = RooRealVar("rrv_delta_c1_ErfPow2%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_c1_ErfPow2%s_%s"%(label,self.channel+mass_spectrum),self.workspace4fit_.var("rrv_c1_ErfPow2%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c1_sb.getVal(),self.workspace4fit_.var("rrv_c1_ErfPow2%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c1_sb.getVal() -4*rrv_c1_sb.getError(), self.workspace4fit_.var("rrv_c1_ErfPow2%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c1_sb.getVal()+4*rrv_c1_sb.getError());
+
+            rrv_delta_offset      = RooRealVar("rrv_delta_offset_ErfPow2%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_offset_ErfPow2%s_%s"%(label,self.channel+mass_spectrum),self.workspace4fit_.var("rrv_offset_ErfPow2%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_offset_sb.getVal(),self.workspace4fit_.var("rrv_offset_ErfPow2%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_offset_sb.getVal() -4*rrv_offset_sb.getError(), self.workspace4fit_.var("rrv_offset_ErfPow2%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_offset_sb.getVal()+4*rrv_offset_sb.getError());            
+
+            rrv_delta_width      = RooRealVar("rrv_delta_width_ErfPow2%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_width_ErfPow2%s_%s"%(label,self.channel+mass_spectrum),self.workspace4fit_.var("rrv_width_ErfPow2%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_width_sb.getVal(),self.workspace4fit_.var("rrv_width_ErfPow2%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_width_sb.getVal() -4*rrv_width_sb.getError(), self.workspace4fit_.var("rrv_width_ErfPow2%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_width_sb.getVal()+4*rrv_width_sb.getError());
+                
+            rrv_c0_sr     = RooFormulaVar("rrv_c0_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_c0_sb, rrv_delta_c0 ) );
+            rrv_c1_sr     = RooFormulaVar("rrv_c1_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_c1_sb, rrv_delta_c1 ) );
+            rrv_offset_sr = RooFormulaVar("rrv_offset_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_offset_sb, rrv_delta_offset ) );
+            rrv_width_sr  = RooFormulaVar("rrv_width_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_width_sb, rrv_delta_width ) );
 
             correct_factor_pdf = RooAlpha4ErfPow2Pdf("correct_factor_pdf","correct_factor_pdf", rrv_x, rrv_c0_sr, rrv_c1_sr, rrv_offset_sr,rrv_width_sr, rrv_c0_sb, rrv_c1_sb, rrv_offset_sb, rrv_width_sb);
 
-        if mlvj_model=="ErfPowExp_v1": ## take initial value from what was already fitted in the SR
+        if mlvj_model == "ErfPowExp_v1": ## take initial value from what was already fitted in the SR
 
             rrv_c0_sb     = self.workspace4fit_.var("rrv_c0_ErfPowExp%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
             rrv_c1_sb     = self.workspace4fit_.var("rrv_c1_ErfPowExp%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
@@ -2667,23 +2879,19 @@ class doFit_wj_and_wlvj:
 
             rrv_delta_c0  = RooRealVar("rrv_delta_c0_ErfPowExp%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_c0_ErfPowExp%s_%s"%(label,self.channel+mass_spectrum),
                                         self.workspace4fit_.var("rrv_c0_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c0_sb.getVal(),
-                                        self.workspace4fit_.var("rrv_c0_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c0_sb.getVal()-4*rrv_c0_sb.getError(),
-                                        self.workspace4fit_.var("rrv_c0_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c0_sb.getVal()+4*rrv_c0_sb.getError() )
+                                        self.workspace4fit_.var("rrv_c0_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c0_sb.getVal()-4*rrv_c0_sb.getError(),self.workspace4fit_.var("rrv_c0_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c0_sb.getVal()+4*rrv_c0_sb.getError() )
 
             rrv_delta_c1 = RooRealVar("rrv_delta_c1_ErfPowExp%s_%s"%(label,self.channel),"rrv_delta_c1_ErfPowExp%s_%s"%(label,self.channel+mass_spectrum),
                                        self.workspace4fit_.var("rrv_c1_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c1_sb.getVal(),
-                                       self.workspace4fit_.var("rrv_c1_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c1_sb.getVal()-4*rrv_c1_sb.getError(),
-                                       self.workspace4fit_.var("rrv_c1_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c1_sb.getVal()+4*rrv_c1_sb.getError() )
+                                       self.workspace4fit_.var("rrv_c1_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c1_sb.getVal()-4*rrv_c1_sb.getError(),self.workspace4fit_.var("rrv_c1_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c1_sb.getVal()+4*rrv_c1_sb.getError() )
 
             rrv_delta_offset = RooRealVar("rrv_delta_offset_ErfPowExp%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_offset_ErfPowExp%s_%s"%(label,self.channel+mass_spectrum),
                                        self.workspace4fit_.var("rrv_offset_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_offset_sb.getVal(),
-                                       self.workspace4fit_.var("rrv_offset_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_offset_sb.getVal()-4*rrv_offset_sb.getError(),
-                                       self.workspace4fit_.var("rrv_offset_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_offset_sb.getVal()+4*rrv_offset_sb.getError())
+                                       self.workspace4fit_.var("rrv_offset_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_offset_sb.getVal()-4*rrv_offset_sb.getError(),self.workspace4fit_.var("rrv_offset_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_offset_sb.getVal()+4*rrv_offset_sb.getError())
 
             rrv_delta_width = RooRealVar("rrv_delta_width_ErfPowExp%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_width_ErfPowExp%s_%s"%(label,self.channel+mass_spectrum),
                                          self.workspace4fit_.var("rrv_width_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_width_sb.getVal(),
-                                         self.workspace4fit_.var("rrv_width_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_width_sb.getVal()-4*rrv_width_sb.getError(),
-                                         self.workspace4fit_.var("rrv_width_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_width_sb.getVal()+4*rrv_width_sb.getError() )
+                                         self.workspace4fit_.var("rrv_width_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_width_sb.getVal()-4*rrv_width_sb.getError(),self.workspace4fit_.var("rrv_width_ErfPowExp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_width_sb.getVal()+4*rrv_width_sb.getError() );
 
             rrv_c0_sr     = RooFormulaVar("rrv_c0_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_c0_sb, rrv_delta_c0 ) );
             rrv_c1_sr     = RooFormulaVar("rrv_c1_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_c1_sb, rrv_delta_c1 ) );
@@ -2692,7 +2900,7 @@ class doFit_wj_and_wlvj:
 
             correct_factor_pdf = RooAlpha4ErfPowExpPdf("correct_factor_pdf","correct_factor_pdf", rrv_x, rrv_c0_sr, rrv_c1_sr, rrv_offset_sr,rrv_width_sr, rrv_c0_sb, rrv_c1_sb, rrv_offset_sb, rrv_width_sb);
 
-        if mlvj_model=="Exp":
+        if mlvj_model == "Exp":
             rrv_c_sb    = self.workspace4fit_.var("rrv_c_Exp%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
             rrv_delta_c = RooRealVar("rrv_delta_c_Exp%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_c_Exp%s_%s"%(label,self.channel+mass_spectrum),
                                       self.workspace4fit_.var("rrv_c_Exp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c_sb.getVal(),
@@ -2701,74 +2909,75 @@ class doFit_wj_and_wlvj:
 
             correct_factor_pdf = RooExponential("correct_factor_pdf","correct_factor_pdf",rrv_x,rrv_delta_c);
 
-        if mlvj_model=="2Exp":
-            rrv_c0_sb    = self.workspace4fit_.var("rrv_c0_2Exp%s_sb_lo_%s"%(label,self.channel));
-            rrv_delta_c0 = RooRealVar("rrv_delta_c0_2Exp%s_%s"%(label,self.channel),"rrv_delta_c0_2Exp%s_%s"%(label,self.channel),
-                                       self.workspace4fit_.var("rrv_c0_2Exp%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_c0_sb.getVal(),
-                                       self.workspace4fit_.var("rrv_c0_2Exp%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_c0_sb.getVal()-4*rrv_c0_sb.getError(),
-                                       self.workspace4fit_.var("rrv_c0_2Exp%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_c0_sb.getVal()+4*rrv_c0_sb.getError() )
-            rrv_c0_sr = RooFormulaVar("rrv_c0_2Exp_sr%s_%s"%(label,self.channel), "@0+@1",RooArgList(rrv_c0_sb, rrv_delta_c0 ) );
+        if mlvj_model == "2Exp":
+            rrv_c0_sb    = self.workspace4fit_.var("rrv_c0_2Exp%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            rrv_delta_c0 = RooRealVar("rrv_delta_c0_2Exp%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_c0_2Exp%s_%s"%(label,self.channel+mass_spectrum),
+                                       self.workspace4fit_.var("rrv_c0_2Exp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c0_sb.getVal(),
+                                       self.workspace4fit_.var("rrv_c0_2Exp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c0_sb.getVal()-4*rrv_c0_sb.getError(),
+                                       self.workspace4fit_.var("rrv_c0_2Exp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c0_sb.getVal()+4*rrv_c0_sb.getError() )
 
-            rrv_c1_sb = self.workspace4fit_.var("rrv_c1_2Exp%s_sb_lo_%s"%(label,self.channel));
-            rrv_delta_c1 = RooRealVar("rrv_delta_c1_2Exp%s_%s"%(label,self.channel),"rrv_delta_c1_2Exp%s_%s"%(label,self.channel),
-                                       self.workspace4fit_.var("rrv_c1_2Exp%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_c1_sb.getVal(),
-                                       self.workspace4fit_.var("rrv_c1_2Exp%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_c1_sb.getVal()-4*rrv_c1_sb.getError(),
-                                       self.workspace4fit_.var("rrv_c1_2Exp%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_c1_sb.getVal()+4*rrv_c1_sb.getError() )
-            rrv_c1_sr =RooFormulaVar("rrv_c1_2Exp_sr%s_%s"%(label,self.channel), "@0+@1",RooArgList(rrv_c1_sb, rrv_delta_c1 ) );
+            rrv_c1_sb = self.workspace4fit_.var("rrv_c1_2Exp%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            rrv_delta_c1 = RooRealVar("rrv_delta_c1_2Exp%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_c1_2Exp%s_%s"%(label,self.channel+mass_spectrum),
+                                       self.workspace4fit_.var("rrv_c1_2Exp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c1_sb.getVal(),
+                                       self.workspace4fit_.var("rrv_c1_2Exp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c1_sb.getVal()-4*rrv_c1_sb.getError(),
+                                       self.workspace4fit_.var("rrv_c1_2Exp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c1_sb.getVal()+4*rrv_c1_sb.getError() )
 
-            rrv_frac_sb    = self.workspace4fit_.var("rrv_frac_2Exp%s_sb_lo_%s"%(label,self.channel));
-            rrv_delta_frac = RooRealVar("rrv_delta_frac_2Exp%s_%s"%(label,self.channel),"rrv_delta_frac_2Exp%s_%s"%(label,self.channel),
-                                         self.workspace4fit_.var("rrv_frac_2Exp%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_frac_sb.getVal(),
-                                         self.workspace4fit_.var("rrv_frac_2Exp%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_frac_sb.getVal()-4*rrv_frac_sb.getError(),
-                                         self.workspace4fit_.var("rrv_frac_2Exp%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_frac_sb.getVal()+4*rrv_frac_sb.getError() )
-            rrv_frac_sr = RooFormulaVar("rrv_frac_2Exp_sr%s_%s"%(label,self.channel), "@0+@1",RooArgList(rrv_frac_sb, rrv_delta_frac ) );
+            rrv_frac_sb    = self.workspace4fit_.var("rrv_frac_2Exp%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            rrv_delta_frac = RooRealVar("rrv_delta_frac_2Exp%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_frac_2Exp%s_%s"%(label,self.channel+mass_spectrum),
+                                         self.workspace4fit_.var("rrv_frac_2Exp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_frac_sb.getVal(),
+                                         self.workspace4fit_.var("rrv_frac_2Exp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_frac_sb.getVal()-4*rrv_frac_sb.getError(),
+                                         self.workspace4fit_.var("rrv_frac_2Exp%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_frac_sb.getVal()+4*rrv_frac_sb.getError() )
+
+            rrv_c0_sr = RooFormulaVar("rrv_c0_2Exp_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_c0_sb, rrv_delta_c0 ) );
+            rrv_c1_sr = RooFormulaVar("rrv_c1_2Exp_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_c1_sb, rrv_delta_c1 ) );
+            rrv_frac_sr = RooFormulaVar("rrv_frac_2Exp_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_frac_sb, rrv_delta_frac ) );
 
             correct_factor_pdf = RooAlpha42ExpPdf("correct_factor_pdf","correct_factor_pdf",rrv_x,rrv_c0_sr,rrv_c1_sr,rrv_frac_sr, rrv_c0_sb,rrv_c1_sb,rrv_frac_sb );
 
         if mlvj_model=="Pow":
 
-            rrv_c_sb    = self.workspace4fit_.var("rrv_c_Pow%s_sb_lo_%s"%(label,self.channel));
-            rrv_delta_c = RooRealVar("rrv_delta_c_Pow%s_%s"%(label,self.channel),"rrv_delta_c_Pow%s_%s"%(label,self.channel),0., -100*rrv_c_sb.getError(),100*rrv_c_sb.getError());
+            rrv_c_sb    = self.workspace4fit_.var("rrv_c_Pow%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            rrv_delta_c = RooRealVar("rrv_delta_c_Pow%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_c_Pow%s_%s"%(label,self.channel+mass_spectrum),0., -100*rrv_c_sb.getError(),100*rrv_c_sb.getError());
             correct_factor_pdf = RooPowPdf("correct_factor_pdf","correct_factor_pdf",rrv_x,rrv_delta_c);
 
         if mlvj_model=="ExpN":
-            rrv_c_sb  = self.workspace4fit_.var("rrv_c_ExpN%s_sb_lo_%s"%(label,self.channel));
-            rrv_n_sb  = self.workspace4fit_.var("rrv_n_ExpN%s_sb_lo_%s"%(label,self.channel));
-            rrv_delta_c = RooRealVar("rrv_delta_c_ExpN%s_%s"%(label,self.channel),"rrv_delta_c_ExpN%s_%s"%(label,self.channel),
-                                      self.workspace4fit_.var("rrv_c_ExpN%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_c_sb.getVal(),
-                                      self.workspace4fit_.var("rrv_c_ExpN%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_c_sb.getVal()-4*rrv_c_sb.getError(),
-                                      self.workspace4fit_.var("rrv_c_ExpN%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_c_sb.getVal()+4*rrv_c_sb.getError() )
-            rrv_delta_n = RooRealVar("rrv_delta_n_ExpN%s_%s"%(label,self.channel),"rrv_delta_n_ExpN%s_%s"%(label,self.channel),
-                                      self.workspace4fit_.var("rrv_n_ExpN%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_n_sb.getVal(),
-                                      self.workspace4fit_.var("rrv_n_ExpN%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_n_sb.getVal()-4*rrv_n_sb.getError(),
-                                      self.workspace4fit_.var("rrv_n_ExpN%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_n_sb.getVal()+4*rrv_n_sb.getError() )
+            rrv_c_sb  = self.workspace4fit_.var("rrv_c_ExpN%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            rrv_n_sb  = self.workspace4fit_.var("rrv_n_ExpN%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            rrv_delta_c = RooRealVar("rrv_delta_c_ExpN%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_c_ExpN%s_%s"%(label,self.channel+mass_spectrum),
+                                      self.workspace4fit_.var("rrv_c_ExpN%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c_sb.getVal(),
+                                      self.workspace4fit_.var("rrv_c_ExpN%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c_sb.getVal()-4*rrv_c_sb.getError(),
+                                      self.workspace4fit_.var("rrv_c_ExpN%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_c_sb.getVal()+4*rrv_c_sb.getError() )
+            rrv_delta_n = RooRealVar("rrv_delta_n_ExpN%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_n_ExpN%s_%s"%(label,self.channel+mass_spectrum),
+                                      self.workspace4fit_.var("rrv_n_ExpN%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_n_sb.getVal(),
+                                      self.workspace4fit_.var("rrv_n_ExpN%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_n_sb.getVal()-4*rrv_n_sb.getError(),
+                                      self.workspace4fit_.var("rrv_n_ExpN%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_n_sb.getVal()+4*rrv_n_sb.getError() )
 
             correct_factor_pdf = RooExpNPdf("correct_factor_pdf","correct_factor_pdf",rrv_x,rrv_delta_c, rrv_delta_n);
 
         if mlvj_model=="ExpTail":
-            rrv_s_sb =self.workspace4fit_.var("rrv_s_ExpTail%s_sb_lo_%s"%(label,self.channel));
-            rrv_a_sb =self.workspace4fit_.var("rrv_a_ExpTail%s_sb_lo_%s"%(label,self.channel));
+            rrv_s_sb =self.workspace4fit_.var("rrv_s_ExpTail%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            rrv_a_sb =self.workspace4fit_.var("rrv_a_ExpTail%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
 
-            rrv_delta_s = RooRealVar("rrv_delta_s_ExpTail%s_%s"%(label,self.channel),"rrv_delta_s_ExpTail%s_%s"%(label,self.channel),
-                                      self.workspace4fit_.var("rrv_s_ExpTail%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_s_sb.getVal(),
-                                      self.workspace4fit_.var("rrv_s_ExpTail%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_s_sb.getVal()-4*rrv_s_sb.getError(),
-                                      self.workspace4fit_.var("rrv_s_ExpTail%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_s_sb.getVal()+4*rrv_s_sb.getError() )
-            rrv_delta_a = RooRealVar("rrv_delta_a_ExpTail%s_%s"%(label,self.channel),"rrv_delta_a_ExpTail%s_%s"%(label,self.channel),
-                                      self.workspace4fit_.var("rrv_a_ExpTail%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_a_sb.getVal(),
-                                      self.workspace4fit_.var("rrv_a_ExpTail%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_a_sb.getVal()-4*rrv_a_sb.getError(),
-                                      self.workspace4fit_.var("rrv_a_ExpTail%s_signal_region_%s"%(label,self.channel)).getVal()-rrv_a_sb.getVal()+4*rrv_a_sb.getError() )
+            rrv_delta_s = RooRealVar("rrv_delta_s_ExpTail%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_s_ExpTail%s_%s"%(label,self.channel+mass_spectrum),
+                                      self.workspace4fit_.var("rrv_s_ExpTail%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_s_sb.getVal(),
+                                      self.workspace4fit_.var("rrv_s_ExpTail%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_s_sb.getVal()-4*rrv_s_sb.getError(),
+                                      self.workspace4fit_.var("rrv_s_ExpTail%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_s_sb.getVal()+4*rrv_s_sb.getError() )
+            rrv_delta_a = RooRealVar("rrv_delta_a_ExpTail%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_a_ExpTail%s_%s"%(label,self.channel+mass_spectrum),
+                                      self.workspace4fit_.var("rrv_a_ExpTail%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_a_sb.getVal(),
+                                      self.workspace4fit_.var("rrv_a_ExpTail%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_a_sb.getVal()-4*rrv_a_sb.getError(),
+                                      self.workspace4fit_.var("rrv_a_ExpTail%s_signal_region_%s"%(label,self.channel+mass_spectrum)).getVal()-rrv_a_sb.getVal()+4*rrv_a_sb.getError() )
 
-            rrv_a_sr = RooFormulaVar("rrv_a_ExpTail_sr%s_%s"%(label,self.channel), "@0+@1",RooArgList(rrv_a_sb, rrv_delta_a ) );
-            rrv_s_sr = RooFormulaVar("rrv_s_ExpTail_sr%s_%s"%(label,self.channel), "@0+@1",RooArgList(rrv_s_sb, rrv_delta_s ) );
+            rrv_a_sr = RooFormulaVar("rrv_a_ExpTail_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_a_sb, rrv_delta_a ) );
+            rrv_s_sr = RooFormulaVar("rrv_s_ExpTail_sr%s_%s"%(label,self.channel+mass_spectrum), "@0+@1",RooArgList(rrv_s_sb, rrv_delta_s ) );
 
             correct_factor_pdf = RooAlpha4ExpTailPdf("correct_factor_pdf","correct_factor_pdf",rrv_x,rrv_s_sr, rrv_a_sr, rrv_s_sb, rrv_a_sb);
 
         if mlvj_model=="Pow2":
 
-            rrv_c0_sb    = self.workspace4fit_.var("rrv_c0_Pow2%s_sb_lo_%s"%(label,self.channel));
-            rrv_c1_sb    = self.workspace4fit_.var("rrv_c1_Pow2%s_sb_lo_%s"%(label,self.channel));
-            rrv_delta_c0 = RooRealVar("rrv_delta_c0_Pow2%s_%s"%(label,self.channel),"rrv_delta_c0_Pow2%s_%s"%(label,self.channel),0., -100*rrv_c0_sb.getError(),100*rrv_c0_sb.getError());
-            rrv_delta_c1 = RooRealVar("rrv_delta_c1_Pow2%s_%s"%(label,self.channel),"rrv_delta_c1_Pow2%s_%s"%(label,self.channel),0., -100*rrv_c1_sb.getError(),100*rrv_c1_sb.getError());
+            rrv_c0_sb    = self.workspace4fit_.var("rrv_c0_Pow2%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            rrv_c1_sb    = self.workspace4fit_.var("rrv_c1_Pow2%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
+            rrv_delta_c0 = RooRealVar("rrv_delta_c0_Pow2%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_c0_Pow2%s_%s"%(label,self.channel+mass_spectrum),0., -100*rrv_c0_sb.getError(),100*rrv_c0_sb.getError());
+            rrv_delta_c1 = RooRealVar("rrv_delta_c1_Pow2%s_%s"%(label,self.channel+mass_spectrum),"rrv_delta_c1_Pow2%s_%s"%(label,self.channel+mass_spectrum),0., -100*rrv_c1_sb.getError(),100*rrv_c1_sb.getError());
             correct_factor_pdf = RooPow2Pdf("correct_factor_pdf","correct_factor_pdf",rrv_x,rrv_delta_c0,rrv_delta_c1);
 
 
@@ -2777,13 +2986,14 @@ class doFit_wj_and_wlvj:
         data_category = RooCategory("data_category","data_category");
         data_category.defineType("sideband");
         data_category.defineType("signal_region");
+
         if mass_spectrum=="_mlvj_relaxed":
            combData4fit = self.workspace4fit_.data("combData4fit%s_%s"%(label,self.channel+"_relaxed"));
         else:
            combData4fit = self.workspace4fit_.data("combData4fit%s_%s"%(label,self.channel));           
 
         model_pdf_sb_lo_WJets         = self.workspace4fit_.pdf("model_pdf%s_sb_lo_%s"%(label,self.channel+mass_spectrum));
-        model_pdf_signal_region_WJets = RooProdPdf("model_pdf%s_signal_region_%s"%(label,self.channel+mass_spectrum),"model_pdf%s_signal_region_%s"%(label,self.channel+mass_spectrum) ,model_pdf_sb_lo_WJets,correct_factor_pdf);
+        model_pdf_signal_region_WJets = RooProdPdf("model_pdf%s_signal_region_%s"%(label,self.channel+"_mlvj"),"model_pdf%s_signal_region_%s_mlvj"%(label,self.channel) ,model_pdf_sb_lo_WJets,correct_factor_pdf);
 
         simPdf = RooSimultaneous("simPdf","simPdf",data_category);
         simPdf.addPdf(model_pdf_sb_lo_WJets,"sideband");
@@ -2796,10 +3006,9 @@ class doFit_wj_and_wlvj:
         ### Decorrelate the parameters in the alpha shape
         wsfit_tmp = RooWorkspace("wsfit_tmp%s_sim%s"%(label,mass_spectrum));
         print "############### diagonalizer alpha ";
-        Deco      = PdfDiagonalizer("Deco%s_sim_%s_%s%s"%(label,self.channel,self.wtagger_label,mass_spectrum),wsfit_tmp,rfresult);
+        Deco      = PdfDiagonalizer("Deco%s_sim_%s_%s_mlvj"%(label,self.channel,self.wtagger_label),wsfit_tmp,rfresult);
         correct_factor_pdf_deco = Deco.diagonalize(correct_factor_pdf);
         correct_factor_pdf_deco.Print();
-      #  raw_input("ENTER");
        
         correct_factor_pdf_deco.getParameters(rdataset_WJets_signal_region_mlvj).Print("v");
         getattr(self.workspace4fit_,"import")(correct_factor_pdf_deco);
@@ -2810,24 +3019,29 @@ class doFit_wj_and_wlvj:
             ### only mc plots in the SB region
             mplot_sb_lo = rrv_x.frame(RooFit.Title("WJets sb low"), RooFit.Bins(int(rrv_x.getBins()/self.narrow_factor)));
 
+            ## plot just W+Jets sb distribution
             rdataset_WJets_sb_lo_mlvj.plotOn(mplot_sb_lo, RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
             model_pdf_sb_lo_WJets.plotOn(mplot_sb_lo);
             mplot_pull_sideband = self.get_pull(rrv_x,mplot_sb_lo);
+
             parameters_list     = model_pdf_sb_lo_WJets.getParameters(rdataset_WJets_sb_lo_mlvj);
             mplot_sb_lo.GetYaxis().SetRangeUser(1e-2,mplot_sb_lo.GetMaximum()*1.2);
+
             if mass_spectrum=="_mlvj_relaxed":
                 self.draw_canvas_with_pull( mplot_sb_lo, mplot_pull_sideband,parameters_list,"plots_%s_%s_%s_%s_g1/other_relaxed/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label), "m_lvj%s_sb_lo_sim"%(label),"",1,1)
             else:
                 self.draw_canvas_with_pull( mplot_sb_lo, mplot_pull_sideband,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label), "m_lvj%s_sb_lo_sim"%(label),"",1,1)                
 
-            ### only mc plots in the SR region
+            ### only W+jets mc plots in the SR region
             mplot_signal_region = rrv_x.frame(RooFit.Title("WJets sr"), RooFit.Bins(int(rrv_x.getBins()/self.narrow_factor)));
 
             rdataset_WJets_signal_region_mlvj.plotOn(mplot_signal_region, RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
             model_pdf_signal_region_WJets.plotOn(mplot_signal_region);
             mplot_pull_signal_region = self.get_pull(rrv_x, mplot_signal_region);
+
             parameters_list = model_pdf_signal_region_WJets.getParameters(rdataset_WJets_signal_region_mlvj);
             mplot_signal_region.GetYaxis().SetRangeUser(1e-2,mplot_signal_region.GetMaximum()*1.2);
+
             if mass_spectrum=="_mlvj_relaxed":
                 self.draw_canvas_with_pull( mplot_signal_region, mplot_pull_signal_region,parameters_list,"plots_%s_%s_%s_%s_g1/other_relaxed/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label), "m_lvj%s_signal_region_sim"%(label),"",1,1);
             else:
@@ -2841,57 +3055,56 @@ class doFit_wj_and_wlvj:
 
         ### plot also what is get from other source if available : alternate PS and shape: 1 PS and 01 is shape or fitting function
         if TString(label).Contains("_WJets0"):
-            if self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets1_xww_sim_%s_%s%s"%(self.channel, self.wtagger_label, mass_spectrum)):
-                self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets1_xww_sim_%s_%s%s"%(self.channel, self.wtagger_label, mass_spectrum)).plotOn(mplot, RooFit.LineColor(kMagenta), RooFit.LineStyle(3),RooFit.Name("#alpha: Alternate PS") );
+            if self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets1_sim_%s_%s_mlvj"%(self.channel,self.wtagger_label)):
+                self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets1_sim_%s_%s_mlvj"%(self.channel,self.wtagger_label).plotOn(mplot, RooFit.LineColor(kOrange), RooFit.LineStyle(3),RooFit.Name("#alpha: Alternate PS") );
 
-            if self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets01_xww_sim_%s_%s%s"%(self.channel, self.wtagger_label, mass_spectrum)):
-                self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets01_xww_sim_%s_%s%s"%(self.channel, self.wtagger_label, mass_spectrum)).plotOn(mplot, RooFit.LineColor(kOrange), RooFit.LineStyle(7),RooFit.Name("#alpha: Alternate Function") );
+            if self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets01_sim_%s_%s_mlvj"%(self.channel, self.wtagger_label)):
+                self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets01_sim_%s_%s_mlvj"%(self.channel, self.wtagger_label)).plotOn(mplot, RooFit.LineColor(kMagenta), RooFit.LineStyle(7),RooFit.Name("#alpha: Alternate Function") );
 
- 
+
         paras=RooArgList();
 	### Make a list of paramters as a function of the model after decorrelation
         if mlvj_model=="ErfExp_v1" or mlvj_model=="ErfPow_v1" or mlvj_model=="2Exp" :
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig0"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig1"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig2"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig3"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig4"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig5"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig0_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig1_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig2_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig3_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig4_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig5_mlvj"%(label,self.channel, self.wtagger_label) ));
 
         if mlvj_model=="ErfPow2_v1" or mlvj_model=="ErfPowExp_v1" :
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig0"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig1"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig2"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig3"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig4"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig5"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig6"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig7"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
-
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig0_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig1_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig2_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig3_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig4_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig5_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig6_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig7_mlvj"%(label,self.channel, self.wtagger_label) ));
 
         if mlvj_model=="Exp" or mlvj_model=="Pow":
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig0"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig1"%(label,self.channel, self.wtagger_label, mass_spectrum) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig0_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s%s_eig1_mlvj"%(label,self.channel, self.wtagger_label) ));
 
         if mlvj_model=="ExpN" or mlvj_model=="ExpTail" or mlvj_model=="Pow2":
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s_mlvj_eig0"%(label,self.channel, self.wtagger_label) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s_mlvj_eig1"%(label,self.channel, self.wtagger_label) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s_mlvj_eig2"%(label,self.channel, self.wtagger_label) ));
-            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s_mlvj_eig3"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s_mlvj_eig0_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s_mlvj_eig1_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s_mlvj_eig2_mlvj"%(label,self.channel, self.wtagger_label) ));
+            paras.add(self.workspace4fit_.var("Deco%s_sim_%s_%s_mlvj_eig3_mlvj"%(label,self.channel, self.wtagger_label) ));
 
         if TString(label).Contains("_WJets0") or TString(label).Contains("_WJets1"): ### draw error band ar 1 and 2 sigma using the decorrelated shape
-            draw_error_band_shape_Decor("correct_factor_pdf_Deco%s_sim_%s_%s"%(label,self.channel, self.wtagger_label+mass_spectrum),"rrv_mass_lvj", paras, self.workspace4fit_,1 ,mplot,kGray+3,"F",3001,"#alpha #pm",20,400);
-            draw_error_band_shape_Decor("correct_factor_pdf_Deco%s_sim_%s_%s"%(label,self.channel, self.wtagger_label+mass_spectrum),"rrv_mass_lvj", paras, self.workspace4fit_,2 ,mplot,kGreen+2,"F",3002,"#alpha #pm",20,400);
-            draw_error_band_shape_Decor("correct_factor_pdf_Deco%s_sim_%s_%s"%(label,self.channel, self.wtagger_label+mass_spectrum),"rrv_mass_lvj", paras, self.workspace4fit_,1 ,mplot,kGray+3,"F",3001,"#alpha_invisible #pm",20,400);
+            draw_error_band_shape_Decor("correct_factor_pdf_Deco%s_sim_%s_%s_mlvj"%(label,self.channel, self.wtagger_label),"rrv_mass_lvj", paras, self.workspace4fit_,1 ,mplot,kGray+3,"F",3001,"#alpha #pm",20,400);
+            draw_error_band_shape_Decor("correct_factor_pdf_Deco%s_sim_%s_%s_mlvj"%(label,self.channel, self.wtagger_label),"rrv_mass_lvj", paras, self.workspace4fit_,2 ,mplot,kGreen+2,"F",3002,"#alpha #pm",20,400);
+            draw_error_band_shape_Decor("correct_factor_pdf_Deco%s_sim_%s_%s_mlvj"%(label,self.channel, self.wtagger_label),"rrv_mass_lvj", paras, self.workspace4fit_,1 ,mplot,kGray+3,"F",3001,"#alpha_invisible #pm",20,400);
 
         ### plot on the same canvas
         correct_factor_pdf_deco.plotOn(mplot, RooFit.LineColor(kBlack),RooFit.Name("#alpha_invisible") );
 
         if TString(label).Contains("_WJets0") : ## add also the plot of alternate ps and function on the canvas
-            if self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets1_xww_sim_%s_%s"%(self.channel,self.wtagger_label+mass_spectrum)):
-                self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets1_xww_sim_%s_%s"%(self.channel,self.wtagger_label+mass_spectrum)).plotOn(mplot, RooFit.LineColor(kMagenta), RooFit.LineStyle(3),RooFit.Name("#alpha_invisible: Alternate PS") );
-            if self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets01_xww_sim_%s_%s"%(self.channel,self.wtagger_label+mass_spectrum)):
-                self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets01_xww_sim_%s_%s"%(self.channel,self.wtagger_label+mass_spectrum)).plotOn(mplot, RooFit.LineColor(kOrange), RooFit.LineStyle(7),RooFit.Name("#alpha_invisible: Alternate Function") );
+            if self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets1_sim_%s_%s_mlvj"%(self.channel,self.wtagger_label)):
+                self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets1_sim_%s_%s_mlvj"%(self.channel,self.wtagger_label)).plotOn(mplot, RooFit.LineColor(kMagenta), RooFit.LineStyle(3),RooFit.Name("#alpha_invisible: Alternate PS") );
+            if self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets01_sim_%s_%s_mlvj"%(self.channel,self.wtagger_label)):
+                self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets01_sim_%s_%s_mlvj"%(self.channel,self.wtagger_label)).plotOn(mplot, RooFit.LineColor(kOrange), RooFit.LineStyle(7),RooFit.Name("#alpha_invisible: Alternate Function") );
 
         elif TString(label).Contains("_WJets01") : ## add also the plot of alternate ps and function on the canvas
             if self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets1_sim_%s_%s_mlvj"%(self.channel,self.wtagger_label)):
@@ -2900,7 +3113,7 @@ class doFit_wj_and_wlvj:
                 self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets0_sim_%s_%s_mlvj"%(self.channel,self.wtagger_label)).plotOn(mplot, RooFit.LineColor(kOrange), RooFit.LineStyle(7),RooFit.Name("#alpha_invisible: Alternate Function") );
 
         ### Add the legend
-        self.leg=self.legend4Plot(mplot,1,0, -0.0, -0.07, 0.02, 0.01, 0.);
+        self.leg = self.legend4Plot(mplot,1,0, -0.0, -0.07, 0.02, 0.01, 0.);
         mplot.addObject(self.leg);
 
         ## set the Y axis in arbitrary unit
@@ -2917,14 +3130,13 @@ class doFit_wj_and_wlvj:
         tmp_alpha_scale = tmp_alpha_ratio/tmp_alpha_pdf;
 
         #add alpha scale axis
-        axis_alpha=TGaxis( rrv_x.getMax(), 0, rrv_x.getMax(), tmp_y_max, 0, tmp_y_max*tmp_alpha_scale, 510, "+L");
+        axis_alpha = TGaxis( rrv_x.getMax(), 0, rrv_x.getMax(), tmp_y_max, 0, tmp_y_max*tmp_alpha_scale, 510, "+L");
         axis_alpha.SetTitle("#alpha");
         axis_alpha.SetTitleOffset(0.65);
         axis_alpha.SetTitleSize(0.05);
         axis_alpha.SetLabelSize(0.045);
         axis_alpha.SetTitleFont(42);
         axis_alpha.SetLabelFont(42);
-        #axis_alpha.RotateTitle(1);
         mplot.addObject(axis_alpha);
 
         if mass_spectrum=="_mlvj_relaxed":
@@ -2933,50 +3145,50 @@ class doFit_wj_and_wlvj:
             self.draw_canvas(mplot,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label),"correction_pdf%s_%s_%s_M_lvj_signal_region_to_sideband"%(label,self.PS_model,mlvj_model),0,1);
 
         correct_factor_pdf_deco.getParameters(rdataset_WJets_sb_lo_mlvj).Print("v");
-#        if mass_spectrum=="_mlvj_relaxed":
-#           model_pdf_WJets_sb_lo_from_fitting_mlvj_Deco = self.workspace4fit_.pdf("model_pdf%s_sb_lo_from_fitting_%s_mlvj_Deco%s_sb_lo_from_fitting_%s_%s"%(label,self.channel,label, self.channel,self.wtagger_label+mass_spectrum));
-#        else:
-#           model_pdf_WJets_sb_lo_from_fitting_mlvj_Deco = self.workspace4fit_.pdf("model_pdf%s_sb_lo_from_fitting_%s_mlvj_Deco%s_sb_lo_from_fitting_%s_%s"%(label,self.channel,label, self.channel,self.wtagger_label+mass_spectrum));           
-#        model_pdf_WJets_sb_lo_from_fitting_mlvj_Deco.Print("v");
+        self.workspace4fit_.Print();
 
+        model_pdf_WJets_sb_lo_from_fitting_mlvj_Deco = self.workspace4fit_.pdf("model_pdf%s_sb_lo_from_fitting_%s_mlvj_Deco%s_sb_lo_from_fitting_%s_%s_mlvj"%(label,self.channel,label, self.channel,self.wtagger_label));           
+        model_pdf_WJets_sb_lo_from_fitting_mlvj_Deco.Print("v");
+    
         ### Wjets shape in the SR correctedfunction * sb
-        model_pdf_WJets_signal_region_after_correct_mlvj = RooProdPdf("model_pdf%s_signal_region_%s_after_correct%s"%(label,self.channel, mass_spectrum),"model_pdf%s_signal_region_%s_after_correct%s"%(label,self.channel, mass_spectrum),model_pdf_sb_lo_WJets,self.workspace4fit_.pdf("correct_factor_pdf_Deco%s_sim_%s_%s"%(label,self.channel,self.wtagger_label+mass_spectrum)));
+        model_pdf_WJets_signal_region_after_correct_mlvj = RooProdPdf("model_pdf%s_signal_region_%s_after_correct_mlvj"%(label,self.channel),"model_pdf%s_signal_region_%s_after_correct_mlvj"%(label,self.channel),model_pdf_WJets_sb_lo_from_fitting_mlvj_Deco,self.workspace4fit_.pdf("correct_factor_pdf_Deco%s_sim_%s_%s_mlvj"%(label,self.channel,self.wtagger_label)));
         model_pdf_WJets_signal_region_after_correct_mlvj.Print()
         ### fix the parmaters and import in the workspace
         getattr(self.workspace4fit_,"import")(model_pdf_WJets_signal_region_after_correct_mlvj)
 
         ##### calculate the normalization and alpha for limit datacard
-        self.workspace4fit_.var("rrv_number%s_signal_region_%s"%(label,self.channel+mass_spectrum)).Print();
-#        self.workspace4fit_.var("rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel)).Print();
-#        self.workspace4fit_.var("rrv_number%s_signal_region_%s"%(label,self.channel+mass_spectrum)).setVal(self.workspace4fit_.var("rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel)).getVal());
- #       self.workspace4fit_.var("rrv_number%s_signal_region_%s"%(label,self.channel+mass_spectrum)).setError(self.workspace4fit_.var("rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel)).getError());
+        self.workspace4fit_.var("rrv_number%s_signal_region_%s_mlvj"%(label,self.channel)).Print();
+        self.workspace4fit_.var("rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel)).Print();
+        self.workspace4fit_.var("rrv_number%s_signal_region_%s_mlvj"%(label,self.channel)).setVal(self.workspace4fit_.var("rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel)).getVal());
+        self.workspace4fit_.var("rrv_number%s_signal_region_%s_mlvj"%(label,self.channel)).setError(self.workspace4fit_.var("rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel)).getError());
 
-        self.workspace4fit_.var("rrv_number%s_signal_region_%s"%(label,self.channel+mass_spectrum)).setConstant(kTRUE);
-
+        self.workspace4fit_.var("rrv_number%s_signal_region_%s_mlvj"%(label,self.channel)).setConstant(kTRUE);
 
 
     ##### Method used to cycle on the events and for the dataset to be fitted
-    def get_mj_and_mlvj_dataset(self,in_file_name, label, jet_mass="jet_mass_pr",vbf_mass = "",is_scaled_mass = 0):# to get the shape of m_lvj
+    def get_mj_and_mlvj_dataset(self,in_file_name, label, jet_mass="jet_mass_pr"):# to get the shape of m_lvj
 
         # read in tree
-        fileIn_name=TString(options.inPath+"/"+self.file_Directory+in_file_name);
+        fileIn_name = TString(self.file_Directory+in_file_name);
         fileIn = TFile(fileIn_name.Data());
         treeIn = fileIn.Get("otree");
                         
         rrv_mass_j = self.workspace4fit_.var("rrv_mass_j") 
-        rrv_mass_lvj = self.workspace4fit_.var("rrv_mass_lvj") 
+        rrv_mass_lvj = self.workspace4fit_.var("rrv_mass_lvj")
+
         rrv_weight = RooRealVar("rrv_weight","rrv_weight",0. ,10000000.) 
         
-        #dataset of m_j
+        # dataset of m_j -> before and after vbf cuts -> central object value
         rdataset_mj     = RooDataSet("rdataset"+label+"_"+self.channel+"_mj","rdataset"+label+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
         rdataset4fit_mj = RooDataSet("rdataset4fit"+label+"_"+self.channel+"_mj","rdataset4fit"+label+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
         rdataset_mj_relaxed     = RooDataSet("rdataset"+label+"_"+self.channel+"_mj_relaxed","rdataset"+label+"_"+self.channel+"_mj_relaxed",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
         rdataset4fit_mj_relaxed = RooDataSet("rdataset4fit"+label+"_"+self.channel+"_mj_relaxed","rdataset4fit"+label+"_"+self.channel+"_mj_relaxed",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
 
-        #dataset of m_lvj
-        rdataset_sb_lo_mlvj         = RooDataSet("rdataset"+label+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        #dataset of m_lvj -> before and after vbf cuts -> central object value
+        rdataset_sb_lo_mlvj     = RooDataSet("rdataset"+label+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
         rdataset_signal_region_mlvj = RooDataSet("rdataset"+label+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
         rdataset_sb_hi_mlvj         = RooDataSet("rdataset"+label+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
         rdataset4fit_sb_lo_mlvj     = RooDataSet("rdataset4fit"+label+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
         rdataset4fit_signal_region_mlvj = RooDataSet("rdataset4fit"+label+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
         rdataset4fit_sb_hi_mlvj     = RooDataSet("rdataset4fit"+label+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
@@ -2984,115 +3196,371 @@ class doFit_wj_and_wlvj:
         rdataset_sb_lo_mlvj_relaxed         = RooDataSet("rdataset"+label+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
         rdataset_signal_region_mlvj_relaxed = RooDataSet("rdataset"+label+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
         rdataset_sb_hi_mlvj_relaxed         = RooDataSet("rdataset"+label+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
         rdataset4fit_sb_lo_mlvj_relaxed     = RooDataSet("rdataset4fit"+label+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
         rdataset4fit_signal_region_mlvj_relaxed = RooDataSet("rdataset4fit"+label+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset4fit_sb_hi_mlvj_relaxed     = RooDataSet("rdataset4fit"+label+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset4fi"+label+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_sb_hi_mlvj_relaxed     = RooDataSet("rdataset4fit"+label+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        #dataset of applying jes up
+        rdataset_mj_jes_up  = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jes_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+        rdataset4fit_mj_jes_up = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jes_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        rdataset_mj_jes_up_relaxed     = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_"+self.channel+"_mj_relaxed","rdataset"+label+"massvbf_jes_up"+"_"+self.channel+"_mj_relaxed",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+        rdataset4fit_mj_jes_up_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_"+self.channel+"_mj_relaxed","rdataset4fit"+label+"massvbf_jes_up"+"_"+self.channel+"_mj_relaxed",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        rdataset_sb_lo_mlvj_jes_up         = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_signal_region_mlvj_jes_up = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_sb_hi_mlvj_jes_up         = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset4fit_sb_lo_mlvj_jes_up_relaxed  = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_signal_region_mlvj_jes_up_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_sb_hi_mlvj_jes_up_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset_sb_lo_mlvj_jes_up_relaxed         = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_signal_region_mlvj_jes_up_relaxed = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_sb_hi_mlvj_jes_up_relaxed         = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset4fit_sb_lo_mlvj_jes_up_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_signal_region_mlvj_jes_up_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_sb_hi_mlvj_jes_up_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        #dataset of applying jes dn
+        rdataset_mj_jes_dn  = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+        rdataset4fit_mj_jes_dn = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        rdataset_mj_jes_dn_relaxed     = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj_relaxed","rdataset"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj_relaxed",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+        rdataset4fit_mj_jes_dn_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj_relaxed","rdataset4fit"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj_relaxed",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        rdataset_sb_lo_mlvj_jes_dn         = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_signal_region_mlvj_jes_dn = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_sb_hi_mlvj_jes_dn         = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset4fit_sb_lo_mlvj_jes_dn_relaxed  = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_signal_region_mlvj_jes_dn_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_sb_hi_mlvj_jes_dn_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset_sb_lo_mlvj_jes_dn_relaxed         = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_signal_region_mlvj_jes_dn_relaxed = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_sb_hi_mlvj_jes_dn_relaxed         = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset4fit_sb_lo_mlvj_jes_dn_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_signal_region_mlvj_jes_dn_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_sb_hi_mlvj_jes_dn_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
 
 
-        data_category=RooCategory("data_category","data_category");
+        #dataset of applying jer up
+        rdataset_mj_jer_up  = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jer_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+        rdataset4fit_mj_jer_up = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jer_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        rdataset_mj_jer_up_relaxed     = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_"+self.channel+"_mj_relaxed","rdataset"+label+"massvbf_jer_up"+"_"+self.channel+"_mj_relaxed",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+        rdataset4fit_mj_jer_up_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_"+self.channel+"_mj_relaxed","rdataset4fit"+label+"massvbf_jer_up"+"_"+self.channel+"_mj_relaxed",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        rdataset_sb_lo_mlvj_jer_up         = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_signal_region_mlvj_jer_up = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_sb_hi_mlvj_jer_up         = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset4fit_sb_lo_mlvj_jer_up_relaxed  = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_signal_region_mlvj_jer_up_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_sb_hi_mlvj_jer_up_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset_sb_lo_mlvj_jer_up_relaxed         = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_signal_region_mlvj_jer_up_relaxed = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_sb_hi_mlvj_jer_up_relaxed         = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset4fit_sb_lo_mlvj_jer_up_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_signal_region_mlvj_jer_up_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_sb_hi_mlvj_jer_up_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        #dataset of applying jer dn
+        rdataset_mj_jer_dn  = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+        rdataset4fit_mj_jer_dn = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        rdataset_mj_jer_dn_relaxed     = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj_relaxed","rdataset"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj_relaxed",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+        rdataset4fit_mj_jer_dn_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj_relaxed","rdataset4fit"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj_relaxed",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        rdataset_sb_lo_mlvj_jer_dn         = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_signal_region_mlvj_jer_dn = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_sb_hi_mlvj_jer_dn         = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset4fit_sb_lo_mlvj_jer_dn_relaxed  = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_signal_region_mlvj_jer_dn_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_sb_hi_mlvj_jer_dn_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset_sb_lo_mlvj_jer_dn_relaxed         = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_signal_region_mlvj_jer_dn_relaxed = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_sb_hi_mlvj_jer_dn_relaxed         = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset4fit_sb_lo_mlvj_jer_dn_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_signal_region_mlvj_jer_dn_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_sb_hi_mlvj_jer_dn_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+
+        #dataset of applying jer dn
+        rdataset_mj_jer  = RooDataSet("rdataset"+label+"massvbf_jer"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jer"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+        rdataset4fit_mj_jer = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jer"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        rdataset_mj_jer_relaxed     = RooDataSet("rdataset"+label+"massvbf_jer"+"_"+self.channel+"_mj_relaxed","rdataset"+label+"massvbf_jer"+"_"+self.channel+"_mj_relaxed",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+        rdataset4fit_mj_jer_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_"+self.channel+"_mj_relaxed","rdataset4fit"+label+"massvbf_jer"+"_"+self.channel+"_mj_relaxed",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        rdataset_sb_lo_mlvj_jer         = RooDataSet("rdataset"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_signal_region_mlvj_jer = RooDataSet("rdataset"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_sb_hi_mlvj_jer         = RooDataSet("rdataset"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset4fit_sb_lo_mlvj_jer_relaxed  = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_signal_region_mlvj_jer_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_sb_hi_mlvj_jer_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset_sb_lo_mlvj_jer_relaxed         = RooDataSet("rdataset"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_signal_region_mlvj_jer_relaxed = RooDataSet("rdataset"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset_sb_hi_mlvj_jer_relaxed         = RooDataSet("rdataset"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+        rdataset4fit_sb_lo_mlvj_jer_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_signal_region_mlvj_jer_relaxed = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+        rdataset4fit_sb_hi_mlvj_jer_relaxed     = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed","rdataset4fit"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj_relaxed",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+
+
+        ###### Define the event categorization
+        data_category = RooCategory("data_category","data_category");
         data_category.defineType("sideband");
         data_category.defineType("signal_region");
-        combData=RooDataSet("combData"+label+"_"+self.channel,"combData"+label+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
-        combData4fit=RooDataSet("combData4fit"+label+"_"+self.channel,"combData4fit"+label+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
 
-        combData_relaxed=RooDataSet("combData"+label+"_"+self.channel+"_relaxed","combData"+label+"_"+self.channel+"_relaxed",RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
-        combData4fit_relaxed=RooDataSet("combData4fit"+label+"_"+self.channel+"_relaxed","combData4fit"+label+"_"+self.channel+"_relaxed",RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        combData = RooDataSet("combData"+label+"_"+self.channel,"combData"+label+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        combData4fit = RooDataSet("combData4fit"+label+"_"+self.channel,"combData4fit"+label+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        combData_relaxed = RooDataSet("combData"+label+"_"+self.channel+"_relaxed","combData"+label+"_"+self.channel+"_relaxed",RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        combData4fit_relaxed = RooDataSet("combData4fit"+label+"_"+self.channel+"_relaxed","combData4fit"+label+"_"+self.channel+"_relaxed",RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        ## jes_up
+        combData_jes_up = RooDataSet("combData"+label+"massvbf_jes_up"+"_"+self.channel,"combData"+label+"massvbf_jes_up"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        combData4fit_jes_up = RooDataSet("combData4fit"+label+"massvbf_jes_up"+"_"+self.channel,"combData4fit"+label+"massvbf_jes_up"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        combData_jes_up_relaxed = RooDataSet("combData"+label+"massvbf_jes_up"+"_"+self.channel+"_relaxed","combData"+label+"massvbf_jes_up"+"_"+self.channel+"_relaxed",RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        combData4fit_jes_up_relaxed = RooDataSet("combData4fit"+label+"massvbf_jes_up"+"_"+self.channel+"_relaxed","combData4fit"+label+"massvbf_jes_up"+"_"+self.channel+"_relaxed",RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        ## jes_dn
+        combData_jes_dn = RooDataSet("combData"+label+"massvbf_jes_dn"+"_"+self.channel,"combData"+label+"massvbf_jes_dn"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        combData4fit_jes_dn = RooDataSet("combData4fit"+label+"massvbf_jes_dn"+"_"+self.channel,"combData4fit"+label+"massvbf_jes_dn"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        combData_jes_dn_relaxed = RooDataSet("combData"+label+"massvbf_jes_dn"+"_"+self.channel+"_relaxed","combData"+label+"massvbf_jes_dn"+"_"+self.channel+"_relaxed",RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        combData4fit_jes_dn_relaxed = RooDataSet("combData4fit"+label+"massvbf_jes_dn"+"_"+self.channel+"_relaxed","combData4fit"+label+"massvbf_jes_dn"+"_"+self.channel+"_relaxed",RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        ## jer_up
+        combData_jer_up = RooDataSet("combData"+label+"massvbf_jer_up"+"_"+self.channel,"combData"+label+"massvbf_jer_up"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        combData4fit_jer_up = RooDataSet("combData4fit"+label+"massvbf_jer_up"+"_"+self.channel,"combData4fit"+label+"massvbf_jer_up"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        combData_jer_up_relaxed = RooDataSet("combData"+label+"massvbf_jer_up"+"_"+self.channel+"_relaxed","combData"+label+"massvbf_jer_up"+"_"+self.channel+"_relaxed",RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        combData4fit_jer_up_relaxed = RooDataSet("combData4fit"+label+"massvbf_jer_up"+"_"+self.channel+"_relaxed","combData4fit"+label+"massvbf_jer_up"+"_"+self.channel+"_relaxed",RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        ## jer_dn
+        combData_jer_dn = RooDataSet("combData"+label+"massvbf_jer_dn"+"_"+self.channel,"combData"+label+"massvbf_jer_dn"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        combData4fit_jer_dn = RooDataSet("combData4fit"+label+"massvbf_jer_dn"+"_"+self.channel,"combData4fit"+label+"massvbf_jer_dn"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        combData_jer_dn_relaxed = RooDataSet("combData"+label+"massvbf_jer_dn"+"_"+self.channel+"_relaxed","combData"+label+"massvbf_jer_dn"+"_"+self.channel+"_relaxed",RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        combData4fit_jer_dn_relaxed = RooDataSet("combData4fit"+label+"massvbf_jer_dn"+"_"+self.channel+"_relaxed","combData4fit"+label+"massvbf_jer_dn"+"_"+self.channel+"_relaxed",RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        ## jer
+        combData_jer = RooDataSet("combData"+label+"massvbf_jer"+"_"+self.channel,"combData"+label+"massvbf_jer"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        combData4fit_jer = RooDataSet("combData4fit"+label+"massvbf_jer"+"_"+self.channel,"combData4fit"+label+"massvbf_jer"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+        combData_jer_relaxed = RooDataSet("combData"+label+"massvbf_jer"+"_"+self.channel+"_relaxed","combData"+label+"massvbf_jer"+"_"+self.channel+"_relaxed",RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        combData4fit_jer_relaxed = RooDataSet("combData4fit"+label+"massvbf_jer"+"_"+self.channel+"_relaxed","combData4fit"+label+"massvbf_jer"+"_"+self.channel+"_relaxed",RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+
 
         print "N entries: ", treeIn.GetEntries()
-        hnum_4region=TH1D("hnum_4region"+label+"_"+self.channel,"hnum_4region"+label+"_"+self.channel,4,-1.5,2.5);# m_j   -1: sb_lo; 0:signal_region; 1: sb_hi; 2:total
-        hnum_2region=TH1D("hnum_2region"+label+"_"+self.channel,"hnum_2region"+label+"_"+self.channel,2,-0.5,1.5);# m_lvj  0: signal_region; 1: total
 
-        hnum_4region_relaxed=TH1D("hnum_4region"+label+"_"+self.channel+"_relaxed","hnum_4region"+label+"_"+self.channel+"_relaxed",4,-1.5,2.5);# m_j   -1: sb_lo; 0:signal_region; 1: sb_hi; 2:total
-        hnum_2region_relaxed=TH1D("hnum_2region"+label+"_"+self.channel+"_relaxed","hnum_2region"+label+"_"+self.channel+"_relaxed",2,-0.5,1.5);# m_lvj  0: signal_region; 1: total
+        hnum_4region = TH1D("hnum_4region"+label+"_"+self.channel,"hnum_4region"+label+"_"+self.channel,4,-1.5,2.5);# m_j   -1: sb_lo; 0:signal_region; 1: sb_hi; 2:total        
+        hnum_2region = TH1D("hnum_2region"+label+"_"+self.channel,"hnum_2region"+label+"_"+self.channel,2,-0.5,1.5);# m_lvj  0: signal_region; 1: total
 
+        hnum_4region_relaxed = TH1D("hnum_4region"+label+"_"+self.channel+"_relaxed","hnum_4region"+label+"_"+self.channel+"_relaxed",4,-1.5,2.5);# m_j   -1: sb_lo; 0:signal_region; 1: sb_hi; 2:total
+        hnum_2region_relaxed = TH1D("hnum_2region"+label+"_"+self.channel+"_relaxed","hnum_2region"+label+"_"+self.channel+"_relaxed",2,-0.5,1.5);# m_lvj  0: signal_region; 1: total
+
+        hnum_4region_jes_up = TH1D("hnum_4region"+label+"massvbf_jes_up"+"_"+self.channel,"hnum_4region"+label+"massvbf_jes_up"+"_"+self.channel,4,-1.5,2.5);  
+        hnum_2region_jes_up = TH1D("hnum_2region"+label+"massvbf_jes_up"+"_"+self.channel,"hnum_2region"+label+"massvbf_jes_up"+"_"+self.channel,2,-0.5,1.5);
+        hnum_4region_jes_up_relaxed = TH1D("hnum_4region"+label+"massvbf_jes_up"+"_"+self.channel+"_relaxed","hnum_4region"+label+"massvbf_jes_up"+"_"+self.channel+"_relaxed",4,-1.5,2.5);
+        hnum_2region_jes_up_relaxed = TH1D("hnum_2region"+label+"massvbf_jes_up"+"_"+self.channel+"_relaxed","hnum_2region"+label+"massvbf_jes_up"+"_"+self.channel+"_relaxed",2,-0.5,1.5);
+
+        hnum_4region_jes_dn = TH1D("hnum_4region"+label+"massvbf_jes_dn"+"_"+self.channel,"hnum_4region"+label+"massvbf_jes_dn"+"_"+self.channel,4,-1.5,2.5);  
+        hnum_2region_jes_dn = TH1D("hnum_2region"+label+"massvbf_jes_dn"+"_"+self.channel,"hnum_2region"+label+"massvbf_jes_dn"+"_"+self.channel,2,-0.5,1.5);
+        hnum_4region_jes_dn_relaxed = TH1D("hnum_4region"+label+"massvbf_jes_dn"+"_"+self.channel+"_relaxed","hnum_4region"+label+"massvbf_jes_dn"+"_"+self.channel+"_relaxed",4,-1.5,2.5);
+        hnum_2region_jes_dn_relaxed = TH1D("hnum_2region"+label+"massvbf_jes_dn"+"_"+self.channel+"_relaxed","hnum_2region"+label+"massvbf_jes_dn"+"_"+self.channel+"_relaxed",2,-0.5,1.5);
+
+        hnum_4region_jer_up = TH1D("hnum_4region"+label+"massvbf_jer_up"+"_"+self.channel,"hnum_4region"+label+"massvbf_jer_up"+"_"+self.channel,4,-1.5,2.5);  
+        hnum_2region_jer_up = TH1D("hnum_2region"+label+"massvbf_jer_up"+"_"+self.channel,"hnum_2region"+label+"massvbf_jer_up"+"_"+self.channel,2,-0.5,1.5);
+        hnum_4region_jer_up_relaxed = TH1D("hnum_4region"+label+"massvbf_jer_up"+"_"+self.channel+"_relaxed","hnum_4region"+label+"massvbf_jer_up"+"_"+self.channel+"_relaxed",4,-1.5,2.5);
+        hnum_2region_jer_up_relaxed = TH1D("hnum_2region"+label+"massvbf_jer_up"+"_"+self.channel+"_relaxed","hnum_2region"+label+"massvbf_jer_up"+"_"+self.channel+"_relaxed",2,-0.5,1.5);
+
+        hnum_4region_jer_dn = TH1D("hnum_4region"+label+"massvbf_jer_dn"+"_"+self.channel,"hnum_4region"+label+"massvbf_jer_dn"+"_"+self.channel,4,-1.5,2.5);  
+        hnum_2region_jer_dn = TH1D("hnum_2region"+label+"massvbf_jer_dn"+"_"+self.channel,"hnum_2region"+label+"massvbf_jer_dn"+"_"+self.channel,2,-0.5,1.5);
+        hnum_4region_jer_dn_relaxed = TH1D("hnum_4region"+label+"massvbf_jer_dn"+"_"+self.channel+"_relaxed","hnum_4region"+label+"massvbf_jer_dn"+"_"+self.channel+"_relaxed",4,-1.5,2.5);
+        hnum_2region_jer_dn_relaxed = TH1D("hnum_2region"+label+"massvbf_jer_dn"+"_"+self.channel+"_relaxed","hnum_2region"+label+"massvbf_jer_dn"+"_"+self.channel+"_relaxed",2,-0.5,1.5);
+
+        hnum_4region_jer = TH1D("hnum_4region"+label+"massvbf_jer"+"_"+self.channel,"hnum_4region"+label+"massvbf_jer"+"_"+self.channel,4,-1.5,2.5);  
+        hnum_2region_jer = TH1D("hnum_2region"+label+"massvbf_jer"+"_"+self.channel,"hnum_2region"+label+"massvbf_jer"+"_"+self.channel,2,-0.5,1.5);
+        hnum_4region_jer_relaxed = TH1D("hnum_4region"+label+"massvbf_jer"+"_"+self.channel+"_relaxed","hnum_4region"+label+"massvbf_jer"+"_"+self.channel+"_relaxed",4,-1.5,2.5);
+        hnum_2region_jer_relaxed = TH1D("hnum_2region"+label+"massvbf_jer"+"_"+self.channel+"_relaxed","hnum_2region"+label+"massvbf_jer"+"_"+self.channel+"_relaxed",2,-0.5,1.5);
+
+        
         for i in range(treeIn.GetEntries()):
 
-          if i % 100000 == 0: print "iEvent: ",i
+          if i % 1000 == 0: print "iEvent: ",i
           treeIn.GetEntry(i);
-    
+
           discriminantCut = False; 
 
           wtagger=-1;
           wtagger=getattr(treeIn,"jet_tau2tau1");
-          if wtagger <self.wtagger_cut:
-            discriminantCut=True;
+
+          if wtagger < self.wtagger_cut:
+            discriminantCut = True;
           else:
-            discriminantCut=False;
+            discriminantCut = False;
         
-          tmp_scale_to_lumi=treeIn.wSampleWeight;
+          tmp_scale_to_lumi = treeIn.wSampleWeight;
                                 
           jet_1 = ROOT.TLorentzVector();
           jet_2 = ROOT.TLorentzVector();
 
           njet = 0. ; tmp_vbf_dEta =0.; tmp_vbf_Mjj = 0.; ungroomed_jet_pt = 0.; pfMET = 0.; mass_lvj = 0. ;
 
-          #jet mass, jet mass up, jet mass down
-          tmp_jet_mass=getattr(treeIn, jet_mass);
+          # jet mass , central value
+          tmp_jet_mass = getattr(treeIn, jet_mass);
+          tmp_vbf_dEta = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta")-getattr(treeIn,"vbf_maxpt_j2_eta"));
+          tmp_vbf_Mjj  = getattr(treeIn, "vbf_maxpt_jj_m");
+          njet = getattr(treeIn,"numberJetBin");
+          ungroomed_jet_pt = getattr(treeIn,"ungroomed_jet_pt");
+          pfMET = getattr(treeIn,"pfMET");
+          mass_lvj = getattr(treeIn,"mass_lvj_type0_met");
 
-          if(vbf_mass == "" and is_scaled_mass == 0):
+          # jet mass jes_up
+          tmp_jet_mass_jes_up = getattr(treeIn, "jet_mass_pr_jes_up");          
+          tmp_vbf_dEta_jes_up = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jes_up")-getattr(treeIn,"vbf_maxpt_j2_eta_jes_up"));
+          jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jes_up"),getattr(treeIn,"vbf_maxpt_j1_eta_jes_up"),getattr(treeIn,"vbf_maxpt_j1_phi_jes_up"),getattr(treeIn,"vbf_maxpt_j1_m_jes_up"));
+          jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jes_up"),getattr(treeIn,"vbf_maxpt_j2_eta_jes_up"),getattr(treeIn,"vbf_maxpt_j2_phi_jes_up"),getattr(treeIn,"vbf_maxpt_j2_m_jes_up"));
+          tmp_vbf_Mjj_jes_up = (jet_1+jet_2).M();           
+          ungroomed_jet_pt_jes_up = getattr(treeIn,"ungroomed_jet_pt_jes_up");
+          njet_jes_up = 0 ;
+          if(getattr(treeIn,"vbf_maxpt_j1_pt_jes_up") > 30.):
+               njet_jes_up = njet_jes_up +1 ;
+          if(getattr(treeIn,"vbf_maxpt_j2_pt_jes_up") > 30.):
+               njet_jes_up = njet_jes_up +1 ;
+          pfMET_jes_up = getattr(treeIn,"pfMET_jes_up");
+          mass_lvj_jes_up = getattr(treeIn,"mass_lvj_type0_met_jes_up");
 
-           tmp_vbf_dEta = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta")-getattr(treeIn,"vbf_maxpt_j2_eta"));
+          # jet mass jes_dn
+          tmp_jet_mass_jes_dn = getattr(treeIn, "jet_mass_pr_jes_dn");                     
+          tmp_vbf_dEta_jes_dn = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jes_dn")-getattr(treeIn,"vbf_maxpt_j2_eta_jes_dn"));
+          jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jes_dn"),getattr(treeIn,"vbf_maxpt_j1_eta_jes_dn"),getattr(treeIn,"vbf_maxpt_j1_phi_jes_dn"),getattr(treeIn,"vbf_maxpt_j1_m_jes_dn"));
+          jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jes_dn"),getattr(treeIn,"vbf_maxpt_j2_eta_jes_dn"),getattr(treeIn,"vbf_maxpt_j2_phi_jes_dn"),getattr(treeIn,"vbf_maxpt_j2_m_jes_dn"));
+          tmp_vbf_Mjj_jes_dn = (jet_1 + jet_2).M();
+          ungroomed_jet_pt_jes_dn = getattr(treeIn,"ungroomed_jet_pt_jes_dn");
+          njet_jes_dn = 0 ;
+          if(getattr(treeIn,"vbf_maxpt_j1_pt_jes_dn") > 30.):
+               njet_jes_dn = njet_jes_dn +1 ;
+          if(getattr(treeIn,"vbf_maxpt_j2_pt_jes_dn") > 30.):
+               njet_jes_dn = njet_jes_dn +1 ;
+          pfMET_jes_dn = getattr(treeIn,"pfMET_jes_dn");
+          mass_lvj_jes_dn = getattr(treeIn,"mass_lvj_type0_met_jes_dn");
 
-           tmp_vbf_Mjj  = getattr(treeIn, "vbf_maxpt_jj_m");
+          #jet mass jer
+          tmp_jet_mass_jer = getattr(treeIn, "jet_mass_pr_jer");          
+          tmp_vbf_dEta_jer = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jer")-getattr(treeIn,"vbf_maxpt_j2_eta_jer"));
+          jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jer"),getattr(treeIn,"vbf_maxpt_j1_eta_jer"),getattr(treeIn,"vbf_maxpt_j1_phi_jer"),getattr(treeIn,"vbf_maxpt_j1_m_jer"));
+          jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jer"),getattr(treeIn,"vbf_maxpt_j2_eta_jer"),getattr(treeIn,"vbf_maxpt_j2_phi_jer"),getattr(treeIn,"vbf_maxpt_j2_m_jer"));
+          tmp_vbf_Mjj_jer = (jet_1+jet_2).M();           
+          ungroomed_jet_pt_jer = getattr(treeIn,"ungroomed_jet_pt_jer");
+          njet_jer = 0 ;
+          if(getattr(treeIn,"vbf_maxpt_j1_pt_jer") > 30.):
+               njet_jer = njet_jer +1 ;
+          if(getattr(treeIn,"vbf_maxpt_j2_pt_jer") > 30.):
+               njet_jer = njet_jer +1 ;
+          pfMET_jer = getattr(treeIn,"pfMET_jer");
+          mass_lvj_jer = getattr(treeIn,"mass_lvj_type0_met_jer");
 
-           njet = getattr(treeIn,"numberJetBin");
+          #jet mass jer up
+          tmp_jet_mass_jer_up = getattr(treeIn, "jet_mass_pr_jer_up");          
+          tmp_vbf_dEta_jer_up = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jer_up")-getattr(treeIn,"vbf_maxpt_j2_eta_jer_up"));
+          jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jer_up"),getattr(treeIn,"vbf_maxpt_j1_eta_jer_up"),getattr(treeIn,"vbf_maxpt_j1_phi_jer_up"),getattr(treeIn,"vbf_maxpt_j1_m_jer_up"));
+          jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jer_up"),getattr(treeIn,"vbf_maxpt_j2_eta_jer_up"),getattr(treeIn,"vbf_maxpt_j2_phi_jer_up"),getattr(treeIn,"vbf_maxpt_j2_m_jer_up"));
+          tmp_vbf_Mjj_jer_up = (jet_1+jet_2).M();           
+          ungroomed_jet_pt_jer_up = getattr(treeIn,"ungroomed_jet_pt_jer_up");
+          njet_jer_up = 0;
+          if(getattr(treeIn,"vbf_maxpt_j1_pt_jer_up") > 30.):
+               njet_jer_up = njet_jer_up +1 ;
+          if(getattr(treeIn,"vbf_maxpt_j2_pt_jer_up") > 30.):
+               njet_jer_up = njet_jer_up +1 ;
+          pfMET_jer_up = getattr(treeIn,"pfMET_jer_up");
+          mass_lvj_jer_up = getattr(treeIn,"mass_lvj_type0_met_jer_up");
 
-           ungroomed_jet_pt = getattr(treeIn,"ungroomed_jet_pt");
-
-           pfMET = getattr(treeIn,"pfMET");
-
-           mass_lvj = getattr(treeIn,"mass_lvj_type0_met");
-
-          elif(vbf_mass == "vbf_up" and is_scaled_mass == 1):
-
-           tmp_vbf_dEta = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_up")-getattr(treeIn,"vbf_maxpt_j2_eta_up"));
-
-           jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_up"),getattr(treeIn,"vbf_maxpt_j1_eta_up"),getattr(treeIn,"vbf_maxpt_j1_phi_up"),getattr(treeIn,"vbf_maxpt_j1_m_up"));
-           jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_up"),getattr(treeIn,"vbf_maxpt_j2_eta_up"),getattr(treeIn,"vbf_maxpt_j2_phi_up"),getattr(treeIn,"vbf_maxpt_j2_m_up"));
-
-           tmp_vbf_Mjj = (jet_1+jet_2).M();           
-
-           ungroomed_jet_pt = getattr(treeIn,"jet_ungroomed_jet_pt_up");
-           
-           if(getattr(treeIn,"vbf_maxpt_j1_pt_up") > 30.):
-               njet = njet +1 ;
-           if(getattr(treeIn,"vbf_maxpt_j2_pt_up") > 30.):
-               njet = njet +1 ;
-
-           pfMET = getattr(treeIn,"pfMET_up");
-
-           mass_lvj = getattr(treeIn,"mass_lvj_type0_met_up");
-
-          elif(vbf_mass == "vbf_dn" and is_scaled_mass == 1):
-
-           tmp_vbf_dEta = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_dn")-getattr(treeIn,"vbf_maxpt_j2_eta_dn"));
-
-           jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_dn"),getattr(treeIn,"vbf_maxpt_j1_eta_dn"),getattr(treeIn,"vbf_maxpt_j1_phi_dn"),getattr(treeIn,"vbf_maxpt_j1_m_dn"));
-           jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_dn"),getattr(treeIn,"vbf_maxpt_j2_eta_dn"),getattr(treeIn,"vbf_maxpt_j2_phi_dn"),getattr(treeIn,"vbf_maxpt_j2_m_dn"));
-
-           tmp_vbf_Mjj = (jet_1 + jet_2).M();
-
-           ungroomed_jet_pt = getattr(treeIn,"jet_ungroomed_jet_pt_dn");
-
-           if(getattr(treeIn,"vbf_maxpt_j1_pt_dn") > 30.):
-               njet = njet +1 ;
-           if(getattr(treeIn,"vbf_maxpt_j2_pt_dn") > 30.):
-               njet = njet +1 ;
-
-           pfMET = getattr(treeIn,"pfMET_dn");
-
-           mass_lvj = getattr(treeIn,"mass_lvj_type0_met_dn");
+          #jet mass jer dn
+          tmp_jet_mass_jer_dn = getattr(treeIn, "jet_mass_pr_jer_dn");                     
+          tmp_vbf_dEta_jer_dn = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jer_dn")-getattr(treeIn,"vbf_maxpt_j2_eta_jer_dn"));
+          jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jer_dn"),getattr(treeIn,"vbf_maxpt_j1_eta_jer_dn"),getattr(treeIn,"vbf_maxpt_j1_phi_jer_dn"),getattr(treeIn,"vbf_maxpt_j1_m_jer_dn"));
+          jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jer_dn"),getattr(treeIn,"vbf_maxpt_j2_eta_jer_dn"),getattr(treeIn,"vbf_maxpt_j2_phi_jer_dn"),getattr(treeIn,"vbf_maxpt_j2_m_jer_dn"));
+          tmp_vbf_Mjj_jer_dn = (jet_1 + jet_2).M();
+          ungroomed_jet_pt_jer_dn = getattr(treeIn,"ungroomed_jet_pt_jer_dn");
+          njet_jer_dn = 0 ;
+          if(getattr(treeIn,"vbf_maxpt_j1_pt_jer_dn") > 30.):
+               njet_jer_dn = njet_jer_dn +1 ;
+          if(getattr(treeIn,"vbf_maxpt_j2_pt_jer_dn") > 30.):
+               njet_jer_dn = njet_jer_dn +1 ;
+          pfMET_jer_dn = getattr(treeIn,"pfMET_jer_dn");
+          mass_lvj_jer_dn = getattr(treeIn,"mass_lvj_type0_met_jer_dn");
+          
 
           isFullVBF = 0 ;
+          isFullVBF_jes_up = 0;
+          isFullVBF_jes_dn = 0;
+          isFullVBF_jer = 0;
+          isFullVBF_jer_up = 0;
+          isFullVBF_jer_dn = 0;
 
           if ungroomed_jet_pt > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj >= rrv_mass_lvj.getMin() and mass_lvj <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet >=2:
-              isFullVBF = 1 ;
+            isFullVBF = 1 ;
           
           if ungroomed_jet_pt > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj >= rrv_mass_lvj.getMin() and mass_lvj <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet >=2 and tmp_vbf_dEta > self.dEta_cut and tmp_vbf_Mjj > self.Mjj_cut:
               isFullVBF = 2 ;
 
+
+          if ungroomed_jet_pt_jes_up > 200. and discriminantCut and tmp_jet_mass_jes_up >= rrv_mass_j.getMin() and tmp_jet_mass_jes_up<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jes_up >= rrv_mass_lvj.getMin() and mass_lvj_jes_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jes_up >=2:
+              isFullVBF_jes_up = 1 ;
+
+          if ungroomed_jet_pt_jes_up > 200. and discriminantCut and tmp_jet_mass_jes_up >= rrv_mass_j.getMin() and tmp_jet_mass_jes_up<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jes_up >= rrv_mass_lvj.getMin() and mass_lvj_jes_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jes_up >=2 and tmp_vbf_dEta_jes_up > self.dEta_cut and tmp_vbf_Mjj_jes_up > self.Mjj_cut :
+           isFullVBF_jes_up = 2 ;
+
+
+          if ungroomed_jet_pt_jes_dn > 200. and discriminantCut and tmp_jet_mass_jes_dn >= rrv_mass_j.getMin() and tmp_jet_mass_jes_dn<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jes_dn >= rrv_mass_lvj.getMin() and mass_lvj_jes_dn <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_dn > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jes_dn >=2:
+            isFullVBF_jes_dn = 1 ;
+
+          if ungroomed_jet_pt_jes_dn > 200. and discriminantCut and tmp_jet_mass_jes_dn >= rrv_mass_j.getMin() and tmp_jet_mass_jes_dn<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jes_dn >= rrv_mass_lvj.getMin() and mass_lvj_jes_dn <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_dn > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jes_dn >=2 and tmp_vbf_dEta_jes_dn > self.dEta_cut and tmp_vbf_Mjj_jes_dn > self.Mjj_cut:
+           isFullVBF_jes_dn = 2 ;
+
+
+          if ungroomed_jet_pt_jer > 200. and discriminantCut and tmp_jet_mass_jer >= rrv_mass_j.getMin() and tmp_jet_mass_jer<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jer >= rrv_mass_lvj.getMin() and mass_lvj_jer <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jer >=2:
+              isFullVBF_jer = 1 ;
+
+          if ungroomed_jet_pt_jer > 200. and discriminantCut and tmp_jet_mass_jer >= rrv_mass_j.getMin() and tmp_jet_mass_jer<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jer >= rrv_mass_lvj.getMin() and mass_lvj_jer <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jer >=2 and tmp_vbf_dEta_jer > self.dEta_cut and tmp_vbf_Mjj_jer > self.Mjj_cut:
+          
+              isFullVBF_jer = 2 ;
+
+
+          if ungroomed_jet_pt_jer_up > 200. and discriminantCut and tmp_jet_mass_jer_up >= rrv_mass_j.getMin() and tmp_jet_mass_jer_up<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jer_up >= rrv_mass_lvj.getMin() and mass_lvj_jer_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jer_up >=2:
+              isFullVBF_jer_up = 1 ;
+
+          if ungroomed_jet_pt_jer_up > 200. and discriminantCut and tmp_jet_mass_jer_up >= rrv_mass_j.getMin() and tmp_jet_mass_jer_up<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jer_up >= rrv_mass_lvj.getMin() and mass_lvj_jer_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jer_up >=2 and tmp_vbf_dEta_jer_up > self.dEta_cut and tmp_vbf_Mjj_jer_up > self.Mjj_cut:
+          
+              isFullVBF_jer_up = 2 ;
+
+
+          if ungroomed_jet_pt_jer_dn > 200. and discriminantCut and tmp_jet_mass_jer_dn >= rrv_mass_j.getMin() and tmp_jet_mass_jer_dn<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jer_dn >= rrv_mass_lvj.getMin() and mass_lvj_jer_dn <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer_dn > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jer_dn >=2:
+              isFullVBF_jer_dn = 1 ;
+
+          if ungroomed_jet_pt_jer_dn > 200. and discriminantCut and tmp_jet_mass_jer_dn >= rrv_mass_j.getMin() and tmp_jet_mass_jer_dn<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jer_dn >= rrv_mass_lvj.getMin() and mass_lvj_jer_dn <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer_dn > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jer_dn >=2 and tmp_vbf_dEta_jer_dn > self.dEta_cut and tmp_vbf_Mjj_jer_dn > self.Mjj_cut:
+          
+              isFullVBF_jer_dn = 2 ;
+
+
               
-          if isFullVBF == 1 or isFullVBF == 2 :
+          if isFullVBF !=0 or isFullVBF_jes_up!=0 or isFullVBF_jes_dn!=0 or isFullVBF_jer!=0 or isFullVBF_jer_up!=0 or isFullVBF_jer_dn!=0 :
+              
              tmp_event_weight = getattr(treeIn,"totalEventWeight");
              tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight");
              tmp_interference_weight_H600 = getattr(treeIn,"interference_Weight_H600");
@@ -3105,7 +3573,7 @@ class doFit_wj_and_wlvj:
              bsmWeightName = "bsmReweight_cPrime%02d_brNew%02d"%(options.cprime,options.BRnew);
              tmp_bsmWeight = getattr(treeIn, bsmWeightName);
              if tmp_bsmWeight < 0: tmp_bsmWeight = 1;
-
+             
              if TString(label).Contains("ggH600"):
                 tmp_event_weight = tmp_event_weight*tmp_interference_weight_H600
                 tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H600
@@ -3148,14 +3616,16 @@ class doFit_wj_and_wlvj:
                  tmp_event_weight = tmp_event_weight*tmp_bsmWeight;
                  tmp_event_weight4fit=tmp_event_weight4fit*tmp_bsmWeight;
 
+        
              if not label=="_data":
                      if TString(label).Contains("_TTbar") or TString(label).Contains("_STop") :
                          tmp_event_weight = tmp_event_weight*self.rrv_wtagger_eff_reweight_forT.getVal();
-                     else:
+                     elif TString(label).Contains("_ggH") or TString(label).Contains("_vbfH") or TString(label).Contains("_VV") or TString(label).Contains("_WW_EWK") :
                          tmp_event_weight = tmp_event_weight*self.rrv_wtagger_eff_reweight_forV.getVal();
-                     tmp_event_weight = tmp_event_weight*self.btag_scale;
-      
+                     tmp_event_weight    = tmp_event_weight* getattr(treeIn,"btag_weight"); ## add the btag weight 
+                     tmp_event_weight4fit    = tmp_event_weight4fit* getattr(treeIn,"btag_weight"); ## add the btag weight 
 
+             ## central values
              rrv_mass_lvj.setVal(mass_lvj);
              rrv_mass_j.setVal(tmp_jet_mass);
 
@@ -3182,7 +3652,7 @@ class doFit_wj_and_wlvj:
                  hnum_2region.Fill(1,tmp_event_weight);
                  if mass_lvj >=self.mlvj_signal_min and mass_lvj <self.mlvj_signal_max: 
                    hnum_2region.Fill(0,tmp_event_weight);
-
+                   
              if tmp_jet_mass >= self.mj_signal_min and tmp_jet_mass < self.mj_signal_max and isFullVBF == 1:
                  rdataset_signal_region_mlvj_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_signal_region_mlvj_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
@@ -3223,18 +3693,366 @@ class doFit_wj_and_wlvj:
                  hnum_4region_relaxed.Fill(1,tmp_event_weight);
               hnum_4region_relaxed.Fill(2,tmp_event_weight);
  
+             ## JES UP
+
+             rrv_mass_lvj.setVal(mass_lvj_jes_up);
+             rrv_mass_j.setVal(tmp_jet_mass_jes_up);
+
+             if tmp_jet_mass_jes_up >= self.mj_sideband_lo_min and tmp_jet_mass_jes_up < self.mj_sideband_lo_max and isFullVBF_jes_up == 2:
+                 rdataset_sb_lo_mlvj_jes_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_lo_mlvj_jes_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("sideband");
+                 combData_jes_up.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jes_up.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+
+             if tmp_jet_mass_jes_up >= self.mj_sideband_lo_min and tmp_jet_mass_jes_up < self.mj_sideband_lo_max and isFullVBF_jes_up == 1:
+                 rdataset_sb_lo_mlvj_jes_up_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_lo_mlvj_jes_up_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("sideband");
+                 combData_jes_up_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jes_up_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+
+             if tmp_jet_mass_jes_up >= self.mj_signal_min and tmp_jet_mass_jes_up < self.mj_signal_max and isFullVBF_jes_up == 2:
+                 rdataset_signal_region_mlvj_jes_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_signal_region_mlvj_jes_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("signal_region");
+                 combData_jes_up.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jes_up.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+                 hnum_2region_jes_up.Fill(1,tmp_event_weight);
+                 if mass_lvj_jes_up >=self.mlvj_signal_min and mass_lvj_jes_up <self.mlvj_signal_max: 
+                   hnum_2region_jes_up.Fill(0,tmp_event_weight);
+                   
+             if tmp_jet_mass_jes_up >= self.mj_signal_min and tmp_jet_mass_jes_up < self.mj_signal_max and isFullVBF_jes_up == 1:
+                 rdataset_signal_region_mlvj_jes_up_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_signal_region_mlvj_jes_up_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("signal_region");
+                 combData_jes_up_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jes_up_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+                 hnum_2region_jes_up_relaxed.Fill(1,tmp_event_weight);
+                 if mass_lvj_jes_up >=self.mlvj_signal_min and mass_lvj_jes_up <self.mlvj_signal_max: 
+                   hnum_2region_jes_up_relaxed.Fill(0,tmp_event_weight);
+
+             if tmp_jet_mass_jes_up >= self.mj_sideband_hi_min and tmp_jet_mass_jes_up < self.mj_sideband_hi_max and isFullVBF_jes_up == 2:
+                 rdataset_sb_hi_mlvj_jes_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_hi_mlvj_jes_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+
+             if tmp_jet_mass_jes_up >= self.mj_sideband_hi_min and tmp_jet_mass_jes_up < self.mj_sideband_hi_max and isFullVBF_jes_up == 1:
+                 rdataset_sb_hi_mlvj_jes_up_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_hi_mlvj_jes_up_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+
+             if isFullVBF_jes_up == 2: 
+              rdataset_mj_jes_up.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+              rdataset4fit_mj_jes_up.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+              if tmp_jet_mass_jes_up >=self.mj_sideband_lo_min and tmp_jet_mass_jes_up <self.mj_sideband_lo_max: 
+                 hnum_4region_jes_up.Fill(-1,tmp_event_weight );
+              if tmp_jet_mass_jes_up >=self.mj_signal_min and tmp_jet_mass_jes_up <self.mj_signal_max : 
+                 hnum_4region_jes_up.Fill(0,tmp_event_weight);
+              if tmp_jet_mass_jes_up >=self.mj_sideband_hi_min and tmp_jet_mass_jes_up <self.mj_sideband_hi_max: 
+                 hnum_4region_jes_up.Fill(1,tmp_event_weight);
+              hnum_4region_jes_up.Fill(2,tmp_event_weight);
+
+             if isFullVBF_jes_up == 1: 
+              rdataset_mj_jes_up_relaxed.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+              rdataset4fit_mj_jes_up_relaxed.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+              if tmp_jet_mass_jes_up >=self.mj_sideband_lo_min and tmp_jet_mass_jes_up <self.mj_sideband_lo_max: 
+                 hnum_4region_jes_up_relaxed.Fill(-1,tmp_event_weight );
+              if tmp_jet_mass_jes_up >=self.mj_signal_min and tmp_jet_mass_jes_up <self.mj_signal_max : 
+                 hnum_4region_jes_up_relaxed.Fill(0,tmp_event_weight);
+              if tmp_jet_mass_jes_up >=self.mj_sideband_hi_min and tmp_jet_mass_jes_up <self.mj_sideband_hi_max: 
+                 hnum_4region_jes_up_relaxed.Fill(1,tmp_event_weight);
+              hnum_4region_jes_up_relaxed.Fill(2,tmp_event_weight);
+
+
+             ### jes dn
+             rrv_mass_lvj.setVal(mass_lvj_jes_dn);
+             rrv_mass_j.setVal(tmp_jet_mass_jes_dn);
+
+             if tmp_jet_mass_jes_dn >= self.mj_sideband_lo_min and tmp_jet_mass_jes_dn < self.mj_sideband_lo_max and isFullVBF_jes_dn == 2:
+                 rdataset_sb_lo_mlvj_jes_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_lo_mlvj_jes_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("sideband");
+                 combData_jes_dn.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jes_dn.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+
+             if tmp_jet_mass_jes_dn >= self.mj_sideband_lo_min and tmp_jet_mass_jes_dn < self.mj_sideband_lo_max and isFullVBF_jes_dn == 1:
+                 rdataset_sb_lo_mlvj_jes_dn_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_lo_mlvj_jes_dn_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("sideband");
+                 combData_jes_dn_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jes_dn_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+
+             if tmp_jet_mass_jes_dn >= self.mj_signal_min and tmp_jet_mass_jes_dn < self.mj_signal_max and isFullVBF_jes_dn == 2:
+                 rdataset_signal_region_mlvj_jes_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_signal_region_mlvj_jes_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("signal_region");
+                 combData_jes_dn.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jes_dn.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+                 hnum_2region_jes_dn.Fill(1,tmp_event_weight);
+                 if mass_lvj_jes_dn >=self.mlvj_signal_min and mass_lvj_jes_dn <self.mlvj_signal_max: 
+                   hnum_2region_jes_dn.Fill(0,tmp_event_weight);
+                   
+             if tmp_jet_mass_jes_dn >= self.mj_signal_min and tmp_jet_mass_jes_dn < self.mj_signal_max and isFullVBF_jes_dn == 1:
+                 rdataset_signal_region_mlvj_jes_dn_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_signal_region_mlvj_jes_dn_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("signal_region");
+                 combData_jes_dn_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jes_dn_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+                 hnum_2region_jes_dn_relaxed.Fill(1,tmp_event_weight);
+                 if mass_lvj_jes_dn >=self.mlvj_signal_min and mass_lvj_jes_dn <self.mlvj_signal_max: 
+                   hnum_2region_jes_dn_relaxed.Fill(0,tmp_event_weight);
+
+             if tmp_jet_mass_jes_dn >= self.mj_sideband_hi_min and tmp_jet_mass_jes_dn < self.mj_sideband_hi_max and isFullVBF_jes_dn == 2:
+                 rdataset_sb_hi_mlvj_jes_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_hi_mlvj_jes_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+
+             if tmp_jet_mass_jes_dn >= self.mj_sideband_hi_min and tmp_jet_mass_jes_dn < self.mj_sideband_hi_max and isFullVBF_jes_dn == 1:
+                 rdataset_sb_hi_mlvj_jes_dn_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_hi_mlvj_jes_dn_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+
+             if isFullVBF_jes_dn == 2: 
+              rdataset_mj_jes_dn.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+              rdataset4fit_mj_jes_dn.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+              if tmp_jet_mass_jes_dn >=self.mj_sideband_lo_min and tmp_jet_mass_jes_dn <self.mj_sideband_lo_max: 
+                 hnum_4region_jes_dn.Fill(-1,tmp_event_weight );
+              if tmp_jet_mass_jes_dn >=self.mj_signal_min and tmp_jet_mass_jes_dn <self.mj_signal_max : 
+                 hnum_4region_jes_dn.Fill(0,tmp_event_weight);
+              if tmp_jet_mass_jes_dn >=self.mj_sideband_hi_min and tmp_jet_mass_jes_dn <self.mj_sideband_hi_max: 
+                 hnum_4region_jes_dn.Fill(1,tmp_event_weight);
+              hnum_4region_jes_dn.Fill(2,tmp_event_weight);
+
+             if isFullVBF_jes_dn == 1: 
+              rdataset_mj_jes_dn_relaxed.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+              rdataset4fit_mj_jes_dn_relaxed.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+              if tmp_jet_mass_jes_dn >=self.mj_sideband_lo_min and tmp_jet_mass_jes_dn <self.mj_sideband_lo_max: 
+                 hnum_4region_jes_dn_relaxed.Fill(-1,tmp_event_weight );
+              if tmp_jet_mass_jes_dn >=self.mj_signal_min and tmp_jet_mass_jes_dn <self.mj_signal_max : 
+                 hnum_4region_jes_dn_relaxed.Fill(0,tmp_event_weight);
+              if tmp_jet_mass_jes_dn >=self.mj_sideband_hi_min and tmp_jet_mass_jes_dn <self.mj_sideband_hi_max: 
+                 hnum_4region_jes_dn_relaxed.Fill(1,tmp_event_weight);
+              hnum_4region_jes_dn_relaxed.Fill(2,tmp_event_weight);
+
+             ########################JER
+
+             rrv_mass_lvj.setVal(mass_lvj_jer);
+             rrv_mass_j.setVal(tmp_jet_mass_jer);
+
+             if tmp_jet_mass_jer >= self.mj_sideband_lo_min and tmp_jet_mass_jer < self.mj_sideband_lo_max and isFullVBF_jer == 2:
+                 rdataset_sb_lo_mlvj_jer.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_lo_mlvj_jer.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("sideband");
+                 combData_jer.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jer.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+
+             if tmp_jet_mass_jer >= self.mj_sideband_lo_min and tmp_jet_mass_jer < self.mj_sideband_lo_max and isFullVBF_jer == 1:
+                 rdataset_sb_lo_mlvj_jer_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_lo_mlvj_jer_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("sideband");
+                 combData_jer_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jer_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+
+             if tmp_jet_mass_jer >= self.mj_signal_min and tmp_jet_mass_jer < self.mj_signal_max and isFullVBF_jer == 2:
+                 rdataset_signal_region_mlvj_jer.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_signal_region_mlvj_jer.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("signal_region");
+                 combData_jer.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jer.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+                 hnum_2region_jer.Fill(1,tmp_event_weight);
+                 if mass_lvj_jer >=self.mlvj_signal_min and mass_lvj_jer <self.mlvj_signal_max: 
+                   hnum_2region_jer.Fill(0,tmp_event_weight);
+                   
+             if tmp_jet_mass_jer >= self.mj_signal_min and tmp_jet_mass_jer < self.mj_signal_max and isFullVBF_jer == 1:
+                 rdataset_signal_region_mlvj_jer_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_signal_region_mlvj_jer_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("signal_region");
+                 combData_jer_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jer_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+                 hnum_2region_jer_relaxed.Fill(1,tmp_event_weight);
+                 if mass_lvj_jer >=self.mlvj_signal_min and mass_lvj_jer <self.mlvj_signal_max: 
+                   hnum_2region_jer_relaxed.Fill(0,tmp_event_weight);
+
+             if tmp_jet_mass_jer >= self.mj_sideband_hi_min and tmp_jet_mass_jer < self.mj_sideband_hi_max and isFullVBF_jer == 2:
+                 rdataset_sb_hi_mlvj_jer.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_hi_mlvj_jer.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+
+             if tmp_jet_mass_jer >= self.mj_sideband_hi_min and tmp_jet_mass_jer < self.mj_sideband_hi_max and isFullVBF_jer == 1:
+                 rdataset_sb_hi_mlvj_jer_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_hi_mlvj_jer_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+
+             if isFullVBF_jer == 2: 
+              rdataset_mj_jer.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+              rdataset4fit_mj_jer.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+              if tmp_jet_mass_jer >=self.mj_sideband_lo_min and tmp_jet_mass_jer <self.mj_sideband_lo_max: 
+                 hnum_4region_jer.Fill(-1,tmp_event_weight );
+              if tmp_jet_mass_jer >=self.mj_signal_min and tmp_jet_mass_jer <self.mj_signal_max : 
+                 hnum_4region_jer.Fill(0,tmp_event_weight);
+              if tmp_jet_mass_jer >=self.mj_sideband_hi_min and tmp_jet_mass_jer <self.mj_sideband_hi_max: 
+                 hnum_4region_jer.Fill(1,tmp_event_weight);
+              hnum_4region_jer.Fill(2,tmp_event_weight);
+
+             if isFullVBF_jer == 1: 
+              rdataset_mj_jer_relaxed.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+              rdataset4fit_mj_jer_relaxed.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+              if tmp_jet_mass_jer >=self.mj_sideband_lo_min and tmp_jet_mass_jer <self.mj_sideband_lo_max: 
+                 hnum_4region_jer_relaxed.Fill(-1,tmp_event_weight );
+              if tmp_jet_mass_jer >=self.mj_signal_min and tmp_jet_mass_jer <self.mj_signal_max : 
+                 hnum_4region_jer_relaxed.Fill(0,tmp_event_weight);
+              if tmp_jet_mass_jer >=self.mj_sideband_hi_min and tmp_jet_mass_jer <self.mj_sideband_hi_max: 
+                 hnum_4region_jer_relaxed.Fill(1,tmp_event_weight);
+              hnum_4region_jer_relaxed.Fill(2,tmp_event_weight);
+
+
+             ########################JER_UP
+
+             rrv_mass_lvj.setVal(mass_lvj_jer_up);
+             rrv_mass_j.setVal(tmp_jet_mass_jer_up);
+
+             if tmp_jet_mass_jer_up >= self.mj_sideband_lo_min and tmp_jet_mass_jer_up < self.mj_sideband_lo_max and isFullVBF_jer_up == 2:
+                 rdataset_sb_lo_mlvj_jer_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_lo_mlvj_jer_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("sideband");
+                 combData_jer_up.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jer_up.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+
+             if tmp_jet_mass_jer_up >= self.mj_sideband_lo_min and tmp_jet_mass_jer_up < self.mj_sideband_lo_max and isFullVBF_jer_up == 1:
+                 rdataset_sb_lo_mlvj_jer_up_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_lo_mlvj_jer_up_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("sideband");
+                 combData_jer_up_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jer_up_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+
+             if tmp_jet_mass_jer_up >= self.mj_signal_min and tmp_jet_mass_jer_up < self.mj_signal_max and isFullVBF_jer_up == 2:
+                 rdataset_signal_region_mlvj_jer_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_signal_region_mlvj_jer_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("signal_region");
+                 combData_jer_up.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jer_up.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+                 hnum_2region_jer_up.Fill(1,tmp_event_weight);
+                 if mass_lvj_jer_up >=self.mlvj_signal_min and mass_lvj_jer_up <self.mlvj_signal_max: 
+                   hnum_2region_jer_up.Fill(0,tmp_event_weight);
+                   
+             if tmp_jet_mass_jer_up >= self.mj_signal_min and tmp_jet_mass_jer_up < self.mj_signal_max and isFullVBF_jer_up == 1:
+                 rdataset_signal_region_mlvj_jer_up_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_signal_region_mlvj_jer_up_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("signal_region");
+                 combData_jer_up_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jer_up_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+                 hnum_2region_jer_up_relaxed.Fill(1,tmp_event_weight);
+                 if mass_lvj_jer_up >=self.mlvj_signal_min and mass_lvj_jer_up <self.mlvj_signal_max: 
+                   hnum_2region_jer_up_relaxed.Fill(0,tmp_event_weight);
+
+             if tmp_jet_mass_jer_up >= self.mj_sideband_hi_min and tmp_jet_mass_jer_up < self.mj_sideband_hi_max and isFullVBF_jer_up == 2:
+                 rdataset_sb_hi_mlvj_jer_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_hi_mlvj_jer_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+
+             if tmp_jet_mass_jer_up >= self.mj_sideband_hi_min and tmp_jet_mass_jer_up < self.mj_sideband_hi_max and isFullVBF_jer_up == 1:
+                 rdataset_sb_hi_mlvj_jer_up_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_hi_mlvj_jer_up_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+
+             if isFullVBF_jer_up == 2: 
+              rdataset_mj_jer_up.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+              rdataset4fit_mj_jer_up.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+              if tmp_jet_mass_jer_up >=self.mj_sideband_lo_min and tmp_jet_mass_jer_up <self.mj_sideband_lo_max: 
+                 hnum_4region_jer_up.Fill(-1,tmp_event_weight );
+              if tmp_jet_mass_jer_up >=self.mj_signal_min and tmp_jet_mass_jer_up <self.mj_signal_max : 
+                 hnum_4region_jer_up.Fill(0,tmp_event_weight);
+              if tmp_jet_mass_jer_up >=self.mj_sideband_hi_min and tmp_jet_mass_jer_up <self.mj_sideband_hi_max: 
+                 hnum_4region_jer_up.Fill(1,tmp_event_weight);
+              hnum_4region_jer_up.Fill(2,tmp_event_weight);
+
+             if isFullVBF_jer_up == 1: 
+              rdataset_mj_jer_up_relaxed.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+              rdataset4fit_mj_jer_up_relaxed.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+              if tmp_jet_mass_jer_up >=self.mj_sideband_lo_min and tmp_jet_mass_jer_up <self.mj_sideband_lo_max: 
+                 hnum_4region_jer_up_relaxed.Fill(-1,tmp_event_weight );
+              if tmp_jet_mass_jer_up >=self.mj_signal_min and tmp_jet_mass_jer_up <self.mj_signal_max : 
+                 hnum_4region_jer_up_relaxed.Fill(0,tmp_event_weight);
+              if tmp_jet_mass_jer_up >=self.mj_sideband_hi_min and tmp_jet_mass_jer_up <self.mj_sideband_hi_max: 
+                 hnum_4region_jer_up_relaxed.Fill(1,tmp_event_weight);
+              hnum_4region_jer_up_relaxed.Fill(2,tmp_event_weight);
+
+
+             ########################JER_DN
+
+             rrv_mass_lvj.setVal(mass_lvj_jer_dn);
+             rrv_mass_j.setVal(tmp_jet_mass_jer_dn);
+
+             if tmp_jet_mass_jer_dn >= self.mj_sideband_lo_min and tmp_jet_mass_jer_dn < self.mj_sideband_lo_max and isFullVBF_jer_dn == 2:
+                 rdataset_sb_lo_mlvj_jer_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_lo_mlvj_jer_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("sideband");
+                 combData_jer_dn.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jer_dn.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+
+             if tmp_jet_mass_jer_dn >= self.mj_sideband_lo_min and tmp_jet_mass_jer_dn < self.mj_sideband_lo_max and isFullVBF_jer_dn == 1:
+                 rdataset_sb_lo_mlvj_jer_dn_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_lo_mlvj_jer_dn_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("sideband");
+                 combData_jer_dn_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jer_dn_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+
+             if tmp_jet_mass_jer_dn >= self.mj_signal_min and tmp_jet_mass_jer_dn < self.mj_signal_max and isFullVBF_jer_dn == 2:
+                 rdataset_signal_region_mlvj_jer_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_signal_region_mlvj_jer_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("signal_region");
+                 combData_jer_dn.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jer_dn.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+                 hnum_2region_jer_dn.Fill(1,tmp_event_weight);
+                 if mass_lvj_jer_dn >=self.mlvj_signal_min and mass_lvj_jer_dn <self.mlvj_signal_max: 
+                   hnum_2region_jer_dn.Fill(0,tmp_event_weight);
+                   
+             if tmp_jet_mass_jer_dn >= self.mj_signal_min and tmp_jet_mass_jer_dn < self.mj_signal_max and isFullVBF_jer_dn == 1:
+                 rdataset_signal_region_mlvj_jer_dn_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_signal_region_mlvj_jer_dn_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+                 data_category.setLabel("signal_region");
+                 combData_jer_dn_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
+                 combData4fit_jer_dn_relaxed.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
+                 hnum_2region_jer_dn_relaxed.Fill(1,tmp_event_weight);
+                 if mass_lvj_jer_dn >=self.mlvj_signal_min and mass_lvj_jer_dn <self.mlvj_signal_max: 
+                   hnum_2region_jer_dn_relaxed.Fill(0,tmp_event_weight);
+
+             if tmp_jet_mass_jer_dn >= self.mj_sideband_hi_min and tmp_jet_mass_jer_dn < self.mj_sideband_hi_max and isFullVBF_jer_dn == 2:
+                 rdataset_sb_hi_mlvj_jer_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_hi_mlvj_jer_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+
+             if tmp_jet_mass_jer_dn >= self.mj_sideband_hi_min and tmp_jet_mass_jer_dn < self.mj_sideband_hi_max and isFullVBF_jer_dn == 1:
+                 rdataset_sb_hi_mlvj_jer_dn_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
+                 rdataset4fit_sb_hi_mlvj_jer_dn_relaxed.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
+
+             if isFullVBF_jer_dn == 2: 
+              rdataset_mj_jer_dn.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+              rdataset4fit_mj_jer_dn.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+              if tmp_jet_mass_jer_dn >=self.mj_sideband_lo_min and tmp_jet_mass_jer_dn <self.mj_sideband_lo_max: 
+                 hnum_4region_jer_dn.Fill(-1,tmp_event_weight );
+              if tmp_jet_mass_jer_dn >=self.mj_signal_min and tmp_jet_mass_jer_dn <self.mj_signal_max : 
+                 hnum_4region_jer_dn.Fill(0,tmp_event_weight);
+              if tmp_jet_mass_jer_dn >=self.mj_sideband_hi_min and tmp_jet_mass_jer_dn <self.mj_sideband_hi_max: 
+                 hnum_4region_jer_dn.Fill(1,tmp_event_weight);
+              hnum_4region_jer_dn.Fill(2,tmp_event_weight);
+
+             if isFullVBF_jer_dn == 1: 
+              rdataset_mj_jer_dn_relaxed.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+              rdataset4fit_mj_jer_dn_relaxed.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+              if tmp_jet_mass_jer_dn >=self.mj_sideband_lo_min and tmp_jet_mass_jer_dn <self.mj_sideband_lo_max: 
+                 hnum_4region_jer_dn_relaxed.Fill(-1,tmp_event_weight );
+              if tmp_jet_mass_jer_dn >=self.mj_signal_min and tmp_jet_mass_jer_dn <self.mj_signal_max : 
+                 hnum_4region_jer_dn_relaxed.Fill(0,tmp_event_weight);
+              if tmp_jet_mass_jer_dn >=self.mj_sideband_hi_min and tmp_jet_mass_jer_dn <self.mj_sideband_hi_max: 
+                 hnum_4region_jer_dn_relaxed.Fill(1,tmp_event_weight);
+              hnum_4region_jer_dn_relaxed.Fill(2,tmp_event_weight);
+
         if not label=="_data":
           if TString(label).Contains("_TTbar") or TString(label).Contains("_STop") :
-             tmp_scale_to_lumi = tmp_scale_to_lumi*self.rrv_wtagger_eff_reweight_forT.getVal();
-          else:
-             tmp_scale_to_lumi = tmp_scale_to_lumi*self.rrv_wtagger_eff_reweight_forV.getVal();
-          tmp_scale_to_lumi = tmp_scale_to_lumi*self.btag_scale;
+              tmp_scale_to_lumi = tmp_scale_to_lumi*self.rrv_wtagger_eff_reweight_forT.getVal();
+            else if TString(label).Contains("ggH") or TString(label).Contains("_vbfH") or TString(label).Contains("_VV") or TString(label).Contains("_WW_EWK"):
+              tmp_scale_to_lumi = tmp_scale_to_lumi*self.rrv_wtagger_eff_reweight_forV.getVal();
 
+                                                              
         ## scale 4fit dataset in order to have the right luminosity normalization
         rrv_scale_to_lumi = RooRealVar("rrv_scale_to_lumi"+label+"_"+self.channel,"rrv_scale_to_lumi"+label+"_"+self.channel,tmp_scale_to_lumi);
         rrv_scale_to_lumi.Print();
-        getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi);                 
+        getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi);
 
+        
         ## rescale factor for relaxed event in the sideband and signal region to match normalization after vbf cuts
         rrv_vbf_cut_sideband_lo = RooRealVar("rrv_vbf_cut_sb_lo"+label+"_"+self.channel,"rrv_vbf_cut_sb_lo"+label+"_"+self.channel,rdataset4fit_sb_lo_mlvj.sumEntries()/rdataset4fit_sb_lo_mlvj_relaxed.sumEntries());
         rrv_vbf_cut_sideband_hi = RooRealVar("rrv_vbf_cut_sb_hi"+label+"_"+self.channel,"rrv_vbf_cut_sb_hi"+label+"_"+self.channel,rdataset4fit_sb_hi_mlvj.sumEntries()/rdataset4fit_sb_hi_mlvj_relaxed.sumEntries());
@@ -3246,20 +4064,18 @@ class doFit_wj_and_wlvj:
         getattr(self.workspace4fit_,"import")(rrv_vbf_cut_signal_region)
         getattr(self.workspace4fit_,"import")(rrv_vbf_cut_total)
 
-        
         rrv_number_dataset_signal_region_mlvj = RooRealVar("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mlvj",hnum_2region.GetBinContent(1));       
         rrv_number_dataset_AllRange_mlvj = RooRealVar("rrv_number_dataset_AllRange"+label+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"_"+self.channel+"_mlvj",hnum_2region.GetBinContent(2));
                
         getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj)
         getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj)
-
+        
         rrv_number_dataset_signal_region_mlvj_relaxed = RooRealVar("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mlvj_relaxed","rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mlvj_relaxed",hnum_2region_relaxed.GetBinContent(1));       
         rrv_number_dataset_AllRange_mlvj_relaxed = RooRealVar("rrv_number_dataset_AllRange"+label+"_"+self.channel+"_mlvj_relaxed","rrv_number_dataset_AllRange"+label+"_"+self.channel+"_mlvj_relaxed",hnum_2region_relaxed.GetBinContent(2));
                
         getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_relaxed)
         getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_relaxed)
 
-               
         getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj);
         getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj);
         getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj);
@@ -3277,14 +4093,177 @@ class doFit_wj_and_wlvj:
         getattr(self.workspace4fit_,"import")(combData_relaxed);
         getattr(self.workspace4fit_,"import")(combData4fit_relaxed);
 
+
+        ###################jes_up
+        rrv_number_dataset_signal_region_mlvj_jes_up = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbfup"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"massvbfup"+"_"+self.channel+"_mlvj",hnum_2region_jes_up.GetBinContent(1));       
+        rrv_number_dataset_AllRange_mlvj_jes_up = RooRealVar("rrv_number_dataset_AllRange"+label+"massvbfup"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"massvbfup"+"_"+self.channel+"_mlvj",hnum_2region_jes_up.GetBinContent(2));
+               
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jes_up)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jes_up)
+        
+        rrv_number_dataset_signal_region_mlvj_jes_up_relaxed = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbfup"+"_"+self.channel+"_mlvj_relaxed","rrv_number_dataset_signal_region"+label+"massvbfup"+"_"+self.channel+"_mlvj_relaxed",hnum_2region_jes_up_relaxed.GetBinContent(1));       
+        rrv_number_dataset_AllRange_mlvj_jes_up_relaxed = RooRealVar("rrv_number_dataset_AllRange"+label+"massvbfup"+"_"+self.channel+"_mlvj_relaxed","rrv_number_dataset_AllRange"+label+"massvbfup"+"_"+self.channel+"_mlvj_relaxed",hnum_2region_jes_up_relaxed.GetBinContent(2));
+               
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jes_up_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jes_up_relaxed)
+               
+        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jes_up);
+        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jes_up);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jes_up);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jes_up);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jes_up);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jes_up);
+        getattr(self.workspace4fit_,"import")(combData_jes_up);
+        getattr(self.workspace4fit_,"import")(combData4fit_jes_up);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jes_up_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jes_up_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jes_up_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jes_up_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jes_up_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jes_up_relaxed);
+        getattr(self.workspace4fit_,"import")(combData_jes_up_relaxed);
+        getattr(self.workspace4fit_,"import")(combData4fit_jes_up_relaxed);
+
+
+        ####################jes_dn
+        rrv_number_dataset_signal_region_mlvj_jes_dn = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbfdn"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"massvbfdn"+"_"+self.channel+"_mlvj",hnum_2region_jes_dn.GetBinContent(1));       
+        rrv_number_dataset_AllRange_mlvj_jes_dn = RooRealVar("rrv_number_dataset_AllRange"+label+"massvbfdn"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"massvbfdn"+"_"+self.channel+"_mlvj",hnum_2region_jes_dn.GetBinContent(2));
+               
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jes_dn)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jes_dn)
+        
+        rrv_number_dataset_signal_region_mlvj_jes_dn_relaxed = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbfdn"+"_"+self.channel+"_mlvj_relaxed","rrv_number_dataset_signal_region"+label+"massvbfdn"+"_"+self.channel+"_mlvj_relaxed",hnum_2region_jes_dn_relaxed.GetBinContent(1));       
+        rrv_number_dataset_AllRange_mlvj_jes_dn_relaxed = RooRealVar("rrv_number_dataset_AllRange"+label+"massvbfdn"+"_"+self.channel+"_mlvj_relaxed","rrv_number_dataset_AllRange"+label+"massvbfdn"+"_"+self.channel+"_mlvj_relaxed",hnum_2region_jes_dn_relaxed.GetBinContent(2));
+               
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jes_dn_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jes_dn_relaxed)
+               
+        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jes_dn);
+        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jes_dn);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jes_dn);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jes_dn);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jes_dn);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jes_dn);
+        getattr(self.workspace4fit_,"import")(combData_jes_dn);
+        getattr(self.workspace4fit_,"import")(combData4fit_jes_dn);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jes_dn_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jes_dn_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jes_dn_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jes_dn_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jes_dn_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jes_dn_relaxed);
+        getattr(self.workspace4fit_,"import")(combData_jes_dn_relaxed);
+        getattr(self.workspace4fit_,"import")(combData4fit_jes_dn_relaxed);
+
+
+        ####################jer
+        rrv_number_dataset_signal_region_mlvj_jer = RooRealVar("rrv_number_dataset_signal_region"+label+"jetres"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"jetres"+"_"+self.channel+"_mlvj",hnum_2region_jer.GetBinContent(1));       
+        rrv_number_dataset_AllRange_mlvj_jer = RooRealVar("rrv_number_dataset_AllRange"+label+"jetres"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"jetres"+"_"+self.channel+"_mlvj",hnum_2region_jer.GetBinContent(2));
+               
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jer)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jer)
+        
+        rrv_number_dataset_signal_region_mlvj_jer_relaxed = RooRealVar("rrv_number_dataset_signal_region"+label+"jetres"+"_"+self.channel+"_mlvj_relaxed","rrv_number_dataset_signal_region"+label+"jetres"+"_"+self.channel+"_mlvj_relaxed",hnum_2region_jer_relaxed.GetBinContent(1));       
+        rrv_number_dataset_AllRange_mlvj_jer_relaxed = RooRealVar("rrv_number_dataset_AllRange"+label+"jetres"+"_"+self.channel+"_mlvj_relaxed","rrv_number_dataset_AllRange"+label+"jetres"+"_"+self.channel+"_mlvj_relaxed",hnum_2region_jer_relaxed.GetBinContent(2));
+               
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jer_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jer_relaxed)
+               
+        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jer);
+        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jer);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jer);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jer);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jer);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jer);
+        getattr(self.workspace4fit_,"import")(combData_jer);
+        getattr(self.workspace4fit_,"import")(combData4fit_jer);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jer_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jer_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jer_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jer_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jer_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jer_relaxed);
+        getattr(self.workspace4fit_,"import")(combData_jer_relaxed);
+        getattr(self.workspace4fit_,"import")(combData4fit_jer_relaxed);
+
+
+        ####################jer_UP
+        rrv_number_dataset_signal_region_mlvj_jer_up = RooRealVar("rrv_number_dataset_signal_region"+label+"jetresup"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"jetresup"+"_"+self.channel+"_mlvj",hnum_2region_jer_up.GetBinContent(1));       
+        rrv_number_dataset_AllRange_mlvj_jer_up = RooRealVar("rrv_number_dataset_AllRange"+label+"jetresup"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"jetresup"+"_"+self.channel+"_mlvj",hnum_2region_jer_up.GetBinContent(2));
+               
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jer_up)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jer_up)
+        
+        rrv_number_dataset_signal_region_mlvj_jer_up_relaxed = RooRealVar("rrv_number_dataset_signal_region"+label+"jetresup"+"_"+self.channel+"_mlvj_relaxed","rrv_number_dataset_signal_region"+label+"jetresup"+"_"+self.channel+"_mlvj_relaxed",hnum_2region_jer_up_relaxed.GetBinContent(1));       
+        rrv_number_dataset_AllRange_mlvj_jer_up_relaxed = RooRealVar("rrv_number_dataset_AllRange"+label+"jetresup"+"_"+self.channel+"_mlvj_relaxed","rrv_number_dataset_AllRange"+label+"jetresup"+"_"+self.channel+"_mlvj_relaxed",hnum_2region_jer_up_relaxed.GetBinContent(2));
+               
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jer_up_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jer_up_relaxed)
+               
+        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jer_up);
+        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jer_up);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jer_up);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jer_up);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jer_up);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jer_up);
+        getattr(self.workspace4fit_,"import")(combData_jer_up);
+        getattr(self.workspace4fit_,"import")(combData4fit_jer_up);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jer_up_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jer_up_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jer_up_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jer_up_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jer_up_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jer_up_relaxed);
+        getattr(self.workspace4fit_,"import")(combData_jer_up_relaxed);
+        getattr(self.workspace4fit_,"import")(combData4fit_jer_up_relaxed);
+
+
+
+        ####################jer_dn
+        rrv_number_dataset_signal_region_mlvj_jer_dn = RooRealVar("rrv_number_dataset_signal_region"+label+"jetresdn"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"jetresdn"+"_"+self.channel+"_mlvj",hnum_2region_jer_dn.GetBinContent(1));       
+        rrv_number_dataset_AllRange_mlvj_jer_dn = RooRealVar("rrv_number_dataset_AllRange"+label+"jetresdn"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"jetresdn"+"_"+self.channel+"_mlvj",hnum_2region_jer_dn.GetBinContent(2));
+               
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jer_dn)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jer_dn)
+        
+        rrv_number_dataset_signal_region_mlvj_jer_dn_relaxed = RooRealVar("rrv_number_dataset_signal_region"+label+"jetresdn"+"_"+self.channel+"_mlvj_relaxed","rrv_number_dataset_signal_region"+label+"jetresdn"+"_"+self.channel+"_mlvj_relaxed",hnum_2region_jer_dn_relaxed.GetBinContent(1));       
+        rrv_number_dataset_AllRange_mlvj_jer_dn_relaxed = RooRealVar("rrv_number_dataset_AllRange"+label+"jetresdn"+"_"+self.channel+"_mlvj_relaxed","rrv_number_dataset_AllRange"+label+"jetresdn"+"_"+self.channel+"_mlvj_relaxed",hnum_2region_jer_dn_relaxed.GetBinContent(2));
+               
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jer_dn_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jer_dn_relaxed)
+               
+        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jer_dn);
+        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jer_dn);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jer_dn);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jer_dn);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jer_dn);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jer_dn);
+        getattr(self.workspace4fit_,"import")(combData_jer_dn);
+        getattr(self.workspace4fit_,"import")(combData4fit_jer_dn);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jer_dn_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jer_dn_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jer_dn_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jer_dn_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jer_dn_relaxed);
+        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jer_dn_relaxed);
+        getattr(self.workspace4fit_,"import")(combData_jer_dn_relaxed);
+        getattr(self.workspace4fit_,"import")(combData4fit_jer_dn_relaxed);
+
+
         self.file_out.write("\n%s events number in m_lvj from dataset: %s"%(label,rdataset_signal_region_mlvj.sumEntries()))
         self.file_out.write("\n%s events number in m_lvj from dataset relaxed: %s"%(label,rdataset_signal_region_mlvj_relaxed.sumEntries()))
+
 
         #prepare m_j dataset       
         rrv_number_dataset_sb_lo_mj = RooRealVar("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj",hnum_4region.GetBinContent(1));
         rrv_number_dataset_signal_region_mj = RooRealVar("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj",hnum_4region.GetBinContent(2));        
-        rrv_number_dataset_sb_hi_mj = RooRealVar("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj",hnum_4region.GetBinContent(3));
+        rrv_number_dataset_sb_hi_mj = RooRealVar("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj",hnum_4region.GetBinContent(3));        
 
+
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj)
+        
         rrv_number_dataset_sb_lo_mj_relaxed = RooRealVar("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj_relaxed",hnum_4region_relaxed.GetBinContent(1));
         rrv_number_dataset_signal_region_mj_relaxed = RooRealVar("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj_relaxed",hnum_4region_relaxed.GetBinContent(2));        
         rrv_number_dataset_sb_hi_mj_relaxed = RooRealVar("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj_relaxed",hnum_4region_relaxed.GetBinContent(3));
@@ -3293,11 +4272,145 @@ class doFit_wj_and_wlvj:
         getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_relaxed)
         getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_relaxed)
                 
-        print "N_rdataset_mj: "
+
         getattr(self.workspace4fit_,"import")(rdataset_mj)
         getattr(self.workspace4fit_,"import")(rdataset4fit_mj)
         getattr(self.workspace4fit_,"import")(rdataset_mj_relaxed)
         getattr(self.workspace4fit_,"import")(rdataset4fit_mj_relaxed)
+
+
+        #####jes_up
+
+        #prepare m_j dataset       
+        rrv_number_dataset_sb_lo_mj_jes_up = RooRealVar("rrv_number_dataset_sb_lo"+label+"massvbfup"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"massvbfup"+"_"+self.channel+"_mj",hnum_4region_jes_up.GetBinContent(1));
+        rrv_number_dataset_signal_region_mj_jes_up = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbfup"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"massvbfup"+"_"+self.channel+"_mj",hnum_4region_jes_up.GetBinContent(2));        
+        rrv_number_dataset_sb_hi_mj_jes_up = RooRealVar("rrv_number_dataset_sb_hi"+label+"massvbfup"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"massvbfup"+"_"+self.channel+"_mj",hnum_4region_jes_up.GetBinContent(3));        
+
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jes_up)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jes_up)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jes_up)
+        
+        rrv_number_dataset_sb_lo_mj_jes_up_relaxed = RooRealVar("rrv_number_dataset_sb_lo"+label+"massvbfup"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_sb_lo"+label+"massvbfup"+"_"+self.channel+"_mj_relaxed",hnum_4region_jes_up_relaxed.GetBinContent(1));
+        rrv_number_dataset_signal_region_mj_jes_up_relaxed = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbfup"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_signal_region"+label+"massvbfup"+"_"+self.channel+"_mj_relaxed",hnum_4region_jes_up_relaxed.GetBinContent(2));        
+        rrv_number_dataset_sb_hi_mj_jes_up_relaxed = RooRealVar("rrv_number_dataset_sb_hi"+label+"massvbfup"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_sb_hi"+label+"massvbfup"+"_"+self.channel+"_mj_relaxed",hnum_4region_jes_up_relaxed.GetBinContent(3));
+
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jes_up_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jes_up_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jes_up_relaxed)
+                
+
+        getattr(self.workspace4fit_,"import")(rdataset_mj_jes_up)
+        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jes_up)
+        getattr(self.workspace4fit_,"import")(rdataset_mj_jes_up_relaxed)
+        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jes_up_relaxed)
+
+
+
+        #####jes_dn
+
+        #prepare m_j dataset       
+        rrv_number_dataset_sb_lo_mj_jes_dn = RooRealVar("rrv_number_dataset_sb_lo"+label+"massvbfdn"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"massvbfdn"+"_"+self.channel+"_mj",hnum_4region_jes_dn.GetBinContent(1));
+        rrv_number_dataset_signal_region_mj_jes_dn = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbfdn"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"massvbfdn"+"_"+self.channel+"_mj",hnum_4region_jes_dn.GetBinContent(2));        
+        rrv_number_dataset_sb_hi_mj_jes_dn = RooRealVar("rrv_number_dataset_sb_hi"+label+"massvbfdn"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"massvbfdn"+"_"+self.channel+"_mj",hnum_4region_jes_dn.GetBinContent(3));        
+
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jes_dn)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jes_dn)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jes_dn)
+        
+        rrv_number_dataset_sb_lo_mj_jes_dn_relaxed = RooRealVar("rrv_number_dataset_sb_lo"+label+"massvbfdn"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_sb_lo"+label+"massvbfdn"+"_"+self.channel+"_mj_relaxed",hnum_4region_jes_dn_relaxed.GetBinContent(1));
+        rrv_number_dataset_signal_region_mj_jes_dn_relaxed = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbfdn"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_signal_region"+label+"massvbfdn"+"_"+self.channel+"_mj_relaxed",hnum_4region_jes_dn_relaxed.GetBinContent(2));        
+        rrv_number_dataset_sb_hi_mj_jes_dn_relaxed = RooRealVar("rrv_number_dataset_sb_hi"+label+"massvbfdn"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_sb_hi"+label+"massvbfdn"+"_"+self.channel+"_mj_relaxed",hnum_4region_jes_dn_relaxed.GetBinContent(3));
+
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jes_dn_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jes_dn_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jes_dn_relaxed)
+                
+
+        getattr(self.workspace4fit_,"import")(rdataset_mj_jes_dn)
+        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jes_dn)
+        getattr(self.workspace4fit_,"import")(rdataset_mj_jes_dn_relaxed)
+        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jes_dn_relaxed)
+
+
+        #####jer
+
+        #prepare m_j dataset       
+        rrv_number_dataset_sb_lo_mj_jer = RooRealVar("rrv_number_dataset_sb_lo"+label+"jetres"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"jetres"+"_"+self.channel+"_mj",hnum_4region_jer.GetBinContent(1));
+        rrv_number_dataset_signal_region_mj_jer = RooRealVar("rrv_number_dataset_signal_region"+label+"jetres"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"jetres"+"_"+self.channel+"_mj",hnum_4region_jer.GetBinContent(2));        
+        rrv_number_dataset_sb_hi_mj_jer = RooRealVar("rrv_number_dataset_sb_hi"+label+"jetres"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"jetres"+"_"+self.channel+"_mj",hnum_4region_jer.GetBinContent(3));        
+
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jer)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jer)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jer)
+        
+        rrv_number_dataset_sb_lo_mj_jer_relaxed = RooRealVar("rrv_number_dataset_sb_lo"+label+"jetres"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_sb_lo"+label+"jetres"+"_"+self.channel+"_mj_relaxed",hnum_4region_jer_relaxed.GetBinContent(1));
+        rrv_number_dataset_signal_region_mj_jer_relaxed = RooRealVar("rrv_number_dataset_signal_region"+label+"jetres"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_signal_region"+label+"jetres"+"_"+self.channel+"_mj_relaxed",hnum_4region_jer_relaxed.GetBinContent(2));        
+        rrv_number_dataset_sb_hi_mj_jer_relaxed = RooRealVar("rrv_number_dataset_sb_hi"+label+"jetres"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_sb_hi"+label+"jetres"+"_"+self.channel+"_mj_relaxed",hnum_4region_jer_relaxed.GetBinContent(3));
+
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jer_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jer_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jer_relaxed)
+                
+
+        getattr(self.workspace4fit_,"import")(rdataset_mj_jer)
+        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jer)
+        getattr(self.workspace4fit_,"import")(rdataset_mj_jer_relaxed)
+        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jer_relaxed)
+
+
+
+        #####jer_up
+
+        #prepare m_j dataset       
+        rrv_number_dataset_sb_lo_mj_jer_up = RooRealVar("rrv_number_dataset_sb_lo"+label+"jetresup"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"jetresup"+"_"+self.channel+"_mj",hnum_4region_jer_up.GetBinContent(1));
+        rrv_number_dataset_signal_region_mj_jer_up = RooRealVar("rrv_number_dataset_signal_region"+label+"jetresup"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"jetresup"+"_"+self.channel+"_mj",hnum_4region_jer_up.GetBinContent(2));        
+        rrv_number_dataset_sb_hi_mj_jer_up = RooRealVar("rrv_number_dataset_sb_hi"+label+"jetresup"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"jetresup"+"_"+self.channel+"_mj",hnum_4region_jer_up.GetBinContent(3));        
+
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jer_up)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jer_up)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jer_up)
+        
+        rrv_number_dataset_sb_lo_mj_jer_up_relaxed = RooRealVar("rrv_number_dataset_sb_lo"+label+"jetresup"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_sb_lo"+label+"jetresup"+"_"+self.channel+"_mj_relaxed",hnum_4region_jer_up_relaxed.GetBinContent(1));
+        rrv_number_dataset_signal_region_mj_jer_up_relaxed = RooRealVar("rrv_number_dataset_signal_region"+label+"jetresup"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_signal_region"+label+"jetresup"+"_"+self.channel+"_mj_relaxed",hnum_4region_jer_up_relaxed.GetBinContent(2));        
+        rrv_number_dataset_sb_hi_mj_jer_up_relaxed = RooRealVar("rrv_number_dataset_sb_hi"+label+"jetresup"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_sb_hi"+label+"jetresup"+"_"+self.channel+"_mj_relaxed",hnum_4region_jer_up_relaxed.GetBinContent(3));
+
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jer_up_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jer_up_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jer_up_relaxed)
+                
+
+        getattr(self.workspace4fit_,"import")(rdataset_mj_jer_up)
+        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jer_up)
+        getattr(self.workspace4fit_,"import")(rdataset_mj_jer_up_relaxed)
+        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jer_up_relaxed)
+
+
+        #####jer_dn
+
+        #prepare m_j dataset       
+        rrv_number_dataset_sb_lo_mj_jer_dn = RooRealVar("rrv_number_dataset_sb_lo"+label+"jetresdn"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"jetresdn"+"_"+self.channel+"_mj",hnum_4region_jer_dn.GetBinContent(1));
+        rrv_number_dataset_signal_region_mj_jer_dn = RooRealVar("rrv_number_dataset_signal_region"+label+"jetresdn"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"jetresdn"+"_"+self.channel+"_mj",hnum_4region_jer_dn.GetBinContent(2));        
+        rrv_number_dataset_sb_hi_mj_jer_dn = RooRealVar("rrv_number_dataset_sb_hi"+label+"jetresdn"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"jetresdn"+"_"+self.channel+"_mj",hnum_4region_jer_dn.GetBinContent(3));        
+
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jer_dn)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jer_dn)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jer_dn)
+        
+        rrv_number_dataset_sb_lo_mj_jer_dn_relaxed = RooRealVar("rrv_number_dataset_sb_lo"+label+"jetresdn"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_sb_lo"+label+"jetresdn"+"_"+self.channel+"_mj_relaxed",hnum_4region_jer_dn_relaxed.GetBinContent(1));
+        rrv_number_dataset_signal_region_mj_jer_dn_relaxed = RooRealVar("rrv_number_dataset_signal_region"+label+"jetresdn"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_signal_region"+label+"jetresdn"+"_"+self.channel+"_mj_relaxed",hnum_4region_jer_dn_relaxed.GetBinContent(2));        
+        rrv_number_dataset_sb_hi_mj_jer_dn_relaxed = RooRealVar("rrv_number_dataset_sb_hi"+label+"jetresdn"+"_"+self.channel+"_mj_relaxed","rrv_number_dataset_sb_hi"+label+"jetresdn"+"_"+self.channel+"_mj_relaxed",hnum_4region_jer_dn_relaxed.GetBinContent(3));
+
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jer_dn_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jer_dn_relaxed)
+        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jer_dn_relaxed)
+                
+
+        getattr(self.workspace4fit_,"import")(rdataset_mj_jer_dn)
+        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jer_dn)
+        getattr(self.workspace4fit_,"import")(rdataset_mj_jer_dn_relaxed)
+        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jer_dn_relaxed)
+        
+        print "N_rdataset_mj: "
 
         rdataset_sb_lo_mlvj.Print();
         rdataset_signal_region_mlvj.Print();
@@ -3335,67 +4448,101 @@ class doFit_wj_and_wlvj:
 
         
     ##### Prepare the workspace for the limit and to store info to be printed in the datacard
-    def prepare_limit(self,mode,isTTbarFloating=0, isVVFloating=0, isSTopFloating=0):
+    def prepare_limit(self,mode,useRelaxedShape = 0, isTTbarFloating=0, isVVFloating=0, isSTopFloating=0, isWW_EWKFloating=0):
 
         print "####################### prepare_limit for %s method ####################"%(mode);
 
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_mass_lvj"));
 
-        ### whole number of events from the considered signal sample, WJets, VV, TTbar, STop -> couting
+        ### whole number of events from the considered signal sample, WJets, VV, TTbar, STop -> counting experiment
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_fitting_signal_region_%s_%s_mlvj"%(self.higgs_sample,self.channel)).clone("rate_%s_for_counting"%(self.higgs_sample) ) )
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_fitting_signal_region_%s_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).clone("rate_%s_for_counting"%(self.vbfhiggs_sample) ) )
 
-        getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_fitting_signal_region_WJets_%s_mlvj"%(self.channel)).clone("rate_WJets_for_counting"))
+        getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_fitting_signal_region_WJets0_%s_mlvj"%(self.channel)).clone("rate_WJets_for_counting"))
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_fitting_signal_region_VV_%s_mlvj"%(self.channel)).clone("rate_VV_for_counting"))
+        getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_fitting_signal_region_WW_EWK_%s_mlvj"%(self.channel)).clone("rate_WW_EWK_for_counting"))        
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_fitting_signal_region_TTbar_%s_mlvj"%(self.channel)).clone("rate_TTbar_for_counting"))
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_fitting_signal_region_STop_%s_mlvj"%(self.channel)).clone("rate_STop_for_counting"))
 
 
-        ### number of signal, Wjets, VV, TTbar and STop --> unbin             
+        ### number of signal, Wjets, VV, TTbar and STop --> unbinned shape analysis             
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_%s_signal_region_%s_mlvj"%(self.higgs_sample, self.channel)).clone("rate_%s_for_unbin"%(self.higgs_sample)));
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_%s_signal_region_%s_mlvj"%(self.vbfhiggs_sample, self.channel)).clone("rate_%s_for_unbin"%(self.vbfhiggs_sample)));
 
-        getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_WJets_signal_region_%s_mlvj"%(self.channel)).clone("rate_WJets_for_unbin"));
+        getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_WJets0_signal_region_%s_mlvj"%(self.channel)).clone("rate_WJets_for_unbin"));
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_VV_signal_region_%s_mlvj"%(self.channel)).clone("rate_VV_for_unbin"));
+        getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_WW_EWK_signal_region_%s_mlvj"%(self.channel)).clone("rate_WW_EWK_for_unbin"));        
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_TTbar_signal_region_%s_mlvj"%(self.channel)).clone("rate_TTbar_for_unbin"));
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_STop_signal_region_%s_mlvj"%(self.channel)).clone("rate_STop_for_unbin"));
 
         ### Set the error properly -> taking into account lumi, Vtagger and theoretical uncertainty on XS -> for VV, TTbar and STop
         self.workspace4limit_.var("rate_VV_for_unbin").setError(self.workspace4limit_.var("rate_VV_for_unbin").getVal()*TMath.Sqrt(self.lumi_uncertainty*self.lumi_uncertainty+self.rrv_wtagger_eff_reweight_forV.getError()/self.rrv_wtagger_eff_reweight_forV.getVal()*self.rrv_wtagger_eff_reweight_forV.getError()/self.rrv_wtagger_eff_reweight_forV.getVal()+self.XS_VV_uncertainty*self.XS_VV_uncertainty));
+        self.workspace4limit_.var("rate_WW_EWK_for_unbin").setError(self.workspace4limit_.var("rate_WW_EWK_for_unbin").getVal()*TMath.Sqrt(self.lumi_uncertainty*self.lumi_uncertainty+self.rrv_wtagger_eff_reweight_forV.getError()/self.rrv_wtagger_eff_reweight_forV.getVal()*self.rrv_wtagger_eff_reweight_forV.getError()/self.rrv_wtagger_eff_reweight_forV.getVal()+self.XS_VV_uncertainty*self.XS_VV_uncertainty));        
         self.workspace4limit_.var("rate_STop_for_unbin").setError(self.workspace4limit_.var("rate_STop_for_unbin").getVal()*TMath.Sqrt(self.lumi_uncertainty*self.lumi_uncertainty+self.rrv_wtagger_eff_reweight_forT.getError()/self.rrv_wtagger_eff_reweight_forT.getVal()*self.rrv_wtagger_eff_reweight_forT.getError()/self.rrv_wtagger_eff_reweight_forT.getVal()+self.XS_STop_uncertainty*self.XS_STop_uncertainty));
         self.workspace4limit_.var("rate_TTbar_for_unbin").setError(self.workspace4limit_.var("rate_TTbar_for_unbin").getVal()*TMath.Sqrt( self.lumi_uncertainty*self.lumi_uncertainty  + self.rrv_wtagger_eff_reweight_forT.getError()/self.rrv_wtagger_eff_reweight_forT.getVal()*self.rrv_wtagger_eff_reweight_forT.getError()/self.rrv_wtagger_eff_reweight_forT.getVal()));
         
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.data("rdataset_data_signal_region_%s_mlvj"%(self.channel)).Clone("data_obs_%s"%(self.channel)))
 
         if mode=="sideband_correction_method1":
-         getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_WJets_signal_region_%s_after_correct_mlvj"%(self.channel)).clone("WJets_%s"%(self.channel)))
+            
+         getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_WJets0_signal_region_%s_after_correct_mlvj"%(self.channel)).clone("WJets_%s"%(self.channel)));
          self.workspace4limit_.allVars().Print();
 
         if isTTbarFloating:
-         getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_TTbar_signal_region_%s_mlvj_Deco_TTbar_signal_region_%s_%s_mlvj"%(self.channel, self.channel, self.wtagger_label)).clone("TTbar_%s_%s"%(self.channel,self.wtagger_label)))
+         if useRelaxedShape == 1 :   
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_TTbar_signal_region_%s_mlvj_relaxed_Deco_TTbar_signal_region_%s_%s_mlvj_relaxed"%(self.channel, self.channel, self.wtagger_label)).clone("TTbar_%s"%(self.channel)));
+         else: 
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_TTbar_signal_region_%s_mlvj_Deco_TTbar_signal_region_%s_%s_mlvj"%(self.channel, self.channel, self.wtagger_label)).clone("TTbar_%s"%(self.channel)));
         else :
-         getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_TTbar_signal_region_%s_mlvj"%(self.channel, self.channel, self.wtagger_label)).clone("TTbar_%s_%s"%(self.channel,self.wtagger_label)))
+         if useRelaxedShape == 1 :
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_TTbar_signal_region_%s_mlvj_relaxed"%(self.channel)).clone("TTbar_%s"%(self.channel)))
+         else:    
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_TTbar_signal_region_%s_mlvj"%(self.channel)).clone("TTbar_%s"%(self.channel)))
 
         if isSTopFloating :
-         getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_STop_signal_region_%s_mlvj_Deco_STop_signal_region_%s_%s_mlvj"%(self.channel, self.channel, self.wtagger_label)).clone("STop_%s_%s"%(self.channel,self.wtagger_label)))
+         if useRelaxedShape == 1 :
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_STop_signal_region_%s_mlvj_relaxed_Deco_STop_signal_region_%s_%s_mlvj_relaxed"%(self.channel, self.channel, self.wtagger_label)).clone("STop_%s"%(self.channel)))
+         else:
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_STop_signal_region_%s_mlvj_Deco_STop_signal_region_%s_%s_mlvj"%(self.channel, self.channel, self.wtagger_label)).clone("STop_%s"%(self.channel)))   
         else :
-         getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_STop_signal_region_%s_mlvj"%(self.channel)).clone("STop_%s_%s"%(self.channel,self.wtagger_label)))
+         if useRelaxedShape == 1 :
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_STop_signal_region_%s_mlvj_relaxed"%(self.channel)).clone("STop_%s"%(self.channel)))
+         else: 
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_STop_signal_region_%s_mlvj"%(self.channel)).clone("STop_%s"%(self.channel)))
 
         if isVVFloating :
-         getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_VV_signal_region_%s_mlvj_Deco_VV_signal_region_%s_%s_mlvj"%(self.channel, self.channel, self.wtagger_label)).clone("VV_%s_%s"%(self.channel,self.wtagger_label)))
+         if useRelaxedShape == 1:   
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_VV_signal_region_%s_mlvj_relaxed_Deco_VV_signal_region_%s_%s_mlvj_relaxed"%(self.channel, self.channel, self.wtagger_label)).clone("VV_%s"%(self.channel)))
+         else:
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_VV_signal_region_%s_mlvj_Deco_VV_signal_region_%s_%s_mlvj"%(self.channel, self.channel, self.wtagger_label)).clone("VV_%s"%(self.channel)))
         else:
-         getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_VV_signal_region_%s_mlvj"%(self.channel)).clone("VV_%s_%s"%(self.channel,self.wtagger_label)))
-                                                              
+         if useRelaxedShape == 1:   
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_VV_signal_region_%s_mlvj_relaxed"%(self.channel)).clone("VV_%s"%(self.channel)))
+         else:
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_VV_signal_region_%s_mlvj"%(self.channel)).clone("VV_%s"%(self.channel)))
+             
+        if isWW_EWKFloating :
+         if useRelaxedShape == 1:  
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_WW_EWK_signal_region_%s_mlvj_relaxed_Deco_WW_EWK_signal_region_%s_%s_mlvj_relaxed"%(self.channel, self.channel, self.wtagger_label)).clone("WW_EWK_%s"%(self.channel)))
+         else:
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_WW_EWK_signal_region_%s_mlvj_Deco_WW_EWK_signal_region_%s_%s_mlvj"%(self.channel, self.channel, self.wtagger_label)).clone("WW_EWK_%s"%(self.channel)))             
+        else:
+         if useRelaxedShape == 1:  
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_WW_EWK_signal_region_%s_mlvj_relaxed"%(self.channel)).clone("WW_EWK_%s"%(self.channel)));         
+         else:                                                              
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_WW_EWK_signal_region_%s_mlvj"%(self.channel)).clone("WW_EWK_%s"%(self.channel)));         
 
+        ### signal shape
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region_%s_mlvj"%(self.higgs_sample,self.channel)).clone(self.higgs_sample+"_%s"%(self.channel)))
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).clone(self.vbfhiggs_sample+"_%s"%(self.channel)))
 
         ### Fix all the Pdf parameters             
-        rrv_x=self.workspace4limit_.var("rrv_mass_lvj");
+        rrv_x = self.workspace4limit_.var("rrv_mass_lvj");
 
         self.fix_Pdf(self.workspace4limit_.pdf("TTbar_%s"%(self.channel)), RooArgSet(rrv_x) ); 
         self.fix_Pdf(self.workspace4limit_.pdf("STop_%s"%(self.channel)), RooArgSet(rrv_x)); 
-        self.fix_Pdf(self.workspace4limit_.pdf("VV_%s"%(self.channel)), RooArgSet(rrv_x)); 
+        self.fix_Pdf(self.workspace4limit_.pdf("VV_%s"%(self.channel)), RooArgSet(rrv_x));
+        self.fix_Pdf(self.workspace4limit_.pdf("WW_EWK_%s"%(self.channel)), RooArgSet(rrv_x));         
         self.fix_Pdf(self.workspace4limit_.pdf("WJets_%s"%(self.channel)), RooArgSet(rrv_x)); 
 
         print " ############## Workspace for limit ";
@@ -3405,14 +4552,14 @@ class doFit_wj_and_wlvj:
         param = par.Next()
         while (param):
          param.Print();
-         param=par.Next()
+         param = par.Next()
+        self.workspace4limit_.Print()
 
         params_list=[];
-
         ### main modality for the alpha function method
         if mode=="sideband_correction_method1":
 
-            if self.MODEL_4_mlvj=="ErfExp_v1" or self.MODEL_4_mlvj=="ErfPow_v1" or self.MODEL_4_mlvj=="2Exp" :
+            if self.MODEL_4_mlvj == "ErfExp_v1" or self.MODEL_4_mlvj == "ErfPow_v1" or self.MODEL_4_mlvj == "2Exp" :
                 ### uncertainty inflation on the Wjets shape from fitting data in sb_lo
                 self.workspace4limit_.var("Deco_WJets0_sb_lo_from_fitting_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_WJets0);
                 self.workspace4limit_.var("Deco_WJets0_sb_lo_from_fitting_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_WJets0);
@@ -3440,15 +4587,23 @@ class doFit_wj_and_wlvj:
                 params_list.append(self.workspace4limit_.var("Deco_WJets0_sim_%s_%s_mlvj_eig5"%(self.channel, self.wtagger_label)))
 
                 ### Do the same for the TTbar
-                if isTTbarFloating !=0 :
-                 self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
-                 self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
-                 self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig2"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                if isTTbarFloating !=0:
+                  if useRelaxedShape == 1 :
+                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig1"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig2"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
 
-                 params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)));
-                 params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)));
-                 params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig2"%(self.channel, self.wtagger_label)));
-                
+                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig0"%(self.channel, self.wtagger_label)));
+                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig1"%(self.channel, self.wtagger_label)));
+                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig2"%(self.channel, self.wtagger_label)));
+                  else:
+                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig2"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+
+                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)));
+                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)));
+                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig2"%(self.channel, self.wtagger_label)));
 
             if self.MODEL_4_mlvj=="ErfPow2_v1" or self.MODEL_4_mlvj=="ErfPowExp_v1" :
                 self.workspace4limit_.var("Deco_WJets0_sb_lo_from_fitting_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_WJets0);
@@ -3483,16 +4638,26 @@ class doFit_wj_and_wlvj:
 
 
                 if isTTbarFloating !=0 :
-                 self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
-                 self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
-                 self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig2"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
-                 self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig3"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                  if useRelaxedShape == 1:  
+                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig1"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig2"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig3"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
 
-                 params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)));
-                 params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)));
-                 params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig2"%(self.channel, self.wtagger_label)));
-                 params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig3"%(self.channel, self.wtagger_label)));
+                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig0"%(self.channel, self.wtagger_label)));
+                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig1"%(self.channel, self.wtagger_label)));
+                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig2"%(self.channel, self.wtagger_label)));
+                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig3"%(self.channel, self.wtagger_label)));
+                  else:
+                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig2"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig3"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
 
+                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)));
+                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)));
+                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig2"%(self.channel, self.wtagger_label)));
+                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig3"%(self.channel, self.wtagger_label)));
 
             if self.MODEL_4_mlvj=="Exp" or self.MODEL_4_mlvj=="Pow" :
 
@@ -3510,8 +4675,12 @@ class doFit_wj_and_wlvj:
                 params_list.append(self.workspace4limit_.var("Deco_WJets0_sim_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)))
 
                 if isTTbarFloating !=0 :
-                 self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
-                 params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)));
+                 if useRelaxedShape == 1:
+                  self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                  params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig0"%(self.channel, self.wtagger_label)));
+                 else:     
+                  self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                  params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)));
 
             if self.MODEL_4_mlvj=="ExpN" or self.MODEL_4_mlvj=="ExpTail" or self.MODEL_4_mlvj=="Pow2" :
 
@@ -3536,25 +4705,14 @@ class doFit_wj_and_wlvj:
 
                 ### TTbar use exp
                 if isTTbarFloating !=0:
-                    print "##################### TTbar will float in the limit procedure + final plot ######################";
-                    self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
-                    params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)));
+                    if useRelaxedShape == 1 :
+                     self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                     params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig0"%(self.channel, self.wtagger_label)));
+                    else:    
+                     self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_TTbar);
+                     params_list.append(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)));
 
-                ### VV use ExpTail:
-                if isVVFloating !=0:
-                  print "##################### VV will float in the limit procedure + final plot ######################";
-                  self.workspace4limit_.var("Deco_VV_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_VV);
-                  self.workspace4limit_.var("Deco_VV_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_VV);
-                  params_list.append(self.workspace4limit_.var("Deco_VV_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)));
-                  params_list.append(self.workspace4limit_.var("Deco_VV_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)));
- 
-                ### STop use Exp:
-                if isSTopFloating !=0:
-                  print "##################### STop will float in the limit procedure + final plot ######################";
-                  self.workspace4limit_.var("Deco_STop_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)).setError(self.shape_para_error_STop);
-                  params_list.append(self.workspace4limit_.var("Deco_STop_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)));
-                                       
-
+        ### print the datacard                                       
         self.print_limit_datacard("unbin", "ggH", params_list);
         self.print_limit_datacard("unbin", "vbfH", params_list);
         self.print_limit_datacard("unbin", "ggHvbfH", params_list);
@@ -3576,9 +4734,14 @@ class doFit_wj_and_wlvj:
                 self.FloatingParams.add(self.workspace4limit_.var("Deco_WJets0_sim_%s_%s_mlvj_eig5"%(self.channel, self.wtagger_label)) );
 
                 if isTTbarFloating!=0:
-                 self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)) );
-                 self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)) );
-                 self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig2"%(self.channel, self.wtagger_label)) );
+                  if useRelaxedShape == 1:
+                   self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig0"%(self.channel, self.wtagger_label)) );
+                   self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig1"%(self.channel, self.wtagger_label)) );
+                   self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig2"%(self.channel, self.wtagger_label)) );
+                  else:    
+                   self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)) );
+                   self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)) );
+                   self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig2"%(self.channel, self.wtagger_label)) );
 
           if self.MODEL_4_mlvj=="ErfPow2_v1" or self.MODEL_4_mlvj=="ErfPowExp_v1" :
 
@@ -3598,10 +4761,16 @@ class doFit_wj_and_wlvj:
                 self.FloatingParams.add(self.workspace4limit_.var("Deco_WJets0_sim_%s_%s_mlvj_eig7"%(self.channel, self.wtagger_label)) );
 
                 if isTTbarFloating!=0:
-                 self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)));
-                 self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)));
-                 self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig2"%(self.channel, self.wtagger_label)));
-                 self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig3"%(self.channel, self.wtagger_label)));
+                   if useRelaxedShape == 1:
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig0"%(self.channel, self.wtagger_label)));
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig1"%(self.channel, self.wtagger_label)));
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig2"%(self.channel, self.wtagger_label)));
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig3"%(self.channel, self.wtagger_label)));
+                   else:     
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)));
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)));
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig2"%(self.channel, self.wtagger_label)));
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig3"%(self.channel, self.wtagger_label)));
 
           if self.MODEL_4_mlvj=="Exp" or self.MODEL_4_mlvj=="Pow" :
 
@@ -3612,7 +4781,10 @@ class doFit_wj_and_wlvj:
                 self.FloatingParams.add(self.workspace4limit_.var("Deco_WJets0_sim_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)) );
 
                 if isTTbarFloating!=0:
-                 self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel,self.wtagger_label)));
+                 if useRelaxedShape == 1:
+                  self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig0"%(self.channel,self.wtagger_label)));
+                 else:    
+                  self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel,self.wtagger_label)));
 
 
           if self.MODEL_4_mlvj=="ExpN" or self.MODEL_4_mlvj=="ExpTail" or self.MODEL_4_mlvj=="Pow2" :
@@ -3628,15 +4800,11 @@ class doFit_wj_and_wlvj:
                 self.FloatingParams.add(self.workspace4limit_.var("Deco_WJets0_sim_%s_%s_mlvj_eig3"%(self.channel, self.wtagger_label)) );
 
                 if isTTbarFloating!=0:
-                    self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel,self.wtagger_label)));
+                   if useRelaxedShape == 1: 
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_relaxed_eig0"%(self.channel,self.wtagger_label)));
+                   else:   
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_mlvj_eig0"%(self.channel,self.wtagger_label)));
 
-                if isVVFloating!=0:
-                  self.FloatingParams.add(self.workspace4limit_.var("Deco_VV_signal_region_%s_%s_mlvj_eig0"%(self.channel, self.wtagger_label)));
-                  self.FloatingParams.add(self.workspace4limit_.var("Deco_VV_signal_region_%s_%s_mlvj_eig1"%(self.channel, self.wtagger_label)));
-
-                if isSTopFloating!=0:
-                  self.FloatingParams.add(self.workspace4limit_.var("Deco_STop_signal_region_%s_%s_mlvj_eig0"%(self.channel,self.wtagger_label)));
-                    
 
         ### Add the floating list to the combiner --> the pdf which are not fixed are floating by default
         getattr(self.workspace4limit_,"import")(self.FloatingParams);
@@ -3655,44 +4823,25 @@ class doFit_wj_and_wlvj:
     def print_limit_datacard(self, mode, signalchannel, params_list=[] ): #mode:unbin or counting
 
       print "############## print_limit_datacard for %s %s ################"%(mode,signalchannel)
-      if not (mode == "unbin" or mode == "counting"):
 
-         print "print_limit_datacard use wrong mode: %s"%(mode);raw_input("ENTER");
+      if (mode == "unbin" or mode == "counting"): 
+         print "print_limit_datacard use wrong mode: %s"%(mode);#raw_input("ENTER");
 
          ### open the datacard
          datacard_out = open(getattr(self,"file_datacard_%s_%s"%(mode, signalchannel)),"w");
          datacard_out.write( "imax 1" )
          if signalchannel == "ggH" or signalchannel == "vbfH":
-            datacard_out.write( "\njmax 4" )
+            datacard_out.write( "\njmax *" )
          elif signalchannel=="ggHvbfH":
-            datacard_out.write( "\njmax 5" )
+            datacard_out.write( "\njmax *" )
          else:
             raw_input("Wrong signal channel, please check!!");
             
          datacard_out.write( "\nkmax *" )
          datacard_out.write( "\n--------------- ")
 
-         if mode == "unbin":
-          fnOnly = ntpath.basename(self.file_rlt_root)
-          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region_%s_mlvj"%(self.higgs_sample,self.channel)).clone(self.higgs_sample+"_%s"%(self.channel)))
-          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).clone(self.vbfhiggs_sample+"_%s"%(self.channel)))
 
-          if signalchannel == "ggH":
-              datacard_out.write("\nshapes %s CMS_%s %s %s:$PROCESS_%s"%(self.higgs_sample,self.channe,fnOnly,self.workspace4limit_.GetName(), self.channel));
-          elif signalchannel == "vbfH":
-              datacard_out.write("\nshapes %s CMS_%s %s %s:$PROCESS_%s"%(self.vbfhiggs_sample,self.channe,fnOnly,self.workspace4limit_.GetName(), self.channel));
-          elif signalchannel == "ggHvbfH":
-              datacard_out.write("\nshapes %s CMS_%s %s %s:$PROCESS_%s"%(self.higgs_sample,self.channe,fnOnly,self.workspace4limit_.GetName(), self.channel));
-              datacard_out.write("\nshapes %s CMS_%s %s %s:$PROCESS_%s"%(self.vbfhiggs_sample,self.channe,fnOnly,self.workspace4limit_.GetName(), self.channel));
-          
-          datacard_out.write("\nshapes WJets CMS_%s %s %s:$PROCESS_%s"%(self.channe,fnOnly,self.workspace4limit_.GetName(), self.channel));
-          datacard_out.write("\nshapes TTbar CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(), self.channel));
-          datacard_out.write("\nshapes STop  CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(), self.channel));
-          datacard_out.write("\nshapes VV    CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(), self.channel));
-          datacard_out.write("\nshapes data_obs CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(), self.channel));
-          datacard_out.write( "\n--------------- ")
-                                                                        
-         datacard_out.write( "\nbin CMS_%s "%(self.channel));
+         datacard_out.write( "\nbin CMS_%s%djet"%(self.channel,options.jet_bin));
          if mode == "unbin":
             datacard_out.write("\nobservation %0.2f "%(self.workspace4limit_.data("data_obs_%s"%(self.channel)).sumEntries()));
          if mode == "counting":
@@ -3700,126 +4849,168 @@ class doFit_wj_and_wlvj:
 
          datacard_out.write( "\n------------------------------" );
 
+         if mode == "unbin":
+          fnOnly = ntpath.basename(self.file_rlt_root)
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region_%s_mlvj"%(self.higgs_sample,self.channel)).clone(self.higgs_sample+"_%s"%(self.channel)))
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).clone(self.vbfhiggs_sample+"_%s"%(self.channel)))
+
+          if signalchannel == "ggH":
+              datacard_out.write("\nshapes %s CMS_%s%djet %s %s:$PROCESS_%s_%djet"%(self.higgs_sample,self.channel,options.jet_bin,fnOnly,self.workspace4limit_.GetName(),self.channel,options.jet_bin));
+          elif signalchannel == "vbfH":
+              datacard_out.write("\nshapes %s CMS_%s%djet %s %s:$PROCESS_%s_%djet"%(self.vbfhiggs_sample,self.channel,options.jet_bin,fnOnly,self.workspace4limit_.GetName(),self.channel,options.jet_bin));
+          elif signalchannel == "ggHvbfH":
+              datacard_out.write("\nshapes %s CMS_%s%djet %s %s:$PROCESS_%s_%djet"%(self.higgs_sample,self.channel,options.jet_bin,fnOnly,self.workspace4limit_.GetName(),self.channel,options.jet_bin));
+              datacard_out.write("\nshapes %s CMS_%s%djet %s %s:$PROCESS_%s_%djet"%(self.vbfhiggs_sample,self.channel,options.jet_bin,fnOnly,self.workspace4limit_.GetName(),self.channel,options.jet_bin));
+          
+          datacard_out.write("\nshapes WJets CMS_%s%djet %s %s:$PROCESS_%s_%djet"%(self.channel,options.jet_bin,fnOnly,self.workspace4limit_.GetName(),self.channel,options.jet_bin));
+          datacard_out.write("\nshapes TTbar CMS_%s%djet %s %s:$PROCESS_%s_%djet"%(self.channel,options.jet_bin,fnOnly,self.workspace4limit_.GetName(),self.channel,options.jet_bin));
+          datacard_out.write("\nshapes STop CMS_%s%djet %s %s:$PROCESS_%s_%djet"%(self.channel,options.jet_bin,fnOnly,self.workspace4limit_.GetName(),self.channel,options.jet_bin));
+          datacard_out.write("\nshapes VV CMS_%s%djet %s %s:$PROCESS_%s_%djet"%(self.channel,options.jet_bin,fnOnly,self.workspace4limit_.GetName(),self.channel,options.jet_bin));
+          datacard_out.write("\nshapes WW_EWK CMS_%s%djet %s %s:$PROCESS_%s_%djet"%(self.channel,options.jet_bin,fnOnly,self.workspace4limit_.GetName(),self.channel,options.jet_bin));
+          datacard_out.write("\nshapes data_obs CMS_%s%djet %s %s:$PROCESS_%s_%djet"%(self.channel,self.channel,options.jet_bin,fnOnly,self.workspace4limit_.GetName(), self.channel));
+          datacard_out.write( "\n--------------- ")
+          
+
          if signalchannel == "ggH":
-            datacard_out.write( "\nbin                CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s"%(self.channel,self.channel,self.channel,self.channel,self.channel));
-            datacard_out.write( "\nprocess            %s        WJets    TTbar    STop    VV "%(self.higgs_sample))
-            datacard_out.write( "\nprocess            -1                 1        2        3       4" )
+            datacard_out.write( "\nbin                CMS_%s%dj    CMS_%s%dj   CMS_%s%dj   CMS_%s%dj  CMS_%s%dj   CMS_%s%dj"%(self.channel,options.jet_bin,self.channel,options.jet_bin,self.channel,options.jet_bin,self.channel,options.jet_bin,self.channel,options.jet_bin,self.channel,options.jet_bin));
+            datacard_out.write( "\nprocess            %s        WJets    TTbar    STop    VV     WW_EWK"%(self.higgs_sample))
+            datacard_out.write( "\nprocess            -1                 1        2        3       4     5" )
 
             if mode == "unbin":
-                datacard_out.write( "\nrate          %0.2f          %0.2f   %0.2f    %0.2f    %0.2f "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal()));
+                datacard_out.write( "\nrate          %0.2f          %0.2f   %0.2f    %0.2f    %0.2f     %0.2f "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_unbin").getVal()));
 
             elif mode == "counting":
-                datacard_out.write( "\nrate          %0.2f          %0.2f   %0.2f    %0.2f    %0.2f"%(self.workspace4limit_.var("rate_%s_for_counting"%(self.higgs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_counting").getVal(), self.workspace4limit_.var("rate_TTbar_for_counting").getVal(), self.workspace4limit_.var("rate_STop_for_counting").getVal(), self.workspace4limit_.var("rate_VV_for_counting").getVal()));
+                datacard_out.write( "\nrate          %0.2f          %0.2f   %0.2f    %0.2f    %0.2f    %0.2f "%(self.workspace4limit_.var("rate_%s_for_counting"%(self.higgs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_counting").getVal(), self.workspace4limit_.var("rate_TTbar_for_counting").getVal(), self.workspace4limit_.var("rate_STop_for_counting").getVal(), self.workspace4limit_.var("rate_VV_for_counting").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_counting").getVal()));
                 
             datacard_out.write( "\n-------------------------------- " )
 
-            datacard_out.write( "\nlumi     lnN       %0.3f          -        %0.3f   %0.3f   %0.3f"%(1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty));
-            
-            datacard_out.write( "\nQCDscale_ggH lnN   %0.3f           -        -       -       -"%(1.+self.QCDscale_ggH))
+            datacard_out.write( "\nQCDscale_ggH lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH))
 
-            datacard_out.write( "\npdf_gg       lnN   %0.3f           -        -       -       -"%(1.+self.pdf_gg))
+            datacard_out.write( "\nQCDscale_ggH1in lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH1in))
 
-            datacard_out.write( "\nhwwlnJ_pdfAcc_gg lnN %0.3f        -        -       -       -"%(1.+self.hwwlnJ_pdfAcc_gg) )
+            datacard_out.write( "\nQCDscale_ggH2in lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH2in))   
 
-            datacard_out.write( "\nintf_ggH  lnN      %0.3f          -        -       -       -"%(1.+self.interference_ggH_uncertainty) )
+            datacard_out.write( "\npdf_gg       lnN   %0.3f     -             -        -       -       -     -"%(1.+self.pdf_gg))
 
-            datacard_out.write( "\nXS_STop  lnN       -               -        -       %0.3f   -"%(1+self.XS_STop_uncertainty) )
+            datacard_out.write( "\nQCDscale_ggH_ACCEPT lnN %0.3f   -             -        -       -       -     -"%(1.+self.hwwlnJ_pdfAcc_gg) )
 
-            datacard_out.write( "\nXS_VV    lnN       -               -        -       -       %0.3f"%(1+self.XS_VV_uncertainty) )
+            datacard_out.write( "\nintf_ggH  lnN      %0.3f     -             -        -       -       -     -"%(1.+self.interference_ggH_uncertainty) )
+
+            datacard_out.write( "\nCMS_hwwlvj_STop  lnN       -         -             -        -       %0.3f   -     -"%(1+self.XS_STop_uncertainty) )
+
+            datacard_out.write( "\nCMS_hwwlvj_VV    lnN       -         -             -        -       -       %0.3f    -"%(1+self.XS_VV_uncertainty) )
+
+            datacard_out.write( "\nCMS_hwwlvj_WW_EWK    lnN       -         -             -        -       -       -     %0.3f"%(1+self.XS_WW_EWK_uncertainty))
+
+            datacard_out.write( "\nCMS_hwwlvj_TTbar    lnN       -         -             -        %0.3f       -       -     -"%(1+self.XS_TTbar_uncertainty) )
+
  
          elif signalchannel=="vbfH":
-
-            datacard_out.write( "\nbin                CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s"%(self.channel,self.channel,self.channel,self.channel,self.channel));
-            datacard_out.write( "\nprocess            %s        WJets    TTbar    STop    VV "%(self.vbfhiggs_sample));
-            datacard_out.write( "\nprocess            -1            1        2     3       4" );
+            datacard_out.write( "\nbin                CMS_%s%dj    CMS_%s%dj   CMS_%s%dj   CMS_%s%dj  CMS_%s%dj   CMS_%s%dj"%(self.channel,options.jet_bin,self.channel,options.jet_bin,self.channel,options.jet_bin,self.channel,options.jet_bin,self.channel,options.jet_bin,self.channel,options.jet_bin));
+            datacard_out.write( "\nprocess            %s        WJets    TTbar    STop    VV     WW_EWK"%(self.vbfhiggs_sample));
+            datacard_out.write( "\nprocess            -1            1        2     3       4     5" );
 
             if mode == "unbin":
-                datacard_out.write( "\nrate            %0.2f         %0.2f   %0.2f    %0.2f    %0.2f "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal()  ) )
+                datacard_out.write( "\nrate            %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f"%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_unbin").getVal()  ) )
 
             elif mode == "counting":
-                datacard_out.write( "\nrate            %0.2f         %0.2f   %0.2f    %0.2f    %0.2f"%(self.workspace4limit_.var("rate_%s_for_counting"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_counting").getVal(), self.workspace4limit_.var("rate_TTbar_for_counting").getVal(), self.workspace4limit_.var("rate_STop_for_counting").getVal(), self.workspace4limit_.var("rate_VV_for_counting").getVal()  ) )
+                datacard_out.write( "\nrate            %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f"%(self.workspace4limit_.var("rate_%s_for_counting"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_counting").getVal(), self.workspace4limit_.var("rate_TTbar_for_counting").getVal(), self.workspace4limit_.var("rate_STop_for_counting").getVal(), self.workspace4limit_.var("rate_VV_for_counting").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_counting").getVal()  ) )
 
             datacard_out.write( "\n-------------------------------- " )
+            
+            datacard_out.write( "\nQCDscale_vbfH lnN  -         %0.3f         -        -       -       -     -"%(1.+self.QCDscale_vbfH) )
 
-            datacard_out.write( "\nlumi     lnN       %0.3f         -        %0.3f   %0.3f   %0.3f"%(1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty) )
+            datacard_out.write( "\npdf_qqbar     lnN  -         %0.3f         -        -       -       -     -"%(1.+self.pdf_vbf))
 
-            datacard_out.write( "\nQCDscale_vbfH lnN  %0.3f         -        -       -       -"%(1.+self.QCDscale_vbfH) )
+            datacard_out.write( "\nQCDscale_qqH_ACCEPT lnN -      %0.3f         -        -       -       -     -"%(1.+self.hwwlnJ_pdfAcc_vbf))
 
-            datacard_out.write( "\npdf_qqbar     lnN  %0.3f         -        -       -       -"%(1.+self.pdf_vbf))
+            datacard_out.write( "\nintf_vbfH lnN      -         %0.3f         -        -       -       -     -"%(1.+self.interference_vbfH_uncertainty) )
 
-            datacard_out.write( "\nhwwlnJ_pdfAcc_vbf lnN %0.3f         -        -       -       -"%(1.+self.hwwlnJ_pdfAcc_vbf))
+            datacard_out.write( "\nCMS_hwwlvj_STop  lnN       -         -             -        -       %0.3f   -     -"%(1+self.XS_STop_uncertainty) )
 
-            datacard_out.write( "\nintf_vbfH lnN      %0.3f         -        -       -       -"%(1.+self.interference_vbfH_uncertainty) )
+            datacard_out.write( "\nCMS_hwwlvj_VV    lnN       -         -             -        -       -       %0.3f    -"%(1+self.XS_VV_uncertainty) )
 
-            datacard_out.write( "\nXS_STop  lnN       -             -        -       %0.3f   -"%(1+self.XS_STop_uncertainty) )
+            datacard_out.write( "\nCMS_hwwlvj_WW_EWK    lnN       -         -             -        -       -       -     %0.3f"%(1+self.XS_WW_EWK_uncertainty))
 
-            datacard_out.write( "\nXS_VV    lnN       -             -        -       -       %0.3f"%(1+self.XS_VV_uncertainty) )
+            datacard_out.write( "\nCMS_hwwlvj_TTbar    lnN       -         -             -        %0.3f       -       -     -"%(1+self.XS_TTbar_uncertainty) )
+
  
          elif signalchannel=="ggHvbfH":
 
-            datacard_out.write( "\nbin                CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s CMS_%s"%(self.channel,self.channel,self.channel,self.channel,self.channel,self.channel));
-            datacard_out.write( "\nprocess            %s    %s       WJets    TTbar    STop    VV "%(self.higgs_sample,self.vbfhiggs_sample) )
-            datacard_out.write( "\nprocess            -1        0             1        2        3       4" )
+            datacard_out.write( "\nbin                CMS_%s%dj    CMS_%s%dj    CMS_%s%dj   CMS_%s%dj   CMS_%s%dj  CMS_%s%dj   CMS_%s%dj"%(self.channel,options.jet_bin,self.channel,options.jet_bin,self.channel,options.jet_bin,self.channel,options.jet_bin,self.channel,options.jet_bin,self.channel,options.jet_bin,self.channel,options.jet_bin));            
+            datacard_out.write( "\nprocess            %s    %s       WJets    TTbar    STop    VV    WW_EWK"%(self.higgs_sample,self.vbfhiggs_sample) )
+            datacard_out.write( "\nprocess            -1        0             1        2        3       4    5" )
 
             if mode == "unbin":
-                datacard_out.write( "\nrate               %0.2f    %0.2f         %0.2f   %0.2f    %0.2f    %0.2f "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal()  ) )
+                datacard_out.write( "\nrate               %0.2f    %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_unbin").getVal()  ) )
 
             elif mode == "counting":
-                datacard_out.write( "\nrate               %0.2f    %0.2f         %0.2f   %0.2f    %0.2f    %0.2f"%(self.workspace4limit_.var("rate_%s_for_counting"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_%s_for_counting"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_counting").getVal(), self.workspace4limit_.var("rate_TTbar_for_counting").getVal(), self.workspace4limit_.var("rate_STop_for_counting").getVal(), self.workspace4limit_.var("rate_VV_for_counting").getVal()  ) )
+                datacard_out.write( "\nrate               %0.2f    %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f"%(self.workspace4limit_.var("rate_%s_for_counting"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_%s_for_counting"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_counting").getVal(), self.workspace4limit_.var("rate_TTbar_for_counting").getVal(), self.workspace4limit_.var("rate_STop_for_counting").getVal(), self.workspace4limit_.var("rate_VV_for_counting").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_counting").getVal()  ) )
+
 
             datacard_out.write( "\n-------------------------------- " )
 
-            datacard_out.write( "\nlumi     lnN       %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f"%(1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty) )
+            datacard_out.write( "\nQCDscale_ggH lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH))
 
-            datacard_out.write( "\nQCDscale_ggH lnN   %0.3f     -             -        -       -       -"%(1.+self.QCDscale_ggH))
+            datacard_out.write( "\nQCDscale_ggH1in lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH1in))
 
-            datacard_out.write( "\npdf_gg       lnN   %0.3f     -             -        -       -       -"%(1.+self.pdf_gg))
+            datacard_out.write( "\nQCDscale_ggH2in lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH2in))   
 
-            datacard_out.write( "\nhwwlnJ_pdfAcc_gg lnN %0.3f   -             -        -       -       -"%(1.+self.hwwlnJ_pdfAcc_gg) )
+            datacard_out.write( "\npdf_gg       lnN   %0.3f     -             -        -       -       -     -"%(1.+self.pdf_gg))
 
-            datacard_out.write( "\nQCDscale_vbfH lnN  -         %0.3f         -        -       -       -"%(1.+self.QCDscale_vbfH) )
+            datacard_out.write( "\nQCDscale_ggH_ACCEPT lnN %0.3f   -             -        -       -       -     -"%(1.+self.hwwlnJ_pdfAcc_gg) )
 
-            datacard_out.write( "\npdf_qqbar     lnN  -         %0.3f         -        -       -       -"%(1.+self.pdf_vbf))
+            datacard_out.write( "\nintf_ggH  lnN      %0.3f     -             -        -       -       -     -"%(1.+self.interference_ggH_uncertainty) )
+            
+            datacard_out.write( "\nQCDscale_vbfH lnN  -         %0.3f         -        -       -       -     -"%(1.+self.QCDscale_vbfH) )
 
-            datacard_out.write( "\nhwwlnJ_pdfAcc_vbf lnN -      %0.3f         -        -       -       -"%(1.+self.hwwlnJ_pdfAcc_vbf))
+            datacard_out.write( "\npdf_qqbar     lnN  -         %0.3f         -        -       -       -     -"%(1.+self.pdf_vbf))
 
-            datacard_out.write( "\nintf_ggH  lnN      %0.3f     -             -        -       -       -"%(1.+self.interference_ggH_uncertainty) )
+            datacard_out.write( "\nQCDscale_qqH_ACCEPT lnN -      %0.3f         -        -       -       -     -"%(1.+self.hwwlnJ_pdfAcc_vbf))
 
-            datacard_out.write( "\nintf_vbfH lnN      -         %0.3f         -        -       -       -"%(1.+self.interference_vbfH_uncertainty) )
+            datacard_out.write( "\nintf_vbfH lnN      -         %0.3f         -        -       -       -     -"%(1.+self.interference_vbfH_uncertainty) )
 
-            datacard_out.write( "\nXS_STop  lnN       -         -             -        -       %0.3f   -"%(1+self.XS_STop_uncertainty) )
+            datacard_out.write( "\nCMS_hwwlvj_STop  lnN       -         -             -        -       %0.3f   -     -"%(1+self.XS_STop_uncertainty) )
 
-            datacard_out.write( "\nXS_VV    lnN       -         -             -        -       -       %0.3f"%(1+self.XS_VV_uncertainty) )
-         else: 
-            raw_input("Wrong signal channel, please check!!");
+            datacard_out.write( "\nCMS_hwwlvj_VV    lnN       -         -             -        -       -       %0.3f    -"%(1+self.XS_VV_uncertainty) )
 
+            datacard_out.write( "\nCMS_hwwlvj_WW_EWK    lnN       -         -             -        -       -       -     %0.3f"%(1+self.XS_WW_EWK_uncertainty))
+
+            datacard_out.write( "\nCMS_hwwlvj_TTbar    lnN       -         -             -        %0.3f       -       -     -"%(1+self.XS_TTbar_uncertainty) )
+
+         datacard_out.write( "\nlumi_8TeV     lnN       %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f   %0.3f"%(1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty) )
+
+         datacard_out.write( "\nCMS_trigger_%s lnN     %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f    %0.3f"%(self.channel,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty, 1+self.lep_trigger_uncertainty ) );
+
+         datacard_out.write( "\nCMS_eff_%s lnN       %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f    %0.3f"%(self.channel, 1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty, 1+self.lep_eff_uncertainty ) );
+
+         datacard_out.write( "\nCMS_Top_norm_%s_%d lnN    -         -             -        %0.3f   %0.3f   -      -"%(self.channel, options.jet_bin,1+self.rrv_wtagger_eff_reweight_forT.getError(), 1+self.rrv_wtagger_eff_reweight_forT.getError() ) );
+
+         datacard_out.write( "\nCMS_wtagger lnN     %0.3f     %0.3f         -        -       -       %0.3f    %0.3f"%(1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError() ) );
+            
          ### nousiance for the bkg
          ### WJets normaliztion due to data fit and alternate modellization
          if self.number_WJets_insideband >0:
-            datacard_out.write( "\nWJ_norm gmN %0.3f     -  %0.3f           -      -        -"%(self.number_WJets_insideband, getattr(self,"datadriven_alpha_WJets_%s"%(mode))));
+            datacard_out.write( "\nWjet_Norm_%s_%d lnN %0.3f     -  %0.3f           -      -        -      -"%(self.channel,options.jet_bin,self.number_WJets_insideband, getattr(self,"datadriven_alpha_WJets_%s"%(mode))));
          else:
-            datacard_out.write( "\nWJ_norm_%s lnN     -         -             %0.3f    -       -       -"%(self.channel, 1+ self.workspace4limit_.var("rate_WJets_for_unbin").getError()/self.workspace4limit_.var("rate_WJets_for_unbin").getVal() ) );
+            datacard_out.write( "\nWjet_Norm_%s_%d lnN     -         -             %0.3f    -       -       -      -"%(self.channel,options.jet_bin, 1+ self.workspace4limit_.var("rate_WJets_for_unbin").getError()/self.workspace4limit_.var("rate_WJets_for_unbin").getVal() ) );
 
-         ## top normalization
-         datacard_out.write( "\nTop_norm_%s lnN    -         -             -        %0.3f   %0.3f   -"%(self.channel, 1+self.rrv_wtagger_eff_reweight_forT.getError(), 1+self.rrv_wtagger_eff_reweight_forT.getError() ) );
 
-         datacard_out.write( "\nwtagger_%s lnN     %0.3f     %0.3f         -        -       -       %0.3f"%(self.channel, 1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError() ) );
+#         datacard_out.write( "\nCMS_btag_efficiency lnN     %0.3f     %0.3f         %0.3f        %0.3f   %0.3f   %0.3f    %0.3f"%(1+self.ggH_normlization_uncertainty_from_btag_scale, 1+self.vbf_normlization_uncertainty_from_btag_scale, 1+self.WJets_normlization_uncertainty_from_btag_scale, 1+self.TTbar_normlization_uncertainty_from_btag_scale, 1+self.STop_normlization_uncertainty_from_btag_scale, 1+self.VV_normlization_uncertainty_from_btag_scale, 1+self.WW_EWK_normlization_uncertainty_from_btag_scale ) );
 
-         datacard_out.write( "\nbtagger_%s lnN     %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f"%(self.channel, 1+self.btag_scale_uncertainty, 1+self.btag_scale_uncertainty, 1+self.btag_scale_uncertainty, 1+self.btag_scale_uncertainty, 1+self.btag_scale_uncertainty ) );
+#         datacard_out.write( "\nCMS_scale_%s lnN     %0.3f     %0.3f         %0.3f        %0.3f   %0.3f   %0.3f    %0.3f"%(self.channel,1+self.ggH_normlization_uncertainty_from_lep_scale, 1+self.vbf_normlization_uncertainty_from_lep_scale, 1+self.WJets_normlization_uncertainty_from_lep_scale, 1+self.TTbar_normlization_uncertainty_from_lep_scale, 1+self.STop_normlization_uncertainty_from_lep_scale, 1+self.VV_normlization_uncertainty_from_lep_scale, 1+self.WW_EWK_normlization_uncertainty_from_lep_scale ) );
 
-         ## jet mass systematic scaling up and down ca8 jets
-         if self.ggH_normlization_uncertainty_from_jet_mass!=0 and self.vbf_normlization_uncertainty_from_jet_mass!=0 and self.WJets_normlization_uncertainty_from_jet_mass!=0 and self.TTbar_normlization_uncertainty_from_jet_mass!=0 and self.STop_normlization_uncertainty_from_jet_mass!=0 and self.VV_normlization_uncertainty_from_jet_mass!=0 : 
-
-          datacard_out.write( "\nJetMass_%s lnN     %0.3f     %0.3f      %0.3f    %0.3f   %0.3f   %0.3f"%(self.channel, 1+self.ggH_normlization_uncertainty_from_jet_mass, 1+self.vbf_normlization_uncertainty_from_jet_mass, 1+self.WJets_normlization_uncertainty_from_jet_mass, 1+self.TTbar_normlization_uncertainty_from_jet_mass, 1+self.STop_normlization_uncertainty_from_jet_mass, 1+self.VV_normlization_uncertainty_from_jet_mass ) )
 
          ## jet mass systematic scaling up and down vbf jets detajj, mjj, and pt selection effect
-         if self.ggH_normlization_uncertainty_from_vbf_jet_mass!=0 and self.vbf_normlization_uncertainty_from_vbf_jet_mass!=0 and self.WJets_normlization_uncertainty_from_vbf_jet_mass!=0 and self.TTbar_normlization_uncertainty_from_vbf_jet_mass!=0 and self.STop_normlization_uncertainty_from_vbf_jet_mass!=0 and self.VV_normlization_uncertainty_from_vbf_jet_mass!=0 : 
+         if self.ggH_normlization_uncertainty_from_jet_scale!=0 and self.vbf_normlization_uncertainty_from_jet_scale!=0 and self.WJets_normlization_uncertainty_from_jet_scale!=0 and self.TTbar_normlization_uncertainty_from_jet_scale!=0 and self.STop_normlization_uncertainty_from_jet_scale!=0 and self.VV_normlization_uncertainty_from_jet_scale!=0 : 
 
-          datacard_out.write( "\nJetVbfMass_%s lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f"%(self.channel, 1+self.ggH_normlization_uncertainty_from_jet_mass, 1+self.vbf_normlization_uncertainty_from_jet_mass, 1+self.WJets_normlization_uncertainty_from_vbf_jet_mass, 1+self.TTbar_normlization_uncertainty_from_vbf_jet_mass, 1+self.STop_normlization_uncertainty_from_vbf_jet_mass, 1+self.VV_normlization_uncertainty_from_vbf_jet_mass ) )        
+          datacard_out.write( "\nCMS_scale_j lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f    %0.3f"%(1+self.ggH_normlization_uncertainty_from_jet_mass, 1+self.vbf_normlization_uncertainty_from_jet_mass, 1+self.WJets_normlization_uncertainty_from_jet_scale, 1+self.TTbar_normlization_uncertainty_from_jet_scale, 1+self.STop_normlization_uncertainty_from_jet_scale, 1+self.VV_normlization_uncertainty_from_jet_scale, 1+self.WW_EWK_normlization_uncertainty_from_jet_scale ) )        
 
-         datacard_out.write( "\ntrigger_%s lnN     %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f"%(self.channel, 1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty ) );
+         if self.ggH_normlization_uncertainty_from_jet_res!=0 and self.vbf_normlization_uncertainty_from_jet_res!=0 and self.WJets_normlization_uncertainty_from_jet_res!=0 and self.TTbar_normlization_uncertainty_from_jet_res!=0 and self.STop_normlization_uncertainty_from_jet_res!=0 and self.VV_normlization_uncertainty_from_jet_res!=0 : 
 
-         datacard_out.write( "\neff_%s   lnN       %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f"%(self.channel, 1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty ) );
+          datacard_out.write( "\nCMS_res_j lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f    %0.3f"%(1+self.ggH_normlization_uncertainty_from_jet_res, 1+self.vbf_normlization_uncertainty_from_jet_res, 1+self.WJets_normlization_uncertainty_from_jet_res, 1+self.TTbar_normlization_uncertainty_from_jet_res, 1+self.STop_normlization_uncertainty_from_jet_res, 1+self.VV_normlization_uncertainty_from_jet_res, 1+self.WW_EWK_normlization_uncertainty_from_jet_res ) )        
+
+#         datacard_out.write( "\nCMS_res_l lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f    %0.3f"%(1+self.ggH_normlization_uncertainty_from_lep_res, 1+self.vbf_normlization_uncertainty_from_lep_res, 1+self.WJets_normlization_uncertainty_from_lep_res, 1+self.TTbar_normlization_uncertainty_from_lep_res, 1+self.STop_normlization_uncertainty_from_lep_res, 1+self.VV_normlization_uncertainty_from_lep_res, 1+self.WW_EWK_normlization_uncertainty_from_lep_res ) )        
 
          if mode == "unbin":
             for i in range(len(params_list)):
@@ -3828,7 +5019,7 @@ class doFit_wj_and_wlvj:
                 else:
                     datacard_out.write( "\n%s param  %0.1f  %0.1f "%( params_list[i].GetName(), params_list[i].getVal(), params_list[i].getError() ) ) 
          if mode == "counting":
-            datacard_out.write( "\nShape    lnN       -         -             %0.3f    -       -       -"%(1+self.rrv_counting_uncertainty_from_shape_uncertainty.getError()))
+            datacard_out.write( "\nShape    lnN       -         -             %0.3f    -       -       -      -"%(1+self.rrv_counting_uncertainty_from_shape_uncertainty.getError()))
 
 
     ### in order to get the pull
@@ -3859,12 +5050,14 @@ class doFit_wj_and_wlvj:
             param = par.Next()
         print "___________________________________________________"
 
+
         rrv_x = workspace.var("rrv_mass_lvj")
         data_obs = workspace.data("data_obs_%s"%(self.channel))
         model_pdf_ggH   = workspace.pdf("%s_%s"%(self.higgs_sample,self.channel))
         model_pdf_vbfH  = workspace.pdf("%s_%s"%(self.vbfhiggs_sample,self.channel))
         model_pdf_WJets = workspace.pdf("WJets_%s"%(self.channel))
         model_pdf_VV = workspace.pdf("VV_%s"%(self.channel))
+        model_pdf_WW_EWK = workspace.pdf("WW_EWK_%s"%(self.channel))
         model_pdf_TTbar = workspace.pdf("TTbar_%s"%(self.channel))
         model_pdf_STop  = workspace.pdf("STop_%s"%(self.channel))
 
@@ -3874,11 +5067,13 @@ class doFit_wj_and_wlvj:
         model_pdf_VV.Print();
         model_pdf_TTbar.Print();
         model_pdf_STop.Print();
+        model_pdf_WW_EWK.Print();
 
         rrv_number_ggH = workspace.var("rate_%s_for_unbin"%(self.higgs_sample))
         rrv_number_vbfH = workspace.var("rate_%s_for_unbin"%(self.vbfhiggs_sample))
         rrv_number_WJets = workspace.var("rate_WJets_for_unbin")
         rrv_number_VV = workspace.var("rate_VV_for_unbin")
+        rrv_number_WW_EWK = workspace.var("rate_WW_EWK_for_unbin")        
         rrv_number_TTbar = workspace.var("rate_TTbar_for_unbin")
         rrv_number_STop = workspace.var("rate_STop_for_unbin")
 
@@ -3886,33 +5081,40 @@ class doFit_wj_and_wlvj:
         rrv_number_vbfH.Print();
         rrv_number_WJets.Print();
         rrv_number_VV.Print();
+        rrv_number_WW_EWK.Print();       
         rrv_number_TTbar.Print();
         rrv_number_STop.Print();
 
         rrv_number_Total_background_MC = RooRealVar("rrv_number_Total_background_MC","rrv_number_Total_background_MC",
                 rrv_number_WJets.getVal()+
                 rrv_number_VV.getVal()+
+                rrv_number_WW_EWK.getVal()+                                                    
                 rrv_number_TTbar.getVal()+
                 rrv_number_STop.getVal());
         rrv_number_Total_background_MC.setError(TMath.Sqrt(
                 rrv_number_WJets.getError()* rrv_number_WJets.getError()+
                 rrv_number_VV.getError()* rrv_number_VV.getError()+
+                rrv_number_WW_EWK.getError()* rrv_number_WW_EWK.getError()+                
                 rrv_number_TTbar.getError()* rrv_number_TTbar.getError()+
                 rrv_number_STop.getError() *rrv_number_STop.getError() 
                 ));
-        
-        model_Total_background_MC = RooAddPdf("model_Total_background_MC","model_Total_background_MC",RooArgList(model_pdf_WJets,model_pdf_VV,model_pdf_TTbar,model_pdf_STop),RooArgList(rrv_number_WJets,rrv_number_VV,rrv_number_TTbar,rrv_number_STop));
 
-        scale_number_ggH  = rrv_number_ggH.getVal()/data_obs.sumEntries()
-        scale_number_vbfH = rrv_number_vbfH.getVal()/data_obs.sumEntries()
-        scale_number_Total_background_MC = rrv_number_Total_background_MC.getVal()/data_obs.sumEntries()
+
+        model_Total_background_MC = RooAddPdf("model_Total_background_MC","model_Total_background_MC",RooArgList(model_pdf_WJets,model_pdf_VV,model_pdf_WW_EWK,model_pdf_TTbar,model_pdf_STop),RooArgList(rrv_number_WJets,rrv_number_VV,rrv_number_WW_EWK,rrv_number_TTbar,rrv_number_STop));
+
+        scale_number_ggH  = rrv_number_ggH.getVal()/data_obs.sumEntries();
+        scale_number_vbfH = rrv_number_vbfH.getVal()/data_obs.sumEntries();
+        scale_number_Total_background_MC = rrv_number_Total_background_MC.getVal()/data_obs.sumEntries();
+
 
         mplot = rrv_x.frame(RooFit.Title("check_workspace"));
         data_obs.plotOn(mplot ,RooFit.DataError(RooAbsData.SumW2), RooFit.Name("data_invisible"),RooFit.Invisible());
 
 
         #### create the frame
-        model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Name("WJets"), RooFit.Components("WJets_%s,VV_%s,TTbar_%s,STop_%s"%(self.channel,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WJets"]), RooFit.LineColor(self.color_palet["WJets"]), RooFit.VLines());
+        model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Name("WJets"), RooFit.Components("WJets_%s,WW_EWK_%s,VV_%s,TTbar_%s,STop_%s"%(self.channel,self.channel,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WJets"]), RooFit.LineColor(self.color_palet["WJets"]), RooFit.VLines());
+
+        model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Name("WW_EWK"), RooFit.Components("WW_EWK_%s,VV_%s,TTbar_%s,STop_%s"%(self.channel,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WW_EWK"]), RooFit.LineColor(self.color_palet["WW_EWK"]), RooFit.VLines());        
 
         model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Name("VV"), RooFit.Components("VV_%s,TTbar_%s,STop_%s"%(self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["VV"]), RooFit.LineColor(self.color_palet["VV"]), RooFit.VLines());
 
@@ -3922,7 +5124,9 @@ class doFit_wj_and_wlvj:
 
 
         #solid line
-        model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Name("WJets_line_invisible"), RooFit.Components("WJets_xww_%s_%s,VV_xww_%s_%s,TTbar_xww_%s_%s,STop_xww_%s_%s"%(self.channel,self.wtagger_label,self.channel,self.wtagger_label,self.channel,self.wtagger_label,self.channel,self.wtagger_label)), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines());
+        model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Name("WJets_line_invisible"), RooFit.Components("WJets_xww_%s_%s,WW_EWK_xww_%s_%s,VV_xww_%s_%s,TTbar_xww_%s_%s,STop_xww_%s_%s"%(self.channel,self.wtagger_label,self.channel,self.wtagger_label,self.channel,self.wtagger_label,self.channel,self.wtagger_label,self.channel,self.wtagger_label)), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines());
+
+        model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Name("WW_EWK_line_invisible"), RooFit.Components("WW_EWK_xww_%s_%s,VV_xww_%s_%s,TTbar_xww_%s_%s,STop_xww_%s_%s"%(self.channel,self.wtagger_label,self.channel,self.wtagger_label,self.channel,self.wtagger_label,self.channel,self.wtagger_label)), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines());
 
         model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Name("VV_line_invisible"), RooFit.Components("VV_xww_%s_%s,TTbar_xww_%s_%s,STop_xww_%s_%s"%(self.channel,self.wtagger_label,self.channel,self.wtagger_label,self.channel,self.wtagger_label)), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines());
 
@@ -3932,34 +5136,29 @@ class doFit_wj_and_wlvj:
 
 
         if self.higgs_sample=="ggH600" or self.higgs_sample=="ggH700":
-           signal_scale=5;
+           signal_scale = 2;
         else: 
-           signal_scale=10;
+           signal_scale = 2;
         
         if self.higgs_sample=="ggH600":
-
-            model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("ggH#times%s, 600GeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["ggH"]), RooFit.LineStyle(2), RooFit.VLines());
-            model_pdf_vbfH.plotOn(mplot,RooFit.Normalization(scale_number_vbfH*signal_scale),RooFit.Name("qqH#times%s, 600GeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["vbfH"]), RooFit.LineStyle( 9), RooFit.VLines());
+            model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("ggH#times%s, m_{H}=0.6TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["ggH"]), RooFit.LineStyle(2), RooFit.VLines());
+            model_pdf_vbfH.plotOn(mplot,RooFit.Normalization(scale_number_vbfH*signal_scale),RooFit.Name("qqH#times%s, m_{H}=0.6TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["vbfH"]), RooFit.LineStyle( 9), RooFit.VLines());
 
         if self.higgs_sample=="ggH700":
-
-            model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("ggH#times%s, 700GeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["ggH"]), RooFit.LineStyle(2), RooFit.VLines());
-            model_pdf_vbfH.plotOn(mplot,RooFit.Normalization(scale_number_vbfH*signal_scale),RooFit.Name("qqH#times%s, 700GeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["vbfH"]), RooFit.LineStyle( 9), RooFit.VLines());
+            model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("ggH#times%s, m_{H}=0.7TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["ggH"]), RooFit.LineStyle(2), RooFit.VLines());
+            model_pdf_vbfH.plotOn(mplot,RooFit.Normalization(scale_number_vbfH*signal_scale),RooFit.Name("qqH#times%s, m_{H}=0.7TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["vbfH"]), RooFit.LineStyle( 9), RooFit.VLines());
 
         if self.higgs_sample=="ggH800":
-
-            model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("ggH#times%s, 800GeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["ggH"]), RooFit.LineStyle(2), RooFit.VLines());
-            model_pdf_vbfH.plotOn(mplot,RooFit.Normalization(scale_number_vbfH*signal_scale),RooFit.Name("qqH#times%s, 800GeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["vbfH"]), RooFit.LineStyle( 9), RooFit.VLines());
+            model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("ggH#times%s, m_{H}=0.8TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["ggH"]), RooFit.LineStyle(2), RooFit.VLines());
+            model_pdf_vbfH.plotOn(mplot,RooFit.Normalization(scale_number_vbfH*signal_scale),RooFit.Name("qqH#times%s, m_{H}=0.8TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["vbfH"]), RooFit.LineStyle( 9), RooFit.VLines());
 
         if self.higgs_sample=="ggH900":
-
-            model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("ggH#times%s, 900GeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["ggH"]), RooFit.LineStyle(2), RooFit.VLines());
-            model_pdf_vbfH.plotOn(mplot,RooFit.Normalization(scale_number_vbfH*signal_scale),RooFit.Name("qqH#times%s, 900GeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["vbfH"]), RooFit.LineStyle( 9), RooFit.VLines());
+            model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("ggH#times%s, m_{H}=0.9TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["ggH"]), RooFit.LineStyle(2), RooFit.VLines());
+            model_pdf_vbfH.plotOn(mplot,RooFit.Normalization(scale_number_vbfH*signal_scale),RooFit.Name("qqH#times%s, m_{H}=0.9TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["vbfH"]), RooFit.LineStyle( 9), RooFit.VLines());
 
         if self.higgs_sample=="ggH1000":
-
-            model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("ggH#times%s, 1000GeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["ggH"]), RooFit.LineStyle(2), RooFit.VLines());
-            model_pdf_vbfH.plotOn(mplot,RooFit.Normalization(scale_number_vbfH*signal_scale),RooFit.Name("qqH#times%s, 1000GeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["vbfH"]), RooFit.LineStyle( 9), RooFit.VLines());
+            model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("ggH#times%s, m_{H}=1TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["ggH"]), RooFit.LineStyle(2), RooFit.VLines());
+            model_pdf_vbfH.plotOn(mplot,RooFit.Normalization(scale_number_vbfH*signal_scale),RooFit.Name("qqH#times%s, m_{H}=1TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["vbfH"]), RooFit.LineStyle( 9), RooFit.VLines());
 
         data_obs.plotOn(mplot, RooFit.Name("data"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
         model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Invisible());
@@ -3974,19 +5173,24 @@ class doFit_wj_and_wlvj:
         mplot.Print();
         self.leg=self.legend4Plot(mplot,0, 1,0.05,0,0.1 );
         mplot.addObject(self.leg);
-        mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.1);
+        mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.3);
 
-        parameters_list=RooArgList();
-        self.draw_canvas_with_pull( mplot, mplot_pull,parameters_list,"plots_%s_%s/m_lvj_fitting/"%(self.channel,self.PS_model),"check_workspace_for_limit_%s_%s"%(self.channel,self.higgs_sample),"",0,1);
+        datahist = data_obs.binnedClone(data_obs.GetName()+"_binnedClone",data_obs.GetName()+"_binnedClone")
+        Nbin = int(rrv_x.getBins()); 
+        nparameters = FloatingParams.getSize();        
+        ChiSquare = model_Total_background_MC.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.DataError(RooAbsData.Poisson));
+        chi_over_ndf= ChiSquare.getVal()/(Nbin - nparameters);
+        ## Add Chisquare to mplot_pull
+        cs = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf)));
+        cs.SetNDC();
+        cs.SetTextSize(0.12);
+        cs.AppendPad("same");
+        mplot_pull.addObject(cs)
 
-        if workspace.var("rrv_num_floatparameter_in_last_fitting"): 
-            nPar_float_in_fitTo= int(workspace.var("rrv_num_floatparameter_in_last_fitting").getVal());
-        else:
-            nPar_float_in_fitTo=1;
+        print "nPar=%s, chiSquare=%s/%s"%(nparameters, ChiSquare.getVal()*(Nbin - nparameters), (Nbin - nparameters) );
 
-        nBinX=mplot.GetNbinsX();
-        ndof= nBinX-nPar_float_in_fitTo;
-        print "nPar=%s, chiSquare=%s/%s"%(nPar_float_in_fitTo, mplot.chiSquare( nPar_float_in_fitTo )*ndof, ndof );
+        parameters_list = RooArgList();
+        self.draw_canvas_with_pull( mplot, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/m_lvj_fitting/"%(options.additioninformation, self.channel,self.PS_model, self.wtagger_label),"check_workspace_for_limit_%s_%s"%(self.channel,self.higgs_sample),"",0,1);
 
 
     ### in order to get the pull
@@ -4041,7 +5245,7 @@ class doFit_wj_and_wlvj:
       return banner;
 
 
-   ### in order to make the legend
+    ### in order to make the legend
     def legend4Plot(self, plot, left=1, isFill=1, x_offset_low=0., y_offset_low=0., x_offset_high =0., y_offset_high =0., TwoCoulum =1.):
         print "############### draw the legend ########################"
         if left==-1:
@@ -4069,9 +5273,54 @@ class doFit_wj_and_wlvj:
         objName_before = "";
         objName_signal_graviton = "";
         objNameLeg_signal_graviton = "";
-        
+
+        if self.categoryID==0: legHeader="(e#nu, 1JLP)";
+        elif self.categoryID==1: legHeader="(e#nu, 1JHP)";
+        elif self.categoryID==2: legHeader="(#mu#nu, 1JLP)";
+        elif self.categoryID==3: legHeader="(#mu#nu, 1JHP)";
+
+        for obj in range(int(plot.numItems()) ):
+          objName = plot.nameOf(obj);
+          if objName == "errorband" : objName = "Uncertainty";
+          print objName;
+          if not ( ( (plot.getInvisible(objName)) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisi") or TString(objName).Contains("TLine") or objName ==objName_before ):
+            theObj = plot.getObject(obj);
+            objTitle = objName;
+            drawoption= plot.getDrawOptions(objName).Data()
+            if drawoption=="P":drawoption="PE"
+            if TString(objName).Contains("Uncertainty") or TString(objName).Contains("sigma"): objName_before=objName; continue ;
+            elif TString(objName).Contains("Graph") : objName_before=objName; continue ;
+            elif TString(objName).Data()=="data" : theLeg.AddEntry(theObj, "CMS Data "+legHeader,"PE"); objName_before=objName;
+            else: objName_before=objName; continue ;
+
+        entryCnt = 0;
+        objName_before = "";
+        objName_signal_graviton = "";
+        objNameLeg_signal_graviton = "";
+                   
+        for obj in range(int(plot.numItems()) ):
+          objName = plot.nameOf(obj);
+          if objName == "errorband" : objName = "Uncertainty";
+          print objName;
+          if not ( ( (plot.getInvisible(objName)) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisi") or TString(objName).Contains("TLine") or objName ==objName_before ):
+            theObj = plot.getObject(obj);
+            objTitle = objName;
+            drawoption= plot.getDrawOptions(objName).Data()
+            if drawoption=="P":drawoption="PE"
+            if TString(objName).Contains("Uncertainty") or TString(objName).Contains("sigma"): objName_before=objName; continue ;
+            elif TString(objName).Contains("Graph") : objName_before=objName; continue ;
+            elif TString(objName).Data()=="WJets" : theLeg.AddEntry(theObj, "W+jets","F"); objName_before=objName;
+            else: objName_before=objName; continue ;
+
+        entryCnt = 0;
+        objName_before = "";
+        objName_signal_graviton = "";
+        objNameLeg_signal_graviton = "";
+
+
         for obj in range(int(plot.numItems()) ):
             objName = plot.nameOf(obj);
+            if objName == "errorband" : objName = "Uncertainty";
             print objName;
             if not ( ( (plot.getInvisible(objName)) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisi") or TString(objName).Contains("TLine") or objName ==objName_before ):
                 theObj = plot.getObject(obj);
@@ -4086,10 +5335,9 @@ class doFit_wj_and_wlvj:
                     if TString(objName).Data()=="STop" : theLeg.AddEntry(theObj, "Single Top","F");
                     elif TString(objName).Data()=="TTbar" : theLeg.AddEntry(theObj, "t#bar{t}","F");
                     elif TString(objName).Data()=="VV" : theLeg.AddEntry(theObj, "WW/WZ","F");
-                    elif TString(objName).Data()=="WJets" : theLeg.AddEntry(theObj, "W+jets","F");
+                    elif TString(objName).Data()=="data" : objName_before=objName; entryCnt = entryCnt+1; continue ;
+                    elif TString(objName).Data()=="WJets" : objName_before=objName; entryCnt = entryCnt+1; continue;
                     elif TString(objName).Contains("vbfH"): theLeg.AddEntry(theObj, (TString(objName).ReplaceAll("vbfH","qqH")).Data() ,"L");
-                    elif TString(objName).Data()=="data" : theLeg.AddEntry(theObj, "CMS Data","PE");
-#                    elif TString(objName).Data()=="data" : theLeg.AddEntry(theObj, "CMS Data"+legHeader,"PE");                    
                     elif TString(objName).Contains("Uncertainty"): theLeg.AddEntry(theObj, objTitle,drawoption);
                     elif TString(objName).Contains("Bulk"):
                        if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M600") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M600"):
@@ -4158,6 +5406,9 @@ class doFit_wj_and_wlvj:
         if objName_signal_graviton !="" :
            theLeg.AddEntry(objName_signal_graviton, TString(objNameLeg_signal_graviton).Data() ,"L");
         return theLeg;
+
+
+
 
     #### draw canvas with plots with pull
     def draw_canvas_with_pull(self, mplot, mplot_pull,parameters_list,in_directory, in_file_name, in_model_name="", show_constant_parameter=0, logy=0):# mplot + pull
@@ -4350,67 +5601,88 @@ class doFit_wj_and_wlvj:
         print "############# fit_Signal #################"
         ### Build the dataset
         self.get_mj_and_mlvj_dataset(self.file_ggH,"_%s"%(self.higgs_sample));
-        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%smassup_vbf"%(self.higgs_sample),"jet_mass_pr_up","vbf_up",1);
-        self.get_mj_and_mlvj_dataset(self.file_ggH,"_%smassdn_vbf"%(self.higgs_sample),"jet_mass_pr_dn","vbf_dn",1);
-
-        # for VBF sample
         self.get_mj_and_mlvj_dataset(self.file_vbfH,"_%s"%(self.vbfhiggs_sample));
-        self.get_mj_and_mlvj_dataset(self.file_vbfH,"_%smassup_vbf"%(self.vbfhiggs_sample),"jet_mass_pr_up", "vbf_up",1);
-        self.get_mj_and_mlvj_dataset(self.file_vbfH,"_%smassdn_vbf"%(self.vbfhiggs_sample),"jet_mass_pr_dn", "vbf_dn",1);
+
 
         if self.higgs_sample=="ggH600":
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup_vbf"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn_vbf"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_up"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_dn"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer_up"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer_dn"%(self.higgs_sample),"_signal_region","CB_v1");
 
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");            
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");             
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jes_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jes_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
 
-        elif self.higgs_sample=="ggH700":
+        if self.higgs_sample=="ggH700":
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_up"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_dn"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer_up"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer_dn"%(self.higgs_sample),"_signal_region","CB_v1");
 
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup_vbf"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn_vbf"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jes_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jes_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
 
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");            
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");             
+        if self.higgs_sample=="ggH800":
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_up"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_dn"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer_up"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer_dn"%(self.higgs_sample),"_signal_region","CB_v1");
 
-        elif self.higgs_sample=="ggH800":
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jes_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jes_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
 
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup_vbf"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn_vbf"%(self.higgs_sample),"_signal_region","CB_v1");            
+        if self.higgs_sample=="ggH900":
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_up"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_dn"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer_up"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer_dn"%(self.higgs_sample),"_signal_region","CB_v1");
 
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1"); 
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jes_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jes_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
 
-        elif self.higgs_sample=="ggH900":
+        if self.higgs_sample=="ggH1000":
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_up"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_dn"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer_up"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer_dn"%(self.higgs_sample),"_signal_region","CB_v1");
 
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup_vbf"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn_vbf"%(self.higgs_sample),"_signal_region","CB_v1");                        
-
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");             
-
-        elif self.higgs_sample=="ggH1000":
-
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassup_vbf"%(self.higgs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%smassdn_vbf"%(self.higgs_sample),"_signal_region","CB_v1");                        
-
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassup_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%smassdn_vbf"%(self.vbfhiggs_sample),"_signal_region","CB_v1");             
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jes_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jes_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
 
         else:
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_sb_lo","BW_v1");
-            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region","BW_v1");  
-            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","BW_v1"); 
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%s"%(self.higgs_sample),"_sb_lo","BW_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%s"%(self.higgs_sample),"_signal_region","BW_v1");  
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%s"%(self.vbfhiggs_sample),"_signal_region","BW_v1"); 
 
         print "________________________________________________________________________"
 
@@ -4421,28 +5693,56 @@ class doFit_wj_and_wlvj:
         self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0")# to get the shape of m_lvj
         self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets01")# to get the shape of m_lvj
 
-  #      self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJetsmassup_vbf","jet_mass_pr_up","vbf_up",1)# to get the shape of m_lvj
-  #      self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJetsmassdn_vbf","jet_mass_pr_dn","vbf_dn",1)# to get the shape of m_lvj
+        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","_WJets0","ErfExp");# use for estimating the PS model uncertainty
+        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets01","_WJets01","User1");# use for estimating the fitting model uncertainty
 
-        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","User1");# use for estimating the PS model uncertainty
-        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets01","ErfExp");# use for estimating the fitting model uncertainty
+        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsmassvbfup","ErfExp");
+        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsmassvbfdn","ErfExp");        
+        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsjetresup","ErfExp");
+        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsjetresdn","ErfExp");        
+        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsjetres","ErfExp");
+        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","_WJetslptup","ErfExp");        
+        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","_WJetslptdn","ErfExp");
+        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","_WJetslepres","ErfExp");        
+        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsbtagscaleup","ErfExp");
+        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsbtagscaledn","ErfExp");        
+        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsbtagscaleupdn","ErfExp");
+        self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsbtagscalednup","ErfExp");        
 
-  #      self.fit_mj_single_MC(self.file_WJets0_mc,"_WJetsmassup_vbf","User1");
-  #      self.fit_mj_single_MC(self.file_WJets0_mc,"_WJetsmassdn_vbf","User1");        
-
-        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
-        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
-        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets01","_sb_lo",self.MODEL_4_mlvj_alter,0,0,1,1);
-        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets01","_signal_region",self.MODEL_4_mlvj_alter,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJets0","_sb_lo",self.MODEL_4_mlvj,1,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJets0","_signal_region",self.MODEL_4_mlvj,1,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets01","_WJets01","_sb_lo",self.MODEL_4_mlvj_alter,1,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets01","_WJets01","_signal_region",self.MODEL_4_mlvj_alter,1,0,1,1);
 
 
-        self.get_WJets_mlvj_correction_sb_lo_to_signal_region("_WJets0",self.MODEL_4_mlvj);
-        self.get_WJets_mlvj_correction_sb_lo_to_signal_region("_WJets0",self.MODEL_4_mlvj,"_mlvj_relaxed");        
-  #      self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJetsmassup_vbf","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
-  #      self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJetsmassup_vbf","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+#        self.get_WJets_mlvj_correction_sb_lo_to_signal_region("_WJets01",self.MODEL_4_mlvj_alter);
+#        self.get_WJets_mlvj_correction_sb_lo_to_signal_region("_WJets0",self.MODEL_4_mlvj);        
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsmassvbfup","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsmassvbfdn","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsjetresup","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsjetresdn","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsjetres","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetslptup","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetslptdn","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetslepres","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsbtagscaleup","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsbtagscaledn","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsbtagscaleupdn","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsbtagscalednup","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
 
-  #      self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJetsmassdn_vbf","_sb_lo",self.MODEL_4_mlvj,0,0,1,1);
-  #      self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJetsmassdn_vbf","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsmassvbfup","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsmassvbfdn","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsjetresup","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsjetresdn","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsjetres","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetslptup","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetslptdn","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetslepres","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsbtagscaleup","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsbtagscaledn","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsbtagscaleupdn","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_WJetsbtagscalednup","_signal_region",self.MODEL_4_mlvj,0,0,1,1);
+
 
         print "________________________________________________________________________"
 
@@ -4452,37 +5752,151 @@ class doFit_wj_and_wlvj:
 
         ### Build the dataset        
         self.get_mj_and_mlvj_dataset(self.file_VV_mc,"_VV","jet_mass_pr")# to get the shape of m_lvj
-        #jet vbf dn and up
-#        self.get_mj_and_mlvj_dataset(self.file_VV_mc,"_VVmassup_vbf","jet_mass_pr_up","vbf_up",1)
-#        self.get_mj_and_mlvj_dataset(self.file_VV_mc,"_VVmassdn_vbf","jet_mass_pr_dn","vbf_dn",1)
 
-        self.fit_mj_single_MC(self.file_VV_mc,"_VV","2_2Gaus");                        
-#        self.fit_mj_single_MC(self.file_VV_mc,"_VVmassup_vbf","2_2Gaus");
-#        self.fit_mj_single_MC(self.file_VV_mc,"_VVmassdn_vbf","2_2Gaus");        
+        self.fit_mj_single_MC(self.file_VV_mc,"_VV","_VV","2_2Gaus");                        
+        self.fit_mj_single_MC(self.file_VV_mc,"_VV","_VVmassvbfup","2_2Gaus");
+        self.fit_mj_single_MC(self.file_VV_mc,"_VV","_VVmassvbfdn","2_2Gaus");        
+        self.fit_mj_single_MC(self.file_VV_mc,"_VV","_VVlptup","2_2Gaus");
+        self.fit_mj_single_MC(self.file_VV_mc,"_VV","_VVlptdn","2_2Gaus");        
+        self.fit_mj_single_MC(self.file_VV_mc,"_VV","_VVlepres","2_2Gaus");
+        self.fit_mj_single_MC(self.file_VV_mc,"_VV","_VVjetres","2_2Gaus");        
+        self.fit_mj_single_MC(self.file_VV_mc,"_VV","_VVjetresup","2_2Gaus");
+        self.fit_mj_single_MC(self.file_VV_mc,"_VV","_VVjetresdn","2_2Gaus");        
+        self.fit_mj_single_MC(self.file_VV_mc,"_VV","_VVbtagscaleup","2_2Gaus");
+        self.fit_mj_single_MC(self.file_VV_mc,"_VV","_VVbtagscaledn","2_2Gaus");        
+        self.fit_mj_single_MC(self.file_VV_mc,"_VV","_VVbtagscaleupdn","2_2Gaus");
+        self.fit_mj_single_MC(self.file_VV_mc,"_VV","_VVbtagscalednup","2_2Gaus");        
 
-        if self.MODEL_4_mlvj=="ErfPowExp_v1":
+      #  if self.MODEL_4_mlvj=="ErfPowExp_v1":
                                           
-         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_sb_lo","ErfExp_v1",0,0,1);
-         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+      #   self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VV","_sb_lo","ErfExp_v1",0,0,1);
+      #   self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VV","_signal_region",self.MODEL_4_mlvj,1,0,1);     
 
-#         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassup_vbf","_sb_lo","ErfExp_v1",0,0,1);
-#         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassup_vbf","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+      #   self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVmassvbfup","_sb_lo","ErfExp_v1",0,0,1);
+      #   self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVmassvbfup","_signal_region",self.MODEL_4_mlvj,1,0,1);     
  
-#         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassdn_vbf","_sb_lo","ErfExp_v1",0,0,1);
-#         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassdn_vbf","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+      #   self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVmassvbfdn","_sb_lo","ErfExp_v1",0,0,1);
+      #   self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVmassvbfdn","_signal_region",self.MODEL_4_mlvj,1,0,1);     
 
-        else:
+      #  else:
 
-         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_sb_lo",self.MODEL_4_mlvj,0,0,1);
-         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+      #   self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VV","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+      #   self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VV","_signal_region",self.MODEL_4_mlvj,1,0,1);     
 
- #        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassup_vbf","_sb_lo",self.MODEL_4_mlvj,0,0,1);
- #        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassup_vbf","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+#         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVmassvbfup","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+#         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVmassvbfup","_signal_region",self.MODEL_4_mlvj,1,0,1);     
  
- #        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassdn_vbf","_sb_lo",self.MODEL_4_mlvj,0,0,1);
- #        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VVmassdn_vbf","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+#         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVmassvbfdn","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+#         self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVmassvbfdn","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+
+
+
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVmassvbfup","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVmassvbfdn","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVjetresup","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVjetresdn","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVjetres","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVlptup","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVlptdn","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVlepres","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVbtagscaleup","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVbtagscaledn","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVbtagscaleupdn","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVbtagscalednup","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVmassvbfup","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVmassvbfdn","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVjetresup","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVjetresdn","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVjetres","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVlptup","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVlptdn","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVlepres","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVbtagscaleup","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVbtagscaledn","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVbtagscaleupdn","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_VVbtagscalednup","_signal_region",self.MODEL_4_mlvj,1,0,1);
+
+
 
         print "________________________________________________________________________"
+
+
+    ##### Define the steps to fit WW_EWK MC in the mj and mlvj spectra
+    def fit_WW_EWK(self):
+        print "############################# fit_WW_EWK ################################"
+
+        ### Build the dataset        
+        self.get_mj_and_mlvj_dataset(self.file_WW_EWK_mc,"_WW_EWK","jet_mass_pr")# to get the shape of m_lvj
+
+        self.fit_mj_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWK","2_2Gaus");                        
+        self.fit_mj_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKmassvbfup","2_2Gaus");
+        self.fit_mj_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKmassvbfdn","2_2Gaus");        
+        self.fit_mj_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKlptup","2_2Gaus");
+        self.fit_mj_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKlptdn","2_2Gaus");        
+        self.fit_mj_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKlepres","2_2Gaus");
+        self.fit_mj_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKjetres","2_2Gaus");        
+        self.fit_mj_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKjetresup","2_2Gaus");
+        self.fit_mj_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKjetresdn","2_2Gaus");        
+        self.fit_mj_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKbtagscaleup","2_2Gaus");
+        self.fit_mj_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKbtagscaledn","2_2Gaus");        
+        self.fit_mj_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKbtagscaleupdn","2_2Gaus");
+        self.fit_mj_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKbtagscalednup","2_2Gaus");        
+
+      #  if self.MODEL_4_mlvj=="ErfPowExp_v1":
+                                          
+      #   self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWK","_sb_lo","ErfExp_v1",0,0,1);
+      #   self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWK","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+
+      #   self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKmassvbfup","_sb_lo","ErfExp_v1",0,0,1);
+      #   self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKmassvbfup","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+ 
+      #   self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKmassvbfdn","_sb_lo","ErfExp_v1",0,0,1);
+      #   self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKmassvbfdn","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+
+      #  else:
+
+      #   self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWK","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+      #   self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWK","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+
+#         self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKmassvbfup","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+#         self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKmassvbfup","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+ 
+#         self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKmassvbfdn","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+#         self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKmassvbfdn","_signal_region",self.MODEL_4_mlvj,1,0,1);     
+
+
+
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKmassvbfup","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKmassvbfdn","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKjetresup","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKjetresdn","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKjetres","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKlptup","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKlptdn","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKlepres","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKbtagscaleup","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKbtagscaledn","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKbtagscaleupdn","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKbtagscalednup","_sb_lo",self.MODEL_4_mlvj,0,0,1);
+
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKmassvbfup","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKmassvbfdn","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKjetresup","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKjetresdn","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKjetres","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKlptup","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKlptdn","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKlepres","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKbtagscaleup","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKbtagscaledn","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKbtagscaleupdn","_signal_region",self.MODEL_4_mlvj,1,0,1);
+        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_WW_EWKbtagscalednup","_signal_region",self.MODEL_4_mlvj,1,0,1);
+
+
+
+        print "________________________________________________________________________"
+
 
     ##### Define the steps to fit TTbar MC in the mj and mlvj spectra
     def fit_TTbar(self):
@@ -4491,38 +5905,73 @@ class doFit_wj_and_wlvj:
         ### Build the dataset
 
         self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbar")# to get the shape of m_lvj
-  #      self.get_mj_and_mlvj_dataset(self.file_TTbar_matchDn_mc,"_TTbar_matchDn")# to get the shape of m_lvj
-  #      self.get_mj_and_mlvj_dataset(self.file_TTbar_matchUp_mc,"_TTbar_matchUp")# to get the shape of m_lvj
-  #      self.get_mj_and_mlvj_dataset(self.file_TTbar_scaleDn_mc,"_TTbar_scaleDn")# to get the shape of m_lvj
-  #      self.get_mj_and_mlvj_dataset(self.file_TTbar_scaleUp_mc,"_TTbar_scaleUp")# to get the shape of m_lvj
-  #      self.get_mj_and_mlvj_dataset(self.file_TTbar_MG_mc,"_TTbar_MG")# to get the shape of m_lvj
+        self.get_mj_and_mlvj_dataset(self.file_TTbar_matchDn_mc,"_TTbar_matchDn")# to get the shape of m_lvj
+        self.get_mj_and_mlvj_dataset(self.file_TTbar_matchUp_mc,"_TTbar_matchUp")# to get the shape of m_lvj
+        self.get_mj_and_mlvj_dataset(self.file_TTbar_scaleDn_mc,"_TTbar_scaleDn")# to get the shape of m_lvj
+        self.get_mj_and_mlvj_dataset(self.file_TTbar_scaleUp_mc,"_TTbar_scaleUp")# to get the shape of m_lvj
+        self.get_mj_and_mlvj_dataset(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo")# to get the shape of m_lvj
 
 
-  #      self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbarmassup_vbf","jet_mass_pr_up","vbf_up",1)
-  #      self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbarmassdn_vbf","jet_mass_pr_dn","vbf_dn",1)        
+        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbar","2Gaus_ErfExp");
+        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbfup","2Gaus_ErfExp");
+        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbfdn","2Gaus_ErfExp");        
+        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarlptup","2Gaus_ErfExp");
+        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarlptdn","2Gaus_ErfExp");        
+        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarlepres","2Gaus_ErfExp");
+        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarjetres","2Gaus_ErfExp");        
+        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarjetresup","2Gaus_ErfExp");
+        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarjetresdn","2Gaus_ErfExp");        
+        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarbtagscaleup","2Gaus_ErfExp");
+        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarbtagscaledn","2Gaus_ErfExp");        
+        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarbtagscaleupdn","2Gaus_ErfExp");
+        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarbtagscalednup","2Gaus_ErfExp");        
 
-        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","2Gaus_ErfExp");
-  #      self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbarmassup_vbf","2Gaus_ErfExp");
-  #      self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbarmassdn_vbf","2Gaus_ErfExp");
 
-        if self.MODEL_4_mlvj=="ErfPowExp_v1":
-           self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_sb_lo","ErfExp_v1");
-  #         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassup_vbf","_sb_lo","ErfExp_v1");
-  #         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassdn_vbf","_sb_lo","ErfExp_v1");
-        else:
-           self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_sb_lo",self.MODEL_4_mlvj);
-  #         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassup_vbf","_sb_lo",self.MODEL_4_mlvj);
-  #         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassdn_vbf","_sb_lo",self.MODEL_4_mlvj);
+#        if self.MODEL_4_mlvj=="ErfPowExp_v1":
+#           self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbar","_sb_lo","ErfExp_v1",1);
+#           self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbfup","_sb_lo","ErfExp_v1",1);
+#           self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbfdn","_sb_lo","ErfExp_v1",1);
+#        else:
+#           self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbar","_sb_lo",self.MODEL_4_mlvj,1);
+#           self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbfup","_sb_lo",self.MODEL_4_mlvj,1);
+#           self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbfdn","_sb_lo",self.MODEL_4_mlvj,1);
 
-        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_signal_region",self.MODEL_4_mlvj);
-  #      self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassup_vbf","_signal_region",self.MODEL_4_mlvj);
-  #      self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbarmassdn_vbf","_signal_region",self.MODEL_4_mlvj);
-  #      self.fit_mlvj_model_single_MC(self.file_TTbar_matchDn_mc,"_TTbar_matchDn","_signal_region",self.MODEL_4_mlvj);
-  #      self.fit_mlvj_model_single_MC(self.file_TTbar_matchUp_mc,"_TTbar_matchUp","_signal_region",self.MODEL_4_mlvj);
-  #      self.fit_mlvj_model_single_MC(self.file_TTbar_scaleDn_mc,"_TTbar_scaleDn","_signal_region",self.MODEL_4_mlvj);
-  #      self.fit_mlvj_model_single_MC(self.file_TTbar_scaleUp_mc,"_TTbar_scaleUp","_signal_region",self.MODEL_4_mlvj);
-  #      self.fit_mlvj_model_single_MC(self.file_TTbar_MG_mc,"_TTbar_MG","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_matchDn_mc,"_TTbar_matchDn","_TTbar_matchDn","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_matchUp_mc,"_TTbar_matchUp","_TTbar_matchUp","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_scaleDn_mc,"_TTbar_scaleDn","_TTbar_scaleDn","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_scaleUp_mc,"_TTbar_scaleUp","_TTbar_scaleUp","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlo","_signal_region",self.MODEL_4_mlvj);
 
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbfup","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbfdn","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarjetresup","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarjetresdn","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarjetres","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarlptup","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarlptdn","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarlepres","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarbtagscaleup","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarbtagscaledn","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarbtagscaleupdn","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarbtagscalednup","_sb_lo",self.MODEL_4_mlvj,1);
+
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbfup","_signal_region",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbfdn","_signal_region",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarjetresup","_signal_region",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarjetresdn","_signal_region",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarjetres","_signal_region",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarlptup","_signal_region",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarlptdn","_signal_region",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarlepres","_signal_region",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarbtagscaleup","_signal_region",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarbtagscaledn","_signal_region",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarbtagscaleupdn","_signal_region",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarbtagscalednup","_signal_region",self.MODEL_4_mlvj,1);
+
+
+#        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbar","_signal_region",self.MODEL_4_mlvj,1);
+#        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbfup","_signal_region",self.MODEL_4_mlvj,1);
+#        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbfdn","_signal_region",self.MODEL_4_mlvj,1);
                                             
         print "________________________________________________________________________"
 
@@ -4533,23 +5982,59 @@ class doFit_wj_and_wlvj:
         print "############################### fit_STop #########################################"
         ### Build the dataset
         self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STop")# to get the shape of m_lvj
-#        self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STopmassup_vbf","jet_mass_pr_up","vbf_up",1)
-#        self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STopmassdn_vbf","jet_mass_pr_dn","vbf_dn",1)
 
-        self.fit_mj_single_MC(self.file_STop_mc,"_STop","ErfExp");
-#        self.fit_mj_single_MC(self.file_STop_mc,"_STopmassup_vbf","ErfExp");
-#        self.fit_mj_single_MC(self.file_STop_mc,"_STopmassdn_vbf","ErfExp");
+        self.fit_mj_single_MC(self.file_STop_mc,"_STop","_STop","ErfExp");
+        self.fit_mj_single_MC(self.file_STop_mc,"_STop","_STopmassvbfup","ErfExp");
+        self.fit_mj_single_MC(self.file_STop_mc,"_STop","_STopmassvbfdn","ErfExp");        
+        self.fit_mj_single_MC(self.file_STop_mc,"_STop","_SToplptup","ErfExp");
+        self.fit_mj_single_MC(self.file_STop_mc,"_STop","_SToplptdn","ErfExp");        
+        self.fit_mj_single_MC(self.file_STop_mc,"_STop","_SToplepres","ErfExp");
+        self.fit_mj_single_MC(self.file_STop_mc,"_STop","_STopjetres","ErfExp");        
+        self.fit_mj_single_MC(self.file_STop_mc,"_STop","_STopjetresup","ErfExp");
+        self.fit_mj_single_MC(self.file_STop_mc,"_STop","_STopjetresdn","ErfExp");        
+        self.fit_mj_single_MC(self.file_STop_mc,"_STop","_STopbtagscaleup","ErfExp");
+        self.fit_mj_single_MC(self.file_STop_mc,"_STop","_STopbtagscaledn","ErfExp");        
+        self.fit_mj_single_MC(self.file_STop_mc,"_STop","_STopbtagscaleupdn","ErfExp");
+        self.fit_mj_single_MC(self.file_STop_mc,"_STop","_STopbtagscalednup","ErfExp");        
 
-        if self.MODEL_4_mlvj=="ErfPowExp_v1":
-           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_sb_lo","ErfExp_v1");
-           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_signal_region","ErfExp_v1",1);
-#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STopmassup_vbf","_signal_region","ErfExp_v1");
-#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STopmassdn_vbf","_signal_region","ErfExp_v1");
-        else:
-           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_sb_lo",self.MODEL_4_mlvj);
-           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_signal_region",self.MODEL_4_mlvj);                                                              
-#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STopmassup_vbf","_signal_region",self.MODEL_4_mlvj);                                                              
-#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STopmassdn_vbf","_signal_region",self.MODEL_4_mlvj);                                                              
+
+#        if self.MODEL_4_mlvj=="ErfPowExp_v1":
+#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STop","_sb_lo","ErfExp_v1");
+#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STop","_signal_region","ErfExp_v1",1);
+#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbfup","_signal_region","ErfExp_v1");
+#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbfdn","_signal_region","ErfExp_v1");
+#        else:
+#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STop","_sb_lo",self.MODEL_4_mlvj);
+#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STop","_signal_region",self.MODEL_4_mlvj);                                                              
+#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbfup","_signal_region",self.MODEL_4_mlvj);                                                              
+
+#           self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbfdn","_signal_region",self.MODEL_4_mlvj);                                                              
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbfup","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbfdn","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopjetresup","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopjetresdn","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopjetres","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_SToplptup","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_SToplptdn","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_SToplepres","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopbtagscaleup","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopbtagscaledn","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopbtagscaleupdn","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopbtagscalednup","_sb_lo",self.MODEL_4_mlvj);
+
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbfup","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbfdn","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopjetresup","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopjetresdn","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopjetres","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_SToplptup","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_SToplptdn","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_SToplepres","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopbtagscaleup","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopbtagscaledn","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopbtagscaleupdn","_signal_region",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopbtagscalednup","_signal_region",self.MODEL_4_mlvj);
+
         
         print "________________________________________________________________________"  
 
@@ -4557,11 +6042,13 @@ class doFit_wj_and_wlvj:
     ##### Fit of all the MC in both mj and mlvj : Signal, TTbar, STop, VV and Wjets
     def fit_AllSamples_Mj_and_Mlvj(self):
         print "################### fit_AllSamples_Mj_and_Mlvj #####################"
-    #    self.fit_Signal();
-        self.fit_WJets();
-        self.fit_TTbar();
-        self.fit_VV();
-        self.fit_STop();
+        self.fit_Signal();
+#        self.fit_WJets();
+#        self.fit_TTbar();
+#        self.fit_VV();
+#        self.fit_WW_EWK();        
+#        self.fit_STop();
+
         print "________________________________________________________________________"
 
                                                                     
@@ -4572,17 +6059,17 @@ class doFit_wj_and_wlvj:
       ### Fit all MC components in both mj and mlvj
       self.fit_AllSamples_Mj_and_Mlvj()
       ### take the real data
-   #   self.get_data()
+#      self.get_data()
       ### fit the WJets Normalization into the signal region -> no jet mass fluctuation has been done
-    #  self.fit_WJetsNorm();
+#      self.fit_WJetsNorm(1);
       ### fit data in the mlvj low sideband with two different models
-#      self.fit_mlvj_in_Mj_sideband("_WJets01","_sb_lo", self.MODEL_4_mlvj_alter,1)
-   #   self.fit_mlvj_in_Mj_sideband("_WJets0","_sb_lo", self.MODEL_4_mlvj,1)
+#      self.fit_mlvj_in_Mj_sideband("_WJets01","_sb_lo", self.MODEL_4_mlvj_alter,1,0)
+#      self.fit_mlvj_in_Mj_sideband("_WJets0","_sb_lo", self.MODEL_4_mlvj,1,0)
 
 
       ### Prepare the workspace and datacards
-#      self.prepare_limit("sideband_correction_method1")
-#      self.read_workspace(1)
+#      self.prepare_limit("sideband_correction_method1",1)
+#      self.read_workspace()
 
     ####### +++++++++++++++
     def analysis_sideband_correction_method1_without_shape_and_psmodel_systermatic(self):
