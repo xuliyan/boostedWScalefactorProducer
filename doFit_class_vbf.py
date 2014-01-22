@@ -1290,7 +1290,7 @@ class doFit_wj_and_wlvj:
     ### take the dataset, the model , the parameters in order to fix them as constant --> for extended pdf
     def get_General_mj_Model(self, label, relaxed = 0 ):
         print "########### Fixing a general mj model  ############"
-        if relaxed = 0:
+        if relaxed == 0:
          rdataset_General_mj = self.workspace4fit_.data("rdataset%s_%s_mj"%(label,self.channel))
         else:
          rdataset_General_mj = self.workspace4fit_.data("rdataset%s_%s_mj_relaxed"%(label,self.channel))            
@@ -1334,7 +1334,7 @@ class doFit_wj_and_wlvj:
     ### fix only the WJets model --> for extended pdf (just fix shape parameters of width, offset of ErfExp and p1 of User1 function
     def get_WJets_mj_Model(self,label, relaxed = 0):
         print "########### Fixing only the WJets mj Shape --> just the printed parameters  ############"
-        if relaxed = 0:
+        if relaxed == 0:
          rdataset_WJets_mj = self.workspace4fit_.data("rdataset%s_%s_mj"%(label,self.channel))
         else:
          rdataset_WJets_mj = self.workspace4fit_.data("rdataset%s_%s_mj_relaxed"%(label,self.channel)) 
@@ -1970,7 +1970,7 @@ class doFit_wj_and_wlvj:
                 draw_error_band(rdataset, model_pdf,rrv_number_dataset,rfresult_pdf,mplot_deco,self.color_palet["Uncertainty"],"F"); ## draw the error band with the area
                 self.workspace4fit_.var("rrv_number_TTbar_signal_region_%s_mlvj"%(self.channel)).Print();
 
-                self.workspace4fit_.pdf("model_TTbar_mcanlo_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_mcanlo"), RooFit.LineStyle(kDashed),RooFit.LineColor(kBlue);
+                self.workspace4fit_.pdf("model_TTbar_mcanlo_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_mcanlo"), RooFit.LineStyle(kDashed),RooFit.LineColor(kBlue));
                 self.workspace4fit_.pdf("model_TTbar_scaleUp_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_scaleUp"), RooFit.LineColor(kRed));
                 self.workspace4fit_.pdf("model_TTbar_scaleDn_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_scaleDn"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
                 self.workspace4fit_.pdf("model_TTbar_matchUp_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_matchUp"), RooFit.LineColor(kGreen+2));
@@ -2096,7 +2096,7 @@ class doFit_wj_and_wlvj:
 
 
     #### method to fit the WJets normalization inside the mj signal region -> and write the jets mass sys if available
-    def fit_WJetsNorm(self, scaleJetMass = 0. relaxed = 0): # to get the normalization of WJets in signal_region
+    def fit_WJetsNorm(self, scaleJetMass = 0., relaxed = 0): # to get the normalization of WJets in signal_region
 
         print "############### Fit mj Normalization ##################"
         ## fit the two version of pdf for Wjets shape if available
@@ -2412,7 +2412,7 @@ class doFit_wj_and_wlvj:
             self.draw_canvas_with_pull( mplot, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/m_j_fitting_wtaggercut%s/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label, self.wtagger_label), "m_j_sideband%s"%(label),"",1)
 
             ### call the function for getting the normalizatio in signal region for data, TTbar, STop, VV and W+jets = label -> store in a output txt file
-            if relaxed = 0:
+            if relaxed == 0:
                self.get_mj_normalization_insignalregion("_data");
                self.get_mj_normalization_insignalregion("_TTbar");
                self.get_mj_normalization_insignalregion("_STop");
@@ -3056,7 +3056,7 @@ class doFit_wj_and_wlvj:
         ### plot also what is get from other source if available : alternate PS and shape: 1 PS and 01 is shape or fitting function
         if TString(label).Contains("_WJets0"):
             if self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets1_sim_%s_%s_mlvj"%(self.channel,self.wtagger_label)):
-                self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets1_sim_%s_%s_mlvj"%(self.channel,self.wtagger_label).plotOn(mplot, RooFit.LineColor(kOrange), RooFit.LineStyle(3),RooFit.Name("#alpha: Alternate PS") );
+                self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets1_sim_%s_%s_mlvj"%(self.channel,self.wtagger_label)).plotOn(mplot, RooFit.LineColor(kOrange), RooFit.LineStyle(3),RooFit.Name("#alpha: Alternate PS") );
 
             if self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets01_sim_%s_%s_mlvj"%(self.channel, self.wtagger_label)):
                 self.workspace4fit_.pdf("correct_factor_pdf_Deco_WJets01_sim_%s_%s_mlvj"%(self.channel, self.wtagger_label)).plotOn(mplot, RooFit.LineColor(kMagenta), RooFit.LineStyle(7),RooFit.Name("#alpha: Alternate Function") );
@@ -4043,7 +4043,7 @@ class doFit_wj_and_wlvj:
         if not label=="_data":
           if TString(label).Contains("_TTbar") or TString(label).Contains("_STop") :
               tmp_scale_to_lumi = tmp_scale_to_lumi*self.rrv_wtagger_eff_reweight_forT.getVal();
-            else if TString(label).Contains("ggH") or TString(label).Contains("_vbfH") or TString(label).Contains("_VV") or TString(label).Contains("_WW_EWK"):
+          elif TString(label).Contains("ggH") or TString(label).Contains("_vbfH") or TString(label).Contains("_VV") or TString(label).Contains("_WW_EWK"):
               tmp_scale_to_lumi = tmp_scale_to_lumi*self.rrv_wtagger_eff_reweight_forV.getVal();
 
                                                               
