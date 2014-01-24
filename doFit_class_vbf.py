@@ -1651,9 +1651,59 @@ class doFit_wj_and_wlvj:
            rdataset_mj.plotOn(mplot_sys, RooFit.Name("MC Events"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
            model.plotOn(mplot_sys,RooFit.Name("Nominal MC"),RooFit.LineColor(kBlack));
            mplot_sys.GetYaxis().SetRangeUser(1e-2,mplot_sys.GetMaximum()*1.2);
-           
 
-           self.draw_canvas_with_pull( mplot_sys, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_j"+label,in_model_name);
+           self.draw_canvas_with_pull( mplot_sys, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_j_extended"+label,in_model_name);
+
+#            self.draw_canvas(mplot_sys,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_j_extended"+label,0,1);
+
+           print "################### Decorrelated mj single mc shape ################"
+           ## temp workspace for the pdf diagonalizer
+           model_pdf = self.workspace4fit_.pdf("model_pdf%s_%s_mj"%(label,self.channel)); ## take the pdf from the workspace
+           model_pdf.fitTo(rdataset_mj, RooFit.Save(1), RooFit.SumW2Error(kTRUE) );
+           rfresult_pdf = model_pdf.fitTo( rdataset_mj, RooFit.Save(1), RooFit.SumW2Error(kTRUE), RooFit.Minimizer("Minuit2"));
+           wsfit_tmp = RooWorkspace("wsfit_tmp"+label+"_"+self.channel+"_mj");
+           Deco      = PdfDiagonalizer("Deco"+label+"_"+self.channel+"_"+self.wtagger_label+"_mj",wsfit_tmp,rfresult_pdf); ## in order to have a good name
+           print "##################### diagonalize ";
+           model_deco = Deco.diagonalize(model_pdf); ## diagonalize
+           print "##################### original  parameters ";
+           model_pdf.getParameters(rdataset_mj).Print("v");
+           print "##################### original  decorrelated parameters ";
+           model_deco.getParameters(rdataset_mj).Print("v");
+           print "##################### original  pdf ";
+           model_pdf.Print();
+           print "##################### decorrelated pdf ";
+           model_deco.Print();
+
+           mplot_sys = rrv_mass_j.frame( RooFit.Bins(int(rrv_mass_j.getBins()/self.narrow_factor)));
+           rdataset_mj.plotOn(mplot_sys, RooFit.Name("MC Events"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+           model_deco.plotOn(mplot_sys,RooFit.Name("Nominal MC"),RooFit.LineColor(kBlack));
+           rrv_number_dataset = RooRealVar("rrv_number_dataset","rrv_number_dataset",rdataset_mj.sumEntries());
+           rrv_number_dataset.setError(0.); ## only shape uncertainty
+           draw_error_band(rdataset_mj, model_pdf,rrv_number_dataset,rfresult_pdf,mplot_sys,self.color_palet["Uncertainty"],"F"); ## draw the error band with the area
+
+           if self.workspace4fit_.pdf("model%smassvbf_jes_up_%s_mj"%(label,self.channel)) :
+              self.workspace4fit_.pdf("model%smassvbf_jes_up_%s_mj"%(label,self.channel)).plotOn(mplot_sys,RooFit.Name("jes_up"), RooFit.LineColor(kRed));
+
+           if self.workspace4fit_.pdf("model%smassvbf_jes_dn_%s_mj"%(label,self.channel)) :
+              self.workspace4fit_.pdf("model%smassvbf_jes_dn_%s_mj"%(label,self.channel)).plotOn(mplot_sys,RooFit.Name("jes_dn"), RooFit.LineColor(kBlue));
+
+           if self.workspace4fit_.pdf("model%smassvbf_jer_%s_mj"%(label,self.channel)) :
+              self.workspace4fit_.pdf("model%smassvbf_jer_%s_mj"%(label,self.channel)).plotOn(mplot_sys,RooFit.Name("jer"), RooFit.LineColor(kAzure+1));
+
+           if self.workspace4fit_.pdf("model%smassvbf_jer_up_%s_mj"%(label,self.channel)) :
+              self.workspace4fit_.pdf("model%smassvbf_jer_up_%s_mj"%(label,self.channel)).plotOn(mplot_sys,RooFit.Name("jer_up"), RooFit.LineColor(kGreen+1));
+
+           if self.workspace4fit_.pdf("model%smassvbf_jer_dn_%s_mj"%(label,self.channel)) :
+              self.workspace4fit_.pdf("model%smassvbf_jer_up_%s_mj"%(label,self.channel)).plotOn(mplot_sys,RooFit.Name("jer_dn"), RooFit.LineColor(6));
+
+           self.leg = self.legend4Plot(mplot_sys,0,1,0., 0.06, 0.16, 0.);
+           mplot_sys.addObject(self.leg);
+           rdataset_mj.plotOn(mplot_sys, RooFit.Name("MC Events"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+           model_deco.plotOn(mplot_sys,RooFit.Name("Nominal MC"),RooFit.LineColor(kBlack));
+           mplot_sys.GetYaxis().SetRangeUser(1e-2,mplot_sys.GetMaximum()*1.2);
+
+#           self.draw_canvas(mplot_sys,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_j_shape"+label,0,1);
+           self.draw_canvas_with_pull( mplot_sys, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_j_shape"+label,in_model_name);
 
 
         if(rdataset_mj_relaxed):
@@ -1784,9 +1834,58 @@ class doFit_wj_and_wlvj:
            model_relaxed.plotOn(mplot_sys,RooFit.Name("Nominal MC"),RooFit.LineColor(kBlack));
            mplot_sys.GetYaxis().SetRangeUser(1e-2,mplot_sys.GetMaximum()*1.2);
            
+           self.draw_canvas_with_pull( mplot_sys, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_j_relaxed_extended"+label,in_model_name);
+#           self.draw_canvas(mplot_sys,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_j_extended_relaxed"+label,0,1);
 
-           self.draw_canvas_with_pull( mplot_sys, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_j_relaxed"+label,in_model_name);
 
+           print "################### Decorrelated mj single mc shape ################"
+           ## temp workspace for the pdf diagonalizer
+           model_pdf = self.workspace4fit_.pdf("model_pdf%s_%s_mj_relaxed"%(label,self.channel)); ## take the pdf from the workspace
+           model_pdf.fitTo(rdataset_mj_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE) );
+           rfresult_pdf = model_pdf.fitTo( rdataset_mj_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE), RooFit.Minimizer("Minuit2"));
+           wsfit_tmp = RooWorkspace("wsfit_tmp"+label+"_"+self.channel+"_mj_relaxed");
+           Deco      = PdfDiagonalizer("Deco"+label+"_"+self.channel+"_"+self.wtagger_label+"_mj_relaxed",wsfit_tmp,rfresult_pdf); ## in order to have a good name
+           print "##################### diagonalize ";
+           model_deco = Deco.diagonalize(model_pdf); ## diagonalize
+           print "##################### original  parameters ";
+           model_pdf.getParameters(rdataset_mj_relaxed).Print("v");
+           print "##################### original  decorrelated parameters ";
+           model_deco.getParameters(rdataset_mj_relaxed).Print("v");
+           print "##################### original  pdf ";
+           model_pdf.Print();
+           print "##################### decorrelated pdf ";
+           model_deco.Print();
+
+           mplot_sys = rrv_mass_j.frame( RooFit.Bins(int(rrv_mass_j.getBins()/self.narrow_factor)));
+           rdataset_mj_relaxed.plotOn(mplot_sys, RooFit.Name("MC Events"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+           model_deco.plotOn(mplot_sys,RooFit.Name("Nominal MC"),RooFit.LineColor(kBlack));
+           rrv_number_dataset = RooRealVar("rrv_number_dataset","rrv_number_dataset",rdataset_mj_relaxed.sumEntries());
+           rrv_number_dataset.setError(0.); ## only shape uncertainty
+           draw_error_band(rdataset_mj_relaxed, model_pdf,rrv_number_dataset,rfresult_pdf,mplot_sys,self.color_palet["Uncertainty"],"F"); ## draw the error band with the area
+
+           if self.workspace4fit_.pdf("model%smassvbf_jes_up_%s_mj_relaxed"%(label,self.channel)) :
+              self.workspace4fit_.pdf("model%smassvbf_jes_up_%s_mj_relaxed"%(label,self.channel)).plotOn(mplot_sys,RooFit.Name("jes_up"), RooFit.LineColor(kRed));
+
+           if self.workspace4fit_.pdf("model%smassvbf_jes_dn_%s_mj_relaxed"%(label,self.channel)) :
+              self.workspace4fit_.pdf("model%smassvbf_jes_dn_%s_mj_relaxed"%(label,self.channel)).plotOn(mplot_sys,RooFit.Name("jes_dn"), RooFit.LineColor(kBlue));
+
+           if self.workspace4fit_.pdf("model%smassvbf_jer_%s_mj_relaxed"%(label,self.channel)) :
+              self.workspace4fit_.pdf("model%smassvbf_jer_%s_mj_relaxed"%(label,self.channel)).plotOn(mplot_sys,RooFit.Name("jer"), RooFit.LineColor(kAzure+1));
+
+           if self.workspace4fit_.pdf("model%smassvbf_jer_up_%s_mj_relaxed"%(label,self.channel)) :
+              self.workspace4fit_.pdf("model%smassvbf_jer_up_%s_mj_relaxed"%(label,self.channel)).plotOn(mplot_sys,RooFit.Name("jer_up"), RooFit.LineColor(kGreen+1));
+
+           if self.workspace4fit_.pdf("model%smassvbf_jer_dn_%s_mj_relaxed"%(label,self.channel)) :
+              self.workspace4fit_.pdf("model%smassvbf_jer_up_%s_mj_relaxed"%(label,self.channel)).plotOn(mplot_sys,RooFit.Name("jer_dn"), RooFit.LineColor(6));
+
+           self.leg = self.legend4Plot(mplot_sys,0,1,0., 0.06, 0.16, 0.);
+           mplot_sys.addObject(self.leg);
+           rdataset_mj_relaxed.plotOn(mplot_sys, RooFit.Name("MC Events"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+           model_pdf.plotOn(mplot_sys,RooFit.Name("Nominal MC"),RooFit.LineColor(kBlack));
+           mplot_sys.GetYaxis().SetRangeUser(1e-2,mplot_sys.GetMaximum()*1.2);
+
+           self.draw_canvas_with_pull( mplot_sys, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_j_shape_relaxed"+label,in_model_name);
+#           self.draw_canvas(mplot_sys,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_j_shape_relaxed"+label,0,1);
 
          par = parameters_list_relaxed.createIterator();
          par.Reset();
@@ -1868,7 +1967,7 @@ class doFit_wj_and_wlvj:
 
         self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj").Print();
 
-        if not deco and ( not TString(label).Contains("_jes") and not TString(label).Contains("_jer")) :
+        if not TString(label).Contains("_jes") and not TString(label).Contains("_jer") :
 
            mplot_sys = rrv_mass_lvj.frame( RooFit.Bins(int(rrv_mass_lvj.getBins()/self.narrow_factor)));
            rdataset.plotOn(mplot_sys, RooFit.Name("MC Events"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
@@ -1897,7 +1996,102 @@ class doFit_wj_and_wlvj:
            model.plotOn(mplot_sys,RooFit.Name("Nominal MC"),RooFit.LineColor(kBlack));
            mplot_sys.GetYaxis().SetRangeUser(1e-2,mplot_sys.GetMaximum()*1.2);
 
-           self.draw_canvas_with_pull( mplot_sys, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj"+label+in_range+mlvj_model, show_constant_parameter, logy);
+           self.draw_canvas_with_pull( mplot_sys, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_extended"+label+in_range+mlvj_model, show_constant_parameter, logy);
+#           self.draw_canvas(mplot_sys,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_extended"+label,0,1);
+
+           print "################### Decorrelated mlvj single mc shape ################"
+           model_pdf = self.workspace4fit_.pdf("model_pdf%s%s_%s_mlvj"%(label,in_range,self.channel)); ## take the pdf from the workspace
+           model_pdf.fitTo(rdataset, RooFit.Save(1), RooFit.SumW2Error(kTRUE) );
+           rfresult_pdf = model_pdf.fitTo( rdataset, RooFit.Save(1), RooFit.SumW2Error(kTRUE), RooFit.Minimizer("Minuit2"));
+
+           ## temp workspace for the pdf diagonalizer
+           wsfit_tmp = RooWorkspace("wsfit_tmp"+label+in_range+"_"+self.channel+"_mlvj");
+           Deco      = PdfDiagonalizer("Deco"+label+in_range+"_"+self.channel+"_"+self.wtagger_label+"_mlvj",wsfit_tmp,rfresult_pdf); ## in order to have a good name
+           print "##################### diagonalize ";
+           model_pdf_deco = Deco.diagonalize(model_pdf); ## diagonalize
+           print "##################### workspace for decorrelation ";
+           wsfit_tmp.Print("v");
+           print "##################### original  parameters ";
+           model_pdf.getParameters(rdataset).Print("v");
+           print "##################### original  decorrelated parameters ";
+           model_pdf_deco.getParameters(rdataset).Print("v");
+           print "##################### original  pdf ";
+           model_pdf.Print();
+           print "##################### decorrelated pdf ";
+           model_pdf_deco.Print();
+
+           ## import in the workspace and print the diagonalizerd pdf
+           if deco: getattr(self.workspace4fit_,"import")(model_pdf_deco);
+
+           if label == "_TTbar" : #all the mc are normalized to the dataset just to appreciate shape variations
+
+               mplot_deco = rrv_mass_lvj.frame( RooFit.Bins(int(rrv_mass_lvj.getBins()/self.narrow_factor)));
+               rdataset.plotOn(mplot_deco, RooFit.Name("Powheg Sample"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+               model_pdf_deco.plotOn(mplot_deco,RooFit.Name("TTbar_Powheg"),RooFit.LineColor(kBlack));
+               rrv_number_dataset = RooRealVar("rrv_number_dataset","rrv_number_dataset",rdataset.sumEntries());
+               rrv_number_dataset.setError(0.); ## only shape uncertainty
+               draw_error_band(rdataset, model_pdf,rrv_number_dataset,rfresult_pdf,mplot_deco,self.color_palet["Uncertainty"],"F"); ## draw the error band with the area
+
+               if self.workspace4fit_.pdf("model%s_mcanlo%s_%s_mlvj"%(label,in_range,self.channel)) :
+                  self.workspace4fit_.pdf("model%s_mcanlo%s_%s_mlvj"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_mcanlo"), RooFit.LineStyle(kDashed),RooFit.LineColor(kBlue));
+
+               if self.workspace4fit_.pdf("model%smassvbf_jes_up%s_%s_mlvj"%(label,in_range,self.channel)) :
+                  self.workspace4fit_.pdf("model%smassvbf_jes_up%s_%s_mlvj"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jes_up"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
+
+               if self.workspace4fit_.pdf("model%smassvbf_jes_dn%s_%s_mlvj"%(label,in_range,self.channel)) :
+                  self.workspace4fit_.pdf("model%smassvbf_jes_dn%s_%s_mlvj"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jes_dn"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
+
+               if self.workspace4fit_.pdf("model%smassvbf_jer%s_%s_mlvj"%(label,in_range,self.channel)) :
+                  self.workspace4fit_.pdf("model%smassvbf_jer%s_%s_mlvj"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jer"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
+
+               if self.workspace4fit_.pdf("model%smassvbf_jer_up%s_%s_mlvj"%(label,in_range,self.channel)) :
+                  self.workspace4fit_.pdf("model%smassvbf_jer_up%s_%s_mlvj"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jer_up"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
+
+               if self.workspace4fit_.pdf("model%smassvbf_jer_dn%s_%s_mlvj"%(label,in_range,self.channel)) :
+                  self.workspace4fit_.pdf("model%smassvbf_jer_dn%s_%s_mlvj"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jer_dn"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
+
+               self.leg = self.legend4Plot(mplot_deco,0,1,0., 0.06, 0.16, 0.);
+               mplot_deco.addObject(self.leg);
+               rdataset.plotOn(mplot_deco, RooFit.Name("MC Events"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+               model_pdf.plotOn(mplot_deco,RooFit.Name("Nominal MC"),RooFit.LineColor(kBlack));
+               mplot_deco.GetYaxis().SetRangeUser(1e-2,mplot_deco.GetMaximum()*1.2);
+
+               self.draw_canvas_with_pull( mplot_deco, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_shape"+label+in_range+mlvj_model, show_constant_parameter, logy);
+#              self.draw_canvas(mplot_sys,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_shape"+label,0,1);
+
+           else:
+
+              mplot_deco = rrv_mass_lvj.frame( RooFit.Bins(int(rrv_mass_lvj.getBins()/self.narrow_factor)));
+              rdataset.plotOn(mplot_deco, RooFit.Name("MC Events"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+              model_pdf.plotOn(mplot_deco,RooFit.Name("Nominal MC"),RooFit.LineColor(kBlack))
+              rrv_number_dataset = RooRealVar("rrv_number_dataset","rrv_number_dataset",rdataset.sumEntries());
+              rrv_number_dataset.setError(0.); ## only shape uncertainty
+              draw_error_band(rdataset, model_pdf,rrv_number_dataset,rfresult_pdf,mplot_deco,self.color_palet["Uncertainty"],"F"); ## draw the error band with the area
+           
+              if self.workspace4fit_.pdf("model%smassvbf_jes_up%s_%s_mlvj"%(label,in_range,self.channel)) :
+                 self.workspace4fit_.pdf("model%smassvbf_jes_up%s_%s_mlvj"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("jes_up"), RooFit.LineColor(kRed));
+
+              if self.workspace4fit_.pdf("model%smassvbf_jes_dn%s_%s_mlvj"%(label,in_range,self.channel)) :
+                 self.workspace4fit_.pdf("model%smassvbf_jes_dn%s_%s_mlvj"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("jes_dn"), RooFit.LineColor(kBlue));
+
+              if self.workspace4fit_.pdf("model%smassvbf_jer%s_%s_mlvj"%(label,in_range,self.channel)) :
+                 self.workspace4fit_.pdf("model%smassvbf_jer%s_%s_mlvj"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("jer"), RooFit.LineColor(kAzure+1));
+
+              if self.workspace4fit_.pdf("model%smassvbf_jer_up%s_%s_mlvj"%(label,in_range,self.channel)) :
+                 self.workspace4fit_.pdf("model%smassvbf_jer_up%s_%s_mlvj"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("jer_up"), RooFit.LineColor(kGreen+1));
+
+              if self.workspace4fit_.pdf("model%smassvbf_jer_dn%s_%s_mlvj"%(label,in_range,self.channel)) :
+                 self.workspace4fit_.pdf("model%smassvbf_jer_dn%s_%s_mlvj"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("jer_dn"), RooFit.LineColor(6));
+
+
+              self.leg = self.legend4Plot(mplot_deco,0,1,0., 0.06, 0.16, 0.);
+              mplot_deco.addObject(self.leg);
+              rdataset.plotOn(mplot_deco, RooFit.Name("MC Events"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+              model_pdf.plotOn(mplot_deco,RooFit.Name("Nominal MC"),RooFit.LineColor(kBlack));
+              mplot_deco.GetYaxis().SetRangeUser(1e-2,mplot_deco.GetMaximum()*1.2);
+
+              self.draw_canvas_with_pull( mplot_deco, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_shape"+label+in_range+mlvj_model, show_constant_parameter, logy);
+              #self.draw_canvas(mplot_sys,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_shape"+label,0,1);
 
 
         if rdataset_relaxed:            
@@ -1970,8 +2164,9 @@ class doFit_wj_and_wlvj:
 
          self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj_relaxed").Print();
 
-         if not deco and ( not TString(label).Contains("_jes") and not TString(label).Contains("_jer")) :
+         if not TString(label).Contains("_jes") and not TString(label).Contains("_jer") :
 
+             
            mplot_sys = rrv_mass_lvj.frame( RooFit.Bins(int(rrv_mass_lvj.getBins()/self.narrow_factor)));
            rdataset_relaxed.plotOn(mplot_sys, RooFit.Name("MC Events"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
            model_relaxed.plotOn(mplot_sys,RooFit.Name("Nominal MC"),RooFit.LineColor(kBlack));
@@ -2000,18 +2195,107 @@ class doFit_wj_and_wlvj:
            model_relaxed.plotOn(mplot_sys,RooFit.Name("Nominal MC"),RooFit.LineColor(kBlack));
            mplot_sys.GetYaxis().SetRangeUser(1e-2,mplot_sys.GetMaximum()*1.2);
            
+#           self.draw_canvas(mplot_sys,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_extended_relaxed"+label,0,1);
 
            self.draw_canvas_with_pull( mplot_sys, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_relaxed"+label+in_range+mlvj_model, show_constant_parameter, logy);
 
 
-         result_param = rfresult_relaxed.floatParsFinal();
+           print "################### Decorrelated mlvj single mc relaxed shape ################"
+           model_pdf_relaxed = self.workspace4fit_.pdf("model_pdf%s%s_%s_mlvj_relaxed"%(label,in_range,self.channel)); ## take the pdf from the workspace
+           model_pdf_relaxed.fitTo( rdataset_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE) );
+           rfresult_pdf_relaxed = model_pdf_relaxed.fitTo( rdataset_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE), RooFit.Minimizer("Minuit2"));
+           rfresult_pdf_relaxed.Print();
 
-         for iresult in range(result_param.getSize()) :
+           ## temp workspace for the pdf diagonalizer
+           wsfit_tmp = RooWorkspace("wsfit_tmp"+label+in_range+"_"+self.channel+"_mlvj_relaxed");
+           Deco = PdfDiagonalizer("Deco"+label+in_range+"_"+self.channel+"_"+self.wtagger_label+"_mlvj_relaxed",wsfit_tmp,rfresult_pdf_relaxed); ## in order to have a good name
+           print "##################### diagonalize ";
+           model_pdf_deco_relaxed = Deco.diagonalize(model_pdf_relaxed); ## diagonalize
+           print "##################### workspace for decorrelation ";
+           wsfit_tmp.Print("v");
+           print "##################### original  parameters relaxed ";
+           model_pdf_relaxed.getParameters(rdataset_relaxed).Print("v");
+           print "##################### original  decorrelated parameters relaxed ";
+           model_pdf_deco_relaxed.getParameters(rdataset_relaxed).Print("v");
+           print "##################### original  pdf relaxed";
+           model_pdf_relaxed.Print();
+           print "##################### decorrelated pdf relaxed";
+           model_pdf_deco_relaxed.Print();
+
+           ## import in the workspace and print the diagonalizerd pdf
+           if deco: getattr(self.workspace4fit_,"import")(model_pdf_deco_relaxed);
+
+           ### define a frame for TTbar or other plots
+           mplot_deco = rrv_mass_lvj.frame( RooFit.Bins(int(rrv_mass_lvj.getBins()/self.narrow_factor)));
+
+           if label == "_TTbar" : #all the mc are normalized to the dataset just to appreciate shape variations
+
+            rdataset_relaxed.plotOn(mplot_deco, RooFit.Name("Powheg Sample"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+            model_pdf_deco_relaxed.plotOn(mplot_deco,RooFit.Name("TTbar_Powheg"),RooFit.LineColor(kBlack));
+            rrv_number_dataset = RooRealVar("rrv_number_dataset","rrv_number_dataset",rdataset.sumEntries());
+            rrv_number_dataset.setError(0.); ## only shape uncertainty
+            draw_error_band(rdataset_relaxed, model_pdf_relaxed,rrv_number_dataset,rfresult_pdf_relaxed,mplot_deco,self.color_palet["Uncertainty"],"F"); ## draw the error band with the area
+
+            if self.workspace4fit_.pdf("model%s_mcanlo%s_%s_mlvj_relaxed"%(label,in_range,self.channel)) :
+               self.workspace4fit_.pdf("model%s_mcanlo%s_%s_mlvj_relaxed"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_mcanlo"), RooFit.LineStyle(kDashed),RooFit.LineColor(kBlue));
+
+            if self.workspace4fit_.pdf("model%smassvbf_jes_up%s_%s_mlvj_relaxed"%(label,in_range,self.channel)) :
+               self.workspace4fit_.pdf("model%smassvbf_jes_up%s_%s_mlvj_relaxed"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jes_up"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
+
+            if self.workspace4fit_.pdf("model%smassvbf_jes_dn%s_%s_mlvj_relaxed"%(label,in_range,self.channel)) :
+               self.workspace4fit_.pdf("model%smassvbf_jes_dn%s_%s_mlvj_relaxed"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jes_dn"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
+
+            if self.workspace4fit_.pdf("model%smassvbf_jer%s_%s_mlvj_relaxed"%(label,in_range,self.channel)) :
+               self.workspace4fit_.pdf("model%smassvbf_jer%s_%s_mlvj_relaxed"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jer"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
+
+            if self.workspace4fit_.pdf("model%smassvbf_jer_up%s_%s_mlvj_relaxed"%(label,in_range,self.channel)) :
+               self.workspace4fit_.pdf("model%smassvbf_jer_up%s_%s_mlvj_relaxed"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jer_up"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
+
+            if self.workspace4fit_.pdf("model%smassvbf_jer_dn%s_%s_mlvj_relaxed"%(label,in_range,self.channel)) :
+               self.workspace4fit_.pdf("model%smassvbf_jer_dn%s_%s_mlvj_relaxed"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jer_dn"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
+
+           else:
+
+            rdataset_relaxed.plotOn(mplot_deco, RooFit.Name("MC Events"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+            model_pdf_deco_relaxed.plotOn(mplot_deco,RooFit.Name("Nominal MC"),RooFit.LineColor(kBlack))
+            rrv_number_dataset = RooRealVar("rrv_number_dataset","rrv_number_dataset",rdataset_relaxed.sumEntries());
+            rrv_number_dataset.setError(0.); ## only shape uncertainty
+            draw_error_band(rdataset_relaxed, model_pdf_relaxed,rrv_number_dataset,rfresult_pdf_relaxed,mplot_deco,self.color_palet["Uncertainty"],"F"); ## draw the error band with the area
+           
+            if self.workspace4fit_.pdf("model%smassvbf_jes_up%s_%s_mlvj_relaxed"%(label,in_range,self.channel)) :
+               self.workspace4fit_.pdf("model%smassvbf_jes_up%s_%s_mlvj_relaxed"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("jes_up"), RooFit.LineColor(kRed));
+
+            if self.workspace4fit_.pdf("model%smassvbf_jes_dn%s_%s_mlvj_relaxed"%(label,in_range,self.channel)) :
+               self.workspace4fit_.pdf("model%smassvbf_jes_dn%s_%s_mlvj_relaxed"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("jes_dn"), RooFit.LineColor(kBlue));
+
+            if self.workspace4fit_.pdf("model%smassvbf_jer%s_%s_mlvj_relaxed"%(label,in_range,self.channel)) :
+               self.workspace4fit_.pdf("model%smassvbf_jer%s_%s_mlvj_relaxed"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("jer"), RooFit.LineColor(kAzure+1));
+
+            if self.workspace4fit_.pdf("model%smassvbf_jer_up%s_%s_mlvj_relaxed"%(label,in_range,self.channel)) :
+               self.workspace4fit_.pdf("model%smassvbf_jer_up%s_%s_mlvj_relaxed"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("jer_up"), RooFit.LineColor(kGreen+1));
+
+            if self.workspace4fit_.pdf("model%smassvbf_jer_dn%s_%s_mlvj_relaxed"%(label,in_range,self.channel)) :
+               self.workspace4fit_.pdf("model%smassvbf_jer_dn%s_%s_mlvj_relaxed"%(label,in_range,self.channel)).plotOn(mplot_deco,RooFit.Name("jer_dn"), RooFit.LineColor(6));
+
+
+           self.leg = self.legend4Plot(mplot_deco,0,1,0., 0.06, 0.16, 0.);
+           mplot_deco.addObject(self.leg);
+           rdataset_relaxed.plotOn(mplot_deco, RooFit.Name("MC Events"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+           model_pdf_deco_relaxed.plotOn(mplot_deco,RooFit.Name("Nominal MC"),RooFit.LineColor(kBlack));
+           mplot_deco.GetYaxis().SetRangeUser(1e-2,mplot_deco.GetMaximum()*1.2);
+
+#           self.draw_canvas(mplot_deco,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_shape_relaxed"+label,0,1);
+           self.draw_canvas_with_pull( mplot_deco, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_shape_relaxed"+label+in_range+mlvj_model, show_constant_parameter, logy);
+
+
+           result_param = rfresult_relaxed.floatParsFinal();
+
+           for iresult in range(result_param.getSize()) :
              if TString(result_param.at(iresult).GetName()).Contains("number"):
               result_param.at(iresult).setVal(result_param.at(iresult).getVal()*normalization);
               result_param.at(iresult).setError(result_param.at(iresult).getError()*normalization);
                  
- 	 ## draw the error band for an extend pdf
+         ## draw the error band for an extend pdf
          rfresult_relaxed.Print();             
 
          ## set the name of the result of the fit and put it in the workspace
@@ -2059,175 +2343,6 @@ class doFit_wj_and_wlvj:
 
          self.draw_canvas_with_pull( mplot_same, mplot_pull_same,parameters_list_same,"plots_%s_%s_%s_%s_g1/m_lvj_fitting_same/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj"+label+in_range+mlvj_model, show_constant_parameter, logy);
 
-        ## if the shape parameters has to be decorrelated
-        if deco :
-            print "################### Decorrelated mlvj single mc shape ################"
-            model_pdf = self.workspace4fit_.pdf("model_pdf%s%s_%s_mlvj"%(label,in_range,self.channel)); ## take the pdf from the workspace
-            model_pdf.fitTo(rdataset, RooFit.Save(1), RooFit.SumW2Error(kTRUE) );
-            rfresult_pdf = model_pdf.fitTo( rdataset, RooFit.Save(1), RooFit.SumW2Error(kTRUE), RooFit.Minimizer("Minuit2"));
-            rfresult_pdf.Print();
-
-            ## temp workspace for the pdf diagonalizer
-            wsfit_tmp = RooWorkspace("wsfit_tmp"+label+in_range+"_"+self.channel+"_mlvj");
-            Deco      = PdfDiagonalizer("Deco"+label+in_range+"_"+self.channel+"_"+self.wtagger_label+"_mlvj",wsfit_tmp,rfresult_pdf); ## in order to have a good name
-            print "##################### diagonalize ";
-            model_pdf_deco = Deco.diagonalize(model_pdf); ## diagonalize
-            print "##################### workspace for decorrelation ";
-            wsfit_tmp.Print("v");
-            print "##################### original  parameters ";
-            model_pdf.getParameters(rdataset).Print("v");
-            print "##################### original  decorrelated parameters ";
-            model_pdf_deco.getParameters(rdataset).Print("v");
-            print "##################### original  pdf ";
-            model_pdf.Print();
-            print "##################### decorrelated pdf ";
-            model_pdf_deco.Print();
-
-            ## import in the workspace and print the diagonalizerd pdf
-            getattr(self.workspace4fit_,"import")(model_pdf_deco);
-
-            ### define a frame for TTbar or other plots
-            mplot_deco = rrv_mass_lvj.frame( RooFit.Bins(int(rrv_mass_lvj.getBins()/self.narrow_factor)));
-
-            if label=="_TTbar" :
-
-                rdataset.plotOn(mplot_deco, RooFit.Name("Powheg Sample"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
-                model_pdf_deco.plotOn(mplot_deco,RooFit.Name("TTbar_Powheg"),RooFit.LineColor(kBlack));
-
-
-                rrv_number_dataset = RooRealVar("rrv_number_dataset","rrv_number_dataset",rdataset.sumEntries());
-                rrv_number_dataset.setError(0.); ## only shape uncertainty
-                draw_error_band(rdataset, model_pdf,rrv_number_dataset,rfresult_pdf,mplot_deco,self.color_palet["Uncertainty"],"F"); ## draw the error band with the area
-
-                if self.workspace4fit_.pdf("model_TTbar_mcanlo_signal_region_%s_mlvj"%(self.channel)) :
-                  self.workspace4fit_.pdf("model_TTbar_mcanlo_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_mcanlo"), RooFit.LineStyle(kDashed),RooFit.LineColor(kBlue));
-
-                if self.workspace4fit_.pdf("model_TTbarmassvbf_jes_up_signal_region_%s_mlvj"%(self.channel)) :
-                  self.workspace4fit_.pdf("model_TTbarmassvbf_jes_up_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jes_up"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
-
-                if self.workspace4fit_.pdf("model_TTbarmassvbf_jes_dn_signal_region_%s_mlvj"%(self.channel)) :
-                  self.workspace4fit_.pdf("model_TTbarmassvbf_jes_dn_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jes_dn"), RooFit.LineColor(kRed));
-
-                if self.workspace4fit_.pdf("model_TTbarmassvbf_jer_signal_region_%s_mlvj"%(self.channel)) :
-                  self.workspace4fit_.pdf("model_TTbarmassvbf_jer_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jer"), RooFit.LineStyle(kDashed),RooFit.LineColor(kBlue));
-
-                if self.workspace4fit_.pdf("model_TTbarmassvbf_jer_dn_signal_region_%s_mlvj"%(self.channel)) :
-                  self.workspace4fit_.pdf("model_TTbarmassvbf_jer_dn_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jer_up"), RooFit.LineColor(kBlue));
-
-                if self.workspace4fit_.pdf("model_TTbarmassvbf_jer_up_signal_region_%s_mlvj"%(self.channel)) :
-                  self.workspace4fit_.pdf("model_TTbarmassvbf_jer_up_signal_region_%s_mlvj"%(self.channel)).plotOn(mplot_deco,RooFit.Name("TTbar_jer_dn"), RooFit.LineColor(kGreen+1));
-
-            else:
-                rdataset.plotOn(mplot_deco, RooFit.Name("Data"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
-                model_pdf_deco.plotOn(mplot_deco,RooFit.Name(label),RooFit.LineColor(kBlack));
-
-                mplot_deco.GetYaxis().SetRangeUser(1e-2,mplot_deco.GetMaximum()*1.2);
-
-	        rrv_number_dataset=RooRealVar("rrv_number_dataset","rrv_number_dataset",rdataset.sumEntries());
-                rrv_number_dataset.setError(0.);
-	        draw_error_band(rdataset, model_pdf,rrv_number_dataset,rfresult_pdf,mplot_deco,self.color_palet["Uncertainty"],"F"); ## don't store the number in the workspace
-
-            self.leg = self.legend4Plot(mplot_deco,0); ## add the legend
-	    mplot_deco.addObject(self.leg);
-            self.draw_canvas( mplot_deco, "plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model, self.wtagger_label),"m_lvj"+label+in_range+in_range+mlvj_model+"_deco",0,logy)
-
-        if deco and rdataset_relaxed :
-
-            print "################### Decorrelated mlvj single mc relaxed shape ################"
-            model_pdf_relaxed = self.workspace4fit_.pdf("model_pdf%s%s_%s_mlvj_relaxed"%(label,in_range,self.channel)); ## take the pdf from the workspace
-            model_pdf_relaxed.fitTo( rdataset_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE) );
-            rfresult_pdf_relaxed = model_pdf_relaxed.fitTo( rdataset_relaxed, RooFit.Save(1), RooFit.SumW2Error(kTRUE), RooFit.Minimizer("Minuit2"));
-            rfresult_pdf_relaxed.Print();
-
-            ## temp workspace for the pdf diagonalizer
-            wsfit_tmp = RooWorkspace("wsfit_tmp"+label+in_range+"_"+self.channel+"_mlvj_relaxed");
-
-            if TString(in_range).Contains("sb_lo"):
-             normalization = self.workspace4fit_.var("rrv_vbf_cut_sb_lo"+label1+"_"+self.channel).getVal();
-            elif TString(in_range).Contains("sb_hi"):    
-             normalization = self.workspace4fit_.var("rrv_vbf_cut_sb_hi"+label1+"_"+self.channel).getVal();
-            elif TString(in_range).Contains("signal_region"):
-             normalization = self.workspace4fit_.var("rrv_vbf_cut_signal_region"+label1+"_"+self.channel).getVal();
-            else:
-             normalization =  self.workspace4fit_.var("rrv_vbf_cut_total"+label1+"_"+self.channel).getVal();
-
-            parameters_list_relaxed = model_relaxed.getParameters(rdataset_relaxed);
-            par=parameters_list_relaxed.createIterator();
-            par.Reset();
-            param=par.Next()
-            while (param):
-             if TString(param.GetName()).Contains("number"):
-                 param.setVal(param.getVal()*normalization);
-                 param.setError(param.getError()*normalization);
-                 param.Print();
-             param=par.Next()
-
-            result_param = rfresult_relaxed.floatParsFinal();
-
-            for iresult in range(result_param.getSize()) :
-             if TString(result_param.at(iresult).GetName()).Contains("number"):
-              result_param.at(iresult).setVal(result_param.at(iresult).getVal()*normalization);
-              result_param.at(iresult).setError(result_param.at(iresult).getError()*normalization);
-                 
- 	    ## draw the error band for an extend pdf
-            rfresult_relaxed.Print();                         
-            Deco = PdfDiagonalizer("Deco"+label+in_range+"_"+self.channel+"_"+self.wtagger_label+"_mlvj_relaxed",wsfit_tmp,rfresult_pdf_relaxed); ## in order to have a good name
-            print "##################### diagonalize ";
-            model_pdf_deco_relaxed = Deco.diagonalize(model_pdf_relaxed); ## diagonalize
-            print "##################### workspace for decorrelation ";
-            wsfit_tmp.Print("v");
-            print "##################### original  parameters relaxed ";
-            model_pdf_relaxed.getParameters(rdataset_relaxed).Print("v");
-            print "##################### original  decorrelated parameters relaxed ";
-            model_pdf_deco_relaxed.getParameters(rdataset_relaxed).Print("v");
-            print "##################### original  pdf relaxed";
-            model_pdf_relaxed.Print();
-            print "##################### decorrelated pdf relaxed";
-            model_pdf_deco_relaxed.Print();
-
-            ## import in the workspace and print the diagonalizerd pdf
-            getattr(self.workspace4fit_,"import")(model_pdf_deco_relaxed);
-
-            ### define a frame for TTbar or other plots
-            mplot_deco_relaxed = rrv_mass_lvj.frame( RooFit.Bins(int(rrv_mass_lvj.getBins()/self.narrow_factor)));
-
-            if label=="_TTbar" and in_range=="_signal_region":
-
-                rdataset.plotOn(mplot_deco_relaxed, RooFit.Name("Powheg Sample"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
-                model_pdf_deco_relaxed.plotOn(mplot_deco_relaxed,RooFit.Name("TTbar_Powheg"),RooFit.LineColor(kBlack));
-
-                mplot_deco_relaxed.GetYaxis().SetRangeUser(1e-2,mplot_deco_relaxed.GetMaximum()*1.2);
-
-                draw_error_band(rdataset, model_pdf_relaxed,rrv_number_dataset,rfresult_pdf_relaxed,mplot_deco_relaxed,self.color_palet["Uncertainty"],"F"); ## draw the error band with the area
-                self.workspace4fit_.var("rrv_number_TTbar_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
-
-                self.workspace4fit_.pdf("model_TTbar_mcanlo_signal_region_%s_mlvj_relaxed"%(self.channel)).plotOn(mplot_deco_relaxed,RooFit.Name("TTbar_mcanlo"), RooFit.LineStyle(kDashed),RooFit.LineColor(kBlue));
-                self.workspace4fit_.pdf("model_TTbar_scaleUp_signal_region_%s_mlvj_relaxed"%(self.channel)).plotOn(mplot_deco_relaxed,RooFit.Name("TTbar_scaleUp"), RooFit.LineColor(kRed));
-                self.workspace4fit_.pdf("model_TTbar_scaleDn_signal_region_%s_mlvj_relaxed"%(self.channel)).plotOn(mplot_deco_relaxed,RooFit.Name("TTbar_scaleDn"), RooFit.LineStyle(kDashed),RooFit.LineColor(kRed));
-                self.workspace4fit_.pdf("model_TTbar_matchUp_signal_region_%s_mlvj_relaxed"%(self.channel)).plotOn(mplot_deco_relaxed,RooFit.Name("TTbar_matchUp"), RooFit.LineColor(kGreen+2));
-                self.workspace4fit_.pdf("model_TTbar_matchDn_signal_region_%s_mlvj_relaxed"%(self.channel)).plotOn(mplot_deco_relaxed,RooFit.Name("TTbar_matchDn"), RooFit.LineStyle(kDashed),RooFit.LineColor(kGreen+2));
-
-                self.workspace4fit_.var("rrv_number_TTbar_matchDn_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
-                self.workspace4fit_.var("rrv_number_TTbar_matchUp_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
-                self.workspace4fit_.var("rrv_number_TTbar_scaleDn_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
-                self.workspace4fit_.var("rrv_number_TTbar_scaleUp_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
-                self.workspace4fit_.var("rrv_number_TTbar_mcanlo_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
-                self.workspace4fit_.var("rrv_number_TTbar_signal_region_%s_mlvj_relaxed"%(self.channel)).Print();
-
-            else:
-                rdataset.plotOn(mplot_deco_relaxed, RooFit.Name("Data"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0));
-                model_pdf_deco_relaxed.plotOn(mplot_deco_relaxed,RooFit.Name(label),RooFit.LineColor(kBlack));
-
-                mplot_deco_relaxed.GetYaxis().SetRangeUser(1e-2,mplot_deco_relaxed.GetMaximum()*1.2);
-
-	        rrv_number_dataset=RooRealVar("rrv_number_dataset","rrv_number_dataset",rdataset.sumEntries());
-                rrv_number_dataset.setError(0.)
-	        draw_error_band(rdataset, model_pdf_relaxed,rrv_number_dataset,rfresult_pdf_relaxed,mplot_deco_relaxed,self.color_palet["Uncertainty"],"F"); ## don't store the number in the workspace
-
-            self.leg = self.legend4Plot(mplot_deco_relaxed,0); ## add the legend
-            mplot_deco_relaxed.addObject(self.leg);
-
-            self.draw_canvas( mplot_deco, "plots_%s_%s_%s_%s_g1/other_same/"%(options.additioninformation, self.channel,self.PS_model, self.wtagger_label),"m_lvj"+label+in_range+in_range+mlvj_model+"_deco",0,logy)
 
 
     #### method to fit the WJets normalization inside the mj signal region -> and write the jets mass sys if available
@@ -5968,48 +6083,47 @@ class doFit_wj_and_wlvj:
         self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbar")# to get the shape of m_lvj
         self.get_mj_and_mlvj_dataset(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo")# to get the shape of m_lvj
 
-
-        self.fit_mj_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlo","2Gaus_ErfExp");
         self.fit_mj_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jes_up","2Gaus_ErfExp");
         self.fit_mj_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jes_dn","2Gaus_ErfExp");        
         self.fit_mj_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jer","2Gaus_ErfExp");        
         self.fit_mj_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jer_up","2Gaus_ErfExp");        
         self.fit_mj_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jer_dn","2Gaus_ErfExp");        
+        self.fit_mj_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlo","2Gaus_ErfExp");
 
-        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbar","2Gaus_ErfExp");
         self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jes_up","2Gaus_ErfExp");
         self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jes_dn","2Gaus_ErfExp");        
         self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jer","2Gaus_ErfExp");        
         self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jer_up","2Gaus_ErfExp");        
         self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jer_dn","2Gaus_ErfExp");        
+        self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","_TTbar","2Gaus_ErfExp");
 
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jes_up","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jes_dn","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jer","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jer_up","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jer_dn","_sb_lo",self.MODEL_4_mlvj,1);
         self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar","_sb_lo",self.MODEL_4_mlvj,1);
-#        self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jes_up","_sb_lo",self.MODEL_4_mlvj,1);
-#        self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jes_dn","_sb_lo",self.MODEL_4_mlvj,1);
-#        self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jer","_sb_lo",self.MODEL_4_mlvj,1);
-#        self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jer_up","_sb_lo",self.MODEL_4_mlvj,1);
-#        self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jer_dn","_sb_lo",self.MODEL_4_mlvj,1);
 
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jes_up","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jes_dn","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jer","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jer_up","_sb_lo",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jer_dn","_sb_lo",self.MODEL_4_mlvj,1);
         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbar","_sb_lo",self.MODEL_4_mlvj,1);
-#        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jes_up","_sb_lo",self.MODEL_4_mlvj,1);
-#        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jes_dn","_sb_lo",self.MODEL_4_mlvj,1);
-#        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jer","_sb_lo",self.MODEL_4_mlvj,1);
-#        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jer_up","_sb_lo",self.MODEL_4_mlvj,1);
-#        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jer_dn","_sb_lo",self.MODEL_4_mlvj,1);
 
-        self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar","_signal_region",self.MODEL_4_mlvj,1);
         self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jes_up","_signal_region",self.MODEL_4_mlvj,1);
         self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jes_dn","_signal_region",self.MODEL_4_mlvj,1);
         self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jer","_signal_region",self.MODEL_4_mlvj,1);
         self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jer_up","_signal_region",self.MODEL_4_mlvj,1);
         self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar_mcanlomassvbf_jer_dn","_signal_region",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_TTbar","_signal_region",self.MODEL_4_mlvj,1);
 
-        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbar","_signal_region",self.MODEL_4_mlvj,1);
         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jes_up","_signal_region",self.MODEL_4_mlvj,1);
         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jes_dn","_signal_region",self.MODEL_4_mlvj,1);
         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jer","_signal_region",self.MODEL_4_mlvj,1);
         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jer_up","_signal_region",self.MODEL_4_mlvj,1);
         self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbarmassvbf_jer_dn","_signal_region",self.MODEL_4_mlvj,1);
+        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_TTbar","_signal_region",self.MODEL_4_mlvj,1);
 
 
         print "________________________________________________________________________"
@@ -6050,12 +6164,12 @@ class doFit_wj_and_wlvj:
     ##### Fit of all the MC in both mj and mlvj : Signal, TTbar, STop, VV and Wjets
     def fit_AllSamples_Mj_and_Mlvj(self):
         print "################### fit_AllSamples_Mj_and_Mlvj #####################"
-#        self.fit_Signal();
+        self.fit_Signal();
         self.fit_STop();
-#        self.fit_VV();
-#        self.fit_WW_EWK();        
-#        self.fit_TTbar();
-#        self.fit_WJets();
+        self.fit_VV();
+        self.fit_WW_EWK();        
+        self.fit_WJets();
+        self.fit_TTbar();
 
         print "________________________________________________________________________"
 
