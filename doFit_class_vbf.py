@@ -6226,8 +6226,8 @@ class doFit_wj_and_wlvj:
       ### take the real data
       self.get_data();
       ### fit the WJets Normalization into the signal region -> no jet mass fluctuation has been done
-      self.fit_WJetsNorm(0);
-      self.fit_WJetsNorm(1);
+      self.fit_WJetsNorm(1,0);
+      self.fit_WJetsNorm(1,1);
       ### fit data in the mlvj low sideband with two different models
 #      self.fit_mlvj_in_Mj_sideband("_WJets01","_sb_lo", self.MODEL_4_mlvj_alter,1,0)
 #      self.fit_mlvj_in_Mj_sideband("_WJets0","_sb_lo", self.MODEL_4_mlvj,1,0)
