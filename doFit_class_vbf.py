@@ -306,8 +306,8 @@ class doFit_wj_and_wlvj:
         self.vpt_cut   = 200;
         self.bcut      = 0.679;
         if self.channel=="el":
-            self.pfMET_cut = 70; 
-            self.lpt_cut   = 35;        
+            self.pfMET_cut = 60; 
+            self.lpt_cut   = 30;        
         #deltaPhi_METj cut
         self.deltaPhi_METj_cut = 2.0;
         self.top_veto_had = 210 ;
@@ -379,7 +379,7 @@ class doFit_wj_and_wlvj:
         self.interference_ggH_uncertainty = 0.1;
         self.interference_vbfH_uncertainty = 0.5;
 
-        #normalization uncertainty from jet_mass
+        #normalization uncertainty from jet scale
         self.WJets_normalization_uncertainty_from_jet_scale = 0.;        
         self.VV_normalization_uncertainty_from_jet_scale = 0.;
         self.WW_EWK_normalization_uncertainty_from_jet_scale = 0.;        
@@ -388,15 +388,24 @@ class doFit_wj_and_wlvj:
         self.ggH_normalization_uncertainty_from_jet_scale = 0.;
         self.vbf_normalization_uncertainty_from_jet_scale = 0.;
 
-        #normalization uncertainty from jet_mass
-        self.WJets_normalization_uncertainty_from_lep_scale = 0.;        
-        self.VV_normalization_uncertainty_from_lep_scale = 0.;
-        self.WW_EWK_normalization_uncertainty_from_lep_scale = 0.;        
-        self.STop_normalization_uncertainty_from_lep_scale = 0.;
-        self.TTbar_normalization_uncertainty_from_lep_scale = 0.;
-        self.ggH_normalization_uncertainty_from_lep_scale = 0.;
-        self.vbf_normalization_uncertainty_from_lep_scale = 0.;
-
+        #normalization uncertainty from lep scale
+        if self.channel == "mu":
+         self.WJets_normalization_uncertainty_from_lep_scale  = 1.000;        
+         self.VV_normalization_uncertainty_from_lep_scale     = 1.070;
+         self.WW_EWK_normalization_uncertainty_from_lep_scale = 1.008;        
+         self.STop_normalization_uncertainty_from_lep_scale   = 1.000;
+         self.TTbar_normalization_uncertainty_from_lep_scale  = 1.008;
+         self.ggH_normalization_uncertainty_from_lep_scale    = 1.028;
+         self.vbf_normalization_uncertainty_from_lep_scale    = 1.015;
+        else:
+         self.WJets_normalization_uncertainty_from_lep_scale  = 1.000;        
+         self.VV_normalization_uncertainty_from_lep_scale     = 1.060;
+         self.WW_EWK_normalization_uncertainty_from_lep_scale = 1.006;        
+         self.STop_normalization_uncertainty_from_lep_scale   = 1.000;
+         self.TTbar_normalization_uncertainty_from_lep_scale  = 1.008;
+         self.ggH_normalization_uncertainty_from_lep_scale    = 1.015;
+         self.vbf_normalization_uncertainty_from_lep_scale    = 1.010;
+            
         #normalization uncertainty from jet_res
         self.WJets_normalization_uncertainty_from_jet_res  = 0.;        
         self.VV_normalization_uncertainty_from_jet_res     = 0.;
@@ -406,23 +415,33 @@ class doFit_wj_and_wlvj:
         self.ggH_normalization_uncertainty_from_jet_res    = 0.;
         self.vbf_normalization_uncertainty_from_jet_res    = 0.;        
 
-        #normalization uncertainty from lep_res
-        self.WJets_normalization_uncertainty_from_lep_res  = 0.;        
-        self.VV_normalization_uncertainty_from_lep_res     = 0.;
-        self.WW_EWK_normalization_uncertainty_from_lep_res = 0.;        
-        self.STop_normalization_uncertainty_from_lep_res   = 0.;
-        self.TTbar_normalization_uncertainty_from_lep_res  = 0.;
-        self.ggH_normalization_uncertainty_from_lep_res    = 0.;
-        self.vbf_normalization_uncertainty_from_lep_res    = 0.;        
 
+        #normalization uncertainty from lep_res
+        if self.channel == "mu":
+         self.WJets_normalization_uncertainty_from_lep_res  = 1.000;        
+         self.VV_normalization_uncertainty_from_lep_res     = 1.016;
+         self.WW_EWK_normalization_uncertainty_from_lep_res = 1.000;        
+         self.STop_normalization_uncertainty_from_lep_res   = 1.000;
+         self.TTbar_normalization_uncertainty_from_lep_res  = 1.000;
+         self.ggH_normalization_uncertainty_from_lep_res    = 1.001;
+         self.vbf_normalization_uncertainty_from_lep_res    = 1.000;        
+        else:
+         self.WJets_normalization_uncertainty_from_lep_res  = 1.000;        
+         self.VV_normalization_uncertainty_from_lep_res     = 1.010;
+         self.WW_EWK_normalization_uncertainty_from_lep_res = 1.000;        
+         self.STop_normalization_uncertainty_from_lep_res   = 1.000;
+         self.TTbar_normalization_uncertainty_from_lep_res  = 1.000;
+         self.ggH_normalization_uncertainty_from_lep_res    = 1.010;
+         self.vbf_normalization_uncertainty_from_lep_res    = 1.001;        
+           
         #normalization uncertainty from btag
-        self.WJets_normalization_uncertainty_from_btag  = 0.;        
-        self.VV_normalization_uncertainty_from_btag     = 0.;
-        self.WW_EWK_normalization_uncertainty_from_btag = 0.;        
-        self.STop_normalization_uncertainty_from_btag   = 0.;
-        self.TTbar_normalization_uncertainty_from_btag  = 0.;
-        self.ggH_normalization_uncertainty_from_btag    = 0.;
-        self.vbf_normalization_uncertainty_from_btag    = 0.;        
+        self.WJets_normalization_uncertainty_from_btag  = 1.000;        
+        self.VV_normalization_uncertainty_from_btag     = 1.005;
+        self.WW_EWK_normalization_uncertainty_from_btag = 1.011;        
+        self.STop_normalization_uncertainty_from_btag   = 1.025;
+        self.TTbar_normalization_uncertainty_from_btag  = 1.018;
+        self.ggH_normalization_uncertainty_from_btag    = 1.004;
+        self.vbf_normalization_uncertainty_from_btag    = 1.004;        
 
         #el and mu trigger and eff uncertainty, AN2012_368_v5 12.3
         self.lep_trigger_uncertainty = 0.01;
@@ -1835,7 +1854,7 @@ class doFit_wj_and_wlvj:
               self.workspace4fit_.pdf("model%smassvbf_jer_up_%s_mj_relaxed"%(label,self.channel)).plotOn(mplot_sys,RooFit.Name("jer_dn"), RooFit.LineColor(6),RooFit.Normalization(self.workspace4fit_.var("rrv_number"+label+"massvbf_jer_dn_"+self.channel+"_mj_relaxed").getVal()/(self.workspace4fit_.var("rrv_vbf_cut_total"+label1+"_"+self.channel).getVal()*rdataset_mj_relaxed.sumEntries()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal())));
 
            if label == "_WJets0" and self.workspace4fit_.pdf("model_WJets01_%s_mj_relaxed"%(self.channel)):
-              self.workspace4fit_.pdf("model_WJets01_%s_mj_relaxed"%(self.channel)).plotOn(mplot_sys,RooFit.Name("alt shape"), RooFit.LineColor(kOrange+1),RooFit.Normalization(self.workspace4fit_.var("rrv_number_WJets01_"+self.channel+"_mj_relaxed").getVal()/(rdataset_mj.sumEntries()*self.workspace4fit_.var("rrv_vbf_cut_total"+label1+"_"+self.channel).getVal()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal())));
+              self.workspace4fit_.pdf("model_WJets01_%s_mj_relaxed"%(self.channel)).plotOn(mplot_sys,RooFit.Name("alt shape"), RooFit.LineColor(kOrange+1),RooFit.Normalization(self.workspace4fit_.var("rrv_number_WJets01_"+self.channel+"_mj_relaxed").getVal()/(rdataset_mj_relaxed.sumEntries()*self.workspace4fit_.var("rrv_vbf_cut_total"+label1+"_"+self.channel).getVal()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal())));
 
            self.leg = self.legend4Plot(mplot_sys,0,1,0., 0.06, 0.16, 0.);
            mplot_sys.addObject(self.leg);
@@ -5965,19 +5984,19 @@ class doFit_wj_and_wlvj:
 
         
         if self.higgs_sample=="ggH600":
-            #self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_up"%(self.higgs_sample),"_signal_region","CB_v1");
-            #self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_dn"%(self.higgs_sample),"_signal_region","CB_v1");
-            #self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer"%(self.higgs_sample),"_signal_region","CB_v1");
-            #self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer_up"%(self.higgs_sample),"_signal_region","CB_v1");
-            #self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer_dn"%(self.higgs_sample),"_signal_region","CB_v1");
-            #self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_up"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_dn"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer_up"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jer_dn"%(self.higgs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%s"%(self.higgs_sample),"_signal_region","CB_v1");
 
-            #self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jes_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            #self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jes_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            #self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            #self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            #self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
-            #self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jes_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jes_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%smassvbf_jer_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
+            self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1");
 
         elif self.higgs_sample=="ggH700":
             self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.higgs_sample),"_%smassvbf_jes_up"%(self.higgs_sample),"_signal_region","CB_v1");
