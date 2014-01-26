@@ -2386,7 +2386,7 @@ class doFit_wj_and_wlvj:
         total_uncertainty = TMath.Sqrt( TMath.Power(rrv_WJets0.getError(),2)+ TMath.Power(rrv_WJets01.getVal()-rrv_WJets0.getVal(),2) ); ## add in quadrature the difference
         rrv_WJets0.setError(total_uncertainty);
         rrv_WJets0.Print();
-        print "Total Uncertainty in WJtes0 due to fit and shape: relaxed ",relaxed," uncertainty ",total_uncertainty;
+        print "Total Uncertainty in WJtes0 due to fit and shape: relaxed ",relaxed," uncertainty ",total_uncertainty/rrv_WJets0.getVal();
 
         if scaleJetMass :
 
@@ -2508,17 +2508,17 @@ class doFit_wj_and_wlvj:
 
             self.WW_EWK_normalization_uncertainty_from_jet_scale = ((TMath.Abs(rrv_WW_EWKmassvbf_jes_up.getVal()-rrv_WW_EWK.getVal())+TMath.Abs(rrv_WW_EWKmassvbf_jes_dn.getVal()-rrv_WW_EWK.getVal() ) )/2.)/rrv_WW_EWK.getVal();         
             print "Total Uncertainty on WW_EWK due to jes: relaxed ",relaxed," uncertainty ",self.WW_EWK_normalization_uncertainty_from_jet_scale;
-            self.WW_EWK_normalization_uncertainty_from_res = ((TMath.Abs(rrv_WW_EWKmassvbf_jer_up.getVal()-rrv_WW_EWK.getVal())+TMath.Abs(rrv_WW_EWKmassvbf_jer_dn.getVal()-rrv_WW_EWK.getVal() )+TMath.Abs(rrv_WW_EWKmass_vbf_jer.getVal()-rrv_WW_EWK.getVal() ) )/3.)/rrv_WW_EWK.getVal();         
+            self.WW_EWK_normalization_uncertainty_from_jet_res = ((TMath.Abs(rrv_WW_EWKmassvbf_jer_up.getVal()-rrv_WW_EWK.getVal())+TMath.Abs(rrv_WW_EWKmassvbf_jer_dn.getVal()-rrv_WW_EWK.getVal() )+TMath.Abs(rrv_WW_EWKmassvbf_jer.getVal()-rrv_WW_EWK.getVal() ) )/3.)/rrv_WW_EWK.getVal();         
             print "Total Uncertainty on WW_EWK due to jer: relaxed ",relaxed," uncertainty ",self.WW_EWK_normalization_uncertainty_from_jet_res;
 
 
          #jet mass uncertainty on ggH normalization
-         rrv_ggH                  = self.workspace4fit_.var("rrv_number_dataset_signal_region_ggH_%s_mj"%(self.channel))
-         rrv_ggHmassvbf_jes_up    = self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jes_up_%s_mj"%(self.channel))
-         rrv_ggHmassvbf_jes_dn    = self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jes_dn_%s_mj"%(self.channel))
-         rrv_ggHmassvbf_jer       = self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jer_%s_mj"%(self.channel))
-         rrv_ggHmassvbf_jer_up    = self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jer_up_%s_mj"%(self.channel))
-         rrv_ggHmassvbf_jer_dn    = self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jer_dn_%s_mj"%(self.channel))
+         rrv_ggH                  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%s_%s_mj"%(self.higgs_sample,self.channel))
+         rrv_ggHmassvbf_jes_up    = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jes_up_%s_mj"%(self.higgs_sample,self.channel))
+         rrv_ggHmassvbf_jes_dn    = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jes_dn_%s_mj"%(self.higgs_sample,self.channel))
+         rrv_ggHmassvbf_jer       = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_%s_mj"%(self.higgs_sample,self.channel))
+         rrv_ggHmassvbf_jer_up    = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_up_%s_mj"%(self.higgs_sample,self.channel))
+         rrv_ggHmassvbf_jer_dn    = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_dn_%s_mj"%(self.higgs_sample,self.channel))
 
          rrv_ggH.Print();
          rrv_ggHmassvbf_jes_up.Print();
@@ -2528,7 +2528,7 @@ class doFit_wj_and_wlvj:
          rrv_ggHmassvbf_jer_dn.Print();        
 
          #jet mass uncertainty on ggH normalization
-         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jes_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jes_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jer_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jes_dn_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_ggHmassvbf_jer_%s_mj"%(self.channel))):    
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jes_up_%s_mj"%(self.higgs_sample,self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jes_up_%s_mj"%(self.higgs_sample,self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_up_%s_mj"%(self.higgs_sample,self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jes_dn_%s_mj"%(self.higgs_sample,self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_%s_mj"%(self.higgs_sample,self.channel))):    
 
             self.ggH_normalization_uncertainty_from_jet_scale = ((TMath.Abs(rrv_ggHmassvbf_jes_up.getVal()-rrv_ggH.getVal())+TMath.Abs(rrv_ggHmassvbf_jes_dn.getVal()-rrv_ggH.getVal() ) )/2.)/rrv_ggH.getVal();         
             print "Total Uncertainty on ggH due to jes: relaxed ",relaxed," uncertainty ",self.ggH_normalization_uncertainty_from_jet_scale;
@@ -2536,13 +2536,13 @@ class doFit_wj_and_wlvj:
             print "Total Uncertainty on ggH due to jer: relaxed ",relaxed," uncertainty ",self.ggH_normalization_uncertainty_from_jet_res;
 
 
-         #jet mass uncertainty on vbf normalization
-         rrv_vbf                = self.workspace4fit_.var("rrv_number_dataset_signal_region_vbf_%s_mj"%(self.channel))
-         rrv_vbfmassvbf_jes_up  = self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jes_up_%s_mj"%(self.channel))
-         rrv_vbfmassvbf_jes_dn  = self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jes_dn_%s_mj"%(self.channel))
-         rrv_vbfmassvbf_jer_up  = self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jer_up_%s_mj"%(self.channel))
-         rrv_vbfmassvbf_jer_dn  = self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jer_dn_%s_mj"%(self.channel))
-         rrv_vbfmassvbf_jer     = self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jer_%s_mj"%(self.channel))
+         #jet mass uncertainty on vbf normalizatio
+         rrv_vbf                = self.workspace4fit_.var("rrv_number_dataset_signal_region_%s_%s_mj"%(self.vbfhiggs_sample,self.channel))
+         rrv_vbfmassvbf_jes_up  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jes_up_%s_mj"%(self.vbfhiggs_sample,self.channel))
+         rrv_vbfmassvbf_jes_dn  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jes_dn_%s_mj"%(self.vbfhiggs_sample,self.channel))
+         rrv_vbfmassvbf_jer_up  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_up_%s_mj"%(self.vbfhiggs_sample,self.channel))
+         rrv_vbfmassvbf_jer_dn  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_dn_%s_mj"%(self.vbfhiggs_sample,self.channel))
+         rrv_vbfmassvbf_jer     = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_%s_mj"%(self.vbfhiggs_sample,self.channel))
 
          rrv_vbf.Print();
          rrv_vbfmassvbf_jes_up.Print();
@@ -2552,7 +2552,7 @@ class doFit_wj_and_wlvj:
          rrv_vbfmassvbf_jer.Print();        
 
          #jet mass uncertainty on vbf normalization
-         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jes_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jes_dn_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jer_up_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jer_dn_%s_mj"%(self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_vbfmassvbf_jer__%s_mj"%(self.channel))):
+         if(self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jes_up_%s_mj"%(self.vbfhiggs_sample,self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jes_dn_%s_mj"%(self.vbfhiggs_sample,self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_up_%s_mj"%(self.vbfhiggs_sample,self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_dn_%s_mj"%(self.vbfhiggs_sample,self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_%s_mj"%(self.vbfhiggs_sample,self.channel))):
              
             self.vbf_normalization_uncertainty_from_jet_scale = ((TMath.Abs(rrv_vbfmassvbf_jes_up.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassvbf_jes_dn.getVal()-rrv_vbf.getVal() ) )/2.)/rrv_vbf.getVal();         
             print "Total Uncertainty on vbfH due to jes: relaxed ",relaxed," uncertainty ",self.vbf_normalization_uncertainty_from_jet_scale;
@@ -2565,7 +2565,7 @@ class doFit_wj_and_wlvj:
         print "############### Fit mj Normalization: ",label," ",massscale," relaxed ",relaxed," ##################"
 	rrv_mass_j = self.workspace4fit_.var("rrv_mass_j")
         ## get real data in mj distribution --> mass up and down have only an effect on Wjets shape -> effect on the normalization -> evaluated in the MC and fit data
-	rdataset_data_mj=self.workspace4fit_.data("rdataset_data_%s_mj"%(self.channel))
+	rdataset_data_mj=self.workspace4fit_.data("rdataset_data_%s_mj"%self.channel)
 
 	### Fix TTbar, VV and STop
         if relaxed == 0:
@@ -2624,47 +2624,47 @@ class doFit_wj_and_wlvj:
             mplot = rrv_mass_j.frame(RooFit.Title(""), RooFit.Bins(int(rrv_mass_j.getBins()/self.narrow_factor)));
             rdataset_data_mj.plotOn(mplot, RooFit.Name("data_invisible"), RooFit.MarkerSize(1.5),RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0));
             ## plot solid style
-            model_data.plotOn(mplot,RooFit.Name("WW_EWK"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WW_EWK"]), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn(mplot,RooFit.Name("WW_EWK"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj,model_TTbar%s_%s_mj,model_VV%s_%s_mj,model_WW_EWK%s_%s_mj"%(label,self.channel,massscale,self.channel,massscale,self.channel,massscale,self.channel,massscale,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WW_EWK"]), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
             
-            model_data.plotOn(mplot,RooFit.Name("VV"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["VV"]), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn(mplot,RooFit.Name("VV"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj,model_TTbar%s_%s_mj,model_VV%s_%s_mj"%(label,self.channel,massscale,self.channel,massscale,self.channel,massscale,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["VV"]), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn(mplot,RooFit.Name("TTbar"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj"%(label,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["TTbar"]), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn(mplot,RooFit.Name("TTbar"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj,model_TTbar%s_%s_mj"%(label,self.channel,massscale,self.channel,massscale,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["TTbar"]), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn(mplot,RooFit.Name("STop"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj"%(label,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["STop"]), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn(mplot,RooFit.Name("STop"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj"%(label,self.channel,massscale,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["STop"]), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
             model_data.plotOn(mplot,RooFit.Name("WJets"), RooFit.Components("model%s_%s_mj"%(label,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WJets"]), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
             ## plot "dashed" style area
-            model_data.plotOn(mplot,RooFit.Name("WW_EWK_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WW_EWK"]), RooFit.LineColor(kBlack),RooFit.FillStyle(3003),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn(mplot,RooFit.Name("WW_EWK_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj,model_TTbar%s_%s_mj,model_VV%s_%s_mj,model_WW_EWK%s_%s_mj"%(label,self.channel,massscale,self.channel,massscale,self.channel,massscale,self.channel,massscale,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WW_EWK"]), RooFit.LineColor(kBlack),RooFit.FillStyle(3003),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn(mplot,RooFit.Name("VV_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["VV"]), RooFit.LineColor(kBlack),RooFit.FillStyle(3003),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn(mplot,RooFit.Name("VV_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj,model_TTbar%s_%s_mj,model_VV%s_%s_mj"%(label,self.channel,massscale,self.channel,massscale,self.channel,massscale,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["VV"]), RooFit.LineColor(kBlack),RooFit.FillStyle(3003),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn(mplot,RooFit.Name("TTbar_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj"%(label,self.channel,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["TTbar"]), RooFit.LineColor(kBlack),RooFit.FillStyle(3003),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn(mplot,RooFit.Name("TTbar_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj,model_TTbar%s_%s_mj"%(label,self.channel,massscale,self.channel,massscale,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["TTbar"]), RooFit.LineColor(kBlack),RooFit.FillStyle(3003),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn(mplot,RooFit.Name("STop_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj"%(label,self.channel,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["STop"]), RooFit.LineColor(kBlack),RooFit.FillStyle(3003),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn(mplot,RooFit.Name("STop_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj"%(label,self.channel,massscale,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["STop"]), RooFit.LineColor(kBlack),RooFit.FillStyle(3003),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
             model_data.plotOn(mplot,RooFit.Name("WJets_invisible"), RooFit.Components("model%s_%s_mj"%(label,self.channel)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WJets"]),RooFit.FillStyle(3003),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()), RooFit.LineColor(kBlack),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
             ### solid line
             model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj"%(label,self.channel)), RooFit.LineColor(kBlack), RooFit.LineWidth(2) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj"%(label,self.channel,self.channel)), RooFit.LineColor(kBlack), RooFit.LineWidth(2),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj"%(label,self.channel,massscale,self.channel)), RooFit.LineColor(kBlack), RooFit.LineWidth(2),RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj"%(label,self.channel,self.channel,self.channel)), RooFit.LineColor(kBlack), RooFit.LineWidth(2) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj,model_TTbar%s_%s_mj"%(label,self.channel,massscale,self.channel,massscale,self.channel)), RooFit.LineColor(kBlack), RooFit.LineWidth(2) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel)),RooFit.LineColor(kBlack), RooFit.LineWidth(2) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj,model_TTbar%s_%s_mj,model_VV%s_%s_mj"%(label,self.channel,massscale,self.channel,massscale,self.channel,massscale,self.channel)),RooFit.LineColor(kBlack), RooFit.LineWidth(2) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel,self.channel)),RooFit.LineColor(kBlack), RooFit.LineWidth(2) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());            
+            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj,model_TTbar%s_%s_mj,model_VV%s_%s_mj,model_WW_EWK%s_%s_mj"%(label,self.channel,massscale,self.channel,massscale,self.channel,massscale,self.channel,massscale,self.channel)),RooFit.LineColor(kBlack), RooFit.LineWidth(2) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());            
 
             ### dash line
             model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj"%(label,self.channel)), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj"%(label,self.channel,self.channel)), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj"%(label,self.channel,massscale,self.channel)), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj"%(label,self.channel,self.channel,self.channel)), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj,model_TTbar%s_%s_mj"%(label,self.channel,massscale,self.channel,massscale,self.channel)), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel)),RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj,model_TTbar%s_%s_mj,model_VV%s_%s_mj"%(label,self.channel,massscale,self.channel,massscale,self.channel,massscale,self.channel)),RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj"%(label,self.channel,self.channel,self.channel,self.channel,self.channel)),RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj,model_TTbar%s_%s_mj,model_VV%s_%s_mj,model_WW_EWK%s_%s_mj"%(label,self.channel,massscale,self.channel,massscale,self.channel,massscale,self.channel,massscale,self.channel)),RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
             ### draw the error band using the sum of all the entries component MC + fit and the total error == Normalization for the fixed MC, shape + normalization for W+jets
             draw_error_band(rdataset_data_mj, model_data, rrv_number_data_mj,rfresult,mplot,self.color_palet["Uncertainty"],"F");
