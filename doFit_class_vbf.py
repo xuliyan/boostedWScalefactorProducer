@@ -306,11 +306,12 @@ class doFit_wj_and_wlvj:
         self.vpt_cut   = 200;
         self.bcut      = 0.679;
         if self.channel=="el":
-            self.pfMET_cut = 60; 
+            self.pfMET_cut = 50; 
             self.lpt_cut   = 30;        
         #deltaPhi_METj cut
         self.deltaPhi_METj_cut = 2.0;
         self.top_veto_had = 210 ;
+            
         self.top_veto_lep = 200 ;
         self.dEta_cut = 3.0 ;
         self.Mjj_cut  = 250 ;
@@ -325,7 +326,7 @@ class doFit_wj_and_wlvj:
         self.XS_STop_uncertainty = 0.30 ;
         self.XS_VV_uncertainty   = 0.30 ;
         self.XS_WW_EWK_uncertainty   = 0.30 ;        
-        self.XS_TTbar_uncertainty= 0.07 ;
+        self.XS_TTbar_uncertainty    = 0.07 ;
         self.XS_TTbar_NLO_uncertainty = 0.063 ;# from AN-12-368 table8
         self.XS_STop_NLO_uncertainty  = 0.05 ;# from AN-12-368 table8
         self.XS_VV_NLO_uncertainty    = 0.10 ;# from AN-12-368 table8
@@ -2707,7 +2708,7 @@ class doFit_wj_and_wlvj:
 
             model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj%s,model_TTbar%s_%s_mj,model_VV%s_%s_mj%s"%(label,self.channel,massscale,self.channel,relaxed,massscale,self.channel,massscale,self.channel,relaxed)),RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
 
-            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj%s,model_TTbar%s_%s_mj,model_VV%s_%s_mj%s,model_WW_EWK%s_%s_mj%s"%(label,self.channel,massscale,self.channel,relaxed,massscale,self.channel,massscale,self.channel,relaxed,massscale,self.channel,relaxed)),RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"), RooFit.VLines());
+            model_data.plotOn( mplot,RooFit.Name("_invisible"), RooFit.Components("model%s_%s_mj,model_STop%s_%s_mj%s,model_TTbar%s_%s_mj,model_VV%s_%s_mj%s,model_WW_EWK%s_%s_mj%s"%(label,self.channel,massscale,self.channel,relaxed,massscale,self.channel,massscale,self.channel,relaxed,massscale,self.channel,relaxed)),RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.LineStyle(kDashed) ,RooFit.NormRange("sb_lo,sb_hi"));
 
             ### draw the error band using the sum of all the entries component MC + fit and the total error == Normalization for the fixed MC, shape + normalization for W+jets
             draw_error_band(rdataset_data_mj, model_data, rrv_number_data_mj,rfresult,mplot,self.color_palet["Uncertainty"],"F");
