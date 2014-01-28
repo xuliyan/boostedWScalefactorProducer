@@ -1231,8 +1231,8 @@ class doFit_wj_and_wlvj:
             model_pdf = ROOT.RooErfExp_Voig_Gaus_Pdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum, rrv_x,rrv_c_ErfExp,rrv_offset_ErfExp,rrv_width_ErfExp,rrv_mean_voig,rrv_width_voig,rrv_sigma_voig,rrv_high1,rrv_mean_gaus,rrv_sigma_gaus,rrv_high2 );
 
         if in_model_name == "User1":
-            rrv_p0 = RooRealVar("rrv_p0_User1"+label+"_"+self.channel+mass_spectrum,"rrv_p0_User1"+label+"_"+self.channel+mass_spectrum, 30, 0,100);
-            rrv_p1 = RooRealVar("rrv_p1_User1"+label+"_"+self.channel+mass_spectrum,"rrv_p1_User1"+label+"_"+self.channel+mass_spectrum, -4,-100,100);
+            rrv_p0 = RooRealVar("rrv_p0_User1"+label+"_"+self.channel+mass_spectrum,"rrv_p0_User1"+label+"_"+self.channel+mass_spectrum, 6, 0,100);
+            rrv_p1 = RooRealVar("rrv_p1_User1"+label+"_"+self.channel+mass_spectrum,"rrv_p1_User1"+label+"_"+self.channel+mass_spectrum, -3,-30,0);
             model_pdf = RooUser1Pdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_p0,rrv_p1);
 
         if in_model_name == "QCD":
@@ -2191,30 +2191,6 @@ class doFit_wj_and_wlvj:
 
          self.draw_canvas_with_pull( mplot_relaxed, mplot_pull_relaxed,parameters_list_relaxed,"plots_%s_%s_%s_%s_g1/m_lvj_fitting_relaxed/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj"+label+in_range+mlvj_model, show_constant_parameter, logy);
 
-         ## plot the result
-	 mplot_same = rrv_mass_lvj.frame(RooFit.Title("M_{lvj"+in_range+"} fitted by "+mlvj_model), RooFit.Bins(int(rrv_mass_lvj.getBins()/self.narrow_factor)));
-         rdataset.plotOn( mplot_same, RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
-
-         if TString(in_range).Contains("sb_lo"):
-             normalization = self.workspace4fit_.var("rrv_vbf_cut_sb_lo"+label+"_"+self.channel).getVal();
-         elif TString(in_range).Contains("sb_hi"):    
-             normalization = self.workspace4fit_.var("rrv_vbf_cut_sb_hi"+label+"_"+self.channel).getVal();
-         elif TString(in_range).Contains("signal_region"):
-             normalization = self.workspace4fit_.var("rrv_vbf_cut_signal_region"+label+"_"+self.channel).getVal();
-         else:
-             normalization = self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal();
-
-         par = parameters_list_relaxed.createIterator();
-         par.Reset();
-         param = par.Next()
-         while (param):
-             if TString(param.GetName()).Contains("number"):
-                 param.setVal(param.getVal()*normalization);
-                 param.setError(param.getError()*normalization);
-                 param.Print();
-             param=par.Next()
-
-
          if not TString(label).Contains("_jes") and not TString(label).Contains("_jer") :
 
              
@@ -2251,7 +2227,7 @@ class doFit_wj_and_wlvj:
            
 #           self.draw_canvas(mplot_sys,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_extended_relaxed"+label,0,1);
 
-           self.draw_canvas_with_pull( mplot_sys, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_relaxed"+label+in_range+mlvj_model, show_constant_parameter, logy);
+           self.draw_canvas_with_pull( mplot_sys, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_extended_relaxed"+label+in_range+mlvj_model, show_constant_parameter, logy);
 
 
            print "################### Decorrelated mlvj single mc relaxed shape ################"
@@ -2344,27 +2320,51 @@ class doFit_wj_and_wlvj:
 #           self.draw_canvas(mplot_deco,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_shape_relaxed"+label,0,1);
            self.draw_canvas_with_pull( mplot_deco, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj_shape_relaxed"+label+in_range+mlvj_model, show_constant_parameter, logy);
 
+         ## plot the result
+         if TString(in_range).Contains("sb_lo"):
+             normalization = self.workspace4fit_.var("rrv_vbf_cut_sb_lo"+label+"_"+self.channel).getVal();
+         elif TString(in_range).Contains("sb_hi"):    
+             normalization = self.workspace4fit_.var("rrv_vbf_cut_sb_hi"+label+"_"+self.channel).getVal();
+         elif TString(in_range).Contains("signal_region"):
+             normalization = self.workspace4fit_.var("rrv_vbf_cut_signal_region"+label+"_"+self.channel).getVal();
+         else:
+             normalization = self.workspace4fit_.var("rrv_vbf_cut_total"+label+"_"+self.channel).getVal();
 
-           result_param = rfresult_relaxed.floatParsFinal();
+         par = parameters_list_relaxed.createIterator();
+         par.Reset();
+         param = par.Next()
+         while (param):
+             if TString(param.GetName()).Contains("number"):
+                 param.setVal(param.getVal()*normalization);
+                 param.setError(param.getError()*normalization);
+                 param.Print();
+             param=par.Next()
 
-           for iresult in range(result_param.getSize()) :
-             if TString(result_param.at(iresult).GetName()).Contains("number"):
-              result_param.at(iresult).setVal(result_param.at(iresult).getVal()*normalization);
-              result_param.at(iresult).setError(result_param.at(iresult).getError()*normalization);
+
+
+        result_param = rfresult_relaxed.floatParsFinal();
+
+        for iresult in range(result_param.getSize()) :
+          if TString(result_param.at(iresult).GetName()).Contains("number"):
+           result_param.at(iresult).setVal(result_param.at(iresult).getVal()*normalization);
+           result_param.at(iresult).setError(result_param.at(iresult).getError()*normalization);
                  
-         ## draw the error band for an extend pdf
-         rfresult_relaxed.Print();             
+        ## draw the error band for an extend pdf
+        rfresult_relaxed.Print();             
 
-         ## set the name of the result of the fit and put it in the workspace
-         rfresult_relaxed.SetName("rfresult_relaxed"+label+in_range+"_"+self.channel+"_mlvj")
-         getattr(self.workspace4fit_,"import")(rfresult_relaxed)
+        mplot_same = rrv_mass_lvj.frame(RooFit.Title("M_{lvj"+in_range+"} fitted by "+mlvj_model), RooFit.Bins(int(rrv_mass_lvj.getBins()/self.narrow_factor)));
+        rdataset.plotOn( mplot_same, RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
 
-         ## re-draw the dataset
-         band_up = TGraph(); band_dn = TGraph();         
-         band_up = mplot_relaxed.findObject("error_up");
-         band_dn = mplot_relaxed.findObject("error_dn");
+        ## set the name of the result of the fit and put it in the workspace
+        rfresult_relaxed.SetName("rfresult_relaxed"+label+in_range+"_"+self.channel+"_mlvj")
+        getattr(self.workspace4fit_,"import")(rfresult_relaxed)
+
+        ## re-draw the dataset
+        band_up = TGraph(); band_dn = TGraph();         
+        band_up = mplot_relaxed.findObject("error_up");
+        band_dn = mplot_relaxed.findObject("error_dn");
          
-         for ipoint in range(0,band_up.GetN()) and range(0,band_dn.GetN()):
+        for ipoint in range(0,band_up.GetN()) and range(0,band_dn.GetN()):
              x1 = ROOT.Double(0.) ; y1 = ROOT.Double(0.) ;
              band_up.GetPoint(ipoint,x1,y1);
              band_up.SetPoint(ipoint,x1,y1*normalization);
@@ -2372,39 +2372,39 @@ class doFit_wj_and_wlvj:
              band_dn.GetPoint(ipoint,x2,y2);
              band_dn.SetPoint(ipoint,x2,y2*normalization);
              
-         mplot_same.addObject(band_up,"L");
-         mplot_same.addObject(band_dn,"L"); 
+        mplot_same.addObject(band_up,"L");
+        mplot_same.addObject(band_dn,"L"); 
         
-         rdataset.plotOn(mplot_same,RooFit.MarkerSize(1.5),RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0));
-         ## draw the function
-         model.plotOn(mplot_same, RooFit.LineColor(1));
-         model_relaxed.plotOn(mplot_same);# remove RooFit.VLines() in order to get right pull in the 1st bin
+        rdataset.plotOn(mplot_same,RooFit.MarkerSize(1.5),RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0));
+        ## draw the function
+        model.plotOn(mplot_same, RooFit.LineColor(1));
+        model_relaxed.plotOn(mplot_same);# remove RooFit.VLines() in order to get right pull in the 1st bin
 
-         ## get the pull
-	 mplot_pull_same      = self.get_pull(rrv_mass_lvj,mplot_same);
-         parameters_list_same = model_relaxed.getParameters(rdataset);
-         mplot_same.GetYaxis().SetRangeUser(1e-5,mplot_same.GetMaximum()*1.2);
+        ## get the pull
+        mplot_pull_same      = self.get_pull(rrv_mass_lvj,mplot_same);
+        parameters_list_same = model_relaxed.getParameters(rdataset);
+        mplot_same.GetYaxis().SetRangeUser(1e-5,mplot_same.GetMaximum()*1.2);
 
-         ##CALCULATE CHI2
-         datahist = rdataset.binnedClone(rdataset.GetName()+"_binnedClone",rdataset.GetName()+"_binnedClone")
-         Nbin = int(rrv_mass_lvj.getBins()); 
-         ChiSquare_same = model_relaxed.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE));
-         chi_over_ndf_same= ChiSquare_same.getVal()/(Nbin - nparameters_relaxed);
+        ##CALCULATE CHI2
+        datahist = rdataset.binnedClone(rdataset.GetName()+"_binnedClone",rdataset.GetName()+"_binnedClone")
+        Nbin = int(rrv_mass_lvj.getBins()); 
+        ChiSquare_same = model_relaxed.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE));
+        chi_over_ndf_same= ChiSquare_same.getVal()/(Nbin - nparameters_relaxed);
 
-         ##Add Chisquare to mplot_pull
-         cs3 = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf_same)));
-         cs3.SetNDC();
-         cs3.SetTextSize(0.12);
-         cs3.AppendPad("same");
-         mplot_pull_same.addObject(cs3)
+        ##Add Chisquare to mplot_pull
+        cs3 = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf_same)));
+        cs3.SetNDC();
+        cs3.SetTextSize(0.12);
+        cs3.AppendPad("same");
+        mplot_pull_same.addObject(cs3)
 
-         self.draw_canvas_with_pull( mplot_same, mplot_pull_same,parameters_list_same,"plots_%s_%s_%s_%s_g1/m_lvj_fitting_same/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj"+label+in_range+mlvj_model, show_constant_parameter, logy);
+        self.draw_canvas_with_pull( mplot_same, mplot_pull_same,parameters_list_same,"plots_%s_%s_%s_%s_g1/m_lvj_fitting_same/"%(options.additioninformation,self.channel,self.PS_model,self.wtagger_label),in_file_name,"m_lvj"+label+in_range+mlvj_model, show_constant_parameter, logy);
 
-         ### Number of the event in the dataset and lumi scale factor --> set the proper number for bkg extraction or for signal region
-         self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj_relaxed").setVal(self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj_relaxed").getVal()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal())
-         self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj_relaxed").setError(self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj").getError()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal())
+        ### Number of the event in the dataset and lumi scale factor --> set the proper number for bkg extraction or for signal region
+        self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj_relaxed").setVal(self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj_relaxed").getVal()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal())
+        self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj_relaxed").setError(self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj").getError()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal())
 
-         self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj_relaxed").Print();
+        self.workspace4fit_.var("rrv_number"+label+in_range+"_"+self.channel+"_mlvj_relaxed").Print();
 
 
 
@@ -6230,12 +6230,12 @@ class doFit_wj_and_wlvj:
         self.fit_mj_single_MC(self.file_STop_mc,"_STop","_STopmassvbf_jer_dn","ErfExp");        
         self.fit_mj_single_MC(self.file_STop_mc,"_STop","_STop","ErfExp");
 
-        #self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbf_jes_up","_sb_lo",self.MODEL_4_mlvj);
-        #self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbf_jes_dn","_sb_lo",self.MODEL_4_mlvj);
-        #self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbf_jer","_sb_lo",self.MODEL_4_mlvj);
-        #self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbf_jer_up","_sb_lo",self.MODEL_4_mlvj);
-        #self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbf_jer_dn","_sb_lo",self.MODEL_4_mlvj);
-        #self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STop","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbf_jes_up","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbf_jes_dn","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbf_jer","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbf_jer_up","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbf_jer_dn","_sb_lo",self.MODEL_4_mlvj);
+        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STop","_sb_lo",self.MODEL_4_mlvj);
 
         #self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbf_jes_up","_signal_region",self.MODEL_4_mlvj);
         #self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_STopmassvbf_jes_dn","_signal_region",self.MODEL_4_mlvj);
@@ -6251,12 +6251,12 @@ class doFit_wj_and_wlvj:
     ##### Fit of all the MC in both mj and mlvj : Signal, TTbar, STop, VV and Wjets
     def fit_AllSamples_Mj_and_Mlvj(self):
         print "################### fit_AllSamples_Mj_and_Mlvj #####################"
-        self.fit_Signal();
+#        self.fit_Signal();
         self.fit_STop();
-        self.fit_VV();
-        self.fit_WW_EWK();        
-        self.fit_WJets();
-        self.fit_TTbar();
+#        self.fit_VV();
+#        self.fit_WW_EWK();        
+#        self.fit_WJets();
+#        self.fit_TTbar();
 
         print "________________________________________________________________________"
 
