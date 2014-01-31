@@ -815,6 +815,81 @@ Double_t RooAlpha4ExpTailPdf::evaluate() const {
    return ExpTail(x, s0, a0)/ExpTail(x, s1, a1) ; 
 } 
 
+/// ErfExpTail Pdf
+Double_t ErfExpTail(Double_t x, Double_t offset, Double_t width, Double_t s, Double_t a){
+  return TMath::Exp(-x/(s+a*x))*((1.+TMath::Erf((x-offset)/width))/2);
+}
+ 
+ClassImp(RooErfExpTailPdf) 
+
+RooErfExpTailPdf::RooErfExpTailPdf(const char *name, const char *title, 
+                        RooAbsReal& _x,
+                        RooAbsReal& _offset,
+                        RooAbsReal& _width,
+                        RooAbsReal& _s,
+                        RooAbsReal& _a) :
+   RooAbsPdf(name,title), 
+   x("x","x",this,_x),
+   offset("offset","offset",this,_offset),
+   width("width","width",this,_width),
+   s("s","s",this,_s), 
+   a("a","a",this,_a){} 
+
+
+RooErfExpTailPdf::RooErfExpTailPdf(const RooErfExpTailPdf& other, const char* name) :  
+   RooAbsPdf(other,name), 
+   x("x","x",this,other.x),
+   offset("offset","offset",this,other.offset),
+   width("width","width",this,other.width),
+   s("s","s",this,other.s), 
+   a("a","a",this,other.a){} 
+
+
+Double_t RooErfExpTailPdf::evaluate() const { 
+  return ErfExpTail(x, offset, width, s, a) ; 
+ } 
+
+ClassImp(RooAlpha4ErfExpTailPdf) 
+
+RooAlpha4ErfExpTailPdf::RooAlpha4ErfExpTailPdf(const char *name, const char *title, 
+                        RooAbsReal& _x,
+                        RooAbsReal& _offset0,
+                        RooAbsReal& _width0,
+                        RooAbsReal& _s0,
+                        RooAbsReal& _a0,
+                        RooAbsReal& _offset1,
+                        RooAbsReal& _width1,
+                        RooAbsReal& _s1,
+                        RooAbsReal& _a1) :
+   RooAbsPdf(name,title), 
+   x("x","x",this,_x),
+   offset0("offset0","offset0",this,_offset0),
+   width0("width0","width0",this,_width0),
+   s0("s0","s0",this,_s0),
+   a0("a0","a0",this,_a0),
+   offset1("offset1","offset1",this,_offset1),
+   width1("width1","width1",this,_width1),
+   s1("s1","s1",this,_s1),
+   a1("a1","a1",this,_a1){} 
+
+
+RooAlpha4ErfExpTailPdf::RooAlpha4ErfExpTailPdf(const RooAlpha4ErfExpTailPdf& other, const char* name) :  
+   RooAbsPdf(other,name), 
+   x("x","x",this,other.x),
+   offset0("offset0","offset0",this,other.offset0),
+   width0("width0","width0",this,other.width0),
+   s0("s0",this,other.s0),
+   a0("a0",this,other.a0),
+   offset1("offset1","offset1",this,other.offset1),
+   width1("width1","width1",this,other.width1),
+   s1("s1",this,other.s1),
+   a1("a1",this,other.a1){} 
+
+
+Double_t RooAlpha4ErfExpTailPdf::evaluate() const { 
+  return ErfExpTail(x, offset0, width0, s0, a0)/ErfExpTail(x, offset1, width1, s1, a1) ; 
+} 
+
 ///////////////////////////////////////////////Roo2ExpPdf.cxx
 Double_t TwoExp(Double_t x, Double_t c0, Double_t c1, Double_t frac){
 	if(frac<0){frac=0.;}
