@@ -699,6 +699,81 @@ private:
 };
 
 
+//////// ErfExpTail Pdf = Levelled exp with 2 parameter
+Double_t ErfExpTail(Double_t x, Double_t offset, Double_t width, Double_t s, Double_t a);
+
+class RooErfExpTailPdf : public RooAbsPdf {
+public:
+  RooErfExpTailPdf() {} ; 
+  RooErfExpTailPdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width,
+	      RooAbsReal& _s,
+	      RooAbsReal& _a);
+
+  RooErfExpTailPdf(const RooErfExpTailPdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooErfExpTailPdf(*this,newname); }
+
+  inline virtual ~RooErfExpTailPdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
+  RooRealProxy s ;
+  RooRealProxy a ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooErfExpTailPdf,1) // Your description goes here...
+};
+
+////// Alpha function given by the ratio of two levelled exp
+class RooAlpha4ErfExpTailPdf : public RooAbsPdf {
+public:
+  RooAlpha4ErfExpTailPdf() {} ; 
+  RooAlpha4ErfExpTailPdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _offset0,
+	      RooAbsReal& _width0,
+	      RooAbsReal& _s0,
+	      RooAbsReal& _a0,
+	      RooAbsReal& _offset1,
+	      RooAbsReal& _width1,
+	      RooAbsReal& _s1,
+	      RooAbsReal& _a1);
+
+  RooAlpha4ErfExpTailPdf(const RooAlpha4ErfExpTailPdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooAlpha4ErfExpTailPdf(*this,newname); }
+
+  inline virtual ~RooAlpha4ErfExpTailPdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy offset0 ;
+  RooRealProxy width0 ;
+  RooRealProxy s0 ;
+  RooRealProxy a0 ;  
+  RooRealProxy offset1 ;
+  RooRealProxy width1 ;
+  RooRealProxy s1 ;
+  RooRealProxy a1 ;
+
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooAlpha4ErfExpTailPdf,1) // Your description goes here...
+};
+
+
 //////////// Doublw exp function and pdf 
 Double_t TwoExp(Double_t x, Double_t c0, Double_t c1, Double_t frac);
 
