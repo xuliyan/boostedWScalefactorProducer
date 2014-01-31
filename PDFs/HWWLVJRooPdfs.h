@@ -916,6 +916,388 @@ class RooDoubleCrystalBall : public RooAbsPdf {
   ClassDef(RooDoubleCrystalBall,1)
 };
 
+///////////////////////////////////////////////////////////////
+
+/////// Atan * Exponential 
+
+Double_t AtanExp(Double_t x, Double_t c, Double_t offset, Double_t width);
+ 
+class RooAtanExpPdf : public RooAbsPdf {
+ public:
+  RooAtanExpPdf() {} ;  // default constructor
+  RooAtanExpPdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _c, // slope of the exp
+	      RooAbsReal& _offset, // offset of the erf
+	      RooAbsReal& _width); // width of the erf
+
+  RooAtanExpPdf(const RooAtanExpPdf& other, const char* name=0) ; // ctor
+
+  virtual TObject* clone(const char* newname) const { return new RooAtanExpPdf(*this,newname); } // clone 
+
+  inline virtual ~RooAtanExpPdf() { } // dtor
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy c ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
+  
+  Double_t evaluate() const ; // evaluate method 
+
+private:
+
+  ClassDef(RooAtanExpPdf,1) // Your description goes here...
+};
+
+
+/////// Alpha defined as ration of two Erf*Exp
+
+class RooAtanAlpha : public RooAbsPdf {
+ public:
+	 RooAtanAlpha();
+	 RooAtanAlpha(const char *name, const char *title,
+				    RooAbsReal& _x,
+				    RooAbsReal& _c,
+				    RooAbsReal& _offset,
+				    RooAbsReal& _width,
+				    RooAbsReal& _ca,
+				    RooAbsReal& _offseta,
+				    RooAbsReal& _widtha,
+                                    Double_t _xmin,
+                                    Double_t _xmax);
+
+	RooAtanAlpha(const RooAtanAlpha& other, const char* name=0) ;
+
+	virtual TObject* clone(const char* newname) const { return new RooAtanAlpha(*this,newname); }
+
+	inline virtual ~RooAtanAlpha() { }
+
+        Double_t xmin;
+        Double_t xmax;
+
+ protected:
+
+	   RooRealProxy x ;
+	   RooRealProxy c;
+	   RooRealProxy offset;
+	   RooRealProxy width;
+	   RooRealProxy ca;
+	   RooRealProxy offseta;
+	   RooRealProxy widtha;
+
+	   Double_t evaluate() const ;
+
+ private:
+
+	  ClassDef(RooAtanAlpha,1)
+};
+
+
+////////////  Erf*Pow2 function 
+
+Double_t  AtanPow2(Double_t x,Double_t c0, Double_t c1, Double_t offset, Double_t width);
+
+class RooAtanPow2Pdf : public RooAbsPdf {
+public:
+  RooAtanPow2Pdf() {} ; 
+  RooAtanPow2Pdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _c0,
+	      RooAbsReal& _c1,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width);
+
+  RooAtanPow2Pdf(const RooAtanPow2Pdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooAtanPow2Pdf(*this,newname); }
+
+  inline virtual ~RooAtanPow2Pdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy c0 ;
+  RooRealProxy c1 ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooAtanPow2Pdf,1) // Your description goes here...
+};
+ 
+
+///// Alpha function for Atan*Pow2 funtion
+
+class RooAlpha4AtanPow2Pdf : public RooAbsPdf {
+public:
+  RooAlpha4AtanPow2Pdf() {} ; 
+  RooAlpha4AtanPow2Pdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _c0,
+	      RooAbsReal& _c1,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width,
+	      RooAbsReal& _c0a,
+	      RooAbsReal& _c1a,
+	      RooAbsReal& _offseta,
+	      RooAbsReal& _widtha);
+
+  RooAlpha4AtanPow2Pdf(const RooAlpha4AtanPow2Pdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooAlpha4AtanPow2Pdf(*this,newname); }
+
+  inline virtual ~RooAlpha4AtanPow2Pdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy c0 ;
+  RooRealProxy c1 ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
+  RooRealProxy c0a ;
+  RooRealProxy c1a ;
+  RooRealProxy offseta ;
+  RooRealProxy widtha ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooAlpha4AtanPow2Pdf,1) // Your description goes here...
+};
+
+
+
+/////// AtanPow Exp function and related pdf 
+
+Double_t  AtanPowExp(Double_t x,Double_t c0, Double_t c1, Double_t offset, Double_t width);
+
+
+class RooAtanPowExpPdf : public RooAbsPdf {
+public:
+  RooAtanPowExpPdf() {} ; 
+  RooAtanPowExpPdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _c0,
+	      RooAbsReal& _c1,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width);
+
+  RooAtanPowExpPdf(const RooAtanPowExpPdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooAtanPowExpPdf(*this,newname); }
+
+  inline virtual ~RooAtanPowExpPdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy c0 ;
+  RooRealProxy c1 ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooAtanPowExpPdf,1) // Your description goes here...
+};
+ 
+
+/////// Alpha function given by the ration of two Atan*Pow*Exp Pdf
+
+class RooAlpha4AtanPowExpPdf : public RooAbsPdf {
+public:
+  RooAlpha4AtanPowExpPdf() {} ; 
+  RooAlpha4AtanPowExpPdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _c0,
+	      RooAbsReal& _c1,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width,
+	      RooAbsReal& _c0a,
+	      RooAbsReal& _c1a,
+	      RooAbsReal& _offseta,
+	      RooAbsReal& _widtha);
+
+  RooAlpha4AtanPowExpPdf(const RooAlpha4AtanPowExpPdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooAlpha4AtanPowExpPdf(*this,newname); }
+
+  inline virtual ~RooAlpha4AtanPowExpPdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy c0 ;
+  RooRealProxy c1 ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
+  RooRealProxy c0a ;
+  RooRealProxy c1a ;
+  RooRealProxy offseta ;
+  RooRealProxy widtha ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooAlpha4AtanPowExpPdf,1) // Your description goes here...
+};
+
+
+///// Atan*Pow pdf definition
+
+Double_t  AtanPow(Double_t x,Double_t c, Double_t offset, Double_t width);
+
+
+class RooAtanPowPdf : public RooAbsPdf {
+public:
+  RooAtanPowPdf() {} ; 
+  RooAtanPowPdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _c,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width);
+
+  RooAtanPowPdf(const RooAtanPowPdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooAtanPowPdf(*this,newname); }
+
+  inline virtual ~RooAtanPowPdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy c ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooAtanPowPdf,1) // Your description goes here...
+};
+ 
+
+//////// Alpha given by the ratio of two AtanPow Pdf 
+class RooAlpha4AtanPowPdf : public RooAbsPdf {
+public:
+  RooAlpha4AtanPowPdf() {} ; 
+  RooAlpha4AtanPowPdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _c,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width,
+	      RooAbsReal& _ca,
+	      RooAbsReal& _offseta,
+	      RooAbsReal& _widtha);
+
+  RooAlpha4AtanPowPdf(const RooAlpha4AtanPowPdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooAlpha4AtanPowPdf(*this,newname); }
+
+  inline virtual ~RooAlpha4AtanPowPdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy c ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
+  RooRealProxy ca ;
+  RooRealProxy offseta ;
+  RooRealProxy widtha ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooAlpha4AtanPowPdf,1) // Your description goes here...
+};
+
+
+//////// AtanExpTail Pdf = Levelled exp with 2 parameter
+Double_t AtanExpTail(Double_t x, Double_t offset, Double_t width, Double_t s, Double_t a);
+
+class RooAtanExpTailPdf : public RooAbsPdf {
+public:
+  RooAtanExpTailPdf() {} ; 
+  RooAtanExpTailPdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width,
+	      RooAbsReal& _s,
+	      RooAbsReal& _a);
+
+  RooAtanExpTailPdf(const RooAtanExpTailPdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooAtanExpTailPdf(*this,newname); }
+
+  inline virtual ~RooAtanExpTailPdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
+  RooRealProxy s ;
+  RooRealProxy a ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooAtanExpTailPdf,1) // Your description goes here...
+};
+
+////// Alpha function given by the ratio of two levelled exp
+class RooAlpha4AtanExpTailPdf : public RooAbsPdf {
+public:
+  RooAlpha4AtanExpTailPdf() {} ; 
+  RooAlpha4AtanExpTailPdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _offset0,
+	      RooAbsReal& _width0,
+	      RooAbsReal& _s0,
+	      RooAbsReal& _a0,
+	      RooAbsReal& _offset1,
+	      RooAbsReal& _width1,
+	      RooAbsReal& _s1,
+	      RooAbsReal& _a1);
+
+  RooAlpha4AtanExpTailPdf(const RooAlpha4AtanExpTailPdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooAlpha4AtanExpTailPdf(*this,newname); }
+
+  inline virtual ~RooAlpha4AtanExpTailPdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy offset0 ;
+  RooRealProxy width0 ;
+  RooRealProxy s0 ;
+  RooRealProxy a0 ;  
+  RooRealProxy offset1 ;
+  RooRealProxy width1 ;
+  RooRealProxy s1 ;
+  RooRealProxy a1 ;
+
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooAlpha4AtanExpTailPdf,1) // Your description goes here...
+};
 
 
 #endif
