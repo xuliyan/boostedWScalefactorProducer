@@ -88,7 +88,7 @@ class doFit_wj_and_wlvj:
         ### Set the binning for mlvj plots as a function of the model
         if not options.fitsignal:
          if self.MODEL_4_mlvj=="ErfPowExp_v1" or self.MODEL_4_mlvj=="ErfPow2_v1" or self.MODEL_4_mlvj=="ErfExp_v1":
-            self.BinWidth_mlvj = 35.;
+            self.BinWidth_mlvj = 50.;
          else:
             self.BinWidth_mlvj = 50.;
         else:
@@ -101,7 +101,7 @@ class doFit_wj_and_wlvj:
 
         self.leg = TLegend();
         
-        self.narrow_factor = 1.;
+        self.narrow_factor = 10.;
 
         ## correct the binning of mj
         self.BinWidth_mj = self.BinWidth_mj/self.narrow_factor;
