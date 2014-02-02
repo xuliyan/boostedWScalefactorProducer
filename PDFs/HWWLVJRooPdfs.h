@@ -732,7 +732,7 @@ private:
 
   ClassDef(RooErfExpTailPdf,1) // Your description goes here...
 };
-
+/*
 ////// Alpha function given by the ratio of two levelled exp
 class RooAlpha4ErfExpTailPdf : public RooAbsPdf {
 public:
@@ -772,7 +772,7 @@ private:
 
   ClassDef(RooAlpha4ErfExpTailPdf,1) // Your description goes here...
 };
-
+*/
 
 //////////// Doublw exp function and pdf 
 Double_t TwoExp(Double_t x, Double_t c0, Double_t c1, Double_t frac);
