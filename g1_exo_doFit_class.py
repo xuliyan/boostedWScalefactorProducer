@@ -11,7 +11,7 @@ from subprocess import Popen
 from optparse import OptionParser
 
 
-from ROOT import gROOT, TPaveLabel, gStyle, gSystem, TGaxis, TStyle, TLatex, TString, TF1,TFile,TLine, TLegend, TH1D,TH2D,THStack,TChain, TCanvas, TMatrixDSym, TMath, TText, TPad, RooFit, RooArgSet, RooArgList, RooArgSet, RooAbsData, RooAbsPdf, RooAddPdf, RooWorkspace, RooExtendPdf,RooCBShape, RooLandau, RooFFTConvPdf, RooGaussian, RooBifurGauss, RooArgusBG,RooDataSet, RooExponential,RooBreitWigner, RooVoigtian, RooNovosibirsk, RooRealVar,RooFormulaVar, RooDataHist, RooHistPdf,RooCategory, RooChebychev, RooSimultaneous, RooGenericPdf,RooConstVar, RooKeysPdf, RooHistPdf, RooEffProd, RooProdPdf, TIter, kTRUE, kFALSE, kGray, kRed, kDashed, kGreen,kAzure, kOrange, kBlack,kBlue,kYellow,kCyan, kMagenta, kWhite
+from ROOT import gROOT, TPaveLabel, gStyle, gSystem, TGaxis, TStyle, TLatex, TString, TF1,TFile,TLine, TLegend, TH1D,TH2D,THStack,TChain, TCanvas, TMatrixDSym, TMath, TText, TPad, RooFit, RooArgSet, RooArgList, RooArgSet, RooAbsData, RooAbsPdf, RooAddPdf, RooWorkspace, RooExtendPdf,RooCBShape, RooLandau, RooFFTConvPdf, RooGaussian, RooBifurGauss, RooArgusBG,RooDataSet, RooExponential,RooBreitWigner, RooVoigtian, RooNovosibirsk, RooRealVar,RooFormulaVar, RooDataHist, RooHist,RooCategory, RooChebychev, RooSimultaneous, RooGenericPdf,RooConstVar, RooKeysPdf, RooHistPdf, RooEffProd, RooProdPdf, TIter, kTRUE, kFALSE, kGray, kRed, kDashed, kGreen,kAzure, kOrange, kBlack,kBlue,kYellow,kCyan, kMagenta, kWhite
 
 
 ############################################
@@ -45,8 +45,8 @@ parser.add_option('--category', action="store",type="string",dest="category",def
 (options, args) = parser.parse_args()
 
 ROOT.gSystem.Load(options.inPath+"/PDFs/PdfDiagonalizer_cc.so")
-ROOT.gSystem.Load(options.inPath+"/PDFs/HWWLVJRooPdfs_cxx.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/Util_cxx.so")
+ROOT.gSystem.Load(options.inPath+"/PDFs/HWWLVJRooPdfs_cxx.so")
 
 from ROOT import draw_error_band, draw_error_band_extendPdf, draw_error_band_Decor, draw_error_band_shape_Decor, Calc_error_extendPdf, Calc_error, RooErfExpPdf, RooAlpha, RooAlpha4ErfPowPdf, RooAlpha4ErfPow2Pdf, RooAlpha4ErfPowExpPdf, PdfDiagonalizer, RooPowPdf, RooPow2Pdf, RooErfPowExpPdf, RooErfPowPdf, RooErfPow2Pdf, RooQCDPdf, RooUser1Pdf, RooBWRunPdf, RooAnaExpNPdf, RooExpNPdf, RooAlpha4ExpNPdf, RooExpTailPdf, RooAlpha4ExpTailPdf, Roo2ExpPdf, RooAlpha42ExpPdf
 
@@ -89,7 +89,7 @@ class doFit_wj_and_wlvj:
             self.BinWidth_mlvj=100.;
             
         #narrow the BinWidth_mj and BinWidth_mlvj by a factor of 5. Because Higgs-Combination-Tools will generate a binned sample, so need the bin width narrow. So, as a easy selution, we will increase the bin-width by a factor of 5 when ploting m_j m_WW
-        self.narrow_factor=10.;
+        self.narrow_factor=1.;
 
         ## correct the binning of mj 
         self.BinWidth_mj=self.BinWidth_mj/self.narrow_factor;
@@ -2622,7 +2622,7 @@ class doFit_wj_and_wlvj:
 
             mplot = rrv_mass_lvj.frame(RooFit.Title("M_lvj fitted in M_j sideband "), RooFit.Bins(int(rrv_mass_lvj.getBins()/self.narrow_factor)));
 
-            rdataset_data_mlvj.plotOn( mplot , RooFit.Invisible(), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.Poisson), RooFit.XErrorSize(0) );
+            rdataset_data_mlvj.plotOn( mplot , RooFit.Invisible(), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.Poisson), RooFit.XErrorSize(0), RooFit.MarkerColor(0), RooFit.LineColor(0) );
 
             model_data.plotOn(mplot, RooFit.Components("model%s_sb_lo_from_fitting_%s_mlvj,model_TTbar_xww_sb_lo_%s_mlvj,model_STop_xww_sb_lo_%s_mlvj,model_VV_xww_sb_lo_%s_mlvj"%(label,self.channel,self.channel,self.channel,self.channel)), RooFit.Name("WJets"),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WJets"]), RooFit.LineColor(kBlack), RooFit.VLines()) ;
 
@@ -2642,12 +2642,11 @@ class doFit_wj_and_wlvj:
             model_data.plotOn(mplot, RooFit.Components("model_STop_xww_sb_lo_%s_mlvj"%(self.channel)), RooFit.Name("STop_line_invisible"), RooFit.LineColor(kBlack), RooFit.LineWidth(2), RooFit.VLines());
  
 
-            rdataset_data_mlvj.plotOn(mplot,RooFit.Name("data"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.Poisson), RooFit.XErrorSize(0) );
             ### draw the error band 
             draw_error_band(rdataset_data_mlvj, model_data,self.workspace4fit_.var("rrv_number_data_xww_sb_lo_%s_mlvj"%(self.channel)) ,rfresult,mplot,self.color_palet["Uncertainty"],"F");
             model_data.plotOn( mplot , RooFit.VLines(), RooFit.Invisible());
             model_data.plotOn( mplot , RooFit.Invisible());
-            rdataset_data_mlvj.plotOn(mplot,RooFit.Name("data_invisible1"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.Poisson), RooFit.XErrorSize(0) );
+            self.getData_PoissonInterval(rdataset_data_mlvj,mplot);
 
             mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.2);  
 
@@ -3899,10 +3898,10 @@ class doFit_wj_and_wlvj:
         scale_number_signal = rrv_number_signal.getVal()/data_obs.sumEntries()
         #### scale factor in order to scale MC to data in the final plot -> in order to avoid the normalization to data which is done by default in rooFit
         scale_number_Total_background_MC = rrv_number_Total_background_MC.getVal()/data_obs.sumEntries()
-
+                         
         #### create the frame
         mplot = rrv_x.frame(RooFit.Title("check_workspace"), RooFit.Bins(int(rrv_x.getBins()/self.narrow_factor)));
-        data_obs.plotOn(mplot , RooFit.Name("data_invisible"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.Poisson), RooFit.XErrorSize(0) );
+        data_obs.plotOn(mplot , RooFit.Name("data_invisible"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.Poisson), RooFit.XErrorSize(0), RooFit.MarkerColor(0), RooFit.LineColor(0));
 
         model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Name("WJets"), RooFit.Components("WJets_xww_%s_%s,VV_xww_%s_%s,TTbar_xww_%s_%s,STop_xww_%s_%s"%(self.channel,self.wtagger_label,self.channel,self.wtagger_label,self.channel,self.wtagger_label,self.channel,self.wtagger_label)),RooFit.DrawOption("F"), RooFit.FillColor(self.color_palet["WJets"]), RooFit.LineColor(kBlack), RooFit.VLines());
         
@@ -3933,9 +3932,10 @@ class doFit_wj_and_wlvj:
             signal_scale=25*self.xs_rescale;
 
         model_pdf_signal.plotOn(mplot,RooFit.Normalization(scale_number_signal*signal_scale),RooFit.Name("%s #times %s"%(self.signal_sample, signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["Signal"]), RooFit.LineStyle(2), RooFit.VLines());
-        
-        data_obs.plotOn(mplot, RooFit.Name("data"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.Poisson), RooFit.XErrorSize(0) );
 
+        #### plot the observed data using poissonian error bar
+        self.getData_PoissonInterval(data_obs,mplot);
+        
         model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Invisible());
 
         mplot_pull=self.get_pull(rrv_x,mplot);
@@ -3989,6 +3989,29 @@ class doFit_wj_and_wlvj:
         mplot_pull.GetYaxis().CenterTitle();
 
         return mplot_pull;
+
+    def getData_PoissonInterval(self,data_obs,mplot):
+        rrv_x = self.workspace4fit_.var("rrv_mass_lvj");
+        datahist   = data_obs.binnedClone(data_obs.GetName()+"_binnedClone",data_obs.GetName()+"_binnedClone");
+        data_histo = datahist.createHistogram("histo_data",rrv_x) ;
+        data_histo.SetName("data");
+        data_plot  = RooHist(data_histo);
+        data_plot.SetMarkerStyle(20);
+        data_plot.SetMarkerSize(1.5);
+        
+        alpha = 1 - 0.6827;
+        for iPoint  in range(data_plot.GetN()):
+          N = data_plot.GetY()[iPoint];
+          if N==0 : L = 0;
+          else : L = (ROOT.Math.gamma_quantile(alpha/2,N,1.));
+          U =  ROOT.Math.gamma_quantile_c(alpha/2,N+1,1);
+          data_plot.SetPointEYlow(iPoint, N-L);
+          data_plot.SetPointEYhigh(iPoint,U-N);
+          data_plot.SetPointEXlow(iPoint,0);        
+          data_plot.SetPointEXhigh(iPoint,0);        
+        
+        mplot.addPlotable(data_plot,"PE");
+
 
     #### in order to make the banner on the plots
     def banner4Plot(self, iswithpull=0):
@@ -4048,10 +4071,10 @@ class doFit_wj_and_wlvj:
         objName_signal_graviton = "";
         objNameLeg_signal_graviton = "";        
 
-        if self.categoryID==0:   legHeader="(e#nu, 1JLP)";
-        elif self.categoryID==1: legHeader="(e#nu, 1JHP)";
-        elif self.categoryID==2: legHeader="(#mu#nu, 1JLP)";
-        elif self.categoryID==3: legHeader="(#mu#nu, 1JHP)";
+        if   self.categoryID == 0: legHeader="(e#nu, 1JLP)";
+        elif self.categoryID == 1: legHeader="(e#nu, 1JHP)";
+        elif self.categoryID == 2: legHeader="(#mu#nu, 1JLP)";
+        elif self.categoryID == 3: legHeader="(#mu#nu, 1JHP)";
 
         for obj in range(int(plot.numItems()) ):
           objName = plot.nameOf(obj);
