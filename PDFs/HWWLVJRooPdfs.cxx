@@ -819,7 +819,7 @@ Double_t RooAlpha4ExpTailPdf::evaluate() const {
 Double_t ErfExpTail(Double_t x, Double_t offset, Double_t width, Double_t s, Double_t a){
   return TMath::Exp(-x/(s+a*x))*((1.+TMath::Erf((x-offset)/width))/2);
 }
- 
+
 ClassImp(RooErfExpTailPdf) 
 
 RooErfExpTailPdf::RooErfExpTailPdf(const char *name, const char *title, 
@@ -848,7 +848,7 @@ RooErfExpTailPdf::RooErfExpTailPdf(const RooErfExpTailPdf& other, const char* na
 Double_t RooErfExpTailPdf::evaluate() const { 
   return ErfExpTail(x, offset, width, s, a) ; 
  } 
-
+/*
 ClassImp(RooAlpha4ErfExpTailPdf) 
 
 RooAlpha4ErfExpTailPdf::RooAlpha4ErfExpTailPdf(const char *name, const char *title, 
@@ -889,7 +889,7 @@ RooAlpha4ErfExpTailPdf::RooAlpha4ErfExpTailPdf(const RooAlpha4ErfExpTailPdf& oth
 Double_t RooAlpha4ErfExpTailPdf::evaluate() const { 
   return ErfExpTail(x, offset0, width0, s0, a0)/ErfExpTail(x, offset1, width1, s1, a1) ; 
 } 
-
+*/
 ///////////////////////////////////////////////Roo2ExpPdf.cxx
 Double_t TwoExp(Double_t x, Double_t c0, Double_t c1, Double_t frac){
 	if(frac<0){frac=0.;}
@@ -1121,7 +1121,7 @@ Double_t RooDoubleCrystalBall::analyticalIntegral(Int_t code, const char* rangeN
 Double_t AtanExp(Double_t x, Double_t c, Double_t offset, Double_t width){
     if(width<1e-2) width=1e-2;
     if (c==0) c=-1e-7;
-    return TMath::Exp(c*x)*(1.+TMath::ATan((x-offset)/width))/2. ;
+    return TMath::Exp(c*x)*(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2 ;
 }
 
 
@@ -1216,7 +1216,7 @@ Double_t  AtanPow2(Double_t x,Double_t c0,Double_t c1, Double_t offset, Double_t
 
    if(width<1e-2)width=1e-2;
    Double_t sqrt_s=2000.;
-   return TMath::Power(x/sqrt_s ,-1*(c0+c1*TMath::Log(x/sqrt_s)) )*(1+ TMath::ATan((x-offset)/width)) /2. ; 
+   return TMath::Power(x/sqrt_s ,-1*(c0+c1*TMath::Log(x/sqrt_s)) ) *(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2 ; 
  }
 
 RooAtanPow2Pdf::RooAtanPow2Pdf(const char *name, const char *title, 
@@ -1301,7 +1301,7 @@ ClassImp(RooAtanPowExpPdf)
 Double_t  AtanPowExp(Double_t x,Double_t c0,Double_t c1, Double_t offset, Double_t width){
    if(width<1e-2)width=1e-2;
    Double_t sqrt_s=2000.;
-   return TMath::Power(x/sqrt_s ,-1*(c1*TMath::Log(x/sqrt_s)) )*TMath::Exp(-1*x/sqrt_s*c0)*(1+ TMath::ATan((x-offset)/width)) /2. ; 
+   return TMath::Power(x/sqrt_s ,-1*(c1*TMath::Log(x/sqrt_s)) )*TMath::Exp(-1*x/sqrt_s*c0)*(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2; 
 }
 
 RooAtanPowExpPdf::RooAtanPowExpPdf(const char *name, const char *title, 
@@ -1386,7 +1386,7 @@ ClassImp(RooAtanPowPdf)
 Double_t  AtanPow(Double_t x,Double_t c, Double_t offset, Double_t width){
    if(width<1e-2)width=1e-2;
    Double_t sqrt_s=2000.;
-   return TMath::Power(x/sqrt_s ,c)*(1+ TMath::ATan((x-offset)/width)) /2. ; 
+   return TMath::Power(x/sqrt_s ,c)*(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2; 
 }
 
 RooAtanPowPdf::RooAtanPowPdf(const char *name, const char *title, 
@@ -1457,7 +1457,7 @@ Double_t RooAlpha4AtanPowPdf::evaluate() const {
 
 /// AtanExpTail Pdf
 Double_t AtanExpTail(Double_t x, Double_t offset, Double_t width, Double_t s, Double_t a){
-  return TMath::Exp(-x/(s+a*x))*((1.+TMath::ATan((x-offset)/width))/2);
+  return TMath::Exp(-x/(s+a*x))*(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2;
 }
  
 ClassImp(RooAtanExpTailPdf) 
