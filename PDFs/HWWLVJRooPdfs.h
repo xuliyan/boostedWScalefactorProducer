@@ -312,80 +312,7 @@ private:
 };
 
 
-////// Gaus*Exp Pdf 
-
-Double_t  GausExp(Double_t x,Double_t c, Double_t mean, Double_t sigma);
-
-class RooGausExpPdf : public RooAbsPdf {
-public:
-  RooGausExpPdf() {} ; 
-  RooGausExpPdf(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _c,
-	      RooAbsReal& _mean,
-	      RooAbsReal& _sigma);
-
-  RooGausExpPdf(const RooGausExpPdf& other, const char* name=0) ;
-
-  virtual TObject* clone(const char* newname) const { return new RooGausExpPdf(*this,newname); }
-
-  inline virtual ~RooGausExpPdf() { }
-
-protected:
-
-  RooRealProxy x ;
-  RooRealProxy c ;
-  RooRealProxy mean ;
-  RooRealProxy sigma ;
-  
-  Double_t evaluate() const ;
-
-private:
-
-  ClassDef(RooGausExpPdf,1) // Your description goes here...
-};
-
-
-///// Alpha for the ration of Exp*Gaus pdf
-
-class RooAlpha4GausExpPdf : public RooAbsPdf {
-public:
-  RooAlpha4GausExpPdf() {} ; 
-  RooAlpha4GausExpPdf(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _c,
-	      RooAbsReal& _mean,
-	      RooAbsReal& _sigma,
-	      RooAbsReal& _ca,
-	      RooAbsReal& _meana,
-	      RooAbsReal& _sigmaa);
-
-  RooAlpha4GausExpPdf(const RooAlpha4GausExpPdf& other, const char* name=0) ;
-
-  virtual TObject* clone(const char* newname) const { return new RooAlpha4GausExpPdf(*this,newname); }
-
-  inline virtual ~RooAlpha4GausExpPdf() { }
-
-protected:
-
-  RooRealProxy x ;
-  RooRealProxy c ;
-  RooRealProxy mean ;
-  RooRealProxy sigma ;
-  RooRealProxy ca ;
-  RooRealProxy meana ;
-  RooRealProxy sigmaa ;
-  
-  Double_t evaluate() const ;
-
-private:
-
-  ClassDef(RooAlpha4GausExpPdf,1) // Your description goes here...
-};
-
-
 ///// Erf*Pow pdf definition
-
 Double_t  ErfPow(Double_t x,Double_t c, Double_t offset, Double_t width);
 
 
@@ -732,7 +659,7 @@ private:
 
   ClassDef(RooErfExpTailPdf,1) // Your description goes here...
 };
-/*
+
 ////// Alpha function given by the ratio of two levelled exp
 class RooAlpha4ErfExpTailPdf : public RooAbsPdf {
 public:
@@ -772,7 +699,82 @@ private:
 
   ClassDef(RooAlpha4ErfExpTailPdf,1) // Your description goes here...
 };
-*/
+
+
+//////// ErfExpTail Pdf = Levelled exp with 2 parameter
+Double_t ErfExpN(Double_t x, Double_t offset, Double_t width, Double_t c, Double_t n);
+
+class RooErfExpNPdf : public RooAbsPdf {
+public:
+  RooErfExpNPdf() {} ; 
+  RooErfExpNPdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width,
+	      RooAbsReal& _s,
+	      RooAbsReal& _a);
+
+  RooErfExpNPdf(const RooErfExpNPdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooErfExpNPdf(*this,newname); }
+
+  inline virtual ~RooErfExpNPdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
+  RooRealProxy c ;
+  RooRealProxy n ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooErfExpNPdf,1) // Your description goes here...
+};
+
+////// Alpha function given by the ratio of two levelled exp
+class RooAlpha4ErfExpNPdf : public RooAbsPdf {
+public:
+  RooAlpha4ErfExpNPdf() {} ; 
+  RooAlpha4ErfExpNPdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _offset0,
+	      RooAbsReal& _width0,
+	      RooAbsReal& _c0,
+	      RooAbsReal& _n0,
+	      RooAbsReal& _offset1,
+	      RooAbsReal& _width1,
+	      RooAbsReal& _c1,
+	      RooAbsReal& _n1);
+
+  RooAlpha4ErfExpNPdf(const RooAlpha4ErfExpNPdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooAlpha4ErfExpNPdf(*this,newname); }
+
+  inline virtual ~RooAlpha4ErfExpNPdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy offset0 ;
+  RooRealProxy width0 ;
+  RooRealProxy c0 ;
+  RooRealProxy n0 ;  
+  RooRealProxy offset1 ;
+  RooRealProxy width1 ;
+  RooRealProxy c1 ;
+  RooRealProxy n1 ;
+
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooAlpha4ErfExpNPdf,1) // Your description goes here...
+};
+
 
 //////////// Doublw exp function and pdf 
 Double_t TwoExp(Double_t x, Double_t c0, Double_t c1, Double_t frac);
