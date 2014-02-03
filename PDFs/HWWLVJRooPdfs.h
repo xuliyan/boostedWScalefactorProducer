@@ -188,6 +188,43 @@ private:
 
   ClassDef(RooErfPow2Pdf,1) // Your description goes here...
 };
+
+
+
+Double_t  ErfPow3(Double_t x,Double_t c0, Double_t c1, Double_t c2, Double_t offset, Double_t width);
+
+class RooErfPow3Pdf : public RooAbsPdf {
+public:
+  RooErfPow3Pdf() {} ; 
+  RooErfPow3Pdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _c0,
+	      RooAbsReal& _c1,
+	      RooAbsReal& _c2,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width);
+
+  RooErfPow3Pdf(const RooErfPow3Pdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooErfPow3Pdf(*this,newname); }
+
+  inline virtual ~RooErfPow3Pdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy c0 ;
+  RooRealProxy c1 ;
+  RooRealProxy c2 ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooErfPow3Pdf,1) // Your description goes here...
+};
  
 
 ///// Alpha function for Erf*Pow2 funtion
@@ -1030,6 +1067,43 @@ protected:
 private:
 
   ClassDef(RooAtanPow2Pdf,1) // Your description goes here...
+};
+
+////////////  Erf*Pow2 function 
+
+Double_t  AtanPow3(Double_t x,Double_t c0, Double_t c1, Double_t c2, Double_t offset, Double_t width);
+
+class RooAtanPow3Pdf : public RooAbsPdf {
+public:
+  RooAtanPow3Pdf() {} ; 
+  RooAtanPow3Pdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _c0,
+	      RooAbsReal& _c1,
+	      RooAbsReal& _c2,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width);
+
+  RooAtanPow3Pdf(const RooAtanPow3Pdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooAtanPow3Pdf(*this,newname); }
+
+  inline virtual ~RooAtanPow3Pdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy c0 ;
+  RooRealProxy c1 ;
+  RooRealProxy c2 ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooAtanPow3Pdf,1) // Your description goes here...
 };
  
 
