@@ -103,6 +103,13 @@ Double_t  ErfPow2(Double_t x,Double_t c0,Double_t c1, Double_t offset, Double_t 
    return TMath::Power(x/sqrt_s ,-1*(c0+c1*TMath::Log(x/sqrt_s)) )*(1+ TMath::Erf((x-offset)/width)) /2. ; 
 }
 
+Double_t  ErfPow3(Double_t x,Double_t c0,Double_t c1, Double_t c2, Double_t offset, Double_t width){
+
+   if(width<1e-2)width=1e-2;
+   Double_t sqrt_s=2000.;
+   return TMath::Power(x/sqrt_s ,-1*(c0+c1*TMath::Log(x/sqrt_s)+c2*TMath::Log(x/sqrt_s))*TMath::Log(x/sqrt_s))*(1+ TMath::Erf((x-offset)/width)) /2. ; 
+}
+
 Double_t  ErfPowExp(Double_t x,Double_t c0,Double_t c1, Double_t offset, Double_t width){
    if(width<1e-2)width=1e-2;
    Double_t sqrt_s=2000.;
@@ -160,7 +167,14 @@ Double_t  AtanPow2(Double_t x,Double_t c0,Double_t c1, Double_t offset, Double_t
 
    if(width<1e-2)width=1e-2;
    Double_t sqrt_s=2000.;
-   return TMath::Power(x/sqrt_s ,-1*(c0+c1*TMath::Log(x/sqrt_s)) ) *(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2 ; 
+   return TMath::Power(x/sqrt_s ,-1*(c0+c1*TMath::Log(x/sqrt_s))) *(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2 ; 
+ }
+
+Double_t  AtanPow3(Double_t x,Double_t c0,Double_t c1, Double_t c2, Double_t offset, Double_t width){
+
+   if(width<1e-2)width=1e-2;
+   Double_t sqrt_s=2000.;
+   return TMath::Power(x/sqrt_s ,-1*(c0+c1*TMath::Log(x/sqrt_s)+c2*TMath::Log(x/sqrt_s))*TMath::Log(x/sqrt_s)) *(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2 ; 
  }
 
 
@@ -421,6 +435,40 @@ Double_t RooAlpha4ErfPow2Pdf::evaluate() const {
     Double_t width_tmp=width; if(width<1e-2){ width_tmp=1e-2;}
     Double_t widtha_tmp=widtha; if(widtha<1e-2){ widtha_tmp=1e-2;}
     return ErfPow2(x,c0,c1,offset,width_tmp)/ErfPow2(x,c0a,c1a,offseta,widtha_tmp);
+ } 
+
+
+///// Erf*Pow2 pdf 
+ClassImp(RooErfPow3Pdf) 
+
+RooErfPow3Pdf::RooErfPow3Pdf(const char *name, const char *title, 
+                        RooAbsReal& _x,
+                        RooAbsReal& _c0,
+                        RooAbsReal& _c1,
+                        RooAbsReal& _c2,
+                        RooAbsReal& _offset,
+                        RooAbsReal& _width) :
+   RooAbsPdf(name,title), 
+   x("x","x",this,_x),
+   c0("c0","c0",this,_c0),
+   c1("c1","c1",this,_c1),
+   c2("c2","c2",this,_c2),
+   offset("offset","offset",this,_offset),
+   width("width","width",this,_width){} 
+
+
+RooErfPow3Pdf::RooErfPow3Pdf(const RooErfPow3Pdf& other, const char* name) :  
+   RooAbsPdf(other,name), 
+   x("x",this,other.x),
+   c0("c0",this,other.c0),
+   c1("c1",this,other.c1),
+   c2("c1",this,other.c2),
+   offset("offset",this,other.offset),
+   width("width",this,other.width){ } 
+
+Double_t RooErfPow3Pdf::evaluate() const { 
+   Double_t width_tmp=width; if(width<1e-2){ width_tmp=1e-2;}
+   return ErfPow3(x,c0,c1,c2,offset,width_tmp);
  } 
 
 
@@ -1314,6 +1362,41 @@ Double_t RooAlpha4AtanPow2Pdf::evaluate() const {
     Double_t widtha_tmp=widtha; if(widtha<1e-2){ widtha_tmp=1e-2;}
     return AtanPow2(x,c0,c1,offset,width_tmp)/AtanPow2(x,c0a,c1a,offseta,widtha_tmp);
  } 
+
+
+/// Alpha function given by the ratio of two exponential functions
+ClassImp(RooAtanPow3Pdf)
+
+RooAtanPow3Pdf::RooAtanPow3Pdf(const char *name, const char *title, 
+                        RooAbsReal& _x,
+                        RooAbsReal& _c0,
+                        RooAbsReal& _c1,
+                        RooAbsReal& _c2,
+                        RooAbsReal& _offset,
+                        RooAbsReal& _width) :
+   RooAbsPdf(name,title), 
+   x("x","x",this,_x),
+   c0("c0","c0",this,_c0),
+   c1("c1","c1",this,_c1),
+   c2("c2","c2",this,_c2),
+   offset("offset","offset",this,_offset),
+   width("width","width",this,_width){} 
+
+
+RooAtanPow3Pdf::RooAtanPow3Pdf(const RooAtanPow3Pdf& other, const char* name) :  
+   RooAbsPdf(other,name), 
+   x("x",this,other.x),
+   c0("c0",this,other.c0),
+   c1("c1",this,other.c1),
+   c2("c2",this,other.c2),
+   offset("offset",this,other.offset),
+   width("width",this,other.width){ } 
+
+Double_t RooAtanPow3Pdf::evaluate() const { 
+   Double_t width_tmp=width; if(width<1e-2){ width_tmp=1e-2;}
+   return AtanPow3(x,c0,c1,c2,offset,width_tmp);
+ } 
+
 
 
 //////// Atan Pow Exp pdf 
