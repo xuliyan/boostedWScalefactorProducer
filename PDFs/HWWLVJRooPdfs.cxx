@@ -95,6 +95,75 @@ Double_t Exp(Double_t x, Double_t x_min, Double_t x_max, Double_t c){
 	return TMath::Exp(c*x)/integral ;
 }
 
+/// Erf*Power law 2 order
+Double_t  ErfPow2(Double_t x,Double_t c0,Double_t c1, Double_t offset, Double_t width){
+
+   if(width<1e-2)width=1e-2;
+   Double_t sqrt_s=2000.;
+   return TMath::Power(x/sqrt_s ,-1*(c0+c1*TMath::Log(x/sqrt_s)) )*(1+ TMath::Erf((x-offset)/width)) /2. ; 
+}
+
+Double_t  ErfPowExp(Double_t x,Double_t c0,Double_t c1, Double_t offset, Double_t width){
+   if(width<1e-2)width=1e-2;
+   Double_t sqrt_s=2000.;
+   return TMath::Power(x/sqrt_s ,-1*(c1*TMath::Log(x/sqrt_s)) )*TMath::Exp(-1*x/sqrt_s*c0)*(1+ TMath::Erf((x-offset)/width)) /2. ; 
+}
+
+
+Double_t  ErfPow(Double_t x,Double_t c, Double_t offset, Double_t width){
+   if(width<1e-2)width=1e-2;
+   Double_t sqrt_s=2000.;
+   return TMath::Power(x/sqrt_s ,c)*(1+ TMath::Erf((x-offset)/width)) /2. ; 
+}
+
+
+Double_t ExpN(Double_t x, Double_t c, Double_t n){
+    return TMath::Exp( c*x+n/x ); 
+}
+
+Double_t ExpTail(Double_t x, Double_t s, Double_t a){
+    return TMath::Exp( -x/(s+a*x) ); 
+}
+
+Double_t ErfExpTail(Double_t x, Double_t offset, Double_t width, Double_t s, Double_t a){
+  Double_t val = ExpTail(x,s,a)*((1.+TMath::Erf((x-offset)/width))/2);
+  return val ;
+}
+
+Double_t ErfExpN(Double_t x, Double_t offset, Double_t width, Double_t c, Double_t n){
+  Double_t val = ExpN(x,c,n)*((1.+TMath::Erf((x-offset)/width))/2);
+  return val ;
+}
+Double_t AtanExp(Double_t x, Double_t c, Double_t offset, Double_t width){
+    if(width<1e-2) width=1e-2;
+    if (c==0) c=-1e-7;
+    return TMath::Exp(c*x)*(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2 ;
+}
+
+
+Double_t  AtanPowExp(Double_t x,Double_t c0,Double_t c1, Double_t offset, Double_t width){
+   if(width<1e-2)width=1e-2;
+   Double_t sqrt_s=2000.;
+   return TMath::Power(x/sqrt_s ,-1*(c1*TMath::Log(x/sqrt_s)) )*TMath::Exp(-1*x/sqrt_s*c0)*(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2; 
+}
+
+Double_t  AtanPow(Double_t x,Double_t c, Double_t offset, Double_t width){
+   if(width<1e-2)width=1e-2;
+   Double_t sqrt_s=2000.;
+   return TMath::Power(x/sqrt_s ,c)*(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2; 
+}
+Double_t AtanExpTail(Double_t x, Double_t offset, Double_t width, Double_t s, Double_t a){
+  return ExpTail(x,s,a)*(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2;
+}
+
+Double_t  AtanPow2(Double_t x,Double_t c0,Double_t c1, Double_t offset, Double_t width){
+
+   if(width<1e-2)width=1e-2;
+   Double_t sqrt_s=2000.;
+   return TMath::Power(x/sqrt_s ,-1*(c0+c1*TMath::Log(x/sqrt_s)) ) *(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2 ; 
+ }
+
+
 
 //// Erf*Exp pdf 
 ClassImp(RooErfExpPdf) 
@@ -221,7 +290,7 @@ double RooAlpha::evaluate() const{
 
 
 /// Alpha function given by the ratio of two exponential functions
-ClassImp(RooAlpha)
+ClassImp(RooAlphaExp)
 
 RooAlphaExp::RooAlphaExp(){}
 
@@ -256,7 +325,7 @@ double RooAlphaExp::evaluate() const{
 ///// Relativistic BW
 ClassImp(RooBWRunPdf) 
 
- RooBWRunPdf::RooBWRunPdf(const char *name, const char *title, 
+RooBWRunPdf::RooBWRunPdf(const char *name, const char *title, 
                         RooAbsReal& _x,
                         RooAbsReal& _mean,
                         RooAbsReal& _width) :
@@ -266,25 +335,18 @@ ClassImp(RooBWRunPdf)
    width("width","width",this,_width){ } 
 
 
- RooBWRunPdf::RooBWRunPdf(const RooBWRunPdf& other, const char* name) :  
+RooBWRunPdf::RooBWRunPdf(const RooBWRunPdf& other, const char* name) :  
    RooAbsPdf(other,name), 
    x("x",this,other.x),
    mean("mean",this,other.mean),
    width("width",this,other.width){ } 
 
- Double_t RooBWRunPdf::evaluate() const { 
+Double_t RooBWRunPdf::evaluate() const { 
    return (x*x*width/mean) / ( (x*x-mean*mean)*(x*x-mean*mean) + (x*x*width/mean)*(x*x*width/mean) );
  } 
 
 ///// Erf*Pow2 pdf 
 ClassImp(RooErfPow2Pdf) 
-
-Double_t  ErfPow2(Double_t x,Double_t c0,Double_t c1, Double_t offset, Double_t width){
-
-   if(width<1e-2)width=1e-2;
-   Double_t sqrt_s=2000.;
-   return TMath::Power(x/sqrt_s ,-1*(c0+c1*TMath::Log(x/sqrt_s)) )*(1+ TMath::Erf((x-offset)/width)) /2. ; 
- }
 
 RooErfPow2Pdf::RooErfPow2Pdf(const char *name, const char *title, 
                         RooAbsReal& _x,
@@ -310,7 +372,7 @@ RooErfPow2Pdf::RooErfPow2Pdf(const RooErfPow2Pdf& other, const char* name) :
 
 Double_t RooErfPow2Pdf::evaluate() const { 
    Double_t width_tmp=width; if(width<1e-2){ width_tmp=1e-2;}
-   return ErfPow2(x,c0,c1,offset,width_tmp);
+  return ErfPow2(x,c0,c1,offset,width_tmp);
  } 
 
 
@@ -364,12 +426,6 @@ Double_t RooAlpha4ErfPow2Pdf::evaluate() const {
 
 //////// Erf Pow Exp pdf 
 ClassImp(RooErfPowExpPdf) 
-
-Double_t  ErfPowExp(Double_t x,Double_t c0,Double_t c1, Double_t offset, Double_t width){
-   if(width<1e-2)width=1e-2;
-   Double_t sqrt_s=2000.;
-   return TMath::Power(x/sqrt_s ,-1*(c1*TMath::Log(x/sqrt_s)) )*TMath::Exp(-1*x/sqrt_s*c0)*(1+ TMath::Erf((x-offset)/width)) /2. ; 
-}
 
 RooErfPowExpPdf::RooErfPowExpPdf(const char *name, const char *title, 
                         RooAbsReal& _x,
@@ -444,86 +500,8 @@ Double_t RooAlpha4ErfPowExpPdf::evaluate() const {
    return ErfPowExp(x,c0,c1,offset,width_tmp)/ErfPowExp(x,c0a,c1a,offseta,widtha_tmp);
 } 
 
-////// Gaus Exp Pdf 
-ClassImp(RooGausExpPdf) 
-
-Double_t  GausExp(Double_t x,Double_t c,Double_t mean, Double_t sigma){
-        if(sigma<1e-2)sigma=1e-2;
-	return TMath::Exp(c*x)+TMath::Exp(-(x-mean)*(x-mean)/(2*sigma*sigma)) ; 
-}
-
-RooGausExpPdf::RooGausExpPdf(const char *name, const char *title, 
-                        RooAbsReal& _x,
-                        RooAbsReal& _c,
-                        RooAbsReal& _mean,
-                        RooAbsReal& _sigma) :
-   RooAbsPdf(name,title), 
-   x("x","x",this,_x),
-   c("c","c",this,_c),
-   mean("mean","mean",this,_mean),
-   sigma("sigma","sigma",this,_sigma){ } 
-
-
-RooGausExpPdf::RooGausExpPdf(const RooGausExpPdf& other, const char* name) :  
-   RooAbsPdf(other,name), 
-   x("x",this,other.x),
-   c("c",this,other.c),
-   mean("mean",this,other.mean),
-   sigma("sigma",this,other.sigma){} 
-
-
-Double_t RooGausExpPdf::evaluate() const { 
-   Double_t width_tmp=sigma; if(sigma<1e-2){ width_tmp=1e-2;}
-   return GausExp(x,c,mean,width_tmp);
-} 
-
-
-/////////////// Alpha for Gaus Exp Function
-
-ClassImp(RooGausExpPdf) 
-
-RooAlpha4GausExpPdf::RooAlpha4GausExpPdf(const char *name, const char *title, 
-                        RooAbsReal& _x,
-                        RooAbsReal& _c,
-                        RooAbsReal& _mean,
-                        RooAbsReal& _sigma,
-                        RooAbsReal& _ca,
-                        RooAbsReal& _meana,
-		        RooAbsReal& _sigmaa):
-   RooAbsPdf(name,title), 
-   x("x","x",this,_x),
-   c("c","c",this,_c),
-   mean("mean","mean",this,_mean),
-   sigma("sigma","sigma",this,_sigma),
-   ca("ca","ca",this,_ca),
-   meana("meana","meana",this,_meana),
-   sigmaa("sigmaa","sigmaa",this,_sigmaa){} 
-
-
-RooAlpha4GausExpPdf::RooAlpha4GausExpPdf(const RooAlpha4GausExpPdf& other, const char* name) :  
-   RooAbsPdf(other,name), 
-   x("x",this,other.x),
-   c("c",this,other.c),
-   mean("mean",this,other.mean),
-   sigma("sigma",this,other.sigma),
-   ca("ca",this,other.ca),
-   meana("meana",this,other.meana),
-   sigmaa("sigmaa",this,other.sigmaa){} 
-
-Double_t RooAlpha4GausExpPdf::evaluate() const { 
-    Double_t width_tmp=sigma; if(sigma<1e-2){ width_tmp=1e-2;}
-    Double_t widtha_tmp=sigmaa; if(sigmaa<1e-2){ widtha_tmp=1e-2;}
-    return GausExp(x,c,mean,width_tmp)/GausExp(x,ca,meana,widtha_tmp);} 
-
-
 ////// Erf*Pow Pdf 
 ClassImp(RooErfPowPdf) 
-
-Double_t  ErfPow(Double_t x,Double_t c, Double_t offset, Double_t width){
-   if(width<1e-2)width=1e-2;
-   Double_t sqrt_s=2000.;
-   return TMath::Power(x/sqrt_s ,c)*(1+ TMath::Erf((x-offset)/width)) /2. ; 
-}
 
 RooErfPowPdf::RooErfPowPdf(const char *name, const char *title, 
                         RooAbsReal& _x,
@@ -698,10 +676,6 @@ Double_t RooUser1Pdf::evaluate() const {
 
 
 ///////////////////////////////////////////////RooExpNPdf.cxx
-Double_t ExpN(Double_t x, Double_t c, Double_t n){
-    return TMath::Exp( c*x+n/x ); 
-}
-
 ClassImp(RooExpNPdf) 
 
 RooExpNPdf::RooExpNPdf(const char *name, const char *title, 
@@ -758,10 +732,6 @@ Double_t RooAlpha4ExpNPdf::evaluate() const {
 
 
 ///////////////////////////////////////////////RooExpTailPdf.cxx
-Double_t ExpTail(Double_t x, Double_t s, Double_t a){
-    return TMath::Exp( -x/(s+a*x) ); 
-}
- 
 ClassImp(RooExpTailPdf) 
 
 RooExpTailPdf::RooExpTailPdf(const char *name, const char *title, 
@@ -815,13 +785,10 @@ Double_t RooAlpha4ExpTailPdf::evaluate() const {
    return ExpTail(x, s0, a0)/ExpTail(x, s1, a1) ; 
 } 
 
-/// ErfExpTail Pdf
-Double_t ErfExpTail(Double_t x, Double_t offset, Double_t width, Double_t s, Double_t a){
-  return TMath::Exp(-x/(s+a*x))*((1.+TMath::Erf((x-offset)/width))/2);
-}
 
 ClassImp(RooErfExpTailPdf) 
 
+/// ErfExpTail Pdf
 RooErfExpTailPdf::RooErfExpTailPdf(const char *name, const char *title, 
                         RooAbsReal& _x,
                         RooAbsReal& _offset,
@@ -848,7 +815,7 @@ RooErfExpTailPdf::RooErfExpTailPdf(const RooErfExpTailPdf& other, const char* na
 Double_t RooErfExpTailPdf::evaluate() const { 
   return ErfExpTail(x, offset, width, s, a) ; 
  } 
-/*
+
 ClassImp(RooAlpha4ErfExpTailPdf) 
 
 RooAlpha4ErfExpTailPdf::RooAlpha4ErfExpTailPdf(const char *name, const char *title, 
@@ -889,7 +856,78 @@ RooAlpha4ErfExpTailPdf::RooAlpha4ErfExpTailPdf(const RooAlpha4ErfExpTailPdf& oth
 Double_t RooAlpha4ErfExpTailPdf::evaluate() const { 
   return ErfExpTail(x, offset0, width0, s0, a0)/ErfExpTail(x, offset1, width1, s1, a1) ; 
 } 
-*/
+
+
+ClassImp(RooErfExpNPdf) 
+
+RooErfExpNPdf::RooErfExpNPdf(const char *name, const char *title, 
+                        RooAbsReal& _x,
+                        RooAbsReal& _offset,
+                        RooAbsReal& _width,
+                        RooAbsReal& _c,
+                        RooAbsReal& _n) :
+   RooAbsPdf(name,title), 
+   x("x","x",this,_x),
+   offset("offset","offset",this,_offset),
+   width("width","width",this,_width),
+   c("c","c",this,_c), 
+   n("n","n",this,_n){} 
+
+
+RooErfExpNPdf::RooErfExpNPdf(const RooErfExpNPdf& other, const char* name) :  
+   RooAbsPdf(other,name), 
+   x("x","x",this,other.x),
+   offset("offset","offset",this,other.offset),
+   width("width","width",this,other.width),
+   c("c","c",this,other.c), 
+   n("n","n",this,other.n){} 
+
+
+Double_t RooErfExpNPdf::evaluate() const { 
+  return ErfExpN(x, offset, width, c, n) ; 
+ } 
+
+ClassImp(RooAlpha4ErfExpNPdf) 
+
+RooAlpha4ErfExpNPdf::RooAlpha4ErfExpNPdf(const char *name, const char *title, 
+                        RooAbsReal& _x,
+                        RooAbsReal& _offset0,
+                        RooAbsReal& _width0,
+                        RooAbsReal& _c0,
+                        RooAbsReal& _n0,
+                        RooAbsReal& _offset1,
+                        RooAbsReal& _width1,
+                        RooAbsReal& _c1,
+                        RooAbsReal& _n1) :
+   RooAbsPdf(name,title), 
+   x("x","x",this,_x),
+   offset0("offset0","offset0",this,_offset0),
+   width0("width0","width0",this,_width0),
+   c0("c0","c0",this,_c0),
+   n0("n0","n0",this,_n0),
+   offset1("offset1","offset1",this,_offset1),
+   width1("width1","width1",this,_width1),
+   c1("c1","c1",this,_c1), 
+   n1("n1","n1",this,_n1){} 
+
+
+RooAlpha4ErfExpNPdf::RooAlpha4ErfExpNPdf(const RooAlpha4ErfExpNPdf& other, const char* name) :  
+   RooAbsPdf(other,name), 
+   x("x","x",this,other.x),
+   offset0("offset0","offset0",this,other.offset0),
+   width0("width0","width0",this,other.width0),
+   c0("c0",this,other.c0),
+   n0("n0",this,other.n0),
+   offset1("offset1","offset1",this,other.offset1),
+   width1("width1","width1",this,other.width1),
+   c1("c1",this,other.c1),
+   n1("n1",this,other.n1){} 
+
+
+Double_t RooAlpha4ErfExpNPdf::evaluate() const { 
+  return ErfExpN(x, offset0, width0, c0, n0)/ErfExpN(x, offset1, width1, c1, n1) ; 
+} 
+
 ///////////////////////////////////////////////Roo2ExpPdf.cxx
 Double_t TwoExp(Double_t x, Double_t c0, Double_t c1, Double_t frac){
 	if(frac<0){frac=0.;}
@@ -1118,11 +1156,6 @@ Double_t RooDoubleCrystalBall::analyticalIntegral(Int_t code, const char* rangeN
 
 /////////////////////////////////////
 //// Atan*Exp function implementation 
-Double_t AtanExp(Double_t x, Double_t c, Double_t offset, Double_t width){
-    if(width<1e-2) width=1e-2;
-    if (c==0) c=-1e-7;
-    return TMath::Exp(c*x)*(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2 ;
-}
 
 
 //// Atan*Exp pdf 
@@ -1205,19 +1238,7 @@ double RooAtanAlpha::evaluate() const{
 
 
 /// Alpha function given by the ratio of two exponential functions
-ClassImp(RooAtanAlpha)
-
-
-///// Erf*Pow2 pdf 
-ClassImp(RooErfPow2Pdf) 
-
-
-Double_t  AtanPow2(Double_t x,Double_t c0,Double_t c1, Double_t offset, Double_t width){
-
-   if(width<1e-2)width=1e-2;
-   Double_t sqrt_s=2000.;
-   return TMath::Power(x/sqrt_s ,-1*(c0+c1*TMath::Log(x/sqrt_s)) ) *(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2 ; 
- }
+ClassImp(RooAtanPow2Pdf)
 
 RooAtanPow2Pdf::RooAtanPow2Pdf(const char *name, const char *title, 
                         RooAbsReal& _x,
@@ -1298,12 +1319,6 @@ Double_t RooAlpha4AtanPow2Pdf::evaluate() const {
 //////// Atan Pow Exp pdf 
 ClassImp(RooAtanPowExpPdf) 
 
-Double_t  AtanPowExp(Double_t x,Double_t c0,Double_t c1, Double_t offset, Double_t width){
-   if(width<1e-2)width=1e-2;
-   Double_t sqrt_s=2000.;
-   return TMath::Power(x/sqrt_s ,-1*(c1*TMath::Log(x/sqrt_s)) )*TMath::Exp(-1*x/sqrt_s*c0)*(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2; 
-}
-
 RooAtanPowExpPdf::RooAtanPowExpPdf(const char *name, const char *title, 
                         RooAbsReal& _x,
                         RooAbsReal& _c0,
@@ -1383,12 +1398,6 @@ Double_t RooAlpha4AtanPowExpPdf::evaluate() const {
 ////// Atan*Pow Pdf 
 ClassImp(RooAtanPowPdf) 
 
-Double_t  AtanPow(Double_t x,Double_t c, Double_t offset, Double_t width){
-   if(width<1e-2)width=1e-2;
-   Double_t sqrt_s=2000.;
-   return TMath::Power(x/sqrt_s ,c)*(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2; 
-}
-
 RooAtanPowPdf::RooAtanPowPdf(const char *name, const char *title, 
                         RooAbsReal& _x,
                         RooAbsReal& _c,
@@ -1455,11 +1464,7 @@ Double_t RooAlpha4AtanPowPdf::evaluate() const {
 } 
 
 
-/// AtanExpTail Pdf
-Double_t AtanExpTail(Double_t x, Double_t offset, Double_t width, Double_t s, Double_t a){
-  return TMath::Exp(-x/(s+a*x))*(TMath::Pi()/2+TMath::ATan((x-offset)/width))/2;
-}
- 
+/// AtanExpTail Pdf 
 ClassImp(RooAtanExpTailPdf) 
 
 RooAtanExpTailPdf::RooAtanExpTailPdf(const char *name, const char *title, 
