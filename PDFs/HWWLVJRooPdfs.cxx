@@ -640,6 +640,33 @@ Double_t RooPow2Pdf::evaluate() const {
    return TMath::Power( x/sqrt_s,-1*( p0+p1*TMath::Log(x/sqrt_s) ) )  ; 
 } 
 
+//////////////////////////////////////////RooPow3Pdf.cxx
+ClassImp(RooPow3Pdf) 
+
+RooPow3Pdf::RooPow3Pdf(const char *name, const char *title, 
+                        RooAbsReal& _x,
+                        RooAbsReal& _p0,
+ 	 	        RooAbsReal& _p1,
+		        RooAbsReal& _p2) :
+   RooAbsPdf(name,title), 
+   x("x","x",this,_x),
+   p0("p0","p0",this,_p0),
+   p1("p1","p1",this,_p1),
+   p2("p2","p2",this,_p2){} 
+
+
+RooPow3Pdf::RooPow3Pdf(const RooPow3Pdf& other, const char* name) :  
+   RooAbsPdf(other,name), 
+   x("x",this,other.x),
+   p0("p0",this,other.p0),
+   p1("p1",this,other.p1),
+   p2("p2",this,other.p2){} 
+
+Double_t RooPow3Pdf::evaluate() const { 
+   Double_t sqrt_s=2000.;
+   return TMath::Power( x/sqrt_s,-1*( p0+p1*TMath::Log(x/sqrt_s) + p2*TMath::Log(x/sqrt_s)*TMath::Log(x/sqrt_s) ) )  ; 
+} 
+
 ////////////////////////////RooPowPdf.cxx
 ClassImp(RooPowPdf) 
 
