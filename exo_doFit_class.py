@@ -2570,9 +2570,9 @@ class doFit_wj_and_wlvj:
             for i in range(len(params_list)):
                 print " param list  ",params_list[i].GetName() ;
                 if TString(params_list[i].GetName()).Contains("Deco_TTbar_signal_region"):
-                    datacard_out.write( "\n%s param  %0.1f  %0.1f "%( params_list[i].GetName(), params_list[i].getVal(), params_list[i].getError() ) ) 
+                    datacard_out.write( "\n%s param  %0.3f  %0.3f "%( params_list[i].GetName(), params_list[i].getVal(), params_list[i].getError() ) ) 
                 else:
-                    datacard_out.write( "\n%s param  %0.1f  %0.1f "%( params_list[i].GetName(), params_list[i].getVal(), params_list[i].getError() ) ) 
+                    datacard_out.write( "\n%s param  %0.3f  %0.3f "%( params_list[i].GetName(), params_list[i].getVal(), params_list[i].getError() ) ) 
         if mode == "counting":
             datacard_out.write( "\nShape_%s_%s    lnN       -         -             %0.3f    -       -       -"%(self.channel,self.wtagger_label, 1+self.rrv_counting_uncertainty_from_shape_uncertainty.getError()))
 
@@ -3193,8 +3193,6 @@ objName ==objName_before ):
     def get_data(self):
         print "get_data"
         self.get_mj_and_mlvj_dataset(self.file_data,"_data")
-        self.get_mj_and_mlvj_dataset(self.file_data,"_datamassup","jet_mass_pr_up")
-        self.get_mj_and_mlvj_dataset(self.file_data,"_datamassdn","jet_mass_pr_dn")
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_dataset_signal_region_data_%s_mlvj"%(self.channel)).clone("observation_for_counting"))
  
     ######## ++++++++++++++
