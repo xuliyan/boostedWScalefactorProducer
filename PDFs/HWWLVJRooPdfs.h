@@ -449,6 +449,38 @@ private:
   ClassDef(RooPow2Pdf,1) // Your description goes here...
 };
 
+
+///////// Pow3 Pdf 
+class RooPow3Pdf : public RooAbsPdf {
+public:
+  RooPow3Pdf() {} ; 
+  RooPow3Pdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _p0,
+ 	      RooAbsReal& _p1,
+	      RooAbsReal& _p2
+          );
+
+  RooPow3Pdf(const RooPow3Pdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooPow3Pdf(*this,newname); }
+
+  inline virtual ~RooPow3Pdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy p0 ;
+  RooRealProxy p1 ;
+  RooRealProxy p2 ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooPow3Pdf,1) // Your description goes here...
+};
+
 ////// Pow Pdf 
 class RooPowPdf : public RooAbsPdf {
 public:
