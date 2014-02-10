@@ -508,16 +508,16 @@ class doBiasStudy_mlvj:
             model_pdf = RooGenericPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "TMath::Exp(%s-%s*%s-%s*%s*%s)"%(rrv_c1_Exp.GetName(),rrv_x.GetName(),rrv_c2_Exp.GetName(), rrv_c3_Exp.GetName(),rrv_x.GetName(),rrv_x.GetName()), RooArgList(rrv_x,rrv_c1_Exp,rrv_c2_Exp,rrv_c3_Exp) );
 
  
-        ## two exponential --> exp^{-[0]*x}-[1]*exp^{-[2]*x}
+        ## two exponential --> exp^{-[0]*x}+[1]*exp^{-[2]*x}
         if in_model_name == "2Exp":
 
             rrv_c1_Exp = RooRealVar("rrv_c1_2Exp"+label+"_"+self.channel,"rrv_c1_2Exp"+label+"_"+self.channel,-0.05,-0.1,0.);
-            rrv_c2_Exp = RooRealVar("rrv_c2_2Exp"+label+"_"+self.channel,"rrv_c2_2Exp"+label+"_"+self.channel,-0.05,-0.1,0.);
+            rrv_c2_Exp = RooRealVar("rrv_c2_2Exp"+label+"_"+self.channel,"rrv_c2_2Exp"+label+"_"+self.channel,-5e-5,-0.1,0.);
 
             exp1 = ROOT.RooExponential("exp1"+label+"_"+self.channel+mass_spectrum,"exp1"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c1_Exp);
             exp2 = ROOT.RooExponential("exp2"+label+"_"+self.channel+mass_spectrum,"exp3"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c2_Exp);
 
-            rrv_frac = RooRealVar("rrv_frac_2Exp"+label+"_"+self.channel,"rrv_frac_2Exp"+label+"_"+self.channel,0.5,0.,1.);
+            rrv_frac = RooRealVar("rrv_frac_2Exp"+label+"_"+self.channel,"rrv_frac_2Exp"+label+"_"+self.channel,0.001,0.,0.1);
 
             model_pdf = RooAddPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,RooArgList(exp1,exp2),RooArgList(rrv_frac));
 
@@ -2121,40 +2121,40 @@ objName ==objName_before ):
 
        self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0")# to get the shape of m_lvj                                                                                             
 
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Exp",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Exp",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ExpTail",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ExpTail",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Exp_v3",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Exp_v3",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Exp",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Exp",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ExpTail",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ExpTail",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Exp_v3",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Exp_v3",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","2Exp",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","2Exp",1,0,1);
 
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Pow",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Pow",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Pow2",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Pow2",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Pow3",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Pow3",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","2Pow",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","2Pow",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Pow",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Pow",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Pow2",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Pow2",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Pow3",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Pow3",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","2Pow",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","2Pow",1,0,1);
 
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Chebychev_v2",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Chebychev_v2",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Chebychev_v3",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Chebychev_v3",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Chebychev_v4",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Chebychev_v4",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Chebychev_v2",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Chebychev_v2",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Chebychev_v3",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Chebychev_v3",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Chebychev_v4",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Chebychev_v4",1,0,1);
 
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Bernstein_v3",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Bernstein_v3",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Bernstein_v4",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Bernstein_v4",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Bernstein_v5",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Bernstein_v5",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Bernstein_v3",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Bernstein_v3",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Bernstein_v4",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Bernstein_v4",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Bernstein_v5",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Bernstein_v5",1,0,1);
 
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Keys",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Keys",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Keys",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Keys",1,0,1);
 
          
      else:
