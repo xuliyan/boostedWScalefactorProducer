@@ -13,6 +13,94 @@
 #include "RooAbsReal.h"
 #include "RooAbsCategory.h"
 
+////// Pow Pdf 
+class RooPowPdf : public RooAbsPdf {
+public:
+  RooPowPdf() {} ; 
+  RooPowPdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _p0);
+
+  RooPowPdf(const RooPowPdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooPowPdf(*this,newname); }
+
+  inline virtual ~RooPowPdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy p0 ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooPowPdf,1) // Your description goes here...
+};
+
+///////// Pow2 Pdf 
+class RooPow2Pdf : public RooAbsPdf {
+public:
+  RooPow2Pdf() {} ; 
+  RooPow2Pdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _p0,
+	      RooAbsReal& _p1
+          );
+
+  RooPow2Pdf(const RooPow2Pdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooPow2Pdf(*this,newname); }
+
+  inline virtual ~RooPow2Pdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy p0 ;
+  RooRealProxy p1 ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooPow2Pdf,1) // Your description goes here...
+};
+
+
+///////// Pow3 Pdf 
+class RooPow3Pdf : public RooAbsPdf {
+public:
+  RooPow3Pdf() {} ; 
+  RooPow3Pdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _p0,
+ 	      RooAbsReal& _p1,
+	      RooAbsReal& _p2
+          );
+
+  RooPow3Pdf(const RooPow3Pdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooPow3Pdf(*this,newname); }
+
+  inline virtual ~RooPow3Pdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy p0 ;
+  RooRealProxy p1 ;
+  RooRealProxy p2 ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooPow3Pdf,1) // Your description goes here...
+};
+
+
 /////// Error Function * Exponential 
 
 Double_t ErfExp(Double_t x, Double_t c, Double_t offset, Double_t width);
@@ -93,7 +181,7 @@ class RooAlpha : public RooAbsPdf {
 };
 
 
-/////// Alpha defined as ration of two Exp 
+/////// Alpha defined as ratio of two Exp 
 class RooAlphaExp : public RooAbsPdf {
 	public:
 		RooAlphaExp();
@@ -154,204 +242,8 @@ private:
   ClassDef(RooBWRunPdf,1) // Your description goes here...
 };
 
-////////////  Erf*Pow2 function 
-
-Double_t  ErfPow2(Double_t x,Double_t c0, Double_t c1, Double_t offset, Double_t width);
-
-class RooErfPow2Pdf : public RooAbsPdf {
-public:
-  RooErfPow2Pdf() {} ; 
-  RooErfPow2Pdf(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _c0,
-	      RooAbsReal& _c1,
-	      RooAbsReal& _offset,
-	      RooAbsReal& _width);
-
-  RooErfPow2Pdf(const RooErfPow2Pdf& other, const char* name=0) ;
-
-  virtual TObject* clone(const char* newname) const { return new RooErfPow2Pdf(*this,newname); }
-
-  inline virtual ~RooErfPow2Pdf() { }
-
-protected:
-
-  RooRealProxy x ;
-  RooRealProxy c0 ;
-  RooRealProxy c1 ;
-  RooRealProxy offset ;
-  RooRealProxy width ;
-  
-  Double_t evaluate() const ;
-
-private:
-
-  ClassDef(RooErfPow2Pdf,1) // Your description goes here...
-};
-
-
-
-Double_t  ErfPow3(Double_t x,Double_t c0, Double_t c1, Double_t c2, Double_t offset, Double_t width);
-
-class RooErfPow3Pdf : public RooAbsPdf {
-public:
-  RooErfPow3Pdf() {} ; 
-  RooErfPow3Pdf(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _c0,
-	      RooAbsReal& _c1,
-	      RooAbsReal& _c2,
-	      RooAbsReal& _offset,
-	      RooAbsReal& _width);
-
-  RooErfPow3Pdf(const RooErfPow3Pdf& other, const char* name=0) ;
-
-  virtual TObject* clone(const char* newname) const { return new RooErfPow3Pdf(*this,newname); }
-
-  inline virtual ~RooErfPow3Pdf() { }
-
-protected:
-
-  RooRealProxy x ;
-  RooRealProxy c0 ;
-  RooRealProxy c1 ;
-  RooRealProxy c2 ;
-  RooRealProxy offset ;
-  RooRealProxy width ;
-  
-  Double_t evaluate() const ;
-
-private:
-
-  ClassDef(RooErfPow3Pdf,1) // Your description goes here...
-};
- 
-
-///// Alpha function for Erf*Pow2 funtion
-
-class RooAlpha4ErfPow2Pdf : public RooAbsPdf {
-public:
-  RooAlpha4ErfPow2Pdf() {} ; 
-  RooAlpha4ErfPow2Pdf(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _c0,
-	      RooAbsReal& _c1,
-	      RooAbsReal& _offset,
-	      RooAbsReal& _width,
-	      RooAbsReal& _c0a,
-	      RooAbsReal& _c1a,
-	      RooAbsReal& _offseta,
-	      RooAbsReal& _widtha);
-
-  RooAlpha4ErfPow2Pdf(const RooAlpha4ErfPow2Pdf& other, const char* name=0) ;
-
-  virtual TObject* clone(const char* newname) const { return new RooAlpha4ErfPow2Pdf(*this,newname); }
-
-  inline virtual ~RooAlpha4ErfPow2Pdf() { }
-
-protected:
-
-  RooRealProxy x ;
-  RooRealProxy c0 ;
-  RooRealProxy c1 ;
-  RooRealProxy offset ;
-  RooRealProxy width ;
-  RooRealProxy c0a ;
-  RooRealProxy c1a ;
-  RooRealProxy offseta ;
-  RooRealProxy widtha ;
-  
-  Double_t evaluate() const ;
-
-private:
-
-  ClassDef(RooAlpha4ErfPow2Pdf,1) // Your description goes here...
-};
-
-
-
-/////// ErfPow Exp function and related pdf 
-
-Double_t  ErfPowExp(Double_t x,Double_t c0, Double_t c1, Double_t offset, Double_t width);
-
-
-class RooErfPowExpPdf : public RooAbsPdf {
-public:
-  RooErfPowExpPdf() {} ; 
-  RooErfPowExpPdf(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _c0,
-	      RooAbsReal& _c1,
-	      RooAbsReal& _offset,
-	      RooAbsReal& _width);
-
-  RooErfPowExpPdf(const RooErfPowExpPdf& other, const char* name=0) ;
-
-  virtual TObject* clone(const char* newname) const { return new RooErfPowExpPdf(*this,newname); }
-
-  inline virtual ~RooErfPowExpPdf() { }
-
-protected:
-
-  RooRealProxy x ;
-  RooRealProxy c0 ;
-  RooRealProxy c1 ;
-  RooRealProxy offset ;
-  RooRealProxy width ;
-  
-  Double_t evaluate() const ;
-
-private:
-
-  ClassDef(RooErfPowExpPdf,1) // Your description goes here...
-};
- 
-
-/////// Alpha function given by the ration of two Erf*Pow*Exp Pdf
-
-class RooAlpha4ErfPowExpPdf : public RooAbsPdf {
-public:
-  RooAlpha4ErfPowExpPdf() {} ; 
-  RooAlpha4ErfPowExpPdf(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _c0,
-	      RooAbsReal& _c1,
-	      RooAbsReal& _offset,
-	      RooAbsReal& _width,
-	      RooAbsReal& _c0a,
-	      RooAbsReal& _c1a,
-	      RooAbsReal& _offseta,
-	      RooAbsReal& _widtha);
-
-  RooAlpha4ErfPowExpPdf(const RooAlpha4ErfPowExpPdf& other, const char* name=0) ;
-
-  virtual TObject* clone(const char* newname) const { return new RooAlpha4ErfPowExpPdf(*this,newname); }
-
-  inline virtual ~RooAlpha4ErfPowExpPdf() { }
-
-protected:
-
-  RooRealProxy x ;
-  RooRealProxy c0 ;
-  RooRealProxy c1 ;
-  RooRealProxy offset ;
-  RooRealProxy width ;
-  RooRealProxy c0a ;
-  RooRealProxy c1a ;
-  RooRealProxy offseta ;
-  RooRealProxy widtha ;
-  
-  Double_t evaluate() const ;
-
-private:
-
-  ClassDef(RooAlpha4ErfPowExpPdf,1) // Your description goes here...
-};
-
-
 ///// Erf*Pow pdf definition
 Double_t  ErfPow(Double_t x,Double_t c, Double_t offset, Double_t width);
-
 
 class RooErfPowPdf : public RooAbsPdf {
 public:
@@ -420,91 +312,192 @@ private:
 };
 
 
-///////// Pow2 Pdf 
-class RooPow2Pdf : public RooAbsPdf {
+////////////  Erf*Pow2 function 
+Double_t  ErfPow2(Double_t x,Double_t c0, Double_t c1, Double_t offset, Double_t width);
+
+class RooErfPow2Pdf : public RooAbsPdf {
 public:
-  RooPow2Pdf() {} ; 
-  RooPow2Pdf(const char *name, const char *title,
+  RooErfPow2Pdf() {} ; 
+  RooErfPow2Pdf(const char *name, const char *title,
 	      RooAbsReal& _x,
-	      RooAbsReal& _p0,
-	      RooAbsReal& _p1
-          );
+	      RooAbsReal& _c0,
+	      RooAbsReal& _c1,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width);
 
-  RooPow2Pdf(const RooPow2Pdf& other, const char* name=0) ;
+  RooErfPow2Pdf(const RooErfPow2Pdf& other, const char* name=0) ;
 
-  virtual TObject* clone(const char* newname) const { return new RooPow2Pdf(*this,newname); }
+  virtual TObject* clone(const char* newname) const { return new RooErfPow2Pdf(*this,newname); }
 
-  inline virtual ~RooPow2Pdf() { }
+  inline virtual ~RooErfPow2Pdf() { }
 
 protected:
 
   RooRealProxy x ;
-  RooRealProxy p0 ;
-  RooRealProxy p1 ;
+  RooRealProxy c0 ;
+  RooRealProxy c1 ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
   
   Double_t evaluate() const ;
 
 private:
 
-  ClassDef(RooPow2Pdf,1) // Your description goes here...
+  ClassDef(RooErfPow2Pdf,1) // Your description goes here...
+};
+
+///// Alpha function for Erf*Pow2 funtion
+class RooAlpha4ErfPow2Pdf : public RooAbsPdf {
+public:
+  RooAlpha4ErfPow2Pdf() {} ; 
+  RooAlpha4ErfPow2Pdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _c0,
+	      RooAbsReal& _c1,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width,
+	      RooAbsReal& _c0a,
+	      RooAbsReal& _c1a,
+	      RooAbsReal& _offseta,
+	      RooAbsReal& _widtha);
+
+  RooAlpha4ErfPow2Pdf(const RooAlpha4ErfPow2Pdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooAlpha4ErfPow2Pdf(*this,newname); }
+
+  inline virtual ~RooAlpha4ErfPow2Pdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy c0 ;
+  RooRealProxy c1 ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
+  RooRealProxy c0a ;
+  RooRealProxy c1a ;
+  RooRealProxy offseta ;
+  RooRealProxy widtha ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooAlpha4ErfPow2Pdf,1) // Your description goes here...
 };
 
 
-///////// Pow3 Pdf 
-class RooPow3Pdf : public RooAbsPdf {
+/// Erf Pow3
+Double_t  ErfPow3(Double_t x,Double_t c0, Double_t c1, Double_t c2, Double_t offset, Double_t width);
+
+class RooErfPow3Pdf : public RooAbsPdf {
 public:
-  RooPow3Pdf() {} ; 
-  RooPow3Pdf(const char *name, const char *title,
+  RooErfPow3Pdf() {} ; 
+  RooErfPow3Pdf(const char *name, const char *title,
 	      RooAbsReal& _x,
-	      RooAbsReal& _p0,
- 	      RooAbsReal& _p1,
-	      RooAbsReal& _p2
-          );
+	      RooAbsReal& _c0,
+	      RooAbsReal& _c1,
+	      RooAbsReal& _c2,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width);
 
-  RooPow3Pdf(const RooPow3Pdf& other, const char* name=0) ;
+  RooErfPow3Pdf(const RooErfPow3Pdf& other, const char* name=0) ;
 
-  virtual TObject* clone(const char* newname) const { return new RooPow3Pdf(*this,newname); }
+  virtual TObject* clone(const char* newname) const { return new RooErfPow3Pdf(*this,newname); }
 
-  inline virtual ~RooPow3Pdf() { }
+  inline virtual ~RooErfPow3Pdf() { }
 
 protected:
 
   RooRealProxy x ;
-  RooRealProxy p0 ;
-  RooRealProxy p1 ;
-  RooRealProxy p2 ;
+  RooRealProxy c0 ;
+  RooRealProxy c1 ;
+  RooRealProxy c2 ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
   
   Double_t evaluate() const ;
 
 private:
 
-  ClassDef(RooPow3Pdf,1) // Your description goes here...
+  ClassDef(RooErfPow3Pdf,1) // Your description goes here...
 };
+ 
 
-////// Pow Pdf 
-class RooPowPdf : public RooAbsPdf {
+
+/////// ErfPow Exp function and related pdf 
+Double_t  ErfPowExp(Double_t x,Double_t c0, Double_t c1, Double_t offset, Double_t width);
+
+class RooErfPowExpPdf : public RooAbsPdf {
 public:
-  RooPowPdf() {} ; 
-  RooPowPdf(const char *name, const char *title,
+  RooErfPowExpPdf() {} ; 
+  RooErfPowExpPdf(const char *name, const char *title,
 	      RooAbsReal& _x,
-	      RooAbsReal& _p0);
+	      RooAbsReal& _c0,
+	      RooAbsReal& _c1,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width);
 
-  RooPowPdf(const RooPowPdf& other, const char* name=0) ;
+  RooErfPowExpPdf(const RooErfPowExpPdf& other, const char* name=0) ;
 
-  virtual TObject* clone(const char* newname) const { return new RooPowPdf(*this,newname); }
+  virtual TObject* clone(const char* newname) const { return new RooErfPowExpPdf(*this,newname); }
 
-  inline virtual ~RooPowPdf() { }
+  inline virtual ~RooErfPowExpPdf() { }
 
 protected:
 
   RooRealProxy x ;
-  RooRealProxy p0 ;
+  RooRealProxy c0 ;
+  RooRealProxy c1 ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
   
   Double_t evaluate() const ;
 
 private:
 
-  ClassDef(RooPowPdf,1) // Your description goes here...
+  ClassDef(RooErfPowExpPdf,1) // Your description goes here...
+};
+ 
+
+/////// Alpha function given by the ration of two Erf*Pow*Exp Pdf
+class RooAlpha4ErfPowExpPdf : public RooAbsPdf {
+public:
+  RooAlpha4ErfPowExpPdf() {} ; 
+  RooAlpha4ErfPowExpPdf(const char *name, const char *title,
+	      RooAbsReal& _x,
+	      RooAbsReal& _c0,
+	      RooAbsReal& _c1,
+	      RooAbsReal& _offset,
+	      RooAbsReal& _width,
+	      RooAbsReal& _c0a,
+	      RooAbsReal& _c1a,
+	      RooAbsReal& _offseta,
+	      RooAbsReal& _widtha);
+
+  RooAlpha4ErfPowExpPdf(const RooAlpha4ErfPowExpPdf& other, const char* name=0) ;
+
+  virtual TObject* clone(const char* newname) const { return new RooAlpha4ErfPowExpPdf(*this,newname); }
+
+  inline virtual ~RooAlpha4ErfPowExpPdf() { }
+
+protected:
+
+  RooRealProxy x ;
+  RooRealProxy c0 ;
+  RooRealProxy c1 ;
+  RooRealProxy offset ;
+  RooRealProxy width ;
+  RooRealProxy c0a ;
+  RooRealProxy c1a ;
+  RooRealProxy offseta ;
+  RooRealProxy widtha ;
+  
+  Double_t evaluate() const ;
+
+private:
+
+  ClassDef(RooAlpha4ErfPowExpPdf,1) // Your description goes here...
 };
 
 
@@ -692,156 +685,6 @@ protected:
 private:
 
   ClassDef(RooAlpha4ExpTailPdf,1) // Your description goes here...
-};
-
-
-//////// ErfExpTail Pdf = Levelled exp with 2 parameter
-Double_t ErfExpTail(Double_t x, Double_t offset, Double_t width, Double_t s, Double_t a);
-
-class RooErfExpTailPdf : public RooAbsPdf {
-public:
-  RooErfExpTailPdf() {} ; 
-  RooErfExpTailPdf(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _offset,
-	      RooAbsReal& _width,
-	      RooAbsReal& _s,
-	      RooAbsReal& _a);
-
-  RooErfExpTailPdf(const RooErfExpTailPdf& other, const char* name=0) ;
-
-  virtual TObject* clone(const char* newname) const { return new RooErfExpTailPdf(*this,newname); }
-
-  inline virtual ~RooErfExpTailPdf() { }
-
-protected:
-
-  RooRealProxy x ;
-  RooRealProxy offset ;
-  RooRealProxy width ;
-  RooRealProxy s ;
-  RooRealProxy a ;
-  
-  Double_t evaluate() const ;
-
-private:
-
-  ClassDef(RooErfExpTailPdf,1) // Your description goes here...
-};
-
-////// Alpha function given by the ratio of two levelled exp
-class RooAlpha4ErfExpTailPdf : public RooAbsPdf {
-public:
-  RooAlpha4ErfExpTailPdf() {} ; 
-  RooAlpha4ErfExpTailPdf(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _offset0,
-	      RooAbsReal& _width0,
-	      RooAbsReal& _s0,
-	      RooAbsReal& _a0,
-	      RooAbsReal& _offset1,
-	      RooAbsReal& _width1,
-	      RooAbsReal& _s1,
-	      RooAbsReal& _a1);
-
-  RooAlpha4ErfExpTailPdf(const RooAlpha4ErfExpTailPdf& other, const char* name=0) ;
-
-  virtual TObject* clone(const char* newname) const { return new RooAlpha4ErfExpTailPdf(*this,newname); }
-
-  inline virtual ~RooAlpha4ErfExpTailPdf() { }
-
-protected:
-
-  RooRealProxy x ;
-  RooRealProxy offset0 ;
-  RooRealProxy width0 ;
-  RooRealProxy s0 ;
-  RooRealProxy a0 ;  
-  RooRealProxy offset1 ;
-  RooRealProxy width1 ;
-  RooRealProxy s1 ;
-  RooRealProxy a1 ;
-
-  Double_t evaluate() const ;
-
-private:
-
-  ClassDef(RooAlpha4ErfExpTailPdf,1) // Your description goes here...
-};
-
-
-//////// ErfExpTail Pdf = Levelled exp with 2 parameter
-Double_t ErfExpN(Double_t x, Double_t offset, Double_t width, Double_t c, Double_t n);
-
-class RooErfExpNPdf : public RooAbsPdf {
-public:
-  RooErfExpNPdf() {} ; 
-  RooErfExpNPdf(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _offset,
-	      RooAbsReal& _width,
-	      RooAbsReal& _s,
-	      RooAbsReal& _a);
-
-  RooErfExpNPdf(const RooErfExpNPdf& other, const char* name=0) ;
-
-  virtual TObject* clone(const char* newname) const { return new RooErfExpNPdf(*this,newname); }
-
-  inline virtual ~RooErfExpNPdf() { }
-
-protected:
-
-  RooRealProxy x ;
-  RooRealProxy offset ;
-  RooRealProxy width ;
-  RooRealProxy c ;
-  RooRealProxy n ;
-  
-  Double_t evaluate() const ;
-
-private:
-
-  ClassDef(RooErfExpNPdf,1) // Your description goes here...
-};
-
-////// Alpha function given by the ratio of two levelled exp
-class RooAlpha4ErfExpNPdf : public RooAbsPdf {
-public:
-  RooAlpha4ErfExpNPdf() {} ; 
-  RooAlpha4ErfExpNPdf(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _offset0,
-	      RooAbsReal& _width0,
-	      RooAbsReal& _c0,
-	      RooAbsReal& _n0,
-	      RooAbsReal& _offset1,
-	      RooAbsReal& _width1,
-	      RooAbsReal& _c1,
-	      RooAbsReal& _n1);
-
-  RooAlpha4ErfExpNPdf(const RooAlpha4ErfExpNPdf& other, const char* name=0) ;
-
-  virtual TObject* clone(const char* newname) const { return new RooAlpha4ErfExpNPdf(*this,newname); }
-
-  inline virtual ~RooAlpha4ErfExpNPdf() { }
-
-protected:
-
-  RooRealProxy x ;
-  RooRealProxy offset0 ;
-  RooRealProxy width0 ;
-  RooRealProxy c0 ;
-  RooRealProxy n0 ;  
-  RooRealProxy offset1 ;
-  RooRealProxy width1 ;
-  RooRealProxy c1 ;
-  RooRealProxy n1 ;
-
-  Double_t evaluate() const ;
-
-private:
-
-  ClassDef(RooAlpha4ErfExpNPdf,1) // Your description goes here...
 };
 
 
@@ -1067,7 +910,6 @@ class RooAtanAlpha : public RooAbsPdf {
 
 
 ////////////  Erf*Pow2 function 
-
 Double_t  AtanPow2(Double_t x,Double_t c0, Double_t c1, Double_t offset, Double_t width);
 
 class RooAtanPow2Pdf : public RooAbsPdf {
@@ -1102,7 +944,6 @@ private:
 };
 
 ////////////  Erf*Pow2 function 
-
 Double_t  AtanPow3(Double_t x,Double_t c0, Double_t c1, Double_t c2, Double_t offset, Double_t width);
 
 class RooAtanPow3Pdf : public RooAbsPdf {
@@ -1183,7 +1024,6 @@ private:
 
 
 /////// AtanPow Exp function and related pdf 
-
 Double_t  AtanPowExp(Double_t x,Double_t c0, Double_t c1, Double_t offset, Double_t width);
 
 
@@ -1262,7 +1102,6 @@ private:
 
 
 ///// Atan*Pow pdf definition
-
 Double_t  AtanPow(Double_t x,Double_t c, Double_t offset, Double_t width);
 
 
@@ -1330,81 +1169,6 @@ protected:
 private:
 
   ClassDef(RooAlpha4AtanPowPdf,1) // Your description goes here...
-};
-
-
-//////// AtanExpTail Pdf = Levelled exp with 2 parameter
-Double_t AtanExpTail(Double_t x, Double_t offset, Double_t width, Double_t s, Double_t a);
-
-class RooAtanExpTailPdf : public RooAbsPdf {
-public:
-  RooAtanExpTailPdf() {} ; 
-  RooAtanExpTailPdf(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _offset,
-	      RooAbsReal& _width,
-	      RooAbsReal& _s,
-	      RooAbsReal& _a);
-
-  RooAtanExpTailPdf(const RooAtanExpTailPdf& other, const char* name=0) ;
-
-  virtual TObject* clone(const char* newname) const { return new RooAtanExpTailPdf(*this,newname); }
-
-  inline virtual ~RooAtanExpTailPdf() { }
-
-protected:
-
-  RooRealProxy x ;
-  RooRealProxy offset ;
-  RooRealProxy width ;
-  RooRealProxy s ;
-  RooRealProxy a ;
-  
-  Double_t evaluate() const ;
-
-private:
-
-  ClassDef(RooAtanExpTailPdf,1) // Your description goes here...
-};
-
-////// Alpha function given by the ratio of two levelled exp
-class RooAlpha4AtanExpTailPdf : public RooAbsPdf {
-public:
-  RooAlpha4AtanExpTailPdf() {} ; 
-  RooAlpha4AtanExpTailPdf(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _offset0,
-	      RooAbsReal& _width0,
-	      RooAbsReal& _s0,
-	      RooAbsReal& _a0,
-	      RooAbsReal& _offset1,
-	      RooAbsReal& _width1,
-	      RooAbsReal& _s1,
-	      RooAbsReal& _a1);
-
-  RooAlpha4AtanExpTailPdf(const RooAlpha4AtanExpTailPdf& other, const char* name=0) ;
-
-  virtual TObject* clone(const char* newname) const { return new RooAlpha4AtanExpTailPdf(*this,newname); }
-
-  inline virtual ~RooAlpha4AtanExpTailPdf() { }
-
-protected:
-
-  RooRealProxy x ;
-  RooRealProxy offset0 ;
-  RooRealProxy width0 ;
-  RooRealProxy s0 ;
-  RooRealProxy a0 ;  
-  RooRealProxy offset1 ;
-  RooRealProxy width1 ;
-  RooRealProxy s1 ;
-  RooRealProxy a1 ;
-
-  Double_t evaluate() const ;
-
-private:
-
-  ClassDef(RooAlpha4AtanExpTailPdf,1) // Your description goes here...
 };
 
 
