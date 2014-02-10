@@ -68,7 +68,7 @@ WW2jet_phantom  0.000698971 1.0
 WJets_Pythia         0.492871535 1.0
 #(NNLO rescaled value 36607 pb xs)
 WJets_Pythia_matchDn 1.713474935 1.0
-#(NNLO rescaled value 37347 pb xs)
+#(NNLO rescaled valueA 37347 pb xs)
 WJets_Pythia_matchUp 1.7804836  1.0 
 #(NNLO rescaled value 39456 pb xs)
 WJets_Pythia_scaleUp 1.900497108 1.0
