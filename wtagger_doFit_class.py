@@ -41,7 +41,8 @@ parser.add_option('--category', action="store",type="string",dest="category",def
 parser.add_option('--herwig', action="store",type="int",dest="herwig",default=0)
 parser.add_option('--ttbarMC', action="store",type="int",dest="ttbarMC",default=0)
 parser.add_option('--pTbin', action="callback",callback=foo_callback,type="string",dest="pTbin",default="")
-
+parser.add_option('--shift', action="store", type="int",dest="shift",default=0)
+parser.add_option('--smear', action="store", type="int",dest="smear",default=0)
 
 (options, args) = parser.parse_args()
 
@@ -204,7 +205,8 @@ class doFit_wj_and_wlvj:
         self.file_ttbar_control_txt = "ttbar_control_%s_%s_wtaggercut%s.txt"%(self.signal_sample,self.channel,self.wtagger_label);
         self.file_out_ttbar_control=open(self.file_ttbar_control_txt,"w");
 
-
+        self.mean_shift = 1.4 ; self.sigma_scale = 1.08 ;
+        
     ## Set basic TDR style for canvas, pad ..etc ..
     def setTDRStyle(self):
         self.tdrStyle =TStyle("tdrStyle","Style for P-TDR");
@@ -1075,7 +1077,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
        par.Reset();
        param=par.Next()
        while (param):
-            if (TString(label).Contains("VV") or TString(label).Contains("STop") or TString(label).Contains("TTbar")) and (not (options.fitwtaggersim or options.fitwtagger)):
+           if (TString(label).Contains("VV") or TString(label).Contains("STop") or TString(label).Contains("TTbar")) and (not (options.fitwtaggersim or options.fitwtagger)):
                 #param.Print();
                 if TString(param.GetName()).Contains("rrv_mean1_gaus"):
                     param.setRange(param.getMin()+self.mean_shift, param.getMax()+self.mean_shift);
@@ -1093,7 +1095,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
                     param.setRange(param.getMin()/self.sigma_scale, param.getMax()/self.sigma_scale);
                     param.setVal(param.getVal()/self.sigma_scale);
                     #param.Print(); raw_input("sigma"+label);
-            param=par.Next()
+           param=par.Next()
                                        
 
     ############# -----------
@@ -1867,6 +1869,9 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
         hnum_2region = TH1D("hnum_2region"+label+"_"+self.channel,"hnum_2region"+label+"_"+self.channel,2,-0.5,1.5);# m_lvj 0: signal_region; 1: total
         hnum_2region_error2 = TH1D("hnum_2region_error2"+label+"_"+self.channel,"hnum_2region_error2"+label+"_"+self.channel,2,-0.5,1.5);# m_lvj 0: signal_region; 1: total
 
+        rand = ROOT.TRandom3() ;
+        rand.SetSeed();
+        
         for i in range(treeIn.GetEntries()):
             if i % 100000 == 0: print "iEntry: ",i
             treeIn.GetEntry(i);
@@ -1882,8 +1887,14 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
                 discriminantCut=1;
             elif wtagger > 0.75 :
                 iscriminantCut=0;
-                
-            tmp_jet_mass=getattr(treeIn, jet_mass);
+
+            tmp_jet_mass = 0. ;    
+            if options.shift == 1 and not TString(label).Contains("data"):
+                 tmp_jet_mass = getattr(treeIn, jet_mass) + self.mean_shift;
+            elif options.smear == 1 and not TString(label).Contains("data"):
+                 tmp_jet_mass = getattr(treeIn, jet_mass)*(1+rand.Gaus(0,self.sigma_scale-1));
+            else:
+                 tmp_jet_mass = getattr(treeIn, jet_mass);
 
             tmp_event_weight = getattr(treeIn,"totalEventWeight");
             tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight");
@@ -1898,10 +1909,9 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
 
 
             ### Cut for the HP category
-            if discriminantCut ==2 and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_jet_closer") > 1.3:
+            if discriminantCut ==2 and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2:
 
             # and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0 and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
-
 
 
                 if TString(label).Contains("herwig") and not TString(label).Contains("data") :
@@ -1931,7 +1941,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
                 combData_p_f.add(RooArgSet(rrv_mass_j,category_p_f),tmp_event_weight);
 
             ### Cut for the Total category
-            if getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_jet_closer") > 1.3:
+            if getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2:
 
 #        and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0  and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
 
@@ -1953,7 +1963,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
                 combData4cut.add(RooArgSet(rrv_mass_j,category_cut),tmp_event_weight4fit);
 
             ### 1-HP category
-            if (discriminantCut==1 or discriminantCut==0) and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_jet_closer") > 1.3:
+            if (discriminantCut==1 or discriminantCut==0) and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2:
 
 # and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0 and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130):
 
@@ -1971,7 +1981,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
                 combData_p_f.add(RooArgSet(rrv_mass_j,category_p_f),tmp_event_weight);
 
             ### extreme fail category
-            if discriminantCut==0 and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_jet_closer") > 1.3:
+            if discriminantCut==0 and getattr(treeIn,"mass_lvj_type0_met") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0_met") > self.mass_lvj_min and (getattr(treeIn,"ttb_nak5_same_csvm") > 0 or getattr(treeIn,"ttb_nak5_oppoveto_csvm") > 0) and getattr(treeIn,"isttbar") > 0 and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ttb_ca8_ungroomed_pt") > 200 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ttb_ca8_ungroomed_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ttb_ca8_ungroomed_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"ttb_dR_ca8_jet_closer") < 2:
 
 # and getattr(treeIn,"ttb_dR_ca8_bjet_closer") < 2.0 and ( getattr(treeIn,"mass_ungroomedjet_closerjet")<230 and getattr(treeIn,"mass_ungroomedjet_closerjet")>150) and (getattr(treeIn,"mass_leptonic_closerjet") < 230 and getattr(treeIn,"mass_leptonic_closerjet") > 130) :
 
@@ -2556,8 +2566,9 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
         print "##################################################"
         print "############### Single Top DataSet ###############"
         print "##################################################"
-
+          
         self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_STop_mc,"_STop");
+            
 
         if self.channel=="mu":
          self.fit_mj_single_MC(self.file_STop_mc,"_STop","ErfExpGaus_sp","_TTbar_controlsample"); ## Erf*exp + Gaus pass sample
@@ -2572,6 +2583,7 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
         print "###########################################"
         print "############### WJets Pythia ##############"
         print "###########################################"
+
 
         self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_WJets0_mc,"_WJets0");
 
@@ -2600,11 +2612,13 @@ paraName.Contains("rrv_p1_User1_WJets") or paraName.Contains("rrv_p1_User1_WJets
         print "#########################################"
         print "############# TTbar Powheg ##############"
         print "#########################################"
+
         self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_TTbar_mc,"_TTbar");
 
         print "################################################"
         print "############## Pseudo Data Powheg ##############"
         print "################################################"
+
         self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_pseudodata,"_TotalMC");
 
 
