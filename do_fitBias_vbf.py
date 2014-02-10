@@ -39,7 +39,7 @@ ROOT.gSystem.Load(options.inPath+"/PDFs/HWWLVJRooPdfs_cxx.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/Util_cxx.so")
 
 
-from ROOT import draw_error_band, draw_error_band_extendPdf, draw_error_band_Decor, draw_error_band_shape_Decor, Calc_error_extendPdf, Calc_error, RooErfExpPdf, RooAlpha, RooAlpha4ErfPowPdf, RooAlpha4ErfPow2Pdf, RooAlpha4ErfPowExpPdf, PdfDiagonalizer, RooPowPdf, RooPow2Pdf, RooErfPowExpPdf, RooErfPowPdf, RooErfPow2Pdf, RooQCDPdf, RooUser1Pdf, RooBWRunPdf, RooAnaExpNPdf,RooExpNPdf, RooAlpha4ExpNPdf, RooExpTailPdf, RooAlpha4ExpTailPdf, RooAtanExpPdf, RooAtanPowPdf, RooAtanPowExpPdf, RooAtanPow2Pdf, RooAtanPow3Pdf, RooErfPow3Pdf, RooPow3Pdf
+from ROOT import draw_error_band, draw_error_band_extendPdf, draw_error_band_Decor, draw_error_band_shape_Decor, Calc_error_extendPdf, Calc_error, RooErfExpPdf, RooAlpha, RooAlpha4ErfPowPdf, RooAlpha4ErfPow2Pdf, RooAlpha4ErfPowExpPdf, PdfDiagonalizer, RooPowPdf, RooPow2Pdf, RooErfPowExpPdf, RooErfPowPdf, RooErfPow2Pdf, RooQCDPdf, RooUser1Pdf, RooBWRunPdf, RooAnaExpNPdf,RooExpNPdf, RooAlpha4ExpNPdf, RooExpTailPdf, RooPow3Pdf
 
 
 class doBiasStudy_mlvj:
@@ -169,8 +169,8 @@ class doBiasStudy_mlvj:
 
         ## for basic selection
         self.vpt_cut   = 200;
-        self.pfMET_cut = 70;
-        self.lpt_cut   = 35;
+        self.pfMET_cut = 50;
+        self.lpt_cut   = 30;
 
         if self.channel=="el":
             self.pfMET_cut = 70; self.lpt_cut = 35;#very tight
@@ -178,10 +178,10 @@ class doBiasStudy_mlvj:
 
         self.top_veto_had_max = 200 ;
         self.top_veto_lep_max = 200 ;
-        self.top_veto_had_min = 130 ;
-        self.top_veto_lep_min = 110 ;
+        self.top_veto_had_min = 0 ;
+        self.top_veto_lep_min = 0 ;
 
-        self.dEta_cut = 2.5 ;
+        self.dEta_cut = 3.0 ;
         self.Mjj_cut  = 250 ;
 
         if self.channel=="mu" and self.wtagger_label=="HP":
@@ -479,68 +479,180 @@ class doBiasStudy_mlvj:
 
             model_pdf = RooCBShape("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum, rrv_x,rrv_mean_CB,rrv_sigma_CB,rrv_alpha_CB,rrv_n_CB);
 
-        #################################################################
+        #######################################################
+        ############### Simple Falling models #################
+        #######################################################
+
+        ## single exponential e^{-[0]*x}                                                                                                                             
+        if in_model_name == "Exp" :
+
+            rrv_c_Exp = RooRealVar("rrv_c_Exp"+label+"_"+self.channel,"rrv_c_Exp"+label+"_"+self.channel,-0.05,-0.1,0.);
+
+            model_pdf = ROOT.RooExponential("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c_Exp);
+
+        ## levelled exp for W+jets bkg fit --> e^{-[0]-[1]*x}                                                                                                                
+        if in_model_name == "ExpTail":
+
+            rrv_s_ExpTail = RooRealVar("rrv_s_ExpTail"+label+"_"+self.channel,"rrv_s_ExpTail"+label+"_"+self.channel, 250,-1.e6,1e6);
+            rrv_a_ExpTail = RooRealVar("rrv_a_ExpTail"+label+"_"+self.channel,"rrv_a_ExpTail"+label+"_"+self.channel, 1e-1,-1.e-2,1e6);
+
+            model_pdf     = ROOT.RooExpTailPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_s_ExpTail, rrv_a_ExpTail);
+
+        ## three parameter exonential --> e^{-[0]-[1]*x-[2]*x*x}                                                                                                                
+        if in_model_name == "Exp_v3":
+
+            rrv_c1_Exp = RooRealVar("rrv_c1_Exp_v3"+label+"_"+self.channel,"rrv_c1_Exp_v3"+label+"_"+self.channel,1,-1.e6,1.e6);
+            rrv_c2_Exp = RooRealVar("rrv_c2_Exp_v3"+label+"_"+self.channel,"rrv_c2_Exp_v3"+label+"_"+self.channel,-0.05,-0.1,0.);
+            rrv_c3_Exp = RooRealVar("rrv_c3_Exp_v3"+label+"_"+self.channel,"rrv_c3_Exp_v3"+label+"_"+self.channel,-0.05,-0.1,0.);
+
+            model_pdf = RooGenericPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "TMath::Exp(%s-%s*%s-%s*%s*%s)"%(rrv_c1_Exp.GetName(),rrv_x.GetName(),rrv_c2_Exp.GetName(), rrv_c3_Exp.GetName(),rrv_x.GetName(),rrv_x.GetName()), RooArgList(rrv_x,rrv_c1_Exp,rrv_c2_Exp,rrv_c3_Exp) );
+
+ 
+        ## two exponential --> exp^{-[0]*x}-[1]*exp^{-[2]*x}
+        if in_model_name == "2Exp":
+
+            rrv_c1_Exp = RooRealVar("rrv_c1_2Exp"+label+"_"+self.channel,"rrv_c1_2Exp"+label+"_"+self.channel,-0.05,-0.1,0.);
+            rrv_c2_Exp = RooRealVar("rrv_c2_2Exp"+label+"_"+self.channel,"rrv_c2_2Exp"+label+"_"+self.channel,-0.05,-0.1,0.);
+
+            exp1 = ROOT.RooExponential("exp1"+label+"_"+self.channel+mass_spectrum,"exp1"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c1_Exp);
+            exp2 = ROOT.RooExponential("exp2"+label+"_"+self.channel+mass_spectrum,"exp3"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c2_Exp);
+
+            rrv_frac = RooRealVar("rrv_frac_2Exp"+label+"_"+self.channel,"rrv_frac_2Exp"+label+"_"+self.channel,0.5,0.,1.);
+
+            model_pdf = RooAddPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,RooArgList(exp1,exp2),RooArgList(rrv_frac));
+
+       ## For mlvj fit -> Pow funtion: [x/sqrt(s)]^{-[0]}                                                                 
+        if in_model_name == "Pow" :
+
+            rrv_c = RooRealVar("rrv_c_Pow"+label+"_"+self.channel,"rrv_c_Pow"+label+"_"+self.channel, -5, -20, 0);
+
+            model_pdf = RooPowPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x, rrv_c );
+
+        ## For mlvj fit -> Pow function: [x/sqrt{s}]^{-[0]-[1]*log(x/sqrt(s)}                                                                                     
+        if in_model_name == "Pow2":
+
+            rrv_c0 = RooRealVar("rrv_c0_Pow2"+label+"_"+self.channel,"rrv_c0_Pow2"+label+"_"+self.channel, 5, 0, 20);
+            rrv_c1 = RooRealVar("rrv_c1_Pow2"+label+"_"+self.channel,"rrv_c1_Pow2"+label+"_"+self.channel, 0, -5 , 5);
+
+            model_pdf = RooPow2Pdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum, rrv_x, rrv_c0, rrv_c1 );
+
+        ## For mlvj fit -> Pow function: [x/sqrt{s}]^{-[0]-[1]*log(x/sqrt(s)-[2]*log(x/sqrt(s))*log(x/sqrt(s))}                                             
+        if in_model_name == "Pow3":
+
+            rrv_c0 = RooRealVar("rrv_c0_Pow3"+label+"_"+self.channel,"rrv_c0_Pow3"+label+"_"+self.channel, 5, 0, 20);
+            rrv_c1 = RooRealVar("rrv_c1_Pow3"+label+"_"+self.channel,"rrv_c1_Pow3"+label+"_"+self.channel, 0, -5 , 5);
+            rrv_c2 = RooRealVar("rrv_c2_Pow3"+label+"_"+self.channel,"rrv_c2_Pow3"+label+"_"+self.channel, 0, -5 , 5);
+
+            model_pdf = RooPow3Pdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum, rrv_x, rrv_c0, rrv_c1, rrv_c2);
+    
+        ## For mlvj fit -> 2Pow function: x^{-[0]}+[1]*x^{-[1]}                                             
+        if in_model_name == "2Pow":
+
+            rrv_c0 = RooRealVar("rrv_c0_2Pow"+label+"_"+self.channel,"rrv_c0_2Pow"+label+"_"+self.channel, 5, 0, 20);
+            rrv_c1 = RooRealVar("rrv_c1_2Pow"+label+"_"+self.channel,"rrv_c1_2Pow"+label+"_"+self.channel, 0, -5 , 5);
+            rrv_frac = RooRealVar("rrv_frac_2Pow"+label+"_"+self.channel,"rrv_frac_2Po2"+label+"_"+self.channel,0.5,0.,1.);
+              
+            model_pdf = RooGenericPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,"TMath::Pow(%s,-%s)+%s*TMath::Pow(%s,-%s)"(rrv_x.GetName(),rrv_c0.GetName(),rrv_frac.GetName(),rrv_x.GetName(),rrv_c1.GetName()),RooArgList(rrv_x,rrv_c0,rrv_c1,rrv_frac));
+
+        ##### polynomial functions   
+        if in_model_name == "Chebychev_v2":#can replace erf*exp                                                                                                                           
+
+            rrv_p0      = RooRealVar("rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+
+            model_pdf = RooChebychev("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1));
+
+        if in_model_name == "Chebychev_v3":#can replace erf*exp                                                                                                                           
+
+            rrv_p0      = RooRealVar("rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p2_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+ 
+            model_pdf = RooChebychev("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2));
+
+        if in_model_name == "Chebychev_v4":#can replace erf*exp                                                                                                                           
+
+            rrv_p0      = RooRealVar("rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p2_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p3      = RooRealVar("rrv_p3_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p3_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+ 
+            model_pdf = RooChebychev("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2,rrv_p3));
+
+
+        if in_model_name == "Bernstein_v3":#can replace erf*exp                                                                                                                           
+
+            rrv_p0      = RooRealVar("rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p2_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+ 
+            model_pdf = RooBernstein("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2));
+
+
+        if in_model_name == "Bernstein_v4":#can replace erf*exp                                                                                                                           
+
+            rrv_p0      = RooRealVar("rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p2_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p3      = RooRealVar("rrv_p3_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p3_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+ 
+            model_pdf = RooBernstein("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2,rrv_p3));
+
+
+        if in_model_name == "Bernstein_v5":#can replace erf*exp                                                                                                                           
+
+            rrv_p0      = RooRealVar("rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p2_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p3      = RooRealVar("rrv_p3_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p3_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p4      = RooRealVar("rrv_p4_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p4_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+ 
+            model_pdf = RooBernstein("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2,rrv_p3,rrv_p4));
+
+
+        ########################################################
+        ############### Turn On + Falling part #################
+        ########################################################
 
         if in_model_name == "ErfExp_v1" : #different init-value and range                                                                                                            
 
-            rrv_c_ErfExp      = RooRealVar("rrv_c_ErfExp"+label+"_"+self.channel+mass_spectrum,"rrv_c_ErfExp"+label+"_"+self.channel+mass_spectrum,-0.006,-0.1,0.);
-            rrv_offset_ErfExp = RooRealVar("rrv_offset_ErfExp"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfExp"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
+            rrv_c_ErfExp      = RooRealVar("rrv_c_ErfExp"+label+"_"+self.channel+mass_spectrum,"rrv_c_ErfExp"+label+"_"+self.channel+mass_spectrum,-0.005,-0.1,0.);
+            rrv_offset_ErfExp = RooRealVar("rrv_offset_ErfExp"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfExp"+label+"_"+self.channel+mass_spectrum,450.,420.,600.);
             rrv_width_ErfExp  = RooRealVar("rrv_width_ErfExp"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfExp"+label+"_"+self.channel+mass_spectrum,60.,15.,100.);
 
             model_pdf  = RooErfExpPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c_ErfExp,rrv_offset_ErfExp,rrv_width_ErfExp);
 
         if in_model_name == "ErfExpTail" : #different init-value and range                                                                                                             
    
-            rrv_offset_erf = RooRealVar("rrv_offset_ErfExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfExpTail"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
+            rrv_offset_erf = RooRealVar("rrv_offset_ErfExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfExpTail"+label+"_"+self.channel+mass_spectrum,450.,400.,600.);
             rrv_width_erf  = RooRealVar("rrv_width_ErfExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfExpTail"+label+"_"+self.channel+mass_spectrum,70.,15.,100.);
 
-            rrv_s_ExpTail = RooRealVar("rrv_s_ErfExpTail"+label+"_"+self.channel,"rrv_s_ErfExpTail"+label+"_"+self.channel, 250,-1.e6,1e6);
-            rrv_a_ExpTail = RooRealVar("rrv_a_ErfExpTail"+label+"_"+self.channel,"rrv_a_ErfExpTail"+label+"_"+self.channel, 1e-1,-1.e2,1e6);
+            rrv_s_ExpTail = RooRealVar("rrv_s_ErfExpTail"+label+"_"+self.channel,"rrv_s_ErfExpTail"+label+"_"+self.channel, 500,-1.e6,1e6);
+            rrv_a_ExpTail = RooRealVar("rrv_a_ErfExpTail"+label+"_"+self.channel,"rrv_a_ErfExpTail"+label+"_"+self.channel, -1e-1,-1.e2,1e6);
 
-            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf));
+            erf       = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf));
 
-            expTail = ROOT.RooExpTailPdf("expTail"+label+"_"+self.channel+mass_spectrum,"expTail"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_s_ExpTail, rrv_a_ExpTail);
+            expTail   = ROOT.RooExpTailPdf("expTail"+label+"_"+self.channel+mass_spectrum,"expTail"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_s_ExpTail,rrv_a_ExpTail);
 
             model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,expTail);
-
-        if in_model_name == "ErfExp_v2" : #different init-value and range                                                                                                             
-   
-            rrv_offset_erf = RooRealVar("rrv_offset_ErfExp2"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfExp2"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
-            rrv_width_erf  = RooRealVar("rrv_width_ErfExp2"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfExp2"+label+"_"+self.channel+mass_spectrum,70.,15.,100.);
-
-            rrv_s_ExpTail = RooRealVar("rrv_s_ErfExp2"+label+"_"+self.channel,"rrv_s_ErfExp2"+label+"_"+self.channel, -0.006,-0.1,0.);
-            rrv_a_ExpTail = RooRealVar("rrv_a_ErfExp2"+label+"_"+self.channel,"rrv_a_ErfExp2"+label+"_"+self.channel, -0.00001,-0.001,0.);
-
-            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum,"(1.+TMath::Erf((%s-%s)/%s))/2."%(rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf));
-
-            exp2 = RooGenericPdf("exp2"+label+"_"+self.channel+mass_spectrum,"exp2"+label+"_"+self.channel+mass_spectrum,"TMath::Exp(%s*%s+%s*%s*%s)"%(rrv_x.GetName(),rrv_s_ExpTail.GetName(), rrv_a_ExpTail.GetName(),rrv_x.GetName(),rrv_x.GetName()), RooArgList(rrv_x,rrv_s_ExpTail,rrv_a_ExpTail));
-
-            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,exp2);
           
         if in_model_name == "ErfExp_v3" : #different init-value and range                                                                                                             
    
-            rrv_offset_erf = RooRealVar("rrv_offset_ErfExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfExpTail"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
-            rrv_width_erf  = RooRealVar("rrv_width_ErfExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfExpTail"+label+"_"+self.channel+mass_spectrum,70.,15.,100.);
+            rrv_offset_erf = RooRealVar("rrv_offset_ErfExp_v3"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfExp_v3"+label+"_"+self.channel+mass_spectrum,450.,400.,600.);
+            rrv_width_erf  = RooRealVar("rrv_width_ErfExp_v3"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfExp_v3"+label+"_"+self.channel+mass_spectrum,60.,35.,100.);
 
-            rrv_s_ExpTail = RooRealVar("rrv_s_ErfExpTail"+label+"_"+self.channel,"rrv_s_ErfExpTail"+label+"_"+self.channel, -0.006,-0.2,0.);
-            rrv_a_ExpTail = RooRealVar("rrv_a_ErfExpTail"+label+"_"+self.channel,"rrv_a_ErfExpTail"+label+"_"+self.channel, -0.001,-1.,0.01);
+            if TString(label).Contains("sb_lo"):
 
-            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf) );
+             rrv_s_ExpTail = RooRealVar("rrv_s_ErfExp_v3"+label+"_"+self.channel,"rrv_s_ErfExp_v3"+label+"_"+self.channel, -0.004,-0.2,0.);
+             rrv_a_ExpTail = RooRealVar("rrv_a_ErfExp_v3"+label+"_"+self.channel,"rrv_a_ErfExp_v3"+label+"_"+self.channel, -10,-50.,-0.001);
+             rrv_c_ExpTail = RooRealVar("rrv_c_ErfExp_v3"+label+"_"+self.channel,"rrv_c_ErfExp_v3"+label+"_"+self.channel, -2.e-6,-0.001,0.001);
+            
+            else:
 
-            exp3 = RooGenericPdf("exp3"+label+"_"+self.channel+mass_spectrum,"exp3"+label+"_"+self.channel+mass_spectrum, "TMath::Exp(%s+%s*%s)"%( rrv_a_ExpTail.GetName(),rrv_s_ExpTail.GetName(), rrv_x.GetName()), RooArgList(rrv_x,rrv_s_ExpTail,rrv_a_ExpTail) );
+             rrv_s_ExpTail = RooRealVar("rrv_s_ErfExp_v3"+label+"_"+self.channel,"rrv_s_ErfExp_v3"+label+"_"+self.channel, -0.001,-0.2,0.);
+             rrv_a_ExpTail = RooRealVar("rrv_a_ErfExp_v3"+label+"_"+self.channel,"rrv_a_ErfExp_v3"+label+"_"+self.channel, -35,-50.,-0.001);
+             rrv_c_ExpTail = RooRealVar("rrv_c_ErfExp_v3"+label+"_"+self.channel,"rrv_c_ErfExp_v3"+label+"_"+self.channel, -2.e-6,-0.001,0.001);
 
-            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,exp3);
-
-
-        if in_model_name == "ErfExp_v4" : #different init-value and range                                                                                                             
-   
-            rrv_offset_erf = RooRealVar("rrv_offset_ErfExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfExpTail"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
-            rrv_width_erf  = RooRealVar("rrv_width_ErfExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfExpTail"+label+"_"+self.channel+mass_spectrum,70.,15.,100.);
-
-            rrv_s_ExpTail = RooRealVar("rrv_s_ErfExpTail"+label+"_"+self.channel,"rrv_s_ErfExpTail"+label+"_"+self.channel, -0.006,-0.2,0.);
-
-            rrv_a_ExpTail = RooRealVar("rrv_a_ErfExpTail"+label+"_"+self.channel,"rrv_a_ErfExpTail"+label+"_"+self.channel, -0.001,-1.,-0.001);
-            rrv_c_ExpTail = RooRealVar("rrv_c_ErfExpTail"+label+"_"+self.channel,"rrv_c_ErfExpTail"+label+"_"+self.channel, -0.00001,-0.001,0.);
 
             erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf) );
 
@@ -548,80 +660,26 @@ class doBiasStudy_mlvj:
 
             model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,exp4);
 
-        ###############################################################################
 
-        if in_model_name == "AtanExp_v1" : #different init-value and range                                                                                                            
-
-            rrv_c_AtanExp      = RooRealVar("rrv_c_AtanExp"+label+"_"+self.channel+mass_spectrum,"rrv_c_AtanExp"+label+"_"+self.channel+mass_spectrum,-0.006,-0.1,0.);
-            rrv_offset_AtanExp = RooRealVar("rrv_offset_AtanExp"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanExp"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
-            rrv_width_AtanExp  = RooRealVar("rrv_width_AtanExp"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanExp"+label+"_"+self.channel+mass_spectrum,60.,-10.,100.);
-
-            model_pdf  = RooAtanExpPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c_AtanExp,rrv_offset_AtanExp,rrv_width_AtanExp);
-
-        if in_model_name == "AtanExpTail" : #different init-value and range                                                                                                             
+        if in_model_name == "Erf2Exp" : #different init-value and range                                                                                                             
    
-            rrv_offset_erf = RooRealVar("rrv_offset_AtanExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanExpTail"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
-            rrv_width_erf  = RooRealVar("rrv_width_AtanExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanExpTail"+label+"_"+self.channel+mass_spectrum,70.,-10.,100.);
+            rrv_offset_erf = RooRealVar("rrv_offset_Erf2Exp"+label+"_"+self.channel+mass_spectrum,"rrv_offset_Erf2Exp"+label+"_"+self.channel+mass_spectrum,450.,400.,600.);
+            rrv_width_erf  = RooRealVar("rrv_width_Erf2Exp"+label+"_"+self.channel+mass_spectrum,"rrv_width_Erf2Exp"+label+"_"+self.channel+mass_spectrum,60.,35.,100.);
 
-            rrv_s_ExpTail = RooRealVar("rrv_s_AtanExpTail"+label+"_"+self.channel,"rrv_s_AtanExpTail"+label+"_"+self.channel, 250,-1.e6,1e6);
-            rrv_a_ExpTail = RooRealVar("rrv_a_AtanExpTail"+label+"_"+self.channel,"rrv_a_AtanExpTail"+label+"_"+self.channel, 1e-1,-1.e2,1e6);
+            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf) );
 
-            atan = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(TMath::Pi()/2+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf));
+            rrv_c1_Exp = RooRealVar("rrv_c1_Erf2Exp"+label+"_"+self.channel,"rrv_c1_Erf2Exp"+label+"_"+self.channel,-0.005,-0.1,0.);
+            rrv_c2_Exp = RooRealVar("rrv_c2_Erf2Exp"+label+"_"+self.channel,"rrv_c2_Erf2Exp"+label+"_"+self.channel,-5e-5,-0.1,0.);
 
-            expTail = ROOT.RooExpTailPdf("expTail"+label+"_"+self.channel+mass_spectrum,"expTail"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_s_ExpTail, rrv_a_ExpTail);
+            exp1 = ROOT.RooExponential("exp1"+label+"_"+self.channel+mass_spectrum,"exp1"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c1_Exp);
+            exp2 = ROOT.RooExponential("exp2"+label+"_"+self.channel+mass_spectrum,"exp3"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c2_Exp);
 
-            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,atan,expTail);
+            rrv_frac = RooRealVar("rrv_frac_Erf2Exp"+label+"_"+self.channel,"rrv_frac_Erf2Exp"+label+"_"+self.channel,0.1,0.,0.6);
 
-        if in_model_name == "AtanExp_v2" : #different init-value and range                                                                                                             
-   
-            rrv_offset_erf = RooRealVar("rrv_offset_AtanExp2"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanExp2"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
-            rrv_width_erf  = RooRealVar("rrv_width_AtanExp2"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanExp2"+label+"_"+self.channel+mass_spectrum,70.,-10.,100.);
+            Exp = RooAddPdf("2Exp"+label+"_"+self.channel+mass_spectrum,"2Exp"+label+"_"+self.channel+mass_spectrum,RooArgList(exp1,exp2),RooArgList(rrv_frac));
 
-            rrv_s_ExpTail = RooRealVar("rrv_s_AtanExp2"+label+"_"+self.channel,"rrv_s_AtanExp2"+label+"_"+self.channel, -0.006,-0.1,0.001);
-            rrv_a_ExpTail = RooRealVar("rrv_a_AtanExp2"+label+"_"+self.channel,"rrv_a_AtanExp2"+label+"_"+self.channel, -0.00001,-0.001,0.001);
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,Exp);
 
-            atan = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"atan"+label+"_"+self.channel+mass_spectrum,"(TMath::Pi()/2+TMath::ATan((%s-%s)/%s))/2."%(rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf));
-
-            exp2 = RooGenericPdf("exp2"+label+"_"+self.channel+mass_spectrum,"exp2"+label+"_"+self.channel+mass_spectrum,"TMath::Exp(%s*%s+%s*%s*%s)"%(rrv_x.GetName(),rrv_s_ExpTail.GetName(), rrv_a_ExpTail.GetName(),rrv_x.GetName(),rrv_x.GetName()), RooArgList(rrv_x,rrv_s_ExpTail,rrv_a_ExpTail));
-
-            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,atan,exp2);
-          
-        if in_model_name == "AtanExp_v3" : #different init-value and range                                                                                                             
-   
-            rrv_offset_erf = RooRealVar("rrv_offset_AtanExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanExpTail"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
-            rrv_width_erf  = RooRealVar("rrv_width_AtanExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanExpTail"+label+"_"+self.channel+mass_spectrum,70.,-10.,100.);
-
-            rrv_s_ExpTail = RooRealVar("rrv_s_AtanExpTail"+label+"_"+self.channel,"rrv_s_AtanExpTail"+label+"_"+self.channel, -0.006,-0.2,0.);
-            rrv_a_ExpTail = RooRealVar("rrv_a_AtanExpTail"+label+"_"+self.channel,"rrv_a_AtanExpTail"+label+"_"+self.channel, -0.001,-1.,0.01);
-
-            atan = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"atan"+label+"_"+self.channel+mass_spectrum, "(TMath::Pi()/2+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf) );
-
-            exp3 = RooGenericPdf("exp3"+label+"_"+self.channel+mass_spectrum,"exp3"+label+"_"+self.channel+mass_spectrum, "TMath::Exp(%s+%s*%s)"%( rrv_a_ExpTail.GetName(),rrv_s_ExpTail.GetName(), rrv_x.GetName()), RooArgList(rrv_x,rrv_s_ExpTail,rrv_a_ExpTail) );
-
-            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,atan,exp3);
-
-
-        if in_model_name == "AtanExp_v4" : #different init-value and range                                                                                                             
-   
-            rrv_offset_erf = RooRealVar("rrv_offset_AtanExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanExpTail"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
-            rrv_width_erf  = RooRealVar("rrv_width_AtanExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanExpTail"+label+"_"+self.channel+mass_spectrum,70.,-10.,100.);
-
-            rrv_s_ExpTail = RooRealVar("rrv_s_AtanExpTail"+label+"_"+self.channel,"rrv_s_AtanExpTail"+label+"_"+self.channel, -0.006,-0.2,0.001);
-
-            if TString(label).Contains("sb_lo"):               
-             rrv_a_ExpTail = RooRealVar("rrv_a_ErfExpTail"+label+"_"+self.channel,"rrv_a_ErfExpTail"+label+"_"+self.channel, -0.001,-0.1,-0.001);
-             rrv_c_ExpTail = RooRealVar("rrv_c_ErfExpTail"+label+"_"+self.channel,"rrv_c_ErfExpTail"+label+"_"+self.channel, -0.00001,-0.01,0.01);
-            else:
-             rrv_a_ExpTail = RooRealVar("rrv_a_ErfExpTail"+label+"_"+self.channel,"rrv_a_ErfExpTail"+label+"_"+self.channel, -0.001,-1.,0.);
-             rrv_c_ExpTail = RooRealVar("rrv_c_ErfExpTail"+label+"_"+self.channel,"rrv_c_ErfExpTail"+label+"_"+self.channel, -0.00001,-0.001,0.);
-
-
-            atan = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"atan"+label+"_"+self.channel+mass_spectrum, "(TMath::Pi()/2+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf));
-
-            exp4 = RooGenericPdf("exp4"+label+"_"+self.channel+mass_spectrum,"exp4"+label+"_"+self.channel+mass_spectrum, "TMath::Exp(%s+%s*%s+%s*%s*%s)"%( rrv_a_ExpTail.GetName(),rrv_s_ExpTail.GetName(), rrv_x.GetName(), rrv_c_ExpTail.GetName(),rrv_x.GetName(),rrv_x.GetName()), RooArgList(rrv_x,rrv_s_ExpTail,rrv_a_ExpTail,rrv_c_ExpTail));
-
-            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,atan,exp4);
- 
         ##################################################################
 
         if in_model_name == "ErfPow_v1":#can replace erf*exp                                                                                                                           
@@ -641,124 +699,28 @@ class doBiasStudy_mlvj:
 
         if in_model_name == "ErfPow3_v1":#can replace erf*exp                                                                                                                           
 
-            rrv_c0 = RooRealVar("rrv_c0_ErfPow2"+label+"_"+self.channel+mass_spectrum,"rrv_c0_ErfPow3"+label+"_"+self.channel+mass_spectrum,14,1,30);
-            rrv_c1 = RooRealVar("rrv_c1_ErfPow2"+label+"_"+self.channel+mass_spectrum,"rrv_c1_ErfPow3"+label+"_"+self.channel+mass_spectrum, 5,-5,10);
-            rrv_c2 = RooRealVar("rrv_c3_ErfPow2"+label+"_"+self.channel+mass_spectrum,"rrv_c2_ErfPow3"+label+"_"+self.channel+mass_spectrum, 5,-5,10);
-            rrv_offset = RooRealVar("rrv_offset_ErfPow2"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfPow3"+label+"_"+self.channel+mass_spectrum, 600,400,600);
-            rrv_width  = RooRealVar("rrv_width_ErfPow2"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfPow3"+label+"_"+self.channel+mass_spectrum,60,10,100);
+            rrv_c0 = RooRealVar("rrv_c0_ErfPow3"+label+"_"+self.channel+mass_spectrum,"rrv_c0_ErfPow3"+label+"_"+self.channel+mass_spectrum,14,1,30);
+            rrv_c1 = RooRealVar("rrv_c1_ErfPow3"+label+"_"+self.channel+mass_spectrum,"rrv_c1_ErfPow3"+label+"_"+self.channel+mass_spectrum, 5,-5,10);
+            rrv_c2 = RooRealVar("rrv_c3_ErfPow3"+label+"_"+self.channel+mass_spectrum,"rrv_c2_ErfPow3"+label+"_"+self.channel+mass_spectrum, 5,-5,10);
+            rrv_offset = RooRealVar("rrv_offset_ErfPow3"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfPow3"+label+"_"+self.channel+mass_spectrum, 600,400,600);
+            rrv_width  = RooRealVar("rrv_width_ErfPow3"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfPow3"+label+"_"+self.channel+mass_spectrum,60,10,100);
             model_pdf  = RooErfPow3Pdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c0,rrv_c1,rrv_c2,rrv_offset,rrv_width);
 
-        ####################################################################
 
-        if in_model_name == "AtanPow_v1":#can replace erf*exp                                                                                                                           
-            rrv_c      = RooRealVar("rrv_c_AtanPow"+label+"_"+self.channel+mass_spectrum,"rrv_c_AtanPow"+label+"_"+self.channel+mass_spectrum, -5,-10,0);
-            rrv_offset = RooRealVar("rrv_offset_AtanPow"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanPow"+label+"_"+self.channel+mass_spectrum, 450,350,600);
-            rrv_width  = RooRealVar("rrv_width_AtanPow"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanPow"+label+"_"+self.channel+mass_spectrum,50,-10.,100);
+        if in_model_name == "Erf2Pow":#can replace erf*exp                                                                                                                           
 
-            model_pdf  = RooAtanPowPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c,rrv_offset,rrv_width);
+            rrv_offset = RooRealVar("rrv_offset_Erf2Pow"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfPow2"+label+"_"+self.channel+mass_spectrum, 600,400,600);
+            rrv_width  = RooRealVar("rrv_width_Erf2Pow"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfPow2"+label+"_"+self.channel+mass_spectrum,60,10,100);
 
+            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf) );
 
-        if in_model_name == "AtanPow2_v1":#can replace erf*exp                                                                                                                           
+            rrv_c0 = RooRealVar("rrv_c0_ErfPow2"+label+"_"+self.channel+mass_spectrum,"rrv_c0_ErfPow2"+label+"_"+self.channel+mass_spectrum,14,1,30);
+            rrv_c1 = RooRealVar("rrv_c1_ErfPow2"+label+"_"+self.channel+mass_spectrum,"rrv_c1_ErfPow2"+label+"_"+self.channel+mass_spectrum, 5,-5,10);
+            rrv_frac = RooRealVar("rrv_frac_Erf2Pow"+label+"_"+self.channel,"rrv_frac_Erf2Pow"+label+"_"+self.channel,0.5,0.,1.);
+              
+            Pow = RooGenericPdf("2pow"+label+"_"+self.channel+mass_spectrum,"2pow"+label+"_"+self.channel+mass_spectrum,"TMath::Pow(%s,-%s)+%s*TMath::Pow(%s,-%s)"(rrv_x.GetName(),rrv_c0.GetName(),rrv_frac.GetName(),rrv_x.GetName(),rrv_c1.GetName()),RooArgList(rrv_x,rrv_c0,rrv_c1,rrv_frac));
 
-            rrv_c0 = RooRealVar("rrv_c0_AtanPow2"+label+"_"+self.channel+mass_spectrum,"rrv_c0_AtanPow2"+label+"_"+self.channel+mass_spectrum,14,1,30);
-            rrv_c1 = RooRealVar("rrv_c1_AtanPow2"+label+"_"+self.channel+mass_spectrum,"rrv_c1_AtanPow2"+label+"_"+self.channel+mass_spectrum, 5,-5,10);
-            rrv_offset = RooRealVar("rrv_offset_AtanPow2"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanPow2"+label+"_"+self.channel+mass_spectrum, 600,400,600);
-            rrv_width  = RooRealVar("rrv_width_AtanPow2"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanPow2"+label+"_"+self.channel+mass_spectrum,60,-10.,100);
-            model_pdf  = RooErfPow2Pdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c0,rrv_c1,rrv_offset,rrv_width);
-
-
-        if in_model_name == "AtanPow3_v1":#can replace erf*exp                                                                                                                           
-
-            rrv_c0 = RooRealVar("rrv_c0_AtanPow3"+label+"_"+self.channel+mass_spectrum,"rrv_c0_AtanPow3"+label+"_"+self.channel+mass_spectrum,14,1,30);
-            rrv_c1 = RooRealVar("rrv_c1_AtanPow3"+label+"_"+self.channel+mass_spectrum,"rrv_c1_AtanPow3"+label+"_"+self.channel+mass_spectrum, 5,-5,10);
-            rrv_c2 = RooRealVar("rrv_c2_AtanPow3"+label+"_"+self.channel+mass_spectrum,"rrv_c2_AtanPow3"+label+"_"+self.channel+mass_spectrum, 5,-5,10);
-            rrv_offset = RooRealVar("rrv_offset_AtanPow3"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanPow3"+label+"_"+self.channel+mass_spectrum, 600,400,600);
-            rrv_width  = RooRealVar("rrv_width_AtanPow3"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanPow3"+label+"_"+self.channel+mass_spectrum,60,-10.,100);
-            model_pdf  = RooErfPow3Pdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c0,rrv_c1,rrv_c2,rrv_offset,rrv_width);
-
-        #################################################################
-
-        if in_model_name == "ErfPol_v1":#can replace erf*exp                                                                                                                           
-
-            rrv_p0      = RooRealVar("rrv_p0_ErfPol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_ErfPol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
-            rrv_offset  = RooRealVar("rrv_offset_ErfPol"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfPol"+label+"_"+self.channel+mass_spectrum, 450,350,600);
-            rrv_width   = RooRealVar("rrv_width_ErfPol"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfPol"+label+"_"+self.channel+mass_spectrum,50,20,100);
-
-            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
- 
-            pol = RooChebychev("pol"+label+"_"+self.channel+mass_spectrum,"pol"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0));
-
-            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,pol);
-
-        if in_model_name == "ErfPol_v2":#can replace erf*exp                                                                                                                           
-
-            rrv_p0      = RooRealVar("rrv_p0_ErfPol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_ErfPol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
-            rrv_p1      = RooRealVar("rrv_p1_ErfPol"+label+"_"+self.channel+mass_spectrum,"rrv_p1_ErfPol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
-            rrv_offset  = RooRealVar("rrv_offset_ErfPol"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfPol"+label+"_"+self.channel+mass_spectrum, 450,350,600);
-            rrv_width   = RooRealVar("rrv_width_ErfPol"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfPol"+label+"_"+self.channel+mass_spectrum,50,20,100);
-
-            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
- 
-            pol = RooChebychev("pol"+label+"_"+self.channel+mass_spectrum,"pol"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1));
-
-            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,pol);
- 
-        if in_model_name == "ErfPol_v3":#can replace erf*exp                                                                                                                           
-
-            rrv_p0      = RooRealVar("rrv_p0_ErfPol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_ErfPol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
-            rrv_p1      = RooRealVar("rrv_p1_ErfPol"+label+"_"+self.channel+mass_spectrum,"rrv_p1_ErfPol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
-            rrv_p2      = RooRealVar("rrv_p2_ErfPol"+label+"_"+self.channel+mass_spectrum,"rrv_p2_ErfPol"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
-            rrv_offset  = RooRealVar("rrv_offset_ErfPol"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfPol"+label+"_"+self.channel+mass_spectrum, 450,350,600);
-            rrv_width   = RooRealVar("rrv_width_ErfPol"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfPol"+label+"_"+self.channel+mass_spectrum,50,20,100);
-
-            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
- 
-            pol = RooChebychev("pol"+label+"_"+self.channel+mass_spectrum,"pol"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2));
-
-            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,pol);
- 
- 
-        ###################################################################
-             
-        if in_model_name == "AtanPol_v1":#can replace erf*exp                                                                                                                           
-
-            rrv_p0      = RooRealVar("rrv_p0_AtanPol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_AtanPol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
-            rrv_offset  = RooRealVar("rrv_offset_AtanPol"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanPol"+label+"_"+self.channel+mass_spectrum, 450,350,600);
-            rrv_width   = RooRealVar("rrv_width_AtanPol"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanPol"+label+"_"+self.channel+mass_spectrum,50,20,100);
-
-            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(TMath::Pi()/2+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
- 
-            pol = RooChebychev("pol"+label+"_"+self.channel+mass_spectrum,"pol"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0));
-
-            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,pol);
-
-
-        if in_model_name == "AtanPol_v2":#can replace erf*exp                                                                                                                           
-
-            rrv_p0      = RooRealVar("rrv_p0_AtanPol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_AtanPol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
-            rrv_p1      = RooRealVar("rrv_p1_AtanPol"+label+"_"+self.channel+mass_spectrum,"rrv_p1_AtanPol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
-            rrv_offset  = RooRealVar("rrv_offset_AtanPol"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanPol"+label+"_"+self.channel+mass_spectrum, 450,350,600);
-            rrv_width   = RooRealVar("rrv_width_AtanPol"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanPol"+label+"_"+self.channel+mass_spectrum,50,20,100);
-
-            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(TMath::Pi()/2+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
- 
-            pol = RooChebychev("pol"+label+"_"+self.channel+mass_spectrum,"pol"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1));
-
-            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,pol);
-
-        if in_model_name == "AtanPol_v3":#can replace erf*exp                                                                                                                           
-
-            rrv_p0      = RooRealVar("rrv_p0_AtanPol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_AtanPol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
-            rrv_p1      = RooRealVar("rrv_p1_AtanPol"+label+"_"+self.channel+mass_spectrum,"rrv_p1_AtanPol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
-            rrv_p2      = RooRealVar("rrv_p2_AtanPol"+label+"_"+self.channel+mass_spectrum,"rrv_p2_AtanPol"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
-            rrv_offset  = RooRealVar("rrv_offset_AtanPol"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanPol"+label+"_"+self.channel+mass_spectrum, 450,350,600);
-            rrv_width   = RooRealVar("rrv_width_AtanPol"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanPol"+label+"_"+self.channel+mass_spectrum,50,20,100);
-
-            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(TMath::Pi()/2+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
- 
-            pol = RooChebychev("pol"+label+"_"+self.channel+mass_spectrum,"pol"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2));
-
-            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,pol);
+            model_pdf  = RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,Pow);
 
         ###################################################################
 
@@ -769,98 +731,327 @@ class doBiasStudy_mlvj:
             rrv_width  = RooRealVar("rrv_width_ErfPowExp"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfPowExp"+label+"_"+self.channel+mass_spectrum,50,15,150);
             model_pdf  = RooErfPowExpPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c0,rrv_c1,rrv_offset,rrv_width);
 
-        if in_model_name == "AtanPowExp_v1":#can replace erf*exp                                                                                                                          
-            rrv_c0 = RooRealVar("rrv_c0_AtanPowExp"+label+"_"+self.channel+mass_spectrum,"rrv_c0_AtanPowExp"+label+"_"+self.channel+mass_spectrum,13,5,40);
-            rrv_c1 = RooRealVar("rrv_c1_AtanPowExp"+label+"_"+self.channel+mass_spectrum,"rrv_c1_AtanPowExp"+label+"_"+self.channel+mass_spectrum, 2,0,4);
-            rrv_offset = RooRealVar("rrv_offset_AtanPowExp"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanPowExp"+label+"_"+self.channel+mass_spectrum, 450,400,600);
-            rrv_width  = RooRealVar("rrv_width_AtanPowExp"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanPowExp"+label+"_"+self.channel+mass_spectrum,50,-10.,150);
-            model_pdf  = RooErfPowExpPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c0,rrv_c1,rrv_offset,rrv_width);
+
+        #################################################################
+
+        if in_model_name == "ErfChebychev_v2":#can replace erf*exp                                                                                                           
+
+            rrv_offset  = RooRealVar("rrv_offset_ErfChebychev_v2"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfChebychev_v2"+label+"_"+self.channel+mass_spectrum, 450,350,600);
+            rrv_width   = RooRealVar("rrv_width_ErfChebychev_v2"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfChebychev_v2"+label+"_"+self.channel+mass_spectrum,50,20,100);
+
+            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
+
+            rrv_p0      = RooRealVar("rrv_p0_ErfChebychev_v2"+label+"_"+self.channel+mass_spectrum,"rrv_p0_ErfChebychev_v2"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_ErfChebychev_v2"+label+"_"+self.channel+mass_spectrum,"rrv_p1_ErfChebychev_v2"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+ 
+            pol = RooChebychev("Chebychev_v2"+label+"_"+self.channel+mass_spectrum,"Chebychev_v2"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1));
+
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,pol);
+ 
+        if in_model_name == "ErfChebychev_v3":#can replace erf*exp                                                                                               
+
+            rrv_p0      = RooRealVar("rrv_p0_ErfChebychev_v3"+label+"_"+self.channel+mass_spectrum,"rrv_p0_ErfChebychev_v3"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_ErfChebychev_v3"+label+"_"+self.channel+mass_spectrum,"rrv_p1_ErfChebychev_v3"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_ErfChebychev_v3"+label+"_"+self.channel+mass_spectrum,"rrv_p2_ErfChebychev_v3"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+
+            rrv_offset  = RooRealVar("rrv_offset_ErfChebychev_v3"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfChebychev_v3"+label+"_"+self.channel+mass_spectrum, 450,350,600);
+            rrv_width   = RooRealVar("rrv_width_ErfChebychev_v3"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfChebychev_v3"+label+"_"+self.channel+mass_spectrum,50,20,100);
+
+            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
+ 
+            pol = RooChebychev("Chebychev_v3"+label+"_"+self.channel+mass_spectrum,"Chebychev_v3"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2));
+
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,pol);
+
+        if in_model_name == "ErfChebychev_v4":#can replace erf*exp                                                                                               
+
+            rrv_p0      = RooRealVar("rrv_p0_ErfChebychev_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p0_ErfChebychev_v4"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_ErfChebychev_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p1_ErfChebychev_v4"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_ErfChebychev_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p2_ErfChebychev_v4"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+            rrv_p3      = RooRealVar("rrv_p3_ErfChebychev_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p3_ErfChebychev_v4"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+
+            rrv_offset  = RooRealVar("rrv_offset_ErfChebychev_v4"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfChebychev_v4"+label+"_"+self.channel+mass_spectrum, 450,350,600);
+            rrv_width   = RooRealVar("rrv_width_ErfChebychev_v4"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfChebychev_v4"+label+"_"+self.channel+mass_spectrum,50,20,100);
+
+            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
+ 
+            pol = RooChebychev("Chebychev_v4"+label+"_"+self.channel+mass_spectrum,"Chebychev_v4"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2,rrv_p3));
+
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,pol);
 
 
+        #################################################################
+
+        if in_model_name == "ErfBernstein_v3":#can replace erf*exp                                                                                               
+
+            rrv_p0      = RooRealVar("rrv_p0_ErfBernstein_v3"+label+"_"+self.channel+mass_spectrum,"rrv_p0_ErfBernstein_v3"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_ErfBernstein_v3"+label+"_"+self.channel+mass_spectrum,"rrv_p1_ErfBernstein_v3"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_ErfBernstein_v3"+label+"_"+self.channel+mass_spectrum,"rrv_p2_ErfBernstein_v3"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+
+            rrv_offset  = RooRealVar("rrv_offset_ErfBernstein_v3"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfBernstein_v3"+label+"_"+self.channel+mass_spectrum, 450,350,600);
+            rrv_width   = RooRealVar("rrv_width_ErfBernstein_v3"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfBernstein_v3"+label+"_"+self.channel+mass_spectrum,50,20,100);
+
+            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
+ 
+            pol = RooBernstein("Bernstein_v3"+label+"_"+self.channel+mass_spectrum,"Bernstein_v3"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2));
+
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,pol);
+
+        if in_model_name == "ErfBernstein_v4":#can replace erf*exp                                                                                               
+
+            rrv_p0      = RooRealVar("rrv_p0_ErfBernstein_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p0_ErfBernstein_v4"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_ErfBernstein_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p1_ErfBernstein_v4"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_ErfBernstein_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p2_ErfBernstein_v4"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+            rrv_p3      = RooRealVar("rrv_p3_ErfBernstein_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p3_ErfBernstein_v4"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+
+            rrv_offset  = RooRealVar("rrv_offset_ErfBernstein_v4"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfBernstein_v4"+label+"_"+self.channel+mass_spectrum, 450,350,600);
+            rrv_width   = RooRealVar("rrv_width_ErfBernstein_v4"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfBernstein_v4"+label+"_"+self.channel+mass_spectrum,50,20,100);
+
+            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
+ 
+            pol = RooBernstein("Bernstein_v4"+label+"_"+self.channel+mass_spectrum,"Bernstein_v4"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2,rrv_p3));
+
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,pol);
+
+        if in_model_name == "ErfBernstein_v5":#can replace erf*exp                                                                                               
+
+            rrv_p0      = RooRealVar("rrv_p0_ErfBernstein_v5"+label+"_"+self.channel+mass_spectrum,"rrv_p0_ErfBernstein_v5"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_ErfBernstein_v5"+label+"_"+self.channel+mass_spectrum,"rrv_p1_ErfBernstein_v5"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_ErfBernstein_v5"+label+"_"+self.channel+mass_spectrum,"rrv_p2_ErfBernstein_v5"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+            rrv_p3      = RooRealVar("rrv_p3_ErfBernstein_v5"+label+"_"+self.channel+mass_spectrum,"rrv_p3_ErfBernstein_v5"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+            rrv_p4      = RooRealVar("rrv_p4_ErfBernstein_v5"+label+"_"+self.channel+mass_spectrum,"rrv_p4_ErfBernstein_v5"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+
+            rrv_offset  = RooRealVar("rrv_offset_ErfBernstein_v3"+label+"_"+self.channel+mass_spectrum,"rrv_offset_ErfBernstein_v3"+label+"_"+self.channel+mass_spectrum, 450,350,600);
+            rrv_width   = RooRealVar("rrv_width_ErfBernstein_v3"+label+"_"+self.channel+mass_spectrum,"rrv_width_ErfBernstein_v3"+label+"_"+self.channel+mass_spectrum,50,20,100);
+
+            erf = RooGenericPdf("erf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::Erf((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
+ 
+            pol = RooBernstein("Bernstein_v5"+label+"_"+self.channel+mass_spectrum,"Bernstein_v5"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2,rrv_p3,rrv_p4));
+
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,pol);
+
+
+        ########################################################
+        ############### Turn On + Falling part #################
+        ########################################################
+
+        if in_model_name == "AtanExp_v1" : #different init-value and range                                                                                                            
+
+            rrv_c_AtanExp      = RooRealVar("rrv_c_AtanExp"+label+"_"+self.channel+mass_spectrum,"rrv_c_AtanExp"+label+"_"+self.channel+mass_spectrum,-0.006,-0.1,0.);
+            rrv_offset_AtanExp = RooRealVar("rrv_offset_AtanExp"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanExp"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
+            rrv_width_AtanExp  = RooRealVar("rrv_width_AtanExp"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanExp"+label+"_"+self.channel+mass_spectrum,60.,15.,100.);
+
+            model_pdf  = RooAtanExpPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c_AtanExp,rrv_offset_AtanExp,rrv_width_AtanExp);
 
         if in_model_name == "AtanExpTail" : #different init-value and range                                                                                                             
    
-            rrv_offset_ErfExp = RooRealVar("rrv_offset_AtanExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanExpTail"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
-            rrv_width_ErfExp = RooRealVar("rrv_width_AtanExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanExpTail"+label+"_"+self.channel+mass_spectrum,70.,-10.,100.);
+            rrv_offset_erf = RooRealVar("rrv_offset_AtanExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanExpTail"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
+            rrv_width_erf  = RooRealVar("rrv_width_AtanExpTail"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanExpTail"+label+"_"+self.channel+mass_spectrum,70.,15.,100.);
+
             rrv_s_ExpTail = RooRealVar("rrv_s_AtanExpTail"+label+"_"+self.channel,"rrv_s_AtanExpTail"+label+"_"+self.channel, 250,-1.e6,1e6);
-            rrv_a_ExpTail = RooRealVar("rrv_a_AtanExpTail"+label+"_"+self.channel,"rrv_a_AtanExpTail"+label+"_"+self.channel, 1e-1,-1.e2,1e6);
+            rrv_a_ExpTail = RooRealVar("rrv_a_AtanExpTail"+label+"_"+self.channel,"rrv_a_AtanExpTail"+label+"_"+self.channel, 5e-1,-1.e2,1e6);
 
-            atan = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"atan"+label+"_"+self.channel+mass_spectrum, "(TMath::Pi()/2.+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset_ErfExp.GetName(), rrv_width_ErfExp.GetName()), RooArgList(rrv_x,rrv_offset_ErfExp,rrv_width_ErfExp) )
+            atan       = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"atan"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf));
 
-            expTail = ROOT.RooExpTailPdf("expTail"+label+"_"+self.channel+mass_spectrum,"expTail"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_s_ExpTail, rrv_a_ExpTail);
-          
+            expTail   = ROOT.RooExpTailPdf("expTail"+label+"_"+self.channel+mass_spectrum,"expTail"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_s_ExpTail,rrv_a_ExpTail);
+
             model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,atan,expTail);
+          
+        if in_model_name == "AtanExp_v3" : #different init-value and range                                                                                                             
+   
+            rrv_offset_erf = RooRealVar("rrv_offset_AtanExp_v3"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanExp_v3"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
+            rrv_width_erf  = RooRealVar("rrv_width_AtanExp_v3"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanExp_v3"+label+"_"+self.channel+mass_spectrum,70.,15.,100.);
+
+            rrv_s_ExpTail = RooRealVar("rrv_s_AtanExp_v3"+label+"_"+self.channel,"rrv_s_AtanExp_v3"+label+"_"+self.channel, -0.006,-0.2,0.);
+
+            rrv_a_ExpTail = RooRealVar("rrv_a_AtanExp_v3"+label+"_"+self.channel,"rrv_a_AtanExp_v3"+label+"_"+self.channel, -0.1,-50.,-0.001);
+            rrv_c_ExpTail = RooRealVar("rrv_c_AtanExp_v3"+label+"_"+self.channel,"rrv_c_AtanExp_v3"+label+"_"+self.channel, -0.00001,-0.001,0.);
+
+            atan = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"atan"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf) );
+
+            exp4 = RooGenericPdf("exp4"+label+"_"+self.channel+mass_spectrum,"exp4"+label+"_"+self.channel+mass_spectrum, "TMath::Exp(%s+%s*%s+%s*%s*%s)"%( rrv_a_ExpTail.GetName(),rrv_s_ExpTail.GetName(), rrv_x.GetName(), rrv_c_ExpTail.GetName(),rrv_x.GetName(),rrv_x.GetName()), RooArgList(rrv_x,rrv_s_ExpTail,rrv_a_ExpTail,rrv_c_ExpTail));
+
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,atan,exp4);
+
+
+        if in_model_name == "Atan2Exp" : #different init-value and range                                                                                                             
+   
+            rrv_offset_erf = RooRealVar("rrv_offset_Atan2Exp"+label+"_"+self.channel+mass_spectrum,"rrv_offset_Atan2Exp"+label+"_"+self.channel+mass_spectrum,450.,350.,600.);
+            rrv_width_erf  = RooRealVar("rrv_width_Atan2Exp"+label+"_"+self.channel+mass_spectrum,"rrv_width_Atan2Exp"+label+"_"+self.channel+mass_spectrum,70.,15.,100.);
+
+            atan = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf) );
+
+            rrv_c1_Exp = RooRealVar("rrv_c1_Atan2Exp"+label+"_"+self.channel,"rrv_c1_Atan2Exp"+label+"_"+self.channel,-0.05,-0.1,0.);
+            rrv_c2_Exp = RooRealVar("rrv_c2_Atan2Exp"+label+"_"+self.channel,"rrv_c2_Atan2Exp"+label+"_"+self.channel,-0.05,-0.1,0.);
+
+            exp1 = ROOT.RooExponential("exp1"+label+"_"+self.channel+mass_spectrum,"exp1"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c1_Exp);
+            exp2 = ROOT.RooExponential("exp2"+label+"_"+self.channel+mass_spectrum,"exp3"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c2_Exp);
+
+            rrv_frac = RooRealVar("rrv_frac_Atan2Exp"+label+"_"+self.channel,"rrv_frac_Atan2Exp"+label+"_"+self.channel,0.5,0.,1.);
+
+            Exp = RooAddPdf("2Exp"+label+"_"+self.channel+mass_spectrum,"2Exp"+label+"_"+self.channel+mass_spectrum,RooArgList(exp1,exp2),RooArgList(rrv_frac));
+
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,atan,Exp);
+
+        ##################################################################
+
+        if in_model_name == "AtanPow_v1":#can replace erf*exp                                                                                 
+                                          
+            rrv_c      = RooRealVar("rrv_c_AtanPow"+label+"_"+self.channel+mass_spectrum,"rrv_c_AtanPow"+label+"_"+self.channel+mass_spectrum, -5,-10,0);
+            rrv_offset = RooRealVar("rrv_offset_AtanPow"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanPow"+label+"_"+self.channel+mass_spectrum, 450,350,600);
+            rrv_width  = RooRealVar("rrv_width_AtanPow"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanPow"+label+"_"+self.channel+mass_spectrum,50,20,100);
+
+            model_pdf  = RooAtanPowPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c,rrv_offset,rrv_width);
+
+        if in_model_name == "AtanPow2_v1":#can replace erf*exp                                                                                                                           
+
+            rrv_c0 = RooRealVar("rrv_c0_AtanPow2"+label+"_"+self.channel+mass_spectrum,"rrv_c0_AtanPow2"+label+"_"+self.channel+mass_spectrum,14,1,30);
+            rrv_c1 = RooRealVar("rrv_c1_AtanPow2"+label+"_"+self.channel+mass_spectrum,"rrv_c1_AtanPow2"+label+"_"+self.channel+mass_spectrum, 5,-5,10);
+            rrv_offset = RooRealVar("rrv_offset_AtanPow2"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanPow2"+label+"_"+self.channel+mass_spectrum, 600,400,600);
+            rrv_width  = RooRealVar("rrv_width_AtanPow2"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanPow2"+label+"_"+self.channel+mass_spectrum,60,10,100);
+            model_pdf  = RooAtanPow2Pdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c0,rrv_c1,rrv_offset,rrv_width);
+
+        if in_model_name == "AtanPow3_v1":#can replace erf*exp                                                                                                                           
+
+            rrv_c0 = RooRealVar("rrv_c0_AtanPow3"+label+"_"+self.channel+mass_spectrum,"rrv_c0_AtanPow3"+label+"_"+self.channel+mass_spectrum,14,1,30);
+            rrv_c1 = RooRealVar("rrv_c1_AtanPow3"+label+"_"+self.channel+mass_spectrum,"rrv_c1_AtanPow3"+label+"_"+self.channel+mass_spectrum, 5,-5,10);
+            rrv_c2 = RooRealVar("rrv_c3_AtanPow3"+label+"_"+self.channel+mass_spectrum,"rrv_c2_AtanPow3"+label+"_"+self.channel+mass_spectrum, 5,-5,10);
+            rrv_offset = RooRealVar("rrv_offset_AtanPow3"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanPow3"+label+"_"+self.channel+mass_spectrum, 600,400,600);
+            rrv_width  = RooRealVar("rrv_width_AtanPow3"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanPow3"+label+"_"+self.channel+mass_spectrum,60,10,100);
+            model_pdf  = RooAtanPow3Pdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c0,rrv_c1,rrv_c2,rrv_offset,rrv_width);
+
+        if in_model_name == "Atan2Pow":#can replace erf*exp                                                                                                                           
+
+            rrv_offset = RooRealVar("rrv_offset_Atan2Pow"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanPow2"+label+"_"+self.channel+mass_spectrum, 600,400,600);
+            rrv_width  = RooRealVar("rrv_width_Atan2Pow"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanPow2"+label+"_"+self.channel+mass_spectrum,60,10,100);
+
+            atan = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"atan"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::ATan((%s-%s)/%s))/2."%(rrv_x.GetName(),rrv_offset_erf.GetName(), rrv_width_erf.GetName()), RooArgList(rrv_x,rrv_offset_erf,rrv_width_erf));
+
+            rrv_c0 = RooRealVar("rrv_c0_AtanPow2"+label+"_"+self.channel+mass_spectrum,"rrv_c0_AtanPow2"+label+"_"+self.channel+mass_spectrum,14,1,30);
+            rrv_c1 = RooRealVar("rrv_c1_AtanPow2"+label+"_"+self.channel+mass_spectrum,"rrv_c1_AtanPow2"+label+"_"+self.channel+mass_spectrum, 5,-5,10);
+            rrv_frac = RooRealVar("rrv_frac_Atan2Pow"+label+"_"+self.channel,"rrv_frac_Atan2Pow"+label+"_"+self.channel,0.5,0.,1.);
+              
+            Pow = RooGenericPdf("2pow"+label+"_"+self.channel+mass_spectrum,"2pow"+label+"_"+self.channel+mass_spectrum,"TMath::Pow(%s,-%s)+%s*TMath::Pow(%s,-%s)"(rrv_x.GetName(),rrv_c0.GetName(),rrv_frac.GetName(),rrv_x.GetName(),rrv_c1.GetName()),RooArgList(rrv_x,rrv_c0,rrv_c1,rrv_frac));
+
+            model_pdf  = RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,atan,Pow);
+
+        ###################################################################
+
+        if in_model_name == "AtanPowExp_v1":#can replace erf*exp                                                                                                                         
+
+            rrv_c0 = RooRealVar("rrv_c0_AtanPowExp"+label+"_"+self.channel+mass_spectrum,"rrv_c0_AtanPowExp"+label+"_"+self.channel+mass_spectrum,13,5,40);
+            rrv_c1 = RooRealVar("rrv_c1_AtanPowExp"+label+"_"+self.channel+mass_spectrum,"rrv_c1_AtanPowExp"+label+"_"+self.channel+mass_spectrum, 2,0,4);
+            rrv_offset = RooRealVar("rrv_offset_AtanPowExp"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanPowExp"+label+"_"+self.channel+mass_spectrum, 450,400,600);
+            rrv_width  = RooRealVar("rrv_width_AtanPowExp"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanPowExp"+label+"_"+self.channel+mass_spectrum,50,15,150);
+            model_pdf  = RooAtanPowExpPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c0,rrv_c1,rrv_offset,rrv_width);
+
+        #################################################################
+
+        if in_model_name == "AtanChebychev_v2":#can replace erf*exp                                                                                                           
+
+            rrv_offset  = RooRealVar("rrv_offset_AtanChebychev_v2"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanChebychev_v2"+label+"_"+self.channel+mass_spectrum, 450,350,600);
+            rrv_width   = RooRealVar("rrv_width_AtanChebychev_v2"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanChebychev_v2"+label+"_"+self.channel+mass_spectrum,50,20,100);
+
+            atan = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"atan"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
+
+            rrv_p0      = RooRealVar("rrv_p0_AtanChebychev_v2"+label+"_"+self.channel+mass_spectrum,"rrv_p0_AtanChebychev_v2"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_AtanChebychev_v2"+label+"_"+self.channel+mass_spectrum,"rrv_p1_AtanChebychev_v2"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+ 
+            pol = RooChebychev("Chebychev_v2"+label+"_"+self.channel+mass_spectrum,"Chebychev_v2"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1));
+
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,atan,pol);
+ 
+        if in_model_name == "AtanChebychev_v3":#can replace erf*exp                                                                                               
+
+            rrv_p0      = RooRealVar("rrv_p0_AtanChebychev_v3"+label+"_"+self.channel+mass_spectrum,"rrv_p0_AtanChebychev_v3"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_AtanChebychev_v3"+label+"_"+self.channel+mass_spectrum,"rrv_p1_AtanChebychev_v3"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_AtanChebychev_v3"+label+"_"+self.channel+mass_spectrum,"rrv_p2_AtanChebychev_v3"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+
+            rrv_offset  = RooRealVar("rrv_offset_AtanChebychev_v3"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanChebychev_v3"+label+"_"+self.channel+mass_spectrum, 450,350,600);
+            rrv_width   = RooRealVar("rrv_width_AtanChebychev_v3"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanChebychev_v3"+label+"_"+self.channel+mass_spectrum,50,20,100);
+
+            atan = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"atan"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width));
+ 
+            pol = RooChebychev("Chebychev_v3"+label+"_"+self.channel+mass_spectrum,"Chebychev_v3"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2));
+
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,atan,pol);
+
+        if in_model_name == "AtanChebychev_v4":#can replace erf*exp                                                                                               
+
+            rrv_p0      = RooRealVar("rrv_p0_AtanChebychev_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p0_AtanChebychev_v4"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_AtanChebychev_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p1_AtanChebychev_v4"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_AtanChebychev_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p2_AtanChebychev_v4"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+            rrv_p3      = RooRealVar("rrv_p3_AtanChebychev_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p3_AtanChebychev_v4"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+
+            rrv_offset  = RooRealVar("rrv_offset_AtanChebychev_v4"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanChebychev_v4"+label+"_"+self.channel+mass_spectrum, 450,350,600);
+            rrv_width   = RooRealVar("rrv_width_AtanChebychev_v4"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanChebychev_v4"+label+"_"+self.channel+mass_spectrum,50,20,100);
+
+            atan = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"atan"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
+ 
+            pol = RooChebychev("Chebychev_v4"+label+"_"+self.channel+mass_spectrum,"Chebychev_v4"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2,rrv_p3));
+
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,erf,pol);
+
+        #################################################################
+
+        if in_model_name == "AtanBernstein_v3":#can replace erf*exp                                                                                               
+
+            rrv_p0      = RooRealVar("rrv_p0_AtanBernstein_v3"+label+"_"+self.channel+mass_spectrum,"rrv_p0_AtanBernstein_v3"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_AtanBernstein_v3"+label+"_"+self.channel+mass_spectrum,"rrv_p1_AtanBernstein_v3"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_AtanBernstein_v3"+label+"_"+self.channel+mass_spectrum,"rrv_p2_AtanBernstein_v3"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+
+            rrv_offset  = RooRealVar("rrv_offset_AtanBernstein_v3"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanBernstein_v3"+label+"_"+self.channel+mass_spectrum, 450,350,600);
+            rrv_width   = RooRealVar("rrv_width_AtanBernstein_v3"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanBernstein_v3"+label+"_"+self.channel+mass_spectrum,50,20,100);
+
+            atan = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"atan"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
+ 
+            pol = RooBernstein("Bernstein_v3"+label+"_"+self.channel+mass_spectrum,"Bernstein_v3"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2));
+
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,atan,pol);
+
+        if in_model_name == "AtanBernstein_v4":#can replace erf*exp                                                                                               
+
+            rrv_p0      = RooRealVar("rrv_p0_AtanBernstein_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p0_AtanBernstein_v4"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_AtanBernstein_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p1_AtanBernstein_v4"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_AtanBernstein_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p2_AtanBernstein_v4"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+            rrv_p3      = RooRealVar("rrv_p3_AtanBernstein_v4"+label+"_"+self.channel+mass_spectrum,"rrv_p3_AtanBernstein_v4"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+
+            rrv_offset  = RooRealVar("rrv_offset_AtanBernstein_v4"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanBernstein_v4"+label+"_"+self.channel+mass_spectrum, 450,350,600);
+            rrv_width   = RooRealVar("rrv_width_AtanBernstein_v4"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanBernstein_v4"+label+"_"+self.channel+mass_spectrum,50,20,100);
+
+            atan = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"atan"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
+ 
+            pol = RooBernstein("Bernstein_v4"+label+"_"+self.channel+mass_spectrum,"Bernstein_v4"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2,rrv_p3));
+
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,atan,pol);
+
+        if in_model_name == "AtanBernstein_v5":#can replace erf*exp                                                                                               
+
+            rrv_p0      = RooRealVar("rrv_p0_AtanBernstein_v5"+label+"_"+self.channel+mass_spectrum,"rrv_p0_AtanBernstein_v5"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
+            rrv_p1      = RooRealVar("rrv_p1_AtanBernstein_v5"+label+"_"+self.channel+mass_spectrum,"rrv_p1_AtanBernstein_v5"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
+            rrv_p2      = RooRealVar("rrv_p2_AtanBernstein_v5"+label+"_"+self.channel+mass_spectrum,"rrv_p2_AtanBernstein_v5"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+            rrv_p3      = RooRealVar("rrv_p3_AtanBernstein_v5"+label+"_"+self.channel+mass_spectrum,"rrv_p3_AtanBernstein_v5"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+            rrv_p4      = RooRealVar("rrv_p4_AtanBernstein_v5"+label+"_"+self.channel+mass_spectrum,"rrv_p4_AtanBernstein_v5"+label+"_"+self.channel+mass_spectrum, -0.001,-1,1);
+
+            rrv_offset  = RooRealVar("rrv_offset_AtanBernstein_v3"+label+"_"+self.channel+mass_spectrum,"rrv_offset_AtanBernstein_v3"+label+"_"+self.channel+mass_spectrum, 450,350,600);
+            rrv_width   = RooRealVar("rrv_width_AtanBernstein_v3"+label+"_"+self.channel+mass_spectrum,"rrv_width_AtanBernstein_v3"+label+"_"+self.channel+mass_spectrum,50,20,100);
+
+            atan = RooGenericPdf("atan"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "(1.+TMath::ATan((%s-%s)/%s))/2."%( rrv_x.GetName(),rrv_offset.GetName(), rrv_width.GetName()), RooArgList(rrv_x,rrv_offset,rrv_width) );
+ 
+            pol = RooBernstein("Bernstein_v5"+label+"_"+self.channel+mass_spectrum,"Bernstein_v5"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2,rrv_p3,rrv_p4));
+
+            model_pdf = ROOT.RooProdPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,atan,pol);
 
         ###################################################################
 
         if in_model_name == "Keys":
-            if TString(label).Contains("sb_lo"): rdataset = self.workspace4bias_.data("rdataset_WJets0_sb_lo_%s_mlvj"%(self.channel))
 
-            elif TString(label).Contains("signal_region"): rdataset = self.workspace4bias_.data("rdataset_WJets0_signal_region_%s_mlvj"%(self.channel))
+            if TString(label).Contains("sb_lo"): 
+               rdataset = self.workspace4bias_.data("rdataset_WJets0_sb_lo_%s_mlvj"%(self.channel))
+            elif TString(label).Contains("signal_region"): 
+               rdataset = self.workspace4bias_.data("rdataset_WJets0_signal_region_%s_mlvj"%(self.channel))
         
             model_pdf = RooKeysPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum, rrv_x,rdataset,RooKeysPdf.MirrorRight);
-
-        ###################################################################
-
-        ## sum of two exponential                                                                                                                                                    
-        if in_model_name == "Exp" :
-            rrv_c_Exp = RooRealVar("rrv_c_Exp"+label+"_"+self.channel,"rrv_c_Exp"+label+"_"+self.channel,-0.05,-0.1,0.);
-            model_pdf = ROOT.RooExponential("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_c_Exp);
-
-        ## levelled exp for W+jets bkg fit                                                                                                                
-        if in_model_name == "ExpTail":
-            rrv_s_ExpTail = RooRealVar("rrv_s_ExpTail"+label+"_"+self.channel,"rrv_s_ExpTail"+label+"_"+self.channel, 250,-1.e6,1e6);
-            rrv_a_ExpTail = RooRealVar("rrv_a_ExpTail"+label+"_"+self.channel,"rrv_a_ExpTail"+label+"_"+self.channel, 1e-1,-1.e-2,1e6);
-            model_pdf     = ROOT.RooExpTailPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,rrv_s_ExpTail, rrv_a_ExpTail);
-
-        ## levelled exp for W+jets bkg fit                                                                                                                
-        if in_model_name == "Exp_v3":
-            rrv_c1_Exp = RooRealVar("rrv_c1_Exp"+label+"_"+self.channel,"rrv_c1_Exp"+label+"_"+self.channel,1,-1.e6,1.e6);
-            rrv_c2_Exp = RooRealVar("rrv_c2_Exp"+label+"_"+self.channel,"rrv_c2_Exp"+label+"_"+self.channel,-0.05,-0.1,0.);
-            rrv_c3_Exp = RooRealVar("rrv_c3_Exp"+label+"_"+self.channel,"rrv_c3_Exp"+label+"_"+self.channel,-0.05,-0.1,0.);
-            model_pdf = RooGenericPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"erf"+label+"_"+self.channel+mass_spectrum, "TMath::Exp(%s-%s*%s-%s*%s*%s)"%(rrv_c1_Exp.GetName(),rrv_x.GetName(),rrv_c2_Exp.GetName(), rrv_c3_Exp.GetName(),rrv_x.GetName(),rrv_x.GetName()), RooArgList(rrv_x,rrv_c1_Exp,rrv_c2_Exp,rrv_c3_Exp) );
-
-       ## For mlvj fit -> Pow function can replace exp                                                                                                                                    
-        if in_model_name == "Pow" :
-            rrv_c = RooRealVar("rrv_c_Pow"+label+"_"+self.channel,"rrv_c_Pow"+label+"_"+self.channel, -5, -20, 0);
-            model_pdf = RooPowPdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x, rrv_c );
-
-        ## For mlvj fit -> Pow function can replace exp                                                                                                                                   
-        if in_model_name == "Pow2":
-            rrv_c0 = RooRealVar("rrv_c0_Pow2"+label+"_"+self.channel,"rrv_c0_Pow2"+label+"_"+self.channel, 5, 0, 20);
-            rrv_c1 = RooRealVar("rrv_c1_Pow2"+label+"_"+self.channel,"rrv_c1_Pow2"+label+"_"+self.channel, 0, -5 , 5);
-            model_pdf = RooPow2Pdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum, rrv_x, rrv_c0, rrv_c1 );
-
-        if in_model_name == "Pow3":
-            rrv_c0 = RooRealVar("rrv_c0_Pow3"+label+"_"+self.channel,"rrv_c0_Pow3"+label+"_"+self.channel, 5, 0, 20);
-            rrv_c1 = RooRealVar("rrv_c1_Pow3"+label+"_"+self.channel,"rrv_c1_Pow3"+label+"_"+self.channel, 0, -5 , 5);
-            rrv_c2 = RooRealVar("rrv_c2_Pow3"+label+"_"+self.channel,"rrv_c2_Pow3"+label+"_"+self.channel, 0, -5 , 5);
-            model_pdf = RooPow3Pdf("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum, rrv_x, rrv_c0, rrv_c1, rrv_c2);
-    
-
-        if in_model_name == "Pol_v2":#can replace erf*exp                                                                                                                           
-
-            rrv_p0      = RooRealVar("rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
-            rrv_p1      = RooRealVar("rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
- 
-            model_pdf = RooChebychev("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1));
-
-        if in_model_name == "Pol_v3":#can replace erf*exp                                                                                                                           
-
-            rrv_p0      = RooRealVar("rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
-            rrv_p1      = RooRealVar("rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
-            rrv_p2      = RooRealVar("rrv_p2_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p2_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
- 
-            model_pdf = RooChebychev("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2));
-
-        if in_model_name == "Pol_v4":#can replace erf*exp                                                                                                                           
-
-            rrv_p0      = RooRealVar("rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p0_Pol"+label+"_"+self.channel+mass_spectrum, -0.3, -3, 3);
-            rrv_p1      = RooRealVar("rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p1_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
-            rrv_p2      = RooRealVar("rrv_p2_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p2_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
-            rrv_p3      = RooRealVar("rrv_p3_Pol"+label+"_"+self.channel+mass_spectrum,"rrv_p3_Pol"+label+"_"+self.channel+mass_spectrum, -0.01,-1,1);
- 
-            model_pdf = RooChebychev("model_pdf"+label+"_"+self.channel+mass_spectrum,"model_pdf"+label+"_"+self.channel+mass_spectrum,rrv_x,RooArgList(rrv_p0,rrv_p1,rrv_p2,rrv_p3));
                                            
         ## return the pdf
         getattr(self.workspace4bias_,"import")(model_pdf)
@@ -1067,8 +1258,7 @@ class doBiasStudy_mlvj:
         Nbin     = int(rrv_mass_lvj.getBins());
         rresult_param = rfresult.floatParsFinal();
         nparameters   = rresult_param.getSize();
-        if in_range == "_signal_region":  ChiSquare = model.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.DataError(RooAbsData.SumW2));
-        else :                            ChiSquare = model.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.DataError(RooAbsData.Poisson));
+        ChiSquare = model.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.DataError(RooAbsData.Poisson));
         chi_over_ndf  = ChiSquare.getVal()/(Nbin-nparameters);
 
         
@@ -1447,11 +1637,17 @@ class doBiasStudy_mlvj:
         print "########### Nominal Value ###########";
         rrv_scale_to_lumi            = RooRealVar("rrv_scale_to_lumi"+label+"_"+self.channel,"rrv_scale_to_lumi"+label+"_"+self.channel,(rdataset_sb_lo_mlvj.sumEntries()+rdataset_signal_region_mlvj.sumEntries()+rdataset_sb_hi_mlvj.sumEntries())/(rdataset4bias_sb_lo_mlvj.sumEntries()+rdataset4bias_sb_hi_mlvj.sumEntries()+rdataset4bias_signal_region_mlvj.sumEntries()));
         rrv_scale_to_lumi_sb_lo_mlvj = RooRealVar("rrv_scale_to_lumi"+label+"_"+self.channel+"_sb_lo_mlvj","rrv_scale_to_lumi"+label+"_"+self.channel+"_sb_lo_mlvj",(rdataset_sb_lo_mlvj.sumEntries())/(rdataset4bias_sb_lo_mlvj.sumEntries()));
+        rrv_scale_to_lumi_sb_hi_mlvj = RooRealVar("rrv_scale_to_lumi"+label+"_"+self.channel+"_sb_hi_mlvj","rrv_scale_to_lumi"+label+"_"+self.channel+"_sb_hi_mlvj",(rdataset_sb_hi_mlvj.sumEntries())/(rdataset4bias_sb_hi_mlvj.sumEntries()));
+        rrv_scale_to_lumi_signal_region_mlvj = RooRealVar("rrv_scale_to_lumi"+label+"_"+self.channel+"_signal_region_mlvj","rrv_scale_to_lumi"+label+"_"+self.channel+"_signal_region_mlvj",(rdataset_signal_region_mlvj.sumEntries())/(rdataset4bias_signal_region_mlvj.sumEntries()));
         
         rrv_scale_to_lumi.Print();
         rrv_scale_to_lumi_sb_lo_mlvj.Print();
-        getattr(self.workspace4bias_,"import")(rrv_scale_to_lumi);               
-        getattr(self.workspace4bias_,"import")(rrv_scale_to_lumi_sb_lo_mlvj);               
+        rrv_scale_to_lumi_sb_hi_mlvj.Print();
+        rrv_scale_to_lumi_signal_region_mlvj.Print();
+        getattr(self.workspace4bias_,"import")(rrv_scale_to_lumi);  
+        getattr(self.workspace4bias_,"import")(rrv_scale_to_lumi_sb_lo_mlvj);  
+        getattr(self.workspace4bias_,"import")(rrv_scale_to_lumi_sb_hi_mlvj);               
+        getattr(self.workspace4bias_,"import")(rrv_scale_to_lumi_signal_region_mlvj);               
                               
         getattr(self.workspace4bias_,"import")(rdataset_sb_lo_mlvj); rdataset_sb_lo_mlvj.Print();
         getattr(self.workspace4bias_,"import")(rdataset_signal_region_mlvj); rdataset_signal_region_mlvj.Print();
@@ -1886,50 +2082,40 @@ objName ==objName_before ):
       if self.in_mlvj_min < 500:
        self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0")# to get the shape of m_lvj                                                                                             
 
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfExp_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfExp_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfExp_v2",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfExp_v2",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfExp_v4",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfExp_v4",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfExp_v1",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfExp_v1",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfExpTail",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfExpTail",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfExp_v3",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfExp_v3",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Erf2Exp",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Erf2Exp",1,0,1);
 
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","AtanExp_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","AtanExp_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","AtanExp_v2",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","AtanExp_v2",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","AtanExp_v4",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","AtanExp_v4",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfPow_v1",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfPow_v1",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfPow2_v1",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfPow2_v1",1,0,1); 
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfPow3_v1",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfPow3_v1",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Erf2Pow",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Erf2Pow",1,0,1);
 
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfPow_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfPow_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfPow2_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfPow2_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfPow3_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfPow3_v1",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfChebychev_v2",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfChebychev_v2",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfChebychev_v3",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfChebychev_v3",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfChebychev_v4",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfChebychev_v4",1,0,1);
 
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","AtanPow_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","AtanPow_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","AtanPow2_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","AtanPow2_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","AtanPow3_v1",1,0,1);    
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","AtanPow3_v1",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfBernstein_v3",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfBernstein_v3",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfBernstein_v4",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfBernstein_v4",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfBernstein_v5",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfBernstein_v5",1,0,1);
 
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfPol_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfPol_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfPol_v2",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfPol_v2",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfPol_v3",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfPol_v3",1,0,1);
-
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","AtanPol_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","AtanPol_v1",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","AtanPol_v2",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","AtanPol_v2",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","AtanPol_v3",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","AtanPol_v3",1,0,1);
-
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Keys",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Keys",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Keys",1,0,1);
+#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Keys",1,0,1);
 
       else:
 
@@ -1941,6 +2127,8 @@ objName ==objName_before ):
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ExpTail",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Exp_v3",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Exp_v3",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","2Exp",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","2Exp",1,0,1);
 
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Pow",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Pow",1,0,1);
@@ -1948,13 +2136,26 @@ objName ==objName_before ):
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Pow2",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Pow3",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Pow3",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","2Pow",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","2Pow",1,0,1);
 
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Pol_v2",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Pol_v2",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Pol_v3",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Pol_v3",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Pol_v4",1,0,1);
-       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Pol_v4",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Chebychev_v2",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Chebychev_v2",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Chebychev_v3",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Chebychev_v3",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Chebychev_v4",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Chebychev_v4",1,0,1);
+
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Bernstein_v3",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Bernstein_v3",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Bernstein_v4",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Bernstein_v4",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Bernstein_v5",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Bernstein_v5",1,0,1);
+
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Keys",1,0,1);
+       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Keys",1,0,1);
+
          
      else:
 
