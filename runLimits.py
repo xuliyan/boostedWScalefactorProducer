@@ -27,11 +27,11 @@ parser = OptionParser()
 parser.add_option('-b', action='store_true', dest='noX', default=False,
                   help='no X11 windows')
 
-parser.add_option('--makeCards', action='store_true', dest='makeCards', default=False,
+parser.add_option('--makeCards', action='store_true', dest='makeCards', default=True,
                   help='no X11 windows')
-parser.add_option('--computeLimits', action='store_true', dest='computeLimits', default=False,
+parser.add_option('--computeLimits', action='store_true', dest='computeLimits', default=True,
                   help='no X11 windows')
-parser.add_option('--plotLimits', action='store_true', dest='plotLimits', default=False,
+parser.add_option('--plotLimits', action='store_true', dest='plotLimits', default=True,
                   help='no X11 windows')
 
 # submit jobs to condor
@@ -39,7 +39,9 @@ parser.add_option('--batchMode', action='store_true', dest='batchMode', default=
                   help='no X11 windows')
 
 
-parser.add_option('--channel',action="store",type="string",dest="channel",default="mu")
+parser.add_option('--channel',action="store",type="string",dest="channel",default="em")
+parser.add_option('--systematics',action="store",type="int",dest="systematics",default=1)
+parser.add_option('--saveParam',action="store",type="int",dest="saveParam",default=1)
 parser.add_option('--massPoint',action="store",type="int",dest="massPoint",default=-1)
 parser.add_option('--cPrime',action="store",type="int",dest="cPrime",default=-1)
 parser.add_option('--brNew',action="store",type="int",dest="brNew",default=-1)
@@ -123,8 +125,8 @@ def submitBatchJob( command, fn ):
 def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
     
     
-    SIGCH = "";
-    if options.sigChannel.find("H") >= 0: SIGCH = "_"+options.sigChannel;
+    SIGCH = "_2jet";
+#    if options.sigChannel.find("H") >= 0: SIGCH = "_"+options.sigChannel;
     
     currentDir = os.getcwd();
     
@@ -191,10 +193,10 @@ if __name__ == '__main__':
     ccmhi = [ 700, 850, 950,1100,1200]  
     mjlo  = [  40,  40,  40,  40,  40]  
     mjhi  = [ 130, 130, 130, 130, 130]  
-    mlo   = [ 400, 400, 600, 600, 600]      
-    mhi   = [1000,1000,1400,1400,1400]          
-    shape    = ["ErfPowExp_v1","ErfPowExp_v1","Exp","Exp","Exp"]
-    shapeAlt = [  "ErfPow2_v1",  "ErfPow2_v1","Pow","Pow","Pow"]
+    mlo   = [ 400, 400, 400, 400, 400]      
+    mhi   = [1400,1400,1400,1400,1400]          
+    shape    = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"]
+    shapeAlt = [  "ErfPow2_v1",  "ErfPow2_v1","ErfPow2_v1","ErfPow2_v1","ErfPow2_v1"]
 
     #mass  = [ 600, 800]
     #ccmlo = [ 550, 700]  
@@ -206,8 +208,8 @@ if __name__ == '__main__':
     #shape    = ["ErfPowExp_v1","Exp"]
     #shapeAlt = [  "ErfPow2_v1","Pow"]
     
-    BRnew = [0,1,2,3,4,5];
-    cprime = [1,2,3,4,5,6,7,8,9,10];    
+    BRnew = [0];
+    cprime = [10];    
     
     moreCombineOpts = "";
     
@@ -219,7 +221,7 @@ if __name__ == '__main__':
             print "Directory "+DIR+" already exists...";
             #sys.exit(0);
 
-    if options.computeLimits or options.plotLimits: os.chdir("cards_em");
+    if options.computeLimits or options.plotLimits: os.chdir(DIR);
 
 
     # put in functionality to test just one mass point or just one cprime
@@ -276,14 +278,15 @@ if __name__ == '__main__':
                     if options.batchMode and not fileExists:
                         fn = "fitScript_%s_%03d_%02d_%02d"%(options.channel,mass[i],cprime[j],BRnew[k]);
                         submitBatchJob( command, fn );
-                    if not options.batchMode: 
-                        os.system(command);
+#                    if not options.batchMode: 
+#                        os.system(command);
 #                        print "commented out!"
 
     # =====================================
 
     if options.computeLimits:
 
+        SIGCH="_2jet";
         for i in range(mLo,mHi):
             for j in range(cpLo,cpHi):
                 for k in range(brLo,brHi):
@@ -291,12 +294,20 @@ if __name__ == '__main__':
                     print "--------------------------------------------------";
                     print "--------------------------------------------------";                
                     print "creating card: hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k]);
-                    combineCmmd = "combineCards.py hwwlvj_ggH%03d_el%s_%02d_%02d_unbin.txt hwwlvj_ggH%03d_mu%s_%02d_%02d_unbin.txt > hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k]);
-                    os.system(combineCmmd);
+               #     combineCmmd = "combineCards.py hwwlvj_ggH%03d_el%s_%02d_%02d_unbin.txt hwwlvj_ggH%03d_mu%s_%02d_%02d_unbin.txt > hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k]);
+          #          combineCmmd = "combineCards.py hwwlvj_ggH%03d_el%s_%02d_%02d_unbin.txt > hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k]);                    
+                #    os.system(combineCmmd);
 
                     
                     print "running card: hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k]);
-                    runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 0"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts);                    
+
+                    if options.saveParam == 1:
+                       runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --saveWorkspace -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t 0 --expectSignal=0 "%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts);                                        
+
+                    elif options.systematics == 1:
+                       runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts);                                        
+                    else:
+                       runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -S 0"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts);                    
                     
                     if options.batchMode:
                         fn = "combineScript_%03d%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
@@ -314,8 +325,8 @@ if __name__ == '__main__':
 
     if options.plotLimits:
 
-##        for i in range(mLo,mHi):
-##            for j in range(cpLo,cpHi):
+#     for i in range(mLo,mHi):
+#      for j in range(cpLo,cpHi):
         for j in range(cpHi-1,cpLo-1,-1):
             
             xbins = array('d', [])
@@ -327,7 +338,7 @@ if __name__ == '__main__':
             
             for i in range(mLo,mHi):
 
-                curFile = "higgsCombinehwwlvj_ggH%03d_em_%02d_00_unbin.Asymptotic.mH%03d.root"%(mass[i],cprime[j],mass[i]);
+                curFile = "higgsCombinehwwlvj_ggH%03d_em_2jet_%02d_00_unbin.Asymptotic.mH%03d.root"%(mass[i],cprime[j],mass[i]);
                 curAsymLimits = getAsymLimits(curFile);
                 
                 xbins.append( mass[i] );
@@ -344,7 +355,7 @@ if __name__ == '__main__':
 #                    limitsHist_obs.SetBinContent(i+1,j+1,curAsymLimits[0]);                    
             
             for i in range(mHi-1,mLo-1,-1):
-                curFile = "higgsCombinehwwlvj_ggH%03d_em_%02d_00_unbin.Asymptotic.mH%03d.root"%(mass[i],cprime[j],mass[i]);
+                curFile = "higgsCombinehwwlvj_ggH%03d_em_2jet_%02d_00_unbin.Asymptotic.mH%03d.root"%(mass[i],cprime[j],mass[i]);
                 curAsymLimits = getAsymLimits(curFile);
                 
                 xbins_env.append( mass[i] );                                
@@ -376,15 +387,15 @@ if __name__ == '__main__':
         banner = TLatex(0.25,0.92,("CMS Preliminary, 19.2-19.3 fb^{-1} at #sqrt{s}=8TeV, e+#mu"));
         banner.SetNDC(); banner.SetTextSize(0.028);
         
-        leg = ROOT.TLegend(0.15,0.7,0.85,0.9);
+        leg = ROOT.TLegend(0.65,0.8,0.85,0.9);
         leg.SetFillStyle(0);
         leg.SetBorderSize(0);
         leg.SetNColumns(2);
         for k in range(nCprimes):
             print "k: ",k
-            if k == 0: leg.AddEntry(tGraphs[0],"expected, C' = 1","L")
-            tmplabel = "observed, C' = %1.1f"%( float((11.-cprime[k])/10.) )
-            leg.AddEntry(tGraphs[k*4+1],tmplabel,"L");        
+            if k == 0: leg.AddEntry(tGraphs[0],"expected","L")
+     #       tmplabel = "observed, C' = %1.1f"%( float((11.-cprime[k])/10.) )
+     #       leg.AddEntry(tGraphs[k*4+1],tmplabel,"L");        
                 
                 
         drawColors = [];
@@ -404,19 +415,23 @@ if __name__ == '__main__':
         oneLine.SetLineWidth(3);
 
         can0 = ROOT.TCanvas("can0","can0",800,800);
-        hrl0 = can0.DrawFrame(599,0.5,1001,100.0);
-        hrl0.GetYaxis().SetTitle("#mu' = C' #times #mu");
+        hrl0 = can0.DrawFrame(599,0.5,1001,20.0);
+        hrl0.GetYaxis().SetTitle("#mu");
         hrl0.GetXaxis().SetTitle("mass (GeV)");
         can0.SetGrid();
+
+        tGraphs[3].SetFillStyle(3001);
+        tGraphs[2].SetFillStyle(3001);        
         tGraphs[3].Draw("f");
         tGraphs[2].Draw("f");
-        tGraphs[1].Draw("PL");
+#        tGraphs[1].Draw("PL");
         tGraphs[0].Draw("PL");
         oneLine.Draw("LSAMES");
         leg.Draw();
-        ROOT.gPad.SetLogy();
-        can0.SaveAs("limitFigs/test.eps");
-    
+#        ROOT.gPad.SetLogy();
+        if not os.path.isdir("limitFigs"): os.system("mkdir limitFigs" );
+        if options.systematics == 1:        can0.SaveAs("Limit_with_syst.png");
+        else:                               can0.SaveAs("Limit_no_syst.png");
         can = ROOT.TCanvas("can","can",800,800);
         hrl = can.DrawFrame(599,0.5,1001,100.0);
         hrl.GetYaxis().SetTitle("#mu' = C' #times #mu");
@@ -464,14 +479,14 @@ if __name__ == '__main__':
         
         for j in range(cpLo,cpHi):
             for i in range(mLo,mHi):
-                curFile = "higgsCombinehwwlvj_ggH%03d_em_%02d_00_unbin.Asymptotic.mH%03d.root"%(mass[i],cprime[j],mass[i]);
+                curFile = "higgsCombinehwwlvj_ggH%03d_em_2jet_%02d_00_unbin.Asymptotic.mH%03d.root"%(mass[i],cprime[j],mass[i]);
                 curAsymLimits = getAsymLimits(curFile);
                 limitsHist_exp.SetBinContent(i+1,j+1,curAsymLimits[3]);
                 limitsHist_obs.SetBinContent(i+1,j+1,curAsymLimits[0]);          
 
         for j in range(cpLo,cpHi):
             for i in range(brLo,brHi):
-                curFile = "higgsCombinehwwlvj_ggH%03d_em_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(600,cprime[j],BRnew[i],600);
+                curFile = "higgsCombinehwwlvj_ggH%03d_em_2jet_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(600,cprime[j],BRnew[i],600);
                 curAsymLimits = getAsymLimits(curFile);
                 limitsHist_exp_600_2D.SetBinContent(j+1,i+1,curAsymLimits[3]);
                 limitsHist_obs_600_2D.SetBinContent(j+1,i+1,curAsymLimits[0]);          
