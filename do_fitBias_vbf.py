@@ -1320,40 +1320,21 @@ class doBiasStudy_mlvj:
         rdataset_data_mlvj = self.workspace4bias_.data("rdataset_data%s_%s_mlvj"%(mlvj_region,self.channel))
 
         ## get and fix the minor component shapes in the sb low
-        if self.in_mlvj_min < 500:
 
-         model_VV_backgrounds     = self.get_VV_mlvj_Model("_sb_lo","ErfExp_v1");
-         model_STop_backgrounds   = self.get_STop_mlvj_Model("_sb_lo","ErfExp_v1");
-         model_TTbar_backgrounds  = self.get_TTbar_mlvj_Model("_sb_lo","ErfExp_v1");
-         model_WW_EWK_backgrounds = self.get_WW_EWK_mlvj_Model("_sb_lo","ErfExp_v1");
+        model_VV_backgrounds     = self.get_VV_mlvj_Model("_sb_lo",options.fgen);
+        model_STop_backgrounds   = self.get_STop_mlvj_Model("_sb_lo",options.fgen);
+        model_TTbar_backgrounds  = self.get_TTbar_mlvj_Model("_sb_lo",options.fgen);
+        model_WW_EWK_backgrounds = self.get_WW_EWK_mlvj_Model("_sb_lo",options.fgen);
 
-         number_VV_sb_lo_mlvj      = self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)); ## get the normalization
-         number_TTbar_sb_lo_mlvj   = self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)); ## get the normalization
-         number_STop_sb_lo_mlvj    = self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)); ## get the normalization
-         number_WW_EWK_sb_lo_mlvj  = self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)); ## get the normalization       
+        number_VV_sb_lo_mlvj      = self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)); ## get the normalization
+        number_TTbar_sb_lo_mlvj   = self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)); ## get the normalization
+        number_STop_sb_lo_mlvj    = self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)); ## get the normalization
+        number_WW_EWK_sb_lo_mlvj  = self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)); ## get the normalization       
 
-         self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).Print();
-         self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).Print();
-         self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).Print();
-         self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).Print();
-
-        else:
-
-         model_VV_backgrounds     = self.get_VV_mlvj_Model("_sb_lo","Exp");
-         model_STop_backgrounds   = self.get_STop_mlvj_Model("_sb_lo","Exp");
-         model_TTbar_backgrounds  = self.get_TTbar_mlvj_Model("_sb_lo","Exp");
-         model_WW_EWK_backgrounds = self.get_WW_EWK_mlvj_Model("_sb_lo","Exp");
-
-         number_VV_sb_lo_mlvj      = self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%("Exp",self.channel)); ## get the normalization
-         number_TTbar_sb_lo_mlvj   = self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%("Exp",self.channel)); ## get the normalization
-         number_STop_sb_lo_mlvj    = self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%("Exp",self.channel)); ## get the normalization
-         number_WW_EWK_sb_lo_mlvj  = self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%("Exp",self.channel)); ## get the normalization       
-
-         self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%("Exp",self.channel)).Print();
-         self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%("Exp",self.channel)).Print();
-         self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%("Exp",self.channel)).Print();
-         self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%("Exp",self.channel)).Print();
-
+        self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).Print();
+        self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).Print();
+        self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).Print();
+        self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).Print();
 
         ### Make the Pdf for the WJets
         model_pdf_WJets = self.make_Pdf("%s_sb_lo%s_from_fitting"%(label,mlvj_model), mlvj_model,"_mlvj");
@@ -1376,43 +1357,23 @@ class doBiasStudy_mlvj:
         model_WJets.getParameters(rdataset_data_mlvj).Print("v");
 
         ### data in the sideband plus error from fit
-        if self.in_mlvj_min < 500:
-         rrv_number_data_sb_lo_mlvj = RooRealVar("rrv_number_data_sb_lo%s_%s_mlvj"%(mlvj_model,self.channel),"rrv_number_data_sb_lo%s_%s_mlvj"%(mlvj_model,self.channel),
-                                                  self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).getVal()+
-                                                  self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).getVal()+
-                                                  self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).getVal()+
-                                                  self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).getVal()+
-                                                  self.workspace4bias_.var("rrv_number%s_sb_lo%s_from_fitting_%s_mlvj"%(label,mlvj_model,self.channel)).getVal() );
+        rrv_number_data_sb_lo_mlvj = RooRealVar("rrv_number_data_sb_lo%s_%s_mlvj"%(mlvj_model,self.channel),"rrv_number_data_sb_lo%s_%s_mlvj"%(mlvj_model,self.channel),
+                                                 self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).getVal()+
+                                                 self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).getVal()+
+                                                 self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).getVal()+
+                                                 self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).getVal()+
+                                                 self.workspace4bias_.var("rrv_number%s_sb_lo%s_from_fitting_%s_mlvj"%(label,mlvj_model,self.channel)).getVal() );
 
-         rrv_number_data_sb_lo_mlvj.setError( TMath.Sqrt(self.workspace4bias_.var("rrv_number%s_sb_lo%s_from_fitting_%s_mlvj"%(label,mlvj_model,self.channel)).getError()*
-                                                         self.workspace4bias_.var("rrv_number%s_sb_lo%s_from_fitting_%s_mlvj"%(label,mlvj_model,self.channel)).getError()+
-                                                         self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).getError()*
-                                                         self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).getError()+
-                                                         self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).getError()*
-                                                         self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).getError()+
-                                                         self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).getError()*
-                                                         self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).getError()+
-                                                         self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).getError()*
-                                                         self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%("ErfExp_v1",self.channel)).getError()));
-        else:
-
-         rrv_number_data_sb_lo_mlvj = RooRealVar("rrv_number_data_sb_lo%s_%s_mlvj"%(mlvj_model,self.channel),"rrv_number_data_sb_lo%s_%s_mlvj"%(mlvj_model,self.channel),
-                                                  self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%("Exp",self.channel)).getVal()+
-                                                  self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%("Exp",self.channel)).getVal()+
-                                                  self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%("Exp",self.channel)).getVal()+
-                                                  self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%("Exp",self.channel)).getVal()+
-                                                  self.workspace4bias_.var("rrv_number%s_sb_lo%s_from_fitting_%s_mlvj"%(label,mlvj_model,self.channel)).getVal() );
-
-         rrv_number_data_sb_lo_mlvj.setError( TMath.Sqrt(self.workspace4bias_.var("rrv_number%s_sb_lo%s_from_fitting_%s_mlvj"%(label,mlvj_model,self.channel)).getError()*
-                                                         self.workspace4bias_.var("rrv_number%s_sb_lo%s_from_fitting_%s_mlvj"%(label,mlvj_model,self.channel)).getError()+
-                                                         self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%("Exp",self.channel)).getError()*
-                                                         self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%("Exp",self.channel)).getError()+
-                                                         self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%("Exp",self.channel)).getError()*
-                                                         self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%("Exp",self.channel)).getError()+
-                                                         self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%("Exp",self.channel)).getError()*
-                                                         self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%("Exp",self.channel)).getError()+
-                                                         self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%("Exp",self.channel)).getError()*
-                                                         self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%("Exp",self.channel)).getError()));
+        rrv_number_data_sb_lo_mlvj.setError(TMath.Sqrt(self.workspace4bias_.var("rrv_number%s_sb_lo%s_from_fitting_%s_mlvj"%(label,mlvj_model,self.channel)).getError()*
+                                                       self.workspace4bias_.var("rrv_number%s_sb_lo%s_from_fitting_%s_mlvj"%(label,mlvj_model,self.channel)).getError()+
+                                                       self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).getError()*
+                                                       self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).getError()+
+                                                       self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).getError()*
+                                                       self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).getError()+
+                                                       self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).getError()*
+                                                       self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).getError()+
+                                                       self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).getError()*
+                                                       self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%(options.fgen,self.channel)).getError()));
 
         rrv_number_data_sb_lo_mlvj.Print();
         getattr(self.workspace4bias_,"import")(rrv_number_data_sb_lo_mlvj)
@@ -2099,8 +2060,8 @@ objName ==objName_before ):
      if options.isMC == 1:
 
       if self.in_mlvj_min < 500:
-       self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0")# to get the shape of m_lvj                                                                                             
 
+       self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0")# to get the shape of m_lvj                                                                                             
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfExp_v1",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfExp_v1",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfExpTail",1,0,1);
@@ -2125,13 +2086,6 @@ objName ==objName_before ):
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfChebychev_v3",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfChebychev_v4",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfChebychev_v4",1,0,1);
-
-#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfBernstein_v3",1,0,1);
-#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfBernstein_v3",1,0,1);
-#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfBernstein_v4",1,0,1);
-#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfBernstein_v4",1,0,1);
-#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","ErfBernstein_v5",1,0,1);
-#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","ErfBernstein_v5",1,0,1);
 
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Keys",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Keys",1,0,1);
@@ -2164,13 +2118,6 @@ objName ==objName_before ):
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Chebychev_v3",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Chebychev_v4",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Chebychev_v4",1,0,1);
-
-#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Bernstein_v3",1,0,1);
-#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Bernstein_v3",1,0,1);
-#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Bernstein_v4",1,0,1);
-#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Bernstein_v4",1,0,1);
-#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Bernstein_v5",1,0,1);
-#       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Bernstein_v5",1,0,1);
 
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo","Keys",1,0,1);
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_signal_region","Keys",1,0,1);
@@ -2256,75 +2203,46 @@ objName ==objName_before ):
      self.get_mj_and_mlvj_dataset(self.file_vbfH,"_%s"%(self.vbfhiggs_sample), "jet_mass_pr")# to get the shape of m_lvj
      self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1", 0, 0, 1);
 
-     if self.in_mlvj_min < 500:
-
+     if options.isMC == 0:
       ## get diboson and fit it
       self.get_mj_and_mlvj_dataset(self.file_VV_mc,"_VV", "jet_mass_pr");
-      self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_sb_lo","ErfExp_v1",0,0,1);
+      self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_sb_lo",options.fgen,0,0,1);
  
       ## get SingleTop and fit it
       self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STop")# to get the shape of m_lvj                                                                                                 
-      self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_sb_lo","ErfExp_v1",0,0,1);
+      self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_sb_lo",options.fgen,0,0,1);
 
       ## get TTbar and fit it
       self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbar")# to get the shape of m_lvj                                                                                               
-      self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_sb_lo","ErfExp_v1",0,0,1);
+      self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_sb_lo",options.fgen,0,0,1);
             
       ## get WW EWK and fit it in the sb
       self.get_mj_and_mlvj_dataset(self.file_WW_EWK_mc,"_WW_EWK","jet_mass_pr")# to get the shape of m_lvj                                                                               
-      self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_sb_lo","ErfExp_v1",0,0,1);
+      self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_sb_lo",options.fgen,0,0,1);
 
-      ## get WJets and fit it in the sb
-      self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0","jet_mass_pr")# to get the shape of m_lvj                                                                               
-      self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,0,0,1);
+     ## get WJets and fit it in the sb
+     self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0","jet_mass_pr")# to get the shape of m_lvj                                                                               
+     self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,0,0,1);
 
+     if options.isMC == 0:
+ 
       ## get data in sb and fit it                                                                                                                                              
       self.get_mj_and_mlvj_dataset(self.file_data,"_data", "jet_mass_pr"); ## global fit of data in the sidand fixing non dominant bkg             
       self.fit_mlvj_in_Mj_sideband("_WJets0","_sb_lo",options.fgen,1);
 
-     else: 
-
-      ## get diboson and fit it
-      self.get_mj_and_mlvj_dataset(self.file_VV_mc,"_VV", "jet_mass_pr");
-      self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV","_sb_lo","Exp",0,0,1);
- 
-      ## get SingleTop and fit it
-      self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STop")# to get the shape of m_lvj                                                                                                 
-      self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop","_sb_lo","Exp",0,0,1);
-
-      ## get TTbar and fit it
-      self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbar")# to get the shape of m_lvj                                                                                               
-      self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar","_sb_lo","Exp",0,0,1);
-            
-      ## get WW EWK and fit it in the sb
-      self.get_mj_and_mlvj_dataset(self.file_WW_EWK_mc,"_WW_EWK","jet_mass_pr")# to get the shape of m_lvj                                                                               
-      self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK","_sb_lo","Exp",0,0,1);
-
-      ## get WJets and fit it in the sb
-      self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0","jet_mass_pr")# to get the shape of m_lvj                                                                               
-      self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,0,0,1);
-    
-      ## get data in sb and fit it                                                                                                                                   
-      self.get_mj_and_mlvj_dataset(self.file_data,"_data", "jet_mass_pr"); ## global fit of data in the sidand fixing non dominant bkg             
-      self.fit_mlvj_in_Mj_sideband("_WJets0","_sb_lo",options.fgen,1);
 
      ## fix signal and bkg models that are going to be used in the generation
      self.fix_Model("_%s"%self.ggH_sample,"_signal_region","_mlvj","CB_v1");
      self.fix_Model("_%s"%self.vbfhiggs_sample,"_signal_region","_mlvj","CB_v1");
      self.fix_Model("_WJets0","_sb_lo","_mlvj",options.fgen);
 
-     if self.in_mlvj_min < 500: 
-      self.fix_Model("_TTbar" ,"_sb_lo","_mlvj","ErfExp_v1");
-      self.fix_Model("_STop"  ,"_sb_lo","_mlvj","ErfExp_v1");
-      self.fix_Model("_VV"    ,"_sb_lo","_mlvj","ErfExp_v1") ;
-      self.fix_Model("_WW_EWK","_sb_lo","_mlvj","ErfExp_v1") ;
-     else :
-      self.fix_Model("_TTbar" ,"_sb_lo","_mlvj","Exp");
-      self.fix_Model("_STop"  ,"_sb_lo","_mlvj","Exp");
-      self.fix_Model("_VV"    ,"_sb_lo","_mlvj","Exp") ;
-      self.fix_Model("_WW_EWK","_sb_lo","_mlvj","Exp") ;
- 
-         
+     if options.isMC == 0:
+
+      self.fix_Model("_TTbar" ,"_sb_lo","_mlvj",options.fgen);
+      self.fix_Model("_STop"  ,"_sb_lo","_mlvj",options.fgen);
+      self.fix_Model("_VV"    ,"_sb_lo","_mlvj",options.fgen) ;
+      self.fix_Model("_WW_EWK","_sb_lo","_mlvj",options.fgen) ;
+          
      ### clone the signal shape --> parameter already fixed
      fitted_signal_ggH   = self.workspace4bias_.pdf("model_%s_%s_%s_%s"%(self.ggH_sample,"signal_region",self.channel,"mlvj"));
      fitted_signal_vbfH  = self.workspace4bias_.pdf("model_%s_%s_%s_%s"%(self.vbfhiggs_sample,"signal_region",self.channel,"mlvj"));
@@ -2342,11 +2260,6 @@ objName ==objName_before ):
      rrv_number_signal_signal_fit_ggH.setError(self.workspace4bias_.var("rrv_number_"+self.ggH_sample+"_signal_regionCB_v1_"+self.channel+"_mlvj").getError());
      rrv_number_signal_signal_fit_ggH.Print();
  
-     modified_signal_model_ggH = RooExtendPdf("model_%s_signal_region_fit_%s_mlvj"%(self.ggH_sample,self.channel),
-                                              "model_%s_signal_region_fit_%s_mlvj"%(self.ggH_sample,self.channel),model_signal_ggH,rrv_number_signal_signal_fit_ggH);
-     modified_signal_model_ggH.Print();
-     getattr(self.workspace4bias_,"import")(modified_signal_model_ggH);
-
      ### make the pdf for vbfH signal not in the extend way, cloning the parameter from the fitted value and then keep the absolute number of signal yields free
      constrainslist_signal_vbfH = [];
      model_signal_vbfH = self.make_Pdf("_%s_signal_region_fit"%(self.vbfhiggs_sample),"CB_v1","_mlvj",constrainslist_signal_vbfH,1);
@@ -2359,13 +2272,26 @@ objName ==objName_before ):
      rrv_number_signal_signal_fit_vbfH.setVal(self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+"_signal_regionCB_v1_"+self.channel+"_mlvj").getVal());
      rrv_number_signal_signal_fit_vbfH.setError(self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+"_signal_regionCB_v1_"+self.channel+"_mlvj").getError());
      rrv_number_signal_signal_fit_vbfH.Print();
- 
-     modified_signal_model_vbfH = RooExtendPdf("model_%s_signal_region_fit_%s_mlvj"%(self.vbfhiggs_sample,self.channel),
-                                               "model_%s_signal_region_fit_%s_mlvj"%(self.vbfhiggs_sample,self.channel),model_signal_vbfH,rrv_number_signal_signal_fit_vbfH);
-     modified_signal_model_vbfH.Print();
-     getattr(self.workspace4bias_,"import")(modified_signal_model_vbfH);
 
-     
+     ## total pdf: ggH + vbfH 
+     rrv_fraction_ggH_vbf    = RooRealVar("rrv_fraction_ggH_vbf","rrv_fraction_ggH_vbf",rrv_number_signal_signal_fit_vbfH.getVal()/rrv_number_signal_signal_fit_ggH.getVal());
+     rrv_fraction_ggH_vbf.setConstant(kTRUE);
+     rrv_fraction_ggH_vbf.Print();
+
+     model_modified_signal   = RooAddPdf("model_modified_signal","model_modified_signal",RooArgList(model_signal_vbfH,model_signal_ggH),RooArgList(rrv_fraction_ggH_vbf),1);
+     model_modified_signal.Print();
+     getattr(self.workspace4bias_,"import")(model_modified_signal);
+  
+
+     rrv_number_signal_region_fit_ggH = RooRealVar("rrv_number_signal_region_fit_H","rrv_number_signal_region_fit_H",0,-1e8,1e8);
+     rrv_number_signal_region_fit_ggH.Print();
+
+     model_total_signal = RooExtendPdf("model_higgs_signal_region_fit_%s_mlvj"%(self.channel),
+                                       "model_higgs_signal_region_fit_%s_mlvj"%(self.channel),model_modified_signal,rrv_number_signal_region_fit_ggH);
+
+     model_total_signal.Print();
+     getattr(self.workspace4bias_,"import")(model_total_signal);
+          
      ############### Make the MC analysis --> make the Entended pdf for the bkg
      if options.isMC == 1 :
 
@@ -2377,7 +2303,7 @@ objName ==objName_before ):
       self.workspace4bias_.var("rrv_number_WJets0_sb_lo_fit_"+self.channel+"_mlvj").setVal(self.workspace4bias_.var("rrv_number_WJets0_sb_lo"+options.fgen+"_"+self.channel+"_mlvj").getVal());
 
       ##### Total model for MC
-      model_Total_mc    = RooAddPdf("model_Total_background_mc","model_Total_background_mc",RooArgList(modified_signal_model_vbfH,modified_signal_model_ggH,model_bkg_wjet));
+      model_Total_mc    = RooAddPdf("model_Total_background_mc","model_Total_background_mc",RooArgList(model_total_signal,model_bkg_wjet));
 
       model_Total_mc.Print();
       getattr(self.workspace4bias_,"import")(model_Total_mc);
@@ -2398,8 +2324,8 @@ objName ==objName_before ):
                            RooFit.FitModel(model_Total_mc),
                            RooFit.FitOptions(RooFit.Save(kTRUE),RooFit.SumW2Error(kTRUE),RooFit.Minimizer("Minuit2"),RooFit.Extended(kTRUE)),
                            RooFit.Extended(kTRUE),
-                           RooFit.Silence()
-                          );
+#                           RooFit.Silence()
+      );
 
       mc_wjet.Print();     
       ## create module for chi2 evaluation
@@ -2453,6 +2379,7 @@ objName ==objName_before ):
                   parameters.at(ipar).setError(parlist.at(ipar).getError()) ## copy parameters in order to have the fitted shape
                   
               if TString(parameters.at(ipar).GetName()).Contains("signal_region") and not TString(parameters.at(ipar).GetName()).Contains("number"): continue ; ## skip signal par 
+              if TString(parameters.at(ipar).GetName()).Contains("rrv_fraction_ggH_vbf"): continue ;
              
               if iToy == 0 or len(parameterHisto_wjet)==0 : ## create parameter histo and pull 
 
@@ -2469,39 +2396,35 @@ objName ==objName_before ):
                   parameterHistoError_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_error","",40,0.,math.fabs(parlist.at(ipar).getError()*3)));
                   parameterHistoPull_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_pull","",30,-5,5)); 
                else:
-                parameterHisto_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName(),"",100,-300,300));
-                parameterHisto_fraction_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_fraction","",50,-50,50));
-                parameterHistoError_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_error","",50,0.,math.fabs(parlist.at(ipar).getError()*10)));
-                parameterHistoPull_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_pull","",30,-5,5)); 
+                  parameterHisto_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName(),"",100,-300,300));
+                  parameterHisto_fraction_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_fraction","",50,-50,50));
+                  parameterHistoError_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_error","",50,0.,math.fabs(parlist.at(ipar).getError()*10)));
+                  parameterHistoPull_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_pull","",30,-5,5)); 
                  
-
               if not TString(parlist.at(ipar).GetName()).Contains("signal_region"): ## fill pulls and parameters histo
                parameterHisto_wjet[iparNotConstant].Fill(parlist.at(ipar).getVal());
                parameterHistoError_wjet[iparNotConstant].Fill(parlist.at(ipar).getError());
 
                if not TString(parlist.at(ipar).GetName()).Contains("number") and options.fgen == options.fres:
+                print "parameter name ",parlist.at(ipar).GetName()," value ",parlist.at(ipar).getVal()," error ",parlist.at(ipar).getError()
                 parameterHisto_fraction_wjet[iparNotConstant].Fill(parlist.at(ipar).getVal()/parameters_generated.at(iGenerated).getVal());
                 parameterHistoPull_wjet[iPull].Fill((parlist.at(ipar).getVal()-parameters_generated.at(iGenerated).getVal())/parlist.at(ipar).getError());
                 iPull = iPull +1;
                elif TString(parlist.at(ipar).GetName()).Contains("number"):
+                print "parameter name ",parlist.at(ipar).GetName()," value ",parlist.at(ipar).getVal()," error ",parlist.at(ipar).getError()
                 parameterHistoPull_wjet[iPull].Fill((parlist.at(ipar).getVal()-parlist.find("ngen").getVal())/parlist.at(ipar).getError());
                 parameterHisto_fraction_wjet[iparNotConstant].Fill(parlist.at(ipar).getVal()/parlist.find("ngen").getVal());
                 iPull = iPull +1;                
                iGenerated = iGenerated +1 ;
               else:
-                ### fill with the fraction of the fitted signal events (positive or negative) divided by what is given by mc -> signal strentght in a only bkg generation
-                if TString(parlist.at(ipar).GetName()).Contains("ggH"):  
+                 ### fill with the fraction of the fitted signal events (positive or negative) divided by what is given by mc -> signal strentght in a only bkg generation
+                 print "parameter name ",parlist.at(ipar).GetName()," value ",parlist.at(ipar).getVal()," error ",parlist.at(ipar).getError()
                  parameterHisto_wjet[iparNotConstant].Fill(parlist.at(ipar).getVal());
                  parameterHistoError_wjet[iparNotConstant].Fill(parlist.at(ipar).getError());  
                  parameterHistoPull_wjet[iPull].Fill(parlist.at(ipar).getVal()/parlist.at(ipar).getError());
-                 parameterHisto_fraction_wjet[iparNotConstant].Fill(parlist.at(ipar).getVal()/self.workspace4bias_.var("rrv_number_"+self.ggH_sample+"_signal_regionCB_v1_"+self.channel+"_mlvj").getVal());                  
-                elif TString(parlist.at(ipar).GetName()).Contains("vbfH"):
-                 parameterHisto_wjet[iparNotConstant].Fill(parlist.at(ipar).getVal());
-                 parameterHistoError_wjet[iparNotConstant].Fill(parlist.at(ipar).getError());  
-                 parameterHistoPull_wjet[iPull].Fill(parlist.at(ipar).getVal()/parlist.at(ipar).getError());
-                 parameterHisto_fraction_wjet[iparNotConstant].Fill(parlist.at(ipar).getVal()/self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+"_signal_regionCB_v1_"+self.channel+"_mlvj").getVal());
+                 parameterHisto_fraction_wjet[iparNotConstant].Fill(parlist.at(ipar).getVal()/(self.workspace4bias_.var("rrv_number_"+self.ggH_sample+"_signal_regionCB_v1_"+self.channel+"_mlvj").getVal()+self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+"_signal_regionCB_v1_"+self.channel+"_mlvj").getVal()));                  
 
-                iPull = iPull +1;
+                 iPull = iPull +1;
                     
               iparNotConstant = iparNotConstant+1;
 
@@ -2777,16 +2700,10 @@ objName ==objName_before ):
       ############### Make the Data analysis --> make the Entended pdf for the bkg
       constrainslist_bkg_data = [];
 
-      if self.in_mlvj_min < 500:
-        model_VV_backgrounds     = self.get_VV_mlvj_Model("_sb_lo","ErfExp_v1");
-        model_STop_backgrounds   = self.get_STop_mlvj_Model("_sb_lo","ErfExp_v1");
-        model_TTbar_backgrounds  = self.get_TTbar_mlvj_Model("_sb_lo","ErfExp_v1");
-        model_WW_EWK_backgrounds = self.get_WW_EWK_mlvj_Model("_sb_lo","ErfExp_v1");
-      else: 
-        model_VV_backgrounds     = self.get_VV_mlvj_Model("_sb_lo","Exp");
-        model_STop_backgrounds   = self.get_STop_mlvj_Model("_sb_lo","Exp");
-        model_TTbar_backgrounds  = self.get_TTbar_mlvj_Model("_sb_lo","Exp");
-        model_WW_EWK_backgrounds = self.get_WW_EWK_mlvj_Model("_sb_lo","Exp");
+      model_VV_backgrounds     = self.get_VV_mlvj_Model("_sb_lo",options.fgen);
+      model_STop_backgrounds   = self.get_STop_mlvj_Model("_sb_lo",options.fgen);
+      model_TTbar_backgrounds  = self.get_TTbar_mlvj_Model("_sb_lo",options.fgen);
+      model_WW_EWK_backgrounds = self.get_WW_EWK_mlvj_Model("_sb_lo",options.fgen);
 
       model_bkg_data    = self.make_Model("_data_sb_lo_fit",options.fres,"_mlvj",constrainslist_bkg_data,1); ## basic model used for fit in the toys
       model_bkg_data.Print();
@@ -2795,7 +2712,7 @@ objName ==objName_before ):
       self.workspace4bias_.var("rrv_number_data_sb_lo_fit_"+self.channel+"_mlvj").setVal(self.workspace4bias_.var("rrv_number_WJets0_sb_lo"+options.fgen+"_from_fitting_"+self.channel+"_mlvj").getVal());
 
       ## Add the other bkg component fixed to the total model --> in the extended way
-      model_Total_data = RooAddPdf("model_Total_background_data","model_Total_background_data",RooArgList(modified_signal_model_vbfH,model_bkg_data,model_VV_backgrounds,model_TTbar_backgrounds, model_STop_backgrounds,model_WW_EWK_backgrounds));
+      model_Total_data = RooAddPdf("model_Total_background_data","model_Total_background_data",RooArgList(model_total_signal,model_bkg_data,model_VV_backgrounds,model_TTbar_backgrounds, model_STop_backgrounds,model_WW_EWK_backgrounds));
                                                                                                        
       model_Total_data.Print();
       getattr(self.workspace4bias_,"import")(model_Total_data);
@@ -2873,6 +2790,7 @@ objName ==objName_before ):
               if TString(parameters.at(ipar).GetName()).Contains("_STop_") : continue ;
               if TString(parameters.at(ipar).GetName()).Contains("_TTbar_") : continue ;
               if TString(parameters.at(ipar).GetName()).Contains("_WW_EWK_") : continue ;
+              if TString(parameters.at(ipar).GetName()).Contains("rrv_fraction_ggH_vbf"): continue ;
 
               if iToy == 0 or len(parameterHisto_data)==0 :
 
@@ -2904,33 +2822,21 @@ objName ==objName_before ):
                  parameterHistoPull_data[iPull].Fill((parlist.at(ipar).getVal()-parameters_generated.at(iGenerated).getVal())/parlist.at(ipar).getError());
                  iPull = iPull +1;
                elif TString(parlist.at(ipar).GetName()).Contains("number"):
-                if self.in_mlvj_min < 500:                   
-                 parameterHisto_data[iparNotConstant].Fill(parlist.at(ipar).getVal()+self.workspace4bias_.var("rrv_number_VV_sb_loErfExp_v1_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_TTbar_sb_loErfExp_v1_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_STop_sb_loErfExp_v1_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_WW_EWK_sb_loErfExp_v1_%s_mlvj"%(self.channel)).getVal());
-                 parameterHisto_fraction_data[iparNotConstant].Fill((parlist.at(ipar).getVal()+self.workspace4bias_.var("rrv_number_VV_sb_loErfExp_v1_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_TTbar_sb_loErfExp_v1_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_STop_sb_loErfExp_v1_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_WW_EWK_sb_loErfExp_v1_%s_mlvj"%(self.channel)).getVal())/parlist.find("ngen").getVal());
+                 parameterHisto_data[iparNotConstant].Fill(parlist.at(ipar).getVal()+self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%(options.fres,self.channel)).getVal()+self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%(options.fres,self.channel)).getVal()+self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%(options.fres,self.channel)).getVal()+self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%(options.fres,self.channel)).getVal());
+                 parameterHisto_fraction_data[iparNotConstant].Fill((parlist.at(ipar).getVal()+self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%(options.fres,self.channel)).getVal()+self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%(options.fres,self.channel)).getVal()+self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%(options.fres,self.channel)).getVal()+self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%(options.fres,self.channel)).getVal())/parlist.find("ngen").getVal());
                 
-                 parameterHistoPull_data[iPull].Fill((parlist.at(ipar).getVal()+self.workspace4bias_.var("rrv_number_VV_sb_loErfExp_v1_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_TTbar_sb_loErfExp_v1_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_STop_sb_loErfExp_v1_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_WW_EWK_sb_loErfExp_v1_%s_mlvj"%(self.channel)).getVal()-parlist.find("ngen").getVal())/parlist.at(ipar).getError());
-                else :                   
-                 parameterHisto_data[iparNotConstant].Fill(parlist.at(ipar).getVal()+self.workspace4bias_.var("rrv_number_VV_sb_loExp_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_TTbar_sb_loExp_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_STop_sb_loExp_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_WW_EWK_sb_loExp_%s_mlvj"%(self.channel)).getVal());
-                 parameterHisto_fraction_data[iparNotConstant].Fill((parlist.at(ipar).getVal()+self.workspace4bias_.var("rrv_number_VV_sb_loExp_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_TTbar_sb_loExp_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_STop_sb_loExp_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_WW_EWK_sb_loExp_%s_mlvj"%(self.channel)).getVal())/parlist.find("ngen").getVal());
-                
-                 parameterHistoPull_data[iPull].Fill((parlist.at(ipar).getVal()+self.workspace4bias_.var("rrv_number_VV_sb_loExp_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_TTbar_sb_loExp_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_STop_sb_loExp_%s_mlvj"%(self.channel)).getVal()+self.workspace4bias_.var("rrv_number_WW_EWK_sb_loExp_%s_mlvj"%(self.channel)).getVal()-parlist.find("ngen").getVal())/parlist.at(ipar).getError());
+                 parameterHistoPull_data[iPull].Fill((parlist.at(ipar).getVal()+self.workspace4bias_.var("rrv_number_VV_sb_lo%s_%s_mlvj"%(options.fres,self.channel)).getVal()+self.workspace4bias_.var("rrv_number_TTbar_sb_lo%s_%s_mlvj"%(options.fres,self.channel)).getVal()+self.workspace4bias_.var("rrv_number_STop_sb_lo%s_%s_mlvj"%(options.fres,self.channel)).getVal()+self.workspace4bias_.var("rrv_number_WW_EWK_sb_lo%s_%s_mlvj"%(options.fres,self.channel)).getVal()-parlist.find("ngen").getVal())/parlist.at(ipar).getError());
 
-                iPull = iPull +1;                
+                 iPull = iPull +1;                
                iGenerated = iGenerated +1 ;
               else:
-                ### fill with the fraction of the fitted signal events (positive or negative) divided by what is given by mc -> signal strentght in a only bkg generation  
-                if TString(parlist.at(ipar).GetName()).Contains("ggH"):  
+                 ### fill with the fraction of the fitted signal events (positive or negative) divided by what is given by mc -> signal strentght in a only bkg generation  
                  parameterHisto_data[iparNotConstant].Fill(parlist.at(ipar).getVal());
                  parameterHistoError_data[iparNotConstant].Fill(parlist.at(ipar).getError());  
                  parameterHistoPull_data[iPull].Fill(parlist.at(ipar).getVal()/parlist.at(ipar).getError());
-                 parameterHisto_fraction_data[iparNotConstant].Fill(parlist.at(ipar).getVal()/self.workspace4bias_.var("rrv_number_"+self.ggH_sample+"_signal_regionCB_v1_"+self.channel+"_mlvj").getVal());                  
-                elif TString(parlist.at(ipar).GetName()).Contains("vbfH"):
-                 parameterHisto_data[iparNotConstant].Fill(parlist.at(ipar).getVal());
-                 parameterHistoError_data[iparNotConstant].Fill(parlist.at(ipar).getError());  
-                 parameterHistoPull_data[iPull].Fill(parlist.at(ipar).getVal()/parlist.at(ipar).getError());
-                 parameterHisto_fraction_data[iparNotConstant].Fill(parlist.at(ipar).getVal()/self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+"_signal_regionCB_v1_"+self.channel+"_mlvj").getVal());
-
-                iPull = iPull +1;
+                 parameterHisto_fraction_data[iparNotConstant].Fill(parlist.at(ipar).getVal()/(self.workspace4bias_.var("rrv_number_"+self.ggH_sample+"_signal_regionCB_v1_"+self.channel+"_mlvj").getVal()+self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+"_signal_regionCB_v1_"+self.channel+"_mlvj").getVal()));             
+ 
+                 iPull = iPull +1;
                     
               iparNotConstant = iparNotConstant+1;
 
@@ -2939,7 +2845,7 @@ objName ==objName_before ):
              nLLdistribution_data.append(ROOT.TH1F("nLLdistribution_data","",50,math.fabs(parlist.find("NLL").getVal())*0.3,math.fabs(parlist.find("NLL").getVal())*2));
              
          if len(chi2distribution_data)==0 and parlist.find("chi2red"):
-             chi2distribution_data.append(ROOT.TH1F("chi2distribution_data","",50,0.,parlist.find("chi2red").getVal()*5));
+             chi2distribution_data.append(ROOT.TH1F("chi2distribution_data","",50,0.,5));
 
          if parlist.find("chi2red") :
           chi2distribution_data[0].Fill(parlist.find("chi2red").getVal());
@@ -3213,8 +3119,7 @@ objName ==objName_before ):
         
        canvas_chi2_data_frame[0].SaveAs("plots_%s_%s_%s_g1/m_lvj_fitting_%s_%s/toys/%s.pdf"%(options.additioninformation, self.channel,self.wtagger_label,options.fgen,options.fres,canvas_chi2_data_frame[0].GetName()));
        canvas_chi2_data_frame[0].SaveAs("plots_%s_%s_%s_g1/m_lvj_fitting_%s_%s/toys/%s.png"%(options.additioninformation, self.channel,self.wtagger_label,options.fgen,options.fres,canvas_chi2_data_frame[0].GetName()));
-           
-
+ 
 #### Main code     
 if __name__ == "__main__":
 
