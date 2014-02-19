@@ -2541,7 +2541,7 @@ objName ==objName_before ):
        parameterHisto_wjet[ipar].GetXaxis().SetLabelSize(0.035);
        parameterHisto_wjet[ipar].GetYaxis().SetLabelSize(0.035);
        parameterHisto_wjet[ipar].GetXaxis().SetTitle(parameterHisto_wjet[ipar].GetName());
-       Gaussian = ROOT.TF1("Gaussian_par_%d"%ipar,"gaus",parameterHisto_wjet[ipar].GetXaxis().GetXmin(),parameterHisto_wjet[ipar].GetXaxis().GetXmax());
+       Gaussian = ROOT.TF1("Gaussian_par_%s"%(parameterHisto_wjet[ipar].GetName()),"gaus",parameterHisto_wjet[ipar].GetXaxis().GetXmin(),parameterHisto_wjet[ipar].GetXaxis().GetXmax());
        Gaussian.SetLineColor(kBlue);
        Gaussian.SetLineWidth(2);
        parameterHisto_wjet[ipar].Fit(Gaussian,"MSQ");
@@ -2570,7 +2570,7 @@ objName ==objName_before ):
        parameterHisto_fraction_wjet[ipar].GetXaxis().SetLabelSize(0.035);
        parameterHisto_fraction_wjet[ipar].GetYaxis().SetLabelSize(0.035);
        parameterHisto_fraction_wjet[ipar].GetXaxis().SetTitle(parameterHisto_fraction_wjet[ipar].GetName());
-       Gaussian = ROOT.TF1("Gaussian_par_fraction%d"%ipar,"gaus",parameterHisto_fraction_wjet[ipar].GetXaxis().GetXmin(),parameterHisto_fraction_wjet[ipar].GetXaxis().GetXmax());
+       Gaussian = ROOT.TF1("Gaussian_par_fraction%s"%(parameterHisto_fraction_wjet[ipar].GetName()),"gaus",parameterHisto_fraction_wjet[ipar].GetXaxis().GetXmin(),parameterHisto_fraction_wjet[ipar].GetXaxis().GetXmax());
        Gaussian.SetLineColor(kBlue);
        Gaussian.SetLineWidth(2);
        parameterHisto_fraction_wjet[ipar].Fit(Gaussian,"MSQ");
@@ -2596,7 +2596,7 @@ objName ==objName_before ):
        parameterHistoError_wjet[ipar].GetXaxis().SetLabelSize(0.035);
        parameterHistoError_wjet[ipar].GetYaxis().SetLabelSize(0.035);
        parameterHistoError_wjet[ipar].GetXaxis().SetTitle(parameterHistoError_wjet[ipar].GetName());
-       Gaussian = ROOT.TF1("Gaussian_error_%d"%ipar,"gaus",parameterHistoError_wjet[ipar].GetXaxis().GetXmin(),parameterHistoError_wjet[ipar].GetXaxis().GetXmax());
+       Gaussian = ROOT.TF1("Gaussian_error_%s"%(parameterHistoError_wjet[ipar].GetName()),"gaus",parameterHistoError_wjet[ipar].GetXaxis().GetXmin(),parameterHistoError_wjet[ipar].GetXaxis().GetXmax());
        Gaussian.SetLineColor(kBlue);
        Gaussian.SetLineWidth(2);
        parameterHistoError_wjet[ipar].Fit(Gaussian,"MSQ");
@@ -2620,7 +2620,7 @@ objName ==objName_before ):
        parameterHistoPull_wjet[ipar].GetXaxis().SetLabelSize(0.035);
        parameterHistoPull_wjet[ipar].GetYaxis().SetLabelSize(0.035);
        parameterHistoPull_wjet[ipar].GetXaxis().SetTitle(parameterHistoPull_wjet[ipar].GetName());
-       Gaussian = ROOT.TF1("Gaussian_pull_%d"%ipar,"gaus",-5,5);
+       Gaussian = ROOT.TF1("Gaussian_pull_%s"%(parameterHistoPull_wjet[ipar].GetName()),"gaus",-5,5);
        Gaussian.SetLineColor(kBlue);
        Gaussian.SetLineWidth(2);
        parameterHistoPull_wjet[ipar].Fit(Gaussian,"MSQ");
@@ -2970,7 +2970,7 @@ objName ==objName_before ):
        parameterHisto_data[ipar].GetXaxis().SetLabelSize(0.035);
        parameterHisto_data[ipar].GetYaxis().SetLabelSize(0.035);
        parameterHisto_data[ipar].GetXaxis().SetTitle(parameterHisto_data[ipar].GetName());
-       Gaussian = ROOT.TF1("Gaussian_par_%d"%ipar,"gaus",parameterHisto_data[ipar].GetXaxis().GetXmin(),parameterHisto_data[ipar].GetXaxis().GetXmax());
+       Gaussian = ROOT.TF1("Gaussian_par_%s"%(parameterHisto_data[ipar].GetName()),"gaus",parameterHisto_data[ipar].GetXaxis().GetXmin(),parameterHisto_data[ipar].GetXaxis().GetXmax());
        Gaussian.SetLineColor(kBlue);
        Gaussian.SetLineWidth(2);
        parameterHisto_data[ipar].Fit(Gaussian,"MSQ");
@@ -2999,7 +2999,7 @@ objName ==objName_before ):
        parameterHisto_fraction_data[ipar].GetXaxis().SetLabelSize(0.035);
        parameterHisto_fraction_data[ipar].GetYaxis().SetLabelSize(0.035);
        parameterHisto_fraction_data[ipar].GetXaxis().SetTitle(parameterHisto_fraction_data[ipar].GetName());
-       Gaussian = ROOT.TF1("Gaussian%d"%ipar,"gaus",parameterHisto_fraction_data[ipar].GetXaxis().GetXmin(),parameterHisto_fraction_data[ipar].GetXaxis().GetXmax());
+       Gaussian = ROOT.TF1("Gaussian_%s"%(parameterHisto_fraction_data[ipar].GetName()),"gaus",parameterHisto_fraction_data[ipar].GetXaxis().GetXmin(),parameterHisto_fraction_data[ipar].GetXaxis().GetXmax());
        Gaussian.SetLineColor(kBlue);
        Gaussian.SetLineWidth(2);
        parameterHisto_fraction_data[ipar].Fit(Gaussian,"MSQ");
@@ -3025,7 +3025,7 @@ objName ==objName_before ):
        parameterHistoError_data[ipar].GetXaxis().SetLabelSize(0.035);
        parameterHistoError_data[ipar].GetYaxis().SetLabelSize(0.035);
        parameterHistoError_data[ipar].GetXaxis().SetTitle(parameterHistoError_data[ipar].GetName());
-       Gaussian = ROOT.TF1("Gaussian%d"%ipar,"gaus",parameterHistoError_data[ipar].GetXaxis().GetXmin(),parameterHistoError_data[ipar].GetXaxis().GetXmax());
+       Gaussian = ROOT.TF1("Gaussian_%s"%(parameterHistoError_data[ipar].GetName()),"gaus",parameterHistoError_data[ipar].GetXaxis().GetXmin(),parameterHistoError_data[ipar].GetXaxis().GetXmax());
        Gaussian.SetLineColor(kBlue);
        Gaussian.SetLineWidth(2);
        parameterHistoError_data[ipar].Fit(Gaussian,"MSQ");
@@ -3050,7 +3050,7 @@ objName ==objName_before ):
        parameterHistoPull_data[ipar].GetXaxis().SetLabelSize(0.035);
        parameterHistoPull_data[ipar].GetYaxis().SetLabelSize(0.035);
        parameterHistoPull_data[ipar].GetXaxis().SetTitle(parameterHistoPull_data[ipar].GetName());
-       Gaussian = ROOT.TF1("Gaussian_pull_%d"%ipar,"gaus",-5,5);
+       Gaussian = ROOT.TF1("Gaussian_pull_%s"%(parameterHistoPull_data[ipar].GetName()),"gaus",-5,5);
        Gaussian.SetLineColor(kBlue);
        Gaussian.SetLineWidth(2);
        parameterHistoPull_data[ipar].Fit(Gaussian,"MSQ");
