@@ -73,8 +73,21 @@ else:
 
 if options.biasStudy:
 
- shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
- shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
+ if not options.turnOnAnalysis:
+
+#  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
+  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
+  shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
+#  shape_fit = ["Pow","Pow","Pow","Pow","Pow"]
+
+ else:
+
+#  shape_gen = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"]    
+  shape_fit = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"]
+  shape_gen = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"]    
+#  shape_fit = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"]
+
+
  nexp      = [1000,1000,1000,1000,1000]
  isMC      = [0,0,0,0,0]
 
@@ -316,8 +329,8 @@ if __name__ == '__main__':
             print "--------------------------------------------------";                
             print "--------------------------------------------------";  
 
-            runCmmd = "python do_fitBias_vbf.py ggH%03d %03d %03d %03d %03d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel);             
-            print runCmmd ;
+            command = "python do_fitBias_vbf.py ggH%03d %03d %03d %03d %03d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd());             
+            print command ;
             if options.batchMode:
               fn = "biasScript_ggH%03d_%s_%s"%(mass[i],shape_gen[i],shape_fit[i]);
               submitBatchJob( command, fn );
