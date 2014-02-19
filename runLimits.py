@@ -75,7 +75,7 @@ if options.biasStudy:
 
  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
- nexp      = [500,500,500,500,500]
+ nexp      = [1000,1000,1000,1000,1000]
  isMC      = [0,0,0,0,0]
 
 BRnew  = [0];
@@ -138,7 +138,7 @@ def submitBatchJob( command, fn ):
  condorScript.write("\n"+"Executable = "+fn+".sh")
  condorScript.write("\n"+'Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000')
  condorScript.write("\n"+'Should_Transfer_Files = YES')
- condorScript.write("\n"+'Transfer_Input_Files = doFit_class.py')    
+ condorScript.write("\n"+'Transfer_Input_Files = doFit_class.py, BiasStudy/do_fitBias_vbf.py')    
  condorScript.write("\n"+'WhenToTransferOutput  = ON_EXIT_OR_EVICT')
  condorScript.write("\n"+'Output = out_$(Cluster).stdout')
  condorScript.write("\n"+'Error  = out_$(Cluster).stderr')
