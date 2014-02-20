@@ -2390,20 +2390,20 @@ objName ==objName_before ):
 
                if not TString(parlist.at(ipar).GetName()).Contains("signal_region"):
                  if not TString(parlist.at(ipar).GetName()).Contains("number") :  
-                  parameterHisto_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName(),"",75,-math.fabs(parlist.at(ipar).getVal()*3),math.fabs(parlist.at(ipar).getVal()*3)));
+                  parameterHisto_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName(),"",75,-math.fabs(parlist.at(ipar).getVal()*5),math.fabs(parlist.at(ipar).getVal()*5)));
                   parameterHisto_fraction_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_fraction","",50,-50,50));
                   parameterHistoError_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_error","",40,0.,math.fabs(parlist.at(ipar).getError()*3)));
                   if options.fgen == options.fres :
                    parameterHistoPull_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_pull","",30,-5,5));
                  else : 
-                  parameterHisto_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName(),"",50,math.fabs(parlist.at(ipar).getVal())/3,math.fabs(parlist.at(ipar).getVal())*3));
+                  parameterHisto_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName(),"",75,math.fabs(parlist.at(ipar).getVal())/3,math.fabs(parlist.at(ipar).getVal())*3));
                   parameterHisto_fraction_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_fraction","",50,-50,50));
                   parameterHistoError_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_error","",40,0.,math.fabs(parlist.at(ipar).getError()*3)));
                   parameterHistoPull_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_pull","",30,-5,5)); 
                else:
-                  parameterHisto_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName(),"",100,-300,300));
+                  parameterHisto_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName(),"",100,-50,50));
                   parameterHisto_fraction_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_fraction","",50,-50,50));
-                  parameterHistoError_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_error","",50,0.,math.fabs(parlist.at(ipar).getError()*10)));
+                  parameterHistoError_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_error","",50,0.,math.fabs(parlist.at(ipar).getError()*3)));
                   parameterHistoPull_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_pull","",30,-5,5)); 
                  
               if not TString(parlist.at(ipar).GetName()).Contains("signal_region"): ## fill pulls and parameters histo
@@ -2435,7 +2435,7 @@ objName ==objName_before ):
 
          ## fill chi2, NNLL
          if len(chi2distribution_wjet)==0 and parlist.find("chi2red"):
-          chi2distribution_wjet.append(ROOT.TH1F("chi2distribution_wjet","",40,0.,math.fabs(parlist.find("chi2red").getVal())*4));
+          chi2distribution_wjet.append(ROOT.TH1F("chi2distribution_wjet","",30,0.,3));
          if len(nLLdistribution_wjet)==0 and parlist.find("NLL"):
           nLLdistribution_wjet.append(ROOT.TH1F("nLLdistribution_wjet","",40,math.fabs(parlist.find("NLL").getVal())*0.5,math.fabs(parlist.find("NLL").getVal())*2));
 
@@ -2472,7 +2472,7 @@ objName ==objName_before ):
         wjet_binned   = generatedData_wjet[iObj].binnedClone(); ## binned cloning of the unbinned dataset
         ChiSquare = fittedPdf_wjet[iObj].createChi2(wjet_binned,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE)); ## create the chi2
         if len(chi2distribution_wjet_frame) ==0:
-         chi2distribution_wjet_frame.append(ROOT.TH1F("chi2distribution_wjet_frame","",50,(ChiSquare.getVal()/(self.workspace4bias_.var("rrv_mass_lvj").getBins()-parameters.getSize())*0.5),(ChiSquare.getVal()/(self.workspace4bias_.var("rrv_mass_lvj").getBins()-parameters.getSize())*4)));
+         chi2distribution_wjet_frame.append(ROOT.TH1F("chi2distribution_wjet_frame",""30,0,30));
          
         chi2distribution_wjet_frame[0].Fill(ChiSquare.getVal()/(self.workspace4bias_.var("rrv_mass_lvj").getBins()-parameters.getSize()));
 
@@ -2810,20 +2810,20 @@ objName ==objName_before ):
 
                if not TString(parlist.at(ipar).GetName()).Contains("signal_region"):
                  if not TString(parlist.at(ipar).GetName()).Contains("number") :    
-                  parameterHisto_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data","",75,-math.fabs(parlist.at(ipar).getVal()*2),math.fabs(parlist.at(ipar).getVal()*2)));
+                  parameterHisto_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data","",50,-math.fabs(parlist.at(ipar).getVal()*2),math.fabs(parlist.at(ipar).getVal()*2)));
                   parameterHisto_fraction_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_fraction","",50,-50,50));
                   parameterHistoError_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_error","",45,0.,math.fabs(parlist.at(ipar).getError()*2)));
                   if options.fgen == options.fres :
                    parameterHistoPull_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_pull","",40,-5,5));
                  else : 
-                  parameterHisto_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data","",50,math.fabs(parlist.at(ipar).getVal())/2,math.fabs(parlist.at(ipar).getVal())*2));
+                  parameterHisto_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data","",50,0.,math.fabs(parlist.at(ipar).getVal())*2));
                   parameterHisto_fraction_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_fraction","",50,-50,50));
                   parameterHistoError_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_error","",100,0.,math.fabs(parlist.at(ipar).getError()*2)));
                   parameterHistoPull_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_pull","",40,-5,5)); 
                else:
                 parameterHisto_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data","",50,-50,50));
                 parameterHisto_fraction_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_fraction","",500,-50,50));
-                parameterHistoError_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_error","",45,0.,math.fabs(parlist.at(ipar).getError()*10)));
+                parameterHistoError_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_error","",45,0.,math.fabs(parlist.at(ipar).getError()*2)));
                 parameterHistoPull_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_pull","",40,-5,5)); 
                  
               if not TString(parlist.at(ipar).GetName()).Contains("signal_region"): ## fill pulls and parameters histo
@@ -2856,10 +2856,10 @@ objName ==objName_before ):
 
          ## fill chi2, NNLL
          if len(nLLdistribution_data)==0 and parlist.find("NLL"):
-             nLLdistribution_data.append(ROOT.TH1F("nLLdistribution_data","",50,math.fabs(parlist.find("NLL").getVal())*0.3,math.fabs(parlist.find("NLL").getVal())*2));
+            nLLdistribution_data.append(ROOT.TH1F("nLLdistribution_data,"",40,math.fabs(parlist.find("NLL").getVal())*0.5,math.fabs(parlist.find("NLL").getVal())*2));
              
          if len(chi2distribution_data)==0 and parlist.find("chi2red"):
-             chi2distribution_data.append(ROOT.TH1F("chi2distribution_data","",50,0.,5));
+            chi2distribution_data.append(ROOT.TH1F("chi2distribution_data","",30,0.,3));
 
          if parlist.find("chi2red") :
           chi2distribution_data[0].Fill(parlist.find("chi2red").getVal());
@@ -2893,7 +2893,7 @@ objName ==objName_before ):
         data_binned   = generatedData_data[iObj].binnedClone();
         ChiSquare = fittedPdf_data[iObj].createChi2(data_binned,RooFit.Extended(kTRUE),RooFit.SumW2Error(kFALSE));
         if len (chi2distribution_data_frame) ==0:
-         chi2distribution_data_frame.append(ROOT.TH1F("chi2distribution_data_frame","",35,(ChiSquare.getVal()/(self.workspace4bias_.var("rrv_mass_lvj").getBins()-parameters.getSize())*0.5),(ChiSquare.getVal()/(self.workspace4bias_.var("rrv_mass_lvj").getBins()-parameters.getSize())*2)));
+         chi2distribution_data_frame.append(ROOT.TH1F("chi2distribution_data_frame","",30,0,3));
          
         chi2distribution_data_frame[0].Fill(ChiSquare.getVal()/(self.workspace4bias_.var("rrv_mass_lvj").getBins()-parameters.getSize()));
         
