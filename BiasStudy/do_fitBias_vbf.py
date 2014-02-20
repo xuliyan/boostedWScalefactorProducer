@@ -2472,7 +2472,7 @@ objName ==objName_before ):
         wjet_binned   = generatedData_wjet[iObj].binnedClone(); ## binned cloning of the unbinned dataset
         ChiSquare = fittedPdf_wjet[iObj].createChi2(wjet_binned,RooFit.Extended(kTRUE),RooFit.SumW2Error(kTRUE)); ## create the chi2
         if len(chi2distribution_wjet_frame) ==0:
-         chi2distribution_wjet_frame.append(ROOT.TH1F("chi2distribution_wjet_frame",""30,0,30));
+         chi2distribution_wjet_frame.append(ROOT.TH1F("chi2distribution_wjet_frame","",30,0,30));
          
         chi2distribution_wjet_frame[0].Fill(ChiSquare.getVal()/(self.workspace4bias_.var("rrv_mass_lvj").getBins()-parameters.getSize()));
 
@@ -2856,7 +2856,7 @@ objName ==objName_before ):
 
          ## fill chi2, NNLL
          if len(nLLdistribution_data)==0 and parlist.find("NLL"):
-            nLLdistribution_data.append(ROOT.TH1F("nLLdistribution_data,"",40,math.fabs(parlist.find("NLL").getVal())*0.5,math.fabs(parlist.find("NLL").getVal())*2));
+            nLLdistribution_data.append(ROOT.TH1F("nLLdistribution_data","",40,math.fabs(parlist.find("NLL").getVal())*0.5,math.fabs(parlist.find("NLL").getVal())*2));
              
          if len(chi2distribution_data)==0 and parlist.find("chi2red"):
             chi2distribution_data.append(ROOT.TH1F("chi2distribution_data","",30,0.,3));
