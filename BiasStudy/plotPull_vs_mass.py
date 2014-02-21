@@ -28,6 +28,7 @@ parser.add_option('-r','--fres',      help='function to fit toys (Exp,ExpTail,Po
 (options, args) = parser.parse_args()
 
 ####### mass vector #############
+mass = [600]
 mass = [600,700,800,900,1000]
 
 ####### plot style ##############
@@ -83,28 +84,33 @@ if __name__ == "__main__":
   graph_2 = ROOT.TGraphErrors();
 
   ## loop and fill the histograms
+  for imass in range(len(mass)):
 
-  for ifile in range(len(vector_root_file)):
+   masspoint = -1 ;
+   ifilePos  = -1 ;
+  
+   for ifile in range(len(vector_root_file)):
+    if TString(vector_root_file[ifile].GetName()).Contains("%s"%(mass[imass])):      
+       masspoint = mass[imass];
+       ifilePos = ifile ;
+       break; 
 
    vector_root_file[ifile].cd();
 
+   if masspoint == -1 or ifilePos == -1 : continue;
+ 
    if options.isMC == 0: 
 
-    histo_pull_data_wjet    = vector_root_file[ifile].Get("rrv_number_data_sb_lo_fit_%s_mlvj_data_pull"%(options.channel));
-    gaussian_pull_data_wjet = vector_root_file[ifile].Get("Gaussian_pull_rrv_number_data_sb_lo_fit_%s_mlvj_data_pull"%(options.channel)); 
-    histo_pull_signal       = vector_root_file[ifile].Get("rrv_number_signal_region_fit_H_data_pull");
-    gaussian_pull_signal    = vector_root_file[ifile].Get("Gaussian_pull_rrv_number_signal_region_fit_H_data_pull"); 
+    histo_pull_data_wjet    = vector_root_file[ifilePos].Get("rrv_number_data_sb_lo_fit_%s_mlvj_data_pull"%(options.channel));
+    gaussian_pull_data_wjet = vector_root_file[ifilePos].Get("Gaussian_pull_rrv_number_data_sb_lo_fit_%s_mlvj_data_pull"%(options.channel)); 
+    histo_pull_signal       = vector_root_file[ifilePos].Get("rrv_number_signal_region_fit_H_data_pull");
+    gaussian_pull_signal    = vector_root_file[ifilePos].Get("Gaussian_pull_rrv_number_signal_region_fit_H_data_pull"); 
    else:  
-    histo_pull_data_wjet    = vector_root_file[ifile].Get("rrv_number_WJets0_sb_lo_fit_%s_mlvj_data_pull"%(options.channel));
-    gaussian_pull_signal    = vector_root_file[ifile].Get("Gaussian_pull_rrv_number_data_sb_lo_fit_%s_mlvj_data_pull"%(options.channel)); 
-    histo_pull_signal       = vector_root_file[ifile].Get("rrv_number_signal_region_fit_H_data_pull");
-    gaussian_pull_signal    = vector_root_file[ifile].Get("Gaussian_pull_rrv_number_signal_region_fit_H_data_pull"); 
+    histo_pull_data_wjet    = vector_root_file[ifilePos].Get("rrv_number_WJets0_sb_lo_fit_%s_mlvj_data_pull"%(options.channel));
+    gaussian_pull_signal    = vector_root_file[ifilePos].Get("Gaussian_pull_rrv_number_data_sb_lo_fit_%s_mlvj_data_pull"%(options.channel)); 
+    histo_pull_signal       = vector_root_file[ifilePos].Get("rrv_number_signal_region_fit_H_data_pull");
+    gaussian_pull_signal    = vector_root_file[ifilePos].Get("Gaussian_pull_rrv_number_signal_region_fit_H_data_pull"); 
 
-   masspoint = 0 ;
-   for imass in range(len(mass)):
-      if TString(vector_root_file[ifile].GetName()).Contains("%s"%(mass[imass])):
-         masspoint = mass[imass];
-         break;
             
    histogram_pull_vs_mass_nback.SetBinContent(imass+1,histo_pull_data_wjet.GetMean());
    histogram_pull_vs_mass_nback.SetBinError(imass+1,histo_pull_data_wjet.GetRMS());
