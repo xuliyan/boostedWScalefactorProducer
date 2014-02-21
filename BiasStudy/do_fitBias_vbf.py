@@ -214,6 +214,10 @@ class doBiasStudy_mlvj:
              self.rrv_wtagger_eff_reweight_forV=RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.93);
              self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
 
+        if options.pseudodata == 1:
+            self.mean_shift = 1.; self.sigma_scale = 1.;
+        else:    
+            self.mean_shift = 1.4; self.sigma_scale = 1.11;
         
         ### create output txt file for the shape test 
         if options.isMC == 1 and options.shapetest == 1:
@@ -1212,16 +1216,16 @@ class doBiasStudy_mlvj:
           
             ## constrain the peak and the width among electron and muon channel to be the same in case of simultaneous fit
             if self.channel=="el":
-                if self.workspace4fit_.var("rrv_mean1_gaus%s_mu"%(label)) and self.workspace4fit_.var("rrv_sigma1_gaus%s_mu"%(label)):
-                    rrv_mean1_gaus = self.workspace4fit_.var("rrv_mean1_gaus%s_mu"%(label));
-                    rrv_sigma1_gaus = self.workspace4fit_.var("rrv_sigma1_gaus%s_mu"%(label));
+                if self.workspace4bias_.var("rrv_mean1_gaus%s_mu"%(label)) and self.workspace4bias_.var("rrv_sigma1_gaus%s_mu"%(label)):
+                    rrv_mean1_gaus = self.workspace4bias_.var("rrv_mean1_gaus%s_mu"%(label));
+                    rrv_sigma1_gaus = self.workspace4bias_.var("rrv_sigma1_gaus%s_mu"%(label));
                 else:
                     rrv_mean1_gaus = RooRealVar("rrv_mean1_gaus"+label+"_"+self.channel,"rrv_mean1_gaus"+label+"_"+self.channel,mean1_tmp, mean1_tmp-4, mean1_tmp+4);
                     rrv_sigma1_gaus = RooRealVar("rrv_sigma1_gaus"+label+"_"+self.channel,"rrv_sigma1_gaus"+label+"_"+self.channel,sigma1_tmp, sigma1_tmp-4,sigma1_tmp+4);
             elif self.channel=="mu" :
-                if self.workspace4fit_.var("rrv_mean1_gaus%s_el"%(label)) and self.workspace4fit_.var("rrv_sigma1_gaus%s_el"%(label)):
-                    rrv_mean1_gaus = self.workspace4fit_.var("rrv_mean1_gaus%s_el"%(label));
-                    rrv_sigma1_gaus = self.workspace4fit_.var("rrv_sigma1_gaus%s_el"%(label));
+                if self.workspace4bias_.var("rrv_mean1_gaus%s_el"%(label)) and self.workspace4bias_.var("rrv_sigma1_gaus%s_el"%(label)):
+                    rrv_mean1_gaus = self.workspace4bias_.var("rrv_mean1_gaus%s_el"%(label));
+                    rrv_sigma1_gaus = self.workspace4bias_.var("rrv_sigma1_gaus%s_el"%(label));
                 else:
                     rrv_mean1_gaus = RooRealVar("rrv_mean1_gaus"+label+"_"+self.channel,"rrv_mean1_gaus"+label+"_"+self.channel,mean1_tmp, mean1_tmp-4, mean1_tmp+4);
                     rrv_sigma1_gaus = RooRealVar("rrv_sigma1_gaus"+label+"_"+self.channel,"rrv_sigma1_gaus"+label+"_"+self.channel,sigma1_tmp, sigma1_tmp-4,sigma1_tmp+4 );
@@ -1465,8 +1469,8 @@ class doBiasStudy_mlvj:
 
         print "############### Fit mj single MC sample",in_file_name," ",label,"  ",in_model_name," ##################"
         ## import variable and dataset
-        rrv_mass_j = self.workspace4fit_.var("rrv_mass_j");
-        rdataset_mj = self.workspace4fit_.data("rdataset4bias"+label+"_"+self.channel+"_mj");
+        rrv_mass_j = self.workspace4bias_.var("rrv_mass_j");
+        rdataset_mj = self.workspace4bias_.data("rdataset4bias"+label+"_"+self.channel+"_mj");
         rdataset_mj.Print();
         
         ## make the extended model
@@ -1477,7 +1481,7 @@ class doBiasStudy_mlvj:
         rfresult.Print();
 
         ## Plot the result
-        mplot = rrv_mass_j.frame(RooFit.Title(label+" fitted by "+in_model_name), RooFit.Bins(int(rrv_mass_j.getBins()/self.narrow_factor)) );
+        mplot = rrv_mass_j.frame(RooFit.Title(label+" fitted by "+in_model_name), RooFit.Bins(int(rrv_mass_j.getBins())));
         rdataset_mj.plotOn( mplot, RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
 
 	## draw the error band for an extend pdf
@@ -1485,7 +1489,7 @@ class doBiasStudy_mlvj:
         ## re-draw the dataset
         rdataset_mj.plotOn( mplot , RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0),RooFit.Name("data"));
         ## draw the function
-        model.plotOn( mplot,RooFit.Name("mode:mc")  );# remove RooFit.VLines() in order to get right pull in the 1st bin
+        model.plotOn( mplot,RooFit.Name("model_mc")  );# remove RooFit.VLines() in order to get right pull in the 1st bin
 
         ## Get the pull
         mplot_pull = self.get_pull(rrv_mass_j, mplot,"data","model_mc");
@@ -1507,7 +1511,7 @@ class doBiasStudy_mlvj:
         mplot_pull.addObject(cs)
 
         parameters_list = model.getParameters(rdataset_mj);
-        self.draw_canvas_with_pull( mplot, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/m_j_fitting%s_%s/"%(options.additioninformation, self.channel,self.PS_model, self.wtagger_label, additioninformation, self.wtagger_label), label+in_file_name, in_model_name)
+        self.draw_canvas_with_pull( mplot, mplot_pull,parameters_list,"plots_%s_%s_%s_g1/m_j_fitting%s_%s/"%(options.additioninformation, self.channel, self.wtagger_label, additioninformation, self.wtagger_label), label+in_file_name, in_model_name);
 
 
         print "####################################################";
@@ -1515,20 +1519,20 @@ class doBiasStudy_mlvj:
         print "####################################################";
 
         #normalize the number of total events to lumi --> correct the number to scale to the lumi
-        self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").setVal(self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").getVal()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal() )
-        self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").setError(self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").getError()*self.workspace4fit_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal() )
+        self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").setVal(self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").getVal()*self.workspace4bias_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal() )
+        self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").setError(self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").getError()*self.workspace4bias_.var("rrv_scale_to_lumi"+label+"_"+self.channel).getVal() )
 
-        self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").Print();
+        self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").Print();
         
         if TString(label).Contains("ggH"):
-            self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").setVal( self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").getVal() )
-            self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").setError(self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").getError() )
-            self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").Print();
+            self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").setVal( self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").getVal() )
+            self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").setError(self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").getError() )
+            self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").Print();
 
         if TString(label).Contains("vbfH"):
-            self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").setVal( self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").getVal() )
-            self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").setError(self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").getError() )
-            self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj").Print();
+            self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").setVal( self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").getVal() )
+            self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").setError(self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").getError() )
+            self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj").Print();
 
         ##### apply the correction of the mean and sigma from the ttbar control sample to the STop, TTbar and VV
         par=parameters_list.createIterator();
@@ -1634,35 +1638,35 @@ class doBiasStudy_mlvj:
         ## fit the two version of pdf for Wjets shape if available
         self.fit_WJetsNormalization_in_Mj_signal_region(label);
 	 
-        rrv_WJets0  = self.workspace4fit_.var("rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel)); ## nominal parametrization for Wjets
+        rrv_WJets0  = self.workspace4bias_.var("rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel)); ## nominal parametrization for Wjets
         rrv_WJets0.Print();
          
-	rrv_STop  = self.workspace4fit_.var("rrv_number_dataset_signal_region_STop_%s_mj"%(self.channel,regionvbf));
+	rrv_STop  = self.workspace4bias_.var("rrv_number_dataset_signal_region_STop_%s_mj"%(self.channel,regionvbf));
         rrv_STop.Print();
 
-        rrv_TTbar = self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbar_%s_mj"%(self.channel));
+        rrv_TTbar = self.workspace4bias_.var("rrv_number_dataset_signal_region_TTbar_%s_mj"%(self.channel));
         rrv_TTbar.Print();
 
-        rrv_WJets  = self.workspace4fit_.var("rrv_number_dataset_signal_region_WJets0_%s_mj"%(self.channel));
+        rrv_WJets  = self.workspace4bias_.var("rrv_number_dataset_signal_region_WJets0_%s_mj"%(self.channel));
         rrv_WJets.Print();
 
-        rrv_VV = self.workspace4fit_.var("rrv_number_dataset_signal_region_VV_%s_mj"%(self.channel));
+        rrv_VV = self.workspace4bias_.var("rrv_number_dataset_signal_region_VV_%s_mj"%(self.channel));
         rrv_VV.Print();
         
-        rrv_WW_EWK  = self.workspace4fit_.var("rrv_number_dataset_signal_region_WW_EWK_%s_mj"%(self.channel));
+        rrv_WW_EWK  = self.workspace4bias_.var("rrv_number_dataset_signal_region_WW_EWK_%s_mj"%(self.channel));
         rrv_WW_EWK.Print();
          
-	rrv_ggH  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%s_%s_mj"%(self.higgs_sample,self.channel))
+	rrv_ggH  = self.workspace4bias_.var("rrv_number_dataset_signal_region_%s_%s_mj"%(self.higgs_sample,self.channel))
         rrv_ggH.Print();
          
-	rrv_vbf  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%s_%s_mj"%(self.vbfhiggs_sample,self.channel))
+	rrv_vbf  = self.workspace4bias_.var("rrv_number_dataset_signal_region_%s_%s_mj"%(self.vbfhiggs_sample,self.channel))
         rrv_vbf.Print();
     
     #### make the mj sideband fit on data ti get the Wjets normaliztion
     def fit_WJetsNormalization_in_Mj_signal_region(self,label):
 
-        print "############### Fit mj Normalization: ",label," ",massscale," relaxed ",relaxed," ##################"
-	rrv_mass_j = self.workspace4fit_.var("rrv_mass_j")
+        print "############### Fit mj Normalization: ",label," ##################"
+	rrv_mass_j = self.workspace4bias_.var("rrv_mass_j")
 	rdataset_data_mj = self.workspace4bias_.data("rdataset_data_%s_mj"%self.channel)
 
 	### Fix TTbar, VV and STop
@@ -1682,44 +1686,44 @@ class doBiasStudy_mlvj:
         ## only two parameters are fix, offset and width while the exp is floating , otherwise if shape different User1 or ErfExp everything is flaoting
 
 	## Total Pdf and fit only in sideband
-        model_data = RooAddPdf("model_data%s_%s_mj%s"%(massscale,self.channel,relaxed),"model_data_%s_mj"%(self.channel),RooArgList(model_WJets,model_VV,model_WW_EWK,model_TTbar,model_STop));
+        model_data = RooAddPdf("model_data_%s_mj"%(self.channel),"model_data_%s_mj"%(self.channel),RooArgList(model_WJets,model_VV,model_WW_EWK,model_TTbar,model_STop));
                 
             
         rfresult = model_data.fitTo( rdataset_data_mj, RooFit.Save(1) , RooFit.Range("sb_lo,sb_hi") ,RooFit.Extended(kTRUE), RooFit.NumCPU(4) );
         rfresult = model_data.fitTo( rdataset_data_mj, RooFit.Save(1) , RooFit.Range("sb_lo,sb_hi") ,RooFit.Extended(kTRUE), RooFit.NumCPU(4), RooFit.Minimizer("Minuit2") );
         rfresult.Print();
 	rfresult.covarianceMatrix().Print();
-        getattr(self.workspace4fit_,"import")(model_data);
+        getattr(self.workspace4bias_,"import")(model_data);
 
 	## Total numver of event --> full propagation of error due to all the background sources coming from the fit
         rrv_number_data_mj = RooRealVar("rrv_number_data_%s_mj"%(self.channel),"rrv_number_data_%s_mj"%(self.channel),
-                                         self.workspace4fit_.var("rrv_number_TTbar_%s_mj"%(self.channel)).getVal()+ ## TTbar
-                                         self.workspace4fit_.var("rrv_number_STop_%s_mj"%(self.channel)).getVal()+  ## STop
-                                         self.workspace4fit_.var("rrv_number_VV_%s_mj"%(self.channel)).getVal()+    ## VV
-                                         self.workspace4fit_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).getVal()+ ## WW_EWK
-                                         self.workspace4fit_.var("rrv_number%s_%s_mj"%(label,self.channel)).getVal());  ## WJets
+                                         self.workspace4bias_.var("rrv_number_TTbar_%s_mj"%(self.channel)).getVal()+ ## TTbar
+                                         self.workspace4bias_.var("rrv_number_STop_%s_mj"%(self.channel)).getVal()+  ## STop
+                                         self.workspace4bias_.var("rrv_number_VV_%s_mj"%(self.channel)).getVal()+    ## VV
+                                         self.workspace4bias_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).getVal()+ ## WW_EWK
+                                         self.workspace4bias_.var("rrv_number%s_%s_mj"%(label,self.channel)).getVal());  ## WJets
 
-        rrv_number_data_mj.setError(TMath.Sqrt(self.workspace4fit_.var("rrv_number_TTbar_%s_mj"%(self.channel)).getError()*
-                                               self.workspace4fit_.var("rrv_number_TTbar_%s_mj"%(self.channel)).getError()+
-                                               self.workspace4fit_.var("rrv_number_STop_%s_mj"%(self.channel)).getError()*
-                                               self.workspace4fit_.var("rrv_number_STop_%s_mj"%(self.channel)).getError()+
-                                               self.workspace4fit_.var("rrv_number_VV_%s_mj"%(self.channel)).getError()*
-                                               self.workspace4fit_.var("rrv_number_VV_%s_mj"%(self.channel)).getError()+
-                                               self.workspace4fit_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).getError()*
-                                               self.workspace4fit_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).getError()+       
-                                               self.workspace4fit_.var("rrv_number%s_%s_mj"%(label,self.channel)).getError()*
-                                               self.workspace4fit_.var("rrv_number%s_%s_mj"%(label,self.channel)).getError()));         
-        getattr(self.workspace4fit_,"import")(rrv_number_data_mj);
+        rrv_number_data_mj.setError(TMath.Sqrt(self.workspace4bias_.var("rrv_number_TTbar_%s_mj"%(self.channel)).getError()*
+                                               self.workspace4bias_.var("rrv_number_TTbar_%s_mj"%(self.channel)).getError()+
+                                               self.workspace4bias_.var("rrv_number_STop_%s_mj"%(self.channel)).getError()*
+                                               self.workspace4bias_.var("rrv_number_STop_%s_mj"%(self.channel)).getError()+
+                                               self.workspace4bias_.var("rrv_number_VV_%s_mj"%(self.channel)).getError()*
+                                               self.workspace4bias_.var("rrv_number_VV_%s_mj"%(self.channel)).getError()+
+                                               self.workspace4bias_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).getError()*
+                                               self.workspace4bias_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).getError()+       
+                                               self.workspace4bias_.var("rrv_number%s_%s_mj"%(label,self.channel)).getError()*
+                                               self.workspace4bias_.var("rrv_number%s_%s_mj"%(label,self.channel)).getError()));         
+        getattr(self.workspace4bias_,"import")(rrv_number_data_mj);
 
-        print self.workspace4fit_.var("rrv_number_TTbar_%s_mj"%(self.channel)).getVal();
-        print self.workspace4fit_.var("rrv_number_STop_%s_mj"%(self.channel)).getVal();
-        print self.workspace4fit_.var("rrv_number_VV_%s_mj"%(self.channel)).getVal();
-        print self.workspace4fit_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).getVal();
-        print self.workspace4fit_.var("rrv_number%s_%s_mj"%(label,self.channel)).getVal();
-        print self.workspace4fit_.var("rrv_number_data_%s_mj"%(self.channel)).getVal();
+        print self.workspace4bias_.var("rrv_number_TTbar_%s_mj"%(self.channel)).getVal();
+        print self.workspace4bias_.var("rrv_number_STop_%s_mj"%(self.channel)).getVal();
+        print self.workspace4bias_.var("rrv_number_VV_%s_mj"%(self.channel)).getVal();
+        print self.workspace4bias_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).getVal();
+        print self.workspace4bias_.var("rrv_number%s_%s_mj"%(label,self.channel)).getVal();
+        print self.workspace4bias_.var("rrv_number_data_%s_mj"%(self.channel)).getVal();
 
         ## draw the plot for the default WJets Shape
-        mplot = rrv_mass_j.frame(RooFit.Title(""), RooFit.Bins(int(rrv_mass_j.getBins()/self.narrow_factor)));
+        mplot = rrv_mass_j.frame(RooFit.Title(""), RooFit.Bins(int(rrv_mass_j.getBins())));
         rdataset_data_mj.plotOn(mplot, RooFit.Name("data_invisible"), RooFit.MarkerSize(1.5),RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0),RooFit.Invisible());
         ## plot solid style
 	if options.ttbarcontrolsample:
@@ -1856,12 +1860,12 @@ class doBiasStudy_mlvj:
          fullInt_val   = fullInt.getVal();
          signalInt_val = signalInt.getVal()/fullInt_val;
          ## take the value from the fit (normalization) and multiply it from the ratio of the integrals
-         rrv_number_TTbar_in_mj_signal_region_from_fitting = RooRealVar("rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel),"rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel),self.workspace4fit_.var("rrv_number%s_%s_mj"%(label,self.channel)).getVal()*signalInt_val);
+         rrv_number_TTbar_in_mj_signal_region_from_fitting = RooRealVar("rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel),"rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel),self.workspace4bias_.var("rrv_number%s_%s_mj"%(label,self.channel)).getVal()*signalInt_val);
 
          #### Error on the normalization --> from a dedicated function taking into account shape uncertainty on the parameters that are floating in the fit)
          rrv_number_TTbar_in_mj_signal_region_from_fitting.setError( Calc_error_extendPdf(rdataset_data_mj, model_TTbar, rfresult,"signal_region") );
          print "########## error on the normaliztion due to shape + norm = %s"%(rrv_number_TTbar_in_mj_signal_region_from_fitting.getError());
-         getattr(self.workspace4fit_,"import")(rrv_number_TTbar_in_mj_signal_region_from_fitting);
+         getattr(self.workspace4bias_,"import")(rrv_number_TTbar_in_mj_signal_region_from_fitting);
          rrv_number_TTbar_in_mj_signal_region_from_fitting.Print();
 
 	else:	
@@ -1870,20 +1874,20 @@ class doBiasStudy_mlvj:
          fullInt_val   = fullInt.getVal();
          signalInt_val = signalInt.getVal()/fullInt_val;
          ## take the value from the fit (normalization) and multiply it from the ratio of the integrals
-         rrv_number_WJets_in_mj_signal_region_from_fitting = RooRealVar("rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel),"rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel),self.workspace4fit_.var("rrv_number%s_%s_mj"%(label,self.channel)).getVal()*signalInt_val);
+         rrv_number_WJets_in_mj_signal_region_from_fitting = RooRealVar("rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel),"rrv_number%s_in_mj_signal_region_from_fitting_%s"%(label,self.channel),self.workspace4bias_.var("rrv_number%s_%s_mj"%(label,self.channel)).getVal()*signalInt_val);
 
          #### Error on the normalization --> from a dedicated function taking into account shape uncertainty on the parameters that are floating in the fit)
          rrv_number_WJets_in_mj_signal_region_from_fitting.setError( Calc_error_extendPdf(rdataset_data_mj, model_WJets, rfresult,"signal_region") );
          print "########## error on the normaliztion due to shape + norm = %s"%(rrv_number_WJets_in_mj_signal_region_from_fitting.getError());
-         getattr(self.workspace4fit_,"import")(rrv_number_WJets_in_mj_signal_region_from_fitting);
+         getattr(self.workspace4bias_,"import")(rrv_number_WJets_in_mj_signal_region_from_fitting);
          rrv_number_WJets_in_mj_signal_region_from_fitting.Print();
 
 
     ##### Counting of the events of each component in the signal region taking the lavel for the model
     def get_mj_normalization_insignalregion(self):
         print "################## get mj normalization ",label," ################## ";
-        rrv_mass_j = self.workspace4fit_.var("rrv_mass_j");
-        model = self.workspace4fit_.pdf("model"+label+"_"+self.channel+"_mj");
+        rrv_mass_j = self.workspace4bias_.var("rrv_mass_j");
+        model = self.workspace4bias_.pdf("model"+label+"_"+self.channel+"_mj");
                                   
 	fullInt   = model.createIntegral(RooArgSet(rrv_mass_j),RooArgSet(rrv_mass_j) );
 	sb_loInt  = model.createIntegral(RooArgSet(rrv_mass_j),RooArgSet(rrv_mass_j),("sb_lo"));
@@ -1896,12 +1900,12 @@ class doBiasStudy_mlvj:
         signalInt_val = signalInt.getVal()/fullInt_val;
 
         print "########### Events Number in MC Dataset: #############"
-        self.workspace4fit_.var("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj").Print();
-        self.workspace4fit_.var("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj").Print();
-        self.workspace4fit_.var("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj").Print();
+        self.workspace4bias_.var("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj").Print();
+        self.workspace4bias_.var("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj").Print();
+        self.workspace4bias_.var("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj").Print();
             
         print "########### Events Number get from fit: ##############"
-        rrv_tmp = self.workspace4fit_.var("rrv_number"+label+"_"+self.channel+"_mj");
+        rrv_tmp = self.workspace4bias_.var("rrv_number"+label+"_"+self.channel+"_mj");
         rrv_tmp.Print();
         
         print "Events Number in sideband_low :%s"%(rrv_tmp.getVal()*sb_loInt_val);
@@ -2152,7 +2156,10 @@ class doBiasStudy_mlvj:
         rrv_mass_j         = self.workspace4bias_.var("rrv_mass_j") 
         rrv_mass_lvj       = self.workspace4bias_.var("rrv_mass_lvj")
         rrv_weight         = RooRealVar("rrv_weight","rrv_weight",0. ,10000000.) 
-        
+         
+	rdataset_mj     = RooDataSet("rdataset"+label+"_"+self.channel+"_mj","rdataset"+label+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+        rdataset4bias_mj = RooDataSet("rdataset4bias"+label+"_"+self.channel+"_mj","rdataset4bias"+label+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+
         #dataset of m_lvj -> before and after vbf cuts -> central object value
         rdataset_sb_lo_mlvj     = RooDataSet("rdataset"+label+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
         rdataset_signal_region_mlvj = RooDataSet("rdataset"+label+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
@@ -2171,7 +2178,9 @@ class doBiasStudy_mlvj:
         combData4bias = RooDataSet("combData4bias"+label+"_"+self.channel,"combData4bias"+label+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
 
         print "N entries: ", treeIn.GetEntries();
-
+        
+	hnum_4region = TH1D("hnum_4region"+label+"_"+self.channel,"hnum_4region"+label+"_"+self.channel,4,-1.5,2.5);# m_j   -1: 
+	
         for i in range(treeIn.GetEntries()):
 
           if i % 100000 == 0: print "iEvent: ",i
@@ -2317,7 +2326,19 @@ class doBiasStudy_mlvj:
              if tmp_jet_mass >= self.mj_sideband_hi_min and tmp_jet_mass < self.mj_sideband_hi_max and isFullVBF >= 2:
                  rdataset_sb_hi_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4bias_sb_hi_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4bias );
-                                                     
+                                     
+	     if isFullVBF >= 2: 
+              rdataset_mj.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+              rdataset4bias_mj.add( RooArgSet( rrv_mass_j ), tmp_event_weight4bias );
+             
+	      if tmp_jet_mass >=self.mj_sideband_lo_min and tmp_jet_mass <self.mj_sideband_lo_max: 
+                  hnum_4region.Fill(-1,tmp_event_weight );
+              if tmp_jet_mass >=self.mj_signal_min and tmp_jet_mass <self.mj_signal_max : 
+                  hnum_4region.Fill(0,tmp_event_weight);
+              if tmp_jet_mass >=self.mj_sideband_hi_min and tmp_jet_mass <self.mj_sideband_hi_max: 
+                  hnum_4region.Fill(1,tmp_event_weight);
+              hnum_4region.Fill(2,tmp_event_weight);
+              
         print "########### Nominal Value ###########";        
         rrv_scale_to_lumi            = RooRealVar("rrv_scale_to_lumi"+label+"_"+self.channel,"rrv_scale_to_lumi"+label+"_"+self.channel,(rdataset_sb_lo_mlvj.sumEntries()+rdataset_signal_region_mlvj.sumEntries()+rdataset_sb_hi_mlvj.sumEntries())/(rdataset4bias_sb_lo_mlvj.sumEntries()+rdataset4bias_sb_hi_mlvj.sumEntries()+rdataset4bias_signal_region_mlvj.sumEntries()));
         rrv_scale_to_lumi.Print();
@@ -2346,7 +2367,20 @@ class doBiasStudy_mlvj:
         getattr(self.workspace4bias_,"import")(rdataset4bias_sb_hi_mlvj); rdataset4bias_sb_hi_mlvj.Print();
         getattr(self.workspace4bias_,"import")(combData); combData.Print();
         getattr(self.workspace4bias_,"import")(combData4bias); combData4bias.Print();
-                
+       
+        print "########### nominal value ###########";
+        rrv_number_dataset_sb_lo_mj = RooRealVar("rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"_"+self.channel+"_mj",hnum_4region.GetBinContent(1));
+        rrv_number_dataset_signal_region_mj = RooRealVar("rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"_"+self.channel+"_mj",hnum_4region.GetBinContent(2));        
+        rrv_number_dataset_sb_hi_mj = RooRealVar("rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"_"+self.channel+"_mj",hnum_4region.GetBinContent(3));        
+
+
+        getattr(self.workspace4bias_,"import")(rdataset_mj); rdataset_mj.Print();
+        getattr(self.workspace4bias_,"import")(rdataset4bias_mj); rdataset4bias_mj.Print();
+        getattr(self.workspace4bias_,"import")(rrv_number_dataset_sb_lo_mj); rrv_number_dataset_sb_lo_mj.Print();
+        getattr(self.workspace4bias_,"import")(rrv_number_dataset_signal_region_mj); rrv_number_dataset_signal_region_mj.Print();
+        getattr(self.workspace4bias_,"import")(rrv_number_dataset_sb_hi_mj); rrv_number_dataset_sb_hi_mj.Print();
+
+       
     ### in order to get the pull
     def get_pull(self, rrv_x, mplot_orig, dataname = "data", pdfname = "model_mc"):
 
@@ -2911,13 +2945,15 @@ objName ==objName_before ):
    
      print"######################## begin the bias analysis ###########################";  
      if fitjetmass == 1: options.mlvjregion = "";
-     
+     if fitjetmass == 1 and options.isMC == 1:
+         print " cannot use MC to perform bias test for the mJ fit -> options not provided" ;
+         return ;
      ## get the signal and fit it     
      self.get_mj_and_mlvj_dataset(self.file_ggH ,"_%s"%(self.ggH_sample),"jet_mass_pr")# to get the shape of m_lvj
      self.get_mj_and_mlvj_dataset(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"jet_mass_pr")# to get the shape of m_lvj
      if fitjetmass:
 	self.fit_mj_single_MC(self.file_ggH,"_%s"%(self.ggH_sample),"2Gaus");
-	self.fit_mj_single_MC(self.file_ggH,"_%s"%(self.ggH_sample),"2Gaus");
+	self.fit_mj_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"2Gaus");
      else:
         self.fit_mlvj_model_single_MC(self.file_ggH,"_%s"%(self.ggH_sample),"_signal_region","CB_v1", 0, 0, 1);
         self.fit_mlvj_model_single_MC(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1", 0, 0, 1);
@@ -2972,7 +3008,7 @@ objName ==objName_before ):
      if options.isMC == 0: 
       self.get_mj_and_mlvj_dataset(self.file_data,"_data", "jet_mass_pr"); ## global fit of data in the sidand fixing non dominant bkg             
       if fitjetmass :
-	  self.fit_Normalization_in_Mj_signal_region(label,options.fgen);
+	  self.fit_WJetsNorm(label);
       else:      
        self.fit_mlvj_in_Mj_sideband(label,options.mlvjregion,options.fgen,1);
 
