@@ -43,6 +43,9 @@ parser.add_option('--sigChannel',action="store",type="string",dest="sigChannel",
 
 parser.add_option('--turnOnAnalysis', action="store",type="int",   dest="turnOnAnalysis",default=0)
 parser.add_option('--shapetest',      action="store",type="int",   dest="shapetest",default=0)
+parser.add_option('--ttbarcontrolregion',      action="store",type="int",   dest="ttbarcontrolregion",default=0)
+parser.add_option('--mlvjregion',      action="store",type="string",   dest="mlvjregion",default="_sb_lo")
+parser.add_option('--fitjetmass',      action="store",type="string",   dest="fitjetmass",default=0)
 
 
 (options, args) = parser.parse_args()
@@ -329,7 +332,7 @@ if __name__ == '__main__':
             print "--------------------------------------------------";                
             print "--------------------------------------------------";  
 
-            command = "python do_fitBias_vbf.py ggH%03d %03d %03d %03d %03d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd());             
+            command = "python do_fitBias_vbf.py ggH%03d %03d %03d %03d %03d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s "%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion);             
             print command ;
             if options.batchMode:
               fn = "biasScript_ggH%03d_%s_%s"%(mass[i],shape_gen[i],shape_fit[i]);
