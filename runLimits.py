@@ -45,8 +45,8 @@ parser.add_option('--turnOnAnalysis', action="store",type="int",   dest="turnOnA
 parser.add_option('--shapetest',      action="store",type="int",   dest="shapetest",default=0)
 parser.add_option('--ttbarcontrolregion',      action="store",type="int",   dest="ttbarcontrolregion",default=0)
 parser.add_option('--mlvjregion',      action="store",type="string",   dest="mlvjregion",default="_sb_lo")
-parser.add_option('--fitjetmass',      action="store",type="string",   dest="fitjetmass",default=0)
-
+parser.add_option('--fitjetmass',      action="store",type="int",   dest="fitjetmass",default=0)
+parser.add_option('--onlybackgroundfit',  help='run only background fit',  type=int, default=0)
 
 (options, args) = parser.parse_args()
 
@@ -54,45 +54,64 @@ parser.add_option('--fitjetmass',      action="store",type="string",   dest="fit
 ######### Get Some Global Variables #########
 #############################################
 
-mass  =  [ 600, 700, 800, 900,1000]
+mass  =  [ 600, 700, 800, 900,1000] ## define the mass point considered for the analysis
 ccmlo =  [ 550, 600, 700, 750, 800]
 ccmhi =  [ 700, 850, 950,1100,1200]
-mjlo  =  [ 40, 40, 40, 40, 40]
-mjhi  =  [ 130, 130, 130, 130, 130]
+mjlo  =  [ 40, 40, 40, 40, 40]      ## min mJ cut
+mjhi  =  [ 130, 130, 130, 130, 130] ## max mJ cut
 
-if options.turnOnAnalysis:
+################## options turnOn Analysis
 
- mlo      =  [ 400, 400, 400, 400, 400]
- mhi      =  [1500,1500,1500,1500,1500]
- shape    =  ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"]
- shapeAlt =  ["ErfPow2_v1", "ErfPow2_v1","ErfPow2_v1","ErfPow2_v1","ErfPow2_v1"]
+if options.turnOnAnalysis :
 
-else:
+ mlo      =  [ 400, 400, 400, 400, 400] ## min mlvj cut 
+ mhi      =  [1500,1500,1500,1500,1500] ## max mlvj cut
 
- mlo      =  [ 550, 550, 550, 550, 550]
- mhi      =  [1500,1500,1500,1500,1500]
- shape    =  ["Exp","Exp","Exp","Exp","Exp"]
- shapeAlt =  ["Pow","Pow","Pow","Pow","Pow"]
+else: 
+
+ mlo      =  [ 550, 550, 550, 550, 550] ## min mlvj cut
+ mhi      =  [1500,1500,1500,1500,1500] ## max mlvj cut
+
+
+################## options for makeCards
+ 
+if options.makeCards and options.turnOnAnalysis:
+ 
+ shape    =  ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"] ## basic shape
+ shapeAlt =  ["ErfPow2_v1", "ErfPow2_v1","ErfPow2_v1","ErfPow2_v1","ErfPow2_v1"] ## alternate one
+
+elif not options.turnOnAnalysis and options.makeCards:
+
+ shape    =  ["Exp","Exp","Exp","Exp","Exp"] ## basic shape
+ shapeAlt =  ["Pow","Pow","Pow","Pow","Pow"] ## alternate one
+
+################## options for bias Study
 
 if options.biasStudy:
 
- if not options.turnOnAnalysis:
+ if not options.turnOnAnalysis and not options.fitjetmass:
 
-#  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
+  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
   shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
-  shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
+#  shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
 #  shape_fit = ["Pow","Pow","Pow","Pow","Pow"]
 
- else:
+ elif options.turnOnAnalysis and not options.fitjetmass:
 
-#  shape_gen = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"]    
-  shape_fit = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"]
-  shape_gen = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"]    
-#  shape_fit = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"]
+  shape_gen = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"];    
+  shape_fit = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"];
+#  shape_gen = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"];    
+#  shape_fit = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"];
 
+ elif options.fitjetmass:
 
- nexp      = [1000,1000,1000,1000,1000]
- isMC      = [0,0,0,0,0]
+  shape_gen = ["ErfExp","ErfExp","ErfExp","ErfExp","ErfExp"];    
+  shape_fit = ["ErfExp","ErfExp","ErfExp","ErfExp","ErfExp"];
+#  shape_gen = ["User1","User1","User1","User1","User1"];    
+#  shape_fit = ["User1","User1","User1","User1","User1"]:
+
+ nexp      = [10,10,10,10,10]; 
+ isMC      = [0,0,0,0,0];
 
 BRnew  = [0];
 cprime = [10];
