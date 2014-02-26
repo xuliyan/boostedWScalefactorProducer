@@ -237,10 +237,12 @@ class doBiasStudy_mlvj:
 
         ### create output root file for the pull plot vs mass
         if options.shapetest  == 0:
-           if options.ttbarcontrolregion == 0 : 
+           if options.ttbarcontrolregion == 0 and not options.fitjetmass : 
             self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");
-           else:
+           elif options.ttbarcontrolregion == 1 and not options.fitjetmass :
             self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_ttbar.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");
+           elif options.fitjetmass :
+            self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_jetmass.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");
                
            self.outputFilePull.cd(); 
 
