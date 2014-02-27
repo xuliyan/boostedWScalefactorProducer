@@ -77,14 +77,18 @@ if __name__ == "__main__":
  else:
    spectrum = "_mlvj";
    
- if options.fitjetmass and options.ttbarcontrolregion:
-  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep jetmass | grep ttbar > list_temp.txt");
- elif options.fitjetmass and not options.ttbarcontrolregion:
-  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep jetmass | grep -v ttbar > list_temp.txt");
- elif not options.fitjetmass and options.ttbarcontrolregion:
-  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep ttbar > list_temp.txt");
- elif not options.fitjetmass and not options.ttbarcontrolregion:
-  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep -v ttbar > list_temp.txt");
+ if options.fitjetmass and options.ttbarcontrolregion and options.onlybackgroundfit :
+  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep jetmass | grep ttbar | grep _B > list_temp.txt");
+ elif options.fitjetmass and not options.ttbarcontrolregion and options.onlybackgroundfit:
+  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep jetmass | grep -v ttbar | grep _B > list_temp.txt");
+ elif not options.fitjetmass and options.ttbarcontrolregion and options.onlybackgroundfit:
+  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep ttbar | grep _B > list_temp.txt");
+ elif not options.fitjetmass and not options.ttbarcontrolregion and options.onlybackgroundfit :
+  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep -v ttbar | grep _B > list_temp.txt");
+ elif not options.fitjetmass and options.ttbarcontrolregion and not options.onlybackgroundfit:
+  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep ttbar | grep _SB > list_temp.txt");
+ elif not options.fitjetmass and not options.ttbarcontrolregion and not options.onlybackgroundfit :
+  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep -v ttbar | grep _SB > list_temp.txt");
 
  vector_root_file = [];
 
