@@ -10,7 +10,7 @@ import subprocess
 from subprocess import Popen
 from optparse import OptionParser
 
-from ROOT import TFile, TString, TH1F, TF1, TStyle, TCanvas, TPad, TGraphErrors, TFormula, TColor, kGreen, TLatex, kYellow, kBlue, kRed
+from ROOT import TFile, TString, TH1F, TF1, TStyle, TCanvas, TPad, TGraphErrors, TFormula, TColor, kGreen, TLatex, kYellow, kBlue, kRed, gROOT
 
 ##########################
 ### Parse the options ####
@@ -53,9 +53,18 @@ def setPlotStyle():
 ####### main part of the code ##############
 if __name__ == "__main__":
 
- setPlotStyle();
-
  ## take the list of TFile to be used for the plot
+
+ ROOTStyle = os.getenv ("ROOTStyle");
+ gROOT.ProcessLine((".x "+ROOTStyle+"/rootLogon.C"));
+ gROOT.ProcessLine((".x "+ROOTStyle+"/rootPalette.C"));
+ gROOT.ProcessLine((".x "+ROOTStyle+"/rootColors.C"));
+ gROOT.ProcessLine((".x "+ROOTStyle+"/setTDRStyle.C"));
+                
+ ROOT.gStyle.SetOptFit(111);
+ ROOT.gStyle.SetOptStat(1111);
+ ROOT.gStyle.SetStatFont(42);
+ ROOT.gStyle.SetTitleSize(0.04,"XYZ");
  
  nameInputDirectory = options.inputDirectory ;
  if not os.path.isdir(nameInputDirectory):
@@ -78,14 +87,16 @@ if __name__ == "__main__":
   os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep -v ttbar > list_temp.txt");
 
  vector_root_file = [];
- 
+
+ os.system("mkdir -p "+options.outputDir);
+
  with open("list_temp.txt") as input_list:
   for line in input_list:
       for name in line.split():
         name.replace(" ", "");
         vector_root_file.append(TFile(TString(nameInputDirectory+"/"+name).Data(),"READ"));
 
-  
+
   ## make the histograms
 
   histogram_pull_vs_mass_nback = ROOT.TH1F("histogram_pull_vs_mass_nback","",len(mass),0,len(mass));
@@ -99,6 +110,9 @@ if __name__ == "__main__":
   graph_1 = ROOT.TGraphErrors();
   graph_2 = ROOT.TGraphErrors();
 
+  canvas_pull_bkg_data = [];
+  canvas_pull_sig_data = [];
+  
   ## loop and fill the histograms
   for imass in range(len(mass)):
 
@@ -127,6 +141,19 @@ if __name__ == "__main__":
     if not options.onlybackgroundfit:
      histo_pull_signal       = vector_root_file[ifilePos].Get("rrv_number_signal_region_fit_ggH_vbfH_data_pull");
      gaussian_pull_signal    = vector_root_file[ifilePos].Get("Gaussian_pull_rrv_number_signal_region_fit_ggH_vbfH_data_pull"); 
+
+   canvas_pull_bkg_data.append(TCanvas("canvas_"+histo_pull_data_wjet.GetName()+"_mH%d"%(mass[imass]),""));
+   canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].cd();
+   histo_pull_data_wjet.Draw();
+   canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].GetName()+".png","png");
+   canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].GetName()+".pdf","pdf");
+
+   if not options.onlybackgroundfit:
+    canvas_pull_sig_data.append(TCanvas("canvas_"+histo_pull_sig_wjet.GetName()+"_mH%d"%(mass[imass]),""));
+    canvas_pull_sig_data[len(canvas_pull_sig_data)-1].cd();
+    histo_pull_signal.Draw();
+    canvas_pull_sig_data[len(canvas_pull_sig_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_sig_data[len(canvas_pull_sig_data)-1].GetName()+".png","png");
+    canvas_pull_sig_data[len(canvas_pull_sig_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_sig_data[len(canvas_pull_sig_data)-1].GetName()+".pdf","pdf");
 
    histogram_pull_vs_mass_nback.SetBinContent(imass+1,histo_pull_data_wjet.GetMean());
    histogram_pull_vs_mass_nback.SetBinError(imass+1,histo_pull_data_wjet.GetRMS());
@@ -161,7 +188,7 @@ if __name__ == "__main__":
 
  ## make the output directory
 
- os.system("mkdir -p "+options.outputDir);
+ setPlotStyle();
            
  canvas_1 = ROOT.TCanvas("histo_bkg", "histo_bkg")
  histogram_pull_vs_mass_nback.GetXaxis().SetLabelSize(0.065);
