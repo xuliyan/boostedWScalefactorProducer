@@ -3324,7 +3324,9 @@ objName ==objName_before ):
 
                 if  options.fgen == options.fres:                                            
 
-                 parameterHisto_fraction_wjet[iparNotConstant].Fill(parlist.at(ipar).getVal()/parameters_generated.at(iGenerated).getVal());
+                 if parameters_generated.at(iGenerated).getVal() < 1e-6: parameterHisto_fraction_wjet[iparNotConstant].Fill(parlist.at(ipar).getVal()/1.);
+                 else: parameterHisto_fraction_wjet[iparNotConstant].Fill(parlist.at(ipar).getVal()/parameters_generated.at(iGenerated).getVal());
+
                  parameterHistoPull_wjet[iPull].Fill((parlist.at(ipar).getVal()-parameters_generated.at(iGenerated).getVal())/parlist.at(ipar).getError());
                  iPull = iPull +1;
 
@@ -3846,7 +3848,8 @@ objName ==objName_before ):
 
                 if  options.fgen == options.fres:                                            
 
-                 parameterHisto_fraction_data[iparNotConstant].Fill(parlist.at(ipar).getVal()/parameters_generated.at(iGenerated).getVal());
+                 if parameters_generated.at(iGenerated).getVal() < 1.e-6: parameterHisto_fraction_data[iparNotConstant].Fill(parlist.at(ipar).getVal()/1.);
+                 else: parameterHisto_fraction_data[iparNotConstant].Fill(parlist.at(ipar).getVal()/parameters_generated.at(iGenerated).getVal());
                  parameterHistoPull_data[iPull].Fill((parlist.at(ipar).getVal()-parameters_generated.at(iGenerated).getVal())/parlist.at(ipar).getError());
                  iPull = iPull +1;
 
