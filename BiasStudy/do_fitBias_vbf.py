@@ -246,9 +246,15 @@ class doBiasStudy_mlvj:
            elif options.ttbarcontrolregion == 1 and not options.fitjetmass and not options.onlybackgroundfit :
             self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_ttbar_SB.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");
            elif options.fitjetmass and options.onlybackgroundfit:
-            self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_jetmass_B.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");               
+             if in_mlvj_min < 550: 
+              self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_jetmass_turnOn_B.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");
+             else: 
+              self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_jetmass_B.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");
            elif options.fitjetmass and not options.onlybackgroundfit:
-            self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_jetmass_SB.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");               
+             if in_mlvj_min < 550: 
+               self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_jetmass_turnOn_SB.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");               
+             else: 
+               self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_jetmass_SB.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");               
            self.outputFilePull.cd(); 
 
     ## Set basic TDR style for canvas, pad ..etc ..
