@@ -354,7 +354,12 @@ if __name__ == '__main__':
             command = "python do_fitBias_vbf.py ggH%03d %03d %03d %03d %03d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s "%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion);             
             print command ;
             if options.batchMode:
-              fn = "biasScript_ggH%03d_%s_%s"%(mass[i],shape_gen[i],shape_fit[i]);
+              suffix = "";  
+              if options.fitjetmass == 1:
+                 suffix = suffix+"_jetmass";
+              if options.ttbarcontrolregion :
+                 suffix = suffix+"_ttbar"; 
+              fn = "biasScript_ggH%03d_%s_%s_%s"%(mass[i],shape_gen[i],shape_fit[i],suffix);
               submitBatchJob( command, fn );
             else: 
               os.system(runCmmd);
