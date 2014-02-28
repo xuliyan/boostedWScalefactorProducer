@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 import re
 from sys import argv, stdout, stderr, exit
@@ -34,145 +35,79 @@ if len(args) == 0:
     exit(1)
 
 file = ROOT.TFile(args[0])
-if file == None: raise RuntimeError, "Cannot open file %s" % args[0]
-fit_s  = file.Get("fit_s")
-fit_b  = file.Get("fit_b")
-prefit = file.Get("nuisances_prefit")
-if fit_s == None or fit_s.ClassName()   != "RooFitResult": raise RuntimeError, "File %s does not contain the output of the signal fit 'fit_s'"     % args[0]
-if fit_b == None or fit_b.ClassName()   != "RooFitResult": raise RuntimeError, "File %s does not contain the output of the background fit 'fit_b'" % args[0]
-if prefit == None or prefit.ClassName() != "RooArgSet":    raise RuntimeError, "File %s does not contain the prefit nuisances 'nuisances_prefit'"  % args[0]
 
-isFlagged = {}
-table = {}
-fpf_b = fit_b.floatParsFinal()
-fpf_s = fit_s.floatParsFinal()
+tree_s = file.Get("tree_fit_sb")
+tree_b = file.Get("tree_fit_b")
+
+prefit= file.Get("nuisances_prefit")
+
+branches_list_b = tree_b.GetListOfBranches()
+branches_list_s = tree_s.GetListOfBranches()
+
+histo_list_In = [];
+histo_list_fin= [];
+list_mean_fin= [];
+pulls_name= [];
+errors=[];
+
 pulls = []
 sig_x = []
-for i in range(fpf_s.getSize()):
-    nuis_s = fpf_s.at(i)
-    name   = nuis_s.GetName();
-    nuis_b = fpf_b.find(name)
-    nuis_p = prefit.find(name)
-    row = []
-    flag = False;
-    mean_p, sigma_p = 0,0
-    if nuis_p == None:
-        if not options.abs: continue
-        row += [ "[%.2f, %.2f]" % (nuis_s.getMin(), nuis_s.getMax()) ]
-    else:
-        mean_p, sigma_p = (nuis_p.getVal(), nuis_p.getError())
-        if options.abs: row += [ "%.2f +/- %.2f" % (nuis_p.getVal(), nuis_p.getError()) ]
-    for fit_name, nuis_x in [('b', nuis_b), ('s',nuis_s)]:
-        if nuis_x == None:
-            row += [ " n/a " ]
-        else:
-            row += [ "%+.2f +/- %.2f" % (nuis_x.getVal(), nuis_x.getError()) ]
-            if nuis_p != None:
-                valShift = (nuis_x.getVal() - mean_p)/sigma_p
-                if fit_name == options.type:
-                    pulls.append(float(valShift))
-                    sig_x.append(float(nuis_x.getError()/sigma_p))
-                sigShift = nuis_x.getError()/sigma_p
-                if options.abs:
-                    row[-1] += " (%+4.2fsig, %4.2f)" % (valShift, sigShift)
-                else:
-                    row[-1] = " %+4.2f, %4.2f" % (valShift, sigShift)
-                if (abs(valShift) > options.vtol2 or abs(sigShift-1) > options.stol2):
-                    isFlagged[(name,fit_name)] = 2
-                    flag = True
-                elif (abs(valShift) > options.vtol  or abs(sigShift-1) > options.stol):
-                    if options.all: isFlagged[(name,fit_name)] = 1
-                    flag = True
-                elif options.all:
-                    flag = True
-    row += [ "%+4.2f"  % fit_s.correlation(name, options.poi) ]
-    if flag or options.all: table[name] = row
 
-fmtstring = "%-40s     %15s    %15s  %10s"
-highlight = "*%s*"
-morelight = "!%s!"
-pmsub, sigsub = None, None
-if options.format == 'text':
-    if options.abs:
-        fmtstring = "%-40s     %15s    %30s    %30s  %10s"
-        print fmtstring % ('name', 'pre fit', 'b-only fit', 's+b fit', 'rho')
-    else:
-        print fmtstring % ('name', 'b-only fit', 's+b fit', 'rho')
-elif options.format == 'latex':
-    pmsub  = (r"(\S+) \+/- (\S+)", r"$\1 \\pm \2$")
-    sigsub = ("sig", r"$\\sigma$")
-    highlight = "\\textbf{%s}"
-    morelight = "{{\\color{red}\\textbf{%s}}}"
-    if options.abs:
-        fmtstring = "%-40s &  %15s & %30s & %30s & %6s \\\\"
-        print "\\begin{tabular}{|l|r|r|r|r|} \\hline ";
-        print (fmtstring % ('name', 'pre fit', '$b$-only fit', '$s+b$ fit', r'$\rho(\theta, \mu)$')), " \\hline"
-    else:
-        fmtstring = "%-40s &  %15s & %15s & %6s \\\\"
-        print "\\begin{tabular}{|l|r|r|r|} \\hline ";
-        #what = r"$(x_\text{out} - x_\text{in})/\sigma_{\text{in}}$, $\sigma_{\text{out}}/\sigma_{\text{in}}$"
-        what = r"\Delta x/\sigma_{\text{in}}$, $\sigma_{\text{out}}/\sigma_{\text{in}}$"
-        print  fmtstring % ('',     '$b$-only fit', '$s+b$ fit', '')
-        print (fmtstring % ('name', what, what, r'$\rho(\theta, \mu)$')), " \\hline"
-elif options.format == 'twiki':
-    pmsub  = (r"(\S+) \+/- (\S+)", r"\1 &plusmn; \2")
-    sigsub = ("sig", r"&sigma;")
-    highlight = "<b>%s</b>"
-    morelight = "<b style='color:red;'>%s</b>"
-    if options.abs:
-        fmtstring = "| <verbatim>%-40s</verbatim>  | %-15s  | %-30s  | %-30s   | %-15s  |"
-        print "| *name* | *pre fit* | *b-only fit* | *s+b fit* | "
-    else:
-        fmtstring = "| <verbatim>%-40s</verbatim>  | %-15s  | %-15s | %-15s  |"
-        print "| *name* | *b-only fit* | *s+b fit* | *corr.* |"
-elif options.format == 'html':
-    pmsub  = (r"(\S+) \+/- (\S+)", r"\1 &plusmn; \2")
-    sigsub = ("sig", r"&sigma;")
-    highlight = "<b>%s</b>"
-    morelight = "<strong>%s</strong>"
-    print """
-<html><head><title>Comparison of nuisances</title>
-<style type="text/css">
-    td, th { border-bottom: 1px solid black; padding: 1px 1em; }
-    td { font-family: 'Consolas', 'Courier New', courier, monospace; }
-    strong { color: red; font-weight: bolder; }
-</style>
-</head><body style="font-family: 'Verdana', sans-serif; font-size: 10pt;"><h1>Comparison of nuisances</h1>
-<table>
-"""
-    if options.abs:
-        print "<tr><th>nuisance</th><th>pre fit</th><th>background fit </th><th>signal fit</th><th>correlation</th></tr>"
-        fmtstring = "<tr><td><tt>%-40s</tt> </td><td> %-15s </td><td> %-30s </td><td> %-30s </td><td> %-15s </td></tr>"
-    else:
-        what = "&Delta;x/&sigma;<sub>in</sub>, &sigma;<sub>out</sub>/&sigma;<sub>in</sub>";
-        print "<tr><th>nuisance</th><th>background fit<br/>%s </th><th>signal fit<br/>%s</th><th>&rho;(&mu;, &theta;)</tr>" % (what,what)
-        fmtstring = "<tr><td><tt>%-40s</tt> </td><td> %-15s </td><td> %-15s </td><td> %-15s </td></tr>"
+#nuisance = {'QCDscale_ggH2in':1.19, 'pdf_gg':1.095, 'QCDscale_ggH_ACCEPT':1.036, 'intf_ggH':1.100, 'QCDscale_vbfH':1.007, 'pdf_qqbar':1.036, 'QCDscale_qqH_ACCEPT':1.007, 'intf_vbfH':1.500, 'CMS_hwwlvj_STop':1.300, 'CMS_hwwlvj_VV':1.300, 'CMS_hwwlvj_WW_EWK':1.300, 'lumi_8TeV':1.026, 'CMS_trigger_em':1.010, 'CMS_eff_em':1.020, 'CMS_Top_norm_em_2':1.225, 'CMS_wtagger':1.097, 'Wjet_Norm_em_2':1.322, 'CMS_scale_j':1.050 , 'CMS_res_j':1.100 , 'CMS_scale_l':1.015 , 'CMS_res_l':1.002 ,'CMS_btag_eff':1.017 , 'Deco_WJets0_sb_lo_from_fitting_em_HP_mlvj_eig0': 1.4, 'Deco_WJets0_sb_lo_from_fitting_em_HP_mlvj_eig1': 1.4, 'Deco_WJets0_sim_em_HP_mlvj_eig0': 1.4, 'Deco_WJets0_sim_em_HP_mlvj_eig1':1.4, 'Deco_TTbar_signal_region_em_HP_mlvj_eig0':2.0}
 
-names = table.keys()
-names.sort()
-highlighters = { 1:highlight, 2:morelight };
-for n in names:
-    v = table[n]
-    if options.format == "latex": n = n.replace(r"_", r"\_")
-    if pmsub  != None: v = [ re.sub(pmsub[0],  pmsub[1],  i) for i in v ]
-    if sigsub != None: v = [ re.sub(sigsub[0], sigsub[1], i) for i in v ]
-    if (n,'b') in isFlagged: v[-3] = highlighters[isFlagged[(n,'b')]] % v[-3]
-    if (n,'s') in isFlagged: v[-2] = highlighters[isFlagged[(n,'s')]] % v[-2]
-    if options.abs:
-       print fmtstring % (n, v[0], v[1], v[2], v[3])
-    else:
-       print fmtstring % (n, v[0], v[1], v[2])
+nuisance = {'QCDscale_ggH2in':1.19, 'pdf_gg':1.095, 'QCDscale_ggH_ACCEPT':1.036, 'intf_ggH':1.100, 'QCDscale_vbfH':1.007, 'pdf_qqbar':1.036, 'QCDscale_qqH_ACCEPT':1.007, 'intf_vbfH':1.500, 'CMS_hwwlvj_STop':1.300, 'CMS_hwwlvj_VV':1.300, 'CMS_hwwlvj_WW_EWK':1.300, 'lumi_8TeV':1.026, 'CMS_trigger_em':1.010, 'CMS_eff_em':1.020, 'CMS_Top_norm_em_2':1.225, 'CMS_wtagger':1.097, 'Wjet_Norm_em_2':1.322, 'CMS_scale_j':1.100 , 'CMS_res_j':1.100 , 'CMS_scale_l':1.015 , 'CMS_res_l':1.002 ,'CMS_btag_eff':1.017 , 'Deco_WJets0_sb_lo_from_fitting_em_HP_mlvj_eig0': 1.4, 'Deco_WJets0_sb_lo_from_fitting_em_HP_mlvj_eig1': 1.4, 'Deco_WJets0_sb_lo_from_fitting_em_HP_mlvj_eig2': 1.4, 'Deco_WJets0_sb_lo_from_fitting_em_HP_mlvj_eig3': 1.4, 'Deco_WJets0_sim_em_HP_mlvj_eig0': 1.4, 'Deco_WJets0_sim_em_HP_mlvj_eig1':1.4, 'Deco_WJets0_sim_em_HP_mlvj_eig2':1.4, 'Deco_WJets0_sim_em_HP_mlvj_eig3':1.4, 'Deco_WJets0_sim_em_HP_mlvj_eig4':1.4,'Deco_WJets0_sim_em_HP_mlvj_eig5':1.4, 'Deco_TTbar_signal_region_em_HP_mlvj_eig0':2.0, 'Deco_TTbar_signal_region_em_HP_mlvj_eig1':2.0, 'Deco_TTbar_signal_region_em_HP_mlvj_eig2':2.0}
 
-if options.format == "latex":
-    print " \\hline\n\end{tabular}"
-elif options.format == "html":
-    print "</table></body></html>"
+for i in range (branches_list_s.GetEntries()):
+
+    hname = branches_list_s[i].GetName();    
+    hname_sigma = branches_list_s[i+1].GetName();
+
+    if ( hname.find("mu")==-1 and hname.find("nll")==-1 and hname.find("n_exp")==-1 and hname.find("status")==-1 and hname.find("In")==-1 and hname.find("sigma")):
+
+#            nuis_p = prefit.find(hname);
+#            error = nuis_p.getError();
+#            print error;
+
+            histo_temp = ROOT.TH1F(hname,"",100,-2,2);
+            histo_temp_sigma = ROOT.TH1F(hname_sigma,"",100,-2,2);    
+
+            if options.type == 's':
+                tree_s.Draw( branches_list_s[i].GetName()+" >> "+hname, "" ,"goff")
+                tree_s.Draw( branches_list_s[i+1].GetName()+" >> "+hname_sigma, "" ,"goff")
+
+            if options.type == 'b':
+                tree_b.Draw( branches_list_s[i].GetName()+" >> "+hname, "" ,"goff")
+                tree_b.Draw( branches_list_s[i+1].GetName()+" >> "+hname_sigma, "" ,"goff")            
+                
+#            histo_temp.Scale(1./error);
+#            histo_temp.GetXaxis().SetTitle("pull");
+
+            histo_list_fin.append(histo_temp);
+            pulls_name.append(hname);
+            nuis_p = prefit.find(hname);            
+            pulls.append(float(histo_temp.GetMean()));
+#            k = nuisance[hname];
+            errors.append(histo_temp_sigma.GetMean());
+#            print hname;
+#            print hname_sigma;
+#            print histo_temp.GetMean();
+            canvas_temp = ROOT.TCanvas();
+            histo_temp.Draw();
+            canvas_temp.SaveAs(hname+".png","png");
+#            print hname;
+#            print histo_temp.GetMean();
+#            print histo_temp.GetRMS();
+#    print histo_temp.GetEntries();    
+
+#    tree_s.GetEntry(1);
+#    print (getattr(tree_s,branches_list_s[i].GetName() ))
 
 if options.plotfile:
     import ROOT
 #    ROOT.gROOT.SetStyle("Plain")
 #    ROOT.gStyle.SetOptFit(1)
-    histogram = ROOT.TH1F("","",len(names),0,len(names));
+    histogram = ROOT.TH1F("","",len(pulls),0,len(pulls));
+    histogram2 = ROOT.TH1F("a","a",len(pulls),0,len(pulls));    
     
     ROOT.gStyle.SetPadBottomMargin(0.50)
     ROOT.gStyle.SetPadLeftMargin  (0.05)
@@ -186,23 +121,36 @@ if options.plotfile:
     ROOT.gStyle.SetStatY         (0.91)
     ROOT.gStyle.cd()
 
+
                                             
     ROOT.gStyle.SetGridStyle (2)
     gr = ROOT.TGraphErrors();
 
+    print len(pulls);
     i=0;
     c=1;
     for pull in pulls:
 
+#        print pull;
+#        print errors[i];
         histogram.SetBinContent(i+1,pull);
-        histogram.GetXaxis().SetBinLabel(i+1,names[i]);
-        histogram.GetXaxis().SetLabelSize(0.035);
-        histogram.GetXaxis().SetLabelFont(42);
+        histogram.GetXaxis().SetBinLabel(i+1,pulls_name[i]);
+        if pulls_name[i].find("Deco")==-1:
+            histogram.GetXaxis().SetLabelSize(0.040);
+        else:
+            histogram.GetXaxis().SetLabelSize(0.035);        
+#        histogram.GetXaxis().SetLabelFont(42);
         histogram.GetXaxis().LabelsOption("v");
         gr.SetPoint(i+1,i,0);
         gr.SetPointError(i+1,0,1);
+        histogram.SetBinError(i+1,errors[i]);
+        
+#        histogram2.SetBinContent(i+1,errors[i]);
+#        histogram2.GetXaxis().SetBinLabel(i+1,pulls_name[i]);
+#        histogram2.GetXaxis().SetLabelSize(0.035);
+#        histogram2.GetXaxis().SetLabelFont(42);
+#        histogram2.GetXaxis().LabelsOption("v");
 
-        histogram.SetBinError(i+1,sig_x[i]);
         i=i+1;
 
     gr.SetPoint(i+1,i,0);
@@ -215,6 +163,7 @@ if options.plotfile:
     histogram.SetMarkerStyle(20)
     histogram.SetMarkerSize(0.5)
     #histogram.Fit("gaus")
+#    gr.SetLineColor(1);
     gr.SetFillColor(5);
     gr.SetFillStyle(3001);
 
@@ -222,10 +171,28 @@ if options.plotfile:
     histogram.SetMaximum(3);
     histogram.SetMinimum(-3);    
     histogram.Draw("pe1")
-    gr.Draw("e3same");
+#    gr.Draw("same");
+    gr.Draw("e3same");    
     histogram.Draw("pe1same")    
    # ROOT.gPad.RedrawAxis();
-   # histogram.Draw("pe1")    
+#    histogram.Draw("pe1")    
 
     canvas.SetGridy();
-    canvas.SaveAs(options.plotfile,"png")
+    canvas.SaveAs(options.plotfile+".png","png")
+
+
+    '''
+    canvas2 = ROOT.TCanvas("asdf2", "asdf2")
+    histogram2.GetYaxis().SetTitle("(k-1)/RMS")
+    histogram2.GetYaxis().SetTitleOffset(0.55)    
+    histogram2.SetTitle("(k-1)/RMS")
+    histogram2.SetMarkerStyle(20)
+    histogram2.SetMarkerSize(0.5)
+
+    histogram2.SetMaximum(4);
+    histogram2.SetMinimum(-0.1);    
+    histogram2.Draw("p")
+
+    canvas2.SetGridy();
+    canvas2.SaveAs(options.plotfile+"_k.png","png")
+    '''
