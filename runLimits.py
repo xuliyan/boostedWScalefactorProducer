@@ -98,19 +98,19 @@ if options.biasStudy:
 
  elif options.turnOnAnalysis and not options.fitjetmass:
 
-  shape_gen = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"];    
+ # shape_gen = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"];    
   shape_fit = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"];
-#  shape_gen = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"];    
-#  shape_fit = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"];
+  shape_gen = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"];    
+ # shape_fit = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"];
 
  elif options.fitjetmass:
 
   shape_gen = ["ErfExp","ErfExp","ErfExp","ErfExp","ErfExp"];    
-  shape_fit = ["ErfExp","ErfExp","ErfExp","ErfExp","ErfExp"];
+#  shape_fit = ["ErfExp","ErfExp","ErfExp","ErfExp","ErfExp"];
 #  shape_gen = ["User1","User1","User1","User1","User1"];    
-#  shape_fit = ["User1","User1","User1","User1","User1"]:
+  shape_fit = ["User1","User1","User1","User1","User1"];
 
- nexp      = [10,10,10,10,10]; 
+ nexp      = [1000,1000,1000,1000,1000]; 
  isMC      = [0,0,0,0,0];
 
 BRnew  = [0];
@@ -351,18 +351,24 @@ if __name__ == '__main__':
             print "--------------------------------------------------";                
             print "--------------------------------------------------";  
 
-            command = "python do_fitBias_vbf.py ggH%03d %03d %03d %03d %03d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s "%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion);             
+            command = "python do_fitBias_vbf.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d "%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit); 
             print command ;
             if options.batchMode:
               suffix = "";  
               if options.fitjetmass == 1:
                  suffix = suffix+"_jetmass";
               if options.ttbarcontrolregion :
-                 suffix = suffix+"_ttbar"; 
+                 suffix = suffix+"_ttbar";
+              if options.turnOnAnalysis :
+                 suffix = suffix+"_turnOn" 
+              if options.onlybackgroundfit:
+                 suffix = suffix+"_B";
+              else:   
+                 suffix = suffix+"_SB";
               fn = "biasScript_ggH%03d_%s_%s_%s"%(mass[i],shape_gen[i],shape_fit[i],suffix);
               submitBatchJob( command, fn );
             else: 
-              os.system(runCmmd);
+              os.system(command);
 
     # =================== Plot of the Limit  ================== #
 

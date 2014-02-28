@@ -237,13 +237,24 @@ class doBiasStudy_mlvj:
 
         ### create output root file for the pull plot vs mass
         if options.shapetest  == 0:
-           if options.ttbarcontrolregion == 0 and not options.fitjetmass : 
-            self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");
-           elif options.ttbarcontrolregion == 1 and not options.fitjetmass :
-            self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_ttbar.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");
-           elif options.fitjetmass :
-            self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_jetmass.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");
-               
+           if options.ttbarcontrolregion == 0 and not options.fitjetmass and options.onlybackgroundfit : 
+            self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_B.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");
+           elif options.ttbarcontrolregion == 1 and not options.fitjetmass and options.onlybackgroundfit :
+            self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_ttbar_B.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");            
+           elif options.ttbarcontrolregion == 0 and not options.fitjetmass and not options.onlybackgroundfit :
+            self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_SB.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");
+           elif options.ttbarcontrolregion == 1 and not options.fitjetmass and not options.onlybackgroundfit :
+            self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_ttbar_SB.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");
+           elif options.fitjetmass and options.onlybackgroundfit:
+             if in_mlvj_min < 550: 
+              self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_jetmass_turnOn_B.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");
+             else: 
+              self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_jetmass_B.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");
+           elif options.fitjetmass and not options.onlybackgroundfit:
+             if in_mlvj_min < 550: 
+               self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_jetmass_turnOn_SB.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");               
+             else: 
+               self.outputFilePull = ROOT.TFile("pull_output_%s_%s_%s_jetmass_SB.root"%(self.ggH_sample,options.fgen,options.fres),"RECREATE");               
            self.outputFilePull.cd(); 
 
     ## Set basic TDR style for canvas, pad ..etc ..
@@ -3279,19 +3290,19 @@ objName ==objName_before ):
                   parameterHistoError_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_wjet_error","",45,0.,math.fabs(parlist.at(ipar).getError()*2)));
 
                   if options.fgen == options.fres :
-                   parameterHistoPull_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_wjet_pull","",40,-5,5));
+                   parameterHistoPull_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_wjet_pull","",40,-3,3));
 
                  else :
                      parameterHisto_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_wjet","",50,0.,math.fabs(parlist.at(ipar).getVal())*3));
                      parameterHisto_fraction_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_wjet_fraction","",50,-50,50));
                      parameterHistoError_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_wjet_error","",100,0.,math.fabs(parlist.at(ipar).getError()*2)));
-                     parameterHistoPull_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_wjet_pull","",40,-5,5)); 
+                     parameterHistoPull_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_wjet_pull","",40,-3,3)); 
 
                else:
                 parameterHisto_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_wjet","",50,-50,50));
                 parameterHisto_fraction_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_wjet_fraction","",500,-50,50));
                 parameterHistoError_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_wjet_error","",45,0.,math.fabs(parlist.at(ipar).getError()*2)));
-                parameterHistoPull_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_wjet_pull","",40,-5,5)); 
+                parameterHistoPull_wjet.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_wjet_pull","",40,-3,3)); 
                  
               if not TString(parlist.at(ipar).GetName()).Contains("ggH") or not TString(parlist.at(ipar).GetName()).Contains("vbfH"): ## fill pulls and parameters histo
 
@@ -3313,7 +3324,9 @@ objName ==objName_before ):
 
                 if  options.fgen == options.fres:                                            
 
-                 parameterHisto_fraction_wjet[iparNotConstant].Fill(parlist.at(ipar).getVal()/parameters_generated.at(iGenerated).getVal());
+                 if parameters_generated.at(iGenerated).getVal() < 1e-6: parameterHisto_fraction_wjet[iparNotConstant].Fill(parlist.at(ipar).getVal()/1.);
+                 else: parameterHisto_fraction_wjet[iparNotConstant].Fill(parlist.at(ipar).getVal()/parameters_generated.at(iGenerated).getVal());
+
                  parameterHistoPull_wjet[iPull].Fill((parlist.at(ipar).getVal()-parameters_generated.at(iGenerated).getVal())/parlist.at(ipar).getError());
                  iPull = iPull +1;
 
@@ -3542,7 +3555,7 @@ objName ==objName_before ):
        parameterHistoPull_wjet[ipar].GetXaxis().SetLabelSize(0.035);
        parameterHistoPull_wjet[ipar].GetYaxis().SetLabelSize(0.035);
        parameterHistoPull_wjet[ipar].GetXaxis().SetTitle(parameterHistoPull_wjet[ipar].GetName());
-       Gaussian = ROOT.TF1("Gaussian_pull_%s"%(parameterHistoPull_wjet[ipar].GetName()),"gaus",-5,5);
+       Gaussian = ROOT.TF1("Gaussian_pull_%s"%(parameterHistoPull_wjet[ipar].GetName()),"gaus",-3,3);
        Gaussian.SetLineColor(kBlue);
        Gaussian.SetLineWidth(2);
        parameterHistoPull_wjet[ipar].Fit(Gaussian,"MSQ");
@@ -3794,19 +3807,19 @@ objName ==objName_before ):
                   parameterHistoError_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_error","",45,0.,math.fabs(parlist.at(ipar).getError()*2)));
 
                   if options.fgen == options.fres :
-                   parameterHistoPull_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_pull","",40,-5,5));
+                   parameterHistoPull_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_pull","",40,-3,3));
 
                  else :
                      parameterHisto_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data","",50,0.,math.fabs(parlist.at(ipar).getVal())*3));
                      parameterHisto_fraction_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_fraction","",50,-50,50));
                      parameterHistoError_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_error","",100,0.,math.fabs(parlist.at(ipar).getError()*2)));
-                     parameterHistoPull_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_pull","",40,-5,5)); 
+                     parameterHistoPull_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_pull","",40,-3,3)); 
 
                else:
                 parameterHisto_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data","",50,-50,50));
                 parameterHisto_fraction_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_fraction","",500,-50,50));
                 parameterHistoError_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_error","",45,0.,math.fabs(parlist.at(ipar).getError()*2)));
-                parameterHistoPull_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_pull","",40,-5,5)); 
+                parameterHistoPull_data.append(ROOT.TH1F(parlist.at(ipar).GetName()+"_data_pull","",40,-3,3)); 
                  
               if not TString(parlist.at(ipar).GetName()).Contains("ggH") or not TString(parlist.at(ipar).GetName()).Contains("vbfH"): ## fill pulls and parameters histo
 
@@ -3835,7 +3848,8 @@ objName ==objName_before ):
 
                 if  options.fgen == options.fres:                                            
 
-                 parameterHisto_fraction_data[iparNotConstant].Fill(parlist.at(ipar).getVal()/parameters_generated.at(iGenerated).getVal());
+                 if parameters_generated.at(iGenerated).getVal() < 1.e-6: parameterHisto_fraction_data[iparNotConstant].Fill(parlist.at(ipar).getVal()/1.);
+                 else: parameterHisto_fraction_data[iparNotConstant].Fill(parlist.at(ipar).getVal()/parameters_generated.at(iGenerated).getVal());
                  parameterHistoPull_data[iPull].Fill((parlist.at(ipar).getVal()-parameters_generated.at(iGenerated).getVal())/parlist.at(ipar).getError());
                  iPull = iPull +1;
 
@@ -4146,7 +4160,7 @@ objName ==objName_before ):
        parameterHistoPull_data[ipar].GetXaxis().SetLabelSize(0.035);
        parameterHistoPull_data[ipar].GetYaxis().SetLabelSize(0.035);
        parameterHistoPull_data[ipar].GetXaxis().SetTitle(parameterHistoPull_data[ipar].GetName());
-       Gaussian = ROOT.TF1("Gaussian_pull_%s"%(parameterHistoPull_data[ipar].GetName()),"gaus",-5,5);
+       Gaussian = ROOT.TF1("Gaussian_pull_%s"%(parameterHistoPull_data[ipar].GetName()),"gaus",-3,3);
        Gaussian.SetLineColor(kBlue);
        Gaussian.SetLineWidth(2);
        parameterHistoPull_data[ipar].Fit(Gaussian,"MSQ");
