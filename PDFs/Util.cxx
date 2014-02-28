@@ -59,12 +59,15 @@ using namespace std;
 void Util(){}
 
 /// function used to draw an error band around a RooAbsPdf -> used to draw the band after each fit
-void draw_error_band(RooAbsData &rdata, RooAbsPdf &rpdf, RooRealVar &rrv_number_events , RooFitResult *rfres, RooPlot *mplot, Int_t kcolor=6, std::string opt ="F", Int_t number_point=100, const Int_t number_errorband=2000){
+void draw_error_band(const RooAbsData &rdata, const RooAbsPdf &rpdf, const RooRealVar &rrv_number_events , const RooFitResult &rfres, RooPlot *mplot, Int_t kcolor=6, std::string opt ="F", Int_t number_point=100, const Int_t number_errorband=2000){
 
+        std::cout<<" <<<<<<<<<<<<<<<< draw error band <<<<<<<<<<<<<<<< "<<std::endl;
 	TRandom3 rand(1234);
+        rand.SetSeed(0);
 
         /// get the observables of the pdf --> mj or mlvj depends on which bands you are drawing
-	RooArgSet* argset_obs=rpdf.getObservables(rdata);
+	RooArgSet* argset_obs = rpdf.getObservables(rdata);
+
         /// create an iterator on the observables
 	TIterator *par=argset_obs->createIterator();
 	par->Reset();
@@ -72,14 +75,15 @@ void draw_error_band(RooAbsData &rdata, RooAbsPdf &rpdf, RooRealVar &rrv_number_
 	RooRealVar *rrv_x=(RooRealVar*)par->Next();
 	rrv_x->Print();
         rpdf.Print("v");
+
         /// Get the pdf pramters 
         rpdf.getParameters(RooArgSet(*rrv_x))->Print("v");
 	rrv_number_events.Print();
         /// Define min and max x range
-	Double_t x_min=rrv_x->getMin();
-	Double_t x_max=rrv_x->getMax();
+	Double_t x_min = rrv_x->getMin();
+	Double_t x_max = rrv_x->getMax();
         /// define the step to sample the function 
-	Double_t delta_x=(x_max-x_min)/number_point;
+	Double_t delta_x = (x_max-x_min)/number_point;
         /// Original Bin width
 	Double_t width_x = mplot->getFitRangeBinW();
         /// number of events  
@@ -89,7 +93,7 @@ void draw_error_band(RooAbsData &rdata, RooAbsPdf &rpdf, RooRealVar &rrv_number_
 	TGraph *bkgpred = new TGraph(number_point+1);
 	for(int i =0 ; i<= number_point ; i++){
 		rrv_x->setVal(x_min+delta_x*i); 
-		bkgpred->SetPoint( i , x_min+delta_x*i , rrv_number_events.getVal()*rpdf.getVal(*rrv_x)*width_x );
+		bkgpred->SetPoint(i ,x_min+delta_x*i ,rrv_number_events.getVal()*rpdf.getVal(*rrv_x)*width_x);
 	}
 	bkgpred->SetLineWidth(2);
 	bkgpred->SetLineColor(kcolor);
@@ -102,7 +106,7 @@ void draw_error_band(RooAbsData &rdata, RooAbsPdf &rpdf, RooRealVar &rrv_number_
 	for(int j=0;j<number_errorband;j++){
 		syst[j] = new TGraph(number_point+1);
                 /// paramters value are randomized using rfres and this can be done also if they are not decorrelate
-		RooArgList par_tmp = rfres->randomizePars();
+		RooArgList par_tmp = rfres.randomizePars();
 		*par_pdf = par_tmp;
 		Double_t number_events_tmp = rand.Gaus(number_events_mean,number_events_sigma); /// new poisson random number of events
 		for(int i =0 ; i<=number_point ; i++){
@@ -111,7 +115,7 @@ void draw_error_band(RooAbsData &rdata, RooAbsPdf &rpdf, RooRealVar &rrv_number_
 		}
 	}
 
-	RooArgList par_tmp = rfres->floatParsFinal();
+	RooArgList par_tmp = rfres.floatParsFinal();
 	*par_pdf = par_tmp;
 
 	std::vector<double> val;
@@ -142,13 +146,16 @@ void draw_error_band(RooAbsData &rdata, RooAbsPdf &rpdf, RooRealVar &rrv_number_
 
 	if( TString(opt).Contains("F") ) mplot->addObject(errorband,"E3");             
 	if( TString(opt).Contains("L") ){ mplot->addObject(am); mplot->addObject(ap); }
+
 }
 
 /// Variation of the previous method using a workspace -> used to draw the band for the final extrapolation -> take in input decorrelated parameters
-void draw_error_band( RooAbsPdf &rpdf, std::string xaxis_name, RooRealVar &rrv_number_events , RooArgList &paras, RooWorkspace &ws, RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
+void draw_error_band(const RooAbsPdf &rpdf, std::string xaxis_name, const RooRealVar &rrv_number_events , const RooArgList &paras, const RooWorkspace &ws, RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
 
 	TRandom3 rand(1234);
+        rand.SetSeed(0);
         /// get observables , pdf and number of events
+        std::cout<<" <<<<<<<<<<<<<<<< draw error band <<<<<<<<<<<<<<<< "<<std::endl;
 	RooRealVar *rrv_x=ws.var(xaxis_name.c_str());
         rpdf.Print("v");
         rpdf.getParameters(RooArgSet(*rrv_x))->Print("v");
@@ -219,9 +226,12 @@ void draw_error_band( RooAbsPdf &rpdf, std::string xaxis_name, RooRealVar &rrv_n
 }
 
 /// Draw error band giving directly the extended Pdf
-void draw_error_band_extendPdf(RooAbsData &rdata, RooExtendPdf &rpdf, RooFitResult *rfres, RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
+void draw_error_band_extendPdf(const RooAbsData &rdata, const RooExtendPdf & rpdf, const RooFitResult &rfres, RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
 
 	TRandom3 rand(1234);
+        rand.SetSeed(0);
+        std::cout<<" <<<<<<<<<<<<<<<< draw error band extended Pdf <<<<<<<<<<<<<<<< "<<std::endl;
+
         /// Take the observable for the pdf
 	RooArgSet* argset_obs=rpdf.getObservables(rdata);
 	TIterator *par=argset_obs->createIterator();
@@ -251,7 +261,7 @@ void draw_error_band_extendPdf(RooAbsData &rdata, RooExtendPdf &rpdf, RooFitResu
 	TGraph* syst[number_errorband];
 	for(int j=0;j<number_errorband;j++){
 		syst[j]=new TGraph(number_point+1);
-		RooArgList par_tmp = rfres->randomizePars();
+		RooArgList par_tmp = rfres.randomizePars();
 		*par_pdf = par_tmp;
 		for(int i =0 ; i<=number_point ; i++){
 			rrv_x->setVal(x_min+delta_x*i); 
@@ -259,7 +269,7 @@ void draw_error_band_extendPdf(RooAbsData &rdata, RooExtendPdf &rpdf, RooFitResu
 		}
 	}
 
-	RooArgList par_tmp = rfres->floatParsFinal();
+	RooArgList par_tmp = rfres.floatParsFinal();
 	*par_pdf = par_tmp;
 
         /// now extract the error curve at 2sigma 
@@ -293,9 +303,11 @@ void draw_error_band_extendPdf(RooAbsData &rdata, RooExtendPdf &rpdf, RooFitResu
 }
 
 /// Draw error band giving directly the a general Pdf
-void draw_error_band_extendPdf(RooAbsData &rdata, RooAbsPdf &rpdf, RooFitResult *rfres, RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
+void draw_error_band_extendPdf(const RooAbsData &rdata, const RooAbsPdf &rpdf, const RooFitResult &rfres, RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
 
 	TRandom3 rand(1234);
+        rand.SetSeed(0);
+        std::cout<<" <<<<<<<<<<<<<<<< draw error band extended Pdf <<<<<<<<<<<<<<<< "<<std::endl;
         /// Take the observable for the pdf
 	RooArgSet* argset_obs=rpdf.getObservables(rdata);
 	TIterator *par=argset_obs->createIterator();
@@ -325,7 +337,7 @@ void draw_error_band_extendPdf(RooAbsData &rdata, RooAbsPdf &rpdf, RooFitResult 
 	TGraph* syst[number_errorband];
 	for(int j=0;j<number_errorband;j++){
 		syst[j]=new TGraph(number_point+1);
-		RooArgList par_tmp = rfres->randomizePars();
+		RooArgList par_tmp = rfres.randomizePars();
 		*par_pdf = par_tmp;
 		for(int i =0 ; i<=number_point ; i++){
 			rrv_x->setVal(x_min+delta_x*i); 
@@ -333,7 +345,7 @@ void draw_error_band_extendPdf(RooAbsData &rdata, RooAbsPdf &rpdf, RooFitResult 
 		}
 	}
 
-	RooArgList par_tmp = rfres->floatParsFinal();
+	RooArgList par_tmp = rfres.floatParsFinal();
 	*par_pdf = par_tmp;
 
         /// now extract the error curve at 2sigma 
@@ -368,10 +380,11 @@ void draw_error_band_extendPdf(RooAbsData &rdata, RooAbsPdf &rpdf, RooFitResult 
 
 
 /// Error band creator for a Decorellated Pdf starting from Workspace
-void draw_error_band_Decor( std::string pdf_name, std::string xaxis_name, RooArgList &paras, RooWorkspace &ws,RooRealVar &rrv_shape_scale , RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
+void draw_error_band_Decor( std::string pdf_name, std::string xaxis_name, RooArgList paras, RooWorkspace ws,RooRealVar rrv_shape_scale , RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
 
 	TRandom3 rand(1234);
-
+        rand.SetSeed(0);
+        std::cout<<" <<<<<<<<<<<<<<<< draw error band Decorrelated <<<<<<<<<<<<<<<< "<<std::endl;
 	RooRealVar *rrv_x=ws.var(xaxis_name.c_str());
 	rrv_x->Print();
 	Double_t x_min=rrv_x->getMin();
@@ -451,9 +464,11 @@ void draw_error_band_Decor( std::string pdf_name, std::string xaxis_name, RooArg
 } 
 
 /// Just the shape and don't touch the normalization 
-void draw_error_band_shape_Decor( std::string pdf_name, std::string xaxis_name, RooArgList &paras, RooWorkspace &ws,Double_t sigma , RooPlot *mplot, Int_t kcolor=6,std::string opt="F", Int_t fillstyle=3013,std::string uncertainty_title="", Int_t number_point=100, const Int_t number_errorband=2000){
+void draw_error_band_shape_Decor( std::string pdf_name, std::string xaxis_name, RooArgList paras, RooWorkspace ws,Double_t sigma , RooPlot *mplot, Int_t kcolor=6,std::string opt="F", Int_t fillstyle=3013,std::string uncertainty_title="", Int_t number_point=100, const Int_t number_errorband=2000){
 
 	TRandom3 rand(1234);
+        rand.SetSeed(0); 
+        std::cout<<" <<<<<<<<<<<<<<<< draw error band Decorrelated shape <<<<<<<<<<<<<<<< "<<std::endl;
         /// take the observable
 	RooRealVar *rrv_x=ws.var(xaxis_name.c_str());
 	rrv_x->Print();
@@ -520,21 +535,23 @@ void draw_error_band_shape_Decor( std::string pdf_name, std::string xaxis_name, 
 
 
 /// Calculate the error when intgrating a pdf in a range -> take the error not as a single fit result but from toys randomizing the parameters
-double Calc_error_extendPdf(RooAbsData &rdata, RooExtendPdf &rpdf, RooFitResult *rfres, std::string range, const Int_t calc_times=2000){
+double Calc_error_extendPdf(const RooAbsData &rdata, const RooExtendPdf & rpdf, const RooFitResult &rfres, std::string range, const Int_t calc_times=2000){
 
 	TRandom3 rand(1234);
+        rand.SetSeed(); 
+        std::cout<<" <<<<<<<<<<<<<<<  Calc_error_extendPdf <<<<<<<<<<<<<<<< "<<std::endl;
         /// Get the observable on the x-axis
-	RooArgSet* argset_obs=rpdf.getObservables(rdata);
-	TIterator *par=argset_obs->createIterator();
+	RooArgSet* argset_obs = rpdf.getObservables(rdata);
+	TIterator *par = argset_obs->createIterator();
 	par->Reset();
 	RooRealVar *rrv_x=(RooRealVar*)par->Next();
 	rrv_x->Print();
 
         /// Create integral of the whole function and in a given range
-        RooAbsReal* fullInt = rpdf.createIntegral(*rrv_x,*rrv_x);
+        RooAbsReal* fullInt   = rpdf.createIntegral(*rrv_x,*rrv_x);
         RooAbsReal* signalInt = rpdf.createIntegral(*rrv_x,*rrv_x,range.c_str());
-        double fullInt_var=fullInt->getVal();
-        double signalInt_var=signalInt->getVal()/fullInt_var;
+        double fullInt_var    = fullInt->getVal();
+        double signalInt_var  = signalInt->getVal()/fullInt_var;
 
         double signal_number_media = signalInt_var*rpdf.expectedEvents(*rrv_x);
 
@@ -545,24 +562,29 @@ double Calc_error_extendPdf(RooAbsData &rdata, RooExtendPdf &rpdf, RooFitResult 
 	std::vector<double> val;
 	val.resize(calc_times);
 	for(int j=0;j<calc_times;j++){
-		RooArgList par_tmp = rfres->randomizePars();
+		RooArgList par_tmp = rfres.randomizePars();
 		*par_pdf = par_tmp;
 
-                fullInt_var=fullInt->getVal();
-                signalInt_var=signalInt->getVal()/fullInt_var;
-                signal_number_media=signalInt_var*rpdf.expectedEvents(*rrv_x);
-                val[j]=signal_number_media;
+                fullInt_var = fullInt->getVal();
+                signalInt_var = signalInt->getVal()/fullInt_var;
+                signal_number_media = signalInt_var*rpdf.expectedEvents(*rrv_x);
+                val[j] = signal_number_media;
 	}
+
+	RooArgList par_tmp = rfres.floatParsFinal();
+        *par_pdf = par_tmp;
 
 	std::sort(val.begin(),val.end());
         return (val[Int_t(0.84*calc_times)]-val[Int_t(0.16*calc_times)])/2.; /// return a doble value 
 }
 
 /// useful for couting analysis
-double Calc_error( std::string rpdfname, std::string xaxis_name , RooArgList &paras, RooWorkspace &ws,std::string range, const Int_t calc_times=2000){
+double Calc_error( std::string rpdfname, std::string xaxis_name , const RooArgList & paras, const RooWorkspace &ws,std::string range, const Int_t calc_times=2000){
 
 	TRandom3 rand(1234);
+        rand.SetSeed(0);
         // Get the observable
+        std::cout<<" <<<<<<<<<<<<<<<  Calc_error <<<<<<<<<<<<<<<< "<<std::endl;
 	RooRealVar *rrv_x=ws.var(xaxis_name.c_str()); 
         rrv_x->Print();
 	RooAbsPdf*rpdf=ws.pdf(rpdfname.c_str());
