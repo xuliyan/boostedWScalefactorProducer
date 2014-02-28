@@ -380,7 +380,7 @@ void draw_error_band_extendPdf(const RooAbsData &rdata, const RooAbsPdf &rpdf, c
 
 
 /// Error band creator for a Decorellated Pdf starting from Workspace
-void draw_error_band_Decor( std::string pdf_name, std::string xaxis_name, RooArgList paras, RooWorkspace ws,RooRealVar rrv_shape_scale , RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
+void draw_error_band_Decor( std::string pdf_name, std::string xaxis_name, const RooArgList &paras, const RooWorkspace &ws, const RooRealVar &rrv_shape_scale , RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
 
 	TRandom3 rand(1234);
         rand.SetSeed(0);
@@ -464,7 +464,7 @@ void draw_error_band_Decor( std::string pdf_name, std::string xaxis_name, RooArg
 } 
 
 /// Just the shape and don't touch the normalization 
-void draw_error_band_shape_Decor( std::string pdf_name, std::string xaxis_name, RooArgList paras, RooWorkspace ws,Double_t sigma , RooPlot *mplot, Int_t kcolor=6,std::string opt="F", Int_t fillstyle=3013,std::string uncertainty_title="", Int_t number_point=100, const Int_t number_errorband=2000){
+void draw_error_band_shape_Decor( std::string pdf_name, std::string xaxis_name, const RooArgList & paras, const RooWorkspace & ws,Double_t sigma , RooPlot *mplot, Int_t kcolor=6,std::string opt="F", Int_t fillstyle=3013,std::string uncertainty_title="", Int_t number_point=100, const Int_t number_errorband=2000){
 
 	TRandom3 rand(1234);
         rand.SetSeed(0); 
