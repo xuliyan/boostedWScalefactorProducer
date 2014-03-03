@@ -29,6 +29,8 @@ parser.add_option('--biasStudy',     action='store_true', dest='biasStudy',     
 
 # submit jobs to condor 
 parser.add_option('--batchMode', action='store_true', dest='batchMode', default=False, help='no X11 windows')
+parser.add_option('--lxbatchCern',  help='run jobs on lxbatch system at cern, default is condor fnal',  type=int, default=0)
+parser.add_option('--herculesMilano',  help='run jobs on hercules system at Milano, default is condor fnal',  type=int, default=0)
 
 
 parser.add_option('--channel',    action="store",type = "string", dest="channel",    default="em")
@@ -152,39 +154,76 @@ def submitBatchJob( command, fn ):
     
  # create a dummy bash/csh
  outScript = open(fn+".sh","w");
-    
- outScript.write('#!/bin/bash');
- outScript.write("\n"+'date');
- outScript.write("\n"+'source /uscmst1/prod/sw/cms/bashrc prod');
- outScript.write("\n"+'echo "condor dir: " ${_CONDOR_SCRATCH_DIR}');    
- outScript.write("\n"+'cd '+currentDir);
- outScript.write("\n"+'eval `scram runtime -sh`');
- outScript.write("\n"+'cd -');    
- outScript.write("\n"+'export PATH=${PATH}:'+currentDir);
- outScript.write("\n"+'echo ${PATH}');
- outScript.write("\n"+'ls'); 
- outScript.write("\n"+command);
- outScript.write("\n"+'tar -cvzf outputFrom_'+fn+'.tar.gz *');    
- outScript.close();
-    
- # link a condor script to your shell script
- condorScript = open("condor_"+fn,"w");
- condorScript.write('universe = vanilla')
- condorScript.write("\n"+"Executable = "+fn+".sh")
- condorScript.write("\n"+'Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000')
- condorScript.write("\n"+'Should_Transfer_Files = YES')
- condorScript.write("\n"+'Transfer_Input_Files = doFit_class.py, BiasStudy/do_fitBias_vbf.py')    
- condorScript.write("\n"+'WhenToTransferOutput  = ON_EXIT_OR_EVICT')
- condorScript.write("\n"+'Output = out_$(Cluster).stdout')
- condorScript.write("\n"+'Error  = out_$(Cluster).stderr')
- condorScript.write("\n"+'Error  = out_$(Cluster).stderr')
- condorScript.write("\n"+'Log    = out_$(Cluster).log')
- condorScript.write("\n"+'Notification    = Error')
- condorScript.write("\n"+'Queue 1')
- condorScript.close();
-    
- # submit the condor job 
- os.system("condor_submit "+"condor_"+fn)
+ 
+ if not options.lxbatchCern or not options.herculesMilano :   
+  outScript.write('#!/bin/bash');
+  outScript.write("\n"+'date');
+  outScript.write("\n"+'source /uscmst1/prod/sw/cms/bashrc prod');
+  outScript.write("\n"+'echo "condor dir: " ${_CONDOR_SCRATCH_DIR}');    
+  outScript.write("\n"+'cd '+currentDir);
+  outScript.write("\n"+'eval `scram runtime -sh`');
+  outScript.write("\n"+'cd -');    
+  outScript.write("\n"+'export PATH=${PATH}:'+currentDir);
+  outScript.write("\n"+'echo ${PATH}');
+  outScript.write("\n"+'ls'); 
+  outScript.write("\n"+command);
+  outScript.write("\n"+'tar -cvzf outputFrom_'+fn+'.tar.gz *');    
+  outScript.close();
+
+  condorScript = open("condor_"+fn,"w");
+  condorScript.write('universe = vanilla')
+  condorScript.write("\n"+"Executable = "+fn+".sh")
+  condorScript.write("\n"+'Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000')
+  condorScript.write("\n"+'Should_Transfer_Files = YES')
+  condorScript.write("\n"+'Transfer_Input_Files = doFit_class.py, BiasStudy/do_fitBias_vbf.py')    
+  condorScript.write("\n"+'WhenToTransferOutput  = ON_EXIT_OR_EVICT')
+  condorScript.write("\n"+'Output = out_$(Cluster).stdout')
+  condorScript.write("\n"+'Error  = out_$(Cluster).stderr')
+  condorScript.write("\n"+'Error  = out_$(Cluster).stderr')
+  condorScript.write("\n"+'Log    = out_$(Cluster).log')
+  condorScript.write("\n"+'Notification    = Error')
+  condorScript.write("\n"+'Queue 1')
+  condorScript.close();
+
+  os.system("condor_submit "+"condor_"+fn);
+
+ elif options.lxbatchCern and not options.herculesMilano:
+  outScript.write('#!/bin/bash');
+  outScript.write("\n"+'cd '+currentDir);
+  outScript.write("\n"+'eval `scram runtime -sh`');
+  outScript.write("\n"+'cd -');
+  outScript.write("\n"+'cp '+currentDir+'/BiasStudy/do_fitBias_vbf.py ./');
+  outScript.write("\n"+'cp '+currentDir+'doFit_class.py ./');
+  outScript.write("\n"+'export PATH=${PATH}:'+currentDir);
+  outScript.write("\n"+'echo ${PATH}');
+  outScript.write("\n"+'ls');  
+  outScript.write("\n"+command);
+  outScript.write("\n"+'tar -cvzf outputFrom_'+fn+'.tar.gz *');    
+  outScript.write("\n"+'cp outputFrom_'+fn+'.tar.gz '+currentDir);    
+  outScript.close();
+         
+  os.system("chmod 777 "+currentDir+"/"+fn+".sh"); 
+  os.system("bsub -q cmscaf1nh -cwd "+currentDir+" "+fn+".sh");
+
+ elif not options.lxbatchCern and options.herculesMilano:
+
+  outScript.write('#!/bin/bash');
+  outScript.write("\n"+'cd '+currentDir);
+  outScript.write("\n"+'eval `scram runtime -sh`');
+  outScript.write("\n"+'cd -');
+  outScript.write("\n"+'cp '+currentDir+'/BiasStudy/do_fitBias_vbf.py ./');
+  outScript.write("\n"+'cp '+currentDir+'doFit_class.py ./');
+  outScript.write("\n"+'export PATH=${PATH}:'+currentDir);
+  outScript.write("\n"+'echo ${PATH}');
+  outScript.write("\n"+'ls');  
+  outScript.write("\n"+command);
+  outScript.write("\n"+'tar -cvzf outputFrom_'+fn+'.tar.gz *');    
+  outScript.write("\n"+'cp outputFrom_'+fn+'.tar.gz '+currentDir);    
+  outScript.close();
+         
+  os.system("chmod 777 "+currentDir+"/"+fn+".sh"); 
+  os.system("qsub -V -d "+currentDir+" -q shortcms "+currentDir+"/"+fn+".sh");
+
 
 # ----------------------------------------
 
@@ -196,39 +235,85 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
     
     # create a dummy bash/csh
     outScript = open(fn+".sh","w");
-    
-    outScript.write('#!/bin/bash');
-    outScript.write("\n"+'date');
-    outScript.write("\n"+'source /uscmst1/prod/sw/cms/bashrc prod');
-    outScript.write("\n"+'cd '+currentDir);
-    outScript.write("\n"+'eval `scram runtime -sh`');
-    outScript.write("\n"+'cd -');
-    outScript.write("\n"+'ls');    
-    outScript.write("\n"+command);
-    outScript.close();
-    
+
     file1 = "hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass,SIGCH,cprime,BRnew);
     file2 = "hwwlvj_ggH%03d_mu_%02d_%02d_workspace.root"%(mass,cprime,BRnew);
-    file3 = "hwwlvj_ggH%03d_el_%02d_%02d_workspace.root"%(mass,cprime,BRnew);    
+    file3 = "hwwlvj_ggH%03d_el_%02d_%02d_workspace.root"%(mass,cprime,BRnew);
 
-    # link a condor script to your shell script
-    condorScript = open("subCondor_"+fn,"w");
-    condorScript.write('universe = vanilla')
-    condorScript.write("\n"+"Executable = "+fn+".sh")
-    condorScript.write("\n"+'Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000')
-    condorScript.write("\n"+'Should_Transfer_Files = YES')
-    condorScript.write("\n"+'Transfer_Input_Files = '+file1+', '+file2+', '+file3)    
-    condorScript.write("\n"+'WhenToTransferOutput  = ON_EXIT_OR_EVICT')
-    condorScript.write("\n"+'Output = out_$(Cluster).stdout')
-    condorScript.write("\n"+'Error  = out_$(Cluster).stderr')
-    condorScript.write("\n"+'Error  = out_$(Cluster).stderr')
-    condorScript.write("\n"+'Log    = out_$(Cluster).log')
-    condorScript.write("\n"+'Notification    = Error')
-    condorScript.write("\n"+'Queue 1')
-    condorScript.close();
+    if not options.lxbatchCern and not options.herculesMilano :   
+     outScript.write('#!/bin/bash');
+     outScript.write("\n"+'date');
+     outScript.write("\n"+'source /uscmst1/prod/sw/cms/bashrc prod');
+     outScript.write("\n"+'cd '+currentDir);
+     outScript.write("\n"+'eval `scram runtime -sh`');
+     outScript.write("\n"+'cd -');
+     outScript.write("\n"+'ls');    
+     outScript.write("\n"+command);
+     outScript.close();
     
-    # submit the condor job     
-    os.system("condor_submit "+"subCondor_"+fn)
+     # link a condor script to your shell script
+     condorScript = open("subCondor_"+fn,"w");
+     condorScript.write('universe = vanilla')
+     condorScript.write("\n"+"Executable = "+fn+".sh")
+     condorScript.write("\n"+'Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000')
+     condorScript.write("\n"+'Should_Transfer_Files = YES')
+     condorScript.write("\n"+'Transfer_Input_Files = '+file1+', '+file2+', '+file3)    
+     condorScript.write("\n"+'WhenToTransferOutput  = ON_EXIT_OR_EVICT')
+     condorScript.write("\n"+'Output = out_$(Cluster).stdout')
+     condorScript.write("\n"+'Error  = out_$(Cluster).stderr')
+     condorScript.write("\n"+'Error  = out_$(Cluster).stderr')
+     condorScript.write("\n"+'Log    = out_$(Cluster).log')
+     condorScript.write("\n"+'Notification    = Error')
+     condorScript.write("\n"+'Queue 1')
+     condorScript.close();
+
+     # submit the condor job     
+     os.system("condor_submit "+"subCondor_"+fn)
+ 
+    elif options.lxbatchCern and not options.herculesMilano: 
+
+     outScript.write('#!/bin/bash');
+     outScript.write("\n"+'date');
+     outScript.write("\n"+'cd '+currentDir);
+     outScript.write("\n"+'eval `scram runtime -sh`');
+     outScript.write("\n"+'cd -');
+     outScript.write("\n"+'ls');    
+    
+     file1 = "hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass,SIGCH,cprime,BRnew);
+     file2 = "hwwlvj_ggH%03d_mu_%02d_%02d_workspace.root"%(mass,cprime,BRnew);
+     file3 = "hwwlvj_ggH%03d_el_%02d_%02d_workspace.root"%(mass,cprime,BRnew);
+
+     outScript.write("\n"+'cp '+currentDir+' '+file1+' ./');
+     outScript.write("\n"+'cp '+currentDir+' '+file2+' ./');
+     outScript.write("\n"+'cp '+currentDir+' '+file3+' ./');
+     outScript.write("\n"+command);
+     outScript.close();
+
+     os.system("chmod 777 "+currentDir+"/"+fn+".sh"); 
+     os.system("bsub -q 8nh -cwd "+currentDir+" "+fn+".sh");
+
+    elif not options.lxbatchCern and options.herculesMilano: 
+
+     outScript.write('#!/bin/bash');
+     outScript.write("\n"+'date');
+     outScript.write("\n"+'cd '+currentDir);
+     outScript.write("\n"+'eval `scram runtime -sh`');
+     outScript.write("\n"+'cd -');
+     outScript.write("\n"+'ls');    
+    
+     file1 = "hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass,SIGCH,cprime,BRnew);
+     file2 = "hwwlvj_ggH%03d_mu_%02d_%02d_workspace.root"%(mass,cprime,BRnew);
+     file3 = "hwwlvj_ggH%03d_el_%02d_%02d_workspace.root"%(mass,cprime,BRnew);
+
+     outScript.write("\n"+'cp '+currentDir+' '+file1+' ./');
+     outScript.write("\n"+'cp '+currentDir+' '+file2+' ./');
+     outScript.write("\n"+'cp '+currentDir+' '+file3+' ./');
+     outScript.write("\n"+command);
+     outScript.close();
+
+     os.system("chmod 777 "+currentDir+"/"+fn+".sh"); 
+     os.system("qsub -V -d "+currentDir+" -q shortcms "+currentDir+"/"+fn+".sh");
+
 
 ############################################################
 
