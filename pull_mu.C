@@ -38,7 +38,7 @@ TTree* tree_s = (TTree*)file->Get("limit");
  tree_s->SetBranchAddress("limitErr",&limitErr);
  tree_s->SetBranchAddress("quantileExpected",&quantileExpected);
 
- TH1F* pullDistribution = new TH1F ("pull","mu",15,-1,1);
+ TH1F* pullDistribution = new TH1F ("pull","mu",15,-2,2);
  TH1F* LimitDistribution = new TH1F ("limit2","limit2",30,-3,3);
 
 for( int iEntry = 0; iEntry < tree_s->GetEntries(); iEntry ++){
@@ -65,7 +65,7 @@ for( int iEntry = 0; iEntry < tree_s->GetEntries(); iEntry ++){
  pullDistribution->SetMarkerStyle(20);
  pullDistribution->SetMarkerSize(0.9);
  f->SetLineColor(4);
- gStyle->SetOptStat(0);
+ gStyle->SetOptStat(1111);
  gStyle->SetOptFit(1111);
 
  pullDistribution->Draw("pe");
