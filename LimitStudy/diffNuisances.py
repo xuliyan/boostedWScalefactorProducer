@@ -53,23 +53,20 @@ errors=[];
 pulls = []
 sig_x = []
 
-#nuisance = {'QCDscale_ggH2in':1.19, 'pdf_gg':1.095, 'QCDscale_ggH_ACCEPT':1.036, 'intf_ggH':1.100, 'QCDscale_vbfH':1.007, 'pdf_qqbar':1.036, 'QCDscale_qqH_ACCEPT':1.007, 'intf_vbfH':1.500, 'CMS_hwwlvj_STop':1.300, 'CMS_hwwlvj_VV':1.300, 'CMS_hwwlvj_WW_EWK':1.300, 'lumi_8TeV':1.026, 'CMS_trigger_em':1.010, 'CMS_eff_em':1.020, 'CMS_Top_norm_em_2':1.225, 'CMS_wtagger':1.097, 'Wjet_Norm_em_2':1.322, 'CMS_scale_j':1.050 , 'CMS_res_j':1.100 , 'CMS_scale_l':1.015 , 'CMS_res_l':1.002 ,'CMS_btag_eff':1.017 , 'Deco_WJets0_sb_lo_from_fitting_em_HP_mlvj_eig0': 1.4, 'Deco_WJets0_sb_lo_from_fitting_em_HP_mlvj_eig1': 1.4, 'Deco_WJets0_sim_em_HP_mlvj_eig0': 1.4, 'Deco_WJets0_sim_em_HP_mlvj_eig1':1.4, 'Deco_TTbar_signal_region_em_HP_mlvj_eig0':2.0}
-
-nuisance = {'QCDscale_ggH2in':1.19, 'pdf_gg':1.095, 'QCDscale_ggH_ACCEPT':1.036, 'intf_ggH':1.100, 'QCDscale_vbfH':1.007, 'pdf_qqbar':1.036, 'QCDscale_qqH_ACCEPT':1.007, 'intf_vbfH':1.500, 'CMS_hwwlvj_STop':1.300, 'CMS_hwwlvj_VV':1.300, 'CMS_hwwlvj_WW_EWK':1.300, 'lumi_8TeV':1.026, 'CMS_trigger_em':1.010, 'CMS_eff_em':1.020, 'CMS_Top_norm_em_2':1.225, 'CMS_wtagger':1.097, 'Wjet_Norm_em_2':1.322, 'CMS_scale_j':1.100 , 'CMS_res_j':1.100 , 'CMS_scale_l':1.015 , 'CMS_res_l':1.002 ,'CMS_btag_eff':1.017 , 'Deco_WJets0_sb_lo_from_fitting_em_HP_mlvj_eig0': 1.4, 'Deco_WJets0_sb_lo_from_fitting_em_HP_mlvj_eig1': 1.4, 'Deco_WJets0_sb_lo_from_fitting_em_HP_mlvj_eig2': 1.4, 'Deco_WJets0_sb_lo_from_fitting_em_HP_mlvj_eig3': 1.4, 'Deco_WJets0_sim_em_HP_mlvj_eig0': 1.4, 'Deco_WJets0_sim_em_HP_mlvj_eig1':1.4, 'Deco_WJets0_sim_em_HP_mlvj_eig2':1.4, 'Deco_WJets0_sim_em_HP_mlvj_eig3':1.4, 'Deco_WJets0_sim_em_HP_mlvj_eig4':1.4,'Deco_WJets0_sim_em_HP_mlvj_eig5':1.4, 'Deco_TTbar_signal_region_em_HP_mlvj_eig0':2.0, 'Deco_TTbar_signal_region_em_HP_mlvj_eig1':2.0, 'Deco_TTbar_signal_region_em_HP_mlvj_eig2':2.0}
 
 for i in range (branches_list_s.GetEntries()):
 
     hname = branches_list_s[i].GetName();    
-    hname_sigma = branches_list_s[i+1].GetName();
 
-    if ( hname.find("mu")==-1 and hname.find("nll")==-1 and hname.find("n_exp")==-1 and hname.find("status")==-1 and hname.find("In")==-1 and hname.find("sigma")):
+    if ( hname.find("nll")==-1 and hname.find("n_exp")==-1 and hname.find("status")==-1 and hname.find("In")==-1 and hname.find("sigma")==-1):
+      
+       if hname.find("mu")==-1: 
 
-#            nuis_p = prefit.find(hname);
-#            error = nuis_p.getError();
-#            print error;
-
-            histo_temp = ROOT.TH1F(hname,"",100,-2,2);
-            histo_temp_sigma = ROOT.TH1F(hname_sigma,"",100,-2,2);    
+            hname_sigma = branches_list_s[i+1].GetName();
+            histo_temp = ROOT.TH1F(hname,"",100,-5,5);          
+            histo_temp_sigma = ROOT.TH1F(hname_sigma,"",100,-5,5);    
+            print hname;
+            print hname_sigma;
 
             if options.type == 's':
                 tree_s.Draw( branches_list_s[i].GetName()+" >> "+hname, "" ,"goff")
@@ -78,29 +75,23 @@ for i in range (branches_list_s.GetEntries()):
             if options.type == 'b':
                 tree_b.Draw( branches_list_s[i].GetName()+" >> "+hname, "" ,"goff")
                 tree_b.Draw( branches_list_s[i+1].GetName()+" >> "+hname_sigma, "" ,"goff")            
-                
-#            histo_temp.Scale(1./error);
-#            histo_temp.GetXaxis().SetTitle("pull");
 
             histo_list_fin.append(histo_temp);
             pulls_name.append(hname);
-            nuis_p = prefit.find(hname);            
             pulls.append(float(histo_temp.GetMean()));
-#            k = nuisance[hname];
             errors.append(histo_temp_sigma.GetMean());
-#            print hname;
-#            print hname_sigma;
-#            print histo_temp.GetMean();
-            canvas_temp = ROOT.TCanvas();
-            histo_temp.Draw();
-            canvas_temp.SaveAs(hname+".png","png");
-#            print hname;
-#            print histo_temp.GetMean();
-#            print histo_temp.GetRMS();
-#    print histo_temp.GetEntries();    
 
-#    tree_s.GetEntry(1);
-#    print (getattr(tree_s,branches_list_s[i].GetName() ))
+       else:
+
+            histo_temp = ROOT.TH1F(hname,"",30,0,20);
+            if options.type == 's':
+                tree_s.Draw( branches_list_s[i].GetName()+" >> "+hname, "" ,"goff")
+            if options.type == 'b':
+                tree_b.Draw( branches_list_s[i].GetName()+" >> "+hname, "" ,"goff")
+                
+       canvas_temp = ROOT.TCanvas();
+       histo_temp.Draw();
+       canvas_temp.SaveAs(hname+".png","png");
 
 if options.plotfile:
     import ROOT
@@ -126,12 +117,13 @@ if options.plotfile:
     ROOT.gStyle.SetGridStyle (2)
     gr = ROOT.TGraphErrors();
 
-    print len(pulls);
+#    print len(pulls);
     i=0;
     c=1;
     for pull in pulls:
 
-#        print pull;
+#      if not pulls_name[i]=="mu":  
+#        print pulls_name[i];
 #        print errors[i];
         histogram.SetBinContent(i+1,pull);
         histogram.GetXaxis().SetBinLabel(i+1,pulls_name[i]);
