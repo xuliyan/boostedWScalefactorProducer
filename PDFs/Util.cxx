@@ -269,7 +269,7 @@ void draw_error_band_pull( RooAbsData &rdata,  RooAbsPdf &rpdf,  RooRealVar &rrv
 
 
 /// Variation of the previous method using a workspace -> used to draw the band for the final extrapolation -> take in input decorrelated parameters
-TGraphAsymmErrors* draw_error_band_ws( RooAbsReal &rdata, RooAbsPdf &rpdf, std::string xaxis_name,  RooRealVar &rrv_number_events ,  RooArgList &paras,  RooWorkspace &ws, RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
+TGraphAsymmErrors* draw_error_band_ws( RooAbsData &rdata, RooAbsPdf &rpdf, std::string xaxis_name,  RooRealVar &rrv_number_events ,  RooArgList &paras,  RooWorkspace &ws, RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
 
 	TRandom3 rand(1234);
         rand.SetSeed(0);
