@@ -415,7 +415,6 @@ void draw_error_band_pull_ws( RooAbsData & rdata, RooAbsPdf &rpdf, std::string x
                 if( errData_up < 1E-6) errData_up = 1;  
       		errorband_pull->SetPoint(i, x_min+delta_x*i,  0.0 );
 		errorband_pull->SetPointError(i, 0.,0., errYLow/errData_dw, errYHi/errData_up);
-		std::cout<<" i "<<i<<" N "<<N<<" errYHi "<<errYHi<<" errYLow "<<errYLow<<" errData_dw "<<errData_dw<<" errData_up "<<errData_up<<std::endl;
 	}
 
 	errorband_pull->SetFillColor(kYellow);
