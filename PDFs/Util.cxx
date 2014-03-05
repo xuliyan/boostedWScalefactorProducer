@@ -22,6 +22,8 @@
 #include <string>
 
 #include "RooPlot.h"
+#include "TMath.h"
+#include "Math/QuantFuncMathCore.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1F.h"
@@ -56,6 +58,8 @@
 #include "TGraphAsymmErrors.h"
 #include <iostream>
 using namespace std;
+using namespace ROOT;
+using namespace TMath;
 
 void Util(){}
 
@@ -232,19 +236,25 @@ void draw_error_band_pull( RooAbsData &rdata,  RooAbsPdf &rpdf,  RooRealVar &rrv
         // Try to build and find max and minimum for each point --> not the curve but the value to do a real envelope -> take one sigma interval
         TGraphAsymmErrors* errorband_pull = new TGraphAsymmErrors(number_point+1);
 	TH1D* hdata = (TH1D*)rdata.createHistogram(rrv_x->GetName());
-        hdata->SetBinErrorOption(TH1::kPoisson);
         errorband_pull->SetName("errorband_pull");
+	const double alpha = 1 - 0.6827;
+
 	for(int i =0 ; i<= number_point ; i++){
 		for(int j=0;j<number_errorband;j++){
 			val[j]=(syst[j])->GetY()[i];
 		}
-		std::sort(val.begin(),val.end());
-		double errYLow = bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)];
-		double errYHi  = val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i];
-
-		double errData = hdata->GetBinError(hdata->FindBin(x_min+delta_x*i));
-		errorband_pull->SetPoint(i, x_min+delta_x*i,  0.0 );
-		errorband_pull->SetPointError(i, 0.,0., -1.0*errYLow/errData, -1.0*errYHi/errData);
+		double errYLow   = (bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)]);
+		double errYHi    = (val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i]);
+                int N = hdata->GetBinContent(hdata->FindBin(x_min+delta_x*i));
+                if (i == number_point) N = hdata->GetBinContent(hdata->FindBin(x_min+delta_x*(i-1)));
+		double errData_dw =  (N==0) ? 0  : (ROOT::Math::gamma_quantile(alpha/2,N,1.));
+                errData_dw = N - errData_dw ;
+		double errData_up =  ROOT::Math::gamma_quantile_c(alpha/2,N+1,1) ;         
+                errData_up = errData_up - N ;
+                if( errData_dw < 1E-6) errData_dw = 1;
+                if( errData_up < 1E-6) errData_up = 1;  
+      		errorband_pull->SetPoint(i, x_min+delta_x*i,  0.0 );
+		errorband_pull->SetPointError(i, 0.,0., errYLow/errData_dw, errYHi/errData_up);
 
 	}
 
@@ -385,21 +395,27 @@ void draw_error_band_pull_ws( RooAbsData & rdata, RooAbsPdf &rpdf, std::string x
 	val.resize(number_errorband);
 	TGraphAsymmErrors* errorband_pull = new TGraphAsymmErrors(number_point+1);
 	TH1D* hdata = (TH1D*)rdata.createHistogram(rrv_x->GetName());
-        hdata->SetBinErrorOption(TH1::kPoisson);
+	const double alpha = 1 - 0.6827;
         errorband_pull->SetName("errorband_pull");
+
 	for(int i =0 ; i<= number_point ; i++){
 		for(int j=0;j<number_errorband;j++){
 			val[j]=(syst[j])->GetY()[i];
 		}
-		std::sort(val.begin(),val.end());
-		double errYLow = bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)];
-		double errYHi  = val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i];
-
-		double errData = hdata->GetBinError(hdata->FindBin(x_min+delta_x*i));
-
-		errorband_pull->SetPoint(i, x_min+delta_x*i,  0.0 );
-		errorband_pull->SetPointError(i, 0.,0., -1.0*errYLow/errData, -1.0*errYHi/errData);
-
+		double errYLow   = fabs((bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)]));
+		double errYHi    = fabs((val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i]));
+                
+                int N = hdata->GetBinContent(hdata->FindBin(x_min+delta_x*i));
+                if (i == number_point) N = hdata->GetBinContent(hdata->FindBin(x_min+delta_x*(i-1)));
+		double errData_dw =  (N==0) ? 0  : (ROOT::Math::gamma_quantile(alpha/2,N,1.));
+		double errData_up =  ROOT::Math::gamma_quantile_c(alpha/2,N+1,1) ;         
+                errData_dw = N - errData_dw ;
+                errData_up = errData_up - N ;
+                if( errData_dw < 1E-6) errData_dw = 1;
+                if( errData_up < 1E-6) errData_up = 1;  
+      		errorband_pull->SetPoint(i, x_min+delta_x*i,  0.0 );
+		errorband_pull->SetPointError(i, 0.,0., errYLow/errData_dw, errYHi/errData_up);
+		std::cout<<" i "<<i<<" N "<<N<<" errYHi "<<errYHi<<" errYLow "<<errYLow<<" errData_dw "<<errData_dw<<" errData_up "<<errData_up<<std::endl;
 	}
 
 	errorband_pull->SetFillColor(kYellow);
@@ -534,7 +550,6 @@ void draw_error_band_extendPdf_pull( RooAbsData &rdata,  RooAbsPdf &rpdf, RooFit
 
         /// Set of parameters
 	RooArgSet* par_pdf  = rpdf.getParameters(RooArgSet(*rrv_x)) ;
-	std::cout<<" end bkg prediction "<<std::endl; 
        
         /// Build a envelope using number_errorband toys
  	TGraph* syst[number_errorband];
@@ -552,34 +567,36 @@ void draw_error_band_extendPdf_pull( RooAbsData &rdata,  RooAbsPdf &rpdf, RooFit
         /// re-take the initial parameters
 	RooArgList par_tmp = rfres->floatParsFinal();
 	*par_pdf = par_tmp;
-	std::cout<<" end envelope "<<std::endl; 
         // build the uncertainty band at 68% CL 
 	std::vector<double> val;
 	val.resize(number_errorband);
 
         // Try to build and find max and minimum for each point --> not the curve but the value to do a real envelope -> take one sigma interval
         TGraphAsymmErrors* errorband_pull = new TGraphAsymmErrors(number_point+1);
-	TH1D* hdata = (TH1D*)rdata.createHistogram(rrv_x->GetName());
-        hdata->SetBinErrorOption(TH1::kPoisson);
-	std::cout<<" make histo "<<std::endl; 
-
+        TH1D* hdata = (TH1D*)rdata.createHistogram(rrv_x->GetName());
+	const double alpha = 1 - 0.6827;
+ 
         errorband_pull->SetName("errorband_pull");
 	for(int i =0 ; i<= number_point ; i++){
 		for(int j=0;j<number_errorband;j++){
 			val[j]=(syst[j])->GetY()[i];
 		}
 		std::sort(val.begin(),val.end());
-		double errYLow = bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)];
-		double errYHi  = val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i];
-
-		double errData = hdata->GetBinError(hdata->FindBin(x_min+delta_x*i));
-
-		errorband_pull->SetPoint(i, x_min+delta_x*i,  0.0 );
-		errorband_pull->SetPointError(i, 0.,0., -1.0*errYLow/errData, -1.0*errYHi/errData);
-
+		double errYLow   = (bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)]);
+		double errYHi    = (val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i]);
+                int N = hdata->GetBinContent(hdata->FindBin(x_min+delta_x*i));
+                if (i == number_point) N = hdata->GetBinContent(hdata->FindBin(x_min+delta_x*(i-1)));
+		double errData_dw =  (N==0) ? 0  : (ROOT::Math::gamma_quantile(alpha/2,N,1.));
+                errData_dw = N - errData_dw ;
+		double errData_up =  ROOT::Math::gamma_quantile_c(alpha/2,N+1,1) ;         
+                errData_up = errData_up-N ;
+                if( errData_dw < 1E-6) errData_dw = 1;
+                if( errData_up < 1E-6) errData_up = 1;  
+      		errorband_pull->SetPoint(i, x_min+delta_x*i,  0.0 );
+		errorband_pull->SetPointError(i, 0.,0., errYLow/errData_dw, errYHi/errData_up);
+                  
 	}
 
-	std::cout<<" error band "<<std::endl; 
 	errorband_pull->SetFillColor(kYellow);
 	errorband_pull->SetLineColor(kYellow);
 	errorband_pull->SetLineWidth(2);
