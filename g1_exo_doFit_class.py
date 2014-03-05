@@ -48,7 +48,7 @@ ROOT.gSystem.Load(options.inPath+"/PDFs/PdfDiagonalizer_cc.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/Util_cxx.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/HWWLVJRooPdfs_cxx.so")
 
-from ROOT import draw_error_band, draw_error_band_extendPdf, draw_error_band_Decor, draw_error_band_shape_Decor, Calc_error_extendPdf, Calc_error, RooErfExpPdf, RooAlpha, RooAlpha4ErfPowPdf, RooAlpha4ErfPow2Pdf, RooAlpha4ErfPowExpPdf, PdfDiagonalizer, RooPowPdf, RooPow2Pdf, RooErfPowExpPdf, RooErfPowPdf, RooErfPow2Pdf, RooQCDPdf, RooUser1Pdf, RooBWRunPdf, RooAnaExpNPdf, RooExpNPdf, RooAlpha4ExpNPdf, RooExpTailPdf, RooAlpha4ExpTailPdf, Roo2ExpPdf, RooAlpha42ExpPdf
+from ROOT import draw_error_band, draw_error_band_extendPdf, draw_error_band_Decor, draw_error_band_shape_Decor, Calc_error_extendPdf, Calc_error, RooErfExpPdf, RooAlpha, RooAlpha4ErfPowPdf, RooAlpha4ErfPow2Pdf, RooAlpha4ErfPowExpPdf, PdfDiagonalizer, RooPowPdf, RooPow2Pdf, RooErfPowExpPdf, RooErfPowPdf, RooErfPow2Pdf, RooQCDPdf, RooUser1Pdf, RooBWRunPdf, RooAnaExpNPdf, RooExpNPdf, RooAlpha4ExpNPdf, RooExpTailPdf, RooAlpha4ExpTailPdf, Roo2ExpPdf, RooAlpha42ExpPdf, draw_error_band_extendPdf_pull, draw_error_band_pull, draw_error_band_pull_ws
 
 ###############################
 ## doFit Class Implemetation ##
@@ -2185,12 +2185,12 @@ class doFit_wj_and_wlvj:
         ## draw the error band for an extend pdf
         draw_error_band_extendPdf(rdataset_mj, model, rfresult,mplot,2,"L");
         ## re-draw the dataset
-        rdataset_mj.plotOn( mplot , RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+        rdataset_mj.plotOn( mplot , RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0), RooFit.Name("data") );
         ## draw the function
-        model.plotOn( mplot );# remove RooFit.VLines() in order to get right pull in the 1st bin
+        model.plotOn( mplot, RooFit.Name("model_mc") );# remove RooFit.VLines() in order to get right pull in the 1st bin
 
         ## Get the pull
-        mplot_pull = self.get_pull(rrv_mass_j, mplot); 
+        mplot_pull = self.get_pull(rrv_mass_j, mplot, rdataset_mj, model, rfresult, "data", "model_mc",0); 
         mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.2);
 
         parameters_list = model.getParameters(rdataset_mj);
@@ -2252,11 +2252,11 @@ class doFit_wj_and_wlvj:
         rdataset.plotOn( mplot , RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
         ## plot the error band but don't store the canvas (only plotted without -b option
         draw_error_band_extendPdf(rdataset, model, rfresult,mplot,2,"L")
-        rdataset.plotOn( mplot , RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
-        model.plotOn( mplot )#, RooFit.VLines()); in order to have the right pull 
+        rdataset.plotOn( mplot , RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0), RooFit.Name("data") );
+        model.plotOn( mplot, RooFit.Name("model_mc") )#, RooFit.VLines()); in order to have the right pull 
 
         ## get the pull 
-        mplot_pull      = self.get_pull(rrv_mass_lvj,mplot);
+        mplot_pull = self.get_pull(rrv_mass_lvj, mplot, rdataset, model, rfresult, "data", "model_mc",0); 
         parameters_list = model.getParameters(rdataset);
         mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.2);
         
@@ -2472,10 +2472,11 @@ class doFit_wj_and_wlvj:
 
             ### draw the error band using the sum of all the entries component MC + fit           
             draw_error_band(rdataset_data_mj, model_data, rrv_number_data_mj,rfresult,mplot,self.color_palet["Uncertainty"],"F");
-            rdataset_data_mj.plotOn(mplot, RooFit.Name("data_invisible"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.Poisson), RooFit.XErrorSize(0) );
+            model_data.plotOn(mplot,RooFit.Name("model_mc"),RooFit.Range(rrv_mass_j.getMin(),rrv_mass_j.getMax()),RooFit.NormRange("sb_lo,sb_hi"),RooFit.Invisible());
+            rdataset_data_mj.plotOn(mplot, RooFit.Name("data_invisible"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.Poisson), RooFit.XErrorSize(0),RooFit.Name("data") );
 
             ### Get the pull and plot it 
-            mplot_pull=self.get_pull(rrv_mass_j,mplot);
+            mplot_pull = self.get_pull(rrv_mass_j, mplot, rdataset_data_mj, model_data, rfresult, "data", "model_mc" ); 
 
             ### signal window zone with vertical lines
             lowerLine = TLine(self.mj_signal_min,0.,self.mj_signal_min,mplot.GetMaximum()*0.9); lowerLine.SetLineWidth(2); lowerLine.SetLineColor(kBlack); lowerLine.SetLineStyle(9);
@@ -2645,7 +2646,7 @@ class doFit_wj_and_wlvj:
             ### draw the error band 
             draw_error_band(rdataset_data_mlvj, model_data,self.workspace4fit_.var("rrv_number_data_xww_sb_lo_%s_mlvj"%(self.channel)) ,rfresult,mplot,self.color_palet["Uncertainty"],"F");
             model_data.plotOn( mplot , RooFit.VLines(), RooFit.Invisible());
-            model_data.plotOn( mplot , RooFit.Invisible());
+            model_data.plotOn( mplot , RooFit.Invisible(), RooFit.Name("model_mc"));
             self.getData_PoissonInterval(rdataset_data_mlvj,mplot);
 
             mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.2);  
@@ -2664,7 +2665,9 @@ class doFit_wj_and_wlvj:
             self.file_out.write("\n fit_mlvj_in_Mj_sideband: nPar=%s, chiSquare=%s/%s"%(self.nPar_float_in_fitTo, mplot.chiSquare( self.nPar_float_in_fitTo )*ndof, ndof ) );
 
             ### get the pull plot and store the canvas
-            mplot_pull = self.get_pull(rrv_mass_lvj,mplot);
+            mplot_pull = self.get_pull(rrv_mass_lvj, mplot, rdataset_data_mlvj, model_data, rfresult, "data", "model_mc"); 
+
+                  
             parameters_list = model_data.getParameters(rdataset_data_mlvj);
                 
             self.draw_canvas_with_pull( mplot, mplot_pull,parameters_list,"plots_%s_%s_%s_%s_g1/m_lvj_fitting/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label), "m_lvj_sb_lo%s"%(label),"",1,1)
@@ -2967,9 +2970,10 @@ class doFit_wj_and_wlvj:
             ### only mc plots in the SB region
             mplot_sb_lo = rrv_x.frame(RooFit.Title("WJets sb low"), RooFit.Bins(int(rrv_x.getBins()/self.narrow_factor)));
             
-            rdataset_WJets_sb_lo_mlvj.plotOn(mplot_sb_lo, RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
-            model_pdf_sb_lo_WJets.plotOn(mplot_sb_lo);
-            mplot_pull_sideband = self.get_pull(rrv_x,mplot_sb_lo);
+            rdataset_WJets_sb_lo_mlvj.plotOn(mplot_sb_lo, RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0), RooFit.Name("data") );
+            model_pdf_sb_lo_WJets.plotOn(mplot_sb_lo, RooFit.Name("model_mc"));
+            mplot_pull_sideband = self.get_pull(rrv_x,mplot_sb_lo,rdataset_WJets_sb_lo_mlvj, model_pdf_sb_lo_WJets, rfresult, "data", "model_mc",0); 
+
             parameters_list     = model_pdf_sb_lo_WJets.getParameters(rdataset_WJets_sb_lo_mlvj);
             mplot_sb_lo.GetYaxis().SetRangeUser(1e-2,mplot_sb_lo.GetMaximum()*1.2);
             self.draw_canvas_with_pull( mplot_sb_lo, mplot_pull_sideband,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label), "m_lvj%s_sb_lo_sim"%(label),"",1,1)
@@ -2977,9 +2981,9 @@ class doFit_wj_and_wlvj:
             ### only mc plots in the SR region
             mplot_signal_region = rrv_x.frame(RooFit.Title("WJets sr"), RooFit.Bins(int(rrv_x.getBins()/self.narrow_factor)));
 
-            rdataset_WJets_signal_region_mlvj.plotOn(mplot_signal_region, RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
-            model_pdf_signal_region_WJets.plotOn(mplot_signal_region);
-            mplot_pull_signal_region = self.get_pull(rrv_x, mplot_signal_region);
+            rdataset_WJets_signal_region_mlvj.plotOn(mplot_signal_region, RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0), RooFit.Name("data") );
+            model_pdf_signal_region_WJets.plotOn(mplot_signal_region, RooFit.Name("model_mc"));
+            mplot_pull_signal_region = self.get_pull(rrv_x,mplot_signal_region,rdataset_WJets_signal_region_mlvj, model_pdf_signal_region_WJets, rfresult, "data", "model_mc",0); 
             parameters_list = model_pdf_signal_region_WJets.getParameters(rdataset_WJets_signal_region_mlvj);
             mplot_signal_region.GetYaxis().SetRangeUser(1e-2,mplot_signal_region.GetMaximum()*1.2);
             self.draw_canvas_with_pull( mplot_signal_region, mplot_pull_signal_region,parameters_list,"plots_%s_%s_%s_%s_g1/other/"%(options.additioninformation, self.channel,self.PS_model,self.wtagger_label), "m_lvj%s_signal_region_sim"%(label),"",1,1);
@@ -3936,12 +3940,12 @@ class doFit_wj_and_wlvj:
         #### plot the observed data using poissonian error bar
         self.getData_PoissonInterval(data_obs,mplot);
         
-        model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Invisible());
-
-        mplot_pull=self.get_pull(rrv_x,mplot);
+        model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Invisible(),"model_mc");
 
         ### Plot the list of floating parameters and the uncertainty band is draw taking into account this floating list defined in the prepare_limit
-        draw_error_band(model_Total_background_MC, rrv_x.GetName(), rrv_number_Total_background_MC,self.FloatingParams,workspace ,mplot,self.color_palet["Uncertainty"],"F");
+        draw_error_band_ws(model_Total_background_MC, rrv_x.GetName(), rrv_number_Total_background_MC,self.FloatingParams,workspace ,mplot,self.color_palet["Uncertainty"],"F");
+
+        mplot_pull = self.get_pull_ws(rrv_x,mplot,data_obs,model_Total_background_MC,rrv_x.GetName(),rrv_number_Total_background_MC,self.FloatingParams,workspace,"data","model_mc");
 
         mplot.Print();
         self.leg = self.legend4Plot(mplot,0,1,-0.01,-0.05,0.11,0.);
@@ -3963,19 +3967,67 @@ class doFit_wj_and_wlvj:
         print "nPar=%s, chiSquare=%s/%s"%(self.nPar_float_in_fitTo, mplot.chiSquare( self.nPar_float_in_fitTo )*ndof, ndof );
 
     ### in order to get the pull
-    def get_pull(self, rrv_x, mplot_orig):
+    def get_pull(self, rrv_x, mplot_orig, rdataset, model, rfresult, dataname = "data", modelname = "model_mc", makeBand = 1):
 
         print "############### draw the pull plot ########################"
-        hpull = mplot_orig.pullHist();
+        hpull = mplot_orig.pullHist(dataname,modelname);
         x = ROOT.Double(0.); y = ROOT.Double(0) ;
+        err_y_low = ROOT.Double(0.); err_y_high = ROOT.Double(0) ;
+        err_x_low = ROOT.Double(0.); err_x_high = ROOT.Double(0) ;
         for ipoint in range(0,hpull.GetN()):
           hpull.GetPoint(ipoint,x,y);
+          err_x_low = hpull.GetErrorXlow(ipoint);
+          err_x_high = hpull.GetErrorXhigh(ipoint);
+          err_y_low = hpull.GetErrorYlow(ipoint);
+          err_y_high = hpull.GetErrorYhigh(ipoint);
           if(y == 0):
            hpull.SetPoint(ipoint,x,10)
+           hpull.SetPointError(ipoint,err_x_low,err_x_high,err_y_low,err_y_high);
        
         mplot_pull = rrv_x.frame(RooFit.Title("Pull Distribution"), RooFit.Bins(int(rrv_x.getBins()/self.narrow_factor)));
         medianLine = TLine(rrv_x.getMin(),0.,rrv_x.getMax(),0); medianLine.SetLineWidth(2); medianLine.SetLineColor(kRed);
-        mplot_pull.addObject(medianLine);
+
+        if makeBand: draw_error_band_extendPdf_pull(rdataset,model,rfresult,mplot_pull);
+
+        mplot_pull.addObject(medianLine);        
+        mplot_pull.addPlotable(hpull,"P");
+        mplot_pull.SetTitle("");
+        mplot_pull.GetXaxis().SetTitle("");
+        mplot_pull.GetYaxis().SetRangeUser(-5,5);
+        mplot_pull.GetYaxis().SetTitleSize(0.10);
+        mplot_pull.GetYaxis().SetLabelSize(0.10);
+        mplot_pull.GetXaxis().SetTitleSize(0.10);
+        mplot_pull.GetXaxis().SetLabelSize(0.10);
+        mplot_pull.GetYaxis().SetTitleOffset(0.40);
+        mplot_pull.GetYaxis().SetTitle("#frac{Data-Fit}{#sigma_{data}}");
+        mplot_pull.GetYaxis().CenterTitle();
+
+        return mplot_pull;
+
+    def get_pull_ws(self, rrv_x, mplot_orig, rdataset, model, axis_name, bkg_events, paramlist, RooWorkspace, dataname = "data", modelname = "model_mc", makeBand = 1):
+
+        print "############### draw the pull plot ########################"
+        print "############### draw the pull plot ########################"
+        hpull = mplot_orig.pullHist(dataname,modelname);
+        x = ROOT.Double(0.); y = ROOT.Double(0) ;
+        err_y_low = ROOT.Double(0.); err_y_high = ROOT.Double(0) ;
+        err_x_low = ROOT.Double(0.); err_x_high = ROOT.Double(0) ;
+        for ipoint in range(0,hpull.GetN()):
+          hpull.GetPoint(ipoint,x,y);
+          err_x_low = hpull.GetErrorXlow(ipoint);
+          err_x_high = hpull.GetErrorXhigh(ipoint);
+          err_y_low = hpull.GetErrorYlow(ipoint);
+          err_y_high = hpull.GetErrorYhigh(ipoint);
+          if(y == 0):
+           hpull.SetPoint(ipoint,x,10)
+           hpull.SetPointError(ipoint,err_x_low,err_x_high,err_y_low,err_y_high);
+       
+        mplot_pull = rrv_x.frame(RooFit.Title("Pull Distribution"), RooFit.Bins(int(rrv_x.getBins()/self.narrow_factor)));
+        medianLine = TLine(rrv_x.getMin(),0.,rrv_x.getMax(),0); medianLine.SetLineWidth(2); medianLine.SetLineColor(kRed);
+
+        if makeBand: draw_error_band_pull_ws(rdataset,model,axis_name,bkg_events,paramlist,workspace,mplot_pull); 
+
+        mplot_pull.addObject(medianLine);        
         mplot_pull.addPlotable(hpull,"P");
         mplot_pull.SetTitle("");
         mplot_pull.GetXaxis().SetTitle("");
