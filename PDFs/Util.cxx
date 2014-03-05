@@ -72,25 +72,28 @@ void draw_error_band( RooAbsData &rdata,  RooAbsPdf &rpdf,  RooRealVar &rrv_numb
         /// create an iterator on the observables
 	TIterator *par=argset_obs->createIterator();
 	par->Reset();
-        /// extract the RooRealVar 
+        /// extract the RooRealVar --> in our case just one obs
 	RooRealVar *rrv_x=(RooRealVar*)par->Next();
 	rrv_x->Print();
-
-        rpdf.Print("v");
 
         /// Get the pdf pramters 
         rpdf.getParameters(RooArgSet(*rrv_x))->Print("v");
 	rrv_number_events.Print();
+
         /// Define min and max x range
 	Double_t x_min = rrv_x->getMin();
 	Double_t x_max = rrv_x->getMax();
+
         /// define the step to sample the function 
 	Double_t delta_x = (x_max-x_min)/number_point;
+
         /// Original Bin width
 	Double_t width_x = mplot->getFitRangeBinW();
+
         /// number of events  
 	Double_t number_events_mean = rrv_number_events.getVal();
 	Double_t number_events_sigma= rrv_number_events.getError();
+
         /// Create a Graph for the central background prediction 
 	TGraph *bkgpred = new TGraph(number_point+1);
 	for(int i =0 ; i<= number_point ; i++){
@@ -99,6 +102,7 @@ void draw_error_band( RooAbsData &rdata,  RooAbsPdf &rpdf,  RooRealVar &rrv_numb
 	}
 	bkgpred->SetLineWidth(2);
 	bkgpred->SetLineColor(kcolor);
+
         /// Set of parameters
 	RooArgSet* par_pdf  = rpdf.getParameters(RooArgSet(*rrv_x)) ;
        
@@ -116,15 +120,19 @@ void draw_error_band( RooAbsData &rdata,  RooAbsPdf &rpdf,  RooRealVar &rrv_numb
 		}
 	}
 
+        /// re-take the initial parameters
 	RooArgList par_tmp = rfres->floatParsFinal();
 	*par_pdf = par_tmp;
 
+        // build the uncertainty band at 68% CL 
 	std::vector<double> val;
 	val.resize(number_errorband);
-        // Try to build and find max and minimum for each point --> not the curve but the value to do a real envelope -> take one 2sigma interval
-	TGraph *ap=new TGraph(number_point+1);
-	TGraph *am=new TGraph(number_point+1);
-	TGraphAsymmErrors* errorband=new TGraphAsymmErrors(number_point+1);
+
+        // Try to build and find max and minimum for each point --> not the curve but the value to do a real envelope -> take one sigma interval
+	TGraph *ap = new TGraph(number_point+1);
+	TGraph *am = new TGraph(number_point+1);
+	TGraphAsymmErrors* errorband = new TGraphAsymmErrors(number_point+1);
+
         ap->SetName("error_up");
         am->SetName("error_dn");
         errorband->SetName("errorband");
@@ -136,7 +144,10 @@ void draw_error_band( RooAbsData &rdata,  RooAbsPdf &rpdf,  RooRealVar &rrv_numb
 		ap->SetPoint(i, x_min+delta_x*i,val[Int_t(0.16*number_errorband)]);
 		am->SetPoint(i, x_min+delta_x*i,val[Int_t(0.84*number_errorband)]);
 		errorband->SetPoint(i, x_min+delta_x*i,bkgpred->GetY()[i] );
-		errorband->SetPointError(i, 0.,0., bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)],val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i]);
+		double errYLow = bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)];
+		double errYHi  = val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i];
+		errorband->SetPointError(i, 0.,0.,errYLow , errYHi);
+
 	}
 	ap->SetLineWidth(2);
 	ap->SetLineColor(kcolor);
@@ -149,6 +160,103 @@ void draw_error_band( RooAbsData &rdata,  RooAbsPdf &rpdf,  RooRealVar &rrv_numb
 	if( TString(opt).Contains("L") ){ mplot->addObject(am); mplot->addObject(ap); }
 
 }
+
+void draw_error_band_pull( RooAbsData &rdata,  RooAbsPdf &rpdf,  RooRealVar &rrv_number_events , RooFitResult *rfres, RooPlot *mplot, Int_t kcolor=6, Int_t number_point=100, const Int_t number_errorband=2000){
+
+        std::cout<<" <<<<<<<<<<<<<<<< draw error band for the pull plot <<<<<<<<<<<<<<<< "<<std::endl;
+	TRandom3 rand(1234);
+        rand.SetSeed(0);
+
+        /// get the observables of the pdf --> mj or mlvj depends on which bands you are drawing
+	RooArgSet* argset_obs = rpdf.getObservables(rdata);
+
+        /// create an iterator on the observables
+	TIterator *par=argset_obs->createIterator();
+	par->Reset();
+        /// extract the RooRealVar --> in our case just one obs
+	RooRealVar *rrv_x=(RooRealVar*)par->Next();
+	rrv_x->Print();
+
+        /// Get the pdf pramters 
+        rpdf.getParameters(RooArgSet(*rrv_x))->Print("v");
+	rrv_number_events.Print();
+
+        /// Define min and max x range
+	Double_t x_min = rrv_x->getMin();
+	Double_t x_max = rrv_x->getMax();
+
+        /// define the step to sample the function 
+	Double_t delta_x = (x_max-x_min)/number_point;
+
+        /// Original Bin width
+	Double_t width_x = mplot->getFitRangeBinW();
+
+        /// number of events  
+	Double_t number_events_mean = rrv_number_events.getVal();
+	Double_t number_events_sigma= rrv_number_events.getError();
+
+        /// Create a Graph for the central background prediction 
+	TGraph *bkgpred = new TGraph(number_point+1);
+	for(int i =0 ; i<= number_point ; i++){
+		rrv_x->setVal(x_min+delta_x*i); 
+		bkgpred->SetPoint(i ,x_min+delta_x*i ,rrv_number_events.getVal()*rpdf.getVal(*rrv_x)*width_x);
+	}
+	bkgpred->SetLineWidth(2);
+	bkgpred->SetLineColor(kcolor);
+
+        /// Set of parameters
+	RooArgSet* par_pdf  = rpdf.getParameters(RooArgSet(*rrv_x)) ;
+       
+        /// Build a envelope using number_errorband toys
+ 	TGraph* syst[number_errorband];
+	for(int j=0;j<number_errorband;j++){
+		syst[j] = new TGraph(number_point+1);
+                /// paramters value are randomized using rfres and this can be done also if they are not decorrelate
+		RooArgList par_tmp = rfres->randomizePars();
+		*par_pdf = par_tmp;
+		Double_t number_events_tmp = rand.Gaus(number_events_mean,number_events_sigma); /// new poisson random number of events
+		for(int i =0 ; i<=number_point ; i++){
+			rrv_x->setVal(x_min+delta_x*i); 
+			syst[j]->SetPoint( i , x_min+delta_x*i , number_events_tmp*rpdf.getVal(*rrv_x)*width_x);
+		}
+	}
+
+        /// re-take the initial parameters
+	RooArgList par_tmp = rfres->floatParsFinal();
+	*par_pdf = par_tmp;
+
+        // build the uncertainty band at 68% CL 
+	std::vector<double> val;
+	val.resize(number_errorband);
+
+        // Try to build and find max and minimum for each point --> not the curve but the value to do a real envelope -> take one sigma interval
+        TGraphAsymmErrors* errorband_pull = new TGraphAsymmErrors(number_point+1);
+	TH1D* hdata = (TH1D*)rdata.createHistogram(rrv_x->GetName());
+        hdata->SetBinErrorOption(TH1::kPoisson);
+        errorband_pull->SetName("errorband_pull");
+	for(int i =0 ; i<= number_point ; i++){
+		for(int j=0;j<number_errorband;j++){
+			val[j]=(syst[j])->GetY()[i];
+		}
+		std::sort(val.begin(),val.end());
+		double errYLow = bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)];
+		double errYHi  = val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i];
+
+		double errData = hdata->GetBinError(hdata->FindBin(x_min+delta_x*i));
+		errorband_pull->SetPoint(i, x_min+delta_x*i,  0.0 );
+		errorband_pull->SetPointError(i, 0.,0., -1.0*errYLow/errData, -1.0*errYHi/errData);
+
+	}
+
+	errorband_pull->SetFillColor(kYellow);
+	errorband_pull->SetLineColor(kYellow);
+	errorband_pull->SetLineWidth(2);
+	errorband_pull->SetFillStyle(3001);
+
+        mplot->addObject(errorband_pull,"E3");             
+
+}
+
 
 /// Variation of the previous method using a workspace -> used to draw the band for the final extrapolation -> take in input decorrelated parameters
 void draw_error_band_ws( RooAbsPdf &rpdf, std::string xaxis_name,  RooRealVar &rrv_number_events ,  RooArgList &paras,  RooWorkspace &ws, RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
@@ -225,6 +333,85 @@ void draw_error_band_ws( RooAbsPdf &rpdf, std::string xaxis_name,  RooRealVar &r
 	if( TString(opt).Contains("F") ) mplot->addObject(errorband,"E3");
 	if( TString(opt).Contains("L") ){ mplot->addObject(am); mplot->addObject(ap); }
 }
+
+
+void draw_error_band_pull_ws( RooAbsData & rdata, RooAbsPdf &rpdf, std::string xaxis_name,  RooRealVar &rrv_number_events ,  RooArgList &paras,  RooWorkspace &ws, RooPlot *mplot, Int_t number_point=100, const Int_t number_errorband=2000){
+
+	TRandom3 rand(1234);
+        rand.SetSeed(0);
+        /// get observables , pdf and number of events
+        std::cout<<" <<<<<<<<<<<<<<<< draw error band 2 <<<<<<<<<<<<<<<< "<<std::endl;
+	RooRealVar *rrv_x=ws.var(xaxis_name.c_str());
+        rpdf.Print("v");
+        rpdf.getParameters(RooArgSet(*rrv_x))->Print("v");
+	rrv_number_events.Print();
+
+        /// Define the sampling of the input pdf
+	Double_t x_min=rrv_x->getMin();
+	Double_t x_max=rrv_x->getMax();
+	Double_t delta_x=(x_max-x_min)/number_point;
+	Double_t width_x=mplot->getFitRangeBinW();
+
+	Double_t number_events_mean = rrv_number_events.getVal();
+	Double_t number_events_sigma= rrv_number_events.getError();
+
+        /// TGraph for the central bkg prediction 
+	TGraph *bkgpred=new TGraph(number_point+1);
+	for(int i =0 ; i<= number_point ; i++){
+		rrv_x->setVal(x_min+delta_x*i); 
+		bkgpred->SetPoint( i , x_min+delta_x*i , rrv_number_events.getVal()*rpdf.getVal(*rrv_x)*width_x );
+	}
+	bkgpred->SetLineWidth(2);
+	bkgpred->SetLineColor(kBlue);
+
+        /// Define the curve in each toy and fill them  not using the randomized par but vaying them by hand -> to be decorrelated
+	TGraph* syst[number_errorband];
+	for(int j=0;j<number_errorband;j++){
+		for(Int_t ipara=0;ipara<paras.getSize();ipara++){
+                  ws.var(paras[ipara].GetName())->setConstant(0);
+	          ws.var(paras[ipara].GetName())->setVal( rand.Gaus(0.,ws.var(paras[ipara].GetName())->getError()) );
+		}
+
+		Double_t number_events_tmp = rand.Gaus(number_events_mean,number_events_sigma);
+		syst[j]=new TGraph(number_point+1);
+		for(int i =0 ; i<=number_point ; i++){
+			rrv_x->setVal(x_min+delta_x*i); 
+			syst[j]->SetPoint( i , x_min+delta_x*i , number_events_tmp*rpdf.getVal(*rrv_x)*width_x);
+		}
+	}
+
+        /// Now look for the envelop at 2sigma CL
+	std::vector<double> val;
+	val.resize(number_errorband);
+	TGraphAsymmErrors* errorband_pull = new TGraphAsymmErrors(number_point+1);
+	TH1D* hdata = (TH1D*)rdata.createHistogram(rrv_x->GetName());
+        hdata->SetBinErrorOption(TH1::kPoisson);
+        errorband_pull->SetName("errorband_pull");
+	for(int i =0 ; i<= number_point ; i++){
+		for(int j=0;j<number_errorband;j++){
+			val[j]=(syst[j])->GetY()[i];
+		}
+		std::sort(val.begin(),val.end());
+		double errYLow = bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)];
+		double errYHi  = val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i];
+
+		double errData = hdata->GetBinError(hdata->FindBin(x_min+delta_x*i));
+
+		errorband_pull->SetPoint(i, x_min+delta_x*i,  0.0 );
+		errorband_pull->SetPointError(i, 0.,0., -1.0*errYLow/errData, -1.0*errYHi/errData);
+
+	}
+
+	errorband_pull->SetFillColor(kYellow);
+	errorband_pull->SetLineColor(kYellow);
+	errorband_pull->SetLineWidth(2);
+	errorband_pull->SetFillStyle(3001);
+
+        mplot->addObject(errorband_pull,"E3");
+}
+
+
+
 
 /// Draw error band giving directly the extended Pdf
 void draw_error_band_extendPdf( RooAbsData &rdata,  RooAbsPdf & rpdf, RooFitResult *rfres, RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100,  Int_t number_errorband=2000){
@@ -303,6 +490,103 @@ void draw_error_band_extendPdf( RooAbsData &rdata,  RooAbsPdf & rpdf, RooFitResu
 
 	if( TString(opt).Contains("F") ) mplot->addObject(errorband,"E3"); 
 	if( TString(opt).Contains("L") ){ mplot->addObject(am); mplot->addObject(ap); }
+}
+
+
+void draw_error_band_extendPdf_pull( RooAbsData &rdata,  RooAbsPdf &rpdf, RooFitResult *rfres, RooPlot *mplot, Int_t kcolor=6, Int_t number_point=100, const Int_t number_errorband=2000){
+
+        std::cout<<" <<<<<<<<<<<<<<<< draw error band extend Pdf Pull <<<<<<<<<<<<<<<< "<<std::endl;
+	TRandom3 rand(1234);
+        rand.SetSeed(0);
+
+        /// get the observables of the pdf --> mj or mlvj depends on which bands you are drawing
+	RooArgSet* argset_obs = rpdf.getObservables(rdata);
+
+        /// create an iterator on the observables
+	TIterator *par=argset_obs->createIterator();
+	par->Reset();
+        /// extract the RooRealVar --> in our case just one obs
+	RooRealVar *rrv_x=(RooRealVar*)par->Next();
+	rrv_x->Print();
+
+        /// Get the pdf pramters 
+        rpdf.getParameters(RooArgSet(*rrv_x))->Print("v");
+
+        /// Define min and max x range
+	Double_t x_min = rrv_x->getMin();
+	Double_t x_max = rrv_x->getMax();
+
+        /// define the step to sample the function 
+	Double_t delta_x = (x_max-x_min)/number_point;
+
+        /// Original Bin width
+	Double_t width_x = mplot->getFitRangeBinW();
+
+
+        /// Create a Graph for the central background prediction 
+	TGraph *bkgpred = new TGraph(number_point+1);
+	for(int i =0 ; i<= number_point ; i++){
+		rrv_x->setVal(x_min+delta_x*i); 
+		bkgpred->SetPoint(i ,x_min+delta_x*i ,rpdf.expectedEvents(*rrv_x)*rpdf.getVal(*rrv_x)*width_x);
+	}
+	bkgpred->SetLineWidth(2);
+	bkgpred->SetLineColor(kcolor);
+
+        /// Set of parameters
+	RooArgSet* par_pdf  = rpdf.getParameters(RooArgSet(*rrv_x)) ;
+	std::cout<<" end bkg prediction "<<std::endl; 
+       
+        /// Build a envelope using number_errorband toys
+ 	TGraph* syst[number_errorband];
+	for(int j=0;j<number_errorband;j++){
+		syst[j] = new TGraph(number_point+1);
+                /// paramters value are randomized using rfres and this can be done also if they are not decorrelate
+		RooArgList par_tmp = rfres->randomizePars();
+		*par_pdf = par_tmp;
+		for(int i =0 ; i<=number_point ; i++){
+			rrv_x->setVal(x_min+delta_x*i); 
+			syst[j]->SetPoint( i , x_min+delta_x*i , rpdf.expectedEvents(*rrv_x)*rpdf.getVal(*rrv_x)*width_x);
+		}
+	}
+
+        /// re-take the initial parameters
+	RooArgList par_tmp = rfres->floatParsFinal();
+	*par_pdf = par_tmp;
+	std::cout<<" end envelope "<<std::endl; 
+        // build the uncertainty band at 68% CL 
+	std::vector<double> val;
+	val.resize(number_errorband);
+
+        // Try to build and find max and minimum for each point --> not the curve but the value to do a real envelope -> take one sigma interval
+        TGraphAsymmErrors* errorband_pull = new TGraphAsymmErrors(number_point+1);
+	TH1D* hdata = (TH1D*)rdata.createHistogram(rrv_x->GetName());
+        hdata->SetBinErrorOption(TH1::kPoisson);
+	std::cout<<" make histo "<<std::endl; 
+
+        errorband_pull->SetName("errorband_pull");
+	for(int i =0 ; i<= number_point ; i++){
+		for(int j=0;j<number_errorband;j++){
+			val[j]=(syst[j])->GetY()[i];
+		}
+		std::sort(val.begin(),val.end());
+		double errYLow = bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)];
+		double errYHi  = val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i];
+
+		double errData = hdata->GetBinError(hdata->FindBin(x_min+delta_x*i));
+
+		errorband_pull->SetPoint(i, x_min+delta_x*i,  0.0 );
+		errorband_pull->SetPointError(i, 0.,0., -1.0*errYLow/errData, -1.0*errYHi/errData);
+
+	}
+
+	std::cout<<" error band "<<std::endl; 
+	errorband_pull->SetFillColor(kYellow);
+	errorband_pull->SetLineColor(kYellow);
+	errorband_pull->SetLineWidth(2);
+	errorband_pull->SetFillStyle(3001);
+
+	mplot->addObject(errorband_pull,"E3");             
+
 }
 
 
