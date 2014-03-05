@@ -48,7 +48,7 @@ ROOT.gSystem.Load(options.inPath+"/PDFs/PdfDiagonalizer_cc.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/Util_cxx.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/HWWLVJRooPdfs_cxx.so")
 
-from ROOT import draw_error_band, draw_error_band_extendPdf, draw_error_band_Decor, draw_error_band_shape_Decor, Calc_error_extendPdf, Calc_error, RooErfExpPdf, RooAlpha, RooAlpha4ErfPowPdf, RooAlpha4ErfPow2Pdf, RooAlpha4ErfPowExpPdf, PdfDiagonalizer, RooPowPdf, RooPow2Pdf, RooErfPowExpPdf, RooErfPowPdf, RooErfPow2Pdf, RooQCDPdf, RooUser1Pdf, RooBWRunPdf, RooAnaExpNPdf, RooExpNPdf, RooAlpha4ExpNPdf, RooExpTailPdf, RooAlpha4ExpTailPdf, Roo2ExpPdf, RooAlpha42ExpPdf, draw_error_band_extendPdf_pull, draw_error_band_ws, draw_error_band_pull_ws
+from ROOT import draw_error_band, draw_error_band_extendPdf, draw_error_band_Decor, draw_error_band_shape_Decor, Calc_error_extendPdf, Calc_error, RooErfExpPdf, RooAlpha, RooAlpha4ErfPowPdf, RooAlpha4ErfPow2Pdf, RooAlpha4ErfPowExpPdf, PdfDiagonalizer, RooPowPdf, RooPow2Pdf, RooErfPowExpPdf, RooErfPowPdf, RooErfPow2Pdf, RooQCDPdf, RooUser1Pdf, RooBWRunPdf, RooAnaExpNPdf, RooExpNPdf, RooAlpha4ExpNPdf, RooExpTailPdf, RooAlpha4ExpTailPdf, Roo2ExpPdf, RooAlpha42ExpPdf, draw_error_band_extendPdf_pull, draw_error_band_ws
 
 ###############################
 ## doFit Class Implemetation ##
@@ -3941,9 +3941,10 @@ class doFit_wj_and_wlvj:
         model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Invisible(),RooFit.Name("model_mc"));
 
         ### Plot the list of floating parameters and the uncertainty band is draw taking into account this floating list defined in the prepare_limit
-        draw_error_band_ws(model_Total_background_MC, rrv_x.GetName(), rrv_number_Total_background_MC,self.FloatingParams,workspace ,mplot,self.color_palet["Uncertainty"],"F");
+        pull_graph = draw_error_band_ws(data_obs, model_Total_background_MC, rrv_x.GetName(), rrv_number_Total_background_MC,self.FloatingParams,workspace ,mplot,self.color_palet["Uncertainty"],"F");
 
-        mplot_pull = self.get_pull_ws(rrv_x,mplot,data_obs,model_Total_background_MC,rrv_x.GetName(),rrv_number_Total_background_MC,self.FloatingParams,workspace,"data","model_mc");
+
+        mplot_pull = self.get_pull_ws(rrv_x, mplot, pull_graph, "data", "model_mc"); 
 
         mplot.Print();
         self.leg = self.legend4Plot(mplot,0,1,-0.01,-0.05,0.11,0.);
@@ -4002,9 +4003,9 @@ class doFit_wj_and_wlvj:
 
         return mplot_pull;
 
-    def get_pull_ws(self, rrv_x, mplot_orig, rdataset, model, axis_name, bkg_events, paramlist, workspace, dataname = "data", modelname = "model_mc", makeBand = 1):
+    ### in order to get the pull
+    def get_pull_ws(self, rrv_x, mplot_orig, plot_graph, dataname = "data", modelname = "model_mc"):
 
-        print "############### draw the pull plot ########################"
         print "############### draw the pull plot ########################"
         hpull = mplot_orig.pullHist(dataname,modelname);
         x = ROOT.Double(0.); y = ROOT.Double(0) ;
@@ -4023,8 +4024,7 @@ class doFit_wj_and_wlvj:
         mplot_pull = rrv_x.frame(RooFit.Title("Pull Distribution"), RooFit.Bins(int(rrv_x.getBins()/self.narrow_factor)));
         medianLine = TLine(rrv_x.getMin(),0.,rrv_x.getMax(),0); medianLine.SetLineWidth(2); medianLine.SetLineColor(kRed);
 
-        if makeBand: draw_error_band_pull_ws(rdataset,model,axis_name,bkg_events,paramlist,workspace,mplot_pull); 
-
+        mplot_pull.addObject(plot_graph,"E3");        
         mplot_pull.addObject(medianLine);        
         mplot_pull.addPlotable(hpull,"P");
         mplot_pull.SetTitle("");
@@ -4039,6 +4039,7 @@ class doFit_wj_and_wlvj:
         mplot_pull.GetYaxis().CenterTitle();
 
         return mplot_pull;
+
 
     def getData_PoissonInterval(self,data_obs,mplot):
         rrv_x = self.workspace4fit_.var("rrv_mass_lvj");
