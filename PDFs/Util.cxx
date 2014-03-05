@@ -269,7 +269,7 @@ void draw_error_band_pull( RooAbsData &rdata,  RooAbsPdf &rpdf,  RooRealVar &rrv
 
 
 /// Variation of the previous method using a workspace -> used to draw the band for the final extrapolation -> take in input decorrelated parameters
-void draw_error_band_ws( RooAbsPdf &rpdf, std::string xaxis_name,  RooRealVar &rrv_number_events ,  RooArgList &paras,  RooWorkspace &ws, RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
+TGraphAsymmErrors* draw_error_band_ws( RooAbsReal &rdata, RooAbsPdf &rpdf, std::string xaxis_name,  RooRealVar &rrv_number_events ,  RooArgList &paras,  RooWorkspace &ws, RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100, const Int_t number_errorband=2000){
 
 	TRandom3 rand(1234);
         rand.SetSeed(0);
@@ -314,6 +314,7 @@ void draw_error_band_ws( RooAbsPdf &rpdf, std::string xaxis_name,  RooRealVar &r
 		}
 	}
 
+
         /// Now look for the envelop at 2sigma CL
 	std::vector<double> val;
 	val.resize(number_errorband);
@@ -323,76 +324,7 @@ void draw_error_band_ws( RooAbsPdf &rpdf, std::string xaxis_name,  RooRealVar &r
         ap->SetName("error_up");
         am->SetName("error_dn");
         errorband->SetName("errorband");
-	for(int i =0 ; i<= number_point ; i++){
-		for(int j=0;j<number_errorband;j++){
-			val[j]=(syst[j])->GetY()[i];
-		}
-		std::sort(val.begin(),val.end());
-		ap->SetPoint(i, x_min+delta_x*i,val[Int_t(0.16*number_errorband)]);
-		am->SetPoint(i, x_min+delta_x*i,val[Int_t(0.84*number_errorband)]);
-		errorband->SetPoint(i, x_min+delta_x*i,bkgpred->GetY()[i] );
-		errorband->SetPointError(i, 0.,0., bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)],val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i]);
-	}
-	ap->SetLineWidth(2);
-	ap->SetLineColor(kcolor);
-	am->SetLineWidth(2);
-	am->SetLineColor(kcolor);
-	errorband->SetFillColor(kBlack);
-        errorband->SetFillStyle(3013);
 
-	if( TString(opt).Contains("F") ) mplot->addObject(errorband,"E3");
-	if( TString(opt).Contains("L") ){ mplot->addObject(am); mplot->addObject(ap); }
-}
-
-
-void draw_error_band_pull_ws( RooAbsData & rdata, RooAbsPdf &rpdf, std::string xaxis_name,  RooRealVar &rrv_number_events ,  RooArgList &paras,  RooWorkspace &ws, RooPlot *mplot, Int_t number_point=100, const Int_t number_errorband=2000){
-
-	TRandom3 rand(1234);
-        rand.SetSeed(0);
-        /// get observables , pdf and number of events
-        std::cout<<" <<<<<<<<<<<<<<<< draw error band 2 <<<<<<<<<<<<<<<< "<<std::endl;
-	RooRealVar *rrv_x=ws.var(xaxis_name.c_str());
-        rpdf.Print("v");
-        rpdf.getParameters(RooArgSet(*rrv_x))->Print("v");
-	rrv_number_events.Print();
-
-        /// Define the sampling of the input pdf
-	Double_t x_min=rrv_x->getMin();
-	Double_t x_max=rrv_x->getMax();
-	Double_t delta_x=(x_max-x_min)/number_point;
-	Double_t width_x=mplot->getFitRangeBinW();
-
-	Double_t number_events_mean = rrv_number_events.getVal();
-	Double_t number_events_sigma= rrv_number_events.getError();
-
-        /// TGraph for the central bkg prediction 
-	TGraph *bkgpred=new TGraph(number_point+1);
-	for(int i =0 ; i<= number_point ; i++){
-		rrv_x->setVal(x_min+delta_x*i); 
-		bkgpred->SetPoint( i , x_min+delta_x*i , rrv_number_events.getVal()*rpdf.getVal(*rrv_x)*width_x );
-	}
-	bkgpred->SetLineWidth(2);
-	bkgpred->SetLineColor(kBlue);
-
-        /// Define the curve in each toy and fill them  not using the randomized par but vaying them by hand -> to be decorrelated
-	TGraph* syst[number_errorband];
-	for(int j=0;j<number_errorband;j++){
-		for(Int_t ipara=0;ipara<paras.getSize();ipara++){
-                  ws.var(paras[ipara].GetName())->setConstant(0);
-	          ws.var(paras[ipara].GetName())->setVal( rand.Gaus(0.,ws.var(paras[ipara].GetName())->getError()) );
-		}
-
-		Double_t number_events_tmp = rand.Gaus(number_events_mean,number_events_sigma);
-		syst[j]=new TGraph(number_point+1);
-		for(int i =0 ; i<=number_point ; i++){
-			rrv_x->setVal(x_min+delta_x*i); 
-			syst[j]->SetPoint( i , x_min+delta_x*i , number_events_tmp*rpdf.getVal(*rrv_x)*width_x);
-		}
-	}
-
-        /// Now look for the envelop at 2sigma CL
-	std::vector<double> val;
-	val.resize(number_errorband);
 	TGraphAsymmErrors* errorband_pull = new TGraphAsymmErrors(number_point+1);
 	TH1D* hdata = (TH1D*)rdata.createHistogram(rrv_x->GetName());
 	const double alpha = 1 - 0.6827;
@@ -402,9 +334,13 @@ void draw_error_band_pull_ws( RooAbsData & rdata, RooAbsPdf &rpdf, std::string x
 		for(int j=0;j<number_errorband;j++){
 			val[j]=(syst[j])->GetY()[i];
 		}
+		std::sort(val.begin(),val.end());
+		ap->SetPoint(i, x_min+delta_x*i,val[Int_t(0.16*number_errorband)]);
+		am->SetPoint(i, x_min+delta_x*i,val[Int_t(0.84*number_errorband)]);
+		errorband->SetPoint(i, x_min+delta_x*i,bkgpred->GetY()[i] );
+		errorband->SetPointError(i, 0.,0., bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)],val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i]);
 		double errYLow   = fabs((bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)]));
-		double errYHi    = fabs((val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i]));
-                
+		double errYHi    = fabs((val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i]));                
                 int N = hdata->GetBinContent(hdata->FindBin(x_min+delta_x*i));
                 if (i == number_point) N = hdata->GetBinContent(hdata->FindBin(x_min+delta_x*(i-1)));
 		double errData_dw =  (N==0) ? 0  : (ROOT::Math::gamma_quantile(alpha/2,N,1.));
@@ -415,18 +351,25 @@ void draw_error_band_pull_ws( RooAbsData & rdata, RooAbsPdf &rpdf, std::string x
                 if( errData_up < 1E-6) errData_up = 1;  
       		errorband_pull->SetPoint(i, x_min+delta_x*i,  0.0 );
 		errorband_pull->SetPointError(i, 0.,0., errYLow/errData_dw, errYHi/errData_up);
+		std::cout<<" bkg "<<bkgpred->GetY()[i]<<" up "<<val[Int_t(0.84*number_errorband)]<<" nw "<<val[Int_t(0.16*number_errorband)]<<std::endl;
 	}
+	ap->SetLineWidth(2);
+	ap->SetLineColor(kcolor);
+	am->SetLineWidth(2);
+	am->SetLineColor(kcolor);
+	errorband->SetFillColor(kBlack);
+        errorband->SetFillStyle(3013);
+
+	if( TString(opt).Contains("F") ) mplot->addObject(errorband,"E3");
+	if( TString(opt).Contains("L") ){ mplot->addObject(am); mplot->addObject(ap); }
 
 	errorband_pull->SetFillColor(kYellow);
 	errorband_pull->SetLineColor(kYellow);
 	errorband_pull->SetLineWidth(2);
 	errorband_pull->SetFillStyle(3001);
 
-        mplot->addObject(errorband_pull,"E3");
+        return errorband_pull ; 
 }
-
-
-
 
 /// Draw error band giving directly the extended Pdf
 void draw_error_band_extendPdf( RooAbsData &rdata,  RooAbsPdf & rpdf, RooFitResult *rfres, RooPlot *mplot, Int_t kcolor=6, std::string opt="F", Int_t number_point=100,  Int_t number_errorband=2000){
