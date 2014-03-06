@@ -26,7 +26,7 @@
 
 int main (){
 
-TFile* file = TFile::Open("cards_EXP_em/higgsCombinehwwlvj_ggH600_em_2jet_10_00_unbin.MaxLikelihoodFit.mH600.-532900403.root");
+TFile* file = TFile::Open("EXP_TIGHT_600.root");
 
 TTree* tree_s = (TTree*)file->Get("limit");
 
@@ -40,8 +40,8 @@ TTree* tree_s = (TTree*)file->Get("limit");
 
  TH1F* pullDistribution = new TH1F ("pull","mu pull",15,-3,3);
  TH1F* pullnormDistribution = new TH1F ("pullnorm","mu pull norm",15,-3,3);
- TH1F* deltaDistribution = new TH1F ("delta","delta mu",15,-6,6);
- TH1F* sigmaDistribution = new TH1F ("sigma","sigma",15,0,10);
+ TH1F* deltaDistribution = new TH1F ("delta","delta mu",15,-1*rInput,rInput);
+ TH1F* sigmaDistribution = new TH1F ("sigma","sigma",15,0,rInput);
 
 for( int iEntry = 0; iEntry < tree_s->GetEntries(); iEntry ++){
 
@@ -51,8 +51,8 @@ for( int iEntry = 0; iEntry < tree_s->GetEntries(); iEntry ++){
         if(quantileExpected>0.83 && quantileExpected<0.85) {err_up_temp = limit ;  continue ; }
         if(quantileExpected==-1){
              deltaDistribution->Fill(limit_temp-rInput);
-             sigmaDistribution->Fill(err_up_temp-err_dw_temp);
-             pullDistribution->Fill((limit_temp-rInput)/(err_up_temp-err_dw_temp));
+             sigmaDistribution->Fill((err_up_temp-err_dw_temp)/2);
+             pullDistribution->Fill(2*(limit_temp-rInput)/(err_up_temp-err_dw_temp));
 	     //	     std::cout<<limit_temp<<" "<<err_up_temp<<" "<<err_dw_temp<<std::endl;
                         }
               }
