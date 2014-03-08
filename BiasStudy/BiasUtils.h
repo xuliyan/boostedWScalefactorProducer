@@ -29,6 +29,8 @@
 #include "TLatex.h"
 #include "TLine.h"
 
+#include "../PDFs/Util.cxx"
+
 #ifndef BIAS_MODEL_ANALYSIS
 #define BIAS_MODEL_ANALYSIS
 
@@ -44,57 +46,61 @@ class biasModelAnalysis{
   biasModelAnalysis* clone() {return new biasModelAnalysis(*this); };
 
   void generateAndFitToys(int nevents, const std::string & = "" );
-  void createBranches(const std::string &, const std::string &);
-  void fillBranches(const int &, const int &);
+  void createBranches(const std::string &, const std::string &, const int &);
+  void fillBranches(const int &, const int &, RooWorkspace*);
+
+  void GetDataPoissonInterval(RooDataSet* , RooRealVar* , RooPlot*);
 
   void setFittingModel(RooAbsPdf*);
   void setTree(TTree*);
   void setNToys(const int &);
   void setIsMC(const int &);
-
-  void saveToysPlots(const int &, const int &);
-
-  
-  TTree* tree_ ;
-
-  RooMCStudy*   mc_study_ ;
-  RooAbsPdf*    model_generation_ ;
-  RooAbsPdf*    model_fit_;
-  RooArgSet*    observables_;
-  RooDataSet*   generated_dataset_;
-  RooChi2MCSModule chi2_module_ ;
-
-  RooArgList* parlist_;
-  RooArgList* param_;
-  RooArgList* param_generated_;
-
-  std::string fres_ ;
-  std::string fgen_ ;
-  std::string fitRange_ ;
+  void setPdfInfomation(const std::string &, const std::string &, const std::string &);
+  void setBackgroundPdfCore(RooAbsPdf*);
+  void saveToysPlots(const int &, const int &, const int & = 0 );
  
-  std::string label_ ;
-  std::string mlvjregion_ ;
-  std::string channel_ ;
-  std::string spectrum_ ;
+  private: 
+
+   TTree* tree_ ;
+
+   RooMCStudy*   mc_study_ ;
+   RooAbsPdf*    model_generation_ ;
+   RooAbsPdf*    model_fit_;
+   RooAbsPdf*    model_bkg_data_;
+   RooArgSet*    observables_;
+   RooDataSet*   generated_dataset_;
+   RooChi2MCSModule chi2_module_ ;
+
+   RooArgList* parlist_;
+   RooArgList* param_;
+   RooArgList* param_generated_;
+
+   std::string fres_ ;
+   std::string fgen_ ;
+   std::string fitRange_ ;
+ 
+   std::string mlvjregion_ ;
+   std::string channel_ ;
+   std::string spectrum_ ;
   
-  std::vector<const RooAbsData*>   generatedData_; 
-  std::vector<RooAbsPdf*>          fittedPdf_;
-  std::vector<const RooFitResult*> fitResults_;
+   std::vector<const RooAbsData*>   generatedData_; 
+   std::vector<RooAbsPdf*>          fittedPdf_;
+   std::vector<const RooFitResult*> fitResults_;
 
-  float* parameter_ ;
-  float* parameterResidual_ ;                                                                      
-  float* parameterError_;
-  float* parameterPull_ ;
+   float* parameter_ ;
+   float* parameterResidual_ ;                                                                      
+   float* parameterError_;
+   float* parameterPull_ ;
 
-  std::vector<TCanvas*> canvasVector_ ;
+   std::vector<TCanvas*> canvasVector_ ;
   
-  float chi2_;
-  float nLL_;
-  float chi2_frame_;
+   float chi2_;
+   float nLL_;
+   float chi2_frame_;
 
-  int   nexp_ ;
-  bool  isMC_ ;
-  int   nevents_ ;
+   int   nexp_ ;
+   bool  isMC_ ;
+   int   nevents_ ;
 };
 
 #endif
