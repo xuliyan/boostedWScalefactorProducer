@@ -339,8 +339,8 @@ TGraphAsymmErrors* draw_error_band_ws( RooAbsData &rdata, RooAbsPdf &rpdf, std::
 		am->SetPoint(i, x_min+delta_x*i,val[Int_t(0.84*number_errorband)]);
 		errorband->SetPoint(i, x_min+delta_x*i,bkgpred->GetY()[i] );
 		errorband->SetPointError(i, 0.,0., bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)],val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i]);
-		double errYLow   = fabs((bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)]));
-		double errYHi    = fabs((val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i]));                
+		double errYLow   = bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)];
+		double errYHi    = val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i];                
                 int N = hdata->GetBinContent(hdata->FindBin(x_min+delta_x*i));
                 if (i == number_point) N = hdata->GetBinContent(hdata->FindBin(x_min+delta_x*(i-1)));
 		double errData_dw =  (N==0) ? 0  : (ROOT::Math::gamma_quantile(alpha/2,N,1.));
@@ -786,3 +786,4 @@ double Calc_error( std::string rpdfname, std::string xaxis_name ,  RooArgList & 
 	double number_error=(val[Int_t(0.84*calc_times)]-val[Int_t(0.16*calc_times)])/2./signal_number_media;
         return number_error;
 }
+
