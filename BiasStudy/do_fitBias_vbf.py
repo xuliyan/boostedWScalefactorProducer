@@ -97,10 +97,11 @@ class doBiasStudy_mlvj:
 
         suffix = "";
         if options.ttbarcontrolregion : suffix = "_ttbar";
-        if options.onlybackgroundfit : suffix = suffix+"_B";
+        if options.fitjetmass         : suffix = "_jetmass";
+        if in_mlvj_min < 550          : suffix = suffix+"_turnOn";                
+        if options.onlybackgroundfit  : suffix = suffix+"_B";
         else: suffix = suffix+"_SB";
-        if in_mlvj_min < 550: suffix = suffix+"_turnOn";                
-
+        
 
         ## create the workspace and import them
         if input_workspace is None:
@@ -247,7 +248,7 @@ class doBiasStudy_mlvj:
 
         ### create output root file for the pull plot vs mass
         if options.shapetest  == 0:
-            self.outputFile  = ROOT.TFile("output_%s_%s_%s_%s.root"%(self.ggH_sample,options.fgen,options.fres,suffix),"RECREATE");
+            self.outputFile  = ROOT.TFile("output_%s_%s_%s%s.root"%(self.ggH_sample,options.fgen,options.fres,suffix),"RECREATE");
             self.outputTree  = ROOT.TTree("otree","otree");
             self.outputFile.cd(); 
 
@@ -1998,13 +1999,14 @@ class doBiasStudy_mlvj:
 
         if options.ttbarcontrolregion == 0:
          model_TTbar_backgrounds  = self.get_TTbar_mlvj_Model(mlvj_region,options.fgen);
-         number_TTbar_sb_lo_mlvj   = self.workspace4bias_.var("rrv_number_TTbar%s%s_%s_mlvj"%(mlvj_region,options.fgen,self.channel)); ## get the normalization
+         number_TTbar_sb_lo_mlvj  = self.workspace4bias_.var("rrv_number_TTbar%s%s_%s_mlvj"%(mlvj_region,options.fgen,self.channel)); ## get the normalization
         else: 
          model_WJets_backgrounds  = self.get_WJets_mlvj_Model(mlvj_region,options.fgen);
-         number_TTbar_sb_lo_mlvj   = self.workspace4bias_.var("rrv_number_WJets0%s%s_%s_mlvj"%(mlvj_region,options.fgen,self.channel)); ## get the normalization
+         number_WJets_sb_lo_mlvj  = self.workspace4bias_.var("rrv_number_WJets0%s%s_%s_mlvj"%(mlvj_region,options.fgen,self.channel)); ## get the normalization
          
 
         self.workspace4bias_.var("rrv_number_TTbar%s%s_%s_mlvj"%(mlvj_region,options.fgen,self.channel)).Print();
+        print "rrv_number_WJets0%s%s_%s_mlvj"%(mlvj_region,options.fgen,self.channel) ; 
         self.workspace4bias_.var("rrv_number_WJets0%s%s_%s_mlvj"%(mlvj_region,options.fgen,self.channel)).Print();
         self.workspace4bias_.var("rrv_number_STop%s%s_%s_mlvj"%(mlvj_region,options.fgen,self.channel)).Print();
         self.workspace4bias_.var("rrv_number_VV%s%s_%s_mlvj"%(mlvj_region,options.fgen,self.channel)).Print();
@@ -3038,7 +3040,7 @@ objName ==objName_before ):
      elif options.isMC and not options.ttbarcontrolregion:    
       self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0","jet_mass_pr")# to get the shape of m_lvj                                                                               
       self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fgen,0,0,1);
-
+   
      elif not options.isMC:
 
       ###### get diboson and fit it 
@@ -3066,9 +3068,9 @@ objName ==objName_before ):
       ###### get WJets and fit it in the sb
       self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0","jet_mass_pr")# to get the shape of m_lvj                                                                               
       if fitjetmass: 
-	   self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","ErfExp");
+	   self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","ErfExp",1);
       else: 
-	   self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0",options.fgen,1);
+           self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fgen,0,0,1);
 	
       ######## get TTbar and fit it
       self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbar")# to get the shape of m_lvj                                                                                               
@@ -3248,7 +3250,7 @@ objName ==objName_before ):
       mcWjetTreeResult.setBackgroundPdfCore(model_bkg_wjet);
       mcWjetTreeResult.generateAndFitToys(int(numevents_mc));
       self.outputFile.cd();
-      mcWjetTreeResult.createBranches(options.fgen,options.fres,options.isttbarcontrolregion);
+      mcWjetTreeResult.createBranches(options.fgen,options.fres,options.ttbarcontrolregion);
       mcWjetTreeResult.fillBranches(options.ttbarcontrolregion,options.fitjetmass,self.workspace4bias_);
 
       ratePlotsToStore = 0 ;
@@ -3261,7 +3263,7 @@ objName ==objName_before ):
       elif options.nexp >= 100:
           ratePlotsToStore = 10 ;
           
-      mcWjetTreeResult.saveToysPlots(int(numPlotsToStore),options.fitjetmass); 
+      mcWjetTreeResult.saveToysPlots(int(ratePlotsToStore),options.fitjetmass); 
       self.outputTree.Write();
       self.outputFile.Close();
 
@@ -3317,7 +3319,7 @@ objName ==objName_before ):
        ## inflate yields
        self.workspace4bias_.var("rrv_number_VV%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number_VV%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()*options.inflatejobstatistic);
        self.workspace4bias_.var("rrv_number_STop%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number_STop%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()*options.inflatejobstatistic);
-       self.workspace4bias_.var("rrv_number_WW_EWK%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number_WW_EWK%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel))*options.inflatejobstatistic) ## get the normalization
+       self.workspace4bias_.var("rrv_number_WW_EWK%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number_WW_EWK%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()*options.inflatejobstatistic) ## get the normalization
 
        print " VV number ",self.workspace4bias_.var("rrv_number_VV%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
        print " STop number ",self.workspace4bias_.var("rrv_number_STop%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
@@ -3325,18 +3327,18 @@ objName ==objName_before ):
 
        if options.ttbarcontrolregion == 0:
 
-        self.workspace4bias_.var("rrv_number_TTbar%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel));options.inflatejobstatistic  ## get the normalization
-        self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+mlvj_model+"_from_fitting_"+self.channel+"_mlvj").setVal(self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+mlvj_model+"_from_fitting_"+self.channel+"_mlvj").getVal()*options.inflatejobstatistic);
+        self.workspace4bias_.var("rrv_number_TTbar%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number_TTbar%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()*options.inflatejobstatistic)  ## get the normalization
+        self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+options.fgen+"_from_fitting_"+self.channel+"_mlvj").setVal(self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+options.fgen+"_from_fitting_"+self.channel+"_mlvj").getVal()*options.inflatejobstatistic);
 
         print " TTbar number ",self.workspace4bias_.var("rrv_number_TTbar%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
-        print " WJets number ",self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+mlvj_model+"_from_fitting_"+self.channel+"_mlvj").getVal()," inflate ",options.inflatejobstatistic;
+        print " WJets number ",self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+options.fgen+"_from_fitting_"+self.channel+"_mlvj").getVal()," inflate ",options.inflatejobstatistic;
        else:
 
-        self.workspace4bias_.var("rrv_number_WJets0%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel));options.inflatejobstatistic  ## get the normalization
-        self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+mlvj_model+"_from_fitting_"+self.channel+"_mlvj").setVal(self.workspace4bias_.var("rrv_number"+label+options.mlvj_region+mlvj_model+"_from_fitting_"+self.channel+"_mlvj").getVal()*options.inflatejobstatistic);
+        self.workspace4bias_.var("rrv_number_WJets0%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number_WJets0%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()*options.inflatejobstatistic);  ## get the normalization
+        self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+options.fgen+"_from_fitting_"+self.channel+"_mlvj").setVal(self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+options.fgen+"_from_fitting_"+self.channel+"_mlvj").getVal()*options.inflatejobstatistic);
 
-        print " WJets number ",self.workspace4bias_.var("rrv_number_WJets0%s%s_%s_mlvj"%(options.mlvj_region,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
-        print " TTbar number ",self.workspace4bias_.var("rrv_number"+label+options.mlvj_region+mlvj_model+"_from_fitting_"+self.channel+"_mlvj").getVal()," inflate ",options.inflatejobstatistic;
+        print " WJets number ",self.workspace4bias_.var("rrv_number_WJets0%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+        print " TTbar number ",self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+options.fgen+"_from_fitting_"+self.channel+"_mlvj").getVal()," inflate ",options.inflatejobstatistic;
            
       #### make the global model for the background  
       if options.fitjetmass:
@@ -3394,9 +3396,10 @@ objName ==objName_before ):
        mcWjetTreeResult.setTree(self.outputTree);
        mcWjetTreeResult.setFittingModel(model_Total_data);
        mcWjetTreeResult.setBackgroundPdfCore(model_bkg_data);
+       mcWjetTreeResult.setPdfInformation(options.mlvjregion,spectrum,self.channel);
        mcWjetTreeResult.generateAndFitToys(int(numevents_data),"sb_lo,sb_hi");
        self.outputFile.cd();
-       mcWjetTreeResult.createBranches(options.fgen,options.fres,options.isttbarcontrolregion);
+       mcWjetTreeResult.createBranches(options.fgen,options.fres,options.ttbarcontrolregion);
        mcWjetTreeResult.fillBranches(options.ttbarcontrolregion,options.fitjetmass,self.workspace4bias_);
       else:
        mcWjetTreeResult = biasModelAnalysis(RooArgSet(self.workspace4bias_.var("rrv_mass_lvj")),
@@ -3407,9 +3410,10 @@ objName ==objName_before ):
        mcWjetTreeResult.setTree(self.outputTree);
        mcWjetTreeResult.setFittingModel(model_Total_data);
        mcWjetTreeResult.setBackgroundPdfCore(model_bkg_data);
+       mcWjetTreeResult.setPdfInformation(options.mlvjregion,spectrum,self.channel);
        mcWjetTreeResult.generateAndFitToys(int(numevents_data));
        self.outputFile.cd();
-       mcWjetTreeResult.createBranches(options.fgen,options.fres,options.isttbarcontrolregion);
+       mcWjetTreeResult.createBranches(options.fgen,options.fres,options.ttbarcontrolregion);
        mcWjetTreeResult.fillBranches(options.ttbarcontrolregion,options.fitjetmass,self.workspace4bias_);
 
 
@@ -3423,7 +3427,7 @@ objName ==objName_before ):
       elif options.nexp >= 100:
           ratePlotsToStore = 10 ;
           
-      mcWjetTreeResult.saveToysPlots(int(numPlotsToStore),options.fitjetmass); 
+      mcWjetTreeResult.saveToysPlots(int(ratePlotsToStore),options.fitjetmass); 
       self.outputTree.Write();
       self.outputFile.Close();
 
