@@ -47,7 +47,7 @@ class biasModelAnalysis{
 
   void generateAndFitToys(int nevents, const std::string & = "" );
   void createBranches(const std::string &, const std::string &, const int &);
-  void fillBranches(const int &, const int &, RooWorkspace*);
+  void fillBranches(const int &, const int &, RooWorkspace&);
 
   void GetDataPoissonInterval(RooDataSet* , RooRealVar* , RooPlot*);
 
@@ -55,7 +55,7 @@ class biasModelAnalysis{
   void setTree(TTree*);
   void setNToys(const int &);
   void setIsMC(const int &);
-  void setPdfInfomation(const std::string &, const std::string &, const std::string &);
+  void setPdfInformation(const std::string &, const std::string &, const std::string &);
   void setBackgroundPdfCore(RooAbsPdf*);
   void saveToysPlots(const int &, const int &, const int & = 0 );
  
