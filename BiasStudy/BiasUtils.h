@@ -30,11 +30,6 @@
 #include "TLine.h"
 
 #include "../PlotStyle/PlotUtils.h"
-#include "../PlotStyle/Util.h"
-
-#ifndef BIAS_MODEL_ANALYSIS
-#define BIAS_MODEL_ANALYSIS
-
 
 class biasModelAnalysis{
 
@@ -101,6 +96,4 @@ class biasModelAnalysis{
    bool  isMC_ ;
    int   nevents_ ;
 };
-
-#endif
 
