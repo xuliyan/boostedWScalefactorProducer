@@ -28,10 +28,10 @@ void GetDataPoissonInterval(const RooAbsData* data, RooRealVar* rrv_x, RooPlot* 
 
 }
 
+
+
 // in order to get the pull
-RooPlot* get_pull(RooRealVar* rrv_x, RooPlot* mplot_orig, RooDataSet* rdataset, RooAbsPdf* model, 
-                  RooFitResult* rfresult, const std::string & dataname, 
-                  const std::string & modelname, const int & makeBand, const int & narrow_factor){
+RooPlot* get_pull(RooRealVar* rrv_x, RooPlot* mplot_orig, RooDataSet* rdataset, RooAbsPdf* model, RooFitResult* rfresult, const std::string & dataname, const std::string & modelname, const int & makeBand, const int & narrow_factor){
 
   std::cout<<"############### draw the pull plot ########################"<<std::endl;
   RooHist* hpull = mplot_orig->pullHist(dataname.c_str(),modelname.c_str());
@@ -371,7 +371,7 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
    return theLeg;
 }
 
-void draw_canvas(RooPlot* in_obj, const std::string & in_directory, const std::string & in_file_name, const std::string & channel, const float & lumi, const int & in_range, const int & logy, const int & frompull){
+void draw_canvas(RooPlot* in_obj, std::string & in_directory, TString & in_file_name, const std::string & channel, const float & lumi, const int & in_range, const int & logy, const int & frompull){
 
   std::cout<<"############### draw the canvas without pull ########################"<<std::endl;
   TCanvas cMassFit ("cMassFit","cMassFit", 600,600);
@@ -435,7 +435,7 @@ void draw_canvas(RooPlot* in_obj, const std::string & in_directory, const std::s
 
 
 // draw canvas with plots with pull
-void draw_canvas_with_pull(RooPlot* mplot, RooPlot* mplot_pull, RooArgList* parameters_list, const std::string & in_directory, const std::string & in_file_name, const std::string & in_model_name, const std::string & channel, const int & show_parameter, const int & logy, const float & lumi){
+void draw_canvas_with_pull(RooPlot* mplot, RooPlot* mplot_pull, RooArgList* parameters_list, std::string & in_directory, std::string & in_file_name, std::string & in_model_name, const std::string & channel, const int & show_parameter, const int & logy, const float & lumi){
 
   std::cout<<"############### draw the canvas with pull ########################"<<std::endl;
   mplot->GetXaxis()->SetTitleOffset(1.1);
@@ -548,7 +548,8 @@ void draw_canvas_with_pull(RooPlot* mplot, RooPlot* mplot_pull, RooArgList* para
      cMassFit.SaveAs(rlt_file.Data());
   }
  
- draw_canvas(mplot,in_directory,std::string(string_file_name),channel,lumi,0,logy,1);
+  draw_canvas(mplot,in_directory,string_file_name,channel,lumi,0,logy,1);
+
 }
 
 // set tdr style function
