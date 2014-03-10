@@ -29,7 +29,8 @@
 #include "TLatex.h"
 #include "TLine.h"
 
-#include "../PDFs/Util.cxx"
+#include "../PlotStyle/PlotUtils.h"
+#include "../PlotStyle/Util.h"
 
 #ifndef BIAS_MODEL_ANALYSIS
 #define BIAS_MODEL_ANALYSIS
@@ -48,8 +49,6 @@ class biasModelAnalysis{
   void generateAndFitToys(int nevents, const std::string & = "" );
   void createBranches(const std::string &, const std::string &, const int &);
   void fillBranches(const int &, const int &, RooWorkspace&);
-
-  void GetDataPoissonInterval(RooDataSet* , RooRealVar* , RooPlot*);
 
   void setFittingModel(RooAbsPdf*);
   void setTree(TTree*);
