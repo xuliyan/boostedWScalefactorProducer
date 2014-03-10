@@ -45,17 +45,19 @@ ROOT.gSystem.Load(options.inPath+"/PDFs/PdfDiagonalizer_cc.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/Util_cxx.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/HWWLVJRooPdfs_cxx.so")
 ROOT.gSystem.Load(options.inPath+"/BiasStudy/BiasUtils_cxx.so")
+ROOT.gSystem.Load(options.inPath+"/PlotStyle/PlotUtils_cxx.so")
 
 
 from ROOT import draw_error_band, draw_error_band_extendPdf, draw_error_band_Decor, draw_error_band_shape_Decor, Calc_error_extendPdf, Calc_error, RooErfExpPdf, RooAlpha, RooAlpha4ErfPowPdf, RooAlpha4ErfPow2Pdf, RooAlpha4ErfPowExpPdf, PdfDiagonalizer, RooPowPdf, RooPow2Pdf, RooErfPowExpPdf, RooErfPowPdf, RooErfPow2Pdf, RooQCDPdf, RooUser1Pdf, RooBWRunPdf, RooAnaExpNPdf,RooExpNPdf, RooAlpha4ExpNPdf, RooExpTailPdf, RooPow3Pdf, RooErfPow3Pdf, RooUser1Pdf, biasModelAnalysis
 
+from ROOT import setTDRStyle, get_pull
 
 class doBiasStudy_mlvj:
 
     def __init__(self,in_channel,in_ggH_sample,in_mlvj_min=400., in_mlvj_max=1400., in_mj_min=40, in_mj_max=130, generation_model="ErfExp", fit_model="ErfExp", input_workspace=None):
 
-        self.setTDRStyle();
- 
+        setTDRStyle(); #import the tdr style
+
         RooAbsPdf.defaultIntegratorConfig().setEpsRel(1e-9) ;
         RooAbsPdf.defaultIntegratorConfig().setEpsAbs(1e-9) ;
         ROOT.RooRandom.randomGenerator().SetSeed(0);
@@ -63,7 +65,6 @@ class doBiasStudy_mlvj:
         print "###################### construnctor ############################# ";
         ### set the channel type --> electron or muon
         self.channel = in_channel;
-
         ## event categorization as a function of the purity and the applied selection
         self.wtagger_label = options.category;
 
@@ -102,7 +103,6 @@ class doBiasStudy_mlvj:
         if options.onlybackgroundfit  : suffix = suffix+"_B";
         else: suffix = suffix+"_SB";
         
-
         ## create the workspace and import them
         if input_workspace is None:
              self.workspace4bias_ = RooWorkspace("workspace4bias_%s_%s_%s_%s_%s"%(self.channel,self.wtagger_label,self.generation_model,self.fit_model,suffix),"workspace4bias_%s_%s_%s_%s_%s"%(self.channel,self.wtagger_label,self.generation_model,self.fit_model,suffix));
@@ -251,109 +251,6 @@ class doBiasStudy_mlvj:
             self.outputFile  = ROOT.TFile("output_%s_%s_%s%s.root"%(self.ggH_sample,options.fgen,options.fres,suffix),"RECREATE");
             self.outputTree  = ROOT.TTree("otree","otree");
             self.outputFile.cd(); 
-
-    ## Set basic TDR style for canvas, pad ..etc ..
-    def setTDRStyle(self):
-        self.tdrStyle =TStyle("tdrStyle","Style for P-TDR");
-        #For the canvas:
-        self.tdrStyle.SetCanvasBorderMode(0);
-        self.tdrStyle.SetCanvasColor(kWhite);
-        self.tdrStyle.SetCanvasDefH(600); #Height of canvas
-        self.tdrStyle.SetCanvasDefW(600); #Width of canvas
-        self.tdrStyle.SetCanvasDefX(0); #POsition on screen
-        self.tdrStyle.SetCanvasDefY(0);
-      
-        #For the Pad:
-        self.tdrStyle.SetPadBorderMode(0);
-        self.tdrStyle.SetPadColor(kWhite);
-        self.tdrStyle.SetPadGridX(False);
-        self.tdrStyle.SetPadGridY(False);
-        self.tdrStyle.SetGridColor(0);
-        self.tdrStyle.SetGridStyle(3);
-        self.tdrStyle.SetGridWidth(1);
-      
-        #For the frame:
-        self.tdrStyle.SetFrameBorderMode(0);
-        self.tdrStyle.SetFrameBorderSize(1);
-        self.tdrStyle.SetFrameFillColor(0);
-        self.tdrStyle.SetFrameFillStyle(0);
-        self.tdrStyle.SetFrameLineColor(1);
-        self.tdrStyle.SetFrameLineStyle(1);
-        self.tdrStyle.SetFrameLineWidth(1);
-      
-        #For the histo:
-        self.tdrStyle.SetHistLineColor(1);
-        self.tdrStyle.SetHistLineStyle(0);
-        self.tdrStyle.SetHistLineWidth(1);
-        self.tdrStyle.SetEndErrorSize(2);
-        self.tdrStyle.SetErrorX(0.);
-        self.tdrStyle.SetMarkerStyle(20);
-      
-        #For the fit/function:
-        self.tdrStyle.SetOptFit(1);
-        self.tdrStyle.SetFitFormat("5.4g");
-        self.tdrStyle.SetFuncColor(2);
-        self.tdrStyle.SetFuncStyle(1);
-        self.tdrStyle.SetFuncWidth(1);
-      
-        #For the date:
-        self.tdrStyle.SetOptDate(0);
-      
-        #For the statistics box:
-        self.tdrStyle.SetOptFile(0);
-        self.tdrStyle.SetOptStat(111111); #To display the mean and RMS:
-        self.tdrStyle.SetStatColor(kWhite);
-        self.tdrStyle.SetStatFont(42);
-        self.tdrStyle.SetStatFontSize(0.025);
-        self.tdrStyle.SetStatTextColor(1);
-        self.tdrStyle.SetStatFormat("6.4g");
-        self.tdrStyle.SetStatBorderSize(1);
-        self.tdrStyle.SetStatH(0.1);
-        self.tdrStyle.SetStatW(0.15);
-      
-        #Margins:
-        self.tdrStyle.SetPadTopMargin(0.05);
-        self.tdrStyle.SetPadBottomMargin(0.13);
-        self.tdrStyle.SetPadLeftMargin(0.18);
-        self.tdrStyle.SetPadRightMargin(0.06);
-      
-        #For the Global title:
-        self.tdrStyle.SetOptTitle(0);
-        self.tdrStyle.SetTitleFont(42);
-        self.tdrStyle.SetTitleColor(1);
-        self.tdrStyle.SetTitleTextColor(1);
-        self.tdrStyle.SetTitleFillColor(10);
-        self.tdrStyle.SetTitleFontSize(0.05);
-      
-        #For the axis titles:
-        self.tdrStyle.SetTitleColor(1, "XYZ");
-        self.tdrStyle.SetTitleFont(42, "XYZ");
-        self.tdrStyle.SetTitleSize(0.03, "XYZ");
-        self.tdrStyle.SetTitleXOffset(0.9);
-        self.tdrStyle.SetTitleYOffset(1.5);
-      
-        #For the axis labels:
-        self.tdrStyle.SetLabelColor(1, "XYZ");
-        self.tdrStyle.SetLabelFont(42, "XYZ");
-        self.tdrStyle.SetLabelOffset(0.007, "XYZ");
-        self.tdrStyle.SetLabelSize(0.03, "XYZ");
-      
-        #For the axis:
-        self.tdrStyle.SetAxisColor(1, "XYZ");
-        self.tdrStyle.SetStripDecimals(kTRUE);
-        self.tdrStyle.SetTickLength(0.03, "XYZ");
-        self.tdrStyle.SetNdivisions(510, "XYZ");
-        self.tdrStyle.SetPadTickX(1); #To get tick marks on the opposite side of the frame
-        self.tdrStyle.SetPadTickY(1);
-      
-        #Change for log plots:
-        self.tdrStyle.SetOptLogx(0);
-        self.tdrStyle.SetOptLogy(0);
-        self.tdrStyle.SetOptLogz(0);
-      
-        #Postscript options:
-        self.tdrStyle.SetPaperSize(20.,20.);
-        self.tdrStyle.cd();
 
     #### Method to make a RooAbsPdf giving label, model name, spectrum, if it is mc or not and a constraint list for the parameters
     def make_Pdf(self, label, in_model_name, mass_spectrum="_mj", ConstraintsList=[],ismc = 0):
@@ -1527,7 +1424,7 @@ class doBiasStudy_mlvj:
         model.plotOn( mplot,RooFit.Name("model_mc")  );# remove RooFit.VLines() in order to get right pull in the 1st bin
 
         ## Get the pull
-        mplot_pull = self.get_pull(rrv_mass_j, mplot,"data","model_mc");
+        mplot_pull = get_pull(rrv_mass_j,mplot,"data","model_mc",self.narrow_factor);
         mplot.GetYaxis().SetRangeUser(1e-5,mplot.GetMaximum()*1.2);
 
         ## CALCULATE CHI2
@@ -1643,7 +1540,7 @@ class doBiasStudy_mlvj:
         rdataset.plotOn( mplot , RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0), RooFit.Name("data") );
 
         ## get the pull
-        mplot_pull = self.get_pull(rrv_mass_lvj,mplot,"data","model_mc");
+        mplot_pull = get_pull(rrv_mass_lvj,mplot,"data","model_mc",self.narrow_factor);
         parameters_list = model.getParameters(rdataset);
         
         ##CALCULATE CHI2                                                                                                                                                    
@@ -1913,7 +1810,7 @@ class doBiasStudy_mlvj:
          self.getData_PoissonInterval(rdataset_data_mj,rrv_mass_j,mplot);
 		
         ### Get the pull and plot it
-        mplot_pull = self.get_pull(rrv_mass_j,mplot,"data","model_mc");
+        mplot_pull = get_pull(rrv_mass_j,mplot,"data","model_mc",self.narrow_factor);
   
         ### signal window zone with vertical lines
         lowerLine = TLine(self.mj_signal_min,0.,self.mj_signal_min,mplot.GetMaximum()*0.9); lowerLine.SetLineWidth(2); lowerLine.SetLineColor(kGray+2); lowerLine.SetLineStyle(9);
@@ -2170,7 +2067,7 @@ class doBiasStudy_mlvj:
         mplot.addObject(leg);
 
         ### get the pull plot and store the canvas
-        mplot_pull = self.get_pull(rrv_mass_lvj,mplot,"data","model_mc");
+        mplot_pull = get_pull(rrv_mass_lvj,mplot,"data","model_mc",self.narrow_factor);
         parameters_list = model_data.getParameters(rdataset_data_mlvj);
 
         ##CALCULATE CHI2                                                                                                                                               
@@ -2449,418 +2346,7 @@ class doBiasStudy_mlvj:
         getattr(self.workspace4bias_,"import")(rrv_number_dataset_sb_lo_mj); rrv_number_dataset_sb_lo_mj.Print();
         getattr(self.workspace4bias_,"import")(rrv_number_dataset_signal_region_mj); rrv_number_dataset_signal_region_mj.Print();
         getattr(self.workspace4bias_,"import")(rrv_number_dataset_sb_hi_mj); rrv_number_dataset_sb_hi_mj.Print();
-
-       
-    ### in order to get the pull
-    def get_pull(self, rrv_x, mplot_orig, dataname = "", pdfname = ""):
-
-        print "############### draw the pull plot ########################"
-        if dataname == "" or pdfname == "": 
-         hpull = mplot_orig.pullHist();
-        else: 
-         hpull = mplot_orig.pullHist(dataname,pdfname);
-        x = ROOT.Double(0.); y = ROOT.Double(0) ;
-        for ipoint in range(0,hpull.GetN()):
-          hpull.GetPoint(ipoint,x,y);
-          if(y == 0):
-           hpull.SetPoint(ipoint,x,10)
-       
-        mplot_pull = rrv_x.frame(RooFit.Title("Pull Distribution"), RooFit.Bins(int(rrv_x.getBins())));
-        medianLine = TLine(rrv_x.getMin(),0.,rrv_x.getMax(),0); medianLine.SetLineWidth(2); medianLine.SetLineColor(kRed);
-        mplot_pull.addObject(medianLine);
-        mplot_pull.addPlotable(hpull,"P");
-        mplot_pull.SetTitle("");
-        mplot_pull.GetXaxis().SetTitle("");
-        mplot_pull.GetYaxis().SetRangeUser(-5,5);
-        mplot_pull.GetYaxis().SetTitleSize(0.10);
-        mplot_pull.GetYaxis().SetLabelSize(0.10);
-        mplot_pull.GetXaxis().SetTitleSize(0.10);
-        mplot_pull.GetXaxis().SetLabelSize(0.10);
-        mplot_pull.GetYaxis().SetTitleOffset(0.40);
-        mplot_pull.GetYaxis().SetTitle("#frac{data-fit}{#sigma_{data}}");
-        mplot_pull.GetYaxis().CenterTitle();
-         
-        return mplot_pull;
-        
-
-    def getData_PoissonInterval(self,data_obs,rrv_x,mplot):
-        datahist   = data_obs.binnedClone(data_obs.GetName()+"_binnedClone",data_obs.GetName()+"_binnedClone");
-        data_histo = datahist.createHistogram("histo_data",rrv_x) ;
-        data_histo.SetName("data");
-        data_plot  = RooHist(data_histo);
-        data_plot.SetMarkerStyle(20);
-        data_plot.SetMarkerSize(1.5);
-        
-        alpha = 1 - 0.6827;
-        for iPoint  in range(data_plot.GetN()):
-          N = data_plot.GetY()[iPoint];
-          if N==0 : L = 0;
-          else : L = (ROOT.Math.gamma_quantile(alpha/2,N,1.));
-          U =  ROOT.Math.gamma_quantile_c(alpha/2,N+1,1);
-          data_plot.SetPointEYlow(iPoint, N-L);
-          data_plot.SetPointEYhigh(iPoint,U-N);
-          data_plot.SetPointEXlow(iPoint,0);
-          data_plot.SetPointEXhigh(iPoint,0);
-
-        mplot.addPlotable(data_plot,"PE");
-
-    #### in order to make the banner on the plots
-    def banner4Plot(self, iswithpull=0):
-      print "############### draw the banner ########################"
-
-
-    def banner4Plot(self, iswithpull=0):
-      print "############### draw the banner ########################"
-
-      if iswithpull:
-       if self.channel=="el":
-        banner = TLatex(0.3,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow e #nu "%(self.GetLumi())));
-       elif self.channel=="mu":
-        banner = TLatex(0.3,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu #nu "%(self.GetLumi())));
-       elif self.channel=="em":
-        banner = TLatex(0.3,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow l #nu "%(self.GetLumi())));
-       banner.SetNDC(); banner.SetTextSize(0.04);
-      else:
-       if self.channel=="el":
-        banner = TLatex(0.22,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow e #nu "%(self.GetLumi())));
-       if self.channel=="mu":
-        banner = TLatex(0.22,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu #nu "%(self.GetLumi())));
-       if self.channel=="em":
-        banner = TLatex(0.22,0.96,("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow l #nu "%(self.GetLumi())));
-       banner.SetNDC(); banner.SetTextSize(0.033);
-                                                                                                         
-      return banner;
-
-    ### in order to make the legend                                                                                                                                                        
-    def legend4Plot(self, plot, left=1, isFill=1, x_offset_low=0., y_offset_low=0., x_offset_high =0., y_offset_high =0., TwoCoulum =1.):
-        print "############### draw the legend ########################"
-        if left==-1:
-            theLeg = TLegend(0.65+x_offset_low, 0.58+y_offset_low, 0.93+x_offset_low, 0.87+y_offset_low, "", "NDC");
-            theLeg.SetName("theLegend");
-            theLeg.SetLineColor(0);
-            theLeg.SetTextFont(42);
-            theLeg.SetTextSize(.04);
-        else:
-            theLeg = TLegend(0.41+x_offset_low, 0.61+y_offset_low, 0.76+x_offset_high, 0.93+y_offset_high, "", "NDC");
-            theLeg.SetName("theLegend");
-            if TwoCoulum :
-                theLeg.SetNColumns(2);
-
-        theLeg.SetFillColor(0);
-        theLeg.SetFillStyle(0);
-        theLeg.SetBorderSize(0);
-        theLeg.SetLineColor(0);
-        theLeg.SetLineWidth(0);
-        theLeg.SetLineStyle(0);
-        theLeg.SetTextSize(0.040);
-        theLeg.SetTextFont(42);
-
-        entryCnt = 0;
-        objName_before = "";
-        objName_signal_graviton = "";
-        objNameLeg_signal_graviton = "";
-
-        if   self.channel == "mu": legHeader="(#mu#nu, 1JHP)";
-        if   self.channel == "el": legHeader="(e#nu, 1JHP)";
-        if   self.channel == "em": legHeader="(l#nu, 1JHP)";
-
-        for obj in range(int(plot.numItems()) ):
-          objName = plot.nameOf(obj);
-          if objName == "errorband" : objName = "Uncertainty";
-          print objName;
-          if not ( ( (plot.getInvisible(objName)) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisi") or TString(objName).Contains("TLine") or
-objName ==objName_before ):
-            theObj = plot.getObject(obj);
-            objTitle = objName;
-            drawoption= plot.getDrawOptions(objName).Data()
-            if drawoption=="P":drawoption="PE"
-            if TString(objName).Contains("Uncertainty") or TString(objName).Contains("sigma"):  objName_before=objName; continue ;
-            elif TString(objName).Contains("Graph") :  objName_before=objName; continue ;
-            elif TString(objName).Data()=="data" : theLeg.AddEntry(theObj, "CMS Data "+legHeader,"PE");  objName_before=objName;
-            else: objName_before=objName; continue ;
-
-        entryCnt = 0;
-        objName_before = "";
-        objName_signal_graviton = "";
-        objNameLeg_signal_graviton = "";
-
-        for obj in range(int(plot.numItems()) ):
-          objName = plot.nameOf(obj);
-          if objName == "errorband" : objName = "Uncertainty";
-          print objName;
-          if not ( ( (plot.getInvisible(objName)) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisi") or TString(objName).Contains("TLine") or
-objName ==objName_before ):
-            theObj = plot.getObject(obj);
-            objTitle = objName;
-            drawoption= plot.getDrawOptions(objName).Data()
-            if drawoption=="P":drawoption="PE"
-            if TString(objName).Contains("Uncertainty") or TString(objName).Contains("sigma"):  objName_before=objName; continue ;
-            elif TString(objName).Contains("Graph") :  objName_before=objName; continue ;
-            elif TString(objName).Data()=="WJets" : theLeg.AddEntry(theObj, "W+jets","F");  objName_before=objName;
-            else:  objName_before=objName; continue ;
-
-        entryCnt = 0;
-        objName_before = "";
-        objName_signal_graviton = "";
-        objNameLeg_signal_graviton = "";
-
-        for obj in range(int(plot.numItems()) ):
-            objName = plot.nameOf(obj);
-            if objName == "errorband" : objName = "Uncertainty";
-            print objName;
-            if not ( ( (plot.getInvisible(objName)) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisi") or TString(objName).Contains("TLine") or objName ==objName_before ):
-                theObj = plot.getObject(obj);
-                objTitle = objName;
-                drawoption= plot.getDrawOptions(objName).Data()
-                if drawoption=="P":drawoption="PE"
-                if TString(objName).Contains("Uncertainty") or TString(objName).Contains("sigma"):
-                    theLeg.AddEntry(theObj, objName,"F");
-                elif TString(objName).Contains("Graph") :
-                    if not (objName_before=="Graph" or objName_before=="Uncertainty"): theLeg.AddEntry(theObj, "Uncertainty","F");
-                else:
-                    if TString(objName).Data()=="STop" : theLeg.AddEntry(theObj, "Single Top","F");
-                    elif TString(objName).Data()=="TTbar" : theLeg.AddEntry(theObj, "t#bar{t}","F");
-                    elif TString(objName).Data()=="VV" : theLeg.AddEntry(theObj, "WW/WZ","F");
-                    elif TString(objName).Data()=="data" :  objName_before=objName; entryCnt = entryCnt+1; continue ;
-                    elif TString(objName).Data()=="WJets" : objName_before=objName; entryCnt = entryCnt+1; continue;
-                    elif TString(objName).Contains("vbfH"): theLeg.AddEntry(theObj, (TString(objName).ReplaceAll("vbfH","qqH")).Data() ,"L");
-                    elif TString(objName).Contains("Uncertainty"): theLeg.AddEntry(theObj, objTitle,drawoption);
-                    elif TString(objName).Contains("Bulk"):
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M600") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M600"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.6 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M700") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M700"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.7 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M800") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M800"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.8 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M900") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M900"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.9 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1000") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1000"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1100") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1100"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.1 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1200") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1200"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.2 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1300") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1300"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.3 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1400") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1400"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.4 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1500") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1500"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.5 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1600") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1600"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.6 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1700") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1700"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.7 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1800") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1800"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.8 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1900") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1900"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.9 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2000") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2000"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=2 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2100") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2100"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.1 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2200") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2200"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.2 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2300") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2300"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.3 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2400") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2400"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.4 TeV #tilde{k}=0.5 (#times100)";
-                       if TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2500") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2500"):
-                           objName_signal_graviton = theObj ;
-                           objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.5 TeV #tilde{k}=0.5 (#times100)";
-                    else : theLeg.AddEntry(theObj, objTitle,drawoption);
-                entryCnt=entryCnt+1;
-            objName_before=objName;
-        if objName_signal_graviton !="" :
-           theLeg.AddEntry(objName_signal_graviton, TString(objNameLeg_signal_graviton).Data() ,"L");
-        return theLeg;
-
-
-    #### draw canvas with plots with pull
-    def draw_canvas_with_pull(self, mplot, mplot_pull,parameters_list,in_directory, in_file_name, in_model_name="", show_constant_parameter=0, logy=0):# mplot + pull
-
-        print "############### draw the canvas with pull ########################"
-        mplot.GetXaxis().SetTitleOffset(1.1);
-        mplot.GetYaxis().SetTitleOffset(1.3);
-        mplot.GetXaxis().SetTitleSize(0.055);
-        mplot.GetYaxis().SetTitleSize(0.055);
-        mplot.GetXaxis().SetLabelSize(0.045);
-        mplot.GetYaxis().SetLabelSize(0.045);
-        mplot_pull.GetXaxis().SetLabelSize(0.14);
-        mplot_pull.GetYaxis().SetLabelSize(0.14);
-        mplot_pull.GetYaxis().SetTitleSize(0.15);
-        mplot_pull.GetYaxis().SetNdivisions(205);
-
-                                                                          
-        cMassFit = TCanvas("cMassFit","cMassFit", 600,600);
-        # if parameters_list is empty, don't draw pad3
-        par_first=parameters_list.createIterator();
-        par_first.Reset();
-        param_first=par_first.Next()
-        doParameterPlot = 0 ;
-        if param_first and doParameterPlot != 0:
-         pad1=TPad("pad1","pad1",0.,0. ,0.8,0.24);
-         pad2=TPad("pad2","pad2",0.,0.24,0.8,1. );
-         pad3=TPad("pad3","pad3",0.8,0.,1,1);
-         pad1.Draw();
-         pad2.Draw();
-         pad3.Draw();
-        else:
-         pad1=TPad("pad1","pad1",0.,0. ,0.99,0.24);
-         pad2=TPad("pad2","pad2",0.,0.24,0.99,1. );
-         pad1.Draw();
-         pad2.Draw();
-         
-	pad2.cd();
-        mplot.Draw();
-        banner = self.banner4Plot(1);
-        banner.Draw();
-
-        pad1.cd();
-        mplot_pull.Draw();
-
-        if param_first and doParameterPlot != 0:
-
-            pad3.cd();
-            latex=TLatex();
-            latex.SetTextSize(0.1);
-            par=parameters_list.createIterator();
-            par.Reset();
-            param=par.Next()
-            i=0;
-            while param:
-                if (not param.isConstant() ) or show_constant_parameter:
-                    param.Print();
-                    icolor=1;#if a paramenter is constant, color is 2
-                    if param.isConstant(): icolor=2
-                    latex.DrawLatex(0,0.9-i*0.04,"#color[%s]{%s}"%(icolor,param.GetName()) );
-                    latex.DrawLatex(0,0.9-i*0.04-0.02," #color[%s]{%4.3e +/- %2.1e}"%(icolor,param.getVal(),param.getError()) );
-                    i=i+1;
-                param=par.Next();
-
-        ## create the directory where store the plots
-        Directory = TString(in_directory+self.ggH_sample);
-        if not Directory.EndsWith("/"):Directory = Directory.Append("/");
-        if not os.path.isdir(Directory.Data()):
-              os.system("mkdir -p "+Directory.Data());
-
-        rlt_file = TString(Directory.Data()+in_file_name);
-        if rlt_file.EndsWith(".root"):
-            TString(in_model_name).ReplaceAll(".root","");
-            rlt_file.ReplaceAll(".root","_"+in_model_name+"_with_pull.png");
-        else:
-            TString(in_model_name).ReplaceAll(".root","");
-            rlt_file.ReplaceAll(".root","");
-            rlt_file=rlt_file.Append("_"+in_model_name+"_with_pull.png");
-
-        cMassFit.SaveAs(rlt_file.Data());
-
-        rlt_file.ReplaceAll(".png",".pdf");
-        cMassFit.SaveAs(rlt_file.Data());
-        
-        rlt_file.ReplaceAll(".pdf",".root");
-        cMassFit.SaveAs(rlt_file.Data());
-
-        string_file_name = TString(in_file_name);
-        if string_file_name.EndsWith(".root"):
-            string_file_name.ReplaceAll(".root","_"+in_model_name);
-        else:
-            string_file_name.ReplaceAll(".root","");
-            string_file_name.Append("_"+in_model_name);
-
-        if logy:
-            mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*100);
-            pad2.SetLogy() ;
-            pad2.Update();
-            cMassFit.Update();
-            rlt_file.ReplaceAll(".root","_log.root");
-            cMassFit.SaveAs(rlt_file.Data());
-            rlt_file.ReplaceAll(".root",".pdf");
-            cMassFit.SaveAs(rlt_file.Data());
-            rlt_file.ReplaceAll(".pdf",".png");
-            cMassFit.SaveAs(rlt_file.Data());
-
-        self.draw_canvas(mplot,in_directory,string_file_name.Data(),0,logy,1);
-
-    #### jusr drawing canvas with no pull
-    def draw_canvas(self, in_obj,in_directory, in_file_name, is_range=0, logy=0, frompull=0):
-
-        print "############### draw the canvas without pull ########################"
-        cMassFit = TCanvas("cMassFit","cMassFit", 600,600);
-
-        if frompull and logy :
-            in_obj.GetYaxis().SetRangeUser(1e-2,in_obj.GetMaximum()/100)
-        elif not frompull and logy :
-            in_obj.GetYaxis().SetRangeUser(0.00001,in_obj.GetMaximum())
-            
-
-        if is_range:
-            h2=TH2D("h2","",100,400,1400,4,0.00001,4);
-            h2.Draw();
-            in_obj.Draw("same")
-        else :
-            in_obj.Draw()
-
-        in_obj.GetXaxis().SetTitleSize(0.045);
-        in_obj.GetXaxis().SetTitleOffset(1.15);
-        in_obj.GetXaxis().SetLabelSize(0.04);
-
-        in_obj.GetYaxis().SetTitleSize(0.045);
-        in_obj.GetYaxis().SetTitleOffset(1.40);
-        in_obj.GetYaxis().SetLabelSize(0.04);
-
-        banner = self.banner4Plot();
-        banner.Draw();
-        
-        Directory=TString(in_directory+self.ggH_sample);
-        if not Directory.EndsWith("/"):Directory=Directory.Append("/");
-        if not os.path.isdir(Directory.Data()):
-              os.system("mkdir -p "+Directory.Data());
-
-        rlt_file=TString(Directory.Data()+in_file_name);
-        if rlt_file.EndsWith(".root"):
-            rlt_file.ReplaceAll(".root","_rlt_without_pull_and_paramters.png");
-        else:
-            rlt_file.ReplaceAll(".root","");
-            rlt_file = rlt_file.Append(".png");
-
-        cMassFit.SaveAs(rlt_file.Data());
-
-        rlt_file.ReplaceAll(".png",".pdf");
-        cMassFit.SaveAs(rlt_file.Data());
-
-        rlt_file.ReplaceAll(".pdf",".root");
-        cMassFit.SaveAs(rlt_file.Data());
-
-        if logy:
-            in_obj.GetYaxis().SetRangeUser(1e-2,in_obj.GetMaximum()*100);
-            cMassFit.SetLogy() ;
-            cMassFit.Update();
-            rlt_file.ReplaceAll(".root","_log.root");
-            cMassFit.SaveAs(rlt_file.Data());
-            rlt_file.ReplaceAll(".root",".pdf");
-            cMassFit.SaveAs(rlt_file.Data());
-            rlt_file.ReplaceAll(".pdf",".png");
-            cMassFit.SaveAs(rlt_file.Data());
-
+    
     ##### Get Lumi for banner title
     def GetLumi(self):
         if self.channel=="el": return 19.3;
@@ -2870,11 +2356,8 @@ objName ==objName_before ):
 
     def shapeParametrizationAnalysis(self,label = "_WJets0"):
 
-     if label == "_WJets0":
-         fileName = self.file_WJets0_mc ;
-     else:
-         fileName = self.file_TTbar_mc ;
-
+     if label == "_WJets0": fileName = self.file_WJets0_mc ;
+     else:                  fileName = self.file_TTbar_mc ;
      mlvj_region = options.mlvjregion;
 
      if options.isMC == 1:
@@ -2984,20 +2467,20 @@ objName ==objName_before ):
        self.get_mj_and_mlvj_dataset(self.file_VV_mc,"_VV", "jet_mass_pr");
        self.fit_mlvj_model_single_MC(self.file_VV_mc,"_VV",mlvj_region,"Exp",0,0,1);
  
-       self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STop")# to get the shape of m_lvj                                                                                                 
+       self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STop");
        self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop",mlvj_region,"Exp",0,0,1);
 
-       self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbar")# to get the shape of m_lvj                                                                                               
+       self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbar");
        self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar",mlvj_region,"Exp",0,0,1);
  
-       self.get_mj_and_mlvj_dataset(self.file_WW_EWK_mc,"_WW_EWK","jet_mass_pr")# to get the shape of m_lvj                                                                               
+       self.get_mj_and_mlvj_dataset(self.file_WW_EWK_mc,"_WW_EWK","jet_mass_pr");
        self.fit_mlvj_model_single_MC(self.file_WW_EWK_mc,"_WW_EWK",mlvj_region,"Exp",0,0,1);
 
-       self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0")# to get the shape of m_lvj                                                                                             
+       self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0");
        self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0",mlvj_region,"Exp",0,0,1);
 
-       self.get_mj_and_mlvj_dataset(self.file_data,"_data"); ## global fit of data in the sidand fixing non dominant bkg
- 
+       self.get_mj_and_mlvj_dataset(self.file_data,"_data");
+       
        self.fit_mlvj_in_Mj_sideband(label,mlvj_region,"Exp");
        self.fit_mlvj_in_Mj_sideband(label,mlvj_region,"ExpTail");
        self.fit_mlvj_in_Mj_sideband(label,mlvj_region,"Exp_v3");
