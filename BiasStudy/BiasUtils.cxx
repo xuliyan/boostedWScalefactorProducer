@@ -451,9 +451,7 @@ void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int &
 
        if(fitjetmass){
 
-	 std::cout<<" signal int "<<std::endl;                                                                                                                                                             
 	  fullInt_signal  = dynamic_cast<RooAbsReal*>((dynamic_cast<RooAddPdf*>((*this).fittedPdf_[iToy])->pdfList()).find(std::string("model_higgs_signal_region_fit_"+channel_+spectrum_).c_str()))->createIntegral(*x,*x);
-	 std::cout<<" signal int 2 "<<std::endl;                                                                                                                                                             
 	  signalInt_signal  = dynamic_cast<RooAbsReal*>((dynamic_cast<RooAddPdf*>((*this).fittedPdf_[iToy])->pdfList()).find(std::string("model_higgs_signal_region_fit_"+channel_+spectrum_).c_str()))->createIntegral(*x,*x,"signal_region");
 
                                                                                                                                            
@@ -522,7 +520,7 @@ void biasModelAnalysis::saveToysPlots(const int & nPlots, const int & fitjetmass
   banner->SetTextSize(0.04);
 
   TString Title ;
-
+/*
   for(unsigned int iToy = 0 ; iToy < (*this).generatedData_.size() ; iToy++){
     if(iToy%nPlots != 0 ) continue ; 
 
@@ -554,7 +552,7 @@ void biasModelAnalysis::saveToysPlots(const int & nPlots, const int & fitjetmass
     if(pseudodata == 0 )
      (*this).generatedData_[iToy]->plotOn(mplot,RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0),RooFit::Name(Title.Data()));
     else 
-      GetDataPoissonInterval((RooDataSet*)generatedData_[iToy],rrv_x,mplot);                                                                          
+      GetDataPoissonInterval((RooDataSet*) generatedData_[iToy],rrv_x,mplot);                                                                   
   
     mplot->GetYaxis()->SetRangeUser(1e-2,mplot->GetMaximum()*1.2);                                                                                                                    
 
@@ -613,35 +611,9 @@ void biasModelAnalysis::saveToysPlots(const int & nPlots, const int & fitjetmass
     canvasVector_.back()->Write();
     
   }
-  
+  */
   return ;
 
 }
 
-void biasModelAnalysis::GetDataPoissonInterval(RooDataSet* data, RooRealVar* rrv_x, RooPlot* mplot){
- 
-  TString Title ; Title.Form("%s_binnedClone",data->GetName());
-  RooDataHist* datahist   = new RooDataHist(Title.Data(),Title.Data(),(*(*this).observables_),*data);
-  TH1* data_histo         = datahist->createHistogram("histo_data",*rrv_x) ;
-  RooHist* data_plot  = new RooHist(*data_histo);
-  data_plot->SetMarkerStyle(20);
-  data_plot->SetMarkerSize(1.5);
-  data_plot->SetName("data");
 
-  double alpha = 1 - 0.6827;
-  for( int iPoint = 0 ; iPoint < data_plot->GetN(); iPoint++){
-
-   double N = data_plot->GetY()[iPoint];
-   double L , U ;
-   if(N==0) L = 0;
-   else L = (ROOT::Math::gamma_quantile(alpha/2,N,1.));
-   U =  ROOT::Math::gamma_quantile_c(alpha/2,N+1,1);
-   data_plot->SetPointEYlow(iPoint, N-L);
-   data_plot->SetPointEYhigh(iPoint,U-N);
-   data_plot->SetPointEXlow(iPoint,0);
-   data_plot->SetPointEXhigh(iPoint,0);
-  }
-
-   mplot->addPlotable(data_plot,"PE");
-
-}
