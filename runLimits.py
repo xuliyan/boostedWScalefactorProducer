@@ -49,6 +49,7 @@ parser.add_option('--ttbarcontrolregion',      action="store",type="int",   dest
 parser.add_option('--mlvjregion',      action="store",type="string",   dest="mlvjregion",default="_sb_lo")
 parser.add_option('--fitjetmass',      action="store",type="int",   dest="fitjetmass",default=0)
 parser.add_option('--onlybackgroundfit',  help='run only background fit',  type=int, default=0)
+parser.add_option('--inflatejobstatistic',  help='enlarge the generated statistics in the fit',  type=int, default=1)
 
 (options, args) = parser.parse_args()
 
@@ -93,24 +94,24 @@ if options.biasStudy:
 
  if not options.turnOnAnalysis and not options.fitjetmass:
 
-  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
-  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
-#  shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
-#  shape_fit = ["Pow","Pow","Pow","Pow","Pow"]
+#  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
+#  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
+  shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
+  shape_fit = ["Pow","Pow","Pow","Pow","Pow"]
 
  elif options.turnOnAnalysis and not options.fitjetmass:
 
- # shape_gen = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"];    
+#  shape_gen = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"];    
   shape_fit = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"];
   shape_gen = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"];    
- # shape_fit = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"];
+#  shape_fit = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"];
 
  elif options.fitjetmass:
 
   shape_gen = ["ErfExp","ErfExp","ErfExp","ErfExp","ErfExp"];    
-#  shape_fit = ["ErfExp","ErfExp","ErfExp","ErfExp","ErfExp"];
+  shape_fit = ["ErfExp","ErfExp","ErfExp","ErfExp","ErfExp"];
 #  shape_gen = ["User1","User1","User1","User1","User1"];    
-  shape_fit = ["User1","User1","User1","User1","User1"];
+#  shape_fit = ["User1","User1","User1","User1","User1"];
 
  nexp      = [1000,1000,1000,1000,1000]; 
  isMC      = [0,0,0,0,0];
@@ -436,7 +437,7 @@ if __name__ == '__main__':
             print "--------------------------------------------------";                
             print "--------------------------------------------------";  
 
-            command = "python do_fitBias_vbf.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d "%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit); 
+            command = "python do_fitBias_vbf.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d --inflatejobstatistic %d"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit,options.inflatejobstatistic); 
             print command ;
             if options.batchMode:
               suffix = "";  
@@ -450,7 +451,7 @@ if __name__ == '__main__':
                  suffix = suffix+"_B";
               else:   
                  suffix = suffix+"_SB";
-              fn = "biasScript_ggH%03d_%s_%s_%s"%(mass[i],shape_gen[i],shape_fit[i],suffix);
+              fn = "biasScript_ggH%03d_%s_%s%s"%(mass[i],shape_gen[i],shape_fit[i],suffix);
               submitBatchJob( command, fn );
             else: 
               os.system(command);
