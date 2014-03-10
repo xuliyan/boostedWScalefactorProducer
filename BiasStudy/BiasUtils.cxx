@@ -385,7 +385,7 @@ void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int &
 	  }
 
 	  RooFitResult* fresult = dynamic_cast<RooFitResult*>((*this).fitResults_[iToy]->Clone("fresult"));
- 	  double mjet_fit_data_error = Calc_error_extendPdf(*((RooAbsData*)(*this).generatedData_[iToy]),*(dynamic_cast<RooExtendPdf*>(model_bkg_data_)),fresult,"signal_region");     
+ 	  double mjet_fit_data_error = Calc_error_extendPdf(*((RooAbsData*)(*this).generatedData_[iToy]),*(dynamic_cast<RooExtendPdf*>(model_bkg_data_)),fresult,std::string("signal_region"));     
           parameterError_[iparNotConstant] = mjet_fit_data_error;                                                                                                
 	  if(ttbarcontrolregion == 0){
 
@@ -515,12 +515,10 @@ void biasModelAnalysis::saveToysPlots(const int & nPlots, const int & fitjetmass
   RooRealVar*   rrv_x = NULL ;
   RooFitResult* fres = NULL ;
 
-  TLatex*  banner = new TLatex(0.3,0.96,("CMS Preliminary, 19.3 fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow l #nu "));
-  banner->SetNDC(); 
-  banner->SetTextSize(0.04);
-
+  TLatex* banner = banner4Plot(channel_,19.3,1);
+    
   TString Title ;
-/*
+
   for(unsigned int iToy = 0 ; iToy < (*this).generatedData_.size() ; iToy++){
     if(iToy%nPlots != 0 ) continue ; 
 
@@ -536,8 +534,8 @@ void biasModelAnalysis::saveToysPlots(const int & nPlots, const int & fitjetmass
      
     (*this).generatedData_[iToy]->plotOn(mplot,RooFit::MarkerSize(1.5), RooFit::Invisible(), RooFit::XErrorSize(0));
 
+    fres = dynamic_cast<RooFitResult*>((*this).fitResults_[iToy]->Clone("fres"));
     if(!fitjetmass){
-     fres = dynamic_cast<RooFitResult*>((*this).fitResults_[iToy]->Clone("fres"));
      draw_error_band_extendPdf(*((RooAbsData*)(*this).generatedData_[iToy]), *((*this).fittedPdf_[iToy]),fres,mplot,2,"L");
     }
 
@@ -552,10 +550,12 @@ void biasModelAnalysis::saveToysPlots(const int & nPlots, const int & fitjetmass
     if(pseudodata == 0 )
      (*this).generatedData_[iToy]->plotOn(mplot,RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0),RooFit::Name(Title.Data()));
     else 
-      GetDataPoissonInterval((RooDataSet*) generatedData_[iToy],rrv_x,mplot);                                                                   
-  
+      GetDataPoissonInterval(dynamic_cast<const RooAbsData*>(generatedData_[iToy]),dynamic_cast<RooRealVar*>(rrv_x),dynamic_cast<RooPlot*>(mplot));
+
     mplot->GetYaxis()->SetRangeUser(1e-2,mplot->GetMaximum()*1.2);                                                                                                                    
 
+    RooPlot* mplot_pull = get_pull(rrv_x, mplot,(RooDataSet*) generatedData_[iToy], (*this).fittedPdf_[iToy],fres,"data",std::string(Title),1,1);
+         
     Title.Form("canvas_generatedToys_wjet_%d",iToy);
     canvasVector_.push_back(new TCanvas(Title.Data(),""));
     canvasVector_.back()->cd();
@@ -577,32 +577,7 @@ void biasModelAnalysis::saveToysPlots(const int & nPlots, const int & fitjetmass
     banner->Draw();
 
     pad2->cd();                                                                                                                                                                         
-    RooHist* hpull = mplot->pullHist();
-    double x = 0. ;
-    double y = 0. ;
-
-    for( int ipoint = 0 ; ipoint < hpull->GetN() ; ipoint++){
-     hpull->GetPoint(ipoint,x,y);
-     if(y == 0) hpull->SetPoint(ipoint,x,10);
-    }
   
-    RooPlot* mplot_pull = rrv_x->frame(RooFit::Title("Pull Distribution"), RooFit::Bins(int(rrv_x->getBins())));
-    TLine* medianLine = new TLine(rrv_x->getMin(),0.,rrv_x->getMax(),0); 
-    medianLine->SetLineWidth(2); 
-    medianLine->SetLineColor(kRed);
-    mplot_pull->addObject(medianLine);
-    mplot_pull->addPlotable(hpull,"P");
-    mplot_pull->SetTitle("");
-    mplot_pull->GetXaxis()->SetTitle("");
-    mplot_pull->GetYaxis()->SetRangeUser(-5,5);
-    mplot_pull->GetYaxis()->SetTitleSize(0.10);
-    mplot_pull->GetYaxis()->SetLabelSize(0.10);
-    mplot_pull->GetXaxis()->SetTitleSize(0.10);
-    mplot_pull->GetXaxis()->SetLabelSize(0.10);
-    mplot_pull->GetYaxis()->SetTitleOffset(0.40);
-    mplot_pull->GetYaxis()->SetTitle("#frac{data-fit}{#sigma_{data}}");
-    mplot_pull->GetYaxis()->CenterTitle();
-
     mplot_pull->Draw();                                                                                                                                                                 
     mplot_pull->GetXaxis()->SetLabelSize(0.15);                                                                                                                                          
     mplot_pull->GetYaxis()->SetLabelSize(0.15);                                                                                                                                          
@@ -611,7 +586,7 @@ void biasModelAnalysis::saveToysPlots(const int & nPlots, const int & fitjetmass
     canvasVector_.back()->Write();
     
   }
-  */
+
   return ;
 
 }
