@@ -56,10 +56,10 @@ if __name__ == "__main__":
  ## take the list of TFile to be used for the plot
 
  ROOTStyle = os.getenv ("ROOTStyle");
-# gROOT.ProcessLine((".x "+ROOTStyle+"/rootLogon.C"));
-# gROOT.ProcessLine((".x "+ROOTStyle+"/rootPalette.C"));
-# gROOT.ProcessLine((".x "+ROOTStyle+"/rootColors.C"));
-# gROOT.ProcessLine((".x "+ROOTStyle+"/setTDRStyle.C"));
+ gROOT.ProcessLine((".x "+ROOTStyle+"/rootLogon.C"));
+ gROOT.ProcessLine((".x "+ROOTStyle+"/rootPalette.C"));
+ gROOT.ProcessLine((".x "+ROOTStyle+"/rootColors.C"));
+ gROOT.ProcessLine((".x "+ROOTStyle+"/setTDRStyle.C"));
                 
  ROOT.gStyle.SetOptFit(111);
  ROOT.gStyle.SetOptStat(1111);
