@@ -220,7 +220,7 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
   objName_before = "";
   objName_signal_graviton = NULL;
   objNameLeg_signal_graviton = "";
-
+  
   for( int obj = 0 ; obj < int(plot->numItems()) ; obj++ ){
     std::string objName = plot->nameOf(obj);
     if( objName == "errorband" ) objName = "Uncertainty";
@@ -253,9 +253,11 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
    objName_signal_graviton = NULL;
    objNameLeg_signal_graviton = "";
 
+   
    for( int obj = 0 ; obj < int(plot->numItems()) ; obj++){
             
       std::string objName = plot->nameOf(obj);
+      std::cout<<" objName "<<objName<<std::endl;
       if(objName == "errorband") objName = "Uncertainty";
       if(not(( (plot->getInvisible(objName.c_str())) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisible") or TString(objName).Contains("TLine") or objName == objName_before)){
          TObject* theObj = plot->getObject(obj);
@@ -366,9 +368,14 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
 	 }
       }
    }
-   if(std::string(objName_signal_graviton->GetName()) != "")
-      theLeg->AddEntry(objName_signal_graviton, TString(objNameLeg_signal_graviton).Data() ,"L");
-   return theLeg;
+
+ std::cout<<" <<<<<<<<<<<<<<<<<<<< "<<std::endl;   
+ if(objName_signal_graviton != NULL){
+   if(std::string(objName_signal_graviton->GetName()) != "") 
+    theLeg->AddEntry(objName_signal_graviton,TString(objNameLeg_signal_graviton).Data(),"L");
+ }
+ std::cout<<" <<<<<<<<<<<<<<<<<<<< "<<std::endl;     
+ return theLeg;
 }
 
 void draw_canvas(RooPlot* in_obj, const std::string & in_directory, const TString & in_file_name, const std::string & channel, const float & lumi, const int & in_range, const int & logy, const int & frompull){
