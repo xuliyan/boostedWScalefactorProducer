@@ -38,9 +38,9 @@ TLatex* banner4Plot(const std::string & = "mu", const float & = 19.5, const int 
 TLegend* legend4Plot(RooPlot*, const int & = 0, const double & = 0, const double & = 0,  const double & = 0, const double & = 0, const int & = 1, const std::string & = "mu" );
 
 // draw canvas with plots with pull
-void draw_canvas_with_pull(RooPlot*, RooPlot*, RooArgList*, std::string &, std::string &, std::string &, const std::string & = "mu", const int & = 0, const int & = 0, const float & lumi = 19.5);
+void draw_canvas_with_pull(RooPlot*, RooPlot*, RooArgList*, const std::string & = "", const std::string & = "", const std::string & = "", const std::string & = "mu", const int & = 0, const int & = 0, const float & lumi = 19.5);
 
-void draw_canvas(RooPlot*, std::string & ,  TString &, const std::string & = "mu", const float & = 19.5, const int & = 0, const int & = 0, const int & = 0);
+void draw_canvas(RooPlot*, const std::string & = "" ,  const TString & = "", const std::string & = "mu", const float & = 19.5, const int & = 0, const int & = 0, const int & = 0);
 
 // set tdr style function
 void setTDRStyle();
