@@ -128,7 +128,7 @@ if __name__ == "__main__":
        masspoint = mass[imass];
        ifilePos = ifile ;
        break; 
- 
+   print " ifile ",ifile," iFilePos ",ifilePos ;
    vector_root_file[ifile].cd();
    
    if masspoint == -1 or ifilePos == -1 : continue;
@@ -153,7 +153,7 @@ if __name__ == "__main__":
    canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].GetName()+".pdf","pdf");
 
    if not options.onlybackgroundfit:
-    canvas_pull_sig_data.append(TCanvas("canvas_"+histo_pull_sig_wjet.GetName()+"_mH%d"%(mass[imass]),""));
+    canvas_pull_sig_data.append(TCanvas("canvas_"+histo_pull_signal.GetName()+"_mH%d"%(mass[imass]),""));
     canvas_pull_sig_data[len(canvas_pull_sig_data)-1].cd();
     histo_pull_signal.Draw();
     canvas_pull_sig_data[len(canvas_pull_sig_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_sig_data[len(canvas_pull_sig_data)-1].GetName()+".png","png");
