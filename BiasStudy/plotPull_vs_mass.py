@@ -119,7 +119,6 @@ if __name__ == "__main__":
   
   ## loop and fill the histograms
   for imass in range(len(mass)):
-   print imass; 
 
    masspoint = -1 ;
    ifilePos  = -1 ;
@@ -145,10 +144,6 @@ if __name__ == "__main__":
    name_pull = "rrv_number_data%s_fit_%s%s_data_pull"%(options.mlvjregion,options.channel,spectrum);
    name_signal_pull = "rrv_number_signal_region_fit_ggH_vbfH_wjet_pull";
    name_pull_MC = "rrv_number_data%s_fit_%s%s_wjet_pull"%(options.mlvjregion,options.channel,spectrum);
-
-   print name_pull;
-   print name_signal_pull;
-   print name_pull_MC;
 
    if options.isMC == 0:
        
