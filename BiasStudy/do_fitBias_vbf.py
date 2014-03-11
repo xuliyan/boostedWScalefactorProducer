@@ -49,7 +49,7 @@ ROOT.gSystem.Load(options.inPath+"/BiasStudy/BiasUtils_cxx.so")
 
 from ROOT import draw_error_band, draw_error_band_extendPdf, draw_error_band_Decor, draw_error_band_shape_Decor, Calc_error_extendPdf, Calc_error, RooErfExpPdf, RooAlpha, RooAlpha4ErfPowPdf, RooAlpha4ErfPow2Pdf, RooAlpha4ErfPowExpPdf, PdfDiagonalizer, RooPowPdf, RooPow2Pdf, RooErfPowExpPdf, RooErfPowPdf, RooErfPow2Pdf, RooQCDPdf, RooUser1Pdf, RooBWRunPdf, RooAnaExpNPdf,RooExpNPdf, RooAlpha4ExpNPdf, RooExpTailPdf, RooPow3Pdf, RooErfPow3Pdf, RooUser1Pdf, biasModelAnalysis
 
-from ROOT import setTDRStyle, get_pull, draw_canvas, draw_canvas_with_pull, legend4Plot
+from ROOT import setTDRStyle, get_pull, draw_canvas, draw_canvas_with_pull, legend4Plot, GetDataPoissonInterval
 
 class doBiasStudy_mlvj:
 
@@ -1818,8 +1818,8 @@ class doBiasStudy_mlvj:
         mplot.addObject(upperLine);
 
         ### legend of the plot
-        self.leg = self.legend4Plot(mplot,0,1, -0.2, 0.07, 0.04, 0.);
-        mplot.addObject(self.leg);
+        leg = legend4Plot(mplot,0,-0.2,0.07,0.04,0.,1,"em");
+        mplot.addObject(leg);
         mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.5);
 
         ## CALCULATE CHI2
@@ -2062,7 +2062,7 @@ class doBiasStudy_mlvj:
         mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.2);
             
         ### Add the legend to the plot
-        leg = self.legend4Plot(mplot,0,1,0., 0.06, 0.16, 0.);
+        leg = legend4Plot(mplot,0,0.,0.06,0.16,0.,1,"em");
         mplot.addObject(leg);
 
         ### get the pull plot and store the canvas
