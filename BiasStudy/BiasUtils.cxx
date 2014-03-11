@@ -385,7 +385,7 @@ void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int &
 	  }
 
 	  RooFitResult* fresult = dynamic_cast<RooFitResult*>((*this).fitResults_[iToy]->Clone("fresult"));
- 	  double mjet_fit_data_error = Calc_error_extendPdf(*((RooAbsData*)(*this).generatedData_[iToy]),*(dynamic_cast<RooExtendPdf*>(model_bkg_data_)),fresult,std::string("signal_region"));     
+ 	  double mjet_fit_data_error = Calc_error_extendPdf((RooAbsData*)(*this).generatedData_[iToy],dynamic_cast<RooExtendPdf*>(model_bkg_data_),fresult,std::string("signal_region"));     
           parameterError_[iparNotConstant] = mjet_fit_data_error;                                                                                                
 	  if(ttbarcontrolregion == 0){
 
@@ -536,7 +536,7 @@ void biasModelAnalysis::saveToysPlots(const int & nPlots, const int & fitjetmass
 
     fres = dynamic_cast<RooFitResult*>((*this).fitResults_[iToy]->Clone("fres"));
     if(!fitjetmass){
-     draw_error_band_extendPdf(*((RooAbsData*)(*this).generatedData_[iToy]), *((*this).fittedPdf_[iToy]),fres,mplot,2,"L");
+     draw_error_band_extendPdf((RooAbsData*)(*this).generatedData_[iToy], (*this).fittedPdf_[iToy],fres,mplot,2,"L");
     }
 
     Title.Form("%s_curve",(*this).fittedPdf_[iToy]->GetName());
@@ -554,7 +554,7 @@ void biasModelAnalysis::saveToysPlots(const int & nPlots, const int & fitjetmass
 
     mplot->GetYaxis()->SetRangeUser(1e-2,mplot->GetMaximum()*1.2);                                                                                                                    
 
-    RooPlot* mplot_pull = get_pull(rrv_x, mplot,(RooDataSet*) generatedData_[iToy], (*this).fittedPdf_[iToy],fres,"data",std::string(Title),1,1);
+    RooPlot* mplot_pull = get_pull(rrv_x, mplot,(RooDataSet*)generatedData_[iToy],(*this).fittedPdf_[iToy],fres,"data",std::string(Title),1);
          
     Title.Form("canvas_generatedToys_wjet_%d",iToy);
     canvasVector_.push_back(new TCanvas(Title.Data(),""));
