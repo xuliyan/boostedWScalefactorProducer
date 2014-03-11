@@ -54,13 +54,13 @@ RooPlot* get_pull(RooRealVar* rrv_x, RooPlot* mplot_orig, RooDataSet* rdataset, 
         
   RooPlot* mplot_pull = rrv_x->frame(RooFit::Title("Pull Distribution"), RooFit::Bins(int(rrv_x->getBins()/narrow_factor)));
   
-  TLine medianLine(rrv_x->getMin(),0.,rrv_x->getMax(),0); 
-  medianLine.SetLineWidth(2); 
-  medianLine.SetLineColor(kRed);
+  TLine* medianLine = new TLine(rrv_x->getMin(),0.,rrv_x->getMax(),0); 
+  medianLine->SetLineWidth(2); 
+  medianLine->SetLineColor(kRed);
 
-  if(makeBand) draw_error_band_extendPdf_pull(*rdataset,*model,rfresult,mplot_pull);
+  if(makeBand) draw_error_band_extendPdf_pull(rdataset,model,rfresult,mplot_pull);
 
-  mplot_pull->addObject(&medianLine);        
+  mplot_pull->addObject(medianLine);        
   mplot_pull->addPlotable(hpull,"P");
   mplot_pull->SetTitle("");
   mplot_pull->GetXaxis()->SetTitle("");
@@ -100,12 +100,12 @@ RooPlot* get_pull_ws(RooRealVar* rrv_x, RooPlot* mplot_orig, TGraphAsymmErrors* 
  }
  
  RooPlot* mplot_pull = rrv_x->frame(RooFit::Title("Pull Distribution"), RooFit::Bins(int(rrv_x->getBins()/narrow_factor)));
- TLine medianLine (rrv_x->getMin(),0.,rrv_x->getMax(),0);
- medianLine.SetLineWidth(2); 
- medianLine.SetLineColor(kRed);
+ TLine* medianLine = new TLine(rrv_x->getMin(),0.,rrv_x->getMax(),0);
+ medianLine->SetLineWidth(2); 
+ medianLine->SetLineColor(kRed);
 
  mplot_pull->addObject(plot_graph,"E3");        
- mplot_pull->addObject(&medianLine);        
+ mplot_pull->addObject(medianLine);        
  mplot_pull->addPlotable(hpull,"P");
  mplot_pull->SetTitle("");
  mplot_pull->GetXaxis()->SetTitle("");
@@ -371,7 +371,7 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
    return theLeg;
 }
 
-void draw_canvas(RooPlot* in_obj, std::string & in_directory, TString & in_file_name, const std::string & channel, const float & lumi, const int & in_range, const int & logy, const int & frompull){
+void draw_canvas(RooPlot* in_obj, const std::string & in_directory, const TString & in_file_name, const std::string & channel, const float & lumi, const int & in_range, const int & logy, const int & frompull){
 
   std::cout<<"############### draw the canvas without pull ########################"<<std::endl;
   TCanvas cMassFit ("cMassFit","cMassFit", 600,600);
@@ -435,7 +435,7 @@ void draw_canvas(RooPlot* in_obj, std::string & in_directory, TString & in_file_
 
 
 // draw canvas with plots with pull
-void draw_canvas_with_pull(RooPlot* mplot, RooPlot* mplot_pull, RooArgList* parameters_list, std::string & in_directory, std::string & in_file_name, std::string & in_model_name, const std::string & channel, const int & show_parameter, const int & logy, const float & lumi){
+void draw_canvas_with_pull(RooPlot* mplot, RooPlot* mplot_pull, RooArgList* parameters_list, const std::string & in_directory, const std::string & in_file_name, const std::string & in_model_name, const std::string & channel, const int & show_parameter, const int & logy, const float & lumi){
 
   std::cout<<"############### draw the canvas with pull ########################"<<std::endl;
   mplot->GetXaxis()->SetTitleOffset(1.1);
@@ -555,105 +555,104 @@ void draw_canvas_with_pull(RooPlot* mplot, RooPlot* mplot_pull, RooArgList* para
 // set tdr style function
 void setTDRStyle(){
 
- TStyle tdrStyle("tdrStyle","Style for P-TDR");
  
  //For the canvas:
- tdrStyle.SetCanvasBorderMode(0);
- tdrStyle.SetCanvasColor(kWhite);
- tdrStyle.SetCanvasDefH(600); 
- tdrStyle.SetCanvasDefW(600); 
- tdrStyle.SetCanvasDefX(0); 
- tdrStyle.SetCanvasDefY(0);
+ gStyle->SetCanvasBorderMode(0);
+ gStyle->SetCanvasColor(kWhite);
+ gStyle->SetCanvasDefH(600); 
+ gStyle->SetCanvasDefW(600); 
+ gStyle->SetCanvasDefX(0); 
+ gStyle->SetCanvasDefY(0);
       
  //For the Pad:
- tdrStyle.SetPadBorderMode(0);
- tdrStyle.SetPadColor(kWhite);
- tdrStyle.SetPadGridX(kFALSE);
- tdrStyle.SetPadGridY(kFALSE);
- tdrStyle.SetGridColor(0);
- tdrStyle.SetGridStyle(3);
- tdrStyle.SetGridWidth(1);
+ gStyle->SetPadBorderMode(0);
+ gStyle->SetPadColor(kWhite);
+ gStyle->SetPadGridX(kFALSE);
+ gStyle->SetPadGridY(kFALSE);
+ gStyle->SetGridColor(0);
+ gStyle->SetGridStyle(3);
+ gStyle->SetGridWidth(1);
       
  //For the frame:
- tdrStyle.SetFrameBorderMode(0);
- tdrStyle.SetFrameBorderSize(1);
- tdrStyle.SetFrameFillColor(0);
- tdrStyle.SetFrameFillStyle(0);
- tdrStyle.SetFrameLineColor(1);
- tdrStyle.SetFrameLineStyle(1);
- tdrStyle.SetFrameLineWidth(1);
+ gStyle->SetFrameBorderMode(0);
+ gStyle->SetFrameBorderSize(1);
+ gStyle->SetFrameFillColor(0);
+ gStyle->SetFrameFillStyle(0);
+ gStyle->SetFrameLineColor(1);
+ gStyle->SetFrameLineStyle(1);
+ gStyle->SetFrameLineWidth(1);
       
  //For the histo:
- tdrStyle.SetHistLineColor(1);
- tdrStyle.SetHistLineStyle(0);
- tdrStyle.SetHistLineWidth(1);
- tdrStyle.SetEndErrorSize(2);
- tdrStyle.SetErrorX(0.);
- tdrStyle.SetMarkerStyle(20);
+ gStyle->SetHistLineColor(1);
+ gStyle->SetHistLineStyle(0);
+ gStyle->SetHistLineWidth(1);
+ gStyle->SetEndErrorSize(2);
+ gStyle->SetErrorX(0.);
+ gStyle->SetMarkerStyle(20);
       
  //For the fit/function:
- tdrStyle.SetOptFit(1);
- tdrStyle.SetFitFormat("5.4g");
- tdrStyle.SetFuncColor(2);
- tdrStyle.SetFuncStyle(1);
- tdrStyle.SetFuncWidth(1);
+ gStyle->SetOptFit(1);
+ gStyle->SetFitFormat("5.4g");
+ gStyle->SetFuncColor(2);
+ gStyle->SetFuncStyle(1);
+ gStyle->SetFuncWidth(1);
       
  //For the date:
- tdrStyle.SetOptDate(0);
+ gStyle->SetOptDate(0);
       
  //For the statistics box:
- tdrStyle.SetOptFile(0);
- tdrStyle.SetOptStat(0);
- tdrStyle.SetStatColor(kWhite);
- tdrStyle.SetStatFont(42);
- tdrStyle.SetStatFontSize(0.025);
- tdrStyle.SetStatTextColor(1);
- tdrStyle.SetStatFormat("6.4g");
- tdrStyle.SetStatBorderSize(1);
- tdrStyle.SetStatH(0.1);
- tdrStyle.SetStatW(0.15);
+ gStyle->SetOptFile(0);
+ gStyle->SetOptStat(0);
+ gStyle->SetStatColor(kWhite);
+ gStyle->SetStatFont(42);
+ gStyle->SetStatFontSize(0.025);
+ gStyle->SetStatTextColor(1);
+ gStyle->SetStatFormat("6.4g");
+ gStyle->SetStatBorderSize(1);
+ gStyle->SetStatH(0.1);
+ gStyle->SetStatW(0.15);
       
   //Margins:
-  tdrStyle.SetPadTopMargin(0.05);
-  tdrStyle.SetPadBottomMargin(0.13);
-  tdrStyle.SetPadLeftMargin(0.18);
-  tdrStyle.SetPadRightMargin(0.06);
+  gStyle->SetPadTopMargin(0.05);
+  gStyle->SetPadBottomMargin(0.13);
+  gStyle->SetPadLeftMargin(0.18);
+  gStyle->SetPadRightMargin(0.06);
       
   //For the Global title:
-  tdrStyle.SetOptTitle(0);
-  tdrStyle.SetTitleFont(42);
-  tdrStyle.SetTitleColor(1);
-  tdrStyle.SetTitleTextColor(1);
-  tdrStyle.SetTitleFillColor(10);
-  tdrStyle.SetTitleFontSize(0.05);
+  gStyle->SetOptTitle(0);
+  gStyle->SetTitleFont(42);
+  gStyle->SetTitleColor(1);
+  gStyle->SetTitleTextColor(1);
+  gStyle->SetTitleFillColor(10);
+  gStyle->SetTitleFontSize(0.05);
       
   //For the axis titles:
-  tdrStyle.SetTitleColor(1, "XYZ");
-  tdrStyle.SetTitleFont(42, "XYZ");
-  tdrStyle.SetTitleSize(0.03, "XYZ");
-  tdrStyle.SetTitleXOffset(0.9);
-  tdrStyle.SetTitleYOffset(1.5);
+  gStyle->SetTitleColor(1, "XYZ");
+  gStyle->SetTitleFont(42, "XYZ");
+  gStyle->SetTitleSize(0.03, "XYZ");
+  gStyle->SetTitleXOffset(0.9);
+  gStyle->SetTitleYOffset(1.5);
       
   //For the axis labels:
-  tdrStyle.SetLabelColor(1, "XYZ");
-  tdrStyle.SetLabelFont(42, "XYZ");
-  tdrStyle.SetLabelOffset(0.007, "XYZ");
-  tdrStyle.SetLabelSize(0.03, "XYZ");
+  gStyle->SetLabelColor(1, "XYZ");
+  gStyle->SetLabelFont(42, "XYZ");
+  gStyle->SetLabelOffset(0.007, "XYZ");
+  gStyle->SetLabelSize(0.03, "XYZ");
       
   //For the axis:
-  tdrStyle.SetAxisColor(1, "XYZ");
-  tdrStyle.SetStripDecimals(kTRUE);
-  tdrStyle.SetTickLength(0.03, "XYZ");
-  tdrStyle.SetNdivisions(510, "XYZ");
-  tdrStyle.SetPadTickX(1); 
-  tdrStyle.SetPadTickY(1);
+  gStyle->SetAxisColor(1, "XYZ");
+  gStyle->SetStripDecimals(kTRUE);
+  gStyle->SetTickLength(0.03, "XYZ");
+  gStyle->SetNdivisions(510, "XYZ");
+  gStyle->SetPadTickX(1); 
+  gStyle->SetPadTickY(1);
       
   //Change for log plots:
-  tdrStyle.SetOptLogx(0);
-  tdrStyle.SetOptLogy(0);
-  tdrStyle.SetOptLogz(0);
+  gStyle->SetOptLogx(0);
+  gStyle->SetOptLogy(0);
+  gStyle->SetOptLogz(0);
       
   //Postscript options:
-  tdrStyle.SetPaperSize(20.,20.);
-  tdrStyle.cd();
+  gStyle->SetPaperSize(20.,20.);
+  gStyle->cd();
 }
