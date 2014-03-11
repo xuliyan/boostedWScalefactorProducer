@@ -42,15 +42,14 @@ parser.add_option('-i','--inflatejobstatistic',  help='enlarge the generated sta
 (options, args) = parser.parse_args()
 
 ROOT.gSystem.Load(options.inPath+"/PDFs/PdfDiagonalizer_cc.so")
-ROOT.gSystem.Load(options.inPath+"/PDFs/Util_cxx.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/HWWLVJRooPdfs_cxx.so")
-ROOT.gSystem.Load(options.inPath+"/BiasStudy/BiasUtils_cxx.so")
+ROOT.gSystem.Load(options.inPath+"/PlotStyle/Util_cxx.so")
 ROOT.gSystem.Load(options.inPath+"/PlotStyle/PlotUtils_cxx.so")
-
+ROOT.gSystem.Load(options.inPath+"/BiasStudy/BiasUtils_cxx.so")
 
 from ROOT import draw_error_band, draw_error_band_extendPdf, draw_error_band_Decor, draw_error_band_shape_Decor, Calc_error_extendPdf, Calc_error, RooErfExpPdf, RooAlpha, RooAlpha4ErfPowPdf, RooAlpha4ErfPow2Pdf, RooAlpha4ErfPowExpPdf, PdfDiagonalizer, RooPowPdf, RooPow2Pdf, RooErfPowExpPdf, RooErfPowPdf, RooErfPow2Pdf, RooQCDPdf, RooUser1Pdf, RooBWRunPdf, RooAnaExpNPdf,RooExpNPdf, RooAlpha4ExpNPdf, RooExpTailPdf, RooPow3Pdf, RooErfPow3Pdf, RooUser1Pdf, biasModelAnalysis
 
-from ROOT import setTDRStyle, get_pull
+from ROOT import setTDRStyle, get_pull, draw_canvas, draw_canvas_with_pull, legend4Plot
 
 class doBiasStudy_mlvj:
 
@@ -1424,7 +1423,7 @@ class doBiasStudy_mlvj:
         model.plotOn( mplot,RooFit.Name("model_mc")  );# remove RooFit.VLines() in order to get right pull in the 1st bin
 
         ## Get the pull
-        mplot_pull = get_pull(rrv_mass_j,mplot,"data","model_mc",self.narrow_factor);
+        mplot_pull = get_pull(rrv_mass_j,mplot,rdataset_mj,model,rfresult,"data","model_mc",0,1);
         mplot.GetYaxis().SetRangeUser(1e-5,mplot.GetMaximum()*1.2);
 
         ## CALCULATE CHI2
@@ -1448,7 +1447,7 @@ class doBiasStudy_mlvj:
          os.system("mkdir -p plots_%s_%s_%s_g1/mj_fitting_%s_%s/"%(options.additioninformation, self.channel,self.wtagger_label,options.fgen,options.fres));
          os.system("mkdir plots_%s_%s_%s_g1/mj_fitting_%s_%s/%s"%(options.additioninformation, self.channel,self.wtagger_label,options.fgen,options.fres,"basePlot/"));
 
-        self.draw_canvas_with_pull(mplot,mplot_pull,parameters_list,"plots_%s_%s_%s_g1/mj_fitting_%s_%s/%s"%(options.additioninformation, self.channel, self.wtagger_label,options.fgen,options.fres,"basePlot/"),label+in_file_name,in_model_name);
+        draw_canvas_with_pull(mplot,mplot_pull,RooArgList(parameters_list),"plots_%s_%s_%s_g1/mj_fitting_%s_%s/%s"%(options.additioninformation, self.channel, self.wtagger_label,options.fgen,options.fres,"basePlot/"),label+in_file_name,in_model_name,"em",0,1,self.GetLumi());
 
 
         print "####################################################";
@@ -1540,7 +1539,7 @@ class doBiasStudy_mlvj:
         rdataset.plotOn( mplot , RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0), RooFit.Name("data") );
 
         ## get the pull
-        mplot_pull = get_pull(rrv_mass_lvj,mplot,"data","model_mc",self.narrow_factor);
+        mplot_pull = get_pull(rrv_mass_lvj,mplot,rdataset,model,rfresult,"data","model_mc",0,1);
         parameters_list = model.getParameters(rdataset);
         
         ##CALCULATE CHI2                                                                                                                                                    
@@ -1583,7 +1582,7 @@ class doBiasStudy_mlvj:
          os.system("mkdir -p plots_%s_%s_%s_g1/mlvj_fitting_%s_%s/"%(options.additioninformation, self.channel,self.wtagger_label,options.fgen,options.fres));
          os.system("mkdir plots_%s_%s_%s_g1/mlvj_fitting_%s_%s/%s"%(options.additioninformation, self.channel,self.wtagger_label,options.fgen,options.fres,"basePlot/"));
 
-        self.draw_canvas_with_pull(mplot,mplot_pull,parameters_list,"plots_%s_%s_%s_g1/mlvj_fitting_%s_%s/%s"%(options.additioninformation, self.channel, self.wtagger_label,options.fgen,options.fres,"basePlot/"),label+in_file_name,mlvj_model);
+        draw_canvas_with_pull(mplot,mplot_pull,RooArgList(parameters_list),"plots_%s_%s_%s_g1/mlvj_fitting_%s_%s/%s"%(options.additioninformation, self.channel, self.wtagger_label,options.fgen,options.fres,"basePlot/"),label+in_file_name,mlvj_model,"em",0,1,self.GetLumi());
 
         ### Number of the event in the dataset and lumi scale factor --> set the proper number for bkg extraction or for signal region
         print "rrv_number"+label+in_range+mlvj_model+"_"+self.channel+"_mlvj";
@@ -1810,7 +1809,7 @@ class doBiasStudy_mlvj:
          self.getData_PoissonInterval(rdataset_data_mj,rrv_mass_j,mplot);
 		
         ### Get the pull and plot it
-        mplot_pull = get_pull(rrv_mass_j,mplot,"data","model_mc",self.narrow_factor);
+        mplot_pull = get_pull(rrv_mass_j,mplot,rdataset_data_mj,model_data,rfresult,"data","model_mc",1,1);
   
         ### signal window zone with vertical lines
         lowerLine = TLine(self.mj_signal_min,0.,self.mj_signal_min,mplot.GetMaximum()*0.9); lowerLine.SetLineWidth(2); lowerLine.SetLineColor(kGray+2); lowerLine.SetLineStyle(9);
@@ -1844,7 +1843,7 @@ class doBiasStudy_mlvj:
          os.system("mkdir -p plots_%s_%s_%s_g1/mj_fitting_%s_%s/"%(options.additioninformation, self.channel,self.wtagger_label,options.fgen,options.fres));
          os.system("mkdir plots_%s_%s_%s_g1/mj_fitting_%s_%s/%s"%(options.additioninformation, self.channel,self.wtagger_label,options.fgen,options.fres,"basePlot/"));
 
-        self.draw_canvas_with_pull(mplot,mplot_pull,parameters_list,"plots_%s_%s_%s_g1/mj_fitting_%s_%s/%s"%(options.additioninformation, self.channel, self.wtagger_label,options.fgen,options.fres,"basePlot/"),"m_j_sideband%s"%(label),"",1);
+        draw_canvas_with_pull(mplot,mplot_pull,RooArgList(parameters_list),"plots_%s_%s_%s_g1/mj_fitting_%s_%s/%s"%(options.additioninformation, self.channel, self.wtagger_label,options.fgen,options.fres,"basePlot/"),"m_j_sideband%s"%(label),"","em",0,1,self.GetLumi());
 
                 
         #### to calculate the WJets's normalization and error in M_J signal_region. The error must contain the shape error: model_WJets have new parameters fitting data
@@ -2058,7 +2057,7 @@ class doBiasStudy_mlvj:
         if options.pseudodata == 1:
          rdataset_data_mlvj.plotOn( mplot , RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0), RooFit.Name("data"));               
         else: 
-         self.getData_PoissonInterval(rdataset_data_mlvj,rrv_mass_lvj,mplot);
+         GetDataPoissonInterval(rdataset_data_mlvj,rrv_mass_lvj,mplot);
 
         mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.2);
             
@@ -2067,7 +2066,7 @@ class doBiasStudy_mlvj:
         mplot.addObject(leg);
 
         ### get the pull plot and store the canvas
-        mplot_pull = get_pull(rrv_mass_lvj,mplot,"data","model_mc",self.narrow_factor);
+        mplot_pull = get_pull(rrv_mass_lvj,mplot,rdataset_data_mlvj,model_data,rfresult,"data","model_mc",1,1);
         parameters_list = model_data.getParameters(rdataset_data_mlvj);
 
         ##CALCULATE CHI2                                                                                                                                               
@@ -2109,7 +2108,7 @@ class doBiasStudy_mlvj:
          os.system("mkdir -p plots_%s_%s_%s_g1/mj_fitting_%s_%s/"%(options.additioninformation, self.channel,self.wtagger_label,options.fgen,options.fres));
          os.system("mkdir plots_%s_%s_%s_g1/mj_fitting_%s_%s/%s"%(options.additioninformation, self.channel,self.wtagger_label,options.fgen,options.fres,"basePlot/"));
 
-        self.draw_canvas_with_pull(mplot,mplot_pull,parameters_list,"plots_%s_%s_%s_g1/mj_fitting_%s_%s/%s"%(options.additioninformation, self.channel, self.wtagger_label,options.fgen,options.fres,"basePlot/"),"m_lvj_sb_lo%s_%s"%(label,mlvj_model),"",1,1);
+        draw_canvas_with_pull(mplot,mplot_pull,RooArgList(parameters_list),"plots_%s_%s_%s_g1/mlvj_fitting_%s_%s/%s"%(options.additioninformation, self.channel, self.wtagger_label,options.fgen,options.fres,"basePlot/"),"m_lvj_sb_lo%s_%s"%(label,mlvj_model),"","em",0,1,self.GetLumi());
 
                 
     ##### Method used to cycle on the events and for the dataset to be fitted
