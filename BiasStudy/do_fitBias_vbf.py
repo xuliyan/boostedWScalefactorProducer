@@ -1806,7 +1806,7 @@ class doBiasStudy_mlvj:
 	if options.pseudodata == 1:
          rdataset_data_mj.plotOn( mplot ,RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0), RooFit.Name("data"));               
         else: 
-         self.getData_PoissonInterval(rdataset_data_mj,rrv_mass_j,mplot);
+         GetDataPoissonInterval(rdataset_data_mj,rrv_mass_j,mplot);
 		
         ### Get the pull and plot it
         mplot_pull = get_pull(rrv_mass_j,mplot,rdataset_data_mj,model_data,rfresult,"data","model_mc",1,1);
