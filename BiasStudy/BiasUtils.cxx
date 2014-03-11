@@ -516,9 +516,8 @@ void biasModelAnalysis::saveToysPlots(const int & nPlots, const int & fitjetmass
   RooFitResult* fres = NULL ;
 
   TLatex* banner = banner4Plot(channel_,19.3,1);
+  TString Title;
     
-  TString Title ;
-
   for(unsigned int iToy = 0 ; iToy < (*this).generatedData_.size() ; iToy++){
     if(iToy%nPlots != 0 ) continue ; 
 
@@ -539,23 +538,21 @@ void biasModelAnalysis::saveToysPlots(const int & nPlots, const int & fitjetmass
      draw_error_band_extendPdf((RooAbsData*)(*this).generatedData_[iToy], (*this).fittedPdf_[iToy],fres,mplot,2,"L");
     }
 
-    Title.Form("%s_curve",(*this).fittedPdf_[iToy]->GetName());
     if(fitjetmass)
-      (*this).fittedPdf_[iToy]->plotOn(mplot,RooFit::Name(Title.Data()),RooFit::Range(rrv_x->getMin(),rrv_x->getMax()),RooFit::NormRange("sb_lo,sb_hi"));
+      (*this).fittedPdf_[iToy]->plotOn(mplot,RooFit::Name("model_mc"),RooFit::Range(rrv_x->getMin(),rrv_x->getMax()),RooFit::NormRange("sb_lo,sb_hi"));
     else
-      (*this).fittedPdf_[iToy]->plotOn(mplot,RooFit::Name(Title.Data()));
+      (*this).fittedPdf_[iToy]->plotOn(mplot,RooFit::Name("model_mc"));
 
-    Title.Form("%s_curve",generatedData_[iToy]->GetName());  
- 
     if(pseudodata == 0 )
-     (*this).generatedData_[iToy]->plotOn(mplot,RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0),RooFit::Name(Title.Data()));
+     (*this).generatedData_[iToy]->plotOn(mplot,RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0),RooFit::Name("data"));
     else 
       GetDataPoissonInterval(dynamic_cast<const RooAbsData*>(generatedData_[iToy]),dynamic_cast<RooRealVar*>(rrv_x),dynamic_cast<RooPlot*>(mplot));
 
     mplot->GetYaxis()->SetRangeUser(1e-2,mplot->GetMaximum()*1.2);                                                                                                                    
 
-    RooPlot* mplot_pull = get_pull(rrv_x, mplot,(RooDataSet*)generatedData_[iToy],(*this).fittedPdf_[iToy],fres,"data",std::string(Title),1);
-         
+    RooPlot* mplot_pull = get_pull(rrv_x, mplot,(RooDataSet*)generatedData_[iToy],(*this).fittedPdf_[iToy],fres,"data","model_mc",1,1);
+
+
     Title.Form("canvas_generatedToys_wjet_%d",iToy);
     canvasVector_.push_back(new TCanvas(Title.Data(),""));
     canvasVector_.back()->cd();
