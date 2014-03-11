@@ -21,7 +21,7 @@ parser.add_option('-d', '--inputDirectory', action = "store",     type = "string
 parser.add_option('-b',                     action = 'store_true', dest='noX',     default = False, help = 'no X11 windows')
 parser.add_option('-c', '--channel', action = 'store', type = "string", default = "em", dest = "channel" )
 parser.add_option('-m', '--isMC',    action = 'store', type = "int" , default = 0 , dest = "isMC" )
-parser.add_option('-o', '--outputDir',  action = 'store', type = "string" , default = "" , dest = "outputDir" )
+parser.add_option('-o', '--outputDir',  action = 'store', type = "string" , default = "outputDir" , dest = "outputDir" )
 parser.add_option('-g','--fgen',      help='function to generate toys Exp,ExpTail,Pow2,ExpN)', type="string", default="ExpN")
 parser.add_option('-r','--fres',      help='function to fit toys (Exp,ExpTail,Pow2,ExpN)',     type="string", default="ExpN")
 parser.add_option('-f','--fitjetmass',   help='flag in order to specify if the fit is done on the jet mass', type="int", default=0)
@@ -78,17 +78,17 @@ if __name__ == "__main__":
    spectrum = "_mlvj";
    
  if options.fitjetmass and options.ttbarcontrolregion and options.onlybackgroundfit :
-  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep jetmass | grep ttbar | grep _B > list_temp.txt");
+  os.system("ls "+nameInputDirectory+" | grep root | grep "+options.fgen+"_"+options.fres+"  | grep jetmass | grep ttbar | grep _B > list_temp.txt");
  elif options.fitjetmass and not options.ttbarcontrolregion and options.onlybackgroundfit:
-  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep jetmass | grep -v ttbar | grep _B > list_temp.txt");
+  os.system("ls "+nameInputDirectory+" | grep root | grep "+options.fgen+"_"+options.fres+"  | grep jetmass | grep -v ttbar | grep _B > list_temp.txt");
  elif not options.fitjetmass and options.ttbarcontrolregion and options.onlybackgroundfit:
-  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep ttbar | grep _B > list_temp.txt");
+  os.system("ls "+nameInputDirectory+" | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep ttbar | grep _B > list_temp.txt");
  elif not options.fitjetmass and not options.ttbarcontrolregion and options.onlybackgroundfit :
-  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep -v ttbar | grep _B > list_temp.txt");
+  os.system("ls "+nameInputDirectory+" | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep -v ttbar | grep _B > list_temp.txt");
  elif not options.fitjetmass and options.ttbarcontrolregion and not options.onlybackgroundfit:
-  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep ttbar | grep _SB > list_temp.txt");
+  os.system("ls "+nameInputDirectory+" | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep ttbar | grep _SB > list_temp.txt");
  elif not options.fitjetmass and not options.ttbarcontrolregion and not options.onlybackgroundfit :
-  os.system("ls "+nameInputDirectory+" | grep pull | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep -v ttbar | grep _SB > list_temp.txt");
+  os.system("ls "+nameInputDirectory+" | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep -v ttbar | grep _SB > list_temp.txt");
 
  vector_root_file = [];
 
@@ -122,40 +122,64 @@ if __name__ == "__main__":
 
    masspoint = -1 ;
    ifilePos  = -1 ;
-   
+
+   ifile=0;
    for ifile in range(len(vector_root_file)):
     if TString(vector_root_file[ifile].GetName()).Contains("%s"%(mass[imass])):
        masspoint = mass[imass];
        ifilePos = ifile ;
        break; 
-   print " ifile ",ifile," iFilePos ",ifilePos ;
-   vector_root_file[ifile].cd();
+
+   vector_root_file[ifilePos].cd();
+   otree = vector_root_file[ifilePos].Get("otree");
+#   branch_list = otree.GetListOfBranches();
    
-   if masspoint == -1 or ifilePos == -1 : continue;
-  
+   if masspoint == -1 or ifilePos == -1 :
+     continue;
+
+   histo_pull_data_wjet = ROOT.TH1F("histo_pull_data_wjet","histo_pull_data_wjet",100,-5,5);
+   histo_pull_signal  = ROOT.TH1F("histo_pull_signal","histo_pull_signal",100,-5,5);
+
+
+   name_pull = "rrv_number_data%s_fit_%s%s_data_pull"%(options.mlvjregion,options.channel,spectrum);
+   name_signal_pull = "rrv_number_signal_region_fit_ggH_vbfH_wjet_pull";
+   name_pull_MC = "rrv_number_data%s_fit_%s%s_wjet_pull"%(options.mlvjregion,options.channel,spectrum);
+
    if options.isMC == 0:
-    histo_pull_data_wjet    = vector_root_file[ifilePos].Get("rrv_number_data%s_fit_%s%s_data_pull"%(options.mlvjregion,options.channel,spectrum));
-    gaussian_pull_data_wjet = vector_root_file[ifilePos].Get("Gaussian_pull_rrv_number_data%s_fit_%s%s_data_pull"%(options.mlvjregion,options.channel,spectrum)); 
-    if not options.onlybackgroundfit:
-     histo_pull_signal       = vector_root_file[ifilePos].Get("rrv_number_signal_region_fit_ggH_vbfH_data_pull");
-     gaussian_pull_signal    = vector_root_file[ifilePos].Get("Gaussian_pull_rrv_number_signal_region_fit_ggH_vbfH_data_pull"); 
-   else:  
-    histo_pull_data_wjet    = vector_root_file[ifilePos].Get("rrv_number_WJets0%s_fit_%s%s_data_pull"%(options.mlvjregion,options.channel,spectrum));
-    gaussian_pull_signal    = vector_root_file[ifilePos].Get("Gaussian_pull_rrv_number_data%s_fit_%s%s_data_pull"%(options.mlvjregion,options.channel,spectrum)); 
-    if not options.onlybackgroundfit:
-     histo_pull_signal       = vector_root_file[ifilePos].Get("rrv_number_signal_region_fit_ggH_vbfH_data_pull");
-     gaussian_pull_signal    = vector_root_file[ifilePos].Get("Gaussian_pull_rrv_number_signal_region_fit_ggH_vbfH_data_pull"); 
+       
+       otree.Draw(name_pull+" >> "+histo_pull_data_wjet.GetName(),"","goff");
+       gaussian_pull_data_wjet = ROOT.TF1("gaussian_pull_data_wjet","gaus",-5,5);
+       histo_pull_data_wjet.Fit("gaussian_pull_data_wjet");
+
+       if not options.onlybackgroundfit:
+         otree.Draw(name_signal_pull+" >> "+histo_pull_signal.GetName(),"","goff");
+         gaussian_pull_signal = ROOT.TF1("gaussian_pull_signal","gaus",-5,5);
+         histo_pull_signal.Fit("gaussian_pull_signal");
+
+   else:
+       otree.Draw(name_pull_MC+" >> "+histo_pull_data_wjet.GetName(),"","goff");
+       gaussian_pull_data_wjet = ROOT.TF1("gaussian_pull_data_wjet","gaus",-5,5);
+       histo_pull_data_wjet.Fit("gaussian_pull_data_wjet");
+
+       if not options.onlybackgroundfit:
+         otree.Draw(name_signal_pull+" >> "+histo_pull_signal.GetName(),"","goff");
+         gaussian_pull_signal = ROOT.TF1("gaussian_pull_signal","gaus",-5,5);
+         histo_pull_signal.Fit("gaussian_pull_signal");         
+
 
    canvas_pull_bkg_data.append(TCanvas("canvas_"+histo_pull_data_wjet.GetName()+"_mH%d"%(mass[imass]),""));
    canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].cd();
    histo_pull_data_wjet.Draw();
+   gaussian_pull_data_wjet.Draw("same");
    canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].GetName()+".png","png");
    canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].GetName()+".pdf","pdf");
+
 
    if not options.onlybackgroundfit:
     canvas_pull_sig_data.append(TCanvas("canvas_"+histo_pull_signal.GetName()+"_mH%d"%(mass[imass]),""));
     canvas_pull_sig_data[len(canvas_pull_sig_data)-1].cd();
     histo_pull_signal.Draw();
+    gaussian_pull_signal.Draw("same");
     canvas_pull_sig_data[len(canvas_pull_sig_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_sig_data[len(canvas_pull_sig_data)-1].GetName()+".png","png");
     canvas_pull_sig_data[len(canvas_pull_sig_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_sig_data[len(canvas_pull_sig_data)-1].GetName()+".pdf","pdf");
 
@@ -230,8 +254,8 @@ if __name__ == "__main__":
  title.SetTextSize(0.042);
  title.SetTextFont(42); 
 
- title2  = TLatex(3.56,1.30,("Generated: %s")%(options.fgen));
- title3  = TLatex(3.56,1.12,("Fitted: %s")%(options.fres));
+ title2  = TLatex(2.56,1.30,("Generated: %s")%(options.fgen));
+ title3  = TLatex(2.56,1.12,("Fitted: %s")%(options.fres));
  title2.SetTextSize(0.042);
  title2.SetTextFont(42); 
  title2.SetTextColor(1); 
