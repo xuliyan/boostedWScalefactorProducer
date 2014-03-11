@@ -33,7 +33,7 @@ parser.add_option('-k','--onlybackgroundfit',   help='in order to specify if an 
 
 ####### mass vector #############
 mass = [600]
-mass = [600,700,800,900]
+mass = [600,700,800,900,1000]
 
 ####### plot style ##############
 def setPlotStyle():
