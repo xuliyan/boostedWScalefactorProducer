@@ -2550,7 +2550,7 @@ class doBiasStudy_mlvj:
       ###### get WJets and fit it in the sb
       self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0","jet_mass_pr")# to get the shape of m_lvj                                                                               
       if fitjetmass: 
-	   self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0","ErfExp",1);
+	   self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0",options.fgen,1);
       else: 
            self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fgen,0,0,1);
 	
