@@ -1,3 +1,5 @@
+#python plotPull_vs_mass.py -d OUTPUT/ -g Exp -r Pow -b
+
 #! /usr/bin/env python
 import os
 import glob
@@ -56,10 +58,10 @@ if __name__ == "__main__":
  ## take the list of TFile to be used for the plot
 
  ROOTStyle = os.getenv ("ROOTStyle");
- gROOT.ProcessLine((".x "+ROOTStyle+"/rootLogon.C"));
- gROOT.ProcessLine((".x "+ROOTStyle+"/rootPalette.C"));
- gROOT.ProcessLine((".x "+ROOTStyle+"/rootColors.C"));
- gROOT.ProcessLine((".x "+ROOTStyle+"/setTDRStyle.C"));
+# gROOT.ProcessLine((".x "+ROOTStyle+"/rootLogon.C"));
+# gROOT.ProcessLine((".x "+ROOTStyle+"/rootPalette.C"));
+# gROOT.ProcessLine((".x "+ROOTStyle+"/rootColors.C"));
+# gROOT.ProcessLine((".x "+ROOTStyle+"/setTDRStyle.C"));
                 
  ROOT.gStyle.SetOptFit(111);
  ROOT.gStyle.SetOptStat(1111);
@@ -106,8 +108,7 @@ if __name__ == "__main__":
   histogram_pull_vs_mass_nback = ROOT.TH1F("histogram_pull_vs_mass_nback","",len(mass),0,len(mass));
   gaussian_pull_vs_mass_nback  = ROOT.TH1F("gaussian_pull_vs_mass_nback","",len(mass),0,len(mass));
 
-  if not options.onlybackgroundfit:
-  
+  if not options.onlybackgroundfit:  
    histogram_pull_vs_mass_nsig  = ROOT.TH1F("histogram_pull_vs_mass_nsig","",len(mass),0,len(mass));
    gaussian_pull_vs_mass_nsig   = ROOT.TH1F("gaussian_pull_vs_mass_nsig","",len(mass),0,len(mass));
 
@@ -138,41 +139,51 @@ if __name__ == "__main__":
      continue;
 
    histo_pull_data_wjet = ROOT.TH1F("histo_pull_data_wjet","histo_pull_data_wjet",100,-5,5);
-   histo_pull_signal  = ROOT.TH1F("histo_pull_signal","histo_pull_signal",100,-5,5);
+   histo_residual_data_wjet = ROOT.TH1F("histo_residual_data_wjet","histo_residual_data_wjet",100,-300,300);
+   histo_error_data_wjet = ROOT.TH1F("histo_error_data_wjet","histo_error_data_wjet",100,-300,300);
 
+   histo_pull_signal  = ROOT.TH1F("histo_pull_signal","histo_pull_signal",100,-5,5);   
+   histo_residual_signal  = ROOT.TH1F("histo_residual_signal","histo_residual_signal",100,-300,300);
+   histo_error_signal  = ROOT.TH1F("histo_error_signal","histo_error_signal",100,-300,300);   
 
-   name_pull = "rrv_number_data%s_fit_%s%s_data_pull"%(options.mlvjregion,options.channel,spectrum);
-   name_signal_pull = "rrv_number_signal_region_fit_ggH_vbfH_wjet_pull";
-   name_pull_MC = "rrv_number_data%s_fit_%s%s_wjet_pull"%(options.mlvjregion,options.channel,spectrum);
+   name_pull = "rrv_number_data%s_fit_%s%s_wjet_pull"%(options.mlvjregion,options.channel,spectrum);
+   name_residual = "rrv_number_data%s_fit_%s%s_wjet_residual"%(options.mlvjregion,options.channel,spectrum);
+   name_error = "rrv_number_data%s_fit_%s%s_wjet_error"%(options.mlvjregion,options.channel,spectrum);
+   
+   name_signal_residual = "rrv_number_signal_region_fit_ggH_vbfH_wjet_residual";
+   name_residual_MC = "rrv_number_data%s_fit_%s%s_wjet_residual"%(options.mlvjregion,options.channel,spectrum);
+   name_signal_error = "rrv_number_signal_region_fit_ggH_vbfH_wjet_error";
+   name_error_MC = "rrv_number_data%s_fit_%s%s_wjet_error"%(options.mlvjregion,options.channel,spectrum);
 
    if options.isMC == 0:
-       
-       otree.Draw(name_pull+" >> "+histo_pull_data_wjet.GetName(),"","goff");
-       gaussian_pull_data_wjet = ROOT.TF1("gaussian_pull_data_wjet","gaus",-5,5);
-       histo_pull_data_wjet.Fit("gaussian_pull_data_wjet");
+
+       otree.Draw(name_error+" >> "+histo_error_data_wjet.GetName(),"","goff");
+       otree.Draw(name_residual+"/"+str(histo_error_data_wjet.GetMean())+" >> "+histo_pull_data_wjet.GetName(),"","goff");
 
        if not options.onlybackgroundfit:
-         otree.Draw(name_signal_pull+" >> "+histo_pull_signal.GetName(),"","goff");
-         gaussian_pull_signal = ROOT.TF1("gaussian_pull_signal","gaus",-5,5);
-         histo_pull_signal.Fit("gaussian_pull_signal");
+         otree.Draw(name_signal_error+" >> "+histo_error_signal.GetName(),"","goff");         
+         otree.Draw(name_signal_residual+"/"+str(histo_error_signal.GetMean())+" >> "+histo_pull_signal.GetName(),"","goff");
 
    else:
-       otree.Draw(name_pull_MC+" >> "+histo_pull_data_wjet.GetName(),"","goff");
-       gaussian_pull_data_wjet = ROOT.TF1("gaussian_pull_data_wjet","gaus",-5,5);
-       histo_pull_data_wjet.Fit("gaussian_pull_data_wjet");
-
+       otree.Draw(name_error_MC+" >> "+histo_error_data_wjet.GetName(),"","goff");
+       otree.Draw(name_residual_MC+"/"+str(histo_error_data_wjet.GetMean())+" >> "+histo_pull_data_wjet.GetName(),"","goff");
+       
        if not options.onlybackgroundfit:
-         otree.Draw(name_signal_pull+" >> "+histo_pull_signal.GetName(),"","goff");
-         gaussian_pull_signal = ROOT.TF1("gaussian_pull_signal","gaus",-5,5);
-         histo_pull_signal.Fit("gaussian_pull_signal");         
+         otree.Draw(name_signal_error+" >> "+histo_error_signal.GetName(),"","goff");         
+         otree.Draw(name_signal_residual+"/"+str(histo_error_signal.GetMean())+" >> "+histo_pull_signal.GetName(),"","goff");
 
+
+   gaussian_pull_data_wjet = ROOT.TF1("gaussian_pull_data_wjet","gaus",-5,5);
+   histo_pull_data_wjet.Fit("gaussian_pull_data_wjet");         
+   gaussian_pull_signal = ROOT.TF1("gaussian_pull_signal","gaus",-5,5);
+   histo_pull_signal.Fit("gaussian_pull_signal");
 
    canvas_pull_bkg_data.append(TCanvas("canvas_"+histo_pull_data_wjet.GetName()+"_mH%d"%(mass[imass]),""));
    canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].cd();
    histo_pull_data_wjet.Draw();
    gaussian_pull_data_wjet.Draw("same");
-   canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].GetName()+".png","png");
-   canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].GetName()+".pdf","pdf");
+   canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].GetName()+"_"+options.fgen+"_"+options.fres+".png","png");
+   canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].GetName()+"_"+options.fgen+"_"+options.fres+".pdf","pdf");
 
 
    if not options.onlybackgroundfit:
@@ -180,8 +191,8 @@ if __name__ == "__main__":
     canvas_pull_sig_data[len(canvas_pull_sig_data)-1].cd();
     histo_pull_signal.Draw();
     gaussian_pull_signal.Draw("same");
-    canvas_pull_sig_data[len(canvas_pull_sig_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_sig_data[len(canvas_pull_sig_data)-1].GetName()+".png","png");
-    canvas_pull_sig_data[len(canvas_pull_sig_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_sig_data[len(canvas_pull_sig_data)-1].GetName()+".pdf","pdf");
+    canvas_pull_sig_data[len(canvas_pull_sig_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_sig_data[len(canvas_pull_sig_data)-1].GetName()+"_"+options.fgen+"_"+options.fres+".png","png");
+    canvas_pull_sig_data[len(canvas_pull_sig_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_sig_data[len(canvas_pull_sig_data)-1].GetName()+"_"+options.fgen+"_"+options.fres+".pdf","pdf");
 
    histogram_pull_vs_mass_nback.SetBinContent(imass+1,histo_pull_data_wjet.GetMean());
    histogram_pull_vs_mass_nback.SetBinError(imass+1,histo_pull_data_wjet.GetRMS());
@@ -254,8 +265,8 @@ if __name__ == "__main__":
  title.SetTextSize(0.042);
  title.SetTextFont(42); 
 
- title2  = TLatex(2.56,1.30,("Generated: %s")%(options.fgen));
- title3  = TLatex(2.56,1.12,("Fitted: %s")%(options.fres));
+ title2  = TLatex(2.86,1.30,("Generated: %s")%(options.fgen));
+ title3  = TLatex(2.86,1.12,("Fitted: %s")%(options.fres));
  title2.SetTextSize(0.042);
  title2.SetTextFont(42); 
  title2.SetTextColor(1); 
