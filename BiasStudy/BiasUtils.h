@@ -49,7 +49,7 @@ class biasModelAnalysis{
   void setTree(TTree*);
   void setNToys(const int &);
   void setIsMC(const int &);
-  void setPdfInformation(const std::string &, const std::string &, const std::string &);
+  void setPdfInformation(const std::string &, const std::string &, const std::string &, const std::string &);
   void setBackgroundPdfCore(RooAbsPdf*);
   void saveToysPlots(const int &, const int &, const int & = 0 );
  
@@ -76,6 +76,7 @@ class biasModelAnalysis{
    std::string mlvjregion_ ;
    std::string channel_ ;
    std::string spectrum_ ;
+   std::string label_ ;
   
    std::vector<const RooAbsData*>   generatedData_; 
    std::vector<RooAbsPdf*>          fittedPdf_;
