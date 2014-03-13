@@ -2551,17 +2551,22 @@ class doBiasStudy_mlvj:
       self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0","jet_mass_pr")# to get the shape of m_lvj                                                                               
       if fitjetmass: 
 	   self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0",options.fgen,1);
+           if options.fgen != options.fres: self.fit_mj_single_MC(self.file_WJets0_mc,"_WJets0",options.fres,1);
       else: 
            self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fgen,0,0,1);
+           if options.fgen != options.fres: self.fit_mlvj_model_single_MC(self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fres,0,0,1);
 	
       ######## get TTbar and fit it
       self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbar")# to get the shape of m_lvj                                                                                               
       if fitjetmass: 
        if options.ttbarcontrolregion :    
           self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar",options.fgen,1);
+          if options.fgen != options.fres: self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar",options.fres,1);
        else:
           self.fit_mj_single_MC(self.file_TTbar_mc,"_TTbar","2Gaus_ErfExp");	   		   
-      else: self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fgen,0,0,1);
+      else:
+          self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fgen,0,0,1);
+          if options.fgen != options.fres: self.fit_mlvj_model_single_MC(self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fres,0,0,1);
 
       ##### get data in sb and fit it                                                                                                                                              
       self.get_mj_and_mlvj_dataset(self.file_data,"_data", "jet_mass_pr"); ## global fit of data in the sidand fixing non dominant bkg             
@@ -2569,6 +2574,7 @@ class doBiasStudy_mlvj:
          self.fit_WJetsNorm(label); ## fit jet mass distribution
       else:      
          self.fit_mlvj_in_Mj_sideband(label,options.mlvjregion,options.fgen,1); ## sideband or TTbar signal region fit
+         self.fit_mlvj_in_Mj_sideband(label,options.mlvjregion,options.fres,1); ## sideband or TTbar signal region fit
 
      ##### fix signal and bkg models that are going to be used in the generation
      if fitjetmass :
@@ -2583,22 +2589,30 @@ class doBiasStudy_mlvj:
      self.fix_Model("_%s"%self.ggH_sample,signal_region,spectrum,signal_model);
      self.fix_Model("_%s"%self.vbfhiggs_sample,signal_region,spectrum,signal_model);
 
-     ###### fix the backgrund models for the generation     
+     ###### fix the backgrund models for the generation
+     print "#############################################################################################";
+     print "################ Begin of the toy analysis -> fix Pdf to what is pre-fitted #################";
+     print "#############################################################################################";
+     
      if options.isMC == 0  and options.ttbarcontrolregion == 0 and not options.fitjetmass :
 
       self.fix_Model("_TTbar" ,options.mlvjregion,spectrum,options.fgen);
+      self.fix_Model("_TTbar" ,options.mlvjregion,spectrum,options.fres);
       self.fix_Model("_STop"  ,options.mlvjregion,spectrum,options.fgen);
       self.fix_Model("_VV"    ,options.mlvjregion,spectrum,options.fgen) ;
       self.fix_Model("_WW_EWK",options.mlvjregion,spectrum,options.fgen) ;
       self.fix_Model(label,options.mlvjregion,spectrum,options.fgen);
+      self.fix_Model(label,options.mlvjregion,spectrum,options.fres);
 
      elif options.isMC == 0  and options.ttbarcontrolregion == 1 and not options.fitjetmass:
 
       self.fix_Model("_WJets0",options.mlvjregion,spectrum,options.fgen);
+      self.fix_Model("_WJets0",options.mlvjregion,spectrum,options.fres);
       self.fix_Model("_STop"  ,options.mlvjregion,spectrum,options.fgen);
       self.fix_Model("_VV"    ,options.mlvjregion,spectrum,options.fgen) ;
       self.fix_Model("_WW_EWK",options.mlvjregion,spectrum,options.fgen) ;
       self.fix_Model(label,options.mlvjregion,spectrum,options.fgen);
+      self.fix_Model(label,options.mlvjregion,spectrum,options.fres);
 
      elif options.fitjetmass and not options.ttbarcontrolregion:
 
@@ -2616,6 +2630,9 @@ class doBiasStudy_mlvj:
       self.fix_Model("_WJets0" ,options.mlvjregion,spectrum);
       self.fix_Model(label,options.mlvjregion,spectrum,options.fgen);
 
+     print "#########################################################";
+     print "################ Build the signal model #################";
+     print "#########################################################";
      
      ### clone the signal shape --> parameter already fixed
      fitted_signal_ggH   = self.workspace4bias_.pdf("model_%s_%s_%s%s"%(self.ggH_sample,signal_region,self.channel,spectrum));
@@ -2634,7 +2651,6 @@ class doBiasStudy_mlvj:
       rrv_number_signal_signal_fit_ggH.setError(self.workspace4bias_.var("rrv_number_"+self.ggH_sample+signal_region+"2Gaus_"+self.channel+spectrum).getError());
       rrv_number_signal_signal_fit_ggH.Print();
       getattr(self.workspace4bias_,"import")(rrv_number_signal_signal_fit_ggH);
-
      else:
       model_signal_ggH = self.make_Pdf("_%s%s_fit"%(self.ggH_sample,signal_region+"CB_v1"),"CB_v1",spectrum,constrainslist_signal_ggH,1);
       model_signal_ggH.Print();     
@@ -2659,7 +2675,6 @@ class doBiasStudy_mlvj:
       rrv_number_signal_signal_fit_vbfH.setError(self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+signal_region+"2Gaus_"+self.channel+spectrum).getError());
       rrv_number_signal_signal_fit_vbfH.Print();
       getattr(self.workspace4bias_,"import")(rrv_number_signal_signal_fit_vbfH);
-
      else: 
       model_signal_vbfH = self.make_Pdf("_%s%s_fit"%(self.vbfhiggs_sample,signal_region+"CB_v1"),"CB_v1",spectrum,constrainslist_signal_vbfH,1);
       model_signal_vbfH.Print();        
@@ -2694,11 +2709,19 @@ class doBiasStudy_mlvj:
      ############### Make the MC analysis --> make the Entended pdf for the bkg
      if options.isMC == 1 :
 
+      print "#################################################################################";
+      print "################ Start the MC analysis -> bkg model in the toy ##################";
+      print "#################################################################################";
+
       constrainslist_bkg_wjet = [];
       model_bkg_wjet    = self.make_Model(label+options.mlvjregion+"_fit",options.fres,spectrum,constrainslist_bkg_wjet,1); ## only mWW analysis can be taken into account
       model_bkg_wjet.Print();
+
       if options.fres == options.fgen :
        self.clone_Model(model_bkg_wjet,label,options.mlvjregion,spectrum,options.fgen); ## clone the parameter from the old mc fit
+      else:
+       self.clone_Model(model_bkg_wjet,label,options.mlvjregion,spectrum,options.fres);
+          
       self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+"_fit_"+self.channel+spectrum).setVal(self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+options.fgen+"_"+self.channel+spectrum).getVal());
 
       ##### Total model for MC
@@ -2720,6 +2743,10 @@ class doBiasStudy_mlvj:
       numevents_mc   = self.workspace4bias_.data("rdataset"+label+options.mlvjregion+"_"+self.channel+spectrum).sumEntries()*options.inflatejobstatistic;
       print"########  numevents mc ",numevents_mc;
 
+      print "###########################################################";
+      print "################ Call the toy class tool ##################";
+      print "###########################################################";
+
       mcWjetTreeResult = biasModelAnalysis(RooArgSet(self.workspace4bias_.var("rrv_mass_lvj")),
                                            generation_model_wjet,
                                            self.workspace4bias_.data("rdataset4bias%s%s_%s%s"%(label,options.mlvjregion,self.channel,spectrum)),
@@ -2728,7 +2755,7 @@ class doBiasStudy_mlvj:
 
       mcWjetTreeResult.setTree(self.outputTree);
       mcWjetTreeResult.setFittingModel(model_Total_mc);
-      mcWjetTreeResult.setPdfInfomation(options.mlvjregion,spectrum,self.channel);
+      mcWjetTreeResult.setPdfInformation(options.mlvjregion,spectrum,self.channel,label);
       mcWjetTreeResult.setBackgroundPdfCore(model_bkg_wjet);
       mcWjetTreeResult.generateAndFitToys(int(numevents_mc));
       self.outputFile.cd();
@@ -2745,7 +2772,9 @@ class doBiasStudy_mlvj:
       elif options.nexp >= 100:
           ratePlotsToStore = 10 ;
           
-      mcWjetTreeResult.saveToysPlots(int(ratePlotsToStore),options.fitjetmass); 
+      if(options.storeplot):
+          mcWjetTreeResult.saveToysPlots(int(ratePlotsToStore),options.fitjetmass); 
+
       self.outputTree.Write();
       self.outputFile.Close();
 
@@ -2753,10 +2782,12 @@ class doBiasStudy_mlvj:
          
       ############### Make the Data analysis --> make the Entended pdf for the bkg
       constrainslist_bkg_data = [];
+      print "#################################################################################";
+      print "################ Start the MC analysis -> bkg model in the toy ##################";
+      print "#################################################################################";
 
       ### take the models for the background component
       if fitjetmass:
-
        model_VV_backgrounds     = self.get_VV_mj_Model("_VV");
        model_STop_backgrounds   = self.get_STop_mj_Model("_STop");
        model_WW_EWK_backgrounds = self.get_WW_EWK_mj_Model("_WW_EWK");
@@ -2765,9 +2796,9 @@ class doBiasStudy_mlvj:
        self.workspace4bias_.var("rrv_number_STop_%s_mj"%(self.channel)).setVal(self.workspace4bias_.var("rrv_number_STop_%s_mj"%(self.channel)).getVal()*options.inflatejobstatistic);
        self.workspace4bias_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).setVal(self.workspace4bias_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).getVal()*options.inflatejobstatistic);
 
-       print " VV number ",self.workspace4bias_.var("rrv_number_VV_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
-       print " STop number ",self.workspace4bias_.var("rrv_number_STop_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
-       print " WW_EWK number ",self.workspace4bias_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+       print "VV number ",self.workspace4bias_.var("rrv_number_VV_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+       print "STop number ",self.workspace4bias_.var("rrv_number_STop_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+       print "WW_EWK number ",self.workspace4bias_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
 
        if options.ttbarcontrolregion:
         model_TTbar_backgrounds  = self.get_TTbar_mj_Model(label,options.fgen);
@@ -2776,8 +2807,8 @@ class doBiasStudy_mlvj:
         self.workspace4bias_.var("rrv_number_WJets0_%s_mj"%(self.channel)).setVal(self.workspace4bias_.var("rrv_number_WJets0_%s_mj"%(self.channel)).getVal()*options.inflatejobstatistic)
         self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).getVal()*options.inflatejobstatistic);
 
-        print " WJets number ",self.workspace4bias_.var("rrv_number_WJets0_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
-        print " TTbar number ",self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+        print "WJets number ",self.workspace4bias_.var("rrv_number_WJets0_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+        print "TTbar number ",self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
 
        else:
 
@@ -2787,8 +2818,8 @@ class doBiasStudy_mlvj:
         self.workspace4bias_.var("rrv_number_TTbar_%s_mj"%(self.channel)).setVal(self.workspace4bias_.var("rrv_number_TTbar_%s_mj"%(self.channel)).getVal()*options.inflatejobstatistic)
         self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).getVal()*options.inflatejobstatistic)
 
-        print " WJets number ",self.workspace4bias_.var("rrv_number_TTbar_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
-        print " TTbar number ",self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+        print "WJets number ",self.workspace4bias_.var("rrv_number_TTbar_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+        print "TTbar number ",self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
 
       else:	       
        ### in case of mWW analysis
@@ -2803,17 +2834,17 @@ class doBiasStudy_mlvj:
        self.workspace4bias_.var("rrv_number_STop%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number_STop%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()*options.inflatejobstatistic);
        self.workspace4bias_.var("rrv_number_WW_EWK%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number_WW_EWK%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()*options.inflatejobstatistic) ## get the normalization
 
-       print " VV number ",self.workspace4bias_.var("rrv_number_VV%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
-       print " STop number ",self.workspace4bias_.var("rrv_number_STop%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
-       print " WW_EWK number ",self.workspace4bias_.var("rrv_number_WW_EWK%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+       print "VV number ",self.workspace4bias_.var("rrv_number_VV%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+       print "STop number ",self.workspace4bias_.var("rrv_number_STop%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+       print "WW_EWK number ",self.workspace4bias_.var("rrv_number_WW_EWK%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
 
        if options.ttbarcontrolregion == 0:
 
         self.workspace4bias_.var("rrv_number_TTbar%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number_TTbar%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()*options.inflatejobstatistic)  ## get the normalization
         self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+options.fgen+"_from_fitting_"+self.channel+"_mlvj").setVal(self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+options.fgen+"_from_fitting_"+self.channel+"_mlvj").getVal()*options.inflatejobstatistic);
 
-        print " TTbar number ",self.workspace4bias_.var("rrv_number_TTbar%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
-        print " WJets number ",self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+options.fgen+"_from_fitting_"+self.channel+"_mlvj").getVal()," inflate ",options.inflatejobstatistic;
+        print "TTbar number ",self.workspace4bias_.var("rrv_number_TTbar%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+        print "WJets number ",self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+options.fgen+"_from_fitting_"+self.channel+"_mlvj").getVal()," inflate ",options.inflatejobstatistic;
        else:
 
         self.workspace4bias_.var("rrv_number_WJets0%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number_WJets0%s%s_%s_mlvj"%(options.mlvjregion,options.fgen,self.channel)).getVal()*options.inflatejobstatistic);  ## get the normalization
@@ -2824,24 +2855,27 @@ class doBiasStudy_mlvj:
            
       #### make the global model for the background  
       if options.fitjetmass:
-       model_bkg_data    = self.make_Model("_data"+signal_region+"_fit",options.fres,spectrum,constrainslist_bkg_data,1); ## basic model used for fit in the toys
+
+       model_bkg_data    = self.make_Model(label+signal_region+"_fit",options.fres,spectrum,constrainslist_bkg_data,1); ## basic model used for fit in the toys
        model_bkg_data.Print();
 
        if options.fgen == options.fres:
         self.clone_Model(model_bkg_data,label,signal_region,spectrum,options.fgen);
-
-       self.workspace4bias_.var("rrv_number_data"+signal_region+"_fit_"+self.channel+spectrum).setVal(self.workspace4bias_.var("rrv_number"+label+signal_region+options.fgen+"_"+self.channel+spectrum).getVal());
-       self.workspace4bias_.var("rrv_number_data"+signal_region+"_fit_"+self.channel+spectrum).Print();
+    
+       self.workspace4bias_.var("rrv_number"+label+signal_region+"_fit_"+self.channel+spectrum).setVal(self.workspace4bias_.var("rrv_number"+label+signal_region+options.fgen+"_"+self.channel+spectrum).getVal());
+       self.workspace4bias_.var("rrv_number"+label+signal_region+"_fit_"+self.channel+spectrum).Print();
 
       else:
-       model_bkg_data    = self.make_Model("_data"+options.mlvjregion+"_fit",options.fres,spectrum,constrainslist_bkg_data,1); ## basic model used for fit in the toys
+       model_bkg_data    = self.make_Model(label+options.mlvjregion+"_fit",options.fres,spectrum,constrainslist_bkg_data,1); ## basic model used for fit in the toys
        model_bkg_data.Print();
 
        if options.fgen == options.fres :
         self.clone_Model(model_bkg_data,label,options.mlvjregion,spectrum,options.fgen+"_from_fitting");        
-
-       self.workspace4bias_.var("rrv_number_data"+options.mlvjregion+"_fit_"+self.channel+spectrum).setVal(self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+options.fgen+"_from_fitting_"+self.channel+spectrum).getVal());
-       self.workspace4bias_.var("rrv_number_data"+options.mlvjregion+"_fit_"+self.channel+spectrum).Print();
+       else:
+        self.clone_Model(model_bkg_data,label,options.mlvjregion,spectrum,options.fres);
+ 
+       self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+"_fit_"+self.channel+spectrum).setVal(self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+options.fgen+"_from_fitting_"+self.channel+spectrum).getVal());
+       self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+"_fit_"+self.channel+spectrum).Print();
 
       ## Add the other bkg component fixed to the total model --> in the extended way
       if options.onlybackgroundfit == 1 and options.ttbarcontrolregion == 0:
@@ -2866,7 +2900,12 @@ class doBiasStudy_mlvj:
        
       self.workspace4bias_.Print();             
       
-      numevents_data   = self.workspace4bias_.data("rdataset"+"_data"+signal_region+"_"+self.channel+spectrum).sumEntries()*options.inflatejobstatistic;
+      numevents_data   = self.workspace4bias_.data("rdataset_data"+options.mlvjregion+"_"+self.channel+spectrum).sumEntries()*options.inflatejobstatistic;
+      print "##### number of events generated ",numevents_data ;
+      
+      print "###########################################################";
+      print "################ Call the toy class tool ##################";
+      print "###########################################################";
 
       if options.fitjetmass :
        mcWjetTreeResult = biasModelAnalysis(RooArgSet(self.workspace4bias_.var("rrv_mass_j")),
@@ -2878,7 +2917,7 @@ class doBiasStudy_mlvj:
        mcWjetTreeResult.setTree(self.outputTree);
        mcWjetTreeResult.setFittingModel(model_Total_data);
        mcWjetTreeResult.setBackgroundPdfCore(model_bkg_data);
-       mcWjetTreeResult.setPdfInformation(options.mlvjregion,spectrum,self.channel);
+       mcWjetTreeResult.setPdfInformation(options.mlvjregion,spectrum,self.channel,label);
        mcWjetTreeResult.generateAndFitToys(int(numevents_data),"sb_lo,sb_hi");
        self.outputFile.cd();
        mcWjetTreeResult.createBranches(options.fgen,options.fres,options.ttbarcontrolregion);
@@ -2892,7 +2931,7 @@ class doBiasStudy_mlvj:
        mcWjetTreeResult.setTree(self.outputTree);
        mcWjetTreeResult.setFittingModel(model_Total_data);
        mcWjetTreeResult.setBackgroundPdfCore(model_bkg_data);
-       mcWjetTreeResult.setPdfInformation(options.mlvjregion,spectrum,self.channel);
+       mcWjetTreeResult.setPdfInformation(options.mlvjregion,spectrum,self.channel,label);
        mcWjetTreeResult.generateAndFitToys(int(numevents_data));
        self.outputFile.cd();
        mcWjetTreeResult.createBranches(options.fgen,options.fres,options.ttbarcontrolregion);
@@ -2909,7 +2948,9 @@ class doBiasStudy_mlvj:
       elif options.nexp >= 100:
           ratePlotsToStore = 10 ;
           
-      mcWjetTreeResult.saveToysPlots(int(ratePlotsToStore),options.fitjetmass); 
+      if(options.storeplot):
+       mcWjetTreeResult.saveToysPlots(int(ratePlotsToStore),options.fitjetmass); 
+
       self.outputTree.Write();
       self.outputFile.Close();
 
