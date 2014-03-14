@@ -133,55 +133,54 @@ if __name__ == "__main__":
 
    vector_root_file[ifilePos].cd();
    otree = vector_root_file[ifilePos].Get("otree");
-#   branch_list = otree.GetListOfBranches();
    
    if masspoint == -1 or ifilePos == -1 :
      continue;
 
-   histo_pull_data_wjet = ROOT.TH1F("histo_pull_data_wjet","histo_pull_data_wjet",100,-5,5);
-   histo_residual_data_wjet = ROOT.TH1F("histo_residual_data_wjet","histo_residual_data_wjet",100,-300,300);
-   histo_error_data_wjet = ROOT.TH1F("histo_error_data_wjet","histo_error_data_wjet",100,-300,300);
+   histo_pull_WJets0_data = ROOT.TH1F("histo_pull_WJets0_data","histo_pull_WJets0_data",100,-5,5);
+   histo_residual_WJets0_data = ROOT.TH1F("histo_residual_WJets0_data","histo_residual_WJets0_data",100,-300,300);
+   histo_error_WJets0_data = ROOT.TH1F("histo_error_WJets0_data","histo_error_WJets0_data",100,-300,300);
 
    histo_pull_signal  = ROOT.TH1F("histo_pull_signal","histo_pull_signal",100,-5,5);   
    histo_residual_signal  = ROOT.TH1F("histo_residual_signal","histo_residual_signal",100,-300,300);
    histo_error_signal  = ROOT.TH1F("histo_error_signal","histo_error_signal",100,-300,300);   
 
-   name_pull = "rrv_number_data%s_fit_%s%s_wjet_pull"%(options.mlvjregion,options.channel,spectrum);
-   name_residual = "rrv_number_data%s_fit_%s%s_wjet_residual"%(options.mlvjregion,options.channel,spectrum);
-   name_error = "rrv_number_data%s_fit_%s%s_wjet_error"%(options.mlvjregion,options.channel,spectrum);
+   name_pull = "rrv_number_WJets0%s_fit_%s%s_data_pull"%(options.mlvjregion,options.channel,spectrum);
+   name_residual = "rrv_number_WJets0%s_fit_%s%s_data_residual"%(options.mlvjregion,options.channel,spectrum);
+   name_error = "rrv_number_WJets0%s_fit_%s%s_data_error"%(options.mlvjregion,options.channel,spectrum);
    
-   name_signal_residual = "rrv_number_signal_region_fit_ggH_vbfH_wjet_residual";
-   name_residual_MC = "rrv_number_data%s_fit_%s%s_wjet_residual"%(options.mlvjregion,options.channel,spectrum);
-   name_signal_error = "rrv_number_signal_region_fit_ggH_vbfH_wjet_error";
-   name_error_MC = "rrv_number_data%s_fit_%s%s_wjet_error"%(options.mlvjregion,options.channel,spectrum);
+   name_signal_residual = "rrv_number_signal_region_fit_ggH_vbfH_data_residual";
+   name_residual_MC = "rrv_number_WJets0%s_fit_%s%s_data_residual"%(options.mlvjregion,options.channel,spectrum);
+   name_signal_error = "rrv_number_signal_region_fit_ggH_vbfH_data_error";
+   name_error_MC = "rrv_number_WJets0%s_fit_%s%s_data_error"%(options.mlvjregion,options.channel,spectrum);
 
    if options.isMC == 0:
 
-       otree.Draw(name_error+" >> "+histo_error_data_wjet.GetName(),"","goff");
-       otree.Draw(name_residual+"/"+str(histo_error_data_wjet.GetMean())+" >> "+histo_pull_data_wjet.GetName(),"","goff");
+       otree.Draw(name_error+" >> "+histo_error_WJets0_data.GetName(),"","goff");
+       otree.Draw(name_residual+"/"+str(histo_error_WJets0_data.GetMean())+" >> "+histo_pull_WJets0_data.GetName(),"","goff");
 
        if not options.onlybackgroundfit:
-         otree.Draw(name_signal_error+" >> "+histo_error_signal.GetName(),"","goff");         
+         otree.Draw(name_signal_error+" >> "+histo_error_signal.GetName(),"","goff");
          otree.Draw(name_signal_residual+"/"+str(histo_error_signal.GetMean())+" >> "+histo_pull_signal.GetName(),"","goff");
 
    else:
-       otree.Draw(name_error_MC+" >> "+histo_error_data_wjet.GetName(),"","goff");
-       otree.Draw(name_residual_MC+"/"+str(histo_error_data_wjet.GetMean())+" >> "+histo_pull_data_wjet.GetName(),"","goff");
+       otree.Draw(name_error_MC+" >> "+histo_error_WJets0_data.GetName(),"","goff");
+       otree.Draw(name_residual_MC+"/"+str(histo_error_WJets0_data.GetMean())+" >> "+histo_pull_WJets0_data.GetName(),"","goff");
        
        if not options.onlybackgroundfit:
          otree.Draw(name_signal_error+" >> "+histo_error_signal.GetName(),"","goff");         
          otree.Draw(name_signal_residual+"/"+str(histo_error_signal.GetMean())+" >> "+histo_pull_signal.GetName(),"","goff");
 
 
-   gaussian_pull_data_wjet = ROOT.TF1("gaussian_pull_data_wjet","gaus",-5,5);
-   histo_pull_data_wjet.Fit("gaussian_pull_data_wjet");         
+   gaussian_pull_WJets0_data = ROOT.TF1("gaussian_pull_WJets0_data","gaus",-5,5);
+   histo_pull_WJets0_data.Fit("gaussian_pull_WJets0_data","QR");         
    gaussian_pull_signal = ROOT.TF1("gaussian_pull_signal","gaus",-5,5);
-   histo_pull_signal.Fit("gaussian_pull_signal");
+   histo_pull_signal.Fit("gaussian_pull_signal","QR");
 
-   canvas_pull_bkg_data.append(TCanvas("canvas_"+histo_pull_data_wjet.GetName()+"_mH%d"%(mass[imass]),""));
+   canvas_pull_bkg_data.append(TCanvas("canvas_"+histo_pull_WJets0_data.GetName()+"_mH%d"%(mass[imass]),""));
    canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].cd();
-   histo_pull_data_wjet.Draw();
-   gaussian_pull_data_wjet.Draw("same");
+   histo_pull_WJets0_data.Draw();
+   gaussian_pull_WJets0_data.Draw("same");
    canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].GetName()+"_"+options.fgen+"_"+options.fres+".png","png");
    canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].GetName()+"_"+options.fgen+"_"+options.fres+".pdf","pdf");
 
@@ -194,12 +193,12 @@ if __name__ == "__main__":
     canvas_pull_sig_data[len(canvas_pull_sig_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_sig_data[len(canvas_pull_sig_data)-1].GetName()+"_"+options.fgen+"_"+options.fres+".png","png");
     canvas_pull_sig_data[len(canvas_pull_sig_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_sig_data[len(canvas_pull_sig_data)-1].GetName()+"_"+options.fgen+"_"+options.fres+".pdf","pdf");
 
-   histogram_pull_vs_mass_nback.SetBinContent(imass+1,histo_pull_data_wjet.GetMean());
-   histogram_pull_vs_mass_nback.SetBinError(imass+1,histo_pull_data_wjet.GetRMS());
+   histogram_pull_vs_mass_nback.SetBinContent(imass+1,histo_pull_WJets0_data.GetMean());
+   histogram_pull_vs_mass_nback.SetBinError(imass+1,histo_pull_WJets0_data.GetRMS());
    histogram_pull_vs_mass_nback.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
    
-   gaussian_pull_vs_mass_nback.SetBinContent(imass+1,gaussian_pull_data_wjet.GetParameter(1));
-   gaussian_pull_vs_mass_nback.SetBinError(imass+1,gaussian_pull_data_wjet.GetParameter(2));
+   gaussian_pull_vs_mass_nback.SetBinContent(imass+1,gaussian_pull_WJets0_data.GetParameter(1));
+   gaussian_pull_vs_mass_nback.SetBinError(imass+1,gaussian_pull_WJets0_data.GetParameter(2));
    gaussian_pull_vs_mass_nback.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
    
    if not options.onlybackgroundfit:
@@ -251,22 +250,22 @@ if __name__ == "__main__":
  oneLine.SetLineColor(ROOT.kRed);
  oneLine.SetLineWidth(2);
                      
- histogram_pull_vs_mass_nback.SetMaximum(1.5);
- histogram_pull_vs_mass_nback.SetMinimum(-1.5);
+ histogram_pull_vs_mass_nback.SetMaximum(2);
+ histogram_pull_vs_mass_nback.SetMinimum(-2);
  histogram_pull_vs_mass_nback.Draw("pe");
  graph_2.Draw("e3same");
  graph_1.Draw("e3same");
  oneLine.Draw("Lsame");
  histogram_pull_vs_mass_nback.Draw("pesame");
 
- banner = TLatex(0.21,1.52,("CMS Preliminary,                       19.3 fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow l #nu"));
+ banner = TLatex(0.21,2.02,("CMS Preliminary,                       19.3 fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow l #nu"));
  banner.SetTextSize(0.046);
- title  = TLatex(0.21,1.13,("N_{bkg} pull from histogram vs mass"));
+ title  = TLatex(0.21,1.63,("N_{bkg} pull from histogram vs mass"));
  title.SetTextSize(0.042);
  title.SetTextFont(42); 
 
- title2  = TLatex(2.86,1.30,("Generated: %s")%(options.fgen));
- title3  = TLatex(2.86,1.12,("Fitted: %s")%(options.fres));
+ title2  = TLatex(2.86,1.70,("Generated: %s")%(options.fgen));
+ title3  = TLatex(2.86,1.42,("Fitted: %s")%(options.fres));
  title2.SetTextSize(0.042);
  title2.SetTextFont(42); 
  title2.SetTextColor(1); 
@@ -302,8 +301,8 @@ if __name__ == "__main__":
   oneLine.SetLineColor(ROOT.kRed);
   oneLine.SetLineWidth(2);
                      
-  histogram_pull_vs_mass_nsig.SetMaximum(1.5);
-  histogram_pull_vs_mass_nsig.SetMinimum(-1.5);
+  histogram_pull_vs_mass_nsig.SetMaximum(2);
+  histogram_pull_vs_mass_nsig.SetMinimum(-2);
   histogram_pull_vs_mass_nsig.Draw("pe");
   graph_2.Draw("e3same");
   graph_1.Draw("e3same");
@@ -311,7 +310,7 @@ if __name__ == "__main__":
   histogram_pull_vs_mass_nsig.Draw("pesame");
 
   banner.Draw();
-  title  = TLatex(0.21,1.13,("N_{sig} pull from histogram vs mass"));
+  title  = TLatex(0.21,1.63,("N_{sig} pull from histogram vs mass"));
   title.SetTextSize(0.042);
   title.SetTextFont(42); 
   title.Draw();
@@ -344,8 +343,8 @@ if __name__ == "__main__":
  oneLine.SetLineColor(ROOT.kRed);
  oneLine.SetLineWidth(2);
                      
- gaussian_pull_vs_mass_nback.SetMaximum(1.5);
- gaussian_pull_vs_mass_nback.SetMinimum(-1.5);
+ gaussian_pull_vs_mass_nback.SetMaximum(2);
+ gaussian_pull_vs_mass_nback.SetMinimum(-2);
  gaussian_pull_vs_mass_nback.Draw("pe");
  graph_2.Draw("e3same");
  graph_1.Draw("e3same");
@@ -354,7 +353,7 @@ if __name__ == "__main__":
  gaussian_pull_vs_mass_nback.Draw("pesame");
 
  banner.Draw();
- title  = TLatex(0.21,1.13,("N_{back} pull from gaussian fit vs mass"));
+ title  = TLatex(0.21,1.63,("N_{back} pull from gaussian fit vs mass"));
  title.SetTextSize(0.042);
  title.SetTextFont(42); 
  title.Draw();
@@ -382,8 +381,8 @@ if __name__ == "__main__":
   gaussian_pull_vs_mass_nsig.SetLineColor(1);
   gaussian_pull_vs_mass_nsig.SetLineWidth(2);
 
-  gaussian_pull_vs_mass_nsig.SetMaximum(1.5);
-  gaussian_pull_vs_mass_nsig.SetMinimum(-1.5);
+  gaussian_pull_vs_mass_nsig.SetMaximum(2);
+  gaussian_pull_vs_mass_nsig.SetMinimum(-2);
   gaussian_pull_vs_mass_nsig.Draw("pe");
   graph_2.Draw("e3same");
   graph_1.Draw("e3same");
@@ -392,7 +391,7 @@ if __name__ == "__main__":
 
   banner.Draw();
 
-  title  = TLatex(0.21,1.13,("N_{sig} pull from gaussian fit vs mass"));
+  title  = TLatex(0.21,1.63,("N_{sig} pull from gaussian fit vs mass"));
   title.SetTextSize(0.042);
   title.SetTextFont(42); 
   title.Draw();
