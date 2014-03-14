@@ -95,9 +95,9 @@ if options.biasStudy:
  if not options.turnOnAnalysis and not options.fitjetmass:
 
 #  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
-#  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
+  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
   shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
-  shape_fit = ["Pow","Pow","Pow","Pow","Pow"]
+#  shape_fit = ["Pow","Pow","Pow","Pow","Pow"]
 
  elif options.turnOnAnalysis and not options.fitjetmass:
 
@@ -108,10 +108,12 @@ if options.biasStudy:
 
  elif options.fitjetmass:
 
-  shape_gen = ["ErfExp","ErfExp","ErfExp","ErfExp","ErfExp"];    
+#  shape_gen = ["ErfExp","ErfExp","ErfExp","ErfExp","ErfExp"];    
   shape_fit = ["ErfExp","ErfExp","ErfExp","ErfExp","ErfExp"];
 #  shape_gen = ["User1","User1","User1","User1","User1"];    
 #  shape_fit = ["User1","User1","User1","User1","User1"];
+  shape_gen = ["ErfPow","ErfPow","ErfPow","ErfPow","ErfPow"];    
+#  shape_fit = ["ErfPow","ErfPow","ErfPow","ErfPow","ErfPow"];
 
  nexp      = [1000,1000,1000,1000,1000]; 
  isMC      = [0,0,0,0,0];
@@ -156,7 +158,7 @@ def submitBatchJob( command, fn ):
  # create a dummy bash/csh
  outScript = open(fn+".sh","w");
  
- if not options.lxbatchCern or not options.herculesMilano :   
+ if not options.lxbatchCern and not options.herculesMilano :
   outScript.write('#!/bin/bash');
   outScript.write("\n"+'date');
   outScript.write("\n"+'source /uscmst1/prod/sw/cms/bashrc prod');
@@ -194,17 +196,17 @@ def submitBatchJob( command, fn ):
   outScript.write("\n"+'eval `scram runtime -sh`');
   outScript.write("\n"+'cd -');
   outScript.write("\n"+'cp '+currentDir+'/BiasStudy/do_fitBias_vbf.py ./');
-  outScript.write("\n"+'cp '+currentDir+'doFit_class.py ./');
+  outScript.write("\n"+'cp '+currentDir+'/doFit_class.py ./');
   outScript.write("\n"+'export PATH=${PATH}:'+currentDir);
   outScript.write("\n"+'echo ${PATH}');
   outScript.write("\n"+'ls');  
   outScript.write("\n"+command);
   outScript.write("\n"+'tar -cvzf outputFrom_'+fn+'.tar.gz *');    
-  outScript.write("\n"+'cp outputFrom_'+fn+'.tar.gz '+currentDir);    
+  outScript.write("\n"+'cp outputFrom_'+fn+'.tar.gz '+currentDir+"/");    
   outScript.close();
          
   os.system("chmod 777 "+currentDir+"/"+fn+".sh"); 
-  os.system("bsub -q cmscaf1nh -cwd "+currentDir+" "+fn+".sh");
+  os.system("bsub -q cmscaf1nd -cwd "+currentDir+" "+fn+".sh");
 
  elif not options.lxbatchCern and options.herculesMilano:
 
@@ -437,7 +439,7 @@ if __name__ == '__main__':
             print "--------------------------------------------------";                
             print "--------------------------------------------------";  
 
-            command = "python do_fitBias_vbf.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d --inflatejobstatistic %d"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit,options.inflatejobstatistic); 
+            command = "python do_fitBias_vbf.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d --inflatejobstatistic %d"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],0,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit,options.inflatejobstatistic); 
             print command ;
             if options.batchMode:
               suffix = "";  
