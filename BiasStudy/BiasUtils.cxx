@@ -525,7 +525,6 @@ void biasModelAnalysis::saveToysPlots(const int & nPlots, const int & fitjetmass
     
   for(unsigned int iToy = 0 ; iToy < (*this).generatedData_.size() ; iToy++){
     if(iToy%nPlots != 0 ) continue ; 
-    //    std::cout<<" store toy number "<<iToy<<" nPlots "<<nPlots<<std::endl;
     if(!(*this).generatedData_.at(iToy) or !(*this).fitResults_.at(iToy)) continue ;
     if((*this).fitResults_.at(iToy)->status()!= 0) continue;
 
@@ -555,7 +554,9 @@ void biasModelAnalysis::saveToysPlots(const int & nPlots, const int & fitjetmass
 
     mplot->GetYaxis()->SetRangeUser(1e-2,mplot->GetMaximum()*1.2);                                                                                                                    
 
-    RooPlot* mplot_pull = get_pull(rrv_x, mplot,(RooDataSet*)generatedData_[iToy],(*this).fittedPdf_[iToy],fres,"data","model_mc",1,1);
+    RooPlot* mplot_pull;
+    if(fitjetmass) mplot_pull  = get_pull(rrv_x, mplot,(RooDataSet*)generatedData_[iToy],(*this).fittedPdf_[iToy],fres,"data","model_mc",0,1);
+    else mplot_pull  = get_pull(rrv_x, mplot,(RooDataSet*)generatedData_[iToy],(*this).fittedPdf_[iToy],fres,"data","model_mc",1,1);
 
 
     Title.Form("canvas_generatedToys_wjet_%d",iToy);
