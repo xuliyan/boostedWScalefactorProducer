@@ -109,9 +109,9 @@ if options.biasStudy:
  elif options.fitjetmass:
 
 #  shape_gen = ["ErfExp","ErfExp","ErfExp","ErfExp","ErfExp"];    
-  shape_fit = ["ErfExp","ErfExp","ErfExp","ErfExp","ErfExp"];
+#  shape_fit = ["ErfExp","ErfExp","ErfExp","ErfExp","ErfExp"];
 #  shape_gen = ["User1","User1","User1","User1","User1"];    
-#  shape_fit = ["User1","User1","User1","User1","User1"];
+  shape_fit = ["User1","User1","User1","User1","User1"];
   shape_gen = ["ErfPow","ErfPow","ErfPow","ErfPow","ErfPow"];    
 #  shape_fit = ["ErfPow","ErfPow","ErfPow","ErfPow","ErfPow"];
 
@@ -439,7 +439,7 @@ if __name__ == '__main__':
             print "--------------------------------------------------";                
             print "--------------------------------------------------";  
 
-            command = "python do_fitBias_vbf.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d --inflatejobstatistic %d"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],0,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit,options.inflatejobstatistic); 
+            command = "python do_fitBias_vbf.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d --inflatejobstatistic %d"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit,options.inflatejobstatistic); 
             print command ;
             if options.batchMode:
               suffix = "";  
