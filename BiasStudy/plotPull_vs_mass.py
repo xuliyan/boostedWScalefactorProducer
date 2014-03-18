@@ -193,214 +193,223 @@ if __name__ == "__main__":
     canvas_pull_sig_data[len(canvas_pull_sig_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_sig_data[len(canvas_pull_sig_data)-1].GetName()+"_"+options.fgen+"_"+options.fres+".png","png");
     canvas_pull_sig_data[len(canvas_pull_sig_data)-1].SaveAs(options.outputDir+"/"+canvas_pull_sig_data[len(canvas_pull_sig_data)-1].GetName()+"_"+options.fgen+"_"+options.fres+".pdf","pdf");
 
-   histogram_pull_vs_mass_nback.SetBinContent(imass+1,histo_pull_WJets0_data.GetMean());
-   histogram_pull_vs_mass_nback.SetBinError(imass+1,histo_pull_WJets0_data.GetRMS());
-   histogram_pull_vs_mass_nback.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
+
+#mass-dependent graphs
+
+   if not options.fitjetmass:
+
+    histogram_pull_vs_mass_nback.SetBinContent(imass+1,histo_pull_WJets0_data.GetMean());
+    histogram_pull_vs_mass_nback.SetBinError(imass+1,histo_pull_WJets0_data.GetRMS());
+    histogram_pull_vs_mass_nback.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
    
-   gaussian_pull_vs_mass_nback.SetBinContent(imass+1,gaussian_pull_WJets0_data.GetParameter(1));
-   gaussian_pull_vs_mass_nback.SetBinError(imass+1,gaussian_pull_WJets0_data.GetParameter(2));
-   gaussian_pull_vs_mass_nback.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
+    gaussian_pull_vs_mass_nback.SetBinContent(imass+1,gaussian_pull_WJets0_data.GetParameter(1));
+    gaussian_pull_vs_mass_nback.SetBinError(imass+1,gaussian_pull_WJets0_data.GetParameter(2));
+    gaussian_pull_vs_mass_nback.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
    
-   if not options.onlybackgroundfit:
+    if not options.onlybackgroundfit:
 
-    histogram_pull_vs_mass_nsig.SetBinContent(imass+1,histo_pull_signal.GetMean());
-    histogram_pull_vs_mass_nsig.SetBinError(imass+1,histo_pull_signal.GetRMS());
-    histogram_pull_vs_mass_nsig.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
+     histogram_pull_vs_mass_nsig.SetBinContent(imass+1,histo_pull_signal.GetMean());
+     histogram_pull_vs_mass_nsig.SetBinError(imass+1,histo_pull_signal.GetRMS());
+     histogram_pull_vs_mass_nsig.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
 
-    gaussian_pull_vs_mass_nsig.SetBinContent(imass+1,gaussian_pull_signal.GetParameter(1));
-    gaussian_pull_vs_mass_nsig.SetBinError(imass+1,gaussian_pull_signal.GetParameter(2));
-    gaussian_pull_vs_mass_nsig.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
+     gaussian_pull_vs_mass_nsig.SetBinContent(imass+1,gaussian_pull_signal.GetParameter(1));
+     gaussian_pull_vs_mass_nsig.SetBinError(imass+1,gaussian_pull_signal.GetParameter(2));
+     gaussian_pull_vs_mass_nsig.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
 
 
-   graph_1.SetPoint(imass+1,imass,0);
-   graph_1.SetPointError(imass+1,0,0.2);
+    graph_1.SetPoint(imass+1,imass,0);
+    graph_1.SetPointError(imass+1,0,0.2);
 
-   graph_2.SetPoint(imass+1,imass,0);
-   graph_2.SetPointError(imass+1,0,1);
+    graph_2.SetPoint(imass+1,imass,0);
+    graph_2.SetPointError(imass+1,0,1);
 
-  graph_1.SetPoint(len(mass)+1,len(mass),0);
-  graph_1.SetPointError(len(mass)+1,0,0.2);
+  if not options.fitjetmass:
 
-  graph_2.SetPoint(len(mass)+1,len(mass),0);
-  graph_2.SetPointError(len(mass)+1,0,1);
+   graph_1.SetPoint(len(mass)+1,len(mass),0);
+   graph_1.SetPointError(len(mass)+1,0,0.2);
+
+   graph_2.SetPoint(len(mass)+1,len(mass),0);
+   graph_2.SetPointError(len(mass)+1,0,1);
 
  ## make the output directory
 
- setPlotStyle();
+ if not options.fitjetmass:
+   
+  setPlotStyle();
            
- canvas_1 = ROOT.TCanvas("histo_bkg", "histo_bkg")
- histogram_pull_vs_mass_nback.GetXaxis().SetLabelSize(0.065);
- histogram_pull_vs_mass_nback.GetXaxis().SetTitleSize(0.055);
- histogram_pull_vs_mass_nback.GetXaxis().SetTitle("m_{H}");
- histogram_pull_vs_mass_nback.GetXaxis().SetTitleOffset(0.85);
- histogram_pull_vs_mass_nback.GetYaxis().SetTitle("Pull");
- histogram_pull_vs_mass_nback.GetYaxis().SetTitleOffset(1.05);
- histogram_pull_vs_mass_nback.GetYaxis().SetTitleSize(0.045);
- histogram_pull_vs_mass_nback.GetYaxis().SetLabelSize(0.045);
- histogram_pull_vs_mass_nback.SetMarkerStyle(20);
- histogram_pull_vs_mass_nback.SetMarkerSize(2.0);
- histogram_pull_vs_mass_nback.SetLineColor(1);
- histogram_pull_vs_mass_nback.SetLineWidth(2);
- graph_1.SetFillColor(kYellow+1);
- graph_1.SetFillStyle(3001);
- graph_2.SetFillColor(kGreen+1);
- graph_2.SetFillStyle(3001);
-
- oneLine = ROOT.TF1("oneLine","0",0,100);
- oneLine.SetLineColor(ROOT.kRed);
- oneLine.SetLineWidth(2);
-                     
- histogram_pull_vs_mass_nback.SetMaximum(2);
- histogram_pull_vs_mass_nback.SetMinimum(-2);
- histogram_pull_vs_mass_nback.Draw("pe");
- graph_2.Draw("e3same");
- graph_1.Draw("e3same");
- oneLine.Draw("Lsame");
- histogram_pull_vs_mass_nback.Draw("pesame");
-
- banner = TLatex(0.21,2.02,("CMS Preliminary,                       19.3 fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow l #nu"));
- banner.SetTextSize(0.046);
- title  = TLatex(0.21,1.63,("N_{bkg} pull from histogram vs mass"));
- title.SetTextSize(0.042);
- title.SetTextFont(42); 
-
- title2  = TLatex(2.86,1.70,("Generated: %s")%(options.fgen));
- title3  = TLatex(2.86,1.42,("Fitted: %s")%(options.fres));
- title2.SetTextSize(0.042);
- title2.SetTextFont(42); 
- title2.SetTextColor(1); 
- title3.SetTextSize(0.042);
- title3.SetTextFont(42); 
- title3.SetTextColor(1);
- 
- banner.Draw();
- title.Draw();
- title2.Draw();
- title3.Draw();
-
- canvas_1.SaveAs(options.outputDir+"/"+histogram_pull_vs_mass_nback.GetName()+"_"+options.fgen+"_"+options.fres+".png","png");
- canvas_1.SaveAs(options.outputDir+"/"+histogram_pull_vs_mass_nback.GetName()+"_"+options.fgen+"_"+options.fres+".pdf","pdf");
- canvas_1.SaveAs(options.outputDir+"/"+histogram_pull_vs_mass_nback.GetName()+"_"+options.fgen+"_"+options.fres+".root","root");
-
- if not options.onlybackgroundfit:
-  canvas_2 = ROOT.TCanvas("histo_sig", "histo_sig")
-  histogram_pull_vs_mass_nsig.GetXaxis().SetLabelSize(0.065);
-  histogram_pull_vs_mass_nsig.GetXaxis().SetTitleSize(0.055);
-  histogram_pull_vs_mass_nsig.GetXaxis().SetTitle("m_{H}");
-  histogram_pull_vs_mass_nsig.GetXaxis().SetTitleOffset(0.85);
-  histogram_pull_vs_mass_nsig.GetYaxis().SetTitle("Pull");
-  histogram_pull_vs_mass_nsig.GetYaxis().SetTitleOffset(1.05);
-  histogram_pull_vs_mass_nsig.GetYaxis().SetLabelSize(0.045);
-  histogram_pull_vs_mass_nsig.GetYaxis().SetTitleSize(0.045);
-  histogram_pull_vs_mass_nsig.SetMarkerStyle(20);
-  histogram_pull_vs_mass_nsig.SetMarkerSize(2.0);
-  histogram_pull_vs_mass_nsig.SetLineColor(1);
-  histogram_pull_vs_mass_nsig.SetLineWidth(2);
+  canvas_1 = ROOT.TCanvas("histo_bkg", "histo_bkg")
+  histogram_pull_vs_mass_nback.GetXaxis().SetLabelSize(0.065);
+  histogram_pull_vs_mass_nback.GetXaxis().SetTitleSize(0.055);
+  histogram_pull_vs_mass_nback.GetXaxis().SetTitle("m_{H}");
+  histogram_pull_vs_mass_nback.GetXaxis().SetTitleOffset(0.85);
+  histogram_pull_vs_mass_nback.GetYaxis().SetTitle("Pull");
+  histogram_pull_vs_mass_nback.GetYaxis().SetTitleOffset(1.05);
+  histogram_pull_vs_mass_nback.GetYaxis().SetTitleSize(0.045);
+  histogram_pull_vs_mass_nback.GetYaxis().SetLabelSize(0.045);
+  histogram_pull_vs_mass_nback.SetMarkerStyle(20);
+  histogram_pull_vs_mass_nback.SetMarkerSize(2.0);
+  histogram_pull_vs_mass_nback.SetLineColor(1);
+  histogram_pull_vs_mass_nback.SetLineWidth(2);
+  graph_1.SetFillColor(kYellow+1);
+  graph_1.SetFillStyle(3001);
+  graph_2.SetFillColor(kGreen+1);
+  graph_2.SetFillStyle(3001);
 
   oneLine = ROOT.TF1("oneLine","0",0,100);
   oneLine.SetLineColor(ROOT.kRed);
   oneLine.SetLineWidth(2);
                      
-  histogram_pull_vs_mass_nsig.SetMaximum(2);
-  histogram_pull_vs_mass_nsig.SetMinimum(-2);
-  histogram_pull_vs_mass_nsig.Draw("pe");
+  histogram_pull_vs_mass_nback.SetMaximum(2);
+  histogram_pull_vs_mass_nback.SetMinimum(-2);
+  histogram_pull_vs_mass_nback.Draw("pe");
   graph_2.Draw("e3same");
   graph_1.Draw("e3same");
   oneLine.Draw("Lsame");
-  histogram_pull_vs_mass_nsig.Draw("pesame");
+  histogram_pull_vs_mass_nback.Draw("pesame");
 
-  banner.Draw();
-  title  = TLatex(0.21,1.63,("N_{sig} pull from histogram vs mass"));
+  banner = TLatex(0.21,2.02,("CMS Preliminary,                       19.3 fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow l #nu"));
+  banner.SetTextSize(0.046);
+  title  = TLatex(0.21,1.63,("N_{bkg} pull from histogram vs mass"));
   title.SetTextSize(0.042);
   title.SetTextFont(42); 
+
+  title2  = TLatex(2.86,1.70,("Generated: %s")%(options.fgen));
+  title3  = TLatex(2.86,1.42,("Fitted: %s")%(options.fres));
+  title2.SetTextSize(0.042);
+  title2.SetTextFont(42); 
+  title2.SetTextColor(1); 
+  title3.SetTextSize(0.042);
+  title3.SetTextFont(42); 
+  title3.SetTextColor(1);
+ 
+  banner.Draw();
   title.Draw();
   title2.Draw();
   title3.Draw();
 
+  canvas_1.SaveAs(options.outputDir+"/"+histogram_pull_vs_mass_nback.GetName()+"_"+options.fgen+"_"+options.fres+".png","png");
+  canvas_1.SaveAs(options.outputDir+"/"+histogram_pull_vs_mass_nback.GetName()+"_"+options.fgen+"_"+options.fres+".pdf","pdf");
+  canvas_1.SaveAs(options.outputDir+"/"+histogram_pull_vs_mass_nback.GetName()+"_"+options.fgen+"_"+options.fres+".root","root");
 
-  canvas_2.SaveAs(options.outputDir+"/"+histogram_pull_vs_mass_nsig.GetName()+"_"+options.fgen+"_"+options.fres+".png","png");
-  canvas_2.SaveAs(options.outputDir+"/"+histogram_pull_vs_mass_nsig.GetName()+"_"+options.fgen+"_"+options.fres+".pdf","pdf");
-  canvas_2.SaveAs(options.outputDir+"/"+histogram_pull_vs_mass_nsig.GetName()+"_"+options.fgen+"_"+options.fres+".root","root");
+  if not options.onlybackgroundfit:
+   canvas_2 = ROOT.TCanvas("histo_sig", "histo_sig")
+   histogram_pull_vs_mass_nsig.GetXaxis().SetLabelSize(0.065);
+   histogram_pull_vs_mass_nsig.GetXaxis().SetTitleSize(0.055);
+   histogram_pull_vs_mass_nsig.GetXaxis().SetTitle("m_{H}");
+   histogram_pull_vs_mass_nsig.GetXaxis().SetTitleOffset(0.85);
+   histogram_pull_vs_mass_nsig.GetYaxis().SetTitle("Pull");
+   histogram_pull_vs_mass_nsig.GetYaxis().SetTitleOffset(1.05);
+   histogram_pull_vs_mass_nsig.GetYaxis().SetLabelSize(0.045);
+   histogram_pull_vs_mass_nsig.GetYaxis().SetTitleSize(0.045);
+   histogram_pull_vs_mass_nsig.SetMarkerStyle(20);
+   histogram_pull_vs_mass_nsig.SetMarkerSize(2.0);
+   histogram_pull_vs_mass_nsig.SetLineColor(1);
+   histogram_pull_vs_mass_nsig.SetLineWidth(2);
 
-
- canvas_3 = ROOT.TCanvas("gaus_bkg", "gaus_bkg")
- gaussian_pull_vs_mass_nback.GetXaxis().SetLabelSize(0.065);
- gaussian_pull_vs_mass_nback.GetXaxis().SetTitleSize(0.055);
- gaussian_pull_vs_mass_nback.GetXaxis().SetTitle("m_{H}");
- gaussian_pull_vs_mass_nback.GetXaxis().SetTitleOffset(0.85);
- gaussian_pull_vs_mass_nback.GetYaxis().SetTitle("Pull");
- gaussian_pull_vs_mass_nback.GetYaxis().SetTitleOffset(1.05);
- gaussian_pull_vs_mass_nback.GetYaxis().SetLabelSize(0.045);
- gaussian_pull_vs_mass_nback.GetYaxis().SetTitleSize(0.045);
- gaussian_pull_vs_mass_nback.SetTitle("Pull of Background Number of Events Gaussian")
- gaussian_pull_vs_mass_nback.SetMarkerStyle(20);
- gaussian_pull_vs_mass_nback.SetMarkerSize(2.0);
- gaussian_pull_vs_mass_nback.SetLineColor(1);
- gaussian_pull_vs_mass_nback.SetLineWidth(2);
-
-
- oneLine = ROOT.TF1("oneLine","0",0,100);
- oneLine.SetLineColor(ROOT.kRed);
- oneLine.SetLineWidth(2);
+   oneLine = ROOT.TF1("oneLine","0",0,100);
+   oneLine.SetLineColor(ROOT.kRed);
+   oneLine.SetLineWidth(2);
                      
- gaussian_pull_vs_mass_nback.SetMaximum(2);
- gaussian_pull_vs_mass_nback.SetMinimum(-2);
- gaussian_pull_vs_mass_nback.Draw("pe");
- graph_2.Draw("e3same");
- graph_1.Draw("e3same");
- oneLine.Draw("Lsame");
+   histogram_pull_vs_mass_nsig.SetMaximum(2);
+   histogram_pull_vs_mass_nsig.SetMinimum(-2);
+   histogram_pull_vs_mass_nsig.Draw("pe");
+   graph_2.Draw("e3same");
+   graph_1.Draw("e3same");
+   oneLine.Draw("Lsame");
+   histogram_pull_vs_mass_nsig.Draw("pesame");
 
- gaussian_pull_vs_mass_nback.Draw("pesame");
+   banner.Draw();
+   title  = TLatex(0.21,1.63,("N_{sig} pull from histogram vs mass"));
+   title.SetTextSize(0.042);
+   title.SetTextFont(42); 
+   title.Draw();
+   title2.Draw();
+   title3.Draw();
 
- banner.Draw();
- title  = TLatex(0.21,1.63,("N_{back} pull from gaussian fit vs mass"));
- title.SetTextSize(0.042);
- title.SetTextFont(42); 
- title.Draw();
- title2.Draw();
- title3.Draw();
 
- canvas_3.SaveAs(options.outputDir+"/"+gaussian_pull_vs_mass_nback.GetName()+"_"+options.fgen+"_"+options.fres+".png","png");
- canvas_3.SaveAs(options.outputDir+"/"+gaussian_pull_vs_mass_nback.GetName()+"_"+options.fgen+"_"+options.fres+".pdf","pdf");
- canvas_3.SaveAs(options.outputDir+"/"+gaussian_pull_vs_mass_nback.GetName()+"_"+options.fgen+"_"+options.fres+".root","root");
+   canvas_2.SaveAs(options.outputDir+"/"+histogram_pull_vs_mass_nsig.GetName()+"_"+options.fgen+"_"+options.fres+".png","png");
+   canvas_2.SaveAs(options.outputDir+"/"+histogram_pull_vs_mass_nsig.GetName()+"_"+options.fgen+"_"+options.fres+".pdf","pdf");
+   canvas_2.SaveAs(options.outputDir+"/"+histogram_pull_vs_mass_nsig.GetName()+"_"+options.fgen+"_"+options.fres+".root","root");
 
- if not options.onlybackgroundfit:
 
-  canvas_4 = ROOT.TCanvas("gaus_sig", "gaus_sig")
-  gaussian_pull_vs_mass_nsig.GetXaxis().SetLabelSize(0.065);
-  gaussian_pull_vs_mass_nsig.GetXaxis().SetTitleSize(0.055);
-  gaussian_pull_vs_mass_nsig.GetXaxis().SetTitle("m_{H}");
-  gaussian_pull_vs_mass_nsig.GetXaxis().SetTitleOffset(0.85);
-  gaussian_pull_vs_mass_nsig.GetYaxis().SetTitle("Pull");
-  gaussian_pull_vs_mass_nsig.GetYaxis().SetTitleOffset(1.05);
-  gaussian_pull_vs_mass_nsig.GetYaxis().SetLabelSize(0.045);
-  gaussian_pull_vs_mass_nsig.GetYaxis().SetTitleSize(0.045);
-  gaussian_pull_vs_mass_nsig.SetTitle("Pull of Signal Number of Events Gaussian")
-  gaussian_pull_vs_mass_nsig.SetMarkerStyle(20);
-  gaussian_pull_vs_mass_nsig.SetMarkerSize(2.0);
-  gaussian_pull_vs_mass_nsig.SetLineColor(1);
-  gaussian_pull_vs_mass_nsig.SetLineWidth(2);
+  canvas_3 = ROOT.TCanvas("gaus_bkg", "gaus_bkg")
+  gaussian_pull_vs_mass_nback.GetXaxis().SetLabelSize(0.065);
+  gaussian_pull_vs_mass_nback.GetXaxis().SetTitleSize(0.055);
+  gaussian_pull_vs_mass_nback.GetXaxis().SetTitle("m_{H}");
+  gaussian_pull_vs_mass_nback.GetXaxis().SetTitleOffset(0.85);
+  gaussian_pull_vs_mass_nback.GetYaxis().SetTitle("Pull");
+  gaussian_pull_vs_mass_nback.GetYaxis().SetTitleOffset(1.05);
+  gaussian_pull_vs_mass_nback.GetYaxis().SetLabelSize(0.045);
+  gaussian_pull_vs_mass_nback.GetYaxis().SetTitleSize(0.045);
+  gaussian_pull_vs_mass_nback.SetTitle("Pull of Background Number of Events Gaussian")
+  gaussian_pull_vs_mass_nback.SetMarkerStyle(20);
+  gaussian_pull_vs_mass_nback.SetMarkerSize(2.0);
+  gaussian_pull_vs_mass_nback.SetLineColor(1);
+  gaussian_pull_vs_mass_nback.SetLineWidth(2);
 
-  gaussian_pull_vs_mass_nsig.SetMaximum(2);
-  gaussian_pull_vs_mass_nsig.SetMinimum(-2);
-  gaussian_pull_vs_mass_nsig.Draw("pe");
+
+  oneLine = ROOT.TF1("oneLine","0",0,100);
+  oneLine.SetLineColor(ROOT.kRed);
+  oneLine.SetLineWidth(2);
+                     
+  gaussian_pull_vs_mass_nback.SetMaximum(2);
+  gaussian_pull_vs_mass_nback.SetMinimum(-2);
+  gaussian_pull_vs_mass_nback.Draw("pe");
   graph_2.Draw("e3same");
   graph_1.Draw("e3same");
   oneLine.Draw("Lsame");
-  gaussian_pull_vs_mass_nsig.Draw("pesame");
+
+  gaussian_pull_vs_mass_nback.Draw("pesame");
 
   banner.Draw();
-
-  title  = TLatex(0.21,1.63,("N_{sig} pull from gaussian fit vs mass"));
+  title  = TLatex(0.21,1.63,("N_{back} pull from gaussian fit vs mass"));
   title.SetTextSize(0.042);
   title.SetTextFont(42); 
   title.Draw();
   title2.Draw();
   title3.Draw();
 
-  canvas_4.SaveAs(options.outputDir+"/"+gaussian_pull_vs_mass_nsig.GetName()+"_"+options.fgen+"_"+options.fres+".png","png");
-  canvas_4.SaveAs(options.outputDir+"/"+gaussian_pull_vs_mass_nsig.GetName()+"_"+options.fgen+"_"+options.fres+".pdf","pdf");
-  canvas_4.SaveAs(options.outputDir+"/"+gaussian_pull_vs_mass_nsig.GetName()+"_"+options.fgen+"_"+options.fres+".root","root");
+  canvas_3.SaveAs(options.outputDir+"/"+gaussian_pull_vs_mass_nback.GetName()+"_"+options.fgen+"_"+options.fres+".png","png");
+  canvas_3.SaveAs(options.outputDir+"/"+gaussian_pull_vs_mass_nback.GetName()+"_"+options.fgen+"_"+options.fres+".pdf","pdf");
+  canvas_3.SaveAs(options.outputDir+"/"+gaussian_pull_vs_mass_nback.GetName()+"_"+options.fgen+"_"+options.fres+".root","root");
+
+  if not options.onlybackgroundfit:
+
+   canvas_4 = ROOT.TCanvas("gaus_sig", "gaus_sig")
+   gaussian_pull_vs_mass_nsig.GetXaxis().SetLabelSize(0.065);
+   gaussian_pull_vs_mass_nsig.GetXaxis().SetTitleSize(0.055);
+   gaussian_pull_vs_mass_nsig.GetXaxis().SetTitle("m_{H}");
+   gaussian_pull_vs_mass_nsig.GetXaxis().SetTitleOffset(0.85);
+   gaussian_pull_vs_mass_nsig.GetYaxis().SetTitle("Pull");
+   gaussian_pull_vs_mass_nsig.GetYaxis().SetTitleOffset(1.05);
+   gaussian_pull_vs_mass_nsig.GetYaxis().SetLabelSize(0.045);
+   gaussian_pull_vs_mass_nsig.GetYaxis().SetTitleSize(0.045);
+   gaussian_pull_vs_mass_nsig.SetTitle("Pull of Signal Number of Events Gaussian")
+   gaussian_pull_vs_mass_nsig.SetMarkerStyle(20);
+   gaussian_pull_vs_mass_nsig.SetMarkerSize(2.0);
+   gaussian_pull_vs_mass_nsig.SetLineColor(1);
+   gaussian_pull_vs_mass_nsig.SetLineWidth(2);
+
+   gaussian_pull_vs_mass_nsig.SetMaximum(2);
+   gaussian_pull_vs_mass_nsig.SetMinimum(-2);
+   gaussian_pull_vs_mass_nsig.Draw("pe");
+   graph_2.Draw("e3same");
+   graph_1.Draw("e3same");
+   oneLine.Draw("Lsame");
+   gaussian_pull_vs_mass_nsig.Draw("pesame");
+
+   banner.Draw();
+
+   title  = TLatex(0.21,1.63,("N_{sig} pull from gaussian fit vs mass"));
+   title.SetTextSize(0.042);
+   title.SetTextFont(42); 
+   title.Draw();
+   title2.Draw();
+   title3.Draw();
+
+   canvas_4.SaveAs(options.outputDir+"/"+gaussian_pull_vs_mass_nsig.GetName()+"_"+options.fgen+"_"+options.fres+".png","png");
+   canvas_4.SaveAs(options.outputDir+"/"+gaussian_pull_vs_mass_nsig.GetName()+"_"+options.fgen+"_"+options.fres+".pdf","pdf");
+   canvas_4.SaveAs(options.outputDir+"/"+gaussian_pull_vs_mass_nsig.GetName()+"_"+options.fgen+"_"+options.fres+".root","root");
 
  os.system("rm list_temp.txt");
  
