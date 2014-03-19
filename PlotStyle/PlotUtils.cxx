@@ -663,3 +663,12 @@ void setTDRStyle(){
   gStyle->SetPaperSize(20.,20.);
   gStyle->cd();
 }
+
+float GetLumi(const std::string & channel){
+ 
+  if(channel=="el") return 19.3;
+  else if(channel=="mu") return 19.3;
+  else if(channel=="em") return 19.3;
+
+  return -1 ;
+}
