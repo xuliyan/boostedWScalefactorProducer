@@ -51,6 +51,7 @@ class biasModelAnalysis{
   void setIsMC(const int &);
   void setPdfInformation(const std::string &, const std::string &, const std::string &, const std::string &);
   void setBackgroundPdfCore(RooAbsPdf*);
+  void setSignalInjection(RooAbsPdf*, const float & = 0, const float & = 1);
   void saveToysPlots(const int &, const int &, const int & = 0 );
  
   private: 
@@ -92,7 +93,8 @@ class biasModelAnalysis{
    float chi2_;
    float nLL_;
    float chi2_frame_;
-
+   float numberSignalEvents_ ;
+   float scalesignalwidth_;
    int   nexp_ ;
    bool  isMC_ ;
    int   nevents_ ;
