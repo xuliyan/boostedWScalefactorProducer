@@ -44,3 +44,7 @@ void draw_canvas(RooPlot*, const std::string & = "" ,  const TString & = "", con
 
 // set tdr style function
 void setTDRStyle();
+
+//
+float GetLumi(const std::string & = "em");
+
