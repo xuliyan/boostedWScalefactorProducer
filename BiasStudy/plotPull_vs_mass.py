@@ -34,7 +34,7 @@ parser.add_option('-k','--onlybackgroundfit',   help='in order to specify if an 
 (options, args) = parser.parse_args()
 
 ####### mass vector #############
-mass = [600]
+#mass = [600]
 mass = [600,700,800,900,1000]
 
 ####### plot style ##############
@@ -104,7 +104,6 @@ if __name__ == "__main__":
 
 
   ## make the histograms
-
   histogram_pull_vs_mass_nback = ROOT.TH1F("histogram_pull_vs_mass_nback","",len(mass),0,len(mass));
   gaussian_pull_vs_mass_nback  = ROOT.TH1F("gaussian_pull_vs_mass_nback","",len(mass),0,len(mass));
 
