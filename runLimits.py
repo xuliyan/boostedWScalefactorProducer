@@ -175,7 +175,7 @@ def submitBatchJob( command, fn ):
   outScript.write("\n"+'export PATH=${PATH}:'+currentDir);
   outScript.write("\n"+'echo ${PATH}');
   outScript.write("\n"+'ls'); 
-  outScript.write("\n"+command);
+  outScript.write("\n"+command);  
   outScript.write("\n"+'tar -cvzf outputFrom_'+fn+'.tar.gz *');    
   outScript.close();
 
@@ -207,6 +207,7 @@ def submitBatchJob( command, fn ):
   outScript.write("\n"+'echo ${PATH}');
   outScript.write("\n"+'ls');  
   outScript.write("\n"+command);
+  outScript.write("\n"+'rm *.out');  
   outScript.write("\n"+'tar -cvzf outputFrom_'+fn+'.tar.gz *');    
   outScript.write("\n"+'cp outputFrom_'+fn+'.tar.gz '+currentDir+"/");    
   outScript.close();
