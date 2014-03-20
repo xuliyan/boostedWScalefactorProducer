@@ -50,6 +50,8 @@ parser.add_option('--mlvjregion',      action="store",type="string",   dest="mlv
 parser.add_option('--fitjetmass',      action="store",type="int",   dest="fitjetmass",default=0)
 parser.add_option('--onlybackgroundfit',  help='run only background fit',  type=int, default=0)
 parser.add_option('--inflatejobstatistic',  help='enlarge the generated statistics in the fit',  type=int, default=1)
+parser.add_option('--scalesignalwidth', help='reduce the signal width by a factor x', type=float, default=1.)
+parser.add_option('--injectSingalStrenght', help='inject a singal in the toy generation', type=float, default=1.)
 
 (options, args) = parser.parse_args()
 
@@ -94,16 +96,20 @@ if options.biasStudy:
 
  if not options.turnOnAnalysis and not options.fitjetmass:
 
-#  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
+  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
   shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
-  shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
+#  shape_gen = ["Pow2","Pow2","Pow2","Pow2","Pow2"]    
+#shape_fit = ["Pow2","Pow2","Pow2","Pow2","Pow2"]
+#  shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
 #  shape_fit = ["Pow","Pow","Pow","Pow","Pow"]
 
  elif options.turnOnAnalysis and not options.fitjetmass:
 
 #  shape_gen = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"];    
   shape_fit = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"];
-  shape_gen = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"];    
+  shape_gen = ["ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1"];    
+#  shape_fit = ["ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1"];
+#  shape_gen = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"];    
 #  shape_fit = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"];
 
  elif options.fitjetmass:
@@ -439,7 +445,7 @@ if __name__ == '__main__':
             print "--------------------------------------------------";                
             print "--------------------------------------------------";  
 
-            command = "python do_fitBias_vbf.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d --inflatejobstatistic %d"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit,options.inflatejobstatistic); 
+            command = "python do_fitBias_vbf.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d --inflatejobstatistic %d --scalesignalwidth %f --injectSingalStrenght %f"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit,options.inflatejobstatistic,options.scalesignalwidth,options.injectSingalStrenght); 
             print command ;
             if options.batchMode:
               suffix = "";  
