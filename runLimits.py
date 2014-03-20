@@ -96,11 +96,11 @@ if options.biasStudy:
 
  if not options.turnOnAnalysis and not options.fitjetmass:
 
-  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
-  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
+#  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
+#  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
 #  shape_gen = ["Pow2","Pow2","Pow2","Pow2","Pow2"]    
-#shape_fit = ["Pow2","Pow2","Pow2","Pow2","Pow2"]
-#  shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
+  shape_fit = ["Pow2","Pow2","Pow2","Pow2","Pow2"]
+  shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
 #  shape_fit = ["Pow","Pow","Pow","Pow","Pow"]
 
  elif options.turnOnAnalysis and not options.fitjetmass:
@@ -445,24 +445,22 @@ if __name__ == '__main__':
             print "--------------------------------------------------";                
             print "--------------------------------------------------";  
 
-            command = "python do_fitBias_vbf.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d --inflatejobstatistic %d --scalesignalwidth %f --injectSingalStrenght %f"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit,options.inflatejobstatistic,options.scalesignalwidth,options.injectSingalStrenght); 
+            command = "python do_fitBias_vbf.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d --inflatejobstatistic %d --scalesignalwidth %0.1f --injectSingalStrenght %0.1f"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit,options.inflatejobstatistic,options.scalesignalwidth,options.injectSingalStrenght); 
             print command ;
             if options.batchMode:
-              suffix = "";  
-              if options.fitjetmass == 1:
-                 suffix = suffix+"_jetmass";
-              if options.ttbarcontrolregion :
-                 suffix = suffix+"_ttbar";
-              if options.turnOnAnalysis :
-                 suffix = suffix+"_turnOn" 
-              if options.onlybackgroundfit:
-                 suffix = suffix+"_B";
-              else:   
-                 suffix = suffix+"_SB";
-              fn = "biasScript_ggH%03d_%s_%s%s"%(mass[i],shape_gen[i],shape_fit[i],suffix);
-              submitBatchJob( command, fn );
+             suffix = "";
+             if options.ttbarcontrolregion : suffix = suffix+"_ttbar";
+             if options.fitjetmass         : suffix = suffix+"_jetmass";
+             if options.turnOnAnalysis     : suffix = suffix+"_turnOn";
+             if options.scalesignalwidth !=1 : suffix = suffix+ ("_width_%0.1f")%(options.scalesignalwidth);
+             if options.injectSingalStrenght !=0 : suffix = suffix+"_SB";
+             else :suffix = suffix+"_B";
+             if options.onlybackgroundfit  : suffix = suffix+"_B";
+             else: suffix = suffix+"_SB";
+             fn = "biasScript_ggH%03d_%s_%s%s"%(mass[i],shape_gen[i],shape_fit[i],suffix);
+             submitBatchJob( command, fn );
             else: 
-              os.system(command);
+             os.system(command);
 
     # =================== Plot of the Limit  ================== #
 
