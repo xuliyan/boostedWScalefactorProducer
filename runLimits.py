@@ -96,11 +96,11 @@ if options.biasStudy:
 
  if not options.turnOnAnalysis and not options.fitjetmass:
 
-#  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
+  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
 #  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
 #  shape_gen = ["Pow2","Pow2","Pow2","Pow2","Pow2"]    
   shape_fit = ["Pow2","Pow2","Pow2","Pow2","Pow2"]
-  shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
+#  shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
 #  shape_fit = ["Pow","Pow","Pow","Pow","Pow"]
 
  elif options.turnOnAnalysis and not options.fitjetmass:
@@ -445,7 +445,7 @@ if __name__ == '__main__':
             print "--------------------------------------------------";                
             print "--------------------------------------------------";  
 
-            command = "python do_fitBias_vbf.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d --inflatejobstatistic %d --scalesignalwidth %0.1f --injectSingalStrenght %0.1f"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit,options.inflatejobstatistic,options.scalesignalwidth,options.injectSingalStrenght); 
+            command = "python do_fitBias_vbf.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d --inflatejobstatistic %d --scalesignalwidth %0.1f --injectSingalStrenght %0.1f"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],nexp[i],isMC[i],0,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit,options.inflatejobstatistic,options.scalesignalwidth,options.injectSingalStrenght); 
             print command ;
             if options.batchMode:
              suffix = "";
