@@ -453,7 +453,8 @@ void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int &
              parameterError_[iparNotConstant] = rrv_parlist->getError();                                                                                                          
 	     parameterResidual_[iPull] = rrv_parlist->getVal()-(dynamic_cast<RooRealVar*>(parlist_->find("ngen"))->getVal()-numberSignalEvents_);                   
              parameterPull_[iPull] = (rrv_parlist->getVal()-(dynamic_cast<RooRealVar*>(parlist_->find("ngen"))->getVal()-numberSignalEvents_))/rrv_parlist->getError();        
-	     //std::cout<<" parameters "<<rrv_parlist->GetName()<<" value "<<parameter_[iparNotConstant]<<" err "<<parameterError_[iparNotConstant]<<" gen val "<<dynamic_cast<RooRealVar*>(parlist_->find("ngen"))->getVal()-numberSignalEvents_<<" residual "<<parameterResidual_[iPull]<<" pull "<<parameterPull_[iPull]<<std::endl; 
+	     //	     std::cout<<" parameters "<<rrv_parlist->GetName()<<" value "<<parameter_[iparNotConstant]<<" err "<<parameterError_[iparNotConstant]<<" gen val "<<dynamic_cast<RooRealVar*>(parlist_->find("ngen"))->getVal()-numberSignalEvents_<<" residual "<<parameterResidual_[iPull]<<" pull "<<parameterPull_[iPull]<<" nsignal events "<<numberSignalEvents_<<std::endl; 
+          
 	   }      
            else if(ttbarcontrolregion == 0 and isMC_ == 0){
 
