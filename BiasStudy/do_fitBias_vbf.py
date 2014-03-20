@@ -101,10 +101,13 @@ class doBiasStudy_mlvj:
         self.fit_model = fit_model ;
 
         suffix = "";
-        if options.ttbarcontrolregion : suffix = "_ttbar";
-        if options.fitjetmass         : suffix = "_jetmass";
-        if in_mlvj_min < 550          : suffix = suffix+"_turnOn";                
-        if options.onlybackgroundfit  : suffix = suffix+"_B";
+        if options.ttbarcontrolregion : suffix = suffix+"_ttbar";
+        if options.fitjetmass         : suffix = suffix+"_jetmass";
+        if in_mlvj_min < 550          : suffix = suffix+"_turnOn";
+        if options.scalesignalwidth !=1 : suffix = suffix+ ("_width_%0.1f")%(options.scalesignalwidth);
+        if options.injectSingalStrenght !=0 : suffix = suffix+"_SB";
+        else :suffix = suffix+"_B";         
+        if options.onlybackgroundfit  : suffix = suffix+"_B";        
         else: suffix = suffix+"_SB";
         
         ## create the workspace and import them
@@ -1404,7 +1407,8 @@ class doBiasStudy_mlvj:
 	     self.fit_mj_single_MC(self.file_STop_mc,"_STop","ErfExpGaus_sp");
 	  else:
              self.fit_mj_single_MC(self.file_STop_mc,"_STop","2Gaus_ErfExp");		   
-      else: self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop",options.mlvjregion,options.fgen,0,0,1);                  
+      else:
+          self.fit_mlvj_model_single_MC(self.file_STop_mc,"_STop",options.mlvjregion,options.fgen,0,0,1);                  
 
       ######## get WW EWK and fit it in the sb
       self.get_mj_and_mlvj_dataset(self.file_WW_EWK_mc,"_WW_EWK","jet_mass_pr")# to get the shape of m_lvj                                                                             
@@ -1462,26 +1466,18 @@ class doBiasStudy_mlvj:
      if options.isMC == 0  and options.ttbarcontrolregion == 0 and not options.fitjetmass :
 
       fix_Model(self.workspace4bias_,"_TTbar",options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,"_TTbar",options.mlvjregion,spectrum,options.fres,self.channel);
       fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,options.fres,self.channel);
       fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,options.fres,self.channel);
       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fres,self.channel);
       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fgen,self.channel);
       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fres,self.channel);
 
      elif options.isMC == 0  and options.ttbarcontrolregion == 1 and not options.fitjetmass:
 
       fix_Model(self.workspace4bias_,"_WJets0",options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,"_WJets0",options.mlvjregion,spectrum,options.fres,self.channel);
       fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,options.fres,self.channel);
       fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,options.fres,self.channel);
       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fres,self.channel);
       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fgen,self.channel);
       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fres,self.channel);
 
