@@ -98,7 +98,7 @@ void biasModelAnalysis::setSignalInjection(RooAbsPdf* signal_model, const float 
       parameter->setVal(numberSignalEvents_);
     }
     if(TString(parameter->GetName()).Contains("sigma")){
-      double new_sigma = parameter->getVal()/scalesignalwidth_ ; std::cout<<" new sigma "<<new_sigma<<std::endl;
+      double new_sigma = parameter->getVal()/scalesignalwidth_ ; 
       if(new_sigma< parameter->getMin()) parameter->setMin(new_sigma) ;
       else if (new_sigma > parameter->getMax()) parameter->setMax(new_sigma);
       parameter->setVal(new_sigma);
@@ -119,7 +119,23 @@ void biasModelAnalysis::generateAndFitToys(int nevents, const std::string & fitR
   else{ std::cout<<" no event in the generation --> terminate"<<std::endl; std::terminate(); }
   
   fitRange_ = fitRange ;
-  
+
+  // scale the signal sigma also in the fitting model                                                                                                                         
+  RooArgSet* parameter_list = model_fit_->getParameters((*this).generated_dataset_);
+  TIter par = parameter_list->createIterator(); par.Reset();
+  RooRealVar* parameter = dynamic_cast<RooRealVar*>(par.Next());
+  while(parameter){
+    if(TString(parameter->GetName()).Contains("sigma") and (TString(parameter->GetName()).Contains("ggH") or TString(parameter->GetName()).Contains("vbfH"))){
+      double new_sigma = parameter->getVal()/scalesignalwidth_; 
+      if(new_sigma< parameter->getMin()) parameter->setMin(new_sigma);
+      else if (new_sigma > parameter->getMax()) parameter->setMax(new_sigma);
+      std::cout<<" new_sigma "<<parameter->GetName()<<" value "<<new_sigma<<std::endl;
+      parameter->setVal(new_sigma);
+    }
+    parameter = dynamic_cast<RooRealVar*>(par.Next());
+  }
+
+
   if((*this).isMC_){
    mc_study_ = new RooMCStudy(*((*this).model_generation_), 
                               *((*this).observables_),                                                                                                            
