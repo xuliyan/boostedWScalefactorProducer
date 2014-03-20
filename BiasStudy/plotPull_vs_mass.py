@@ -26,10 +26,14 @@ parser.add_option('-m', '--isMC',    action = 'store', type = "int" , default = 
 parser.add_option('-o', '--outputDir',  action = 'store', type = "string" , default = "outputDir" , dest = "outputDir" )
 parser.add_option('-g','--fgen',      help='function to generate toys Exp,ExpTail,Pow2,ExpN)', type="string", default="ExpN")
 parser.add_option('-r','--fres',      help='function to fit toys (Exp,ExpTail,Pow2,ExpN)',     type="string", default="ExpN")
-parser.add_option('-f','--fitjetmass',   help='flag in order to specify if the fit is done on the jet mass', type="int", default=0)
-parser.add_option('-t','--ttbarcontrolregion',   help='in order to specify if the study is performed in the ttbar control region', type="int", default=0)
-parser.add_option('-j','--mlvjregion',   help='in order to specify if the mWW region where the fit is performed', type="string", default="_sb_lo")
-parser.add_option('-k','--onlybackgroundfit',   help='in order to specify if an only background fit has been perfomed', type="int", default=0)
+parser.add_option('-f','--fitjetmass',   help='flag in order to specify if the fit is done on the jet mass', type = "int", default = 0)
+parser.add_option('-t','--ttbarcontrolregion',   help='in order to specify if the study is performed in the ttbar control region', type = "int", default = 0)
+parser.add_option('-j','--mlvjregion',   help='in order to specify if the mWW region where the fit is performed', type = "string", default = "_sb_lo")
+parser.add_option('-k','--onlybackgroundfit', help = 'in order to specify if an only background fit has been perfomed', type = "int", default = 0)
+parser.add_option('--scalesignalwidth',       help = 'reduce the signal width by a factor x', type = float, default = 1.)
+parser.add_option('--injectSingalStrenght',   help = 'inject a singal in the toy generation', type = float, default = 1.)
+parser.add_option('--turnOnAnalysis', action="store",type="int",   dest="turnOnAnalysis",default=0)
+
 
 (options, args) = parser.parse_args()
 
@@ -44,7 +48,7 @@ def setPlotStyle():
   ROOT.gStyle.SetPadRightMargin(0.05);
   ROOT.gStyle.SetOptTitle(0);
   ROOT.gStyle.SetOptStat(0);
-  ROOT.gStyle.SetStatBorderSize(0);
+  ROOT.gStyle.SetStatBorderSize(1);
   ROOT.gStyle.SetStatColor(10);
   ROOT.gStyle.SetStatFont(42);
   ROOT.gStyle.SetStatX(0.94);
@@ -56,17 +60,11 @@ def setPlotStyle():
 if __name__ == "__main__":
 
  ## take the list of TFile to be used for the plot
-
- ROOTStyle = os.getenv ("ROOTStyle");
-# gROOT.ProcessLine((".x "+ROOTStyle+"/rootLogon.C"));
-# gROOT.ProcessLine((".x "+ROOTStyle+"/rootPalette.C"));
-# gROOT.ProcessLine((".x "+ROOTStyle+"/rootColors.C"));
-# gROOT.ProcessLine((".x "+ROOTStyle+"/setTDRStyle.C"));
-                
- ROOT.gStyle.SetOptFit(111);
- ROOT.gStyle.SetOptStat(1111);
  ROOT.gStyle.SetStatFont(42);
  ROOT.gStyle.SetTitleSize(0.04,"XYZ");
+ setPlotStyle(); 
+ ROOT.gStyle.SetOptFit(111);
+ ROOT.gStyle.SetOptStat(1111);
  
  nameInputDirectory = options.inputDirectory ;
  if not os.path.isdir(nameInputDirectory):
@@ -78,20 +76,21 @@ if __name__ == "__main__":
    options.mlvjregion = "";
  else:
    spectrum = "_mlvj";
-   
- if options.fitjetmass and options.ttbarcontrolregion and options.onlybackgroundfit :
-  os.system("ls "+nameInputDirectory+" | grep root | grep "+options.fgen+"_"+options.fres+"  | grep jetmass | grep ttbar | grep _B > list_temp.txt");
- elif options.fitjetmass and not options.ttbarcontrolregion and options.onlybackgroundfit:
-  os.system("ls "+nameInputDirectory+" | grep root | grep "+options.fgen+"_"+options.fres+"  | grep jetmass | grep -v ttbar | grep _B > list_temp.txt");
- elif not options.fitjetmass and options.ttbarcontrolregion and options.onlybackgroundfit:
-  os.system("ls "+nameInputDirectory+" | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep ttbar | grep _B > list_temp.txt");
- elif not options.fitjetmass and not options.ttbarcontrolregion and options.onlybackgroundfit :
-  os.system("ls "+nameInputDirectory+" | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep -v ttbar | grep _B > list_temp.txt");
- elif not options.fitjetmass and options.ttbarcontrolregion and not options.onlybackgroundfit:
-  os.system("ls "+nameInputDirectory+" | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep ttbar | grep _SB > list_temp.txt");
- elif not options.fitjetmass and not options.ttbarcontrolregion and not options.onlybackgroundfit :
-  os.system("ls "+nameInputDirectory+" | grep root | grep "+options.fgen+"_"+options.fres+"  | grep -v jetmass | grep -v ttbar | grep _SB > list_temp.txt");
 
+
+ suffix = "";
+ if options.ttbarcontrolregion : suffix = suffix+"_ttbar";
+ if options.fitjetmass         : suffix = suffix+"_jetmass";
+ if options.turnOnAnalysis     : suffix = suffix+"_turnOn";
+ if options.scalesignalwidth !=1 : suffix = suffix+ ("_width_%0.1f")%(options.scalesignalwidth);
+ if options.injectSingalStrenght !=0 : suffix = suffix+"_SB";
+ else :suffix = suffix+"_B";
+ if options.onlybackgroundfit  : suffix = suffix+"_B";
+ else: suffix = suffix+"_SB";
+             
+  
+ os.system("ls "+nameInputDirectory+" | grep root | grep _"+options.fgen+"_"+options.fres+"_  | grep "+suffix+" > list_temp.txt");
+ print "ls "+nameInputDirectory+" | grep root | grep _"+options.fgen+"_"+options.fres+"_  | grep "+suffix+" > list_temp.txt"
  vector_root_file = [];
 
  os.system("mkdir -p "+options.outputDir);
@@ -136,13 +135,22 @@ if __name__ == "__main__":
    if masspoint == -1 or ifilePos == -1 :
      continue;
 
-   histo_pull_WJets0_data = ROOT.TH1F("histo_pull_WJets0_data","histo_pull_WJets0_data",100,-5,5);
-   histo_residual_WJets0_data = ROOT.TH1F("histo_residual_WJets0_data","histo_residual_WJets0_data",100,-300,300);
-   histo_error_WJets0_data = ROOT.TH1F("histo_error_WJets0_data","histo_error_WJets0_data",100,-300,300);
+   if options.onlybackgroundfit == 1 and options.injectSingalStrenght == 0:
+      histo_pull_WJets0_data     = ROOT.TH1F("histo_pull_WJets0_data","histo_pull_WJets0_data",50,-0.2,0.2);   
+      histo_residual_WJets0_data = ROOT.TH1F("histo_residual_WJets0_data","histo_residual_WJets0_data",40,-20,20);
+      histo_error_WJets0_data    = ROOT.TH1F("histo_error_WJets0_data","histo_error_WJets0_data",40,-10,10);
+      histo_pull_signal  = ROOT.TH1F("histo_pull_signal","histo_pull_signal",50,-1,1);   
+      histo_residual_signal  = ROOT.TH1F("histo_residual_signal","histo_residual_signal",40,-20,20);
+      histo_error_signal  = ROOT.TH1F("histo_error_signal","histo_error_signal",40,-10,10);   
 
-   histo_pull_signal  = ROOT.TH1F("histo_pull_signal","histo_pull_signal",100,-5,5);   
-   histo_residual_signal  = ROOT.TH1F("histo_residual_signal","histo_residual_signal",100,-300,300);
-   histo_error_signal  = ROOT.TH1F("histo_error_signal","histo_error_signal",100,-300,300);   
+   else:
+      histo_pull_WJets0_data     = ROOT.TH1F("histo_pull_WJets0_data","histo_pull_WJets0_data",100,-5,5);   
+      histo_residual_WJets0_data = ROOT.TH1F("histo_residual_WJets0_data","histo_residual_WJets0_data",100,-300,300);
+      histo_error_WJets0_data    = ROOT.TH1F("histo_error_WJets0_data","histo_error_WJets0_data",100,-300,300);
+      histo_pull_signal  = ROOT.TH1F("histo_pull_signal","histo_pull_signal",100,-5,5);   
+      histo_residual_signal  = ROOT.TH1F("histo_residual_signal","histo_residual_signal",100,-300,300);
+      histo_error_signal  = ROOT.TH1F("histo_error_signal","histo_error_signal",100,-300,300);   
+    
 
    name_pull = "rrv_number_WJets0%s_fit_%s%s_data_pull"%(options.mlvjregion,options.channel,spectrum);
    name_residual = "rrv_number_WJets0%s_fit_%s%s_data_residual"%(options.mlvjregion,options.channel,spectrum);
@@ -176,7 +184,7 @@ if __name__ == "__main__":
    gaussian_pull_signal = ROOT.TF1("gaussian_pull_signal","gaus",-5,5);
    histo_pull_signal.Fit("gaussian_pull_signal","QR");
 
-   canvas_pull_bkg_data.append(TCanvas("canvas_"+histo_pull_WJets0_data.GetName()+"_mH%d"%(mass[imass]),""));
+   canvas_pull_bkg_data.append(TCanvas("canvas_"+histo_pull_WJets0_data.GetName()+"_mH%d"%(mass[imass]),"",500,550));
    canvas_pull_bkg_data[len(canvas_pull_bkg_data)-1].cd();
    histo_pull_WJets0_data.Draw();
    gaussian_pull_WJets0_data.Draw("same");
@@ -185,7 +193,8 @@ if __name__ == "__main__":
 
 
    if not options.onlybackgroundfit:
-    canvas_pull_sig_data.append(TCanvas("canvas_"+histo_pull_signal.GetName()+"_mH%d"%(mass[imass]),""));
+
+    canvas_pull_sig_data.append(TCanvas("canvas_"+histo_pull_signal.GetName()+"_mH%d"%(mass[imass]),"",500,550));
     canvas_pull_sig_data[len(canvas_pull_sig_data)-1].cd();
     histo_pull_signal.Draw();
     gaussian_pull_signal.Draw("same");
@@ -194,8 +203,8 @@ if __name__ == "__main__":
 
 
 #mass-dependent graphs
-
-   if not options.fitjetmass:
+   
+   if not options.fitjetmass and options.onlybackgroundfit == 0:
 
     histogram_pull_vs_mass_nback.SetBinContent(imass+1,histo_pull_WJets0_data.GetMean());
     histogram_pull_vs_mass_nback.SetBinError(imass+1,histo_pull_WJets0_data.GetRMS());
@@ -205,15 +214,14 @@ if __name__ == "__main__":
     gaussian_pull_vs_mass_nback.SetBinError(imass+1,gaussian_pull_WJets0_data.GetParameter(2));
     gaussian_pull_vs_mass_nback.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
    
-    if not options.onlybackgroundfit:
 
-     histogram_pull_vs_mass_nsig.SetBinContent(imass+1,histo_pull_signal.GetMean());
-     histogram_pull_vs_mass_nsig.SetBinError(imass+1,histo_pull_signal.GetRMS());
-     histogram_pull_vs_mass_nsig.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
+    histogram_pull_vs_mass_nsig.SetBinContent(imass+1,histo_pull_signal.GetMean());
+    histogram_pull_vs_mass_nsig.SetBinError(imass+1,histo_pull_signal.GetRMS());
+    histogram_pull_vs_mass_nsig.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
 
-     gaussian_pull_vs_mass_nsig.SetBinContent(imass+1,gaussian_pull_signal.GetParameter(1));
-     gaussian_pull_vs_mass_nsig.SetBinError(imass+1,gaussian_pull_signal.GetParameter(2));
-     gaussian_pull_vs_mass_nsig.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
+    gaussian_pull_vs_mass_nsig.SetBinContent(imass+1,gaussian_pull_signal.GetParameter(1));
+    gaussian_pull_vs_mass_nsig.SetBinError(imass+1,gaussian_pull_signal.GetParameter(2));
+    gaussian_pull_vs_mass_nsig.GetXaxis().SetBinLabel(imass+1,"%d"%(masspoint));
 
 
     graph_1.SetPoint(imass+1,imass,0);
@@ -222,7 +230,7 @@ if __name__ == "__main__":
     graph_2.SetPoint(imass+1,imass,0);
     graph_2.SetPointError(imass+1,0,1);
 
-  if not options.fitjetmass:
+  if not options.fitjetmass and options.onlybackgroundfit == 0:
 
    graph_1.SetPoint(len(mass)+1,len(mass),0);
    graph_1.SetPointError(len(mass)+1,0,0.2);
@@ -232,10 +240,9 @@ if __name__ == "__main__":
 
  ## make the output directory
 
- if not options.fitjetmass:
-   
-  setPlotStyle();
-           
+ setPlotStyle(); 
+ if not options.fitjetmass and  options.onlybackgroundfit == 0:
+              
   canvas_1 = ROOT.TCanvas("histo_bkg", "histo_bkg")
   histogram_pull_vs_mass_nback.GetXaxis().SetLabelSize(0.065);
   histogram_pull_vs_mass_nback.GetXaxis().SetTitleSize(0.055);
@@ -410,5 +417,4 @@ if __name__ == "__main__":
    canvas_4.SaveAs(options.outputDir+"/"+gaussian_pull_vs_mass_nsig.GetName()+"_"+options.fgen+"_"+options.fres+".pdf","pdf");
    canvas_4.SaveAs(options.outputDir+"/"+gaussian_pull_vs_mass_nsig.GetName()+"_"+options.fgen+"_"+options.fres+".root","root");
 
- os.system("rm list_temp.txt");
- 
+# os.system("rm list_temp.txt");
