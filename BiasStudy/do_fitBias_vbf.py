@@ -1601,8 +1601,6 @@ class doBiasStudy_mlvj:
 
       if options.fres == options.fgen :
        clone_Model(self.workspace4bias_,model_bkg_wjet,label,options.mlvjregion,spectrum,options.fgen,self.channel,0);
-      else:
-       clone_Model(self.workspace4bias_,model_bkg_wjet,label,options.mlvjregion,spectrum,options.res,self.channel,0);
           
       self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+"_fit_"+self.channel+spectrum).setVal(self.workspace4bias_.var("rrv_number"+label+options.mlvjregion+options.fgen+"_"+self.channel+spectrum).getVal());
 
