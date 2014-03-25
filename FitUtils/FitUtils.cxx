@@ -22,6 +22,10 @@ const std::string & channel,const std::string & wtagger_label,const int & additi
      rfresult = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2"));
      rfresult->Print();
 
+     workspace->import(*model_pdf);
+     workspace->import(*rfresult);
+
+
      //## Plot the result
      RooPlot* mplot = rrv_mass_j->frame(RooFit::Title((label+" fitted by "+model).c_str()), RooFit::Bins(int(rrv_mass_j->getBins())));
      rdataset_mj->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
@@ -39,39 +43,36 @@ const std::string & channel,const std::string & wtagger_label,const int & additi
      mplot->GetYaxis()->SetRangeUser(1e-5,mplot->GetMaximum()*1.2);
 
      //## CALCULATE CHI2
-      RooDataHist* datahist = rdataset_mj->binnedClone((std::string(rdataset_mj->GetName())+"_binnedClone").c_str(),(std::string(rdataset_mj->GetName())+"_binnedClone").c_str());
-      int Nbin = int(rrv_mass_j->getBins()); 
-      RooArgList rresult_param = rfresult->floatParsFinal();        
-      int nparameters =  rresult_param.getSize();                                         
-      RooAbsReal* ChiSquare = model_pdf->createChi2(*datahist,RooFit::Extended(kTRUE),RooFit::DataError(RooAbsData::Poisson));
-      float chi_over_ndf= ChiSquare->getVal()/(Nbin - nparameters);
+     RooDataHist* datahist = rdataset_mj->binnedClone((std::string(rdataset_mj->GetName())+"_binnedClone").c_str(),(std::string(rdataset_mj->GetName())+"_binnedClone").c_str());
+     int Nbin = int(rrv_mass_j->getBins()); 
+     RooArgList rresult_param = rfresult->floatParsFinal();        
+     int nparameters =  rresult_param.getSize();                                         
+     RooAbsReal* ChiSquare = model_pdf->createChi2(*datahist,RooFit::Extended(kTRUE),RooFit::DataError(RooAbsData::Poisson));
+     float chi_over_ndf= ChiSquare->getVal()/(Nbin - nparameters);
 
-      //## Add Chisquare to mplot_pull
-      TString Name ; Name.Form("#chi^{2}/ndf = %0.2f ",float(chi_over_ndf));
-      TLatex* cs = new TLatex(0.75,0.8,Name.Data());
-      cs->SetNDC();
-      cs->SetTextSize(0.12);
-      cs->AppendPad("same");
-      mplot_pull->addObject(cs);
+     //## Add Chisquare to mplot_pull
+     TString Name ; Name.Form("#chi^{2}/ndf = %0.2f ",float(chi_over_ndf));
+     TLatex* cs = new TLatex(0.75,0.8,Name.Data());
+     cs->SetNDC();
+     cs->SetTextSize(0.12);
+     cs->AppendPad("same");
+     mplot_pull->addObject(cs);
 
-      RooArgSet* parameters_list = model_pdf->getParameters(*rdataset_mj);
+     RooArgSet* parameters_list = model_pdf->getParameters(*rdataset_mj);
 
-      TString command; 
-      command.Form("mkdir -p plots_%s_%s_g1/mj_fitting/",channel.c_str(),wtagger_label.c_str());
-      system(command.Data());
+     TString command; 
+     command.Form("mkdir -p plots_%s_%s_g1/mj_fitting/",channel.c_str(),wtagger_label.c_str());
+     system(command.Data());
 
-      command.Form("plots_%s_%s_g1/mj_fitting/",channel.c_str(),wtagger_label.c_str());
-      draw_canvas_with_pull(mplot,mplot_pull,new RooArgList(*parameters_list),std::string(command.Data()),label+fileName,model,"em",0,1,GetLumi());
+     command.Form("plots_%s_%s_g1/mj_fitting/",channel.c_str(),wtagger_label.c_str());
+     draw_canvas_with_pull(mplot,mplot_pull,new RooArgList(*parameters_list),std::string(command.Data()),label+fileName,model,"em",0,1,GetLumi());
 
-      workspace->import(*model_pdf);
-      workspace->import(*rfresult);
+     std::cout<<"####################################################"<<std::endl;
+     std::cout<<"######## Normalization Factor in mJ ################"<<std::endl;
+     std::cout<<"####################################################"<<std::endl;
 
-      std::cout<<"####################################################"<<std::endl;
-      std::cout<<"######## Normalization Factor in mJ ################"<<std::endl;
-      std::cout<<"####################################################"<<std::endl;
-
-      //normalize the number of total events to lumi --> correct the number to scale to the lumi
-      if(additionalinformation == 1){
+     //normalize the number of total events to lumi --> correct the number to scale to the lumi
+     if(additionalinformation == 1){
          workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setVal(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getVal()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
          workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getError()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
 
@@ -326,7 +327,7 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
    std::cout<< "WW_EWK events: ",workspace->var(("rrv_number_WW_EWK_"+channel+"_mj").c_str())->getVal();
    std::cout<< "WJets  events: ",workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getVal();
    std::cout<< "Data   events: ",workspace->var(("rrv_number_data_"+channel+"_mj").c_str())->getVal();
-   }
+  }
 
   //## draw the plot for the default WJets Shape
   RooPlot* mplot = rrv_mass_j->frame(RooFit::Title("rrv_mass_j"), RooFit::Bins(int(rrv_mass_j->getBins())));
@@ -400,15 +401,15 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
 
     Name.Form("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
 
-    model_data->plotOn(mplot,RooFit::Name("WW_EWK"),RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"]), RooFit::LineColor(kBlack),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+    model_data->plotOn(mplot,RooFit::Name("WW_EWK"),RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WW_EWK"]), RooFit::LineColor(kBlack),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
    
     Name.Form("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
 
-    model_data->plotOn(mplot,RooFit::Name("VV"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WW_EWK"]), RooFit::LineColor(kBlack),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+    model_data->plotOn(mplot,RooFit::Name("VV"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["VV"]), RooFit::LineColor(kBlack),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
     Name.Form("model%s_%s_mj,model_TTbar_%s_mj,model_STop_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str());
 
-    model_data->plotOn(mplot,RooFit::Name("TTbar"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["VV"]), RooFit::LineColor(kBlack),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+    model_data->plotOn(mplot,RooFit::Name("TTbar"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"]), RooFit::LineColor(kBlack),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
     Name.Form("model%s_%s_mj,model_STop_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str());
 
@@ -421,17 +422,17 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
     // plot "dashed" style area
     Name.Form("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
 
-    model_data->plotOn(mplot,RooFit::Name("WW_EWK_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+    model_data->plotOn(mplot,RooFit::Name("WW_EWK_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WW_EWK"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
     //plot "dashed" style area
     Name.Form("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
 
-    model_data->plotOn(mplot,RooFit::Name("VV_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WW_EWK"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+    model_data->plotOn(mplot,RooFit::Name("VV_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["VV"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
            
     //plot "dashed" style area
     Name.Form("model%s_%s_mj,model_TTbar_%s_mj,model_STop_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str());
 
-    model_data->plotOn(mplot,RooFit::Name("TTbar_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["VV"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+    model_data->plotOn(mplot,RooFit::Name("TTbar_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
     // plot "dashed" style area
     Name.Form("model%s_%s_mj,model_STop_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str());
@@ -444,23 +445,23 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
     model_data->plotOn(mplot,RooFit::Name("WJets_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WJets"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 	 
     /// solid line
-    Name.Form("model%s_%s_mj",(label+model).c_str(),channel.c_str());
-    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) ,RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
-
-    Name.Form("model%s_%s_mj,model_STop_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str());
-    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
-
-    Name.Form("model%s_%s_mj,model_TTbar_%s_mj,model_STop_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str());
+    Name.Form("model%s_%s_mj,model_TTbar_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str(),(label+model).c_str());
     model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
     Name.Form("model%s_%s_mj,model_TTbar_%s_mj,model_STop_%s_mj,model_VV_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
     model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
-    Name.Form("model%s_%s_mj,model_TTbar_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str(),(label+model).c_str());
+    Name.Form("model%s_%s_mj,model_TTbar_%s_mj,model_STop_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str());
     model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
-                                                                     
 
-  }
+    Name.Form("model%s_%s_mj,model_STop_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str());
+    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+
+
+    Name.Form("model%s_%s_mj",(label+model).c_str(),channel.c_str());
+    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) ,RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+
+  }                                                                  
         
   /// draw the error band using the sum of all the entries component MC + fit and the total error == Normalization for the fixed MC, shape + normalization for W+jets
   draw_error_band(rdataset_data_mj, model_data, rrv_number_data_mj,rfresult,mplot,color_palet["Uncertainty"],"F");
@@ -526,24 +527,8 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
     workspace->import(*rrv_number_TTbar_in_mj_signal_region_from_fitting);
     rrv_number_TTbar_in_mj_signal_region_from_fitting->Print();
 
-    RooRealVar* rrv_TTbar  = workspace->var(("rrv_number+"+label+"_in_mj_signal_region_from_fitting_"+channel).c_str()); //nominal parametrization for Wjets                        
+    RooRealVar* rrv_TTbar  = workspace->var(("rrv_number"+label+"_in_mj_signal_region_from_fitting_"+channel).c_str()); //nominal parametrization for Wjets                        
     rrv_TTbar->Print();
-
-    RooRealVar* rrv_STop    = workspace->var(("rrv_number_dataset_signal_region_STop_"+channel+"_mj").c_str());
-    rrv_STop->Print();
-
-    RooRealVar* rrv_WJets0   = workspace->var(("rrv_number_dataset_signal_region_WJtes0_"+channel+"_mj").c_str());
-    rrv_WJets0->Print();
-
-    RooRealVar* rrv_TTbar0   = workspace->var(("rrv_number_dataset_signal_region_TTbar_+"+channel+"_mj").c_str());
-    rrv_TTbar0->Print();
-
-    RooRealVar* rrv_VV      = workspace->var(("rrv_number_dataset_signal_region_VV_"+channel+"_mj").c_str());
-    rrv_VV->Print();
-
-    RooRealVar* rrv_WW_EWK  = workspace->var(("rrv_number_dataset_signal_region_WW_EWK_"+channel+"_mj").c_str());
-    rrv_WW_EWK->Print();
-
   }
   else{
          RooAbsReal* fullInt   = model_WJets->createIntegral(RooArgSet(*rrv_mass_j),RooFit::NormSet(RooArgSet(*rrv_mass_j)));
@@ -559,26 +544,9 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
          workspace->import(*rrv_number_WJets_in_mj_signal_region_from_fitting);
          rrv_number_WJets_in_mj_signal_region_from_fitting->Print();
 
-         RooRealVar* rrv_WJets0  = workspace->var(("rrv_number+"+label+"_in_mj_signal_region_from_fitting_"+channel).c_str()); //nominal parametrization for Wjets                        
+         RooRealVar* rrv_WJets0  = workspace->var(("rrv_number"+label+"_in_mj_signal_region_from_fitting_"+channel).c_str()); //nominal parametrization for Wjets                        
          rrv_WJets0->Print();
-
-         RooRealVar* rrv_STop    = workspace->var(("rrv_number_dataset_signal_region_STop_"+channel+"_mj").c_str());
-         rrv_STop->Print();
-
-         RooRealVar* rrv_TTbar   = workspace->var(("rrv_number_dataset_signal_region_TTbar_"+channel+"_mj").c_str());
-         rrv_TTbar->Print();
-
-         RooRealVar* rrv_WJets   = workspace->var(("rrv_number_dataset_signal_region_WJets0_+"+channel+"_mj").c_str());
-         rrv_WJets->Print();
-
-         RooRealVar* rrv_VV      = workspace->var(("rrv_number_dataset_signal_region_VV_"+channel+"_mj").c_str());
-         rrv_VV->Print();
-
-         RooRealVar* rrv_WW_EWK  = workspace->var(("rrv_number_dataset_signal_region_WW_EWK_"+channel+"_mj").c_str());
-         rrv_WW_EWK->Print();
-
    }
-
 
 }
 
