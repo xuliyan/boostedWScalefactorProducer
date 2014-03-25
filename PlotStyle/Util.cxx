@@ -572,7 +572,7 @@ void draw_error_band_Decor( std::string pdf_name, std::string xaxis_name,  RooAr
 
 /// Just the shape and don't touch the normalization 
 
-void draw_error_band_shape_Decor( std::string pdf_name, std::string xaxis_name,  RooArgList* paras,  RooWorkspace* ws, double & sigma , RooPlot *mplot, const int & kcolor,const std::string & opt, const int & fillstyle, const std::string & uncertainty_title, const int & number_point, const int & number_errorband){
+void draw_error_band_shape_Decor( std::string pdf_name, std::string xaxis_name,  RooArgList* paras,  RooWorkspace* ws, double sigma , RooPlot *mplot, const int & kcolor,const std::string & opt, const int & fillstyle, const std::string & uncertainty_title, const int & number_point, const int & number_errorband){
 
  TRandom3 rand(1234);
  rand.SetSeed(0); 
