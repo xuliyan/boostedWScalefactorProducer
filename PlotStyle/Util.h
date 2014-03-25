@@ -60,7 +60,7 @@ void draw_error_band_Decor( std::string, std::string, RooArgList *,  RooWorkspac
                             const int & = 6, const std::string & = "F", const int & = 100, const int & = 2000);
 
 
-void draw_error_band_shape_Decor(std::string, std::string,  RooArgList *,  RooWorkspace *, double &, RooPlot *, 
+void draw_error_band_shape_Decor(std::string, std::string,  RooArgList *,  RooWorkspace *, double , RooPlot *, 
                                  const int & = 6, const std::string & = "F", const int & = 3013, const std::string & = "", const int & = 100, const int & = 2000);
 
 double Calc_error_extendPdf(RooAbsData*,RooExtendPdf*,RooFitResult*,const std::string & = "",const int & = 2000);
