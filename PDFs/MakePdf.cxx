@@ -357,6 +357,8 @@ void clone_Model(RooWorkspace* workspace, RooAbsPdf* inputPdf, const std::string
            param->setVal(param2->getVal());
            param->setError(param2->getError());
            if(fixParam) param->setConstant(kTRUE);
+           if(TString(label.c_str()).Contains("WJets") and TString(model.c_str()).Contains("Erf") and spectrum == "_mj" and TString(param->GetName()).Contains("width"))
+	     param->setConstant(kTRUE);
            param->Print(); param2->Print();
            param  = dynamic_cast<RooRealVar*>(par.Next());
            param2 = dynamic_cast<RooRealVar*>(par2.Next());
@@ -367,11 +369,12 @@ void clone_Model(RooWorkspace* workspace, RooAbsPdf* inputPdf, const std::string
   else if(parameters->getSize() > parameters2->getSize()){
     while(param2){
       if(not TString(param->GetName()).Contains("number")){
-             param->Print(); param2->Print();
-             param->Print(); param2->Print();
              param->setVal(param2->getVal());
              param->setError(param2->getError());
+             param->Print(); param2->Print();
              if(fixParam) param->setConstant(kTRUE);
+             if(TString(label.c_str()).Contains("WJets") and TString(model.c_str()).Contains("Erf") and spectrum == "_mj" and TString(param->GetName()).Contains("width"))
+	      param->setConstant(kTRUE);
              param  = dynamic_cast<RooRealVar*>(par.Next());
              param2 = dynamic_cast<RooRealVar*>(par2.Next());
       }
@@ -380,10 +383,12 @@ void clone_Model(RooWorkspace* workspace, RooAbsPdf* inputPdf, const std::string
   }
   else{
          while (param){
-            param->Print(); param2->Print(); 
             param->setVal(param2->getVal());
             param->setError(param2->getError());
+            param->Print(); param2->Print(); 
             if(fixParam) param->setConstant(kTRUE);
+            if(TString(label.c_str()).Contains("WJets") and TString(model.c_str()).Contains("Erf") and spectrum == "_mj" and TString(param->GetName()).Contains("width"))
+	     param->setConstant(kTRUE);
             param  = dynamic_cast<RooRealVar*>(par.Next());
             param2 = dynamic_cast<RooRealVar*>(par2.Next());
          }
