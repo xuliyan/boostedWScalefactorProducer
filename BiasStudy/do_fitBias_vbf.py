@@ -772,14 +772,14 @@ class doBiasStudy_mlvj:
               self.workspace4bias_.writeToFile(tmp_file.GetName());
 
       ##### get data in sb and fit it                                                                                                                                              
-      self.get_mj_and_mlvj_dataset(self.file_data,"_data", "jet_mass_pr"); ## global fit of data in the sidand fixing non dominant bkg             
+      self.get_mj_and_mlvj_dataset(self.file_data,"_data", "jet_mass_pr"); ## global fit of data in the sidand fixing non dominant bkg
       if fitjetmass :
          fit_WJetsNormalization_in_Mj_signal_region(self.workspace4bias_,self.color_palet,label,options.fgen,self.channel,self.wtagger_label,options.ttbarcontrolregion,options.pseudodata,self.mj_signal_min,self.mj_signal_max); ## fit jet mass distribution
          self.workspace4bias_.writeToFile(tmp_file.GetName());
       else:      
-         fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,label,options.mlvjregion,options.fgen,self.channel.self.wtagger_label,options.fgen,options.ttbarcontrolregion,1,options.pseudodata); ## sideband or TTbar signal region fit
+         fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,label,options.mlvjregion,options.fgen,self.channel,self.wtagger_label,options.fgen,options.ttbarcontrolregion,1,options.pseudodata); ## sideband or TTbar signal region fit
          self.workspace4bias_.writeToFile(tmp_file.GetName());
-         fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,label,options.mlvjregion,options.fres,self.channel.self.wtagger_label,options.fgen,options.ttbarcontrolregion,1,options.pseudodata); ## sideband or TTbar signal region fit
+         fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,label,options.mlvjregion,options.fres,self.channel,self.wtagger_label,options.fgen,options.ttbarcontrolregion,1,options.pseudodata); ## sideband or TTbar signal region fit
          self.workspace4bias_.writeToFile(tmp_file.GetName());
   
      ##### fix signal and bkg models that are going to be used in the generation
@@ -791,7 +791,8 @@ class doBiasStudy_mlvj:
          spectrum = "_mlvj" ;
          signal_region = "_signal_region";
          signal_model  = "CB_v1";
-    
+
+     
      ###### fix the backgrund models for the generation
      print "#############################################################################################";
      print "################ Begin of the toy analysis -> fix Pdf to what is pre-fitted #################";
@@ -811,7 +812,8 @@ class doBiasStudy_mlvj:
       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fgen,self.channel);
       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fres,self.channel);
       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fres,self.channel);
+      if options.fgen != options.fres : 
+       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fres,self.channel);
 
      elif options.isMC == 0  and options.ttbarcontrolregion == 1 and not options.fitjetmass:
 
@@ -824,7 +826,8 @@ class doBiasStudy_mlvj:
       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fgen,self.channel);
       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fres,self.channel);
       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fres,self.channel);
+      if options.fgen != options.fres : 
+       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fres,self.channel);
 
      elif options.fitjetmass and not options.ttbarcontrolregion:
 
@@ -832,7 +835,9 @@ class doBiasStudy_mlvj:
       fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,"",self.channel);
       fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,"",self.channel);
       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,"",self.channel);
-      fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,"",self.channel);
+      fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fgen,self.channel);
+      if options.fgen != options.fres : 
+       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fres,self.channel);
 
      elif options.fitjetmass and options.ttbarcontrolregion:
 
@@ -840,7 +845,9 @@ class doBiasStudy_mlvj:
       fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,"",self.channel);
       fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,"",self.channel);
       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,"",self.channel);
-      fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,"",self.channel);
+      fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fgen,self.channel);
+      if options.fgen != options.fres : 
+       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fres,self.channel);
       
      print "#########################################################";
      print "################ Build the signal model #################";
@@ -969,6 +976,7 @@ class doBiasStudy_mlvj:
       print "###########################################################";
       print "################ Call the toy class tool ##################";
       print "###########################################################";
+      os.system("rm tmp.root");      
       self.outputFile.cd();
       mcWjetTreeResult = biasModelAnalysis(RooArgSet(self.workspace4bias_.var("rrv_mass_lvj")),
                                            generation_model_wjet,
@@ -982,9 +990,9 @@ class doBiasStudy_mlvj:
       mcWjetTreeResult.setBackgroundPdfCore(model_bkg_wjet);
       mcWjetTreeResult.setSignalInjection(model_total_signal,(rrv_number_signal_signal_fit_ggH.getVal()+rrv_number_signal_signal_fit_vbfH.getVal())*options.injectSingalStrenght,options.scalesignalwidth);
       mcWjetTreeResult.generateAndFitToys(int(numevents_mc));
-      self.outputFile.cd();
       mcWjetTreeResult.createBranches(options.fgen,options.fres,options.ttbarcontrolregion);
       mcWjetTreeResult.fillBranches(options.ttbarcontrolregion,options.fitjetmass,self.workspace4bias_);
+      self.outputTree.Write();
 
       ratePlotsToStore = 0 ;
       if options.nexp <= 10 :
@@ -999,9 +1007,7 @@ class doBiasStudy_mlvj:
       if(options.storeplot):
           mcWjetTreeResult.saveToysPlots(int(ratePlotsToStore),options.fitjetmass); 
 
-      self.outputTree.Write();
       self.outputFile.Close();
-      os.system("rm tmp.root");      
 
      else: 
          
@@ -1041,7 +1047,7 @@ class doBiasStudy_mlvj:
        else:
 
         model_TTbar_backgrounds  = get_TTbar_mj_Model(self.workspace4bias_,"_TTbar","",self.channel);           
-        model_WJets_backgrounds  = get_WJets_mj_Model(self.workspace4bias_,label,options.fgen,"",self.channel);
+        model_WJets_backgrounds  = get_WJets_mj_Model(self.workspace4bias_,label,options.fgen,self.channel);
 
         self.workspace4bias_.var("rrv_number_TTbar_%s_mj"%(self.channel)).setVal(self.workspace4bias_.var("rrv_number_TTbar_%s_mj"%(self.channel)).getVal()*options.inflatejobstatistic)
         self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).getVal()*options.inflatejobstatistic)
@@ -1088,8 +1094,8 @@ class doBiasStudy_mlvj:
        model_bkg_data.Print();
 
        if options.fgen == options.fres:
-        clone_Model(self.workspace4bias_,model_bkg_data,options.mlvjregion,spectrum,options.gen,self.channel,0);
-       
+        clone_Model(self.workspace4bias_,model_bkg_data,label,options.mlvjregion,spectrum,options.fgen,self.channel,0);
+              
        getattr(self.workspace4bias_,"import")(model_bkg_data);
     
        self.workspace4bias_.var("rrv_number"+label+signal_region+"_fit_"+self.channel+spectrum).setVal(self.workspace4bias_.var("rrv_number"+label+signal_region+options.fgen+"_"+self.channel+spectrum).getVal());
@@ -1189,7 +1195,7 @@ class doBiasStudy_mlvj:
       self.outputTree.Write();
       self.outputFile.Close();
       os.system("rm tmp.root");      
-
+   
 #### Main code     
 if __name__ == "__main__":
 
