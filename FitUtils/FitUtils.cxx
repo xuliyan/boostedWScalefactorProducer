@@ -335,6 +335,7 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
   //## plot solid style
   if (ttbarcontrolregion){
 
+    // plot solid style 
     Name.Form("model%s_%s_mj,model_STop_%s_mj,model_WJets0_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
 
     model_data->plotOn(mplot,RooFit::Name("TTbar"),RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["_TTbar"]), RooFit::LineColor(kBlack),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
@@ -360,22 +361,18 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
 
     model_data->plotOn(mplot,RooFit::Name("TTbar_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
-    //plot "dashed" style area
     Name.Form("model_STop_%s_mj,model_WJets0_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
 
     model_data->plotOn(mplot,RooFit::Name("WW_EWK_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WW_EWK"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
            
-    //plot "dashed" style area
     Name.Form("model_WJets0_%s_mj,model_VV_%s_mj,model_STop_%s_mj",channel.c_str(),channel.c_str(),channel.c_str());
 
     model_data->plotOn(mplot,RooFit::Name("VV_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["VV"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
-    // plot "dashed" style area
     Name.Form("model_WJets0_%s_mj,model_STop_%s_mj",channel.c_str(),channel.c_str());
 
     model_data->plotOn(mplot,RooFit::Name("STop_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["STop"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 	 
-    //plot "dashed" style area
     Name.Form("model_WJets0_%s_mj",channel.c_str());
 
     model_data->plotOn(mplot,RooFit::Name("WJets_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WJets"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
@@ -384,6 +381,7 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
     Name.Form("model_WJets0_%s_mj",channel.c_str());
     model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) ,RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
+          
     Name.Form("model_WJets0_%s_mj,model_STop_%s_mj",channel.c_str(),channel.c_str());
     model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
@@ -395,6 +393,24 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
 
     Name.Form("model_WJets0_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj,model%s_%s_mj",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str(),(label+model).c_str(),channel.c_str());
     model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+
+    // dash line
+    Name.Form("model_WJets0_%s_mj",channel.c_str());
+    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) , RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()), RooFit::LineStyle(kDashed), RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+
+    Name.Form("model_WJets0_%s_mj,model_STop_%s_mj",channel.c_str(),channel.c_str());
+    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) , RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()), RooFit::LineStyle(kDashed), RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+
+    Name.Form("model_WJets0_%s_mj,model_STop_%s_mj,model_VV_%s_mj",channel.c_str(),channel.c_str(),channel.c_str());
+    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) , RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()), RooFit::LineStyle(kDashed), RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+
+    Name.Form("model_WJets0_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
+    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) , RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()), RooFit::LineStyle(kDashed), RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+
+    Name.Form("model_WJets0_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj,model%s_%s_mj",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str(),(label+model).c_str(),channel.c_str());
+    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) , RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()), RooFit::LineStyle(kDashed), RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+
+
   }
 
   else{
@@ -424,42 +440,56 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
 
     model_data->plotOn(mplot,RooFit::Name("WW_EWK_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WW_EWK"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
-    //plot "dashed" style area
     Name.Form("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
 
     model_data->plotOn(mplot,RooFit::Name("VV_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["VV"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
            
-    //plot "dashed" style area
     Name.Form("model%s_%s_mj,model_TTbar_%s_mj,model_STop_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str());
 
     model_data->plotOn(mplot,RooFit::Name("TTbar_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
-    // plot "dashed" style area
     Name.Form("model%s_%s_mj,model_STop_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str());
 
-    model_data->plotOn(mplot,RooFit::Name("TTbar_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["STop"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+    model_data->plotOn(mplot,RooFit::Name("STop_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["STop"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 	 
-    //plot "dashed" style area
     Name.Form("model%s_%s_mj",(label+model).c_str(),channel.c_str());
 
     model_data->plotOn(mplot,RooFit::Name("WJets_invisible"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WJets"]), RooFit::LineColor(kBlack),RooFit::FillStyle(3003),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 	 
     /// solid line
-    Name.Form("model%s_%s_mj,model_TTbar_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str(),(label+model).c_str());
-    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+    Name.Form("model%s_%s_mj",(label+model).c_str(),channel.c_str());
+    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) ,RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
-    Name.Form("model%s_%s_mj,model_TTbar_%s_mj,model_STop_%s_mj,model_VV_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
+    Name.Form("model%s_%s_mj,model_STop_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str());
     model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
     Name.Form("model%s_%s_mj,model_TTbar_%s_mj,model_STop_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str());
     model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
-    Name.Form("model%s_%s_mj,model_STop_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str());
+
+    Name.Form("model%s_%s_mj,model_TTbar_%s_mj,model_STop_%s_mj,model_VV_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
     model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
 
+    Name.Form("model%s_%s_mj,model_TTbar_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str(),(label+model).c_str());
+    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+
+    // dash line
     Name.Form("model%s_%s_mj",(label+model).c_str(),channel.c_str());
-    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) ,RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) , RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()), RooFit::LineStyle(kDashed), RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+
+    Name.Form("model%s_%s_mj,model_STop_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str());
+    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) , RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()), RooFit::LineStyle(kDashed), RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+
+    Name.Form("model%s_%s_mj,model_STop_%s_mj,model_VV_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str());
+    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) , RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()), RooFit::LineStyle(kDashed), RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+
+    Name.Form("model%s_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
+    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) , RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()), RooFit::LineStyle(kDashed), RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+
+    Name.Form("model%s_%s_mj,model_STop_%s_mj,model_TTbar_%s_mj,model_VV_%s_mj,model_WW_EWK_%s_mj",(label+model).c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
+    model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2) , RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()), RooFit::LineStyle(kDashed), RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+
 
   }                                                                  
         
@@ -507,7 +537,7 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
 
   command.Form("plots_%s_%s_g1/mj_fitting_%s/",channel.c_str(),wtagger.c_str(),model.c_str()); 
 
-  Name.Form("m_j_sideband%s",label.c_str());
+  Name.Form("m_j_sideband%s",(label+model).c_str());
   draw_canvas_with_pull(mplot,mplot_pull,new RooArgList(*parameters_list),std::string(command.Data()),std::string(Name.Data()),model,"em",0,1,GetLumi());
 
                 
