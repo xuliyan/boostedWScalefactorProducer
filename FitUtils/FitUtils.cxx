@@ -586,24 +586,24 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
   std::cout<<"############### Fit mlvj in mj sideband: "<<label<<" "<<mlvj_region<<" "<<mlvj_model<<" ##################"<<std::endl;
 
   RooRealVar* rrv_mass_lvj = workspace->var("rrv_mass_lvj");
-  RooDataSet* rdataset_data_mlvj = (RooDataSet*) workspace->data(("rdataset_data+"+mlvj_region+"_"+channel+"_mlvj").c_str());
+  RooDataSet* rdataset_data_mlvj = (RooDataSet*) workspace->data(("rdataset_data"+mlvj_region+"_"+channel+"_mlvj").c_str());
 
   // get and fix the minor component shapes in the sb low                                                                                                                            
-  RooAbsPdf* model_VV_backgrounds     = get_VV_mlvj_Model(workspace,"_VV",mlvj_region,fgen,channel);
-  RooAbsPdf* model_STop_backgrounds   = get_STop_mlvj_Model(workspace,"_STop",mlvj_region,fgen,channel);
-  RooAbsPdf* model_WW_EWK_backgrounds = get_WW_EWK_mlvj_Model(workspace,"_WW_EWK",mlvj_region,fgen,channel);
+  RooAbsPdf* model_VV_backgrounds     = dynamic_cast<RooAbsPdf*>(get_VV_mlvj_Model(workspace,"_VV",mlvj_region,fgen,channel));
+  RooAbsPdf* model_STop_backgrounds   = dynamic_cast<RooAbsPdf*>(get_STop_mlvj_Model(workspace,"_STop",mlvj_region,fgen,channel));
+  RooAbsPdf* model_WW_EWK_backgrounds = dynamic_cast<RooAbsPdf*>(get_WW_EWK_mlvj_Model(workspace,"_WW_EWK",mlvj_region,fgen,channel));
 
   RooAbsPdf* model_TTbar_backgrounds = NULL ; 
   RooAbsPdf* model_WJets_backgrounds = NULL ; 
 
   if(ttbarcontrolregion == 0)
-     model_TTbar_backgrounds  = get_TTbar_mlvj_Model(workspace,"_TTbar",mlvj_region,fgen,channel);
+    model_TTbar_backgrounds  = dynamic_cast<RooAbsPdf*>(get_TTbar_mlvj_Model(workspace,"_TTbar",mlvj_region,fgen,channel));
   else
-     model_WJets_backgrounds  = get_WJets_mlvj_Model(workspace,"_WJets0",mlvj_region,fgen,channel);
+    model_WJets_backgrounds  = dynamic_cast<RooAbsPdf*>(get_WJets_mlvj_Model(workspace,"_WJets0",mlvj_region,fgen,channel));
 
   workspace->var(("rrv_number_TTbar"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->Print();
   workspace->var(("rrv_number_WJets0"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->Print();
-  workspace->var(("rrv_number_STop"+mlvj_region+fgen,+"_"+channel+"_mlvj").c_str())->Print();
+  workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->Print();
   workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->Print();
   workspace->var(("rrv_number_WW_EWK"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->Print();
 
@@ -615,23 +615,26 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
   RooExtendPdf* model_TTbar = NULL ;
   RooAddPdf*    model_data  = NULL ;
 
+  RooAbsPdf*  model_pdf_WJets = NULL ; 
+  RooAbsPdf*  model_pdf_TTbar = NULL ; 
+
   if(ttbarcontrolregion == 0){
 
-    RooAbsPdf* model_pdf_WJets = MakeGeneralPdf(workspace,label+mlvj_region+mlvj_model+std::string("_from_fitting"),mlvj_model,"_mlvj",wtagger,channel,constraint);
+    model_pdf_WJets = MakeGeneralPdf(workspace,label+mlvj_region+mlvj_model+std::string("_from_fitting"),mlvj_model,"_mlvj",wtagger,channel,constraint);
     model_pdf_WJets->Print();
     //inititalize the value to what was fitted with the mc in the sideband                                                                                                          
     number_WJets_sb_lo = dynamic_cast<RooRealVar*>( workspace->var(("rrv_number"+label+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->clone(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str()));
 
     model_WJets = new RooExtendPdf(("model"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str(),("model"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str(),*model_pdf_WJets,*number_WJets_sb_lo);
-    number_WJets_sb_lo->Print();
-
 
     // Add the other bkg component fixed to the total model --> in the extended way
     model_data = new RooAddPdf(("model_data"+label+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),("model_data"+label+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),RooArgList(*model_WJets,*model_VV_backgrounds,*model_TTbar_backgrounds,*model_STop_backgrounds,*model_WW_EWK_backgrounds));
+    model_data->Print();
+    
   }
   else{
 
-         RooAbsPdf* model_pdf_TTbar = MakeGeneralPdf(workspace,label+mlvj_region+mlvj_model+"_from_fitting",mlvj_model,"_mlvj",wtagger,channel,constraint);
+         model_pdf_TTbar = MakeGeneralPdf(workspace,label+mlvj_region+mlvj_model+"_from_fitting",mlvj_model,"_mlvj",wtagger,channel,constraint);
          model_pdf_TTbar->Print();
          // inititalize the value to what was fitted with the mc in the sideband
          number_TTbar_signal_region = dynamic_cast<RooRealVar*>( workspace->var(("rrv_number"+label+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->clone(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str()));
@@ -643,24 +646,26 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
          model_data = new RooAddPdf(("model_data"+label+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),("model_data"+label+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),RooArgList(*model_TTbar,*model_VV_backgrounds,*model_WJets_backgrounds,*model_STop_backgrounds,*model_WW_EWK_backgrounds));
         
   }
- 
+  
   RooFitResult* rfresult = model_data->fitTo(*rdataset_data_mlvj, RooFit::Save(1) ,RooFit::Extended(kTRUE), RooFit::SumW2Error(kTRUE));
   rfresult = model_data->fitTo(*rdataset_data_mlvj, RooFit::Save(1) ,RooFit::Extended(kTRUE), RooFit::SumW2Error(kTRUE), RooFit::Minimizer("Minuit2"));
   rfresult->Print();
   rfresult->covarianceMatrix().Print();
   workspace->import(*model_data);
+
+  RooRealVar* rrv_number_data_sb_lo_mlvj  = NULL ;
   
   if(ttbarcontrolregion == 0){
     model_WJets->getParameters(*rdataset_data_mlvj)->Print("v");
 
     // data in the sideband plus error from fit        
-    RooRealVar* rrv_number_data_sb_lo_mlvj = new RooRealVar(("rrv_number_data_"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
-                                                            ("rrv_number_data_"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
-                                                            workspace->var(("rrv_number_TTbar"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                            workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                            workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                            workspace->var(("rrv_number_WW_EWK"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                            workspace->var(("rrv_number_WJets0"+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getVal() );
+    rrv_number_data_sb_lo_mlvj = new RooRealVar(("rrv_number_data"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
+                                                ("rrv_number_data"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
+                                                workspace->var(("rrv_number_TTbar"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_WW_EWK"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_WJets0"+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getVal() );
 
     rrv_number_data_sb_lo_mlvj->setError(TMath::Sqrt(workspace->var(("rrv_number_WJets0"+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getError()*
                                                     workspace->var(("rrv_number_WJets0"+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getError()+
@@ -682,13 +687,13 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
     model_TTbar->getParameters(*rdataset_data_mlvj)->Print("v");
 
     // data in the sideband plus error from fit        
-    RooRealVar* rrv_number_data_sb_lo_mlvj = new RooRealVar(("rrv_number_data_"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
-                                                            ("rrv_number_data_"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
-                                                            workspace->var(("rrv_number_TTbar"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                            workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                            workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                            workspace->var(("rrv_number_WW_EWK"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                            workspace->var(("rrv_number_WJets0"+mlvj_region+fgen+"_from_fitting_"+channel+"_mlvj").c_str())->getVal() );
+    rrv_number_data_sb_lo_mlvj = new RooRealVar(("rrv_number_data"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
+                                                ("rrv_number_data"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
+                                                workspace->var(("rrv_number_TTbar"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_WW_EWK"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_WJets0"+mlvj_region+fgen+"_from_fitting_"+channel+"_mlvj").c_str())->getVal() );
 
     rrv_number_data_sb_lo_mlvj->setError(TMath::Sqrt(workspace->var(("rrv_number_WJets0"+mlvj_region+fgen+"_from_fitting_"+channel+"_mlvj").c_str())->getError()*
                                                      workspace->var(("rrv_number_WJets0"+mlvj_region+fgen+"_from_fitting_"+channel+"_mlvj").c_str())->getError()+
@@ -765,15 +770,15 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
 
             model_data->plotOn(mplot,RooFit::Components((std::string(model_STop_backgrounds->GetName())).c_str()), RooFit::Name("STop_line_invisible"), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
 
-      }
+  }
 
    //draw the error band
-   draw_error_band(rdataset_data_mlvj, model_data,workspace->var(("rrv_number_data_"+mlvj_region+mlvj_region+"_"+channel+"_mlvj").c_str()),rfresult,mplot,color_palet["Uncertainty"],"F");
    model_data->plotOn( mplot , RooFit::VLines(), RooFit::Invisible());
    model_data->plotOn( mplot , RooFit::Invisible(), RooFit::Name("model_mc"));
-
    if(pseudodata == 1) rdataset_data_mlvj->plotOn( mplot , RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0), RooFit::Name("data"));     
    else GetDataPoissonInterval(rdataset_data_mlvj,rrv_mass_lvj,mplot);
+
+   draw_error_band_extendPdf(rdataset_data_mlvj,model_data,rfresult,mplot,color_palet["Uncertainty"],"F");
 
    mplot->GetYaxis()->SetRangeUser(1e-2,mplot->GetMaximum()*1.2);
             
@@ -813,7 +818,6 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
      file_out_FTest.write(" Chi2 Chi2var %0.2f "%(chi_over_ndf));
      file_out_FTest.write(" Residual %0.2f   Nbin %0.2f nparameters %0.2f \n"%(residual,Nbin,nparameters));
    */
-
    //Add Chisquare to mplot_pull                                                                                                                                             
    TString Name ; Name.Form("#chi^{2}/ndf = %0.2f ",chi_over_ndf);
    TLatex* cs2 = new TLatex(0.75,0.8,Name.Data());
@@ -829,7 +833,7 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
 
    Name.Form("m_lvj_sb_lo%s_%s",label.c_str(),mlvj_model.c_str());
    draw_canvas_with_pull(mplot,mplot_pull,new RooArgList(*parameters_list),std::string(command.Data()),std::string(Name.Data()),mlvj_model,"em",0,logy,GetLumi());
-
+  
 }  
 
 
