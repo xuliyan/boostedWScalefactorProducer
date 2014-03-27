@@ -90,16 +90,28 @@ RooAbsPdf* get_General_mj_Model(RooWorkspace* workspace, const std::string & lab
   RooAbsPdf* model_General = get_mj_Model(workspace,label+model,channel);
   rdataset_General_mj->Print();
   model_General->Print();
+
+  RooArgSet* parameters_General = model_General->getParameters(*rdataset_General_mj);
+  TIter par = parameters_General->createIterator(); par.Reset();
+  RooRealVar* param = dynamic_cast<RooRealVar*>(par.Next());
+
   if(fix == 1){
-         RooArgSet* parameters_General = model_General->getParameters(*rdataset_General_mj);
-         TIter par = parameters_General->createIterator(); par.Reset();
-         RooRealVar* param = dynamic_cast<RooRealVar*>(par.Next());
          while(param){
            param->setConstant(kTRUE);
            param->Print();
            param = dynamic_cast<RooRealVar*>(par.Next());
         }
   }
+  else if(TString(label).Contains("WJets")){
+         while(param){
+           if(TString(param->GetName()).Contains("width")){
+           param->setConstant(kTRUE);
+           param->Print();
+	 }
+         param = dynamic_cast<RooRealVar*>(par.Next());
+        }
+  }
+
   return model_General;
 }
 
