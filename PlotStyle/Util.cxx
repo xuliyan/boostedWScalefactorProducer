@@ -517,7 +517,7 @@ void draw_error_band_Decor( std::string pdf_name, std::string xaxis_name,  RooAr
  TGraph* syst[number_errorband];
  for(int j=0;j<number_errorband;j++){
 	for(Int_t ipara=0;ipara<paras->getSize();ipara++){
-         ws->var(paras[ipara].GetName())->setVal( rand.Gaus(0.,1.) );
+	  ws->var(paras->at(ipara)->GetName())->setVal( rand.Gaus(0.,1.) );
 	}
 
   /// Change the scaling value
@@ -565,7 +565,7 @@ void draw_error_band_Decor( std::string pdf_name, std::string xaxis_name,  RooAr
   }
 
   for(Int_t ipara=0;ipara<paras->getSize();ipara++){
-    ws->var(paras[ipara].GetName())->setVal(0.);
+    ws->var(paras->at(ipara)->GetName())->setVal(0.);
   }
 
 } 
@@ -578,13 +578,13 @@ void draw_error_band_shape_Decor( std::string pdf_name, std::string xaxis_name, 
  rand.SetSeed(0); 
  std::cout<<" <<<<<<<<<<<<<<<< draw error band Decorrelated shape <<<<<<<<<<<<<<<< "<<std::endl;
  /// take the observable
- RooRealVar *rrv_x=ws->var(xaxis_name.c_str());
+ RooRealVar *rrv_x = ws->var(xaxis_name.c_str());
  rrv_x->Print();
- Double_t x_min=rrv_x->getMin();
- Double_t x_max=rrv_x->getMax();
- Double_t delta_x=(x_max-x_min)/number_point;
- Double_t width_x=mplot->getFitRangeBinW();
-
+ Double_t x_min = rrv_x->getMin();
+ Double_t x_max = rrv_x->getMax();
+ Double_t delta_x = (x_max-x_min)/number_point;
+ Double_t width_x = mplot->getFitRangeBinW();
+ 
  /// bkg prediction central value
  TGraph *bkgpred=new TGraph(number_point+1);
  for(int i =0 ; i<= number_point ; i++){
@@ -596,16 +596,17 @@ void draw_error_band_shape_Decor( std::string pdf_name, std::string xaxis_name, 
 
  // make the envelope
  TGraph* syst[number_errorband];
- for(int j=0;j<number_errorband;j++){
-	for(Int_t ipara=0;ipara<paras->getSize();ipara++){
-	  ws->var(paras[ipara].GetName())->setVal( rand.Gaus(0.,sigma) ); // choose how many sigma on the parameters you wamt
+ for(int j = 0; j < number_errorband;j++){
+	for(Int_t ipara = 0;ipara<paras->getSize();ipara++){
+	  ws->var(paras->at(ipara)->GetName())->setVal( rand.Gaus(0.,sigma) ); // choose how many sigma on the parameters you wamt
 	}
 	syst[j]=new TGraph(number_point+1);
-	for(int i =0 ; i<=number_point ; i++){
+	for(int i =0 ; i <= number_point ; i++){
 		rrv_x->setVal(x_min+delta_x*i); 
 		syst[j]->SetPoint( i , x_min+delta_x*i ,ws->pdf(pdf_name.c_str())->getVal(*rrv_x)*width_x);
 	}
  }
+
 
  std::vector<double> val;
  val.resize(number_errorband);
@@ -625,6 +626,7 @@ void draw_error_band_shape_Decor( std::string pdf_name, std::string xaxis_name, 
 	errorband->SetPoint(i, x_min+delta_x*i,bkgpred->GetY()[i] );
 	errorband->SetPointError(i, 0.,0., bkgpred->GetY()[i]-val[Int_t(0.84*number_errorband)],val[Int_t(0.16*number_errorband)]-bkgpred->GetY()[i]);
  }
+
  ap->SetLineWidth(2);
  ap->SetLineColor(kcolor);
  am->SetLineWidth(2);
@@ -635,8 +637,9 @@ void draw_error_band_shape_Decor( std::string pdf_name, std::string xaxis_name, 
 
  if( TString(opt).Contains("F") ){ mplot->addObject(errorband,"E3"); }
  if( TString(opt).Contains("L") ){ mplot->addObject(am); mplot->addObject(ap); }
+
  for(Int_t ipara=0;ipara<paras->getSize();ipara++)
-   ws->var(paras[ipara].GetName())->setVal(0.);
+   ws->var(paras->at(ipara)->GetName())->setVal(0.);
 
 } 
 
@@ -708,8 +711,8 @@ double Calc_error(std::string rpdfname, std::string xaxis_name ,  RooArgList* pa
  val.resize(calc_times);
  for(int j=0;j<calc_times;j++){
     for(Int_t ipara=0;ipara<paras->getSize();ipara++){
-      ws->var(paras[ipara].GetName())->setConstant(0);
-      ws->var(paras[ipara].GetName())->setVal( rand.Gaus(0.,ws->var(paras[ipara].GetName())->getError()) );
+      ws->var(paras->at(ipara)->GetName())->setConstant(0);
+      ws->var(paras->at(ipara)->GetName())->setVal( rand.Gaus(0.,ws->var(paras->at(ipara)->GetName())->getError()) );
      }
 
      fullInt_var=fullInt->getVal();
@@ -719,7 +722,7 @@ double Calc_error(std::string rpdfname, std::string xaxis_name ,  RooArgList* pa
      val[j]=signal_number_media;
  }
  
-for(Int_t ipara=0;ipara<paras->getSize();ipara++){ ws->var(paras[ipara].GetName())->setVal(0.); }
+for(Int_t ipara=0;ipara<paras->getSize();ipara++){ ws->var(paras->at(ipara)->GetName())->setVal(0.); }
 
 std::sort(val.begin(),val.end());
 double number_error=(val[Int_t(0.84*calc_times)]-val[Int_t(0.16*calc_times)])/2./signal_number_media;

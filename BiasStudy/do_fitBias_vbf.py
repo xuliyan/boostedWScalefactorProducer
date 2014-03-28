@@ -57,7 +57,7 @@ from ROOT import biasModelAnalysis, MakeGeneralPdf, MakeExtendedModel, get_TTbar
 
 from ROOT import setTDRStyle, get_pull, draw_canvas, draw_canvas_with_pull, legend4Plot, GetDataPoissonInterval, GetLumi
 
-from ROOT import fit_mj_single_MC, fit_mlvj_model_single_MC, fit_WJetsNormalization_in_Mj_signal_region, fit_mlvj_in_Mj_sideband
+from ROOT import fit_mj_single_MC, fit_mlvj_model_single_MC, fit_WJetsNormalization_in_Mj_signal_region, fit_mlvj_in_Mj_sideband, get_WJets_mlvj_correction_sb_lo_to_signal_region
 
 class doBiasStudy_mlvj:
 
@@ -76,13 +76,13 @@ class doBiasStudy_mlvj:
         self.wtagger_label = options.category;
 
         self.BinWidth_mj = 5.;
-        nbins_mj = int((in_mj_max-in_mj_min)/self.BinWidth_mj);
-        in_mj_max = in_mj_min+nbins_mj*self.BinWidth_mj;
+        nbins_mj         = int((in_mj_max-in_mj_min)/self.BinWidth_mj);
+        in_mj_max        = in_mj_min+nbins_mj*self.BinWidth_mj;
 
         self.BinWidth_mlvj = 50.;
-        self.in_mlvj_min = in_mlvj_min;
-        self.nbins_mlvj  = int((in_mlvj_max-in_mlvj_min)/self.BinWidth_mlvj);
-        self.in_mlvj_max = in_mlvj_min+self.nbins_mlvj*self.BinWidth_mlvj;
+        self.in_mlvj_min   = in_mlvj_min;
+        self.nbins_mlvj    = int((in_mlvj_max-in_mlvj_min)/self.BinWidth_mlvj);
+        self.in_mlvj_max   = in_mlvj_min+self.nbins_mlvj*self.BinWidth_mlvj;
 
         ## define jet mass variable
         rrv_mass_j = RooRealVar("rrv_mass_j","pruned m_{J}",(in_mj_min+in_mj_max)/2.,in_mj_min,in_mj_max,"GeV/c^{2}");
@@ -127,7 +127,6 @@ class doBiasStudy_mlvj:
         rrv_mass_j.setRange("signal_region",self.mj_signal_min,self.mj_signal_max);
         rrv_mass_j.setRange("sb_hi",self.mj_sideband_hi_min,self.mj_sideband_hi_max);
         rrv_mass_j.setRange("sblo_to_sbhi",self.mj_sideband_lo_min,self.mj_sideband_hi_max);
-
                                                                            
         ## set the signal sample
         self.file_Directory = options.inPath+"/trainingtrees_%s/"%(self.channel);
@@ -165,17 +164,14 @@ class doBiasStudy_mlvj:
         self.file_STop_mc          = ("ofile_STop.root");#single Top                                                                                                                            
         ## event categorization as a function of the label        
         if self.wtagger_label=="HP" :
-
             if self.channel=="el":
                 self.wtagger_cut=0.5 ; self.wtagger_cut_min=0. ;
             if self.channel=="mu":
                 self.wtagger_cut=0.5 ; self.wtagger_cut_min=0. ;
             if self.channel=="em":
                 self.wtagger_cut=0.5 ; self.wtagger_cut_min=0. ;
-
         if self.wtagger_label=="LP":
                 self.wtagger_cut=0.75 ;    self.wtagger_cut_min=0.5 ;
-
         if self.wtagger_label=="NP":
                 self.wtagger_cut=10000;
 
@@ -650,6 +646,8 @@ class doBiasStudy_mlvj:
        fit_mlvj_in_Mj_sideband(self.workspace4bais_,self.color_palet,label,mlvj_region,"Chebychev_v3",self.channel,self.wtagger_label,options.fgen,options.ttbarcontrolregion,1,options.pseudodata);
        fit_mlvj_in_Mj_sideband(self.workspace4bais_,self.color_palet,label,mlvj_region,"Chebychev_v4",self.channel,self.wtagger_label,options.fgen,options.ttbarcontrolregion,1,options.pseudodata);
 
+
+
     def biasAnalysis(self,label="_WJets0",fitjetmass = 0):
    
      print"######################## begin the bias analysis ###########################";  
@@ -659,6 +657,17 @@ class doBiasStudy_mlvj:
          print " cannot use MC to perform bias test for the mJ fit -> options not provided" ;
          return ;
 
+     ##### fix signal and bkg models that are going to be used in the generation
+     if fitjetmass :
+         spectrum = "_mj"   ;
+         signal_region = "";
+         signal_model  = "2Gaus";
+     else:
+         spectrum = "_mlvj" ;
+         signal_region = "_signal_region";
+         signal_model  = "CB_v1";
+
+     
      ###### get the signal and fit it     
      self.get_mj_and_mlvj_dataset(self.file_ggH ,"_%s"%(self.ggH_sample),"jet_mass_pr")# to get the shape of m_lvj
      self.get_mj_and_mlvj_dataset(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"jet_mass_pr")# to get the shape of m_lvj
@@ -688,11 +697,24 @@ class doBiasStudy_mlvj:
 
      elif options.isMC and not options.ttbarcontrolregion:    
       self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0","jet_mass_pr")# to get the shape of m_lvj                                                                               
-      fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,1);
+      fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,1);      
       self.workspace4bias_.writeToFile(tmp_file.GetName());
       if options.fgen != options.fres:
        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,1);
        self.workspace4bias_.writeToFile(tmp_file.GetName());
+
+      if options.mlvjregion == "_signal_region":
+       fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,self.channel,self.wtagger_label,0,0,1);      
+       self.workspace4bias_.writeToFile(tmp_file.GetName());
+       ## calculate the alpha factor
+       get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fgen,spectrum,"4bias",self.channel,self.wtagger_label,1); 
+       self.workspace4bias_.writeToFile(tmp_file.GetName());
+       if options.fgen != options.fres:
+        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fres,self.channel,self.wtagger_label,0,0,1);
+        self.workspace4bias_.writeToFile(tmp_file.GetName());
+        ## calculate the alpha factor
+        get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fres,spectrum,"4bias",self.channel,self.wtagger_label,1); 
+        self.workspace4bias_.writeToFile(tmp_file.GetName());
 
      elif not options.isMC:
       
@@ -751,6 +773,20 @@ class doBiasStudy_mlvj:
            if options.fgen != options.fres:
             fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,1);
             self.workspace4bias_.writeToFile(tmp_file.GetName());
+
+           if options.mlvjregion == "_signal_region":
+             fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,self.channel,self.wtagger_label,0,0,1);      
+             self.workspace4bias_.writeToFile(tmp_file.GetName());
+             ## calculate the alpha factor
+             get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fgen,spectrum,"4bias",self.channel,self.wtagger_label,1); 
+             self.workspace4bias_.writeToFile(tmp_file.GetName());
+             if options.fgen != options.fres:
+               fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fres,self.channel,self.wtagger_label,0,0,1);
+               self.workspace4bias_.writeToFile(tmp_file.GetName());
+               ## calculate the alpha factor
+               get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fres,spectrum,"4bias",self.channel,self.wtagger_label,1); 
+               self.workspace4bias_.writeToFile(tmp_file.GetName());
+
 	
       ######## get TTbar and fit it
       self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbar")# to get the shape of m_lvj                                                                                               
@@ -781,18 +817,8 @@ class doBiasStudy_mlvj:
          self.workspace4bias_.writeToFile(tmp_file.GetName());
          fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,label,options.mlvjregion,options.fres,self.channel,self.wtagger_label,options.fgen,options.ttbarcontrolregion,1,options.pseudodata); ## sideband or TTbar signal region fit
          self.workspace4bias_.writeToFile(tmp_file.GetName());
-  
-     ##### fix signal and bkg models that are going to be used in the generation
-     if fitjetmass :
-         spectrum = "_mj"   ;
-         signal_region = "";
-         signal_model  = "2Gaus";
-     else:
-         spectrum = "_mlvj" ;
-         signal_region = "_signal_region";
-         signal_model  = "CB_v1";
 
-     
+     '''
      ###### fix the backgrund models for the generation
      print "#############################################################################################";
      print "################ Begin of the toy analysis -> fix Pdf to what is pre-fitted #################";
@@ -1195,7 +1221,7 @@ class doBiasStudy_mlvj:
       self.outputTree.Write();
       self.outputFile.Close();
       os.system("rm tmp.root");      
-   
+'''   
 #### Main code     
 if __name__ == "__main__":
 

@@ -142,7 +142,7 @@ TLatex* banner4Plot(const std::string & channel, const float & lumi, const int &
  }
  else{
     banner = new TLatex(0.22,0.96,bannerName.Data());
-    banner->SetNDC(); banner->SetTextSize(0.04);
+    banner->SetNDC(); banner->SetTextSize(0.033);
  }                                                                                                         
       
  return banner;
@@ -260,7 +260,7 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
       std::cout<<" Loop objName "<<objName<<std::endl;
       if(objName == "errorband") objName = "Uncertainty";
       if(not(( (plot->getInvisible(objName.c_str())) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisible") or TString(objName).Contains("TLine") or objName == objName_before)){
-        std::cout<<" Skip invisible and double counting "<<objName<<std::endl;
+         std::cout<<" Skip invisible and double counting "<<objName<<std::endl;
          TObject* theObj = plot->getObject(obj);
          std::string objTitle = objName;
          std::string drawoption = plot->getDrawOptions(objName.c_str()).Data();
@@ -282,94 +282,94 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
                else if(TString(objName).Contains("Uncertainty"))
                  theLeg->AddEntry(theObj,objTitle.c_str(),drawoption.c_str());
                else if(TString(objName).Contains("Bulk")){
-               if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M600") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M600")){
+                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M600") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M600")){
                  objName_signal_graviton = theObj ;
                  objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.6 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M700") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M700")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M700") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M700")){
                    objName_signal_graviton = theObj ;
                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.7 TeV #tilde{k}=0.5 (#times100)";
-                }
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M800") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M800")){
+                 }
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M800") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M800")){
                    objName_signal_graviton = theObj ;
                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.8 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M900") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M900")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M900") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M900")){
                     objName_signal_graviton = theObj ;
                     objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.9 TeV #tilde{k}=0.5 (#times100)";
-                }   
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1000") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1000")){
+                  }   
+                  if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1000") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1000")){
                     objName_signal_graviton = theObj ;
                     objNameLeg_signal_graviton = "Bulk G* M_{G*}=1 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1100") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1100")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1100") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1100")){
                     objName_signal_graviton = theObj ;
                     objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.1 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1200") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1200")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1200") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1200")){
                     objName_signal_graviton = theObj ;
                     objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.2 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1300") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1300")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1300") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1300")){
                     objName_signal_graviton = theObj ;
                     objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.3 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1400") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1400")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1400") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1400")){
                     objName_signal_graviton = theObj ;
                     objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.4 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1500") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1500")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1500") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1500")){
                     objName_signal_graviton = theObj ;
                     objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.5 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1600") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1600")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1600") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1600")){
                    objName_signal_graviton = theObj ;
                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.6 TeV #tilde{k}=0.5 (#times100)";
-                }
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1700") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1700")){
+                 }
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1700") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1700")){
                    objName_signal_graviton = theObj ;
                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.7 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1800") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1800")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1800") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1800")){
                    objName_signal_graviton = theObj ;
                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.8 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1900") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1900")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1900") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1900")){
                    objName_signal_graviton = theObj ;
                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.9 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2000") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2000")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2000") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2000")){
                    objName_signal_graviton = theObj ;
                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=2 TeV #tilde{k}=0.5 (#times100)";
-                }   
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2100") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2100")){
+                 }   
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2100") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2100")){
                    objName_signal_graviton = theObj ;
                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.1 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2200") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2200")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2200") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2200")){
                    objName_signal_graviton = theObj ;
                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.2 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2300") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2300")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2300") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2300")){
                    objName_signal_graviton = theObj ;
                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.3 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2400") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2400")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2400") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2400")){
                    objName_signal_graviton = theObj ;
                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.4 TeV #tilde{k}=0.5 (#times100)";
-                }    
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2500") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2500")){
+                 }    
+                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2500") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2500")){
                    objName_signal_graviton = theObj ;
                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.5 TeV #tilde{k}=0.5 (#times100)";
-		}
-                else theLeg->AddEntry(theObj,objTitle.c_str(),drawoption.c_str());
+	  	 }
 	       }
-               entryCnt = entryCnt+1;
+               else theLeg->AddEntry(theObj,objTitle.c_str(),drawoption.c_str());
 	 }
+         entryCnt = entryCnt+1;
       }
       objName_before = objName;
    }
-  
+
    if(objName_signal_graviton != NULL){
     if(std::string(objName_signal_graviton->GetName()) != "") 
      theLeg->AddEntry(objName_signal_graviton,TString(objNameLeg_signal_graviton).Data(),"L");
