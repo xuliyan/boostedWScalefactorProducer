@@ -22,36 +22,47 @@ parser = OptionParser()
 
 parser.add_option('-b', action='store_true', dest='noX', default=False, help='no X11 windows')
 
-parser.add_option('--makeCards',     action='store_true', dest='makeCards',         default=False, help='no X11 windows')
-parser.add_option('--computeLimits', action='store_true', dest='computeLimits', default=False, help='no X11 windows')
-parser.add_option('--plotLimits',    action='store_true', dest='plotLimits',       default=False, help='no X11 windows')
-parser.add_option('--biasStudy',     action='store_true', dest='biasStudy',        default=False, help='no X11 windows')
+#### basic allowed methods
+parser.add_option('--makeCards',     action='store_true', dest='makeCards',         default=False, help='options to produce datacards and workspaces via fitting analysis')
+parser.add_option('--computeLimits', action='store_true', dest='computeLimits',     default=False, help='basic option in order to compute asymptotic limits')
+parser.add_option('--plotLimits',    action='store_true', dest='plotLimits',        default=False, help='basic option to plot asymptotic and pvalue')
+parser.add_option('--biasStudy',     action='store_true', dest='biasStudy',         default=False, help='basic option to perform bias study with our own tool')
+parser.add_option('--maximumLikelihoodFit', action='store_true', dest='maximumLikelihoodFit', default=False, help='basic option to run max Likelihood fit inside combination tool')
 
-# submit jobs to condor 
-parser.add_option('--batchMode', action='store_true', dest='batchMode', default=False, help='no X11 windows')
-parser.add_option('--lxbatchCern',  help='run jobs on lxbatch system at cern, default is condor fnal',  type=int, default=0)
-parser.add_option('--herculesMilano',  help='run jobs on hercules system at Milano, default is condor fnal',  type=int, default=0)
+##### submit jobs to condor, lxbatch and hercules 
+parser.add_option('--batchMode',      action='store_true', dest='batchMode',      default=False, help='to run jobs on condor fnal')
+parser.add_option('--lxbatchCern',    action='store_true', dest='lxbatchCern',    default=False, help='run jobs on lxbatch system at cern, default is condor fnal')
+parser.add_option('--herculesMilano', action='store_true', dest='herculesMilano', default=False, help='run jobs on hercules system at Milano, default is condor fnal')
+
+##### other basci options for all the methods 
+parser.add_option('--datacardDIR', action="store", type="string", dest="datacardDIR", default="")
+parser.add_option('--channel',     action="store", type="string", dest="channel",     default="em")
+parser.add_option('--pseudodata',  action="store", type="int",    dest="pseudodata",  default=0)
+parser.add_option('--systematics', action="store", type="int",    dest="systematics", default=1)
+parser.add_option('--massPoint',   action="store", type="int",    dest="massPoint",   default=-1)
+parser.add_option('--cPrime',      action="store", type="int",    dest="cPrime",      default=-1)
+parser.add_option('--brNew',       action="store", type="int",    dest="brNew",       default=-1)
+parser.add_option('--odir',        action="store", type="string", dest="odir",        default=".")
+parser.add_option('--sigChannel',  action="store", type="string", dest="sigChannel",  default="")
+parser.add_option('--jetBin',      action="store", type="string", dest="jetBin",      default="")
+parser.add_option('--turnOnAnalysis',       action="store", type="int",  dest="turnOnAnalysis",      default=0)
+parser.add_option('--injectSingalStrenght', action="store", type=float,  dest="injectSingalStrenght", default=1., help='inject a singal in the toy generation')
+
+###### options for Bias test in the combination tool
+parser.add_option('--nToys',        action="store", type="int",    dest="nToys",       default=0)
+parser.add_option('--crossedToys',  action="store", type="int",    dest="crossedToys", default=0)
+parser.add_option('--inputGeneratedDataset', action="store", type="string",    dest="inputGeneratedDataset", default="")
+parser.add_option('--outputTree',   action="store", type="int",    dest="outputTree",  default=0)
 
 
-parser.add_option('--channel',    action="store",type = "string", dest="channel",    default="em")
-parser.add_option('--pseudodata', action="store",type = int,      dest="pseudodata", default = 0)
-parser.add_option('--systematics',action="store",type = "int",    dest="systematics",default=1)
-parser.add_option('--saveParam',action="store",type="int",dest="saveParam",default=1)
-parser.add_option('--massPoint',action="store",type="int",dest="massPoint",default=-1)
-parser.add_option('--cPrime',action="store",type="int",dest="cPrime",default=-1)
-parser.add_option('--brNew',action="store",type="int",dest="brNew",default=-1)
-parser.add_option('--odir',action="store",type="string",dest="odir",default=".")
-parser.add_option('--sigChannel',action="store",type="string",dest="sigChannel",default="")
-
-parser.add_option('--turnOnAnalysis', action="store",type="int",   dest="turnOnAnalysis",default=0)
-parser.add_option('--shapetest',      action="store",type="int",   dest="shapetest",default=0)
-parser.add_option('--ttbarcontrolregion',      action="store",type="int",   dest="ttbarcontrolregion",default=0)
-parser.add_option('--mlvjregion',      action="store",type="string",   dest="mlvjregion",default="_sb_lo")
-parser.add_option('--fitjetmass',      action="store",type="int",   dest="fitjetmass",default=0)
-parser.add_option('--onlybackgroundfit',  help='run only background fit',  type=int, default=0)
-parser.add_option('--inflatejobstatistic',  help='enlarge the generated statistics in the fit',  type=int, default=1)
-parser.add_option('--scalesignalwidth', help='reduce the signal width by a factor x', type=float, default=1.)
-parser.add_option('--injectSingalStrenght', help='inject a singal in the toy generation', type=float, default=1.)
+##### options specific for the bias tool 
+parser.add_option('--shapetest',           action="store", type="int",    dest="shapetest",           default=0)
+parser.add_option('--ttbarcontrolregion',  action="store", type="int",    dest="ttbarcontrolregion",  default=0)
+parser.add_option('--mlvjregion',          action="store", type="string", dest="mlvjregion",          default="_sb_lo")
+parser.add_option('--fitjetmass',          action="store", type="int",    dest="fitjetmass",          default=0)
+parser.add_option('--onlybackgroundfit',   action="store", type="int",    dest="onlybackgroundfit",   default=0, help='run only background fit')
+parser.add_option('--inflatejobstatistic', action="store", type="int",    dest="inflatejobstatistic", default=1, help='enlarge the generated statistics in the fit')
+parser.add_option('--scalesignalwidth',    action="store", type="int",    dest="scalesignalwidth",    default=1, help='reduce the signal width by a factor x')
 
 (options, args) = parser.parse_args()
 
@@ -331,9 +342,15 @@ if __name__ == '__main__':
 
     
     CHAN = options.channel;
-    DIR  = "cards_"+CHAN;
-    SIGCH = "_"+options.sigChannel;    
+    DIR  = options.datacardDIR;
+    if options.sigChannel !="": 
+     SIGCH = options.jetBin+"_"+options.sigChannel;
+    else:
+     SIGCH = options.jetBin;
+        
     moreCombineOpts = "";
+
+    print "channel ",CHAN," directiory ",DIR," signal channel ",SIGCH," more options ",moreCombineOpts ;
     
     ###############    
     if options.makeCards:
@@ -409,24 +426,73 @@ if __name__ == '__main__':
                 for k in range(brLo,brHi):
 
                     print "--------------------------------------------------";
-                    print "creating card: hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                    print "analyzing card: hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                     print "--------------------------------------------------";                
 
-                    combineCmmd = "combineCards.py hwwlvj_ggH%03d_el%s_%02d_%02d_unbin.txt hwwlvj_ggH%03d_mu%s_%02d_%02d_unbin.txt > hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k]);
-                    os.system(combineCmmd);
+                    if options.channel !="em":
+                     combineCmmd = "combineCards.py hwwlvj_ggH%03d_el%s_%02d_%02d_unbin.txt hwwlvj_ggH%03d_mu%s_%02d_%02d_unbin.txt > hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k]);
+                     print "combineCmmd ",combineCmmd; 
+                     os.system(combineCmmd);
 
-                    
-                    print "running card: hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k]);
 
-                    if options.saveParam == 1:
-                       runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --saveWorkspace -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t 0 --expectSignal=0 "%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts);             
+                    if options.maximumLikelihoodFit == 1:
+                       if options.nToys == 0 and options.crossedToys == 0 : 
+                        runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t %d --expectSignal=%d "%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.nToys,options.injectSingalStrenght);                     
+                        print "runCmmd ",runCmmd;
 
-                    elif options.systematics == 0:
-                       runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -S 0"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts);                    
+                       ##### many toys
 
+                       elif options.nToys != 0 and options.crossedToys == 0 :
+                          if options.outputTree == 0:  
+                           for iToy in range(options.nToys):
+                             runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=%d "%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght);                     
+                             print "runCmmd ",runCmmd;
+                             if options.batchMode:
+                              fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                              cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                              submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
+                             else: 
+                              os.system(runCmmd);
+                           continue ;
+                          else:
+                             runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t %d --expectSignal=%d "%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.nToys,options.injectSingalStrenght);                     
+                             print "runCmmd ",runCmmd;
+                             if options.batchMode:
+                              fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],options.nToys);
+                              cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                              submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
+                             else: 
+                              os.system(runCmmd);
+                             continue ;
+
+                       ### crossed toys
+                       elif options.nToys != 0 and options.crossedToys == 1 :
+
+                          os.system("ls "+options.inputGeneratedDataset+" | grep root | grep higgsCombine | grep ",str(mass[i])," | grep ",str(cprime[j])," | grep ",str(BRnew[k])," > list.temp"); 
+
+                          with open("list_temp.txt") as input_list:
+                           for line in input_list:
+                            for name in line.split():                                                                       
+                             if options.outputTree == 0:  
+                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=%d -D %s:toys/toy_1"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght,name);                     
+                                print "runCmmd ",runCmmd;                                
+                                if options.batchMode:
+                                  fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                                  cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                                  submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
+                                else: 
+                                  os.system(runCmmd);
+
+                   ##############
+                                               
+                    Elif options.systematics == 0:
+                       runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -S 0"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts);
+                       print "runCmmd ",runCmmd ;
+                        
                     else: 
                        runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts);                                        
-                    
+                       print "runCmmd ",runCmmd;
+                       
                     if options.batchMode:
                         fn = "combineScript_%03d%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                         cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
