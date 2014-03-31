@@ -441,7 +441,6 @@ if __name__ == '__main__':
                         print "runCmmd ",runCmmd;
 
                        ##### many toys
-
                        elif options.nToys != 0 and options.crossedToys == 0 :
                           if options.outputTree == 0:  
                            for iToy in range(options.nToys):
@@ -468,24 +467,40 @@ if __name__ == '__main__':
                        ### crossed toys
                        elif options.nToys != 0 and options.crossedToys == 1 :
 
-                          os.system("ls "+options.inputGeneratedDataset+" | grep root | grep higgsCombine | grep ",str(mass[i])," | grep ",str(cprime[j])," | grep ",str(BRnew[k])," > list.temp"); 
+                          os.system("ls "+options.inputGeneratedDataset+" | grep root | grep higgsCombine | grep "+str(mass[i])+" > list_temp.txt"); 
 
-                          with open("list_temp.txt") as input_list:
-                           for line in input_list:
-                            for name in line.split():                                                                       
-                             if options.outputTree == 0:  
-                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=%d -D %s:toys/toy_1"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght,name);                     
+                          if options.outputTree == 0:  
+                           with open("list_temp.txt") as input_list:
+                            for line in input_list:
+                             for name in line.split():                                                                       
+                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=%d -D %s/%s:toys/toy_1"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght,options.inputGeneratedDataset,name);                     
                                 print "runCmmd ",runCmmd;                                
-                                if options.batchMode:
-                                  fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
-                                  cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
-                                  submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
-                                else: 
-                                  os.system(runCmmd);
+                                #if options.batchMode:
+                                #  fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                                #  cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                                #  submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
+                                #else: 
+                                #  os.system(runCmmd);
 
+                          else:
+                            for iToy in range(options.nToys):
+                             with open("list_temp.txt") as input_list:
+                              for line in input_list:
+                               for name in line.split():                                                                       
+                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=%d -D %s/%s:toys/toy_%d"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght,options.inputGeneratedDataset,name,iToy+1);                     
+                                print "runCmmd ",runCmmd;                                
+                                #if options.batchMode:
+                                #  fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                                #  cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                                #  submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
+                                #else: 
+                                #  os.system(runCmmd);
+
+                          os.system("rm list_temp.txt")
+                          continue ;
                    ##############
                                                
-                    Elif options.systematics == 0:
+                    elif options.systematics == 0:
                        runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -S 0"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts);
                        print "runCmmd ",runCmmd ;
                         
