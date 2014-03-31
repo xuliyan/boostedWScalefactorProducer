@@ -818,8 +818,7 @@ class doBiasStudy_mlvj:
          fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,label,options.mlvjregion,options.fres,self.channel,self.wtagger_label,options.fgen,options.ttbarcontrolregion,1,options.pseudodata); ## sideband or TTbar signal region fit
          self.workspace4bias_.writeToFile(tmp_file.GetName());
 
-     '''
-     ###### fix the backgrund models for the generation
+     ####### fix the backgrund models for the generation
      print "#############################################################################################";
      print "################ Begin of the toy analysis -> fix Pdf to what is pre-fitted #################";
      print "#############################################################################################";
@@ -1221,7 +1220,7 @@ class doBiasStudy_mlvj:
       self.outputTree.Write();
       self.outputFile.Close();
       os.system("rm tmp.root");      
-'''   
+
 #### Main code     
 if __name__ == "__main__":
 
