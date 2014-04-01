@@ -1,4 +1,4 @@
-#python g1_doDatacard_width.py hwwlvj_ -b --datacardPath cards_EXP_TIGHT_em/ --channel em -n 0.1 -m 1000
+#python doDatacard_signal_width_changed.py hwwlvj_ -b --datacardPath cards_POW_em_SET1/ --channel em -n 0.1 -m 600
 
 #! /usr/bin/env python
 import os
