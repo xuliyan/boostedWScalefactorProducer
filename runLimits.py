@@ -537,7 +537,7 @@ if __name__ == '__main__':
                            with open("list_temp.txt") as input_list:
                             for line in input_list:
                              for name in line.split():                                                                       
-                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2  --toysFile %s/%s "%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.inputGeneratedDataset,name);
+                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s  -t 1  --toysFile %s/%s "%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.inputGeneratedDataset,name);
                                 iToy = iToy + 1 ;
                                 print "runCmmd ",runCmmd;                                
                                 if options.batchMode:
@@ -548,11 +548,10 @@ if __name__ == '__main__':
                                   os.system(runCmmd);
 
                           else:
-                            for iToy in range(options.nToys):
                              with open("list_temp.txt") as input_list:
                               for line in input_list:
                                for name in line.split():                                                                       
-                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 --toysFile %s/%s"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght,options.inputGeneratedDataset,name,iToy+1);                     
+                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s  -t %d --toysFile %s/%s"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.nToys,options.inputGeneratedDataset,name);                     
                                 print "runCmmd ",runCmmd;                                
                                 if options.batchMode:
                                   fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
