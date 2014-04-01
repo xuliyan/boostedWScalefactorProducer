@@ -28,6 +28,7 @@ parser.add_option('--computeLimits', action='store_true', dest='computeLimits', 
 parser.add_option('--plotLimits',    action='store_true', dest='plotLimits',        default=False, help='basic option to plot asymptotic and pvalue')
 parser.add_option('--biasStudy',     action='store_true', dest='biasStudy',         default=False, help='basic option to perform bias study with our own tool')
 parser.add_option('--maximumLikelihoodFit', action='store_true', dest='maximumLikelihoodFit', default=False, help='basic option to run max Likelihood fit inside combination tool')
+parser.add_option('--generateOnly',  action='store_true', dest='generateOnly', default=False, help='basic option to run the only generation with combiner')
 
 ##### submit jobs to condor, lxbatch and hercules 
 parser.add_option('--batchMode',      action='store_true', dest='batchMode',      default=False, help='to run jobs on condor fnal')
@@ -244,22 +245,26 @@ def submitBatchJob( command, fn ):
          
   os.system("chmod 777 "+currentDir+"/"+fn+".sh"); 
   os.system("qsub -V -d "+currentDir+" -q shortcms "+currentDir+"/"+fn+".sh");
-
+  time.sleep(0.3);
+  
 
 # ----------------------------------------
 
 def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
     
     
-    SIGCH = "_"+options.sigChannel;    
+    if options.sigChannel !="": 
+     SIGCH = options.jetBin+"_"+options.sigChannel;
+    else:
+     SIGCH = options.jetBin;
     currentDir = os.getcwd();
     
     # create a dummy bash/csh
     outScript = open(fn+".sh","w");
 
     file1 = "hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass,SIGCH,cprime,BRnew);
-    file2 = "hwwlvj_ggH%03d_mu_%02d_%02d_workspace.root"%(mass,cprime,BRnew);
-    file3 = "hwwlvj_ggH%03d_el_%02d_%02d_workspace.root"%(mass,cprime,BRnew);
+    file2 = "hwwlvj_ggH%03d_mu%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
+    file3 = "hwwlvj_ggH%03d_el%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
 
     if not options.lxbatchCern and not options.herculesMilano :   
      outScript.write('#!/bin/bash');
@@ -270,6 +275,10 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
      outScript.write("\n"+'cd -');
      outScript.write("\n"+'ls');    
      outScript.write("\n"+command);
+     if options.inputGeneratedDataset != "":
+      outScript.write("\n "+"mv higgsCombine* "+currentDir+"/"+options.inputGeneratedDataset);
+      
+     outScript.write("\n "+"rm rootstats* ");
      outScript.close();
     
      # link a condor script to your shell script
@@ -301,13 +310,18 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
      outScript.write("\n"+'ls');    
     
      file1 = "hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass,SIGCH,cprime,BRnew);
-     file2 = "hwwlvj_ggH%03d_mu_%02d_%02d_workspace.root"%(mass,cprime,BRnew);
-     file3 = "hwwlvj_ggH%03d_el_%02d_%02d_workspace.root"%(mass,cprime,BRnew);
+     file2 = "hwwlvj_ggH%03d_mu%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
+     file3 = "hwwlvj_ggH%03d_el%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
+     file4 = "hwwlvj_ggH%03d_em%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
 
-     outScript.write("\n"+'cp '+currentDir+' '+file1+' ./');
-     outScript.write("\n"+'cp '+currentDir+' '+file2+' ./');
-     outScript.write("\n"+'cp '+currentDir+' '+file3+' ./');
+     outScript.write("\n"+'cp '+currentDir+'/'+file1+' ./');
+     outScript.write("\n"+'cp '+currentDir+'/'+file2+' ./');
+     outScript.write("\n"+'cp '+currentDir+'/'+file3+' ./');
+     outScript.write("\n"+'cp '+currentDir+'/'+file4+' ./');
      outScript.write("\n"+command);
+     if options.inputGeneratedDataset != "":
+      outScript.write("\n "+"mv higgsCombine* "+currentDir+"/"+options.inputGeneratedDataset);
+     outScript.write("\n "+"rm rootstats* ");
      outScript.close();
 
      os.system("chmod 777 "+currentDir+"/"+fn+".sh"); 
@@ -323,17 +337,22 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
      outScript.write("\n"+'ls');    
     
      file1 = "hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass,SIGCH,cprime,BRnew);
-     file2 = "hwwlvj_ggH%03d_mu_%02d_%02d_workspace.root"%(mass,cprime,BRnew);
-     file3 = "hwwlvj_ggH%03d_el_%02d_%02d_workspace.root"%(mass,cprime,BRnew);
+     file2 = "hwwlvj_ggH%03d_mu%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
+     file3 = "hwwlvj_ggH%03d_el%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
+     file4 = "hwwlvj_ggH%03d_em%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
 
-     outScript.write("\n"+'cp '+currentDir+' '+file1+' ./');
-     outScript.write("\n"+'cp '+currentDir+' '+file2+' ./');
-     outScript.write("\n"+'cp '+currentDir+' '+file3+' ./');
+     outScript.write("\n"+'cp '+currentDir+'/'+file1+' ./');
+     outScript.write("\n"+'cp '+currentDir+'/'+file2+' ./');
+     outScript.write("\n"+'cp '+currentDir+'/'+file3+' ./');
+     outScript.write("\n"+'cp '+currentDir+'/'+file4+' ./');
      outScript.write("\n"+command);
+     if options.inputGeneratedDataset != "":
+      outScript.write("\n "+"mv higgsCombine* "+currentDir+"/"+options.inputGeneratedDataset);
+     outScript.write("\n "+"rm rootstats* ");
      outScript.close();
 
      os.system("chmod 777 "+currentDir+"/"+fn+".sh"); 
-     os.system("qsub -V -d "+currentDir+" -q shortcms "+currentDir+"/"+fn+".sh");
+     os.system("qsub -V -d "+currentDir+" -q production "+currentDir+"/"+fn+".sh");
 
 
 ############################################################
@@ -434,13 +453,56 @@ if __name__ == '__main__':
                      print "combineCmmd ",combineCmmd; 
                      os.system(combineCmmd);
 
+                    ########################################
+                    ####### Generate only options ##########
+                    ########################################
 
-                    if options.maximumLikelihoodFit == 1:
+                    os.system("mkdir "+options.inputGeneratedDataset);
+                     
+                    if options.generateOnly == 1 :
+                      if options.outputTree == 0 :
+                          for iToy in range(options.nToys):                              
+                           runCmmd =  "combine -M GenerateOnly --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=%d "%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght);
+                           print "runCmmd ",runCmmd;
+                           if options.batchMode:
+                              fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                              cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                              submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
+                           else: 
+                              os.system(runCmmd);
+                              os.system("mv higgsCombine* "+options.inputGeneratedDataset);   
+                           continue ;
+
+                      else:  
+                           runCmmd =  "combine -M GenerateOnly --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t %d --expectSignal=%d "%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.nToys,options.injectSingalStrenght);
+                           print "runCmmd ",runCmmd;
+                           if options.batchMode:
+                              fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                              cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                              submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
+                           else: 
+                              os.system(runCmmd);
+                              os.system("mv higgsCombine* "+options.inputGeneratedDataset);   
+                           continue ;
+
+                    ######################################
+                    ####### Maximum Likelihood Fits ######
+                    ######################################   
+    
+                    elif options.maximumLikelihoodFit == 1:
+                        
+                       ################################################# 
+                       #### just one fit with the defined datacards ####
+                       #################################################
+                        
                        if options.nToys == 0 and options.crossedToys == 0 : 
                         runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t %d --expectSignal=%d "%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.nToys,options.injectSingalStrenght);                     
                         print "runCmmd ",runCmmd;
 
-                       ##### many toys
+                       ######################################################## 
+                       #### run many toys and fits with the same datacards  ###
+                       ########################################################
+
                        elif options.nToys != 0 and options.crossedToys == 0 :
                           if options.outputTree == 0:  
                            for iToy in range(options.nToys):
@@ -464,7 +526,9 @@ if __name__ == '__main__':
                               os.system(runCmmd);
                              continue ;
 
-                       ### crossed toys
+                       ##################################
+                       ##### Make the crossed toys ##### 
+                       ##################################  
                        elif options.nToys != 0 and options.crossedToys == 1 :
 
                           os.system("ls "+options.inputGeneratedDataset+" | grep root | grep higgsCombine | grep "+str(mass[i])+" > list_temp.txt"); 
@@ -473,47 +537,58 @@ if __name__ == '__main__':
                            with open("list_temp.txt") as input_list:
                             for line in input_list:
                              for name in line.split():                                                                       
-                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=%d -D %s/%s:toys/toy_1"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght,options.inputGeneratedDataset,name);                     
+                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2  --toysFile %s/%s "%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.inputGeneratedDataset,name);                     
                                 print "runCmmd ",runCmmd;                                
-                                #if options.batchMode:
-                                #  fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
-                                #  cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
-                                #  submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
-                                #else: 
-                                #  os.system(runCmmd);
+                                if options.batchMode:
+                                  fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                                  cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                                  submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
+                                else: 
+                                  os.system(runCmmd);
 
                           else:
                             for iToy in range(options.nToys):
                              with open("list_temp.txt") as input_list:
                               for line in input_list:
                                for name in line.split():                                                                       
-                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=%d -D %s/%s:toys/toy_%d"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght,options.inputGeneratedDataset,name,iToy+1);                     
+                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 --toysFile %s/%s"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght,options.inputGeneratedDataset,name,iToy+1);                     
                                 print "runCmmd ",runCmmd;                                
-                                #if options.batchMode:
-                                #  fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
-                                #  cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
-                                #  submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
-                                #else: 
-                                #  os.system(runCmmd);
+                                if options.batchMode:
+                                  fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                                  cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                                  submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
+                                else: 
+                                  os.system(runCmmd);
 
                           os.system("rm list_temp.txt")
                           continue ;
-                   ##############
-                                               
+
+                    ###############################
+                    #### Asymptotic Limit part  ###
+                    ###############################
+                      
                     elif options.systematics == 0:
                        runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -S 0"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts);
                        print "runCmmd ",runCmmd ;
-                        
-                    else: 
-                       runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts);                                        
-                       print "runCmmd ",runCmmd;
-                       
-                    if options.batchMode:
+
+                       if options.batchMode:
                         fn = "combineScript_%03d%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                         cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                         submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
-                    else: 
+                       else: 
                         os.system(runCmmd);
+
+                    else: 
+                       runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts);                                        
+                       print "runCmmd ",runCmmd;
+
+                       if options.batchMode:
+                        fn = "combineScript_%03d%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                        cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                        submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
+                       else: 
+                        os.system(runCmmd);
+                       
 
 
     # =================== Bias Analysis ============== #
