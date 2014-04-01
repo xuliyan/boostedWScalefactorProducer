@@ -243,9 +243,9 @@ def submitBatchJob( command, fn ):
   outScript.write("\n"+'cp outputFrom_'+fn+'.tar.gz '+currentDir);    
   outScript.close();
          
-  os.system("chmod 777 "+currentDir+"/"+fn+".sh"); 
+  os.system("chmod 777 "+currentDir+"/"+fn+".sh");
+  
   os.system("qsub -V -d "+currentDir+" -q shortcms "+currentDir+"/"+fn+".sh");
-  time.sleep(0.3);
   
 
 # ----------------------------------------
@@ -275,7 +275,7 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
      outScript.write("\n"+'cd -');
      outScript.write("\n"+'ls');    
      outScript.write("\n"+command);
-     if options.inputGeneratedDataset != "":
+     if options.inputGeneratedDataset != "" and options.generateOnly:
       outScript.write("\n "+"mv higgsCombine* "+currentDir+"/"+options.inputGeneratedDataset);
       
      outScript.write("\n "+"rm rootstats* ");
@@ -319,7 +319,7 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
      outScript.write("\n"+'cp '+currentDir+'/'+file3+' ./');
      outScript.write("\n"+'cp '+currentDir+'/'+file4+' ./');
      outScript.write("\n"+command);
-     if options.inputGeneratedDataset != "":
+     if options.inputGeneratedDataset != "" and options.generateOnly:
       outScript.write("\n "+"mv higgsCombine* "+currentDir+"/"+options.inputGeneratedDataset);
      outScript.write("\n "+"rm rootstats* ");
      outScript.close();
@@ -346,20 +346,20 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
      outScript.write("\n"+'cp '+currentDir+'/'+file3+' ./');
      outScript.write("\n"+'cp '+currentDir+'/'+file4+' ./');
      outScript.write("\n"+command);
-     if options.inputGeneratedDataset != "":
+     if options.inputGeneratedDataset != "" and options.generateOnly:
       outScript.write("\n "+"mv higgsCombine* "+currentDir+"/"+options.inputGeneratedDataset);
      outScript.write("\n "+"rm rootstats* ");
      outScript.close();
 
      os.system("chmod 777 "+currentDir+"/"+fn+".sh"); 
-     os.system("qsub -V -d "+currentDir+" -q production "+currentDir+"/"+fn+".sh");
+     os.system("qsub -V -d "+currentDir+" -q longcms "+currentDir+"/"+fn+".sh");
 
 
 ############################################################
 
 if __name__ == '__main__':
 
-    
+        
     CHAN = options.channel;
     DIR  = options.datacardDIR;
     if options.sigChannel !="": 
@@ -368,7 +368,6 @@ if __name__ == '__main__':
      SIGCH = options.jetBin;
         
     moreCombineOpts = "";
-
     print "channel ",CHAN," directiory ",DIR," signal channel ",SIGCH," more options ",moreCombineOpts ;
     
     ###############    
@@ -463,6 +462,7 @@ if __name__ == '__main__':
                       if options.outputTree == 0 :
                           for iToy in range(options.nToys):                              
                            runCmmd =  "combine -M GenerateOnly --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=%d "%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght);
+                           time.sleep(0.3);
                            print "runCmmd ",runCmmd;
                            if options.batchMode:
                               fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
@@ -532,12 +532,13 @@ if __name__ == '__main__':
                        elif options.nToys != 0 and options.crossedToys == 1 :
 
                           os.system("ls "+options.inputGeneratedDataset+" | grep root | grep higgsCombine | grep "+str(mass[i])+" > list_temp.txt"); 
-
+                          iToy = 0 ;
                           if options.outputTree == 0:  
                            with open("list_temp.txt") as input_list:
                             for line in input_list:
                              for name in line.split():                                                                       
-                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2  --toysFile %s/%s "%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.inputGeneratedDataset,name);                     
+                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin -20 --rMax 20 --saveNormalizations --saveToys -s -1 -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2  --toysFile %s/%s "%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.inputGeneratedDataset,name);
+                                iToy = iToy + 1 ;
                                 print "runCmmd ",runCmmd;                                
                                 if options.batchMode:
                                   fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
