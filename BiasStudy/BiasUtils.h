@@ -43,7 +43,7 @@ class biasModelAnalysis{
 
   void generateAndFitToys(int nevents, const std::string & = "" );
   void createBranches(const std::string &, const std::string &, const int &);
-  void fillBranches(const int &, const int &, RooWorkspace&);
+  void fillBranches(const int &, const int &, RooWorkspace&, const std::string & ="");
 
   void setFittingModel(RooAbsPdf*);
   void setTree(TTree*);
