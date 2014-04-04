@@ -64,7 +64,7 @@ RooAbsPdf* get_TTbar_mj_Model  (RooWorkspace*,const std::string & = "_TTbar",con
 RooAbsPdf* get_STop_mj_Model   (RooWorkspace*,const std::string & = "_STop",const std::string & model = "",const std::string & = "em",const int & = 1);
 RooAbsPdf* get_VV_mj_Model     (RooWorkspace*,const std::string & = "_VV",const std::string & model = "", const std::string & = "em", const int & = 1);
 RooAbsPdf* get_WW_EWK_mj_Model (RooWorkspace*,const std::string & = "_WW_EWK",const std::string & model = "", const std::string & = "em", const int & = 1);
-RooAbsPdf* get_WJets_mj_Model  (RooWorkspace*,const std::string & = "_WJets0",const std::string & model = "",const std::string & = "em", const int & = 1);
+RooAbsPdf* get_WJets_mj_Model  (RooWorkspace*,const std::string & = "_WJets0",const std::string & model = "",const std::string & = "em", const int & = 1, const std::string & = "");
 RooAbsPdf* get_ggH_mj_Model    (RooWorkspace*,const std::string & = "_ggH600",const std::string & model = "",const std::string & = "em",const int & = 1);
 RooAbsPdf* get_vbfH_mj_Model   (RooWorkspace*,const std::string & = "_vbfH600",const std::string & model = "",const std::string & = "em",const int & = 1);
 
