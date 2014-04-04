@@ -1884,6 +1884,16 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
             return model_pdf ;
 	}
 
+        if( model == "ErfPow"){
+            std::cout<< "########### Erf*Pow Pdf  for mlvj fit ############"<<std::endl;
+            RooRealVar* rrv_c      = new RooRealVar(("rrv_c_ErfPow"+label+"_"+channel+spectrum).c_str(),("rrv_c_ErfPow"+label+"_"+channel+spectrum).c_str(),-5.,-10.,0.);
+            RooRealVar* rrv_offset_ErfPow = new RooRealVar(("rrv_offset_ErfPow"+label+"_"+channel+spectrum).c_str(),("rrv_offset_ErfPow"+label+"_"+channel+spectrum).c_str(),60.,30.,120);
+            RooRealVar* rrv_width_ErfPow  = new RooRealVar(("rrv_width_ErfPow"+label+"_"+channel+spectrum).c_str(),("rrv_width_ErfPow"+label+"_"+channel+spectrum).c_str(),30.,10, 60.);
+            RooErfPowPdf* model_pdf  = new RooErfPowPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_c,*rrv_offset_ErfPow,*rrv_width_ErfPow);
+            
+            return model_pdf ;
+	}
+
         // For mlvj fit ->Erf*Pow can replace Erf*Exp -> in the sideband
         if( model == "ErfPow2_v1"){
             std::cout<< "########### Erf*Pow2 Pdf  for mlvj fit ############"<<std::endl;
