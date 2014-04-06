@@ -840,7 +840,7 @@ class doBiasStudy_mlvj:
       ##### get data in sb and fit it                                                                                                                                              
       self.get_mj_and_mlvj_dataset(self.file_data,"_data", "jet_mass_pr"); ## global fit of data in the sidand fixing non dominant bkg
       if fitjetmass :
-         fit_WJetsNormalization_in_Mj_signal_region(self.workspace4bias_,self.color_palet,label,options.fgen,self.channel,self.wtagger_label,options.ttbarcontrolregion,options.pseudodata,self.mj_signal_min,self.mj_signal_max,options.jetBin); ## fit jet mass distribution
+         fit_WJetsNormalization_in_Mj_signal_region(self.workspace4bias_,self.color_palet,label,"",options.fgen,self.channel,self.wtagger_label,options.ttbarcontrolregion,options.pseudodata,self.mj_signal_min,self.mj_signal_max,options.jetBin); ## fit jet mass distribution
          self.workspace4bias_.writeToFile(tmp_file.GetName());
       else:      
          fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,label,options.mlvjregion,options.fgen,self.channel,self.wtagger_label,options.fgen,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin); ## sideband or TTbar signal region fit
