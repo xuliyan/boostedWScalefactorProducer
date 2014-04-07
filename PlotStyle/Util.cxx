@@ -386,7 +386,7 @@ void draw_error_band_extendPdf( RooAbsData *rdata,  RooAbsPdf* rpdf, RooFitResul
  errorband->SetFillStyle(3013);
 
  if( TString(opt).Contains("F") ) mplot->addObject(errorband,"E3"); 
- if( TString(opt).Contains("L") ){ mplot->addObject(am); mplot->addObject(ap); }
+ else if( TString(opt).Contains("L") ){ mplot->addObject(am); mplot->addObject(ap); }
   
 }
 
