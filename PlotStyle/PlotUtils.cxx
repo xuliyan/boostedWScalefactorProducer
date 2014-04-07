@@ -191,7 +191,7 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
    std::string objName = plot->nameOf(obj);
    if(objName == "errorband") objName = "Uncertainty";
    
-   if( not ( ( (plot->getInvisible(objName.c_str())) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisible") or TString(objName).Contains("TLine") or objName ==objName_before )){
+   if( not ( ( (plot->getInvisible(objName.c_str())) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisible") or TString(objName).Contains("TLine") or objName ==objName_before or TString(objName).Contains("error") or TString(objName).Contains("rdataset"))){
      
     TObject*  theObj = plot->getObject(obj);
     std::string objTitle = objName;
@@ -224,7 +224,7 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
   for( int obj = 0 ; obj < int(plot->numItems()) ; obj++ ){
     std::string objName = plot->nameOf(obj);
     if( objName == "errorband" ) objName = "Uncertainty";
-    if(not ( ( (plot->getInvisible(objName.c_str())) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisible") or TString(objName).Contains("TLine") or objName == objName_before )){
+    if(not ( ( (plot->getInvisible(objName.c_str())) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisible") or TString(objName).Contains("TLine") or objName == objName_before or TString(objName).Contains("error") or TString(objName).Contains("rdataset"))){
        TObject* theObj = plot->getObject(obj);
        std::string objTitle = objName;
        std::string drawoption = plot->getDrawOptions(objName.c_str()).Data();
@@ -246,7 +246,7 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
          continue ;
        }
      }
-   }   
+  }   
         
    entryCnt = 0;
    objName_before = "";
@@ -259,7 +259,7 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
       std::string objName = plot->nameOf(obj);
       std::cout<<" Loop objName "<<objName<<std::endl;
       if(objName == "errorband") objName = "Uncertainty";
-      if(not(( (plot->getInvisible(objName.c_str())) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisible") or TString(objName).Contains("TLine") or objName == objName_before)){
+      if(not(( (plot->getInvisible(objName.c_str())) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisible") or TString(objName).Contains("TLine") or objName == objName_before or TString(objName).Contains("error") or TString(objName).Contains("rdataset"))){
          std::cout<<" Skip invisible and double counting "<<objName<<std::endl;
          TObject* theObj = plot->getObject(obj);
          std::string objTitle = objName;
