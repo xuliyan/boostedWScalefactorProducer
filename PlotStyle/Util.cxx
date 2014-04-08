@@ -215,19 +215,19 @@ TGraphAsymmErrors* draw_error_band_ws( RooAbsData *rdata, RooAbsPdf *rpdf,  RooR
   
   /// get observables , pdf and number of events
   std::cout<<" <<<<<<<<<<<<<<<< draw error band 2 <<<<<<<<<<<<<<<< "<<std::endl;
-  RooRealVar *rrv_x=ws->var(xaxis_name.c_str());
+  RooRealVar *rrv_x = ws->var(xaxis_name.c_str());
   rpdf->Print("v");
   rpdf->getParameters(RooArgSet(*rrv_x))->Print("v");
   rrv_number_events->Print();
 
   /// Define the sampling of the input pdf
-  Double_t x_min=rrv_x->getMin();
-  Double_t x_max=rrv_x->getMax();
-  Double_t delta_x=(x_max-x_min)/number_point;
-  Double_t width_x=mplot->getFitRangeBinW();
+  Double_t x_min = rrv_x->getMin(); 
+  Double_t x_max = rrv_x->getMax();
+  Double_t delta_x = (x_max-x_min)/number_point;
+  Double_t width_x = mplot->getFitRangeBinW();
 
-  Double_t number_events_mean = rrv_number_events->getVal();
-  Double_t number_events_sigma= rrv_number_events->getError();
+  Double_t number_events_mean  = rrv_number_events->getVal();
+  Double_t number_events_sigma = rrv_number_events->getError();
 
   /// TGraph for the central bkg prediction 
   TGraph *bkgpred=new TGraph(number_point+1);
