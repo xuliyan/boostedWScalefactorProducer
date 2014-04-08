@@ -78,24 +78,28 @@ const std::string & channel,const std::string & wtagger_label,const int & additi
        rdataset_mj->plotOn(mplot_sys,RooFit::Name("MC Events"),RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
        model_pdf->plotOn(mplot_sys,RooFit::Name("Nominal MC"),RooFit::LineColor(kBlack));
        draw_error_band_extendPdf(rdataset_mj,model_pdf,rfresult,mplot_sys,kBlack,"F");
-              
-       if(workspace->pdf(("model"+label+"massvbf_jes_up_"+channel+"_mj").c_str())) 
-	  workspace->pdf(("model"+label+"massvbf_jes_up_"+channel+"_mj").c_str())->plotOn(mplot_sys,RooFit::Name("jes_up"), RooFit::LineColor(kRed),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jes_up_"+channel+"_mj").c_str())->getVal()/(rdataset_mj->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal())));
+           
+       std::cout<<"model"+label+"massvbf_jes_up"+model+"_"+channel+"_mj"<<"   "<<"rrv_scale_to_lumi"+label+"_"+channel<<std::endl;   
+       if(workspace->pdf(("model"+label+"massvbf_jes_up"+model+"_"+channel+"_mj").c_str())) 
+	  workspace->pdf(("model"+label+"massvbf_jes_up"+model+"_"+channel+"_mj").c_str())->plotOn(mplot_sys,RooFit::Name("jes_up"), RooFit::LineColor(kRed),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jes_up"+model+"_"+channel+"_mj").c_str())->getVal()/(rdataset_mj->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal())));
 
-       if(workspace->pdf(("model"+label+"massvbf_jes_dn_"+label+"_mj").c_str())) 
-          workspace->pdf(("model"+label+"massvbf_jes_dn_"+channel+"_mj").c_str())->plotOn(mplot_sys,RooFit::Name("jes_dn"), RooFit::LineColor(kBlue),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jes_dn_"+channel+"_mj").c_str())->getVal()/(rdataset_mj->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal())));
+       std::cout<<"model"+label+"massvbf_jes_dn"+model+"_"+channel+"_mj"<<"   "<<"rrv_scale_to_lumi"+label+"_"+channel<<std::endl;   
+       if(workspace->pdf(("model"+label+"massvbf_jes_dn"+model+"_"+channel+"_mj").c_str())) 
+          workspace->pdf(("model"+label+"massvbf_jes_dn"+model+"_"+channel+"_mj").c_str())->plotOn(mplot_sys,RooFit::Name("jes_dn"), RooFit::LineColor(kBlue),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jes_dn"+model+"_"+channel+"_mj").c_str())->getVal()/(rdataset_mj->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal())));
 
-       if(workspace->pdf(("model"+label+"massvbf_jer_"+channel+"_mj").c_str()))
-          workspace->pdf(("model"+label+"massvbf_jer_"+channel+"_mj").c_str())->plotOn(mplot_sys,RooFit::Name("jer"), RooFit::LineColor(kAzure+1),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jer_"+channel+"_mj").c_str())->getVal()/(rdataset_mj->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal())));
+       std::cout<<"model"+label+"massvbf_jer"+model+"_"+channel+"_mj"<<"   "<<"rrv_scale_to_lumi"+label+"_"+channel<<std::endl;   
+       if(workspace->pdf(("model"+label+"massvbf_jer"+model+"_"+channel+"_mj").c_str()))
+          workspace->pdf(("model"+label+"massvbf_jer"+model+"_"+channel+"_mj").c_str())->plotOn(mplot_sys,RooFit::Name("jer"), RooFit::LineColor(kAzure+1),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jer"+model+"_"+channel+"_mj").c_str())->getVal()/(rdataset_mj->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal())));
   
-       if(workspace->pdf(("model+"+label+"massvbf_jer_up_"+channel+"_mj").c_str()))
-          workspace->pdf(("model"+label+"massvbf_jer_up_"+channel+"_mj").c_str())->plotOn(mplot_sys,RooFit::Name("jer_up"), RooFit::LineColor(kGreen+1),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jer_up_"+channel+"_mj").c_str())->getVal()/(rdataset_mj->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal())));
+       std::cout<<"model+"+label+"massvbf_jer_up"+model+"_"+channel+"_mj"<<"   "<<"rrv_scale_to_lumi"+label+"_"+channel<<std::endl;   
+       if(workspace->pdf(("model"+label+"massvbf_jer_up"+model+"_"+channel+"_mj").c_str()))
+          workspace->pdf(("model"+label+"massvbf_jer_up"+model+"_"+channel+"_mj").c_str())->plotOn(mplot_sys,RooFit::Name("jer_up"), RooFit::LineColor(kGreen+1),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jer_up"+model+"_"+channel+"_mj").c_str())->getVal()/(rdataset_mj->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal())));
 
-       if(workspace->pdf(("model"+label+"massvbf_jer_dn_"+channel+"_mj").c_str()))
-          workspace->pdf(("model+"+label+"massvbf_jer_up_"+channel+"_mj").c_str())->plotOn(mplot_sys,RooFit::Name("jer_dn"), RooFit::LineColor(6),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jer_dn_"+channel+"_mj").c_str())->getVal()/(rdataset_mj->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal())));
+       if(workspace->pdf(("model"+label+"massvbf_jer_dn"+model+"_"+channel+"_mj").c_str()))
+          workspace->pdf(("model"+label+"massvbf_jer_up"+model+"_"+channel+"_mj").c_str())->plotOn(mplot_sys,RooFit::Name("jer_dn"), RooFit::LineColor(6),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jer_dn"+model+"_"+channel+"_mj").c_str())->getVal()/(rdataset_mj->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal())));
 
-       if(label == "_WJets0" and workspace->pdf(("model_WJets01_"+channel+"_mj").c_str()))
-          workspace->pdf(("model_WJets01_"+channel+"_mj").c_str())->plotOn(mplot_sys,RooFit::Name("alt shape"), RooFit::LineColor(kOrange+1),RooFit::Normalization(workspace->var(("rrv_number_WJets01_"+channel+"_mj").c_str())->getVal()/(rdataset_mj->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal())));
+       if(label == "_WJets0" and workspace->pdf(("model_WJets01_"+model+"_"+channel+"_mj").c_str()))
+          workspace->pdf(("model_WJets01"+model+"_"+channel+"_mj").c_str())->plotOn(mplot_sys,RooFit::Name("alt shape"), RooFit::LineColor(kOrange+1),RooFit::Normalization(workspace->var(("rrv_number_WJets01"+model+"_"+channel+"_mj").c_str())->getVal()/(rdataset_mj->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal())));
                   
                
        TLegend* leg = legend4Plot(mplot_sys,0,0.,0.06,0.16,0.,1,channel);
@@ -134,20 +138,20 @@ const std::string & channel,const std::string & wtagger_label,const int & additi
      rrv_number_dataset->setError(0.);
      draw_error_band(rdataset_mj,model_pdf_temp,rrv_number_dataset,rfresult_pdf,mplot_deco,1,"F");
 
-     if(workspace->pdf(("model"+label+model+"massvbf_jes_up_"+channel+"_mj").c_str()))
-        workspace->pdf(("model"+label+model+"massvbf_jes_up_"+channel+"_mj").c_str())->plotOn(mplot_deco,RooFit::Name("jes_up"), RooFit::LineColor(kRed));
+     if(workspace->pdf(("model"+label+"massvbf_jes_up"+model+"_"+channel+"_mj").c_str()))
+        workspace->pdf(("model"+label+"massvbf_jes_up"+model+"_"+channel+"_mj").c_str())->plotOn(mplot_deco,RooFit::Name("jes_up"), RooFit::LineColor(kRed));
 
-     if(workspace->pdf(("model"+label+model+"massvbf_jes_dn"+channel+"_mj").c_str()))
-        workspace->pdf(("model"+label+model+"massvbf_jes_dn_"+channel+"_mj").c_str())->plotOn(mplot_deco,RooFit::Name("jes_dn"), RooFit::LineColor(kBlue));
+     if(workspace->pdf(("model"+label+"massvbf_jes_dn"+model+"_"+channel+"_mj").c_str()))
+        workspace->pdf(("model"+label+"massvbf_jes_dn"+model+"_"+channel+"_mj").c_str())->plotOn(mplot_deco,RooFit::Name("jes_dn"), RooFit::LineColor(kBlue));
 
-     if(workspace->pdf(("model"+label+model+"massvbf_jer_"+channel+"_mj").c_str()))
-        workspace->pdf(("model"+label+model+"massvbf_jer_"+channel+"_mj").c_str())->plotOn(mplot_deco,RooFit::Name("jer"), RooFit::LineColor(kAzure+1));
+     if(workspace->pdf(("model"+label+"massvbf_jer"+model+"_"+channel+"_mj").c_str()))
+        workspace->pdf(("model"+label+"massvbf_jer"+model+"_"+channel+"_mj").c_str())->plotOn(mplot_deco,RooFit::Name("jer"), RooFit::LineColor(kAzure+1));
 
-     if(workspace->pdf(("model"+label+model+"massvbf_jer_up_"+channel+"_mj").c_str()))
-        workspace->pdf(("model"+label+model+"massvbf_jer_up_"+channel+"_mj").c_str())->plotOn(mplot_deco,RooFit::Name("jer_up"), RooFit::LineColor(kGreen+1));
+     if(workspace->pdf(("model"+label+"massvbf_jer_up"+model+"_"+channel+"_mj").c_str()))
+        workspace->pdf(("model"+label+"massvbf_jer_up"+model+"_"+channel+"_mj").c_str())->plotOn(mplot_deco,RooFit::Name("jer_up"), RooFit::LineColor(kGreen+1));
 
-     if(workspace->pdf(("model"+label+model+"massvbf_jer_dn_"+channel+"_mj").c_str()))
-        workspace->pdf(("model"+label+model+"massvbf_jer_up_"+channel+"_mj").c_str())->plotOn(mplot_deco,RooFit::Name("jer_dn"), RooFit::LineColor(6));
+     if(workspace->pdf(("model"+label+"massvbf_jer_dn"+model+"_"+channel+"_mj").c_str()))
+        workspace->pdf(("model"+label+"massvbf_jer_dn"+model+"_"+channel+"_mj").c_str())->plotOn(mplot_deco,RooFit::Name("jer_dn"), RooFit::LineColor(6));
 
      if(label == "_WJets0" and workspace->pdf(("model_WJets01"+model+"_"+channel+"_mj").c_str()))
         workspace->pdf(("model_WJets01"+model+"_"+channel+"_mj").c_str())->plotOn(mplot_deco,RooFit::Name("alt shape"), RooFit::LineColor(kOrange+1));
@@ -185,20 +189,20 @@ const std::string & channel,const std::string & wtagger_label,const int & additi
          }
       }
       else{
-         workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->setVal(workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->getVal()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
-         workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->getError()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
+         workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setVal(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getVal()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
+         workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getError()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
 
-         workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->Print();
+         workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->Print();
          
          if(TString(label).Contains("ggH")){
-            workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->setVal( workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->getVal());
-            workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->getError());
-            workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->Print();
+            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setVal( workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getVal());
+            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getError());
+            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->Print();
          }
          if(TString(label).Contains("vbfH")){
-            workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->setVal( workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->getVal());
-            workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->getError());
-            workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->Print();
+            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setVal( workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getVal());
+            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getError());
+            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->Print();
         } 
       }
       //##### apply the correction of the mean and sigma from the ttbar control sample to the STop, TTbar and VV
@@ -237,76 +241,77 @@ const std::string & channel,const std::string & wtagger_label,const int & additi
 //## Define the Extended Pdf for and mlvj fit giving: label, fit model name, list constraint, range to be fitted and do the decorrelation
 void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileName, const std::string & label, const std::string & in_range, const std::string & mlvj_model, const std::string & channel, const std::string & wtagger_label, const int & deco, const int & show_constant_parameter, const int & logy, const int & ismc, const std::string & label_origin){
 
-        std::cout<<"############### Fit mlvj single MC sample "<<fileName<<" "<<label<<" "<<mlvj_model<<" "<<in_range<<" ##################"<<std::endl;
-        //## imporparam_generatedt variable and dataset         
-        RooRealVar* rrv_mass_lvj = workspace->var("rrv_mass_lvj");
-	RooDataSet* rdataset     = NULL;
-        if( TString(workspace->GetName()).Contains("4bias"))
-         rdataset = (RooDataSet*) workspace->data(("rdataset4bias"+label+in_range+"_"+channel+"_mlvj").c_str());
-        else if ( TString(workspace->GetName()).Contains("4fit"))
-         rdataset = (RooDataSet*) workspace->data(("rdataset4fit"+label+in_range+"_"+channel+"_mlvj").c_str());
+      std::cout<<"############### Fit mlvj single MC sample "<<fileName<<" "<<label<<" "<<mlvj_model<<" "<<in_range<<" ##################"<<std::endl;
+      //## imporparam_generatedt variable and dataset         
+      RooRealVar* rrv_mass_lvj = workspace->var("rrv_mass_lvj");
+      RooDataSet* rdataset     = NULL;
+      if( TString(workspace->GetName()).Contains("4bias"))
+        rdataset = (RooDataSet*) workspace->data(("rdataset4bias"+label+in_range+"_"+channel+"_mlvj").c_str());
+      else if ( TString(workspace->GetName()).Contains("4fit"))
+        rdataset = (RooDataSet*) workspace->data(("rdataset4fit"+label+in_range+"_"+channel+"_mlvj").c_str());
 
-        RooArgList* constraintlist = new RooArgList();
+      RooArgList* constraintlist = new RooArgList();
 
-        //## make the extended pdf model
-        RooExtendPdf* model = MakeExtendedModel(workspace,label+in_range+mlvj_model,mlvj_model,"_mlvj",channel,wtagger_label,constraintlist,ismc);
-        //make the fit
-        RooFitResult* rfresult = model->fitTo(*rdataset,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE));
-        rfresult = model->fitTo(*rdataset,RooFit::Save(1), RooFit::SumW2Error(kTRUE) ,RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2") );
-        rfresult->Print();
+      //## make the extended pdf model
+      RooExtendPdf* model = MakeExtendedModel(workspace,label+in_range+mlvj_model,mlvj_model,"_mlvj",channel,wtagger_label,constraintlist,ismc);
+      //make the fit
+      RooFitResult* rfresult = model->fitTo(*rdataset,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE));
+      rfresult = model->fitTo(*rdataset,RooFit::Save(1), RooFit::SumW2Error(kTRUE) ,RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2") );
+      rfresult->Print();
 
-        //## set the name of the result of the fit and put it in the workspace
-        rfresult->SetName(("rfresult"+label+in_range+"_"+channel+"_mlvj").c_str());
+      //## set the name of the result of the fit and put it in the workspace
+      rfresult->SetName(("rfresult"+label+in_range+"_"+channel+"_mlvj").c_str());
 
-        //## plot the result
-        RooPlot* mplot = rrv_mass_lvj->frame(RooFit::Title(("M_{lvj"+in_range+"} fitted by "+mlvj_model).c_str()), RooFit::Bins(int(rrv_mass_lvj->getBins())));
-        rdataset->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
-        //## plot the error band but don't store the canvas (only plotted without -b option
-        draw_error_band_extendPdf(rdataset,model,rfresult,mplot,2,"L");
-        model->plotOn(mplot,RooFit::Name("model_mc"));//#, RooFit.VLines()); in order to have the right pull
-        rdataset->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0),RooFit::Name("data"));
+      //## plot the result
+      RooPlot* mplot = rrv_mass_lvj->frame(RooFit::Title(("M_{lvj"+in_range+"} fitted by "+mlvj_model).c_str()), RooFit::Bins(int(rrv_mass_lvj->getBins())));
+      rdataset->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
+      //## plot the error band but don't store the canvas (only plotted without -b option
+      draw_error_band_extendPdf(rdataset,model,rfresult,mplot,2,"L");
+      model->plotOn(mplot,RooFit::Name("model_mc"));//#, RooFit.VLines()); in order to have the right pull
+      rdataset->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0),RooFit::Name("data"));
 
-        //## get the pull
-        RooPlot* mplot_pull = get_pull(rrv_mass_lvj,mplot,rdataset,model,rfresult,"data","model_mc",0,1);
-        RooArgSet* parameters_list = model->getParameters(*rdataset);
+      //## get the pull
+      RooPlot* mplot_pull = get_pull(rrv_mass_lvj,mplot,rdataset,model,rfresult,"data","model_mc",0,1);
+      RooArgSet* parameters_list = model->getParameters(*rdataset);
         
-        //##CALCULATE CHI2                                                                                                                                                    
-        RooDataHist* datahist   = rdataset->binnedClone((std::string(rdataset->GetName())+"_binnedClone").c_str(),(std::string(rdataset->GetName())+"_binnedClone").c_str());
-        TH1F* histo_data = (TH1F*) datahist->createHistogram("histo_data",*rrv_mass_lvj);
-        histo_data->SetName("histo_data");
-        TH1F* histo_func = (TH1F*) model->createHistogram("histo_func",*rrv_mass_lvj);
-        histo_func->SetName("histo_func");
+      //##CALCULATE CHI2                                                                                                                                                    
+      RooDataHist* datahist   = rdataset->binnedClone((std::string(rdataset->GetName())+"_binnedClone").c_str(),(std::string(rdataset->GetName())+"_binnedClone").c_str());
+      TH1F* histo_data = (TH1F*) datahist->createHistogram("histo_data",*rrv_mass_lvj);
+      histo_data->SetName("histo_data");
+      TH1F* histo_func = (TH1F*) model->createHistogram("histo_func",*rrv_mass_lvj);
+      histo_func->SetName("histo_func");
         
-        int Nbin     = int(rrv_mass_lvj->getBins());
-        RooArgSet rresult_param = rfresult->floatParsFinal();
-        int nparameters   = rresult_param.getSize();
-        RooAbsReal* ChiSquare = model->createChi2(*datahist,RooFit::Extended(kTRUE),RooFit::DataError(RooAbsData::Poisson));
-        float chi_over_ndf  = ChiSquare->getVal()/(Nbin-nparameters);
+      int Nbin     = int(rrv_mass_lvj->getBins());
+      RooArgSet rresult_param = rfresult->floatParsFinal();
+      int nparameters   = rresult_param.getSize();
+      RooAbsReal* ChiSquare = model->createChi2(*datahist,RooFit::Extended(kTRUE),RooFit::DataError(RooAbsData::Poisson));
+      float chi_over_ndf  = ChiSquare->getVal()/(Nbin-nparameters);
 
         
-        RooHist* residHist = mplot->residHist("data","model_mc");
-        float residual = 0. ;
-        for(int  iPoint = 0 ; iPoint < residHist->GetN() ; iPoint++){
-	 double x = 0. , y = 0. ;
-         residHist->GetPoint(iPoint,x,y); 
-         residual = residual + y*y ;
-	}
+      RooHist* residHist = mplot->residHist("data","model_mc");
+      float residual = 0. ;
+      for(int  iPoint = 0 ; iPoint < residHist->GetN() ; iPoint++){
+	double x = 0. , y = 0. ;
+        residHist->GetPoint(iPoint,x,y); 
+        residual = residual + y*y ;
+      }
         
-        mplot->GetYaxis()->SetRangeUser(1e-2,mplot->GetMaximum()*1.2);
-	/*
-        if options.shapetest == 1:
-         file_out_FTest.write(" ###################### \n");
-         file_out_FTest.write(" Model pdf %s"%(model.GetName()));
-         file_out_FTest.write(" Chi2 Chi2var %0.2f "%(chi_over_ndf));
-         file_out_FTest.write(" Residual %0.2f   Nbin %0.2f nparameters %0.2f \n"%(residual,Nbin,nparameters));
-	*/
+      mplot->GetYaxis()->SetRangeUser(1e-2,mplot->GetMaximum()*1.2);
+      /*
+      if options.shapetest == 1:
+       file_out_FTest.write(" ###################### \n");
+       file_out_FTest.write(" Model pdf %s"%(model.GetName()));
+       file_out_FTest.write(" Chi2 Chi2var %0.2f "%(chi_over_ndf));
+       file_out_FTest.write(" Residual %0.2f   Nbin %0.2f nparameters %0.2f \n"%(residual,Nbin,nparameters));
+      */
 
-        //##Add Chisquare to mplot_pull   
-        TString command; command.Form("#chi^{2}/ndf = %0.2f ",float(chi_over_ndf));                                                                                                               TLatex* cs2 = new TLatex(0.75,0.8,command.Data());
-        cs2->SetNDC();
-        cs2->SetTextSize(0.12);
-        cs2->AppendPad("same");
-        mplot_pull->addObject(cs2);
+      //##Add Chisquare to mplot_pull   
+      TString command; command.Form("#chi^{2}/ndf = %0.2f ",float(chi_over_ndf));                                                                                
+      TLatex* cs2 = new TLatex(0.75,0.8,command.Data());
+      cs2->SetNDC();
+      cs2->SetTextSize(0.12);
+      cs2->AppendPad("same");
+      mplot_pull->addObject(cs2);
 
       command.Form("mkdir -p plots_%s_%s_g1/mlvj_fitting/",channel.c_str(),wtagger_label.c_str());
       system(command.Data());
@@ -322,23 +327,23 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
         model->plotOn(mplot_sys,RooFit::Name("Nominal MC"),RooFit::LineColor(kBlack));
 	draw_error_band_extendPdf(rdataset, model, rfresult,mplot_sys,1,"F");
 
-        if(workspace->pdf(("model"+label+"massvbf_jes_up"+in_range+"_"+channel+"_mlvj").c_str()))
-	  workspace->pdf(("model"+label+"massvbf_jes_up"+in_range+"_"+channel+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jes_up"), RooFit::LineColor(kRed),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jes_up"+in_range+"_"+channel+"_mlvj").c_str())->getVal()/(rdataset->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal())));
+        if(workspace->pdf(("model"+label+"massvbf_jes_up"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str()))
+	  workspace->pdf(("model"+label+"massvbf_jes_up"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jes_up"), RooFit::LineColor(kRed),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jes_up"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()/(rdataset->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal())));
 
-        if(workspace->pdf(("model"+label+"massvbf_jes_dn"+in_range+"_"+channel+"_mlvj").c_str()))
-	  workspace->pdf(("model"+label+"massvbf_jes_dn"+in_range+"_"+channel+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jes_dn"), RooFit::LineColor(kRed),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jes_dn"+in_range+"_"+channel+"_mlvj").c_str())->getVal()/(rdataset->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal())));
+        if(workspace->pdf(("model"+label+"massvbf_jes_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str()))
+	  workspace->pdf(("model"+label+"massvbf_jes_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jes_dn"), RooFit::LineColor(kBlue),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jes_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()/(rdataset->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal())));
 
-        if(workspace->pdf(("model"+label+"massvbf_jer"+in_range+"_"+channel+"_mlvj").c_str()))
-	  workspace->pdf(("model"+label+"massvbf_jer"+in_range+"_"+channel+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jer"), RooFit::LineColor(kRed),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jer"+in_range+"_"+channel+"_mlvj").c_str())->getVal()/(rdataset->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal())));
+        if(workspace->pdf(("model"+label+"massvbf_jer"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str()))
+	  workspace->pdf(("model"+label+"massvbf_jer"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jer"), RooFit::LineColor(kAzure+1),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jer"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()/(rdataset->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal())));
 
-        if(workspace->pdf(("model"+label+"massvbf_jer_up"+in_range+"_"+channel+"_mlvj").c_str()))
-	  workspace->pdf(("model"+label+"massvbf_jer_up"+in_range+"_"+channel+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jer_up"), RooFit::LineColor(kRed),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jer_up"+in_range+"_"+channel+"_mlvj").c_str())->getVal()/(rdataset->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal())));
+        if(workspace->pdf(("model"+label+"massvbf_jer_up"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str()))
+	  workspace->pdf(("model"+label+"massvbf_jer_up"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jer_up"), RooFit::LineColor(kGreen+1),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jer_up"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()/(rdataset->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal())));
 
-        if(workspace->pdf(("model"+label+"massvbf_jer_dn"+in_range+"_"+channel+"_mlvj").c_str()))
-	  workspace->pdf(("model"+label+"massvbf_jer_dn"+in_range+"_"+channel+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jer_dn"), RooFit::LineColor(kRed),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jer_dn"+in_range+"_"+channel+"_mlvj").c_str())->getVal()/(rdataset->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal())));
+        if(workspace->pdf(("model"+label+"massvbf_jer_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str()))
+	  workspace->pdf(("model"+label+"massvbf_jer_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jer_dn"), RooFit::LineColor(6),RooFit::Normalization(workspace->var(("rrv_number"+label+"massvbf_jer_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()/(rdataset->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal())));
 
-        if(label == "_WJets0" and workspace->pdf(("model_WJets01"+in_range+"_"+channel+"_mlvj").c_str()))
-          workspace->pdf(("model_WJets01"+in_range+"_"+channel+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("alt shape"), RooFit::LineColor(kOrange+1),RooFit::Normalization(workspace->var(("rrv_number_WJets01"+in_range+"_"+channel+"_mlvj").c_str())->getVal()/(rdataset->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal())));
+        if(label == "_WJets0" and workspace->pdf(("model_WJets01"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str()))
+          workspace->pdf(("model_WJets01"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("alt shape"), RooFit::LineColor(kOrange+1),RooFit::Normalization(workspace->var(("rrv_number_WJets01"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()/(rdataset->sumEntries()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal())));
 
       }
 
@@ -388,18 +393,18 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
            workspace->pdf(("model"+label+"massvbf_jes_up"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("TTbar_jes_up"), RooFit::LineColor(kRed));
 
 	if(workspace->pdf(("model"+label+"massvbf_jes_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str()))
-           workspace->pdf(("model"+label+"massvbf_jes_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("TTbar_jes_dn"), RooFit::LineColor(kRed));
+           workspace->pdf(("model"+label+"massvbf_jes_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("TTbar_jes_dn"), RooFit::LineColor(kAzure+1));
 
 	if(workspace->pdf(("model"+label+"massvbf_jer"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str()))
-           workspace->pdf(("model"+label+"massvbf_jer"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("TTbar_jer"), RooFit::LineColor(kRed));
+           workspace->pdf(("model"+label+"massvbf_jer"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("TTbar_jer"), RooFit::LineColor(kGreen+1));
 
 	if(workspace->pdf(("model"+label+"massvbf_jer_up"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str()))
-           workspace->pdf(("model"+label+"massvbf_jer_up"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("TTbar_jer_up"), RooFit::LineColor(kRed));
+           workspace->pdf(("model"+label+"massvbf_jer_up"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("TTbar_jer_up"), RooFit::LineColor(6));
 
 	if(workspace->pdf(("model"+label+"massvbf_jer_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str()))
            workspace->pdf(("model"+label+"massvbf_jer_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("TTbar_jer_dn"), RooFit::LineColor(kRed));
 
-        TLegend* leg = legend4Plot(mplot_sys,0,-0.07,0.02,0.01,0.,1,channel);
+        TLegend* leg = legend4Plot(mplot_deco,0,-0.07,0.02,0.01,0.,1,channel);
 	mplot_deco->addObject(leg);
 	rdataset->plotOn(mplot_deco, RooFit::Name("MC Events"), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0));
 
@@ -420,25 +425,25 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
          rrv_number_dataset->setError(0.);
  	 draw_error_band(rdataset,model_pdf,rrv_number_dataset,rfresult_pdf,mplot_deco,1,"F"); 
            
-	 if(workspace->pdf(("model"+label+"massvbf_jes_up"+in_range+"_"+channel+"_mlvj").c_str())) 
-            workspace->pdf(("model"+label+"massvbf_jes_up"+in_range+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("jes_up"), RooFit::LineColor(kRed));
+	 if(workspace->pdf(("model"+label+"massvbf_jes_up"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())) 
+            workspace->pdf(("model"+label+"massvbf_jes_up"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("jes_up"), RooFit::LineColor(kRed));
 
-	 if(workspace->pdf(("model"+label+"massvbf_jes_dn"+in_range+"_"+channel+"_mlvj").c_str())) 
-            workspace->pdf(("model"+label+"massvbf_jes_dn"+in_range+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("jes_dn"), RooFit::LineColor(kRed));
+	 if(workspace->pdf(("model"+label+"massvbf_jes_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())) 
+            workspace->pdf(("model"+label+"massvbf_jes_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("jes_dn"), RooFit::LineColor(kBlue));
 
-	 if(workspace->pdf(("model"+label+"massvbf_jer"+in_range+"_"+channel+"_mlvj").c_str())) 
-            workspace->pdf(("model"+label+"massvbf_jer"+in_range+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("jer"), RooFit::LineColor(kRed));
+	 if(workspace->pdf(("model"+label+"massvbf_jer"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())) 
+            workspace->pdf(("model"+label+"massvbf_jer"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("jer"), RooFit::LineColor(kAzure+1));
 
-	 if(workspace->pdf(("model"+label+"massvbf_jer_up"+in_range+"_"+channel+"_mlvj").c_str())) 
-            workspace->pdf(("model"+label+"massvbf_jer_up"+in_range+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("jer_up"), RooFit::LineColor(kRed));
+	 if(workspace->pdf(("model"+label+"massvbf_jer_up"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())) 
+            workspace->pdf(("model"+label+"massvbf_jer_up"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("jer_up"), RooFit::LineColor(kGreen+1));
 
-	 if(workspace->pdf(("model"+label+"massvbf_jer_dn"+in_range+"_"+channel+"_mlvj").c_str())) 
-            workspace->pdf(("model"+label+"massvbf_jer_dn"+in_range+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("jer_dn"), RooFit::LineColor(kRed));
+	 if(workspace->pdf(("model"+label+"massvbf_jer_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())) 
+            workspace->pdf(("model"+label+"massvbf_jer_dn"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("jer_dn"), RooFit::LineColor(6));
 
-         if(label == "_WJets0" and workspace->pdf(("model_WJets01"+in_range+"_"+channel+"_mlvj").c_str()))
-            workspace->pdf(("model_WJets01"+in_range+"_"+channel+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("alt shape"), RooFit::LineColor(kOrange+1));
+         if(label == "_WJets0" and workspace->pdf(("model_WJets01"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str()))
+            workspace->pdf(("model_WJets01"+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->plotOn(mplot_deco,RooFit::Name("alt shape"), RooFit::LineColor(kOrange+1));
 
-         TLegend* leg = legend4Plot(mplot_sys,0,-0.07,0.02,0.01,0.,1,channel);
+         TLegend* leg = legend4Plot(mplot_deco,0,-0.07,0.02,0.01,0.,1,channel);
          mplot_deco->addObject(leg);
          rdataset->plotOn(mplot_deco, RooFit::Name("MC Events"), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
          model_pdf->plotOn(mplot_deco,RooFit::Name("Nominal MC"),RooFit::LineColor(kBlack));
@@ -450,13 +455,13 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
 
 
       //## Number of the event in the dataset and lumi scale factor --> set the proper number for bkg extraction or for signal region
-      std::cout<<"rrv_number"+label+in_range+mlvj_model+mlvj_model+"_"+channel+"_mlvj"<<std::endl;
+      std::cout<<"rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj"<<std::endl;
       std::cout<<"rrv_scale_to_lumi"+label+"_"+channel+in_range+"_mlvj"<<std::endl;;
         
       workspace->import(*model_pdf_deco);
 
-      workspace->var(("rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->setVal(workspace->var(("rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel+in_range+"_mlvj").c_str())->getVal());
-      workspace->var(("rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->setError(workspace->var(("rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->getError()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel+in_range+"_mlvj").c_str())->getVal() );
+      workspace->var(("rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->setVal(workspace->var(("rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal());
+      workspace->var(("rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->setError(workspace->var(("rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->getError()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal() );
       workspace->var(("rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->Print();
 
 }
