@@ -735,13 +735,13 @@ class doBiasStudy_mlvj:
        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,self.channel,self.wtagger_label,0,0,1);      
        self.workspace4bias_.writeToFile(tmp_file.GetName());
        ## calculate the alpha factor
-       get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fgen,spectrum,"4bias",self.channel,self.wtagger_label,1); 
+       #get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fgen,spectrum,"4bias",self.channel,self.wtagger_label,1); 
        self.workspace4bias_.writeToFile(tmp_file.GetName());
        if options.fgen != options.fres:
         fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fres,self.channel,self.wtagger_label,0,0,1);
         self.workspace4bias_.writeToFile(tmp_file.GetName());
         ## calculate the alpha factor
-        get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fres,spectrum,"4bias",self.channel,self.wtagger_label,1); 
+        #get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fres,spectrum,"4bias",self.channel,self.wtagger_label,1); 
         self.workspace4bias_.writeToFile(tmp_file.GetName());
 
      elif not options.isMC:
@@ -808,13 +808,13 @@ class doBiasStudy_mlvj:
              fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,self.channel,self.wtagger_label,0,0,1);      
              self.workspace4bias_.writeToFile(tmp_file.GetName());
              ## calculate the alpha factor
-             get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fgen,spectrum,"4bias",self.channel,self.wtagger_label,1); 
+             #get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fgen,spectrum,"4bias",self.channel,self.wtagger_label,1); 
              self.workspace4bias_.writeToFile(tmp_file.GetName());
              if options.fgen != options.fres:
                fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fres,self.channel,self.wtagger_label,0,0,1);
                self.workspace4bias_.writeToFile(tmp_file.GetName());
                ## calculate the alpha factor
-               get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fres,spectrum,"4bias",self.channel,self.wtagger_label,1); 
+               #get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fres,spectrum,"4bias",self.channel,self.wtagger_label,1); 
                self.workspace4bias_.writeToFile(tmp_file.GetName());
 
 	
