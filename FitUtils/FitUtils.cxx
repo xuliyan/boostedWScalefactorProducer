@@ -976,8 +976,8 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
   // to calculate the WJets's normalization and error in M_J signal_region. The error must contain the shape error: model_WJets have new parameters fitting data
   if(ttbarcontrolregion){
 
-    RooAbsReal* fullInt   = model_TTbar->createIntegral(RooArgSet(*rrv_mass_j),RooArgSet(*rrv_mass_j) );
-    RooAbsReal* signalInt = model_TTbar->createIntegral(RooArgSet(*rrv_mass_j),RooArgSet(*rrv_mass_j),("signal_region"));
+    RooAbsReal* fullInt   = model_TTbar->createIntegral(*rrv_mass_j,*rrv_mass_j);
+    RooAbsReal* signalInt = model_TTbar->createIntegral(*rrv_mass_j,*rrv_mass_j,("signal_region"));
     double fullInt_val   = fullInt->getVal();
     double signalInt_val = signalInt->getVal()/fullInt_val;
     // take the value from the fit (normalization) and multiply it from the ratio of the integrals
@@ -993,8 +993,8 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
     rrv_TTbar->Print();
   }
   else{
-         RooAbsReal* fullInt   = model_WJets->createIntegral(RooArgSet(*rrv_mass_j),RooFit::NormSet(RooArgSet(*rrv_mass_j)));
-         RooAbsReal* signalInt = model_WJets->createIntegral(RooArgSet(*rrv_mass_j),RooFit::NormSet(RooArgSet(*rrv_mass_j)),RooFit::Range("signal_region"));
+         RooAbsReal* fullInt   = model_WJets->createIntegral(*rrv_mass_j,*rrv_mass_j);
+         RooAbsReal* signalInt = model_WJets->createIntegral(*rrv_mass_j,*rrv_mass_j,("signal_region"));
          double fullInt_val   = fullInt->getVal();
          double signalInt_val = signalInt->getVal()/fullInt_val;
          //take the value from the fit (normalization) and multiply it from the ratio of the integrals
@@ -1021,10 +1021,10 @@ void get_mj_normalization_insignalregion(RooWorkspace* workspace, const std::str
   RooAbsPdf*  model      = workspace->pdf(("model"+label+model_name+"_"+channel+"_mj").c_str());
   std::cout<<" model "<<"model"+label+"_"+channel+"_mj"<<std::endl;
                                 
-  RooAbsReal* fullInt   = model->createIntegral(RooArgSet(*rrv_mass_j),RooFit::NormSet(RooArgSet(*rrv_mass_j)));
-  RooAbsReal* sb_loInt  = model->createIntegral(RooArgSet(*rrv_mass_j),RooFit::NormSet(RooArgSet(*rrv_mass_j)),("sb_lo"));
-  RooAbsReal* signalInt = model->createIntegral(RooArgSet(*rrv_mass_j),RooFit::NormSet(RooArgSet(*rrv_mass_j)),("signal_region"));
-  RooAbsReal* sb_hiInt  = model->createIntegral(RooArgSet(*rrv_mass_j),RooFit::NormSet(RooArgSet(*rrv_mass_j)),("sb_hi"));
+  RooAbsReal* fullInt   = model->createIntegral(*rrv_mass_j,*rrv_mass_j);
+  RooAbsReal* sb_loInt  = model->createIntegral(*rrv_mass_j,*rrv_mass_j,("sb_lo"));
+  RooAbsReal* signalInt = model->createIntegral(*rrv_mass_j,*rrv_mass_j,("signal_region"));
+  RooAbsReal* sb_hiInt  = model->createIntegral(*rrv_mass_j,*rrv_mass_j,("sb_hi"));
 
   double fullInt_val   = fullInt->getVal();
   double sb_loInt_val  = sb_loInt->getVal()/fullInt_val;
@@ -1051,7 +1051,7 @@ void get_mj_normalization_insignalregion(RooWorkspace* workspace, const std::str
 
 
 //Method to fit data mlvj shape in the sideband -> first step for the background extraction of the shape                                                                           
-void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> color_palet, const std::string & label, const std::string & mlvj_region, const std::string & mlvj_model, const std::string & channel, const std::string & wtagger, const std::string & fgen, const int & ttbarcontrolregion, const int & logy, const int & pseudodata, const std::string & jetBin){
+void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> color_palet, std::map<std::string,std::string> mlvj_shape, const std::string & label, const std::string & mass_scale, const std::string & mlvj_region, const std::string & mlvj_model, const std::string & channel, const std::string & wtagger, const int & ttbarcontrolregion, const int & logy, const int & pseudodata, const std::string & jetBin){
 
   std::cout<<"############### Fit mlvj in mj sideband: "<<label<<" "<<mlvj_region<<" "<<mlvj_model<<" ##################"<<std::endl;
 
@@ -1059,24 +1059,24 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
   RooDataSet* rdataset_data_mlvj = (RooDataSet*) workspace->data(("rdataset_data"+mlvj_region+"_"+channel+"_mlvj").c_str());
 
   // get and fix the minor component shapes in the sb low                                                                                                                            
-  RooAbsPdf* model_VV_backgrounds     = dynamic_cast<RooAbsPdf*>(get_VV_mlvj_Model(workspace,"_VV",mlvj_region,fgen,channel));
-  RooAbsPdf* model_STop_backgrounds   = dynamic_cast<RooAbsPdf*>(get_STop_mlvj_Model(workspace,"_STop",mlvj_region,fgen,channel));
+  RooAbsPdf* model_VV_backgrounds     = dynamic_cast<RooAbsPdf*>(get_VV_mlvj_Model(workspace,"_VV"+mass_scale,mlvj_region,mlvj_shape["VV"],channel));
+  RooAbsPdf* model_STop_backgrounds   = dynamic_cast<RooAbsPdf*>(get_STop_mlvj_Model(workspace,"_STop"+mass_scale,mlvj_region,mlvj_shape["STop"],channel));
   RooAbsPdf* model_WW_EWK_backgrounds = NULL ;
-  if(jetBin == "_2jet") model_WW_EWK_backgrounds = dynamic_cast<RooAbsPdf*>(get_WW_EWK_mlvj_Model(workspace,"_WW_EWK",mlvj_region,fgen,channel));
+  if(jetBin == "_2jet") model_WW_EWK_backgrounds = dynamic_cast<RooAbsPdf*>(get_WW_EWK_mlvj_Model(workspace,"_WW_EWK"+mass_scale,mlvj_region,mlvj_shape["WW_EWK"],channel));
 
   RooAbsPdf* model_TTbar_backgrounds = NULL ; 
   RooAbsPdf* model_WJets_backgrounds = NULL ; 
 
   if(ttbarcontrolregion == 0)
-    model_TTbar_backgrounds  = dynamic_cast<RooAbsPdf*>(get_TTbar_mlvj_Model(workspace,"_TTbar",mlvj_region,fgen,channel));
+    model_TTbar_backgrounds  = dynamic_cast<RooAbsPdf*>(get_TTbar_mlvj_Model(workspace,"_TTbar"+mass_scale,mlvj_region,mlvj_shape["TTbar"],channel));
   else
-    model_WJets_backgrounds  = dynamic_cast<RooAbsPdf*>(get_WJets_mlvj_Model(workspace,"_WJets0",mlvj_region,fgen,channel));
+    model_WJets_backgrounds  = dynamic_cast<RooAbsPdf*>(get_WJets_mlvj_Model(workspace,"_WJets0"+mass_scale,mlvj_region,mlvj_shape["WJets0"],channel));
 
-  workspace->var(("rrv_number_TTbar"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->Print();
-  workspace->var(("rrv_number_WJets0"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->Print();
-  workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->Print();
-  workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->Print();
-  if(jetBin == "_2jet") workspace->var(("rrv_number_WW_EWK"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->Print();
+  workspace->var(("rrv_number_TTbar"+mass_scale+mlvj_region+mlvj_shape["TTbar"]+"_"+channel+"_mlvj").c_str())->Print();
+  workspace->var(("rrv_number_WJets0"+mass_scale+mlvj_region+mlvj_shape["WJets0"]+"_"+channel+"_mlvj").c_str())->Print();
+  workspace->var(("rrv_number_STop"+mass_scale+mlvj_region+mlvj_shape["STop"]+"_"+channel+"_mlvj").c_str())->Print();
+  workspace->var(("rrv_number_VV"+mass_scale+mlvj_region+mlvj_shape["VV"]+"_"+channel+"_mlvj").c_str())->Print();
+  if(jetBin == "_2jet") workspace->var(("rrv_number_WW_EWK"+mass_scale+mlvj_region+mlvj_shape["WW_EWK"]+"_"+channel+"_mlvj").c_str())->Print();
 
   //Make the Pdf for the WJets                                                                                                                                                     
   RooArgList*   constraint = NULL;
@@ -1093,8 +1093,11 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
 
     model_pdf_WJets = MakeGeneralPdf(workspace,label+mlvj_region+mlvj_model+std::string("_from_fitting"),mlvj_model,"_mlvj",wtagger,channel,constraint);
     model_pdf_WJets->Print();
-    //inititalize the value to what was fitted with the mc in the sideband                                                                                                          
-    number_WJets_sb_lo = dynamic_cast<RooRealVar*>( workspace->var(("rrv_number"+label+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->clone(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str()));
+    //inititalize the value to what was fitted with the mc in the sideband
+    if (TString(label).Contains("WJets01"))                                                                                                          
+     number_WJets_sb_lo = dynamic_cast<RooRealVar*>( workspace->var(("rrv_number"+label+mlvj_region+mlvj_shape["WJets01"]+"_"+channel+"_mlvj").c_str())->clone(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str()));
+    else if (TString(label).Contains("WJets0"))
+     number_WJets_sb_lo = dynamic_cast<RooRealVar*>( workspace->var(("rrv_number"+label+mlvj_region+mlvj_shape["WJets0"]+"_"+channel+"_mlvj").c_str())->clone(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str()));
 
     model_WJets = new RooExtendPdf(("model"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str(),("model"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str(),*model_pdf_WJets,*number_WJets_sb_lo);
 
@@ -1112,9 +1115,9 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
          model_pdf_TTbar = MakeGeneralPdf(workspace,label+mlvj_region+mlvj_model+"_from_fitting",mlvj_model,"_mlvj",wtagger,channel,constraint);
          model_pdf_TTbar->Print();
          // inititalize the value to what was fitted with the mc in the sideband
-         number_TTbar_signal_region = dynamic_cast<RooRealVar*>( workspace->var(("rrv_number"+label+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->clone(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str()));
+         number_TTbar_signal_region = dynamic_cast<RooRealVar*>( workspace->var(("rrv_number"+label+mlvj_region+mlvj_shape["TTbar"]+"_"+channel+"_mlvj").c_str())->clone(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str()));
     
-         model_TTbar        = new  RooExtendPdf(("model"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str(),("model"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str(),*model_pdf_TTbar,*number_TTbar_signal_region);
+         model_TTbar     = new  RooExtendPdf(("model"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str(),("model"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str(),*model_pdf_TTbar,*number_TTbar_signal_region);
 
          number_TTbar_signal_region->Print();
 
@@ -1139,42 +1142,42 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
 
     // data in the sideband plus error from fit        
     if(jetBin == "_2jet"){
-     rrv_number_data_sb_lo_mlvj = new RooRealVar(("rrv_number_data"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
-                                                ("rrv_number_data"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
-                                                workspace->var(("rrv_number_TTbar"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                workspace->var(("rrv_number_WW_EWK"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                workspace->var(("rrv_number_WJets0"+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getVal() );
+     rrv_number_data_sb_lo_mlvj = new RooRealVar(("rrv_number_data"+mass_scale+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
+                                                ("rrv_number_data"+mass_scale+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
+                                                workspace->var(("rrv_number_TTbar"+mass_scale+mlvj_region+mlvj_shape["TTbar"]+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_STop"+mass_scale+mlvj_region+mlvj_shape["STop"]+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_VV"+mass_scale+mlvj_region+mlvj_shape["VV"]+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_WW_EWK"+mass_scale+mlvj_region+mlvj_shape["WW_EWK"]+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getVal() );
 
-     rrv_number_data_sb_lo_mlvj->setError(TMath::Sqrt(workspace->var(("rrv_number_WJets0"+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getError()*
-                                                    workspace->var(("rrv_number_WJets0"+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getError()+
-                                                    workspace->var(("rrv_number_TTbar"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()*
-                                                    workspace->var(("rrv_number_TTbar"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()+
-                                                    workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()*
-                                                    workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()+
-                                                    workspace->var(("rrv_number_WW_EWK"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()*
-                                                    workspace->var(("rrv_number_WW_EWK"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()+
-                                                    workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()*
-                                                    workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()));
+     rrv_number_data_sb_lo_mlvj->setError(TMath::Sqrt(workspace->var(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getError()*
+                                                    workspace->var(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getError()+
+                                                    workspace->var(("rrv_number_TTbar"+mass_scale+mlvj_region+mlvj_shape["TTbar"]+"_"+channel+"_mlvj").c_str())->getError()*
+                                                    workspace->var(("rrv_number_TTbar"+mass_scale+mlvj_region+mlvj_shape["TTbar"]+"_"+channel+"_mlvj").c_str())->getError()+
+                                                    workspace->var(("rrv_number_STop"+mass_scale+mlvj_region+mlvj_shape["STop"]+"_"+channel+"_mlvj").c_str())->getError()*
+                                                    workspace->var(("rrv_number_STop"+mass_scale+mlvj_region+mlvj_shape["STop"]+"_"+channel+"_mlvj").c_str())->getError()+
+                                                    workspace->var(("rrv_number_WW_EWK"+mass_scale+mlvj_region+mlvj_shape["WW_EWK"]+"_"+channel+"_mlvj").c_str())->getError()*
+                                                    workspace->var(("rrv_number_WW_EWK"+mass_scale+mlvj_region+mlvj_shape["WW_EWK"]+"_"+channel+"_mlvj").c_str())->getError()+
+                                                    workspace->var(("rrv_number_VV"+mass_scale+mlvj_region+mlvj_shape["VV"]+"_"+channel+"_mlvj").c_str())->getError()*
+                                                    workspace->var(("rrv_number_VV"+mass_scale+mlvj_region+mlvj_shape["VV"]+"_"+channel+"_mlvj").c_str())->getError()));
 
     }
     else{
-      rrv_number_data_sb_lo_mlvj = new RooRealVar(("rrv_number_data"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
-                                                ("rrv_number_data"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
-                                                workspace->var(("rrv_number_TTbar"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                workspace->var(("rrv_number_WJets0"+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getVal() );
+      rrv_number_data_sb_lo_mlvj = new RooRealVar(("rrv_number_data"+mass_scale+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
+                                                ("rrv_number_data"+mass_scale+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
+                                                workspace->var(("rrv_number_TTbar"+mass_scale+mlvj_region+mlvj_shape["TTbar"]+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_STop"+mass_scale+mlvj_region+mlvj_shape["STop"]+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_VV"+mass_scale+mlvj_region+mlvj_shape["VV"]+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getVal() );
 
-      rrv_number_data_sb_lo_mlvj->setError(TMath::Sqrt(workspace->var(("rrv_number_WJets0"+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getError()*
-                                                    workspace->var(("rrv_number_WJets0"+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getError()+
-                                                    workspace->var(("rrv_number_TTbar"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()*
-                                                    workspace->var(("rrv_number_TTbar"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()+
-                                                    workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()*
-                                                    workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()+
-                                                    workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()*
-                                                    workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()));
+      rrv_number_data_sb_lo_mlvj->setError(TMath::Sqrt(workspace->var(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getError()*
+                                                    workspace->var(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str())->getError()+
+                                                    workspace->var(("rrv_number_TTbar"+mass_scale+mlvj_region+mlvj_shape["TTbar"]+"_"+channel+"_mlvj").c_str())->getError()*
+                                                    workspace->var(("rrv_number_TTbar"+mass_scale+mlvj_region+mlvj_shape["TTbar"]+"_"+channel+"_mlvj").c_str())->getError()+
+                                                    workspace->var(("rrv_number_STop"+mass_scale+mlvj_region+mlvj_shape["STop"]+"_"+channel+"_mlvj").c_str())->getError()*
+                                                    workspace->var(("rrv_number_STop"+mass_scale+mlvj_region+mlvj_shape["STop"]+"_"+channel+"_mlvj").c_str())->getError()+
+                                                    workspace->var(("rrv_number_VV"+mass_scale+mlvj_region+mlvj_shape["VV"]+"_"+channel+"_mlvj").c_str())->getError()*
+                                                    workspace->var(("rrv_number_VV"+mass_scale+mlvj_region+mlvj_shape["VV"]+"_"+channel+"_mlvj").c_str())->getError()));
 
 
     }
@@ -1190,42 +1193,42 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
 
     // data in the sideband plus error from fit        
     if(jetBin == "_2jet"){
-     rrv_number_data_sb_lo_mlvj = new RooRealVar(("rrv_number_data"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
-                                                ("rrv_number_data"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
-                                                workspace->var(("rrv_number_TTbar"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                workspace->var(("rrv_number_WW_EWK"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                workspace->var(("rrv_number_WJets0"+mlvj_region+fgen+"_from_fitting_"+channel+"_mlvj").c_str())->getVal() );
+      rrv_number_data_sb_lo_mlvj = new RooRealVar(("rrv_number_data"+mass_scale+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
+                                                ("rrv_number_data"+mass_scale+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
+                                                workspace->var(("rrv_number"+label+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_STop"+mass_scale+mlvj_region+mlvj_shape["STop"]+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_VV"+mass_scale+mlvj_region+mlvj_shape["VV"]+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_WW_EWK"+mass_scale+mlvj_region+mlvj_shape["WW_EWK"]+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_WJets0"+mass_scale+mlvj_region+mlvj_shape["WJets0"]+"_from_fitting_"+channel+"_mlvj").c_str())->getVal() );
 
-     rrv_number_data_sb_lo_mlvj->setError(TMath::Sqrt(workspace->var(("rrv_number_WJets0"+mlvj_region+fgen+"_from_fitting_"+channel+"_mlvj").c_str())->getError()*
-                                                     workspace->var(("rrv_number_WJets0"+mlvj_region+fgen+"_from_fitting_"+channel+"_mlvj").c_str())->getError()+
-                                                     workspace->var(("rrv_number_TTbar"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str())->getError()*
-                                                     workspace->var(("rrv_number_TTbar"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str())->getError()+
-                                                     workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()*
-                                                     workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()+
-                                                     workspace->var(("rrv_number_WW_EWK"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()*
-                                                     workspace->var(("rrv_number_WW_EWK"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()+
-                                                     workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()*
-                                                     workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()));
+     rrv_number_data_sb_lo_mlvj->setError(TMath::Sqrt(workspace->var(("rrv_number_WJets0"+mass_scale+mlvj_region+mlvj_shape["WJets0"]+"_from_fitting_"+channel+"_mlvj").c_str())->getError()*
+                                                     workspace->var(("rrv_number_WJets0"+mass_scale+mlvj_region+mlvj_shape["WJets0"]+"_from_fitting_"+channel+"_mlvj").c_str())->getError()+
+                                                     workspace->var(("rrv_number"+label+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str())->getError()*
+                                                     workspace->var(("rrv_number"+label+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str())->getError()+
+                                                     workspace->var(("rrv_number_STop"+mass_scale+mlvj_region+mlvj_shape["STop"]+"_"+channel+"_mlvj").c_str())->getError()*
+                                                     workspace->var(("rrv_number_STop"+mass_scale+mlvj_region+mlvj_shape["STop"]+"_"+channel+"_mlvj").c_str())->getError()+
+                                                     workspace->var(("rrv_number_WW_EWK"+mass_scale+mlvj_region+mlvj_shape["WW_EWK"]+"_"+channel+"_mlvj").c_str())->getError()*
+                                                     workspace->var(("rrv_number_WW_EWK"+mass_scale+mlvj_region+mlvj_shape["WW_EWK"]+"_"+channel+"_mlvj").c_str())->getError()+
+                                                     workspace->var(("rrv_number_VV"+mass_scale+mlvj_region+mlvj_shape["VV"]+"_"+channel+"_mlvj").c_str())->getError()*
+                                                     workspace->var(("rrv_number_VV"+mass_scale+mlvj_region+mlvj_shape["VV"]+"_"+channel+"_mlvj").c_str())->getError()));
 
     }
     else{
-     rrv_number_data_sb_lo_mlvj = new RooRealVar(("rrv_number_data"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
-                                                ("rrv_number_data"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
-                                                workspace->var(("rrv_number_TTbar"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getVal()+
-                                                workspace->var(("rrv_number_WJets0"+mlvj_region+fgen+"_from_fitting_"+channel+"_mlvj").c_str())->getVal() );
+     rrv_number_data_sb_lo_mlvj = new RooRealVar(("rrv_number_data"+mass_scale+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
+                                                ("rrv_number_data"+mass_scale+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str(),
+                                                workspace->var(("rrv_number"+label+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_STop"+mass_scale+mlvj_region+mlvj_shape["STop"]+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_VV"+mass_scale+mlvj_region+mlvj_shape["VV"]+"_"+channel+"_mlvj").c_str())->getVal()+
+                                                workspace->var(("rrv_number_WJets0"+mass_scale+mlvj_region+mlvj_shape["WJets0"]+"_from_fitting_"+channel+"_mlvj").c_str())->getVal() );
 
-     rrv_number_data_sb_lo_mlvj->setError(TMath::Sqrt(workspace->var(("rrv_number_WJets0"+mlvj_region+fgen+"_from_fitting_"+channel+"_mlvj").c_str())->getError()*
-                                                     workspace->var(("rrv_number_WJets0"+mlvj_region+fgen+"_from_fitting_"+channel+"_mlvj").c_str())->getError()+
-                                                     workspace->var(("rrv_number_TTbar"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str())->getError()*
-                                                     workspace->var(("rrv_number_TTbar"+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str())->getError()+
-                                                     workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()*
-                                                     workspace->var(("rrv_number_STop"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()+
-                                                     workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()*
-                                                     workspace->var(("rrv_number_VV"+mlvj_region+fgen+"_"+channel+"_mlvj").c_str())->getError()));
+     rrv_number_data_sb_lo_mlvj->setError(TMath::Sqrt(workspace->var(("rrv_number_WJets0"+mass_scale+mlvj_region+mlvj_shape["WJets0"]+"_from_fitting_"+channel+"_mlvj").c_str())->getError()*
+                                                     workspace->var(("rrv_number_WJets0"+mass_scale+mlvj_region+mlvj_shape["WJets0"]+"_from_fitting_"+channel+"_mlvj").c_str())->getError()+
+                                                     workspace->var(("rrv_number"+label+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str())->getError()*
+                                                     workspace->var(("rrv_number"+label+mlvj_region+mlvj_model+"_"+channel+"_mlvj").c_str())->getError()+
+                                                     workspace->var(("rrv_number_STop"+mass_scale+mlvj_region+mlvj_shape["STop"]+"_"+channel+"_mlvj").c_str())->getError()*
+                                                     workspace->var(("rrv_number_STop"+mass_scale+mlvj_region+mlvj_shape["STop"]+"_"+channel+"_mlvj").c_str())->getError()+
+                                                     workspace->var(("rrv_number_VV"+mass_scale+mlvj_region+mlvj_shape["VV"]+"_"+channel+"_mlvj").c_str())->getError()*
+                                                     workspace->var(("rrv_number_VV"+mass_scale+mlvj_region+mlvj_shape["VV"]+"_"+channel+"_mlvj").c_str())->getError()));
 
     }
     rrv_number_data_sb_lo_mlvj->Print();
@@ -1235,7 +1238,7 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
 
   RooPlot* mplot = NULL; 
   //plot for WJets default + default shape
-  if(label == "_WJets0"){
+  if(TString(label).Contains("_WJets")){
 
       mplot = rrv_mass_lvj->frame(RooFit::Title("M_lvj fitted in M_j sideband"),RooFit::Bins(int(rrv_mass_lvj->getBins())));
 
@@ -1409,7 +1412,7 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
 
    //#### Decorrelate the parameters in order to have a proper shape in the workspace
    RooWorkspace* wsfit_tmp = new RooWorkspace(("wsfit_tmp+"+label+mlvj_model+"_sb_lo_from_fitting_mlvj").c_str());
-   PdfDiagonalizer* Deco   = new PdfDiagonalizer(("Deco"+label+mlvj_model+"_sb_lo_from_fitting_"+channel+"_"+wtagger+"_mlvj").c_str(),wsfit_tmp,*rfresult);
+   PdfDiagonalizer* Deco   = new PdfDiagonalizer(("Deco"+label+"_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_"+wtagger+"_mlvj").c_str(),wsfit_tmp,*rfresult);
    std::cout<<"#################### diagonalize data sideband fit "<<std::endl;
    RooAbsPdf* model_pdf_WJets_deco = Deco->diagonalize(*model_pdf_WJets);
    std::cout<<"#################### print parameters "<<std::endl;
@@ -1428,27 +1431,25 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
                             
      draw_error_band(rdataset_data_mlvj,model_pdf_WJets,rrv_number_dataset,rfresult,mplot,color_palet["Uncertainty"],"F");
 
-     if(workspace->pdf(("model_pdf"+label+"massvbf_jes_up_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_mlvj_Deco"+label+"massvbf_jes_up_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_"+wtagger+"_mlvj").c_str()))
-       workspace->pdf(("model_pdf"+label+"massvbf_jes_up_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_mlvj_Deco"+label+"massvbf_jes_up_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_"+wtagger+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jes_up"), RooFit::LineColor(kBlue));
+     if(workspace->pdf(("model_pdf"+label+"massvbf_jes_up_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_mlvj_Deco"+label+"massvbf_jes_up_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_"+wtagger+"_mlvj").c_str()))
+        workspace->pdf(("model_pdf"+label+"massvbf_jes_up_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_mlvj_Deco"+label+"massvbf_jes_up_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_"+wtagger+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jes_up"), RooFit::LineColor(kBlue));
 
-     if(workspace->pdf(("model_pdf"+label+"massvbf_jes_dn_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_mlvj_Deco"+label+"massvbf_jes_dn_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_"+wtagger+"_mlvj").c_str()))
-       workspace->pdf(("model_pdf"+label+"massvbf_jes_dn_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_mlvj_Deco"+label+"massvbf_jes_dn_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_"+wtagger+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jes_dn"), RooFit::LineColor(kBlue));
+     if(workspace->pdf(("model_pdf"+label+"massvbf_jes_dn_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_mlvj_Deco"+label+"massvbf_jes_dn_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_"+wtagger+"_mlvj").c_str()))
+        workspace->pdf(("model_pdf"+label+"massvbf_jes_dn_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_mlvj_Deco"+label+"massvbf_jes_dn_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_"+wtagger+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jes_dn"), RooFit::LineColor(kBlue));
 
-     if(workspace->pdf(("model_pdf"+label+"massvbf_jer_up_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_mlvj_Deco"+label+"massvbf_jer_up_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_"+wtagger+"_mlvj").c_str()))
-       workspace->pdf(("model_pdf"+label+"massvbf_jer_up_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_mlvj_Deco"+label+"massvbf_jer_up_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_"+wtagger+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jer_up"), RooFit::LineColor(kBlue));
+     if(workspace->pdf(("model_pdf"+label+"massvbf_jer_up_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_mlvj_Deco"+label+"massvbf_jer_up_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_"+wtagger+"_mlvj").c_str()))
+        workspace->pdf(("model_pdf"+label+"massvbf_jer_up_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_mlvj_Deco"+label+"massvbf_jer_up_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_"+wtagger+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jer_up"), RooFit::LineColor(kBlue));
 
-     if(workspace->pdf(("model_pdf"+label+"massvbf_jer_dn_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_mlvj_Deco"+label+"massvbf_jer_dn_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_"+wtagger+"_mlvj").c_str()))
-       workspace->pdf(("model_pdf"+label+"massvbf_jer_dn_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_mlvj_Deco"+label+"massvbf_jer_dn_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_"+wtagger+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jer_dn"), RooFit::LineColor(kBlue));
+     if(workspace->pdf(("model_pdf"+label+"massvbf_jer_dn_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_mlvj_Deco"+label+"massvbf_jer_dn_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_"+wtagger+"_mlvj").c_str()))
+        workspace->pdf(("model_pdf"+label+"massvbf_jer_dn_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_mlvj_Deco"+label+"massvbf_jer_dn_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_"+wtagger+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jer_dn"), RooFit::LineColor(kBlue));
 
-     if(workspace->pdf(("model_pdf"+label+"massvbf_jer_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_mlvj_Deco"+label+"massvbf_jer_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_"+wtagger+"_mlvj").c_str()))
-       workspace->pdf(("model_pdf"+label+"massvbf_jer_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_mlvj_Deco"+label+"massvbf_jer_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_"+wtagger+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jer"), RooFit::LineColor(kBlue));
+     if(workspace->pdf(("model_pdf"+label+"massvbf_jer_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_mlvj_Deco"+label+"massvbf_jer_sb_lo_"+mlvj_model+"from_fitting_"+channel+"_"+wtagger+"_mlvj").c_str()))
+        workspace->pdf(("model_pdf"+label+"massvbf_jer_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_mlvj_Deco"+label+"massvbf_jer_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_"+wtagger+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("jer"), RooFit::LineColor(kBlue));
 
-
-     if(label == "_WJets0" and workspace->pdf(("model_pdf_WJets01_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_mlvj_Deco_WJets01_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_"+wtagger+"_mlvj%s").c_str()))
-       workspace->pdf(("model_pdf_WJets01_sb_lo_from_fitting"+mlvj_region+"_"+channel+"_mlvj_Deco_WJets01_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_"+wtagger+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("alt shape"), RooFit::LineColor(kOrange+1));
-
+     if(label == "_WJets0" and workspace->pdf(("model_pdf_WJets01_sb_lo"+mlvj_shape["WJets01"]+"_from_fitting_"+channel+"_mlvj_Deco_WJets01_sb_lo"+mlvj_shape["WJets01"]+"_from_fitting_"+channel+"_"+wtagger+"_mlvj").c_str()))
+      workspace->pdf(("model_pdf_WJets01_sb_lo"+mlvj_shape["WJets01"]+"_from_fitting_"+channel+"_mlvj_Deco_WJets01_sb_lo"+mlvj_shape["WJets01"]+"_from_fitting_"+channel+"_"+wtagger+"_mlvj").c_str())->plotOn(mplot_sys,RooFit::Name("alt shape"), RooFit::LineColor(kOrange+1));
                            
-     TLegend* legend = legend4Plot(mplot,0,-0.07,0.02,0.01,0.,1,channel);
+     TLegend* legend = legend4Plot(mplot_sys,0,-0.07,0.02,0.01,0.,1,channel);
      mplot_sys->addObject(legend);
      command.Form("plots_%s_%s_g1/other/",channel.c_str(),wtagger.c_str());
      Name.Form("mlvj_sb_lo%s_%s_%s",label.c_str(),channel.c_str(),wtagger.c_str());
@@ -1460,15 +1461,22 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
 
 
 //##### Function that calculate the normalization inside the mlvj signal region (mass window around the resonance in order to fill datacards)
-void get_mlvj_normalization_insignalregion(RooWorkspace* workspace,const std::string & label, const std::string & model_name, const std::string & channel){
+void get_mlvj_normalization_insignalregion(RooWorkspace* workspace,const std::string & label,  const std::string & model_name, const std::string & mlvj_region,const std::string & channel, const int & isAlpha){
 
   std::cout<< "############### get mlvj normalization inside SR "<<label<<" "<<model_name<<" ##################"<<std::endl;
 
   RooRealVar* rrv_mass_lvj = workspace->var("rrv_mass_lvj");
-  RooAbsPdf* model = workspace->pdf(model_name.c_str());
+  RooAbsPdf* model ;
+  
+  if(isAlpha == 0) 
+   model = workspace->pdf(("model"+label+mlvj_region+model_name+"_"+channel+"_mlvj").c_str());  
+  else
+   model = workspace->pdf(("model_pdf"+label+mlvj_region+model_name+"_"+channel+"_after_correct_mlvj").c_str());
+  
+  std::cout<<"model_pdf"+label+mlvj_region+model_name+"_"+channel+"_after_correct_mlvj"<<std::endl;
 
-  RooAbsReal* fullInt   = model->createIntegral(RooArgSet(*rrv_mass_lvj),RooFit::NormSet(RooArgSet(*rrv_mass_lvj)));
-  RooAbsReal* signalInt = model->createIntegral(RooArgSet(*rrv_mass_lvj),RooFit::NormSet(RooArgSet(*rrv_mass_lvj)),("signal_region"));
+  RooAbsReal* fullInt   = model->createIntegral(*rrv_mass_lvj,*rrv_mass_lvj);
+  RooAbsReal* signalInt = model->createIntegral(*rrv_mass_lvj,*rrv_mass_lvj,("signal_region"));
 
   double fullInt_val = fullInt->getVal();
   double signalInt_val = signalInt->getVal()/fullInt_val;
@@ -1480,7 +1488,7 @@ void get_mlvj_normalization_insignalregion(RooWorkspace* workspace,const std::st
   workspace->var(("rrv_number_dataset_AllRange"+label+"_"+channel+"_mlvj").c_str())->Print();
 
   std::cout<< "########## Events Number get from fit : "<<std::endl;
-  RooRealVar* rrv_tmp = workspace->var(("rrv_number"+label+"_signal_region"+"_"+channel+"_mlvj").c_str());
+  RooRealVar* rrv_tmp = workspace->var(("rrv_number"+label+"_signal_region"+model_name+"_"+channel+"_mlvj").c_str());
   std::cout<< "Events Number in Signal Region from fitting: "<<rrv_tmp->getVal()*signalInt_val<<std::endl;
 
   //#### store the info in the output file
@@ -1499,7 +1507,7 @@ void get_mlvj_normalization_insignalregion(RooWorkspace* workspace,const std::st
 
 
 //method to get the alpha function to extrapolate the wjets in the signal region
-void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,const std::string & label, const std::string & mlvj_model, const std::string & mass_spectrum,const std::string & workspace_label, const std::string & channel, const std::string & wtagger, const int & narrow_factor){
+void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,const std::string & label, const std::string & mlvj_model, const std::string & mlvj_alternate_model, const std::string & mass_spectrum,const std::string & workspace_label, const std::string & channel, const std::string & wtagger, const int & narrow_factor){
 
   std::cout<<" ############# get the extrapolation function alpha from MC : "<<label<<"   "<<mlvj_model<<"   "<<mass_spectrum<<" ###############"<<std::endl;
   gStyle->SetPadRightMargin(0.08);
@@ -1526,12 +1534,7 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
     RooRealVar* rrv_c_sb       = workspace->var(("rrv_c_ErfExp"+label+"_sb_lo"+mlvj_model+"_"+channel+mass_spectrum).c_str());
     RooRealVar* rrv_offset_sb  = workspace->var(("rrv_offset_ErfExp"+label+"_sb_lo"+mlvj_model+"_"+channel+mass_spectrum).c_str());            
 
-    RooRealVar* rrv_width_sb = NULL ;
-    if(mass_spectrum == "_mlvj_relaxed") rrv_width_sb   = workspace->var(("rrv_width_ErfExp"+label+"_sb_lo"+mlvj_model+"_"+channel+mass_spectrum).c_str());
-    else{
-          rrv_width_sb   = workspace->var(("rrv_width_ErfExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str());
-          rrv_width_sb->setConstant(kTRUE);               
-    }
+    RooRealVar* rrv_width_sb   = workspace->var(("rrv_width_ErfExp"+label+"_sb_lo"+mlvj_model+"_"+channel+mass_spectrum).c_str());
             
     RooRealVar* rrv_delta_c      = new RooRealVar(("rrv_delta_c_ErfExp"+label+mlvj_model+"_"+channel+mass_spectrum).c_str(),("rrv_delta_c_ErfExp"+label+mlvj_model+"_"+channel+mass_spectrum).c_str(),workspace->var(("rrv_c_ErfExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c_sb->getVal(),workspace->var(("rrv_c_ErfExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c_sb->getVal() -4*rrv_c_sb->getError(), workspace->var(("rrv_c_ErfExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c_sb->getVal()+4*rrv_c_sb->getError());
 
@@ -1611,21 +1614,22 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
      }
 
      RooRealVar* rrv_delta_c0  = new RooRealVar(("rrv_delta_c0_ErfPowExp"+label+"_"+channel+mass_spectrum).c_str(),("rrv_delta_c0_ErfPowExp"+label+"_"+channel+mass_spectrum).c_str(),
-                                        workspace->var(("rrv_c0_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c0_sb->getVal(),
-					workspace->var(("rrv_c0_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c0_sb->getVal()-4*rrv_c0_sb->getError(),
-                                        workspace->var(("rrv_c0_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c0_sb->getVal()+4*rrv_c0_sb->getError());
+                          workspace->var(("rrv_c0_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c0_sb->getVal(),
+			  workspace->var(("rrv_c0_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c0_sb->getVal()-4*rrv_c0_sb->getError(),
+                          workspace->var(("rrv_c0_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c0_sb->getVal()+4*rrv_c0_sb->getError());
 
      RooRealVar* rrv_delta_c1 = new RooRealVar(("rrv_delta_c1_ErfPowExp"+label+"_"+channel+mass_spectrum).c_str(),("rrv_delta_c1_ErfPowExp"+label+"_"+channel+mass_spectrum).c_str(),
-                                       workspace->var(("rrv_c1_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c1_sb->getVal(),
-                                       workspace->var(("rrv_c1_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c1_sb->getVal()-4*rrv_c1_sb->getError(),
-				       workspace->var(("rrv_c1_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c1_sb->getVal()+4*rrv_c1_sb->getError());
+                          workspace->var(("rrv_c1_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c1_sb->getVal(),
+                          workspace->var(("rrv_c1_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c1_sb->getVal()-4*rrv_c1_sb->getError(),
+			  workspace->var(("rrv_c1_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c1_sb->getVal()+4*rrv_c1_sb->getError());
 
      RooRealVar* rrv_delta_offset = new RooRealVar(("rrv_delta_offset_ErfPowExp"+label+"_"+channel+mass_spectrum).c_str(),
-                                                   ("rrv_delta_offset_ErfPowExp"+label+"_"+channel+mass_spectrum).c_str(),
-                                         workspace->var(("rrv_offset_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_offset_sb->getVal(),
-					 workspace->var(("rrv_offset_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_offset_sb->getVal()-4*rrv_offset_sb->getError(),workspace->var(("rrv_offset_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_offset_sb->getVal()+4*rrv_offset_sb->getError());
+                          ("rrv_delta_offset_ErfPowExp"+label+"_"+channel+mass_spectrum).c_str(),
+                          workspace->var(("rrv_offset_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_offset_sb->getVal(),
+			  workspace->var(("rrv_offset_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_offset_sb->getVal()-4*rrv_offset_sb->getError(),workspace->var(("rrv_offset_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_offset_sb->getVal()+4*rrv_offset_sb->getError());
 
-    RooRealVar*  rrv_delta_width = new RooRealVar(("rrv_delta_width_ErfPowExp"+label+"_"+channel+mass_spectrum).c_str(),("rrv_delta_width_ErfPowExp"+label+"_"+channel+mass_spectrum).c_str(),
+    RooRealVar*  rrv_delta_width = new RooRealVar(("rrv_delta_width_ErfPowExp"+label+"_"+channel+mass_spectrum).c_str(),
+                                         ("rrv_delta_width_ErfPowExp"+label+"_"+channel+mass_spectrum).c_str(),
                                          workspace->var(("rrv_width_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_width_sb->getVal(),
                                          workspace->var(("rrv_width_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_width_sb->getVal()-4*rrv_width_sb->getError(),workspace->var(("rrv_width_ErfPowExp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_width_sb->getVal()+4*rrv_width_sb->getError() );
 
@@ -1641,7 +1645,8 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
   if(mlvj_model == "Exp"){
     RooRealVar* rrv_c_sb    = workspace->var(("rrv_c_Exp"+label+"_sb_lo"+mlvj_model+"_"+channel+mass_spectrum).c_str());    
     rrv_c_sb->Print();
-    RooRealVar* rrv_delta_c = new RooRealVar(("rrv_delta_c_Exp"+label+"_"+mlvj_model+"_"+channel+mass_spectrum).c_str(),("rrv_delta_c_Exp"+label+"_"+mlvj_model+"_"+channel+mass_spectrum).c_str(),
+    RooRealVar* rrv_delta_c = new RooRealVar(("rrv_delta_c_Exp"+label+"_"+mlvj_model+"_"+channel+mass_spectrum).c_str(),
+                            ("rrv_delta_c_Exp"+label+"_"+mlvj_model+"_"+channel+mass_spectrum).c_str(),
                             workspace->var(("rrv_c_Exp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c_sb->getVal(),
                             workspace->var(("rrv_c_Exp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c_sb->getVal()-4*rrv_c_sb->getError(),
 			    workspace->var(("rrv_c_Exp"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c_sb->getVal()+4*rrv_c_sb->getError());
@@ -1664,13 +1669,14 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
     RooRealVar* rrv_c_sb  = workspace->var(("rrv_c_ExpN"+label+"_sb_lo"+mlvj_model+"_"+channel+mass_spectrum).c_str());
     RooRealVar* rrv_n_sb  = workspace->var(("rrv_n_ExpN"+label+"_sb_lo"+mlvj_model+"_"+channel+mass_spectrum).c_str());
     RooRealVar* rrv_delta_c = new RooRealVar(("rrv_delta_c_ExpN"+label+"_"+channel+mass_spectrum).c_str(),("rrv_delta_c_ExpN"+label+"_"+channel+mass_spectrum).c_str(),
-                                      workspace->var(("rrv_c_ExpN"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c_sb->getVal(),
-                                      workspace->var(("rrv_c_ExpN"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c_sb->getVal()-4*rrv_c_sb->getError(),
-				      workspace->var(("rrv_c_ExpN"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c_sb->getVal()+4*rrv_c_sb->getError());
+                                  workspace->var(("rrv_c_ExpN"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c_sb->getVal(),
+                                  workspace->var(("rrv_c_ExpN"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c_sb->getVal()-4*rrv_c_sb->getError(),
+				  workspace->var(("rrv_c_ExpN"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_c_sb->getVal()+4*rrv_c_sb->getError());
+
     RooRealVar* rrv_delta_n = new RooRealVar(("rrv_delta_n_ExpN"+label+"_"+channel+mass_spectrum).c_str(),("rrv_delta_n_ExpN"+label+"_"+channel+mass_spectrum).c_str(),
-                                      workspace->var(("rrv_n_ExpN"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_n_sb->getVal(),
-                                      workspace->var(("rrv_n_ExpN"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_n_sb->getVal()-4*rrv_n_sb->getError(),
-				      workspace->var(("rrv_n_ExpN"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_n_sb->getVal()+4*rrv_n_sb->getError());
+                                  workspace->var(("rrv_n_ExpN"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_n_sb->getVal(),
+                                  workspace->var(("rrv_n_ExpN"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_n_sb->getVal()-4*rrv_n_sb->getError(),
+				  workspace->var(("rrv_n_ExpN"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_n_sb->getVal()+4*rrv_n_sb->getError());
 
     correct_factor_pdf = new RooExpNPdf("correct_factor_pdf","correct_factor_pdf",*rrv_x,*rrv_delta_c,*rrv_delta_n);
 
@@ -1682,13 +1688,13 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
       RooRealVar* rrv_a_sb = workspace->var(("rrv_a_ExpTail"+label+"_sb_lo"+mlvj_model+"_"+channel+mass_spectrum).c_str());
 
       RooRealVar* rrv_delta_s = new RooRealVar(("rrv_delta_s_ExpTail"+label+"_"+channel+mass_spectrum).c_str(),("rrv_delta_s_ExpTail"+label+"_"+channel+mass_spectrum).c_str(),
-                                      workspace->var(("rrv_s_ExpTail"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_s_sb->getVal(),
-                                      workspace->var(("rrv_s_ExpTail"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_s_sb->getVal()-4*rrv_s_sb->getError(),
-				      workspace->var(("rrv_s_ExpTail"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_s_sb->getVal()+4*rrv_s_sb->getError());
+                               workspace->var(("rrv_s_ExpTail"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_s_sb->getVal(),
+                               workspace->var(("rrv_s_ExpTail"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_s_sb->getVal()-4*rrv_s_sb->getError(),
+			       workspace->var(("rrv_s_ExpTail"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_s_sb->getVal()+4*rrv_s_sb->getError());
       RooRealVar* rrv_delta_a = new RooRealVar(("rrv_delta_a_ExpTail"+label+"_"+channel+mass_spectrum).c_str(),("rrv_delta_a_ExpTail"+label+"_"+channel+mass_spectrum).c_str(),
-                                      workspace->var(("rrv_a_ExpTail"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_a_sb->getVal(),
-                                      workspace->var(("rrv_a_ExpTail"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_a_sb->getVal()-4*rrv_a_sb->getError(),
-				      workspace->var(("rrv_a_ExpTail"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_a_sb->getVal()+4*rrv_a_sb->getError());
+                               workspace->var(("rrv_a_ExpTail"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_a_sb->getVal(),
+                               workspace->var(("rrv_a_ExpTail"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_a_sb->getVal()-4*rrv_a_sb->getError(),
+			       workspace->var(("rrv_a_ExpTail"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->getVal()-rrv_a_sb->getVal()+4*rrv_a_sb->getError());
 
       RooFormulaVar* rrv_a_sr = new RooFormulaVar(("rrv_a_ExpTail_sr"+label+"_"+channel+mass_spectrum).c_str(), "@0+@1",RooArgList(*rrv_a_sb,*rrv_delta_a ) );
       RooFormulaVar* rrv_s_sr = new RooFormulaVar(("rrv_s_ExpTail_sr"+label+"_"+channel+mass_spectrum).c_str(), "@0+@1",RooArgList(*rrv_s_sb,*rrv_delta_s ) );
@@ -1717,13 +1723,12 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
   data_category->Print();
   RooDataSet* combData4fit = NULL;
 
-  if(mass_spectrum == "_mlvj_relaxed")  
-    combData4fit = (RooDataSet*) workspace->data(("combData"+workspace_label+label+"_"+channel+"_relaxed").c_str());
-  else combData4fit = (RooDataSet*) workspace->data(("combData"+workspace_label+label+"_"+channel).c_str());           
+  combData4fit = (RooDataSet*) workspace->data(("combData"+workspace_label+label+"_"+channel).c_str());           
   combData4fit->Print();
  
   RooAbsPdf*  model_pdf_sb_lo_WJets    = workspace->pdf(("model_pdf"+label+"_sb_lo"+mlvj_model+"_"+channel+mass_spectrum).c_str());
-  RooProdPdf* model_pdf_signal_region_WJets = new RooProdPdf(("model_pdf"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str(),("model_pdf"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str(),*model_pdf_sb_lo_WJets,*correct_factor_pdf);
+  RooProdPdf* model_pdf_signal_region_WJets = new RooProdPdf(("model_pdf"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str(),
+                                                            ("model_pdf"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str(),*model_pdf_sb_lo_WJets,*correct_factor_pdf);
   model_pdf_sb_lo_WJets->Print();
   model_pdf_signal_region_WJets->Print();
   
@@ -1764,15 +1769,9 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
     std::string NameDir  = "plots_"+channel+"_"+wtagger+"_g1";
     std::string NamePlot = "m_lvj"+label+"_sb_lo_sim";
 
+    NameDir  = NameDir+"/other/";
+    draw_canvas_with_pull(mplot_sb_lo,mplot_pull_sideband,new RooArgList(*parameters_list),NameDir,NamePlot,mlvj_model,channel,0,1,GetLumi());                
 
-    if(mass_spectrum == "_mlvj_relaxed"){
-      NameDir  = NameDir+"/other_relaxed/";
-      draw_canvas_with_pull(mplot_sb_lo,mplot_pull_sideband,new RooArgList(*parameters_list),NameDir,NamePlot,mlvj_model,channel,0,1,GetLumi());
-    }
-    else{
-      NameDir  = NameDir+"/other/";
-      draw_canvas_with_pull(mplot_sb_lo,mplot_pull_sideband,new RooArgList(*parameters_list),NameDir,NamePlot,mlvj_model,channel,0,1,GetLumi());                
-    }
     //only W+jets mc plots in the SR region
     RooPlot* mplot_signal_region = rrv_x->frame(RooFit::Title("WJets sr"), RooFit::Bins(int(rrv_x->getBins()/narrow_factor)));
 
@@ -1783,14 +1782,8 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
     parameters_list = model_pdf_signal_region_WJets->getParameters(rdataset_WJets_signal_region_mlvj);
     mplot_signal_region->GetYaxis()->SetRangeUser(1e-2,mplot_signal_region->GetMaximum()*1.2);
 
-    if(mass_spectrum == "_mlvj_relaxed"){
-       NamePlot = "m_lvj"+label+"_signal_regionsim";
-       draw_canvas_with_pull(mplot_signal_region,mplot_pull_signal_region,new RooArgList(*parameters_list),NameDir,NamePlot,mlvj_model,channel,0,1,GetLumi());
-    }
-    else{
-       NamePlot = "m_lvj"+label+"_signal_regionsim";
-       draw_canvas_with_pull(mplot_signal_region,mplot_pull_signal_region,new RooArgList(*parameters_list),NameDir,NamePlot,mlvj_model,channel,0,1,GetLumi());
-    }    
+    NamePlot = "m_lvj"+label+"_signal_regionsim";
+    draw_canvas_with_pull(mplot_signal_region,mplot_pull_signal_region,new RooArgList(*parameters_list),NameDir,NamePlot,mlvj_model,channel,0,1,GetLumi());
      
     //### Total plot shape in sb_lo, sr and alpha
     model_pdf_sb_lo_WJets->plotOn(mplot,RooFit::Name("Sideband"),RooFit::LineStyle(10));
@@ -1800,8 +1793,8 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
     if(workspace->pdf(("correct_factor_pdf_Deco_WJets1_sim_"+mlvj_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str()))
        workspace->pdf(("correct_factor_pdf_Deco_WJets1_sim_"+mlvj_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str())->plotOn(mplot, RooFit::LineColor(kOrange), RooFit::LineStyle(3),RooFit::Name("#alpha: Alternate PS") );
 
-    if(workspace->pdf(("correct_factor_pdf_Deco_WJets01_sim_"+mlvj_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str()))
-       workspace->pdf(("correct_factor_pdf_Deco_WJets01_sim_"+mlvj_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str())->plotOn(mplot, RooFit::LineColor(kMagenta), RooFit::LineStyle(7),RooFit::Name("#alpha: Alternate Function") );
+    if(workspace->pdf(("correct_factor_pdf_Deco_WJets01_sim_"+mlvj_alternate_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str()))
+       workspace->pdf(("correct_factor_pdf_Deco_WJets01_sim_"+mlvj_alternate_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str())->plotOn(mplot, RooFit::LineColor(kMagenta), RooFit::LineStyle(7),RooFit::Name("#alpha: Alternate Function") );
 
     if(workspace->pdf(("correct_factor_pdf_Deco_WJets0massvbf_jes_up_sim_"+mlvj_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str()))
        workspace->pdf(("correct_factor_pdf_Deco_WJets0massvbf_jes_up_sim_"+mlvj_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str())->plotOn(mplot, RooFit::LineColor(kRed), RooFit::LineStyle(3),RooFit::Name("#alpha: jes up") );
@@ -1867,8 +1860,8 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
   if(label == "_WJets0"){ //## add also the plot of alternate ps and function on the canvas
      if(workspace->pdf(("correct_factor_pdf_Deco_WJets1_sim_"+mlvj_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str()))
        workspace->pdf(("correct_factor_pdf_Deco_WJets1_sim_"+mlvj_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str())->plotOn(mplot, RooFit::LineColor(kMagenta), RooFit::LineStyle(3),RooFit::Name("#alpha_invisible: Alternate PS") );
-     if(workspace->pdf(("correct_factor_pdf_Deco_WJets01_sim_"+mlvj_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str()))
-       workspace->pdf(("correct_factor_pdf_Deco_WJets01_sim_"+mlvj_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str())->plotOn(mplot, RooFit::LineColor(kOrange), RooFit::LineStyle(7),RooFit::Name("#alpha_invisible: Alternate Function"));
+     if(workspace->pdf(("correct_factor_pdf_Deco_WJets01_sim_"+mlvj_alternate_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str()))
+       workspace->pdf(("correct_factor_pdf_Deco_WJets01_sim_"+mlvj_alternate_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str())->plotOn(mplot, RooFit::LineColor(kOrange), RooFit::LineStyle(7),RooFit::Name("#alpha_invisible: Alternate Function"));
    }
      
    //### Add the legend
@@ -1909,24 +1902,28 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
       draw_canvas(mplot,NameDir,NamePlot,channel,GetLumi(),0,1,0);
    }
    
-      
+
+   std::cout<<"###################### corrector factor pdf "<<std::endl;      
    correct_factor_pdf_deco->getParameters(rdataset_WJets_sb_lo_mlvj)->Print("v");
       
-   RooAbsPdf* model_pdf_WJets_sb_lo_from_fitting_mlvj_Deco = workspace->pdf(("model_pdf"+label+"_sb_lo_from_fitting"+mlvj_model+"_"+channel+mass_spectrum+"_Deco_"+label+"_sb_lo_from_fitting"+mlvj_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str());           
+   std::cout<<"###################### decorrelated sb pdf "<<std::endl;      
+   RooAbsPdf* model_pdf_WJets_sb_lo_from_fitting_mlvj_Deco = workspace->pdf(("model_pdf"+label+"_sb_lo"+mlvj_model+"_from_fitting_"+channel+mass_spectrum+"_Deco"+label+"_sb_lo"+mlvj_model+"_from_fitting_"+channel+"_"+wtagger+mass_spectrum).c_str());           
    model_pdf_WJets_sb_lo_from_fitting_mlvj_Deco->Print("v");
     
    //### Wjets shape in the SR correctedfunction * sb
+   std::cout<<"###################### Prod pdf "<<std::endl;      
    RooProdPdf* model_pdf_WJets_signal_regionafter_correct_mlvj = new RooProdPdf(("model_pdf"+label+"_signal_region"+mlvj_model+"_"+channel+"_after_correct"+mass_spectrum).c_str(),("model_pdf"+label+"_signal_region"+mlvj_model+"_"+channel+"_after_correct"+mass_spectrum).c_str(),*model_pdf_WJets_sb_lo_from_fitting_mlvj_Deco,*workspace->pdf(("correct_factor_pdf_Deco"+label+"_sim_"+mlvj_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str()));
    model_pdf_WJets_signal_regionafter_correct_mlvj->Print();
    //### fix the parmaters and import in the workspace
    workspace->import(*model_pdf_WJets_signal_regionafter_correct_mlvj);
 
    //##### calculate the normalization and alpha for limit datacard
+
    if(!TString(workspace_label.c_str()).Contains("4bias")){
     workspace->var(("rrv_number"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->Print();
     workspace->var(("rrv_number"+label+"_in_mj_signal_region_from_fitting_"+channel).c_str())->Print();
-    workspace->var(("rrv_number"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->setVal(workspace->var(("rrv_number"+label+"_in_mj_signal_regionfrom_fitting_"+channel).c_str())->getVal());
-    workspace->var(("rrv_number"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->setError(workspace->var(("rrv_number"+label+"_in_mj_signal_regionfrom_fitting_"+channel).c_str())->getError());
+    workspace->var(("rrv_number"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->setVal(workspace->var(("rrv_number"+label+"_in_mj_signal_region_from_fitting_"+channel).c_str())->getVal());
+    workspace->var(("rrv_number"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->setError(workspace->var(("rrv_number"+label+"_in_mj_signal_region_from_fitting_"+channel).c_str())->getError());
     workspace->var(("rrv_number"+label+"_signal_region"+mlvj_model+"_"+channel+mass_spectrum).c_str())->setConstant(kTRUE);
    }
 }
