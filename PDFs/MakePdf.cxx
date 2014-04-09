@@ -183,7 +183,7 @@ RooAbsPdf* get_WJets_mj_Model  (RooWorkspace* workspace, const std::string & lab
 
 /////////////////////////////////////////
 
-RooAbsPdf* get_mlvj_Model        (RooWorkspace* workspace,const std::string & label,const std::string & region,const std::string & model, const std::string & channel){
+RooAbsPdf* get_mlvj_Model (RooWorkspace* workspace,const std::string & label,const std::string & region,const std::string & model, const std::string & channel){
    
  //#### get a generic mlvj model from the workspace
  std::cout<<"model"+label+region+model+"_"+channel+"_mlvj"<<std::endl;
