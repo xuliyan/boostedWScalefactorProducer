@@ -2004,8 +2004,8 @@ class doFit_wj_and_wlvj:
 
          if mode == "unbin":
           fnOnly = ntpath.basename(self.file_rlt_root)
-          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region_%s_mlvj"%(self.higgs_sample,self.channel)).clone(self.higgs_sample+"_%s"%(self.channel)))
-          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).clone(self.vbfhiggs_sample+"_%s"%(self.channel)))
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).clone(self.higgs_sample+"_%s"%(self.channel)))
+          getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region%s_%s_mlvj"%(self.vbfhiggs_sample,self.mlvj_shape["vbfH"],self.channel)).clone(self.vbfhiggs_sample+"_%s"%(self.channel)))
 
           if signalchannel == "ggH":
               datacard_out.write("\nshapes %s CMS_%s %s %s:$PROCESS_%s"%(self.higgs_sample,self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
