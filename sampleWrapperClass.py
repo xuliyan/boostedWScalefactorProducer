@@ -118,7 +118,7 @@ class sampleWrapperClass:
                 for ipar in range(7):
                  x = ROOT.Double(mass[imass]) ;
                  if ipar == 0:
-                  y = ROOT.Double(ROOT.TMath.Log(f_sig_1.GetParameter(ipar)));
+                  y = ROOT.Double(f_sig_1.GetParameter(ipar));
                   self.signal_parameter_1[ipar].SetPoint(iPoint,x,y);
                  else:
                   y = ROOT.Double(f_sig_1.GetParameter(ipar));                         
@@ -127,7 +127,7 @@ class sampleWrapperClass:
                 for ipar in range(7):
                  x = ROOT.Double(mass[imass]) ; y = ROOT.Double(0.);
                  if ipar == 0:   
-                  y = ROOT.Double(ROOT.TMath.Log(f_sig_int_1.GetParameter(ipar))) ;   
+                  y = ROOT.Double(f_sig_int_1.GetParameter(ipar)) ;   
                   self.signal_interference_parameter_1[ipar].SetPoint(iPoint,x,y);  
                  else:
                   y = ROOT.Double(f_sig_int_1.GetParameter(ipar));                        
@@ -141,7 +141,7 @@ class sampleWrapperClass:
                 for ipar in range(7):
                  x = ROOT.Double(mass[imass]) ;
                  if ipar == 0:
-                  y = ROOT.Double(ROOT.TMath.Log(f_sig_05.GetParameter(ipar)));
+                  y = ROOT.Double(f_sig_05.GetParameter(ipar));
                   self.signal_parameter_05[ipar].SetPoint(iPoint,x,y);
 
                  else:
@@ -151,7 +151,7 @@ class sampleWrapperClass:
                 for ipar in range(7):
                  x = ROOT.Double(mass[imass]) ; y = ROOT.Double(0.);
                  if ipar == 0:   
-                  y = ROOT.Double(ROOT.TMath.Log(f_sig_int_05.GetParameter(ipar))) ;   
+                  y = ROOT.Double(f_sig_int_05.GetParameter(ipar)) ;   
                   self.signal_interference_parameter_05[ipar].SetPoint(iPoint,x,y);  
                  else:
                   y = ROOT.Double(f_sig_int_05.GetParameter(ipar));                        
@@ -165,7 +165,7 @@ class sampleWrapperClass:
                 for ipar in range(7):
                  x = ROOT.Double(mass[imass]) ;
                  if ipar == 0:
-                  y = ROOT.Double(ROOT.TMath.Log(f_sig_2.GetParameter(ipar)));
+                  y = ROOT.Double(f_sig_2.GetParameter(ipar));
                   self.signal_parameter_2[ipar].SetPoint(iPoint,x,y);
 
                  else:
@@ -175,7 +175,7 @@ class sampleWrapperClass:
                 for ipar in range(7):
                  x = ROOT.Double(mass[imass]) ; y = ROOT.Double(0.);
                  if ipar == 0:   
-                  y = ROOT.Double(ROOT.TMath.Log(f_sig_int_2.GetParameter(ipar))) ;   
+                  y = ROOT.Double(f_sig_int_2.GetParameter(ipar)) ;   
                   self.signal_interference_parameter_2[ipar].SetPoint(iPoint,x,y);  
                  else:
                   y = ROOT.Double(f_sig_int_2.GetParameter(ipar));                        
@@ -232,12 +232,11 @@ class sampleWrapperClass:
         n = par[4];
         alpha2 = par[5];
         n2 = par[6];
-
+        
         if (xx-mean)/sigma > math.fabs(alpha) :
             A = ROOT.TMath.Power(n/math.fabs(alpha), n) * ROOT.TMath.Exp(-0.5 * alpha*alpha)
             B = n/math.fabs(alpha) - math.fabs(alpha);
-            return par[0] * A * math.pow(B + (xx-mean)/sigma, -1.*n);
-                                   
+            return par[0] * A * math.pow(B + (xx-mean)/sigma, -1.*n);                                   
 
         elif (xx-mean)/sigma < -1.*math.fabs(alpha2):
                                
@@ -247,7 +246,7 @@ class sampleWrapperClass:
             return par[0] * A * ROOT.TMath.Power(B - (xx-mean)/sigma, -1.*n2);
 
         else:
-          return par[0] * ROOT.TMath.Exp(-1. * (xx-mean)*(xx-mean) / (2*sigma*sigma) );
+            return par[0] * ROOT.TMath.Exp(-1. * (xx-mean)*(xx-mean) / (2*sigma*sigma) );
                                        
 
     ### main function used to create the final otree
@@ -722,40 +721,53 @@ class sampleWrapperClass:
              #### CPS part -> take value from histos external file
              rwCPS = 1;
              if self.SignalMass_ > 0:
-                 binVal = self.x_rwCPS.FindBin(getattr(self.InputTree_,"W_H_mass_gen"));
-                 if binVal > self.h_rwCPS.GetNbinsX(): binVal = self.h_rwCPS.GetNbinsX();
-                 if binVal < 1: binVal = 1;
-                 rwCPS = self.h_rwCPS.GetBinContent( binVal );
+              binVal = self.x_rwCPS.FindBin(getattr(self.InputTree_,"W_H_mass_gen"));
+              if binVal > self.h_rwCPS.GetNbinsX(): binVal = self.h_rwCPS.GetNbinsX();
+              if binVal < 1: binVal = 1;
+              rwCPS = self.h_rwCPS.GetBinContent( binVal );
 
-             ############## interference correction for vbf
-             funz_sig_1  = ROOT.TF1("funz_sig_1",  self.crystalBallLowHigh, 200, 2000, 7);    
-             funz_sAi_1  = ROOT.TF1("funz_sAi_1",  self.crystalBallLowHigh, 200, 2000, 9); 
-             funz_sig_05 = ROOT.TF1("funz_sig_05", self.crystalBallLowHigh, 200, 2000, 7);    
-             funz_sAi_05 = ROOT.TF1("funz_sAi_05", self.crystalBallLowHigh, 200, 2000, 9); 
-             funz_sig_2  = ROOT.TF1("funz_sig_2",  self.crystalBallLowHigh, 200, 2000, 7);    
-             funz_sAi_2  = ROOT.TF1("funz_sAi_2",  self.crystalBallLowHigh, 200, 2000, 9); 
+              ############## interference correction for vbf
+              funz_sig_1  = ROOT.TF1("funz_sig_1",  self.crystalBallLowHigh, 200, 2000, 7);    
+              funz_sAi_1  = ROOT.TF1("funz_sAi_1",  self.crystalBallLowHigh, 200, 2000, 9); 
+              funz_sig_05 = ROOT.TF1("funz_sig_05", self.crystalBallLowHigh, 200, 2000, 7);    
+              funz_sAi_05 = ROOT.TF1("funz_sAi_05", self.crystalBallLowHigh, 200, 2000, 9); 
+              funz_sig_2  = ROOT.TF1("funz_sig_2",  self.crystalBallLowHigh, 200, 2000, 7);    
+              funz_sAi_2  = ROOT.TF1("funz_sAi_2",  self.crystalBallLowHigh, 200, 2000, 9); 
 
-             funz_sig_1.SetParameter(0,ROOT.TMath.Exp(self.signal_parameter_1[0].Eval(self.SignalMass_)));
-             funz_sig_05.SetParameter(0,ROOT.TMath.Exp(self.signal_parameter_05[0].Eval(self.SignalMass_)));
-             funz_sig_2.SetParameter(0,ROOT.TMath.Exp(self.signal_parameter_2[0].Eval(self.SignalMass_)));
+              funz_sig_1.SetParameter(0,self.signal_parameter_1[0].Eval(self.SignalMass_));
+              funz_sig_05.SetParameter(0,self.signal_parameter_05[0].Eval(self.SignalMass_));
+              funz_sig_2.SetParameter(0,self.signal_parameter_2[0].Eval(self.SignalMass_));
 
-             funz_sAi_1.SetParameter(0,ROOT.TMath.Exp(self.signal_interference_parameter_1[0].Eval(self.SignalMass_)));
-             funz_sAi_05.SetParameter(0,ROOT.TMath.Exp(self.signal_interference_parameter_05[0].Eval(self.SignalMass_)));
-             funz_sAi_2.SetParameter(0,ROOT.TMath.Exp(self.signal_interference_parameter_2[0].Eval(self.SignalMass_)));
+              funz_sAi_1.SetParameter(0,self.signal_interference_parameter_1[0].Eval(self.SignalMass_));
+              funz_sAi_05.SetParameter(0,self.signal_interference_parameter_05[0].Eval(self.SignalMass_));
+              funz_sAi_2.SetParameter(0,self.signal_interference_parameter_2[0].Eval(self.SignalMass_));
 
-             for ipar in range(6):
-              funz_sig_1.SetParameter(ipar+1,self.signal_parameter_1[ipar+1].Eval(self.SignalMass_));
-              funz_sig_05.SetParameter(ipar+1,self.signal_parameter_05[ipar+1].Eval(self.SignalMass_));
-              funz_sig_2.SetParameter(ipar+1,self.signal_parameter_2[ipar+1].Eval(self.SignalMass_));
+              for ipar in range(6):
+               funz_sig_1.SetParameter(ipar+1,self.signal_parameter_1[ipar+1].Eval(self.SignalMass_));
+               funz_sig_05.SetParameter(ipar+1,self.signal_parameter_05[ipar+1].Eval(self.SignalMass_));
+               funz_sig_2.SetParameter(ipar+1,self.signal_parameter_2[ipar+1].Eval(self.SignalMass_));
+               
+              for ipar in range(6):
+               funz_sAi_1.SetParameter(ipar+1,self.signal_interference_parameter_1[ipar+1].Eval(self.SignalMass_));
+               funz_sAi_05.SetParameter(ipar+1,self.signal_interference_parameter_05[ipar+1].Eval(self.SignalMass_));
+               funz_sAi_2.SetParameter(ipar+1,self.signal_interference_parameter_2[ipar+1].Eval(self.SignalMass_));
 
-             for ipar in range(6):
-              funz_sAi_1.SetParameter(ipar+1,self.signal_interference_parameter_1[ipar+1].Eval(self.SignalMass_));
-              funz_sAi_05.SetParameter(ipar+1,self.signal_interference_parameter_05[ipar+1].Eval(self.SignalMass_));
-              funz_sAi_2.SetParameter(ipar+1,self.signal_interference_parameter_2[ipar+1].Eval(self.SignalMass_));
 
-             self.interferencevbf_1_[0]  = funz_sAi_1.Eval(getattr(self.InputTree_,"W_H_mass_gen"))/funz_sig_1.Eval(getattr(self.InputTree_,"W_H_mass_gen"));
-             self.interferencevbf_05_[0] = funz_sAi_05.Eval(getattr(self.InputTree_,"W_H_mass_gen"))/funz_sig_05.Eval(getattr(self.InputTree_,"W_H_mass_gen"));
-             self.interferencevbf_2_[0]  = funz_sAi_2.Eval(getattr(self.InputTree_,"W_H_mass_gen"))/funz_sig_2.Eval(getattr(self.InputTree_,"W_H_mass_gen"));
+              if funz_sig_1.Eval(getattr(self.InputTree_,"W_H_mass_gen")) != 0:
+                 self.interferencevbf_1_[0]  = funz_sAi_1.Eval(getattr(self.InputTree_,"W_H_mass_gen"))/funz_sig_1.Eval(getattr(self.InputTree_,"W_H_mass_gen"));
+              else:
+                 self.interferencevbf_1_[0]  = 1 ;
+
+              if funz_sig_05.Eval(getattr(self.InputTree_,"W_H_mass_gen")) != 0:
+                 self.interferencevbf_05_[0]  = funz_sAi_05.Eval(getattr(self.InputTree_,"W_H_mass_gen"))/funz_sig_05.Eval(getattr(self.InputTree_,"W_H_mass_gen"));
+              else:
+                 self.interferencevbf_05_[0]  = 1 ;
+                 
+              if funz_sig_2.Eval(getattr(self.InputTree_,"W_H_mass_gen")) != 0:
+                 self.interferencevbf_2_[0]  = funz_sAi_2.Eval(getattr(self.InputTree_,"W_H_mass_gen"))/funz_sig_2.Eval(getattr(self.InputTree_,"W_H_mass_gen"));
+              else:
+                 self.interferencevbf_2_[0]  = 1 ;
+                 
              
              ############## interference weight and cps weight
              self.complexpolewtggH600    = getattr(self.InputTree_,"complexpolewtggH600")*rwCPS;
