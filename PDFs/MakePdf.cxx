@@ -26,6 +26,7 @@ RooExtendPdf* MakeExtendedModel(RooWorkspace* workspace, const std::string & lab
 
 /////////////////////////////
 
+
 RooGaussian* addConstraint(RooRealVar* rrv_x, RooRealVar* x_mean, RooRealVar* x_sigma, std::vector<std::string> & ConstraintsList){
 
    //########### Gaussian contraint of a parameter of a pdf
@@ -426,6 +427,7 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
   RooRealVar* rrv_x = NULL ; 
   if(TString(spectrum).Contains("_mj"))   rrv_x = workspace->var("rrv_mass_j");
   if(TString(spectrum).Contains("_mlvj")) rrv_x = workspace->var("rrv_mass_lvj");
+  if(TString(spectrum).Contains("_genHMass")) rrv_x = workspace->var("rrv_mass_gen_WW");
     
    if(model == "Voig"){
             std::cout<<"########### Voigtian Pdf for mJ ############"<<std::endl;
@@ -456,11 +458,11 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
  
             if( TString(label).Contains("H600")){                         
                 rrv_mean_BWRUN  = new RooRealVar(("rrv_mean_BWRUN"+label+"_"+channel+spectrum).c_str(),("rrv_mean_BWRUN"+label+"_"+channel+spectrum).c_str(),600,450,750);
-                rrv_width_BWRUN = new RooRealVar(("rrv_width_BWRUN"+label+"_"+channel+spectrum).c_str(),("rrv_width_BWRUN"+label+"_"+channel+spectrum).c_str(),60,5,270);
+                rrv_width_BWRUN = new RooRealVar(("rrv_width_BWRUN"+label+"_"+channel+spectrum).c_str(),("rrv_width_BWRUN"+label+"_"+channel+spectrum).c_str(),60,5,300);
 	    }	    
             else if( TString(label).Contains("H700")){                
                 rrv_mean_BWRUN  = new RooRealVar(("rrv_mean_BWRUN"+label+"_"+channel+spectrum).c_str(),("rrv_mean_BWRUN"+label+"_"+channel+spectrum).c_str(),700,550,850);
-                rrv_width_BWRUN  = new RooRealVar(("rrv_width_BWRUN"+label+"_"+channel+spectrum).c_str(),("rrv_width_BWRUN"+label+"_"+channel+spectrum).c_str(),100,5,350);
+                rrv_width_BWRUN  = new RooRealVar(("rrv_width_BWRUN"+label+"_"+channel+spectrum).c_str(),("rrv_width_BWRUN"+label+"_"+channel+spectrum).c_str(),50,5,350);
 	    }
             else if(TString(label).Contains("H800")){                          
                 rrv_mean_BWRUN  = new RooRealVar(("rrv_mean_BWRUN"+label+"_"+channel+spectrum).c_str(),("rrv_mean_BWRUN"+label+"_"+channel+spectrum).c_str(),800,650,950);
@@ -475,17 +477,56 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
                 rrv_width_BWRUN = new RooRealVar(("rrv_width_BWRUN"+label+"_"+channel+spectrum).c_str(),("rrv_width_BWRUN"+label+"_"+channel+spectrum).c_str(),100,2,570); 
             }
 
-            RooBWRunPdf * bwrun    = new RooBWRunPdf(("bwrun"+label+"_"+channel+spectrum).c_str(),("bwrun"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_mean_BWRUN,*rrv_width_BWRUN);
+            RooBWRunPdf * model_pdf    = new RooBWRunPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_mean_BWRUN,*rrv_width_BWRUN);
           
-            RooRealVar* rrv_mean_cb  = new RooRealVar(("rrv_mean_cb"+label+"_"+channel+spectrum).c_str(),("rrv_mean_cb"+label+"_"+channel+spectrum).c_str(),0);
-            RooRealVar* rrv_sigma_cb = new RooRealVar(("rrv_sigma_cb"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_cb"+label+"_"+channel+spectrum).c_str(),50,10,300);
-            RooGaussian* cbshape     = new RooGaussian(("cbshape"+label+"_"+channel+spectrum).c_str(),("cbshape"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_mean_cb,*rrv_sigma_cb);
-
-            RooFFTConvPdf* model_pdf = new RooFFTConvPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*bwrun,*cbshape);
-
+            //RooRealVar* rrv_mean_cb  = new RooRealVar(("rrv_mean_cb"+label+"_"+channel+spectrum).c_str(),("rrv_mean_cb"+label+"_"+channel+spectrum).c_str(),0);
+            //RooRealVar* rrv_sigma_cb = new RooRealVar(("rrv_sigma_cb"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_cb"+label+"_"+channel+spectrum).c_str(),50,10,300);
+            //RooGaussian* cbshape     = new RooGaussian(("cbshape"+label+"_"+channel+spectrum).c_str(),("cbshape"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_mean_cb,*rrv_sigma_cb);
+            //RooFFTConvPdf* model_pdf = new RooFFTConvPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*bwrun,*cbshape);
             
             return model_pdf ;
     }
+
+
+    if(model == "CBBW_v1"){ //FFT: BreitWigner*CBShape                                                                                                                          
+
+     std::string mass_label = "" ;
+     if(TString(label).Contains("ggH") and TString(label).Contains("600")) 
+        mass_label = "ggH600";
+     else if (TString(label).Contains("ggH") and TString(label).Contains("700"))
+        mass_label = "ggH700";
+     else if (TString(label).Contains("ggH") and TString(label).Contains("800"))
+        mass_label = "ggH800";
+     else if (TString(label).Contains("ggH") and TString(label).Contains("900"))
+        mass_label = "ggH900";
+     else if (TString(label).Contains("ggH") and TString(label).Contains("1000"))
+        mass_label = "ggH1000";
+     else if (TString(label).Contains("vbfH") and TString(label).Contains("600"))
+        mass_label = "ggH600";
+     else if (TString(label).Contains("vbfH") and TString(label).Contains("700"))
+        mass_label = "ggH700";
+     else if (TString(label).Contains("vbfH") and TString(label).Contains("800"))
+        mass_label = "ggH800";
+     else if (TString(label).Contains("vbfH") and TString(label).Contains("900"))
+        mass_label = "ggH900";
+     else if (TString(label).Contains("vbfH") and TString(label).Contains("1000"))
+        mass_label = "ggH1000";
+
+     RooRealVar* rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),100,-150,300);
+     RooRealVar* rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),100,1,300);
+     RooRealVar* rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.2,-4,-0.1);
+     RooRealVar* rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),5,0.1,90);
+     RooRealVar* rrv_mean_BW  = workspace->var(("rrv_mean_BWRUN_"+mass_label+"_"+channel+"_genHMass").c_str());
+     RooRealVar* rrv_width_BW = workspace->var(("rrv_width_BWRUN_"+mass_label+"_"+channel+"_genHMass").c_str());
+
+     rrv_mean_BW->setConstant(kTRUE);
+     rrv_width_BW->setConstant(kTRUE);
+     RooCBShape* cbshape      = new RooCBShape(("cbshape"+label+"_"+channel+spectrum).c_str(),("cbshape"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_mean_CB,*rrv_sigma_CB,*rrv_alpha_CB,*rrv_n_CB);
+     RooBWRunPdf* bw          = new RooBWRunPdf(("bwrun_shape"+label+"_"+channel+spectrum).c_str(),("bwrun_shape"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_mean_BW,*rrv_width_BW);
+     RooFFTConvPdf* model_pdf = new RooFFTConvPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*bw,*cbshape);
+     model_pdf->setBufferFraction(1.0);
+     return model_pdf;
+   }
 
     //Voig for W mass peak
     if(model == "2Voig"){
