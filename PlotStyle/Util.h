@@ -47,8 +47,8 @@ void draw_error_band(RooAbsData*, RooAbsPdf*,  RooRealVar*, RooFitResult*, RooPl
 void draw_error_band_pull(RooAbsData *, RooAbsPdf *, RooRealVar *, RooFitResult*, RooPlot*, 
                           const int & = 6, const int & = 100, const int & = 2000);
 
-TGraphAsymmErrors* draw_error_band_ws(RooAbsData *, RooAbsPdf *, RooRealVar *, RooArgList *, RooWorkspace *, RooPlot *,  
-                                      const std::string & = "", const int & = 6, const std::string & = "F", const int & = 100, const int & = 2000);
+TGraphAsymmErrors* draw_error_band_ws(RooAbsData*, RooAbsPdf *, const std::string & = "", RooRealVar * = NULL,  RooArgList* = NULL, RooWorkspace * = NULL, RooPlot * = NULL,  
+                                      const int & = 6, const std::string & = "F", const int & = 100, const int & = 2000);
 
 void draw_error_band_extendPdf(RooAbsData *, RooAbsPdf*, RooFitResult*, RooPlot*, 
                                const int & = 6, const std::string & = "F", const int & = 100,  const int & = 2000);
