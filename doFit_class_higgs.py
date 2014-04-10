@@ -323,14 +323,14 @@ class doFit_wj_and_wlvj:
         if not os.path.isdir("cards_%s"%(self.channel)): os.system("mkdir cards_%s"%(self.channel));
         self.rlt_DIR = "cards_%s/"%(self.channel)
 
-        self.file_rlt_txt                   = self.rlt_DIR+"other_hwwlvj_%s_%s_%sjet_%02d_%02d.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
-        self.file_rlt_root                  = self.rlt_DIR+"hwwlvj_%s_%s_%sjet_%02d_%02d_workspace.root"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
-        self.file_datacard_unbin_ggHvbfH    = self.rlt_DIR+"hwwlvj_%s_%s_%sjet_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
-        self.file_datacard_unbin_ggH        = self.rlt_DIR+"hwwlvj_%s_%s_%sjet_ggH_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
-        self.file_datacard_unbin_vbfH       = self.rlt_DIR+"hwwlvj_%s_%s_%sjet_vbfH_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
-        self.file_datacard_counting_ggHvbfH = self.rlt_DIR+"hwwlvj_%s_%s_%sjet_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
-        self.file_datacard_counting_ggH     = self.rlt_DIR+"hwwlvj_%s_%s_%sjet_ggH_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
-        self.file_datacard_counting_vbfH    = self.rlt_DIR+"hwwlvj_%s_%s_%sjet_vbfH_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
+        self.file_rlt_txt                   = self.rlt_DIR+"other_hwwlvj_%s_%s%s_%02d_%02d.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
+        self.file_rlt_root                  = self.rlt_DIR+"hwwlvj_%s_%s%s_%02d_%02d_workspace.root"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
+        self.file_datacard_unbin_ggHvbfH    = self.rlt_DIR+"hwwlvj_%s_%s%s_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
+        self.file_datacard_unbin_ggH        = self.rlt_DIR+"hwwlvj_%s_%s%s_ggH_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
+        self.file_datacard_unbin_vbfH       = self.rlt_DIR+"hwwlvj_%s_%s%s_vbfH_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
+        self.file_datacard_counting_ggHvbfH = self.rlt_DIR+"hwwlvj_%s_%s%s_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
+        self.file_datacard_counting_ggH     = self.rlt_DIR+"hwwlvj_%s_%s%s_ggH_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
+        self.file_datacard_counting_vbfH    = self.rlt_DIR+"hwwlvj_%s_%s%s_vbfH_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
         
         self.file_out = open(self.file_rlt_txt,"w");
         self.file_out.write("Welcome:\n");
@@ -2104,17 +2104,17 @@ self.channel));
 
             datacard_out.write( "\n-------------------------------- " )
 
-            datacard_out.write( "\nQCDscale_ggH lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH))
+            datacard_out.write( "\nQCDscale_ggH lnN   %0.3f        -      -      -       -       -     -"%(1.+self.QCDscale_ggH))
 
-            datacard_out.write( "\nQCDscale_ggH1in lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH1in))
+            datacard_out.write( "\nQCDscale_ggH1in lnN   %0.3f     -      -      -       -       -     -"%(1.+self.QCDscale_ggH1in))
 
-            datacard_out.write( "\nQCDscale_ggH2in lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH2in))   
+            datacard_out.write( "\nQCDscale_ggH2in lnN   %0.3f     -      -      -       -       -     -"%(1.+self.QCDscale_ggH2in))   
 
-            datacard_out.write( "\npdf_gg       lnN   %0.3f     -             -        -       -       -     -"%(1.+self.pdf_gg))
+            datacard_out.write( "\npdf_gg       lnN   %0.3f     -     -       -       -       -     -"%(1.+self.pdf_gg))
 
-            datacard_out.write( "\nQCDscale_ggH_ACCEPT lnN %0.3f   -             -        -       -       -     -"%(1.+self.hwwlnJ_pdfAcc_gg) )
+            datacard_out.write( "\nQCDscale_ggH_ACCEPT lnN %0.3f   -       -        -       -       -     -"%(1.+self.hwwlnJ_pdfAcc_gg) )
 
-            datacard_out.write( "\nintf_ggH  lnN      %0.3f     -             -        -       -       -     -"%(1.+self.interference_ggH_uncertainty) )
+            datacard_out.write( "\nintf_ggH  lnN      %0.3f     -       -        -       -       -     -"%(1.+self.interference_ggH_uncertainty) )
             
             datacard_out.write( "\nQCDscale_vbfH lnN  -         %0.3f         -        -       -       -     -"%(1.+self.QCDscale_vbfH) )
 
@@ -2124,9 +2124,9 @@ self.channel));
 
             datacard_out.write( "\nintf_vbfH lnN      -         %0.3f         -        -       -       -     -"%(1.+self.interference_vbfH_uncertainty) )
 
-            datacard_out.write( "\nCMS_hwwlvj_STop  lnN       -         -             -        -       %0.3f   -     -"%(1+self.XS_STop_uncertainty) )
+            datacard_out.write( "\nCMS_hwwlvj_STop  lnN       -         -      -        -       %0.3f   -     -"%(1+self.XS_STop_uncertainty) )
 
-            datacard_out.write( "\nCMS_hwwlvj_VV    lnN       -         -             -        -       -       %0.3f    -"%(1+self.XS_VV_uncertainty) )
+            datacard_out.write( "\nCMS_hwwlvj_VV    lnN       -         -      -        -       -       %0.3f    -"%(1+self.XS_VV_uncertainty) )
 
             datacard_out.write( "\nCMS_hwwlvj_WW_EWK    lnN       -         -             -        -       -       -     %0.3f"%(1+self.XS_WW_EWK_uncertainty))
 
@@ -2138,16 +2138,16 @@ self.channel));
 
          datacard_out.write( "\nCMS_eff_%s lnN       %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f    %0.3f"%(self.channel, 1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty, 1+self.lep_eff_uncertainty ) );
 
-         datacard_out.write( "\nCMS_Top_norm_%s_%d lnN    -         -             -        %0.3f   %0.3f   -      -"%(self.channel, options.jetBin,1+self.rrv_wtagger_eff_reweight_forT.getError(), 1+self.rrv_wtagger_eff_reweight_forT.getError() ) );
+         datacard_out.write( "\nCMS_Top_norm_%s lnN    -         -             -        %0.3f   %0.3f   -      -"%(self.channel,1+self.rrv_wtagger_eff_reweight_forT.getError(), 1+self.rrv_wtagger_eff_reweight_forT.getError() ) );
 
          datacard_out.write( "\nCMS_wtagger lnN     %0.3f     %0.3f         -        -       -       %0.3f    %0.3f"%(1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError() ) );
             
          ### nousiance for the bkg
          ### WJets normaliztion due to data fit and alternate modellization
          if self.number_WJets_insideband >0:
-            datacard_out.write( "\nWjet_Norm_%s_%d lnN %0.3f     -  %0.3f           -      -        -      -"%(self.channel,options.jetBin,self.number_WJets_insideband, getattr(self,"datadriven_alpha_WJets_%s"%(mode))));
+            datacard_out.write( "\nWjet_Norm_%s_%s lnN %0.3f     -  %0.3f           -      -        -      -"%(self.channel,options.jetBin,self.number_WJets_insideband, getattr(self,"datadriven_alpha_WJets_%s"%(mode))));
          else:
-            datacard_out.write( "\nWjet_Norm_%s_%d lnN     -         -             %0.3f    -       -       -      -"%(self.channel,options.jetBin, 1+ self.workspace4limit_.var("rate_WJets_for_unbin").getError()/self.workspace4limit_.var("rate_WJets_for_unbin").getVal() ) );
+            datacard_out.write( "\nWjet_Norm_%s_%s lnN     -         -             %0.3f    -       -       -      -"%(self.channel,options.jetBin, 1+ self.workspace4limit_.var("rate_WJets_for_unbin").getError()/self.workspace4limit_.var("rate_WJets_for_unbin").getVal() ) );
 
 
          ## jet mass systematic scaling up and down vbf jets detajj, mjj, and pt selection effect
@@ -2344,7 +2344,6 @@ self.channel));
 
         data_obs.plotOn(mplot, RooFit.Name("data"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
         model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Invisible(),RooFit.Name("model_mc"));
-        mplot_pull = self.get_pull(rrv_x,mplot);
 
         mplot_pull = get_pull(rrv_x,mplot,data_obs,model_Total_background_MC,rfresult,"data","model_mc",0,1);
 
