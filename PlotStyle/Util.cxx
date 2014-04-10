@@ -206,9 +206,8 @@ void draw_error_band_pull( RooAbsData *rdata,  RooAbsPdf *rpdf,  RooRealVar *rrv
   return;
 }
 
-
 /// Variation of the previous method using a workspace -> used to draw the band for the final extrapolation -> take in input decorrelated parameters
-TGraphAsymmErrors* draw_error_band_ws( RooAbsData *rdata, RooAbsPdf *rpdf,  RooRealVar *rrv_number_events ,  RooArgList *paras,  RooWorkspace *ws, RooPlot *mplot, const std::string & xaxis_name, const int & kcolor, const std::string & opt, const int & number_point, const int & number_errorband){
+TGraphAsymmErrors* draw_error_band_ws(RooAbsData* rdata, RooAbsPdf *rpdf,  const std::string & xaxis_name ,  RooRealVar* rrv_number_events, RooArgList *paras,  RooWorkspace *ws, RooPlot *mplot, const int & kcolor, const std::string & opt, const int & number_point, const int & number_errorband){
 
   TRandom3 rand(1234);
   rand.SetSeed(0);
@@ -229,6 +228,7 @@ TGraphAsymmErrors* draw_error_band_ws( RooAbsData *rdata, RooAbsPdf *rpdf,  RooR
   Double_t number_events_mean  = rrv_number_events->getVal();
   Double_t number_events_sigma = rrv_number_events->getError();
 
+  std::cout<<" <<<<<<<<<< central bkg prediction "<<std::endl;
   /// TGraph for the central bkg prediction 
   TGraph *bkgpred=new TGraph(number_point+1);
   for(int i =0 ; i<= number_point ; i++){
@@ -240,11 +240,16 @@ TGraphAsymmErrors* draw_error_band_ws( RooAbsData *rdata, RooAbsPdf *rpdf,  RooR
   bkgpred->SetLineColor(kcolor);
 
   /// Define the curve in each toy and fill them  not using the randomized par but vaying them by hand -> to be decorrelated
+  std::cout<<" <<<<<<<<<< making the envelope "<<std::endl;
+  for(int ipara = 0; ipara<paras->getSize();ipara++){
+    std::cout<<" name "<<paras->at(ipara)->GetName()<<std::endl;
+  }
+         
   TGraph* syst[number_errorband];
   for(int j=0;j<number_errorband;j++){
 	for(Int_t ipara=0;ipara<paras->getSize();ipara++){
-          ws->var(paras[ipara].GetName())->setConstant(0);
-          ws->var(paras[ipara].GetName())->setVal( rand.Gaus(0.,ws->var(paras[ipara].GetName())->getError()) );
+          ws->var(paras->at(ipara)->GetName())->setConstant(0);           
+          ws->var(paras->at(ipara)->GetName())->setVal( rand.Gaus(0.,ws->var(paras->at(ipara)->GetName())->getError()) );
 	}
 
 	Double_t number_events_tmp = rand.Gaus(number_events_mean,number_events_sigma);
@@ -264,12 +269,12 @@ TGraphAsymmErrors* draw_error_band_ws( RooAbsData *rdata, RooAbsPdf *rpdf,  RooR
    ap->SetName("error_up");
    am->SetName("error_dn");
    errorband->SetName("errorband");
+   std::cout<<" making min and max "<<std::endl;
 
    TGraphAsymmErrors* errorband_pull = new TGraphAsymmErrors(number_point+1);
    TH1D* hdata = (TH1D*)rdata->createHistogram(rrv_x->GetName());
    const double alpha = 1 - 0.6827;
    errorband_pull->SetName("errorband_pull");
-
    for(int i =0 ; i<= number_point ; i++){
 	for(int j=0;j<number_errorband;j++){
 		val[j]=(syst[j])->GetY()[i];
