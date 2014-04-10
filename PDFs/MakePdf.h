@@ -28,20 +28,68 @@
 
 #include "HWWLVJRooPdfs.h"
 
-struct SystematicUncertaintyEXO{ const double mean_signal_uncertainty_jet_scale = 0.013;
-                                 const double mean_signal_uncertainty_lep_scale = 0.001;
+struct SystematicUncertaintyEXO{ const double mean_signal_uncertainty_jet_scale  = 0.013;
+                                 const double mean_signal_uncertainty_lep_scale  = 0.001;
                                  const double sigma_signal_uncertainty_jet_scale = 0.033;
-                                 const double sigma_signal_uncertainty_jet_res = 0.030;
+                                 const double sigma_signal_uncertainty_jet_res   = 0.030;
                                  const double sigma_signal_uncertainty_lep_scale = 0.005;
                                  const double mean_mj_shift = 1.4 ;
                                  const double sigma_mj_smear = 1.11 ;
 };       
 
-struct SystematicUncertaintyHiggs{const double mean_signal_uncertainty_jet_scale = 0.013;
-                                  const double mean_signal_uncertainty_lep_scale = 0.001;
-                                  const double sigma_signal_uncertainty_jet_scale = 0.033;
-                                  const double sigma_signal_uncertainty_jet_res = 0.030;
-                                  const double sigma_signal_uncertainty_lep_scale = 0.005;
+struct SystematicUncertaintyHiggs{
+
+                                  /////// effect on the mean 
+                                  const double mean_signal_uncertainty_jet_scale_ggH_600  = 0.032;
+                                  const double mean_signal_uncertainty_jet_scale_ggH_700  = 0.029;
+                                  const double mean_signal_uncertainty_jet_scale_ggH_800  = 0.025;
+                                  const double mean_signal_uncertainty_jet_scale_ggH_900  = 0.023;
+                                  const double mean_signal_uncertainty_jet_scale_ggH_1000 = 0.020;
+
+                                  const double mean_signal_uncertainty_jet_scale_vbfH_600  = 0.043;
+                                  const double mean_signal_uncertainty_jet_scale_vbfH_700  = 0.039;
+                                  const double mean_signal_uncertainty_jet_scale_vbfH_800  = 0.036;
+                                  const double mean_signal_uncertainty_jet_scale_vbfH_900  = 0.032;
+                                  const double mean_signal_uncertainty_jet_scale_vbfH_1000 = 0.027;
+
+                                  const double mean_signal_uncertainty_jet_res_ggH_600  = 0.006;
+                                  const double mean_signal_uncertainty_jet_res_ggH_700  = 0.004;
+                                  const double mean_signal_uncertainty_jet_res_ggH_800  = 0.002;
+                                  const double mean_signal_uncertainty_jet_res_ggH_900  = 0.007;
+                                  const double mean_signal_uncertainty_jet_res_ggH_1000 = 0.002;
+
+                                  const double mean_signal_uncertainty_jet_res_vbfH_600  = 0.007;
+                                  const double mean_signal_uncertainty_jet_res_vbfH_700  = 0.003;
+                                  const double mean_signal_uncertainty_jet_res_vbfH_800  = 0.006;
+                                  const double mean_signal_uncertainty_jet_res_vbfH_900  = 0.003;
+                                  const double mean_signal_uncertainty_jet_res_vbfH_1000 = 0.003;
+
+
+                                  /////// effect on the sigma 
+                                  const double sigma_signal_uncertainty_jet_scale_ggH_600  = 0.080;
+                                  const double sigma_signal_uncertainty_jet_scale_ggH_700  = 0.040;
+                                  const double sigma_signal_uncertainty_jet_scale_ggH_800  = 0.021;
+                                  const double sigma_signal_uncertainty_jet_scale_ggH_900  = 0.023;
+                                  const double sigma_signal_uncertainty_jet_scale_ggH_1000 = 0.017;
+
+                                  const double sigma_signal_uncertainty_jet_scale_vbfH_600  = 0.080;
+                                  const double sigma_signal_uncertainty_jet_scale_vbfH_700  = 0.030;
+                                  const double sigma_signal_uncertainty_jet_scale_vbfH_800  = 0.040;
+                                  const double sigma_signal_uncertainty_jet_scale_vbfH_900  = 0.016;
+                                  const double sigma_signal_uncertainty_jet_scale_vbfH_1000 = 0.015;
+
+                                  const double sigma_signal_uncertainty_jet_res_ggH_600  = 0.153;
+                                  const double sigma_signal_uncertainty_jet_res_ggH_700  = 0.163;
+                                  const double sigma_signal_uncertainty_jet_res_ggH_800  = 0.100;
+                                  const double sigma_signal_uncertainty_jet_res_ggH_900  = 0.077;
+                                  const double sigma_signal_uncertainty_jet_res_ggH_1000 = 0.057;
+
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_600  = 0.215;
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_700  = 0.195;
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_800  = 0.158;
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_900  = 0.098;
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_1000 = 0.064;
+
                                   const double mean_mj_shift = 1.4 ;
                                   const double sigma_mj_smear = 1.11 ;
 };       
