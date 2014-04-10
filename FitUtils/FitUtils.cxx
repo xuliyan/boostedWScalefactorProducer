@@ -1,15 +1,15 @@
 #include "FitUtils.h"
 
 
-void fit_genHMass(RooWorkspace* workspace, const std::string & file_name, const std::string & label, const std::string & spectrum, const std::string & model, const std::string & channel, const std::string & wtagger, const int & ismc){
+void fit_genHMass(RooWorkspace* workspace, const std::string & label, const std::string & spectrum, const std::string & model, const std::string & channel, const std::string & wtagger, const int & ismc){
 
-  std::cout<<"############## Fit genHMass "<<file_name<<"  "<<label<<"  "<<model<<"  ##################"<<std::endl;
+  std::cout<<"############## Fit genHMass "<<"  "<<label<<"  "<<model<<"  ##################"<<std::endl;
 
   RooRealVar* rrv_mass_gen_WW = workspace->var("rrv_mass_gen_WW");
-  RooDataSet* rdataset = (RooDataSet*) workspace->data(("rdataset4fit"+label+"genHMass_"+channel).c_str());
+  RooDataSet* rdataset = (RooDataSet*) workspace->data(("rdataset4fit"+label+"_genHMass_"+channel).c_str());
   RooArgList* constraint_list = NULL;
 
-  RooAbsPdf* model_pdf = MakeGeneralPdf(workspace,label,model,spectrum,wtagger,channel,constraint_list,ismc);
+  RooAbsPdf* model_pdf = MakeExtendedModel(workspace,label+model,model,spectrum,channel,wtagger,constraint_list);
   rdataset->Print();
 
   RooFitResult* rfresult = model_pdf->fitTo(*rdataset,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE));
@@ -19,12 +19,13 @@ void fit_genHMass(RooWorkspace* workspace, const std::string & file_name, const 
 
   rfresult->SetName(("rfresult"+label+"_"+channel+"_mlvj").c_str());
   workspace->import(*rfresult);
-
+  workspace->import(*model_pdf);
+ 
   RooPlot* mplot = rrv_mass_gen_WW->frame(RooFit::Title("genMHmass_{lvj} fitted by BWRUN"), RooFit::Bins(int(rrv_mass_gen_WW->getBins())));
   rdataset->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
   model_pdf->plotOn(mplot);
 
-  draw_canvas(mplot,("plots_"+channel+"_"+wtagger+"_g1/m_lvj_fitting/").c_str(),"genHiggsMass",channel,GetLumi(),0,1,0);
+  draw_canvas(mplot,("plots_"+channel+"_"+wtagger+"_g1/m_lvj_fitting/").c_str(),"genHiggsMass"+label,channel,GetLumi(),0,1,0);
 }
 
 
