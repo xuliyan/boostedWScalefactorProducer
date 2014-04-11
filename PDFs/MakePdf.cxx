@@ -503,28 +503,117 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
      else if (TString(label).Contains("ggH") and TString(label).Contains("1000"))
         mass_label = "ggH1000";
      else if (TString(label).Contains("vbfH") and TString(label).Contains("600"))
-        mass_label = "ggH600";
+        mass_label = "vbfH600";
      else if (TString(label).Contains("vbfH") and TString(label).Contains("700"))
-        mass_label = "ggH700";
+        mass_label = "vbfH700";
      else if (TString(label).Contains("vbfH") and TString(label).Contains("800"))
-        mass_label = "ggH800";
+        mass_label = "vbfH800";
      else if (TString(label).Contains("vbfH") and TString(label).Contains("900"))
-        mass_label = "ggH900";
+        mass_label = "vbfH900";
      else if (TString(label).Contains("vbfH") and TString(label).Contains("1000"))
-        mass_label = "ggH1000";
+        mass_label = "vbfH1000";
 
-     RooRealVar* rrv_mean_BW  = workspace->var(("rrv_mean_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str());
-     RooRealVar* rrv_width_BW = workspace->var(("rrv_width_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str());
+     RooRealVar* rrv_mean_BW  = new RooRealVar(("rrv_mean_BW"+label+"_"+channel+spectrum).c_str(),("rrv_mean_BW"+label+"_"+channel+spectrum).c_str(),0);
+     RooRealVar* rrv_width_BW = new RooRealVar(("rrv_width_BW"+label+"_"+channel+spectrum).c_str(),("rrv_width_BW"+label+"_"+channel+spectrum).c_str(),0);
      rrv_mean_BW->setConstant(kTRUE);
      rrv_width_BW->setConstant(kTRUE);
 
      RooBWRunPdf* bw          = new RooBWRunPdf(("bwrun_shape"+label+"_"+channel+spectrum).c_str(),("bwrun_shape"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_mean_BW,*rrv_width_BW);
 
-     RooRealVar* rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),100,-150,300);
-     RooRealVar* rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),100,1,300);
-     RooRealVar* rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.2,-20,-0.1);
-     RooRealVar* rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),5,0.1,90);
+     RooRealVar* rrv_mean_CB  = NULL ; 
+     RooRealVar* rrv_sigma_CB = NULL ; 
+     RooRealVar* rrv_alpha_CB = NULL ; 
+     RooRealVar* rrv_n_CB     = NULL ; 
 
+     if(mass_label == "ggH600"){
+       rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),0,-50,50);
+       rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),50,0,100); 
+       rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-5,-8,-2);
+       rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),5,0.1,20);
+       rrv_mean_BW->setVal(workspace->var(("rrv_mean_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+       rrv_width_BW->setVal(workspace->var(("rrv_width_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+
+     }
+     else if(mass_label == "vbfH600"){
+       rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),0,-50,50);
+       rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),50,0,100); 
+       rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-5,-8,-2);
+       rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),5,0.1,20);
+       rrv_mean_BW->setVal(workspace->var(("rrv_mean_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+       rrv_width_BW->setVal(workspace->var(("rrv_width_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+     }
+     else if(mass_label == "ggH700"){
+       rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),16,-50,50);
+       rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),50,20,100); 
+       rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-6,-8,-4);
+       rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),10,0.5,40);
+       rrv_mean_BW->setVal(workspace->var(("rrv_mean_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+       rrv_width_BW->setVal(workspace->var(("rrv_width_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+     }
+     else if(mass_label == "vbfH700"){
+       rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),15,-50,50);
+       rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),50,10,100); 
+       rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-5,-8,-2);
+       rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),30,10,80);
+       rrv_mean_BW->setVal(workspace->var(("rrv_mean_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+       rrv_width_BW->setVal(workspace->var(("rrv_width_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+     }
+     else if(mass_label == "ggH800"){
+       rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),16,-50,50);
+       rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),50,10,100); 
+       rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-5,-8,-2);
+       rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),10,0.1,30);
+       rrv_mean_BW->setVal(workspace->var(("rrv_mean_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+       rrv_width_BW->setVal(workspace->var(("rrv_width_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+     }
+     else if(mass_label == "vbfH800"){
+       rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),16,-50,50);
+       rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),50,20,100); 
+       rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-5,-8,-2);
+       rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),20,0.1,40);
+       rrv_mean_BW->setVal(workspace->var(("rrv_mean_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+       rrv_width_BW->setVal(workspace->var(("rrv_width_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+     }
+     else if(mass_label == "ggH900"){
+       rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),10,-50,50);
+       rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),70,30,120); 
+       rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-5,-8,-2);
+       rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),5,0.1,10);
+       rrv_mean_BW->setVal(workspace->var(("rrv_mean_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+       rrv_width_BW->setVal(workspace->var(("rrv_width_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+     }
+     else if(mass_label == "vbfH900"){
+       rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),16,-50,50);
+       rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),70,70,120); 
+       rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-5,-8,-2);
+       rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),20,0.1,40);
+       rrv_mean_BW->setVal(workspace->var(("rrv_mean_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+       rrv_width_BW->setVal(workspace->var(("rrv_width_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+     }
+     else if(mass_label == "ggH1000"){
+       rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),10,-50,50);
+       rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),70,30,120); 
+       rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-5,-8,-2);
+       rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),5,0.1,10);
+       rrv_mean_BW->setVal(workspace->var(("rrv_mean_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+       rrv_width_BW->setVal(workspace->var(("rrv_width_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+     }
+     else if(mass_label == "vbfH1000"){
+       rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),16,-50,50);
+       rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),90,70,120); 
+       rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-5,-8,-2);
+       rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),20,0.1,40);
+       rrv_mean_BW->setVal(workspace->var(("rrv_mean_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+       rrv_width_BW->setVal(workspace->var(("rrv_width_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+     }
+     else {
+       rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),10,-20,20);
+       rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),70,30,120); 
+       rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-5,-8,-2);
+       rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),5,0.1,10);
+       rrv_mean_BW->setVal(workspace->var(("rrv_mean_BWRUN"+label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+       rrv_width_BW->setVal(workspace->var(("rrv_width_BWRUN_"+mass_label+"BWRUN_"+channel+"_genHMass").c_str())->getVal());
+     }
      //////
      std::string systematic_label ;
      if( TString(mass_label).Contains("ggH")) systematic_label = "_ggH" ;
@@ -533,7 +622,7 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
      RooRealVar* rrv_mean_scale_p1 = new RooRealVar(("CMS_sig_p1_jes"+systematic_label).c_str(),("CMS_sig_p1_jes"+systematic_label).c_str(),0);
      rrv_mean_scale_p1->setConstant(kTRUE);
 
-     RooRealVar* rrv_mean_scale_p2 = new RooRealVar(("CMS_sig_p1_jer"+systematic_label).c_str(),("CMS_sig_p1_jer"++systematic_label).c_str(),0);
+     RooRealVar* rrv_mean_scale_p2 = new RooRealVar(("CMS_sig_p1_jer"+systematic_label).c_str(),("CMS_sig_p1_jer"+systematic_label).c_str(),0);
      rrv_mean_scale_p2->setConstant(kTRUE);
 
      SystematicUncertaintyHiggs_01jetBin systematic ;
@@ -645,9 +734,9 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
 
      RooCBShape* cbshape  = new RooCBShape(("cbshape"+label+"_"+channel+spectrum).c_str(),("cbshape"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_total_mean_CB,*rrv_total_sigma_CB,*rrv_alpha_CB,*rrv_n_CB);
 
+     rrv_x->setBins(5000);
      RooFFTConvPdf* model_pdf = new RooFFTConvPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*bw,*cbshape);
-
-     model_pdf->setBufferFraction(1.0);
+     model_pdf->setBufferFraction(2.0);
 
      return model_pdf;
    }
