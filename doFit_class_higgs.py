@@ -1873,7 +1873,7 @@ class doFit_wj_and_wlvj:
         else:
           systematic = SystematicUncertaintyHiggs_01jetBin() ;
   
-        if TString(self.higgs_sample).Contains("600") and self.mlvj_shape["%s"%(self.higgs_sample)] == "CBBW_v1" and self.mlvj_shape["%s"%(self.vbfhiggs_sample)] == "CBBW_v1" :
+        if TString(self.higgs_sample).Contains("600") :
 
            self.workspace4limit_.var("rrv_mean_shift_scale_jes%s_%s_mlvj"%(self.higgs_sample,self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_600);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer%s_%s_mlvj"%(self.higgs_sample,self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_ggH_600);
@@ -1888,7 +1888,7 @@ class doFit_wj_and_wlvj:
            self.workspace4limit_.var("rrv_sigma_shift_jes%s_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).setVal(systematic.sigma_signal_uncertainty_jet_scale_vbfH_600);
            self.workspace4limit_.var("rrv_sigma_shift_jer%s_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).setVal(systematic.sigma_signal_uncertainty_jet_res_vbfH_600);
 
-        elif TString(self.higgs_sample).Contains("700") and self.mlvj_shape["%s"%(self.higgs_sample)] == "CBBW_v1" and self.mlvj_shape["%s"%(self.vbfhiggs_sample)] == "CBBW_v1" :
+        elif TString(self.higgs_sample).Contains("700") :
 
            self.workspace4limit_.var("rrv_mean_shift_scale_jes%s_%s_mlvj"%(self.higgs_sample,self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_700);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer%s_%s_mlvj"%(self.higgs_sample,self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_ggH_700);
@@ -1903,7 +1903,7 @@ class doFit_wj_and_wlvj:
            self.workspace4limit_.var("rrv_sigma_shift_jes%s_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).setVal(systematic.sigma_signal_uncertainty_jet_scale_vbfH_700);
            self.workspace4limit_.var("rrv_sigma_shift_jer%s_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).setVal(systematic.sigma_signal_uncertainty_jet_res_vbfH_700);
 
-        elif TString(self.higgs_sample).Contains("800") and self.mlvj_shape["%s"%(self.higgs_sample)] == "CBBW_v1" and self.mlvj_shape["%s"%(self.vbfhiggs_sample)] == "CBBW_v1" :
+        elif TString(self.higgs_sample).Contains("800") :
 
            self.workspace4limit_.var("rrv_mean_shift_scale_jes%s_%s_mlvj"%(self.higgs_sample,self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_800);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer%s_%s_mlvj"%(self.higgs_sample,self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_ggH_800);
@@ -1918,7 +1918,7 @@ class doFit_wj_and_wlvj:
            self.workspace4limit_.var("rrv_sigma_shift_jes%s_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).setVal(systematic.sigma_signal_uncertainty_jet_scale_vbfH_800);
            self.workspace4limit_.var("rrv_sigma_shift_jer%s_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).setVal(systematic.sigma_signal_uncertainty_jet_res_vbfH_800);
 
-        elif TString(self.higgs_sample).Contains("900") and self.mlvj_shape["%s"%(self.higgs_sample)] == "CBBW_v1" and self.mlvj_shape["%s"%(self.vbfhiggs_sample)] == "CBBW_v1" :
+        elif TString(self.higgs_sample).Contains("900") :
 
            self.workspace4limit_.var("rrv_mean_shift_scale_jes%s_%s_mlvj"%(self.higgs_sample,self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_900);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer%s_%s_mlvj"%(self.higgs_sample,self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_ggH_900);
@@ -1933,7 +1933,7 @@ class doFit_wj_and_wlvj:
            self.workspace4limit_.var("rrv_sigma_shift_jes%s_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).setVal(systematic.sigma_signal_uncertainty_jet_scale_vbfH_900);
            self.workspace4limit_.var("rrv_sigma_shift_jer%s_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).setVal(systematic.sigma_signal_uncertainty_jet_res_vbfH_900);
 
-        elif TString(self.higgs_sample).Contains("1000") and self.mlvj_shape["%s"%(self.higgs_sample)] == "CBBW_v1" and self.mlvj_shape["%s"%(self.vbfhiggs_sample)] == "CBBW_v1" :
+        elif TString(self.higgs_sample).Contains("1000") :
 
            self.workspace4limit_.var("rrv_mean_shift_scale_jes%s_%s_mlvj"%(self.higgs_sample,self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_1000);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer%s_%s_mlvj"%(self.higgs_sample,self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_ggH_1000);
@@ -1948,27 +1948,25 @@ class doFit_wj_and_wlvj:
            self.workspace4limit_.var("rrv_sigma_shift_jes%s_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).setVal(systematic.sigma_signal_uncertainty_jet_scale_vbfH_1000);
            self.workspace4limit_.var("rrv_sigma_shift_jer%s_%s_mlvj"%(self.vbfhiggs_sample,self.channel)).setVal(systematic.sigma_signal_uncertainty_jet_res_vbfH_1000);
 
-        if self.mlvj_shape["%s"%(self.higgs_sample)] == "CBBW_v1" and self.mlvj_shape["%s"%(self.vbfhiggs_sample)] == "CBBW_v1" :
+        self.workspace4limit_.var("CMS_sig_p1_jes_ggH").setError(1);
+        self.workspace4limit_.var("CMS_sig_p1_jer_ggH").setError(1);
+        self.workspace4limit_.var("CMS_sig_p2_jes_ggH").setError(1);
+        self.workspace4limit_.var("CMS_sig_p2_jer_ggH").setError(1);
 
-         self.workspace4limit_.var("CMS_sig_p1_jes_ggH").setError(1);
-         self.workspace4limit_.var("CMS_sig_p1_jer_ggH").setError(1);
-         self.workspace4limit_.var("CMS_sig_p2_jes_ggH").setError(1);
-         self.workspace4limit_.var("CMS_sig_p2_jer_ggH").setError(1);
+        self.workspace4limit_.var("CMS_sig_p1_jes_vbfH").setError(1);
+        self.workspace4limit_.var("CMS_sig_p1_jer_vbfH").setError(1);
+        self.workspace4limit_.var("CMS_sig_p2_jes_vbfH").setError(1);
+        self.workspace4limit_.var("CMS_sig_p2_jer_vbfH").setError(1);
 
-         self.workspace4limit_.var("CMS_sig_p1_jes_vbfH").setError(1);
-         self.workspace4limit_.var("CMS_sig_p1_jer_vbfH").setError(1);
-         self.workspace4limit_.var("CMS_sig_p2_jes_vbfH").setError(1);
-         self.workspace4limit_.var("CMS_sig_p2_jer_vbfH").setError(1);
-
-         params_list.append(self.workspace4limit_.var("CMS_sig_p1_jes_ggH"));
-         params_list.append(self.workspace4limit_.var("CMS_sig_p1_jer_ggH"));
-         params_list.append(self.workspace4limit_.var("CMS_sig_p2_jes_ggH"));
-         params_list.append(self.workspace4limit_.var("CMS_sig_p2_jer_ggH"));
+        params_list.append(self.workspace4limit_.var("CMS_sig_p1_jes_ggH"));
+        params_list.append(self.workspace4limit_.var("CMS_sig_p1_jer_ggH"));
+        params_list.append(self.workspace4limit_.var("CMS_sig_p2_jes_ggH"));
+        params_list.append(self.workspace4limit_.var("CMS_sig_p2_jer_ggH"));
                                                              
-         params_list.append(self.workspace4limit_.var("CMS_sig_p1_jes_vbfH"));
-         params_list.append(self.workspace4limit_.var("CMS_sig_p1_jer_vbfH"));
-         params_list.append(self.workspace4limit_.var("CMS_sig_p2_jes_vbfH"));
-         params_list.append(self.workspace4limit_.var("CMS_sig_p2_jer_vbfH"));
+        params_list.append(self.workspace4limit_.var("CMS_sig_p1_jes_vbfH"));
+        params_list.append(self.workspace4limit_.var("CMS_sig_p1_jer_vbfH"));
+        params_list.append(self.workspace4limit_.var("CMS_sig_p2_jes_vbfH"));
+        params_list.append(self.workspace4limit_.var("CMS_sig_p2_jer_vbfH"));
 
         ### print the datacard                                       
         self.print_limit_datacard("unbin", "ggH",    params_list);
@@ -2087,17 +2085,16 @@ class doFit_wj_and_wlvj:
                 if isTTbarFloating!=0:
                      self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_%s_mlvj_eig0"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)));
 
-        if self.mlvj_shape["%s"%(self.higgs_sample)] == "CBBW_v1" and self.mlvj_shape["%s"%(self.vbfhiggs_sample)] == "CBBW_v1" :
  
-         self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p1_jes_ggH"));
-         self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p1_jer_ggH"));
-         self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p2_jes_ggH"));
-         self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p2_jer_ggH"));
+        self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p1_jes_ggH"));
+        self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p1_jer_ggH"));
+        self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p2_jes_ggH"));
+        self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p2_jer_ggH"));
 
-         self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p1_jes_vbfH"));
-         self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p1_jer_vbfH"));
-         self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p2_jes_vbfH"));
-         self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p2_jer_vbfH"));
+        self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p1_jes_vbfH"));
+        self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p1_jer_vbfH"));
+        self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p2_jes_vbfH"));
+        self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p2_jer_vbfH"));
 
         ### Add the floating list to the combiner --> the pdf which are not fixed are floating by default
         getattr(self.workspace4limit_,"import")(self.FloatingParams);
@@ -2541,8 +2538,6 @@ self.channel));
         ### Build the dataset
         self.get_mj_and_mlvj_dataset(self.file_ggH,"_%s"%(self.higgs_sample));
 
-        fit_genHMass(self.workspace4fit_,"_%s"%(self.higgs_sample),"_genHMass","BWRUN",self.channel,self.wtagger_label,0);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
         '''
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%smassvbf_jes_up"%(self.higgs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
@@ -2555,13 +2550,12 @@ self.channel));
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%smassvbf_jer_dn"%(self.higgs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
         '''    
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region",self.mlvj_shape["ggH"],self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        
+        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region",self.mlvj_shape["ggH"],self.channel,self.wtagger_label,1,0,0,0,"_%s"%(self.higgs_sample));
+        self.workspace4fit_.Print(); 
+        fix_Model(self.workspace4fit_,"_%s"%(self.higgs_sample),"_signal_region","_mlvj",self.mlvj_shape["ggH"],self.channel,"",0);        
+
         self.get_mj_and_mlvj_dataset(self.file_vbfH,"_%s"%(self.vbfhiggs_sample));
 
-        fit_genHMass(self.workspace4fit_,"_%s"%(self.vbfhiggs_sample),"_genHMass","BWRUN",self.channel, self.wtagger_label,0)
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
         '''
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jes_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
