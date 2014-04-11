@@ -1051,16 +1051,134 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
             rrv_alpha_CB = new  RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),4,1,5);
             rrv_n_CB     = new   RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),20.,10,40);
             }                                                                            
+
+            // experimental systematic uncertainty
+           std::string systematic_label ;
+          if( TString(label).Contains("ggH")) systematic_label = "_ggH" ;
+          else if ( TString(label).Contains("vbfH")) systematic_label = "_vbfH";
+
+          RooRealVar* rrv_mean_scale_p1 = new RooRealVar(("CMS_sig_p1_jes"+systematic_label).c_str(),("CMS_sig_p1_jes"+systematic_label).c_str(),0);
+          rrv_mean_scale_p1->setConstant(kTRUE);
+
+          RooRealVar* rrv_mean_scale_p2 = new RooRealVar(("CMS_sig_p1_jer"+systematic_label).c_str(),("CMS_sig_p1_jer"+systematic_label).c_str(),0);
+          rrv_mean_scale_p2->setConstant(kTRUE);
+
+          SystematicUncertaintyHiggs_01jetBin systematic ;
+     
+          RooRealVar* rrv_mean_scale_X1 = new RooRealVar(("rrv_mean_shift_scale_jes"+label+"_"+channel+spectrum).c_str(),("rrv_mean_shift_scale_jes"+label+"_"+channel+spectrum).c_str(),0);
+          RooRealVar* rrv_mean_scale_X2 = new RooRealVar(("rrv_mean_shift_scale_jer"+label+"_"+channel+spectrum).c_str(),("rrv_mean_shift_scale_jer"+label+"_"+channel+spectrum).c_str(),0);
+
+          if (TString(label).Contains("ggH") and TString(label).Contains("600")){
+             rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_600);
+             rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_600);
+          }
+          else if (TString(label).Contains("ggH") and TString(label).Contains("700")){
+            rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_700);
+            rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_700);
+          }
+          else if (TString(label).Contains("ggH") and TString(label).Contains("800")){
+           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_800);
+           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_800);
+          }
+          else if (TString(label).Contains("ggH") and TString(label).Contains("900")){
+           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_900);
+           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_900);
+          }
+          else if (TString(label).Contains("ggH") and TString(label).Contains("1000")){
+           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_1000);
+           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_1000);
+          }
+          else if (TString(label).Contains("vbfH") and TString(label).Contains("600")){
+           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_600);
+           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_600);
+          }
+          else if (TString(label).Contains("vbfH") and TString(label).Contains("700")){
+           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_700);
+           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_700);
+          }
+          else if (TString(label).Contains("vbfH") and TString(label).Contains("800")){
+           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_800);
+           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_800);
+          }
+          else if (TString(label).Contains("vbfH") and TString(label).Contains("900")){
+           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_900);
+           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_900);
+          }
+          else if (TString(label).Contains("vbfH") and TString(label).Contains("1000")){
+           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_1000);
+           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_1000);
+          }
+
+         rrv_mean_scale_X1->setConstant(kTRUE);
+         rrv_mean_scale_X2->setConstant(kTRUE);
+
+         RooFormulaVar* rrv_total_mean_CB = new RooFormulaVar(("rrv_total_mean_CB"+label+"_"+channel+spectrum).c_str(),"@0*(1+@1*@2)*(1+@3*@4)", RooArgList(*rrv_mean_CB,*rrv_mean_scale_p1,*rrv_mean_scale_X1,*rrv_mean_scale_p2,*rrv_mean_scale_X2));
+
+     ////////////////////
+            
+     RooRealVar* rrv_sigma_scale_p1 = new RooRealVar(("CMS_sig_p2_jes"+systematic_label).c_str(),("CMS_sig_p2_jes"+systematic_label).c_str(),0);
+     RooRealVar* rrv_sigma_scale_p2 = new RooRealVar(("CMS_sig_p2_jer"+systematic_label).c_str(),("CMS_sig_p2_jer"+systematic_label).c_str(),0);
+     rrv_sigma_scale_p1->setConstant(kTRUE);
+     rrv_sigma_scale_p2->setConstant(kTRUE);
+ 
+     RooRealVar* rrv_sigma_scale_X1 = new RooRealVar(("rrv_sigma_shift_jes"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_shift_jes"+label+"_"+channel+spectrum).c_str(),0);
+     RooRealVar* rrv_sigma_scale_X2 = new RooRealVar(("rrv_sigma_shift_jer"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_shift_jer"+label+"_"+channel+spectrum).c_str(),0);
+
+     if (TString(label).Contains("ggH") and TString(label).Contains("600")){
+       rrv_sigma_scale_X1->setVal(systematic.sigma_signal_uncertainty_jet_scale_ggH_600);
+       rrv_sigma_scale_X2->setVal(systematic.sigma_signal_uncertainty_jet_res_ggH_600);
+     }
+     else if (TString(label).Contains("ggH") and TString(label).Contains("700")){
+       rrv_sigma_scale_X1->setVal(systematic.sigma_signal_uncertainty_jet_scale_ggH_700);
+       rrv_sigma_scale_X2->setVal(systematic.sigma_signal_uncertainty_jet_res_ggH_700);
+     }
+     else if (TString(label).Contains("ggH") and TString(label).Contains("800")){
+       rrv_sigma_scale_X1->setVal(systematic.sigma_signal_uncertainty_jet_scale_ggH_800);
+       rrv_sigma_scale_X2->setVal(systematic.sigma_signal_uncertainty_jet_res_ggH_800);
+     }
+     else if (TString(label).Contains("ggH") and TString(label).Contains("900")){
+       rrv_sigma_scale_X1->setVal(systematic.sigma_signal_uncertainty_jet_scale_ggH_900);
+       rrv_sigma_scale_X2->setVal(systematic.sigma_signal_uncertainty_jet_res_ggH_900);
+     }
+     else if (TString(label).Contains("ggH") and TString(label).Contains("1000")){
+       rrv_sigma_scale_X1->setVal(systematic.sigma_signal_uncertainty_jet_scale_ggH_1000);
+       rrv_sigma_scale_X2->setVal(systematic.sigma_signal_uncertainty_jet_res_ggH_1000);
+     }
+     else if (TString(label).Contains("vbfH") and TString(label).Contains("600")){
+       rrv_sigma_scale_X1->setVal(systematic.sigma_signal_uncertainty_jet_scale_vbfH_600);
+       rrv_sigma_scale_X2->setVal(systematic.sigma_signal_uncertainty_jet_res_vbfH_600);
+     }
+     else if (TString(label).Contains("vbfH") and TString(label).Contains("700")){
+       rrv_sigma_scale_X1->setVal(systematic.sigma_signal_uncertainty_jet_scale_vbfH_700);
+       rrv_sigma_scale_X2->setVal(systematic.sigma_signal_uncertainty_jet_res_vbfH_700);
+     }
+     else if (TString(label).Contains("vbfH") and TString(label).Contains("800")){
+       rrv_sigma_scale_X1->setVal(systematic.sigma_signal_uncertainty_jet_scale_vbfH_800);
+       rrv_sigma_scale_X2->setVal(systematic.sigma_signal_uncertainty_jet_res_vbfH_800);
+     }
+     else if (TString(label).Contains("vbfH") and TString(label).Contains("900")){
+       rrv_sigma_scale_X1->setVal(systematic.sigma_signal_uncertainty_jet_scale_vbfH_900);
+       rrv_sigma_scale_X2->setVal(systematic.sigma_signal_uncertainty_jet_res_vbfH_900);
+     }
+     else if (TString(label).Contains("vbfH") and TString(label).Contains("1000")){
+       rrv_sigma_scale_X1->setVal(systematic.sigma_signal_uncertainty_jet_scale_vbfH_1000);
+       rrv_sigma_scale_X2->setVal(systematic.sigma_signal_uncertainty_jet_res_vbfH_1000);
+     }
+
+     rrv_sigma_scale_X1->setConstant(kTRUE);
+     rrv_sigma_scale_X2->setConstant(kTRUE);
+
+     RooFormulaVar* rrv_total_sigma_CB = new RooFormulaVar(("rrv_total_sigma_CB"+label+"_"+channel+spectrum).c_str(),"@0*(1+@1*@2)*(1+@3*@4)", RooArgList(*rrv_sigma_CB,*rrv_sigma_scale_p1,*rrv_sigma_scale_X1,*rrv_sigma_scale_p2,*rrv_sigma_scale_X2));        
            
-            RooCBShape* model_pdf = new RooCBShape(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(), *rrv_x,*rrv_mean_CB,*rrv_sigma_CB,*rrv_alpha_CB,*rrv_n_CB);
+     RooCBShape* model_pdf = new RooCBShape(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(), *rrv_x,*rrv_total_mean_CB,*rrv_total_sigma_CB,*rrv_alpha_CB,*rrv_n_CB);
 
             
-            return model_pdf ;
+      return model_pdf ;
             
-       }
+    }
 
-      // Crystal  ball shape for Bulk GR samples and higgs 
-      if(model == "BWCB"){
+    // Crystal  ball shape for Bulk GR samples and higgs 
+    if(model == "BWCB"){
 
             std::cout<<"########### Crystal Ball x Breit Wigner for Bulk Graviton width ############"<<std::endl;
             RooRealVar*  rrv_mean_BW = NULL ;
