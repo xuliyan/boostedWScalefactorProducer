@@ -82,6 +82,7 @@ class doFit_wj_and_wlvj:
         self.mj_shape["WW_EWK"]  = "2_2Gaus";
         self.mj_shape["STop"]    = "ErfExp";
         self.mj_shape["WJets0"]  = "ErfExp";
+        self.mj_shape["WJets1"]  = "ErfExp";
         self.mj_shape["WJets01"] = "User1";
 
         self.mlvj_shape = ROOT.std.map(ROOT.std.string,ROOT.std.string) () ;
@@ -90,6 +91,7 @@ class doFit_wj_and_wlvj:
         self.mlvj_shape["WW_EWK"]  = fit_model;
         self.mlvj_shape["STop"]    = fit_model;
         self.mlvj_shape["WJets0"]  = fit_model;
+        self.mlvj_shape["WJets1"]  = fit_model;
         self.mlvj_shape["WJets01"] = fit_model_alter;
         self.mlvj_shape["ggH"]     = "CB_v1";
         self.mlvj_shape["vbfH"]    = "CB_v1";
@@ -100,13 +102,13 @@ class doFit_wj_and_wlvj:
         self.channel = in_channel;
         self.higgs_sample = in_higgs_sample;
 
-        if in_higgs_sample=="ggH600":  self.vbfhiggs_sample="vbfH600";
-        if in_higgs_sample=="ggH700":  self.vbfhiggs_sample="vbfH700";
-        if in_higgs_sample=="ggH800":  self.vbfhiggs_sample="vbfH800";
-        if in_higgs_sample=="ggH900":  self.vbfhiggs_sample="vbfH900";
-        if in_higgs_sample=="ggH1000": self.vbfhiggs_sample="vbfH1000";
-        if in_higgs_sample=="ggH1500": self.vbfhiggs_sample="vbfH1500";
-        if in_higgs_sample=="ggH2000": self.vbfhiggs_sample="vbfH2000";
+        if in_higgs_sample == "ggH600":  self.vbfhiggs_sample = "vbfH600";
+        if in_higgs_sample == "ggH700":  self.vbfhiggs_sample = "vbfH700";
+        if in_higgs_sample == "ggH800":  self.vbfhiggs_sample = "vbfH800";
+        if in_higgs_sample == "ggH900":  self.vbfhiggs_sample = "vbfH900";
+        if in_higgs_sample == "ggH1000": self.vbfhiggs_sample = "vbfH1000";
+        if in_higgs_sample == "ggH1500": self.vbfhiggs_sample = "vbfH1500";
+        if in_higgs_sample == "ggH2000": self.vbfhiggs_sample = "vbfH2000";
 
         print "########################################################################################"
         print "######## define class: binning, variables, cuts, files and nuissance parameters ########"
@@ -133,8 +135,7 @@ class doFit_wj_and_wlvj:
 
         #narrow the BinWidth_mj and BinWidth_mlvj by a factor of 5. Because Higgs-Combination-Tools will generate a binned sample, so need the bin width narrow. So, as a easy solution, we will increase the bin-width by a factor of 5 when ploting m_j m_WW
 
-        self.leg = TLegend();
-        
+        self.leg = TLegend();        
         self.narrow_factor = 1.;
 
         ## correct the binning of mj
@@ -173,14 +174,14 @@ class doFit_wj_and_wlvj:
         self.workspace4limit_ = RooWorkspace("workspace4limit_","workspace4limit_");
 
         ## different code operation mode -> just normal analysis
-	if options.closuretest ==0:
+	if options.closuretest == 0:
             self.mj_sideband_lo_min = in_mj_min;
             self.mj_sideband_lo_max = 65;
             self.mj_signal_min = 65;
             self.mj_signal_max = 105;
             self.mj_sideband_hi_min = 105;
             self.mj_sideband_hi_max = in_mj_max;
-        if options.closuretest ==1: ##closure test A1->A2
+        if options.closuretest == 1: ##closure test A1->A2
             self.mj_sideband_lo_min = in_mj_min;
             self.mj_sideband_lo_max = 55;
             self.mj_signal_min = 55;
@@ -225,7 +226,7 @@ class doFit_wj_and_wlvj:
              self.file_WJets0_mc = ("ofile_WJets_exclusive_Pythia.root");
              self.file_WJets1_mc = ("ofile_WJets_Herwig.root");
             else: 
-             self.file_WJets0_mc = ("ofile_WJets_Pythia180.root");
+             self.file_WJets0_mc = ("ofile_WJets_Pythia100.root");
              self.file_WJets1_mc = ("ofile_WJets_Herwig.root");
         else:
             if options.jetBin == "_2jet" :
@@ -233,7 +234,7 @@ class doFit_wj_and_wlvj:
              self.file_WJets1_mc = ("ofile_WJets_exclusive_Pythia.root");
             else:
              self.file_WJets0_mc = ("ofile_WJets_Herwig.root");
-             self.file_WJets1_mc = ("ofile_WJets_Pythia180.root");
+             self.file_WJets1_mc = ("ofile_WJets_Pythia100.root");
                 
 
         self.file_VV_mc     = ("ofile_VV.root");# WW+WZ
@@ -275,12 +276,12 @@ class doFit_wj_and_wlvj:
           elif options.pseudodata == 0 and  options.jetBin == "_2jet":
            self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",1.128);
            self.rrv_wtagger_eff_reweight_forT.setError(0.338);
-           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.91);
+           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.93);
            self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
           elif options.pseudodata == 0 and not options.jetBin == "_2jet":
-           self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.93);
+           self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.91);
            self.rrv_wtagger_eff_reweight_forT.setError(0.06*self.rrv_wtagger_eff_reweight_forT.getVal());
-           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.91);
+           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.93);
            self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
                                                                                                                           
         if self.channel=="el" and self.wtagger_label=="HP":
@@ -290,26 +291,26 @@ class doFit_wj_and_wlvj:
            self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",1.);
            self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
           elif options.pseudodata == 0 and options.jetBin == "_2jet":
-           self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.96);
+           self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.89);
            self.rrv_wtagger_eff_reweight_forT.setError(0.369);
-           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.94);
+           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.93);
            self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
           elif options.pseudodata == 0 and not  options.jetBin == "_2jet":
-           self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.93);
+           self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.89);
            self.rrv_wtagger_eff_reweight_forT.setError(0.06*self.rrv_wtagger_eff_reweight_forT.getVal());
-           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.94);
+           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.93);
            self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
                                                   
         if self.channel=="em" and self.wtagger_label=="HP":
           if options.pseudodata == 1:
             self.rrv_wtagger_eff_reweight_forT=RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT", 1.0);
-            self.rrv_wtagger_eff_reweight_forT.setError(0.225);
+            self.rrv_wtagger_eff_reweight_forT.setError(0.265);
             self.rrv_wtagger_eff_reweight_forV=RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",1.0);
             self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
           elif options.pseudodata ==0 and options.jetBin == "_2jet":
-            self.rrv_wtagger_eff_reweight_forT=RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT", 1.171);
-            self.rrv_wtagger_eff_reweight_forT.setError(0.225);
-            self.rrv_wtagger_eff_reweight_forV=RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.93);
+            self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT", 1.09);
+            self.rrv_wtagger_eff_reweight_forT.setError(0.265);
+            self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.93);
             self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());              
 
 
@@ -398,59 +399,57 @@ class doFit_wj_and_wlvj:
 
         ### jet binning uncertainty 
         if options.jetBin == "_2jet":                                                
-         self.QCDscale_ggH      = 0.0;
-         self.QCDscale_ggH1in   = 0.0;
+         self.QCDscale_ggH01in  = 0.26;
          self.QCDscale_ggH2in   = 0.19;
         else:
-         self.QCDscale_ggH      = 1.0;
-         self.QCDscale_ggH1in   = 1.0;
-         self.QCDscale_ggH2in   = 1.0;
+         self.QCDscale_ggH01in  = 0.00;
+         self.QCDscale_ggH2in   = -0.06;
             
-        self.QCDscale_vbfH     = 0.01;
+        self.QCDscale_qqH      = 0.0;
         self.pdf_gg            = 0.0;
-        self.pdf_vbf           = 0.0;
-        self.hwwlnJ_pdfAcc_gg  = 0.03;
-        self.hwwlnJ_pdfAcc_vbf = 0.01;
+        self.pdf_qqbar         = 0.0;
+        self.QCDScale_ggH_ACCEPT = 0.0;
+        self.QCDScale_qqH_ACCEPT = 0.0;
 
         # from twiki https:#twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt8TeV,  
         if self.higgs_sample == "ggH600": 
-            self.QCDscale_vbfH = 0.007
-            self.pdf_gg        = 0.095;
-            self.pdf_vbf       = 0.036
-            self.hwwlnJ_pdfAcc_gg  = 0.036;
-            self.hwwlnJ_pdfAcc_vbf = 0.007
+            self.QCDscale_qqH         = 0.007 ;
+            self.pdf_gg               = 0.091 ;
+            self.pdf_qqbar            = 0.050 ;
+            self.QCDScale_ggH_ACCEPT  = 0.036 ;
+            self.QCDScale_qqH_ACCEPT  = 0.007 ;
 
         elif self.higgs_sample == "ggH700": 
-            self.QCDscale_vbfH = 0.008;
-            self.pdf_gg        = 0.101;
-            self.pdf_vbf       = 0.042
-            self.hwwlnJ_pdfAcc_gg  = 0.038;
-            self.hwwlnJ_pdfAcc_vbf = 0.008
+            self.QCDscale_qqH         = 0.008;
+            self.pdf_gg               = 0.101;
+            self.pdf_qqbar            = 0.042
+            self.QCDScale_ggH_ACCEPT  = 0.038;
+            self.QCDScale_qqH_ACCEPT  = 0.008
 
         elif self.higgs_sample == "ggH800": 
-            self.QCDscale_vbfH = 0.010;
-            self.pdf_gg        = 0.106;
-            self.pdf_vbf       = 0.047;
-            self.hwwlnJ_pdfAcc_gg  = 0.040;
-            self.hwwlnJ_pdfAcc_vbf = 0.009
+            self.QCDscale_qqH        = 0.010;
+            self.pdf_gg              = 0.106;
+            self.pdf_qqbar           = 0.047;
+            self.QCDScale_ggH_ACCEPT = 0.040;
+            self.QCDScale_qqH_ACCEPT = 0.009
 
         elif self.higgs_sample == "ggH900": 
-            self.QCDscale_vbfH = 0.012
-            self.pdf_gg        = 0.111;
-            self.pdf_vbf       = 0.053
-            self.hwwlnJ_pdfAcc_gg  = 0.042;
-            self.hwwlnJ_pdfAcc_vbf = 0.010
+            self.QCDscale_qqH        = 0.012
+            self.pdf_gg              = 0.111;
+            self.pdf_qqbar           = 0.053
+            self.QCDScale_ggH_ACCEPT = 0.042;
+            self.QCDScale_qqH_ACCEPT = 0.010
 
         elif self.higgs_sample == "ggH1000": 
-            self.QCDscale_vbfH = 0.013;
-            self.pdf_gg        = 0.121;
-            self.pdf_vbf       = 0.059; 
-            self.hwwlnJ_pdfAcc_gg  = 0.046;
-            self.hwwlnJ_pdfAcc_vbf = 0.011
+            self.QCDscale_qqH        = 0.013;
+            self.pdf_gg              = 0.121;
+            self.pdf_qqbar           = 0.059; 
+            self.QCDScale_ggH_ACCEPT = 0.046;
+            self.QCDScale_qqH_ACCEPT = 0.011
 
         ### interference effect 
-        self.interference_ggH_uncertainty  = 0.1;
-        self.interference_vbfH_uncertainty = 0.5;
+        self.interference_ggH_uncertainty  = 0.10;
+        self.interference_vbfH_uncertainty = 0.25;
 
         #normalization uncertainty from jet scale
         self.WJets_normalization_uncertainty_from_jet_scale  = 0.;        
@@ -565,14 +564,23 @@ class doFit_wj_and_wlvj:
         fit_WJetsNormalization_in_Mj_signal_region(self.workspace4fit_,self.color_palet,self.mj_shape,"_WJets01","",self.mj_shape["WJets01"],self.channel,self.wtagger_label,0,options.pseudodata,self.mj_signal_min,self.mj_signal_max,options.jetBin); ## fit jet mass distribution
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
+        if not options.jetBin == "_2jet": 
+         fit_WJetsNormalization_in_Mj_signal_region(self.workspace4fit_,self.color_palet,self.mj_shape,"_WJets1","",self.mj_shape["WJets1"],self.channel,self.wtagger_label,0,options.pseudodata,self.mj_signal_min,self.mj_signal_max,options.jetBin); ## fit jet mass distribution
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
           
         rrv_WJets0  = self.workspace4fit_.var("rrv_number_WJets0_in_mj_signal_region_from_fitting_%s"%(self.channel)); ## nominal parametrization for Wjets
         rrv_WJets01 = self.workspace4fit_.var("rrv_number_WJets01_in_mj_signal_region_from_fitting_%s"%(self.channel)); ## alternate descrption
-
+        if not options.jetBin == "_2jet": rrv_WJets1 = self.workspace4fit_.var("rrv_number_WJets1_in_mj_signal_region_from_fitting_%s"%(self.channel));
+                
         rrv_WJets0.Print();
         rrv_WJets01.Print();
-
-        total_uncertainty = TMath.Sqrt(TMath.Power(rrv_WJets0.getError(),2)+TMath.Power(rrv_WJets01.getVal()-rrv_WJets0.getVal(),2)); ## add in quadrature the difference
+        if not options.jetBin == "_2jet":  rrv_WJets1.Print();
+        
+        if options.jetBin == "_2jet":
+            total_uncertainty = TMath.Sqrt(TMath.Power(rrv_WJets0.getError(),2)+TMath.Power(rrv_WJets01.getVal()-rrv_WJets0.getVal(),2)); ## add in quadrature the difference
+        else:
+            total_uncertainty = TMath.Sqrt(TMath.Power(rrv_WJets0.getError(),2)+TMath.Power(rrv_WJets01.getVal()-rrv_WJets0.getVal(),2)+TMath.Power(rrv_WJets1.getVal()-rrv_WJets0.getVal(),2)); ## add in quadrature the difference
+            
         rrv_WJets0.setError(total_uncertainty);
         rrv_WJets0.Print();
         print "Total Uncertainty in WJtes0 due to fit and shape: uncertainty ",total_uncertainty/rrv_WJets0.getVal();
@@ -787,68 +795,69 @@ class doFit_wj_and_wlvj:
         rdataset4fit_signal_region_mlvj = RooDataSet("rdataset4fit"+label+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
         rdataset4fit_sb_hi_mlvj     = RooDataSet("rdataset4fit"+label+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
 
-        
-        #dataset of jes_up
-        rdataset_mj_jes_up  = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jes_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
-        rdataset4fit_mj_jes_up = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jes_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+        if label != "WJets01" and label != "WJets1" :
+
+         #dataset of jes_up
+         rdataset_mj_jes_up  = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jes_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+         rdataset4fit_mj_jes_up = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jes_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
          
-        rdataset_sb_lo_mlvj_jes_up         = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset_signal_region_mlvj_jes_up = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset_sb_hi_mlvj_jes_up         = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_sb_lo_mlvj_jes_up         = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_signal_region_mlvj_jes_up = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_sb_hi_mlvj_jes_up         = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
 
-        rdataset4fit_sb_lo_mlvj_jes_up  = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset4fit_signal_region_mlvj_jes_up = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset4fit_sb_hi_mlvj_jes_up  = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_sb_lo_mlvj_jes_up  = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jes_up"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_signal_region_mlvj_jes_up = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jes_up"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_sb_hi_mlvj_jes_up  = RooDataSet("rdataset4fit"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jes_up"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
 
-        #dataset of applying jes dn
-        rdataset_mj_jes_dn  = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
-        rdataset4fit_mj_jes_dn = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+         #dataset of applying jes dn
+         rdataset_mj_jes_dn  = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+         rdataset4fit_mj_jes_dn = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
 
-        rdataset_sb_lo_mlvj_jes_dn         = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset_signal_region_mlvj_jes_dn = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset_sb_hi_mlvj_jes_dn         = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_sb_lo_mlvj_jes_dn         = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_signal_region_mlvj_jes_dn = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_sb_hi_mlvj_jes_dn         = RooDataSet("rdataset"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
 
-        rdataset4fit_sb_lo_mlvj_jes_dn  = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset4fit_signal_region_mlvj_jes_dn = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset4fit_sb_hi_mlvj_jes_dn     = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_sb_lo_mlvj_jes_dn  = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jes_dn"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_signal_region_mlvj_jes_dn = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jes_dn"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_sb_hi_mlvj_jes_dn     = RooDataSet("rdataset4fit"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jes_dn"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
 
 
-        #dataset of applying jer up
-        rdataset_mj_jer_up  = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jer_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
-        rdataset4fit_mj_jer_up = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jer_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+         #dataset of applying jer up
+         rdataset_mj_jer_up  = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jer_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+         rdataset4fit_mj_jer_up = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jer_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
 
-        rdataset_sb_lo_mlvj_jer_up         = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset_signal_region_mlvj_jer_up = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset_sb_hi_mlvj_jer_up         = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_sb_lo_mlvj_jer_up         = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_signal_region_mlvj_jer_up = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_sb_hi_mlvj_jer_up         = RooDataSet("rdataset"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
 
-        rdataset4fit_sb_lo_mlvj_jer_up  = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset4fit_signal_region_mlvj_jer_up = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset4fit_sb_hi_mlvj_jer_up     = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_sb_lo_mlvj_jer_up  = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer_up"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_signal_region_mlvj_jer_up = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer_up"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_sb_hi_mlvj_jer_up     = RooDataSet("rdataset4fit"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer_up"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
 
-        #dataset of applying jer dn
-        rdataset_mj_jer_dn  = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
-        rdataset4fit_mj_jer_dn = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+         #dataset of applying jer dn
+         rdataset_mj_jer_dn  = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+         rdataset4fit_mj_jer_dn = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
 
-        rdataset_sb_lo_mlvj_jer_dn         = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset_signal_region_mlvj_jer_dn = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset_sb_hi_mlvj_jer_dn         = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_sb_lo_mlvj_jer_dn         = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_signal_region_mlvj_jer_dn = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_sb_hi_mlvj_jer_dn         = RooDataSet("rdataset"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
 
-        rdataset4fit_sb_lo_mlvj_jer_dn  = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset4fit_signal_region_mlvj_jer_dn = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset4fit_sb_hi_mlvj_jer_dn     = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_sb_lo_mlvj_jer_dn  = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer_dn"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_signal_region_mlvj_jer_dn = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer_dn"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_sb_hi_mlvj_jer_dn     = RooDataSet("rdataset4fit"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer_dn"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
 
         
-        #dataset of applying jer 
-        rdataset_mj_jer  = RooDataSet("rdataset"+label+"massvbf_jer"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jer"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
-        rdataset4fit_mj_jer = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jer"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+         #dataset of applying jer 
+         rdataset_mj_jer  = RooDataSet("rdataset"+label+"massvbf_jer"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jer"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+         rdataset4fit_mj_jer = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_jer"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
 
-        rdataset_sb_lo_mlvj_jer         = RooDataSet("rdataset"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset_signal_region_mlvj_jer = RooDataSet("rdataset"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset_sb_hi_mlvj_jer         = RooDataSet("rdataset"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_sb_lo_mlvj_jer         = RooDataSet("rdataset"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_signal_region_mlvj_jer = RooDataSet("rdataset"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset_sb_hi_mlvj_jer         = RooDataSet("rdataset"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
 
-        rdataset4fit_sb_lo_mlvj_jer  = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset4fit_signal_region_mlvj_jer = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-        rdataset4fit_sb_hi_mlvj_jer     = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_sb_lo_mlvj_jer  = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer"+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_signal_region_mlvj_jer = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
+         rdataset4fit_sb_hi_mlvj_jer     = RooDataSet("rdataset4fit"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_jer"+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
                 
         ###### Define the event categorization
         data_category = RooCategory("data_category","data_category");
@@ -858,45 +867,49 @@ class doFit_wj_and_wlvj:
         combData = RooDataSet("combData"+label+"_"+self.channel,"combData"+label+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
         combData4fit = RooDataSet("combData4fit"+label+"_"+self.channel,"combData4fit"+label+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
         
-        ## jes_up
-        combData_jes_up = RooDataSet("combData"+label+"massvbf_jes_up"+"_"+self.channel,"combData"+label+"massvbf_jes_up"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
-        combData4fit_jes_up = RooDataSet("combData4fit"+label+"massvbf_jes_up"+"_"+self.channel,"combData4fit"+label+"massvbf_jes_up"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+        if label != "WJets01" and label != "WJets1" :
 
-        ## jes_dn
-        combData_jes_dn = RooDataSet("combData"+label+"massvbf_jes_dn"+"_"+self.channel,"combData"+label+"massvbf_jes_dn"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
-        combData4fit_jes_dn = RooDataSet("combData4fit"+label+"massvbf_jes_dn"+"_"+self.channel,"combData4fit"+label+"massvbf_jes_dn"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+         ## jes_up
+         combData_jes_up = RooDataSet("combData"+label+"massvbf_jes_up"+"_"+self.channel,"combData"+label+"massvbf_jes_up"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+         combData4fit_jes_up = RooDataSet("combData4fit"+label+"massvbf_jes_up"+"_"+self.channel,"combData4fit"+label+"massvbf_jes_up"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
 
-        ## jer_up
-        combData_jer_up = RooDataSet("combData"+label+"massvbf_jer_up"+"_"+self.channel,"combData"+label+"massvbf_jer_up"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
-        combData4fit_jer_up = RooDataSet("combData4fit"+label+"massvbf_jer_up"+"_"+self.channel,"combData4fit"+label+"massvbf_jer_up"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+         ## jes_dn
+         combData_jes_dn = RooDataSet("combData"+label+"massvbf_jes_dn"+"_"+self.channel,"combData"+label+"massvbf_jes_dn"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+         combData4fit_jes_dn = RooDataSet("combData4fit"+label+"massvbf_jes_dn"+"_"+self.channel,"combData4fit"+label+"massvbf_jes_dn"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
 
-        ## jer_dn
-        combData_jer_dn = RooDataSet("combData"+label+"massvbf_jer_dn"+"_"+self.channel,"combData"+label+"massvbf_jer_dn"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
-        combData4fit_jer_dn = RooDataSet("combData4fit"+label+"massvbf_jer_dn"+"_"+self.channel,"combData4fit"+label+"massvbf_jer_dn"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+         ## jer_up
+         combData_jer_up = RooDataSet("combData"+label+"massvbf_jer_up"+"_"+self.channel,"combData"+label+"massvbf_jer_up"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+         combData4fit_jer_up = RooDataSet("combData4fit"+label+"massvbf_jer_up"+"_"+self.channel,"combData4fit"+label+"massvbf_jer_up"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
 
-        ## jer
-        combData_jer = RooDataSet("combData"+label+"massvbf_jer"+"_"+self.channel,"combData"+label+"massvbf_jer"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
-        combData4fit_jer = RooDataSet("combData4fit"+label+"massvbf_jer"+"_"+self.channel,"combData4fit"+label+"massvbf_jer"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+         ## jer_dn
+         combData_jer_dn = RooDataSet("combData"+label+"massvbf_jer_dn"+"_"+self.channel,"combData"+label+"massvbf_jer_dn"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+         combData4fit_jer_dn = RooDataSet("combData4fit"+label+"massvbf_jer_dn"+"_"+self.channel,"combData4fit"+label+"massvbf_jer_dn"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+         ## jer
+         combData_jer = RooDataSet("combData"+label+"massvbf_jer"+"_"+self.channel,"combData"+label+"massvbf_jer"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
+         combData4fit_jer = RooDataSet("combData4fit"+label+"massvbf_jer"+"_"+self.channel,"combData4fit"+label+"massvbf_jer"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
         
         print "N entries: ", treeIn.GetEntries();
 
         hnum_4region = TH1D("hnum_4region"+label+"_"+self.channel,"hnum_4region"+label+"_"+self.channel,4,-1.5,2.5);# m_j   -1: sb_lo; 0:signal_region; 1: sb_hi; 2:total        
         hnum_2region = TH1D("hnum_2region"+label+"_"+self.channel,"hnum_2region"+label+"_"+self.channel,2,-0.5,1.5);# m_lvj  0: signal_region; 1: total
-        
-        hnum_4region_jes_up = TH1D("hnum_4region"+label+"massvbf_jes_up"+"_"+self.channel,"hnum_4region"+label+"massvbf_jes_up"+"_"+self.channel,4,-1.5,2.5);  
-        hnum_2region_jes_up = TH1D("hnum_2region"+label+"massvbf_jes_up"+"_"+self.channel,"hnum_2region"+label+"massvbf_jes_up"+"_"+self.channel,2,-0.5,1.5);
 
-        hnum_4region_jes_dn = TH1D("hnum_4region"+label+"massvbf_jes_dn"+"_"+self.channel,"hnum_4region"+label+"massvbf_jes_dn"+"_"+self.channel,4,-1.5,2.5);  
-        hnum_2region_jes_dn = TH1D("hnum_2region"+label+"massvbf_jes_dn"+"_"+self.channel,"hnum_2region"+label+"massvbf_jes_dn"+"_"+self.channel,2,-0.5,1.5);
+        if label != "WJets01" and label != "WJets1" :
 
-        hnum_4region_jer_up = TH1D("hnum_4region"+label+"massvbf_jer_up"+"_"+self.channel,"hnum_4region"+label+"massvbf_jer_up"+"_"+self.channel,4,-1.5,2.5);  
-        hnum_2region_jer_up = TH1D("hnum_2region"+label+"massvbf_jer_up"+"_"+self.channel,"hnum_2region"+label+"massvbf_jer_up"+"_"+self.channel,2,-0.5,1.5);
+         hnum_4region_jes_up = TH1D("hnum_4region"+label+"massvbf_jes_up"+"_"+self.channel,"hnum_4region"+label+"massvbf_jes_up"+"_"+self.channel,4,-1.5,2.5);  
+         hnum_2region_jes_up = TH1D("hnum_2region"+label+"massvbf_jes_up"+"_"+self.channel,"hnum_2region"+label+"massvbf_jes_up"+"_"+self.channel,2,-0.5,1.5);
 
-        hnum_4region_jer_dn = TH1D("hnum_4region"+label+"massvbf_jer_dn"+"_"+self.channel,"hnum_4region"+label+"massvbf_jer_dn"+"_"+self.channel,4,-1.5,2.5);  
-        hnum_2region_jer_dn = TH1D("hnum_2region"+label+"massvbf_jer_dn"+"_"+self.channel,"hnum_2region"+label+"massvbf_jer_dn"+"_"+self.channel,2,-0.5,1.5);
+         hnum_4region_jes_dn = TH1D("hnum_4region"+label+"massvbf_jes_dn"+"_"+self.channel,"hnum_4region"+label+"massvbf_jes_dn"+"_"+self.channel,4,-1.5,2.5);  
+         hnum_2region_jes_dn = TH1D("hnum_2region"+label+"massvbf_jes_dn"+"_"+self.channel,"hnum_2region"+label+"massvbf_jes_dn"+"_"+self.channel,2,-0.5,1.5);
 
-        hnum_4region_jer = TH1D("hnum_4region"+label+"massvbf_jer"+"_"+self.channel,"hnum_4region"+label+"massvbf_jer"+"_"+self.channel,4,-1.5,2.5);  
-        hnum_2region_jer = TH1D("hnum_2region"+label+"massvbf_jer"+"_"+self.channel,"hnum_2region"+label+"massvbf_jer"+"_"+self.channel,2,-0.5,1.5);
+         hnum_4region_jer_up = TH1D("hnum_4region"+label+"massvbf_jer_up"+"_"+self.channel,"hnum_4region"+label+"massvbf_jer_up"+"_"+self.channel,4,-1.5,2.5);  
+         hnum_2region_jer_up = TH1D("hnum_2region"+label+"massvbf_jer_up"+"_"+self.channel,"hnum_2region"+label+"massvbf_jer_up"+"_"+self.channel,2,-0.5,1.5);
+
+         hnum_4region_jer_dn = TH1D("hnum_4region"+label+"massvbf_jer_dn"+"_"+self.channel,"hnum_4region"+label+"massvbf_jer_dn"+"_"+self.channel,4,-1.5,2.5);  
+         hnum_2region_jer_dn = TH1D("hnum_2region"+label+"massvbf_jer_dn"+"_"+self.channel,"hnum_2region"+label+"massvbf_jer_dn"+"_"+self.channel,2,-0.5,1.5);
+
+         hnum_4region_jer = TH1D("hnum_4region"+label+"massvbf_jer"+"_"+self.channel,"hnum_4region"+label+"massvbf_jer"+"_"+self.channel,4,-1.5,2.5);  
+         hnum_2region_jer = TH1D("hnum_2region"+label+"massvbf_jer"+"_"+self.channel,"hnum_2region"+label+"massvbf_jer"+"_"+self.channel,2,-0.5,1.5);
         
         tmp_scale_to_lumi = 0 ;
 
@@ -938,80 +951,82 @@ class doFit_wj_and_wlvj:
           mass_lvj = getattr(treeIn,"mass_lvj_type0_met");
 
           
-          # jet mass jes_up
-          tmp_jet_mass_jes_up = getattr(treeIn, "jet_mass_pr_jes_up");
-          tmp_vbf_dEta_jes_up = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jes_up")-getattr(treeIn,"vbf_maxpt_j2_eta_jes_up"));
-          jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jes_up"),getattr(treeIn,"vbf_maxpt_j1_eta_jes_up"),getattr(treeIn,"vbf_maxpt_j1_phi_jes_up"),getattr(treeIn,"vbf_maxpt_j1_m_jes_up"));
-          jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jes_up"),getattr(treeIn,"vbf_maxpt_j2_eta_jes_up"),getattr(treeIn,"vbf_maxpt_j2_phi_jes_up"),getattr(treeIn,"vbf_maxpt_j2_m_jes_up"));
-          tmp_vbf_Mjj_jes_up      = (jet_1+jet_2).M();
-          ungroomed_jet_pt_jes_up = getattr(treeIn,"ungroomed_jet_pt_jes_up");
-          njet_jes_up = 0 ;
-          if(getattr(treeIn,"vbf_maxpt_j1_pt_jes_up") > 30.):
+          if label != "WJets01" and label != "WJets1" :
+
+           # jet mass jes_up
+           tmp_jet_mass_jes_up = getattr(treeIn, "jet_mass_pr_jes_up");
+           tmp_vbf_dEta_jes_up = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jes_up")-getattr(treeIn,"vbf_maxpt_j2_eta_jes_up"));
+           jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jes_up"),getattr(treeIn,"vbf_maxpt_j1_eta_jes_up"),getattr(treeIn,"vbf_maxpt_j1_phi_jes_up"),getattr(treeIn,"vbf_maxpt_j1_m_jes_up"));
+           jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jes_up"),getattr(treeIn,"vbf_maxpt_j2_eta_jes_up"),getattr(treeIn,"vbf_maxpt_j2_phi_jes_up"),getattr(treeIn,"vbf_maxpt_j2_m_jes_up"));
+           tmp_vbf_Mjj_jes_up      = (jet_1+jet_2).M();
+           ungroomed_jet_pt_jes_up = getattr(treeIn,"ungroomed_jet_pt_jes_up");
+           njet_jes_up = 0 ;
+           if(getattr(treeIn,"vbf_maxpt_j1_pt_jes_up") > 30.):
                njet_jes_up = njet_jes_up +1 ;
-          if(getattr(treeIn,"vbf_maxpt_j2_pt_jes_up") > 30.):
+           if(getattr(treeIn,"vbf_maxpt_j2_pt_jes_up") > 30.):
                njet_jes_up = njet_jes_up +1 ;
-          pfMET_jes_up = getattr(treeIn,"pfMET_jes_up");
-          mass_lvj_jes_up = getattr(treeIn,"mass_lvj_type0_met_jes_up");
+           pfMET_jes_up = getattr(treeIn,"pfMET_jes_up");
+           mass_lvj_jes_up = getattr(treeIn,"mass_lvj_type0_met_jes_up");
 
-          # jet mass jes_dn
-          tmp_jet_mass_jes_dn = getattr(treeIn, "jet_mass_pr_jes_dn");
-          tmp_vbf_dEta_jes_dn = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jes_dn")-getattr(treeIn,"vbf_maxpt_j2_eta_jes_dn"));
-          jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jes_dn"),getattr(treeIn,"vbf_maxpt_j1_eta_jes_dn"),getattr(treeIn,"vbf_maxpt_j1_phi_jes_dn"),getattr(treeIn,"vbf_maxpt_j1_m_jes_dn"));
-          jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jes_dn"),getattr(treeIn,"vbf_maxpt_j2_eta_jes_dn"),getattr(treeIn,"vbf_maxpt_j2_phi_jes_dn"),getattr(treeIn,"vbf_maxpt_j2_m_jes_dn"));
-          tmp_vbf_Mjj_jes_dn = (jet_1 + jet_2).M();
-          ungroomed_jet_pt_jes_dn = getattr(treeIn,"ungroomed_jet_pt_jes_dn");
-          njet_jes_dn = 0 ;
-          if(getattr(treeIn,"vbf_maxpt_j1_pt_jes_dn") > 30.):
+           # jet mass jes_dn
+           tmp_jet_mass_jes_dn = getattr(treeIn, "jet_mass_pr_jes_dn");
+           tmp_vbf_dEta_jes_dn = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jes_dn")-getattr(treeIn,"vbf_maxpt_j2_eta_jes_dn"));
+           jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jes_dn"),getattr(treeIn,"vbf_maxpt_j1_eta_jes_dn"),getattr(treeIn,"vbf_maxpt_j1_phi_jes_dn"),getattr(treeIn,"vbf_maxpt_j1_m_jes_dn"));
+           jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jes_dn"),getattr(treeIn,"vbf_maxpt_j2_eta_jes_dn"),getattr(treeIn,"vbf_maxpt_j2_phi_jes_dn"),getattr(treeIn,"vbf_maxpt_j2_m_jes_dn"));
+           tmp_vbf_Mjj_jes_dn = (jet_1 + jet_2).M();
+           ungroomed_jet_pt_jes_dn = getattr(treeIn,"ungroomed_jet_pt_jes_dn");
+           njet_jes_dn = 0 ;
+           if(getattr(treeIn,"vbf_maxpt_j1_pt_jes_dn") > 30.):
+                njet_jes_dn = njet_jes_dn +1 ;
+           if(getattr(treeIn,"vbf_maxpt_j2_pt_jes_dn") > 30.):
                njet_jes_dn = njet_jes_dn +1 ;
-          if(getattr(treeIn,"vbf_maxpt_j2_pt_jes_dn") > 30.):
-               njet_jes_dn = njet_jes_dn +1 ;
-          pfMET_jes_dn = getattr(treeIn,"pfMET_jes_dn");
-          mass_lvj_jes_dn = getattr(treeIn,"mass_lvj_type0_met_jes_dn");
+           pfMET_jes_dn = getattr(treeIn,"pfMET_jes_dn");
+           mass_lvj_jes_dn = getattr(treeIn,"mass_lvj_type0_met_jes_dn");
 
-          #jet mass jer
-          tmp_jet_mass_jer = getattr(treeIn, "jet_mass_pr_jer");
-          tmp_vbf_dEta_jer = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jer")-getattr(treeIn,"vbf_maxpt_j2_eta_jer"));
-          jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jer"),getattr(treeIn,"vbf_maxpt_j1_eta_jer"),getattr(treeIn,"vbf_maxpt_j1_phi_jer"),getattr(treeIn,"vbf_maxpt_j1_m_jer"));
-          jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jer"),getattr(treeIn,"vbf_maxpt_j2_eta_jer"),getattr(treeIn,"vbf_maxpt_j2_phi_jer"),getattr(treeIn,"vbf_maxpt_j2_m_jer"));
-          tmp_vbf_Mjj_jer = (jet_1+jet_2).M();
-          ungroomed_jet_pt_jer = getattr(treeIn,"ungroomed_jet_pt_jer");
-          njet_jer = 0 ;
-          if(getattr(treeIn,"vbf_maxpt_j1_pt_jer") > 30.):
+           #jet mass jer
+           tmp_jet_mass_jer = getattr(treeIn, "jet_mass_pr_jer");
+           tmp_vbf_dEta_jer = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jer")-getattr(treeIn,"vbf_maxpt_j2_eta_jer"));
+           jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jer"),getattr(treeIn,"vbf_maxpt_j1_eta_jer"),getattr(treeIn,"vbf_maxpt_j1_phi_jer"),getattr(treeIn,"vbf_maxpt_j1_m_jer"));
+           jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jer"),getattr(treeIn,"vbf_maxpt_j2_eta_jer"),getattr(treeIn,"vbf_maxpt_j2_phi_jer"),getattr(treeIn,"vbf_maxpt_j2_m_jer"));
+           tmp_vbf_Mjj_jer = (jet_1+jet_2).M();
+           ungroomed_jet_pt_jer = getattr(treeIn,"ungroomed_jet_pt_jer");
+           njet_jer = 0 ;
+           if(getattr(treeIn,"vbf_maxpt_j1_pt_jer") > 30.):
                njet_jer = njet_jer +1 ;
-          if(getattr(treeIn,"vbf_maxpt_j2_pt_jer") > 30.):
+           if(getattr(treeIn,"vbf_maxpt_j2_pt_jer") > 30.):
                njet_jer = njet_jer +1 ;
-          pfMET_jer = getattr(treeIn,"pfMET_jer");
-          mass_lvj_jer = getattr(treeIn,"mass_lvj_type0_met_jer");
+           pfMET_jer = getattr(treeIn,"pfMET_jer");
+           mass_lvj_jer = getattr(treeIn,"mass_lvj_type0_met_jer");
 
-          #jet mass jer up
-          tmp_jet_mass_jer_up = getattr(treeIn, "jet_mass_pr_jer_up");
-          tmp_vbf_dEta_jer_up = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jer_up")-getattr(treeIn,"vbf_maxpt_j2_eta_jer_up"));
-          jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jer_up"),getattr(treeIn,"vbf_maxpt_j1_eta_jer_up"),getattr(treeIn,"vbf_maxpt_j1_phi_jer_up"),getattr(treeIn,"vbf_maxpt_j1_m_jer_up"));
-          jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jer_up"),getattr(treeIn,"vbf_maxpt_j2_eta_jer_up"),getattr(treeIn,"vbf_maxpt_j2_phi_jer_up"),getattr(treeIn,"vbf_maxpt_j2_m_jer_up"));
-          tmp_vbf_Mjj_jer_up = (jet_1+jet_2).M();
-          ungroomed_jet_pt_jer_up = getattr(treeIn,"ungroomed_jet_pt_jer_up");
-          njet_jer_up = 0;
-          if(getattr(treeIn,"vbf_maxpt_j1_pt_jer_up") > 30.):
+           #jet mass jer up
+           tmp_jet_mass_jer_up = getattr(treeIn, "jet_mass_pr_jer_up");
+           tmp_vbf_dEta_jer_up = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jer_up")-getattr(treeIn,"vbf_maxpt_j2_eta_jer_up"));
+           jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jer_up"),getattr(treeIn,"vbf_maxpt_j1_eta_jer_up"),getattr(treeIn,"vbf_maxpt_j1_phi_jer_up"),getattr(treeIn,"vbf_maxpt_j1_m_jer_up"));
+           jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jer_up"),getattr(treeIn,"vbf_maxpt_j2_eta_jer_up"),getattr(treeIn,"vbf_maxpt_j2_phi_jer_up"),getattr(treeIn,"vbf_maxpt_j2_m_jer_up"));
+           tmp_vbf_Mjj_jer_up = (jet_1+jet_2).M();
+           ungroomed_jet_pt_jer_up = getattr(treeIn,"ungroomed_jet_pt_jer_up");
+           njet_jer_up = 0;
+           if(getattr(treeIn,"vbf_maxpt_j1_pt_jer_up") > 30.):
                njet_jer_up = njet_jer_up +1 ;
-          if(getattr(treeIn,"vbf_maxpt_j2_pt_jer_up") > 30.):
+           if(getattr(treeIn,"vbf_maxpt_j2_pt_jer_up") > 30.):
                njet_jer_up = njet_jer_up +1 ;
-          pfMET_jer_up = getattr(treeIn,"pfMET_jer_up");
-          mass_lvj_jer_up = getattr(treeIn,"mass_lvj_type0_met_jer_up");
+           pfMET_jer_up = getattr(treeIn,"pfMET_jer_up");
+           mass_lvj_jer_up = getattr(treeIn,"mass_lvj_type0_met_jer_up");
 
-          #jet mass jer dn
-          tmp_jet_mass_jer_dn = getattr(treeIn, "jet_mass_pr_jer_dn");
-          tmp_vbf_dEta_jer_dn = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jer_dn")-getattr(treeIn,"vbf_maxpt_j2_eta_jer_dn"));
-          jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jer_dn"),getattr(treeIn,"vbf_maxpt_j1_eta_jer_dn"),getattr(treeIn,"vbf_maxpt_j1_phi_jer_dn"),getattr(treeIn,"vbf_maxpt_j1_m_jer_dn"));
-          jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jer_dn"),getattr(treeIn,"vbf_maxpt_j2_eta_jer_dn"),getattr(treeIn,"vbf_maxpt_j2_phi_jer_dn"),getattr(treeIn,"vbf_maxpt_j2_m_jer_dn"));
-          tmp_vbf_Mjj_jer_dn = (jet_1 + jet_2).M();
-          ungroomed_jet_pt_jer_dn = getattr(treeIn,"ungroomed_jet_pt_jer_dn");
-          njet_jer_dn = 0 ;
-          if(getattr(treeIn,"vbf_maxpt_j1_pt_jer_dn") > 30.):
+           #jet mass jer dn
+           tmp_jet_mass_jer_dn = getattr(treeIn, "jet_mass_pr_jer_dn");
+           tmp_vbf_dEta_jer_dn = math.fabs(getattr(treeIn, "vbf_maxpt_j1_eta_jer_dn")-getattr(treeIn,"vbf_maxpt_j2_eta_jer_dn"));
+           jet_1.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j1_pt_jer_dn"),getattr(treeIn,"vbf_maxpt_j1_eta_jer_dn"),getattr(treeIn,"vbf_maxpt_j1_phi_jer_dn"),getattr(treeIn,"vbf_maxpt_j1_m_jer_dn"));
+           jet_2.SetPtEtaPhiM(getattr(treeIn,"vbf_maxpt_j2_pt_jer_dn"),getattr(treeIn,"vbf_maxpt_j2_eta_jer_dn"),getattr(treeIn,"vbf_maxpt_j2_phi_jer_dn"),getattr(treeIn,"vbf_maxpt_j2_m_jer_dn"));
+           tmp_vbf_Mjj_jer_dn = (jet_1 + jet_2).M();
+           ungroomed_jet_pt_jer_dn = getattr(treeIn,"ungroomed_jet_pt_jer_dn");
+           njet_jer_dn = 0 ;
+           if(getattr(treeIn,"vbf_maxpt_j1_pt_jer_dn") > 30.):
                njet_jer_dn = njet_jer_dn +1 ;
-          if(getattr(treeIn,"vbf_maxpt_j2_pt_jer_dn") > 30.):
+           if(getattr(treeIn,"vbf_maxpt_j2_pt_jer_dn") > 30.):
                njet_jer_dn = njet_jer_dn +1 ;
-          pfMET_jer_dn = getattr(treeIn,"pfMET_jer_dn");
-          mass_lvj_jer_dn = getattr(treeIn,"mass_lvj_type0_met_jer_dn");
+           pfMET_jer_dn = getattr(treeIn,"pfMET_jer_dn");
+           mass_lvj_jer_dn = getattr(treeIn,"mass_lvj_type0_met_jer_dn");
           
           isPassingCut = 0 ;
           isPassingCut_jes_up = 0;
@@ -1023,45 +1038,48 @@ class doFit_wj_and_wlvj:
           if options.jetBin == "_2jet" :
            if ungroomed_jet_pt > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj >= rrv_mass_lvj.getMin() and mass_lvj <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet >=2 and tmp_vbf_dEta > self.dEta_cut and tmp_vbf_Mjj > self.Mjj_cut:
             isPassingCut = 1 ;
+
+           if label != "WJets01" and label != "WJets1" :
            
-           if ungroomed_jet_pt_jes_up > 200. and discriminantCut and tmp_jet_mass_jes_up >= rrv_mass_j.getMin() and tmp_jet_mass_jes_up<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jes_up >= rrv_mass_lvj.getMin() and mass_lvj_jes_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jes_up >=2 and tmp_vbf_dEta_jes_up > self.dEta_cut and tmp_vbf_Mjj_jes_up > self.Mjj_cut :
-            isPassingCut_jes_up = 1 ;
+            if ungroomed_jet_pt_jes_up > 200. and discriminantCut and tmp_jet_mass_jes_up >= rrv_mass_j.getMin() and tmp_jet_mass_jes_up<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jes_up >= rrv_mass_lvj.getMin() and mass_lvj_jes_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jes_up >=2 and tmp_vbf_dEta_jes_up > self.dEta_cut and tmp_vbf_Mjj_jes_up > self.Mjj_cut :
+              isPassingCut_jes_up = 1 ;
 
           
-           if ungroomed_jet_pt_jes_dn > 200. and discriminantCut and tmp_jet_mass_jes_dn >= rrv_mass_j.getMin() and tmp_jet_mass_jes_dn<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jes_dn >= rrv_mass_lvj.getMin() and mass_lvj_jes_dn <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_dn > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jes_dn >=2 and tmp_vbf_dEta_jes_dn > self.dEta_cut and tmp_vbf_Mjj_jes_dn > self.Mjj_cut:
-            isPassingCut_jes_dn = 1 ;
+            if ungroomed_jet_pt_jes_dn > 200. and discriminantCut and tmp_jet_mass_jes_dn >= rrv_mass_j.getMin() and tmp_jet_mass_jes_dn<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jes_dn >= rrv_mass_lvj.getMin() and mass_lvj_jes_dn <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_dn > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jes_dn >=2 and tmp_vbf_dEta_jes_dn > self.dEta_cut and tmp_vbf_Mjj_jes_dn > self.Mjj_cut:
+             isPassingCut_jes_dn = 1 ;
 
-           if ungroomed_jet_pt_jer > 200. and discriminantCut and tmp_jet_mass_jer >= rrv_mass_j.getMin() and tmp_jet_mass_jer<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jer >= rrv_mass_lvj.getMin() and mass_lvj_jer <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jer >=2 and tmp_vbf_dEta_jer > self.dEta_cut and tmp_vbf_Mjj_jer > self.Mjj_cut:          
-            isPassingCut_jer = 1;
+            if ungroomed_jet_pt_jer > 200. and discriminantCut and tmp_jet_mass_jer >= rrv_mass_j.getMin() and tmp_jet_mass_jer<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jer >= rrv_mass_lvj.getMin() and mass_lvj_jer <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jer >=2 and tmp_vbf_dEta_jer > self.dEta_cut and tmp_vbf_Mjj_jer > self.Mjj_cut:          
+             isPassingCut_jer = 1;
 
-           if ungroomed_jet_pt_jer_up > 200. and discriminantCut and tmp_jet_mass_jer_up >= rrv_mass_j.getMin() and tmp_jet_mass_jer_up<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jer_up >= rrv_mass_lvj.getMin() and mass_lvj_jer_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jer_up >=2 and tmp_vbf_dEta_jer_up > self.dEta_cut and tmp_vbf_Mjj_jer_up > self.Mjj_cut:          
-            isPassingCut_jer_up = 1 ;
+            if ungroomed_jet_pt_jer_up > 200. and discriminantCut and tmp_jet_mass_jer_up >= rrv_mass_j.getMin() and tmp_jet_mass_jer_up<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jer_up >= rrv_mass_lvj.getMin() and mass_lvj_jer_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jer_up >=2 and tmp_vbf_dEta_jer_up > self.dEta_cut and tmp_vbf_Mjj_jer_up > self.Mjj_cut:          
+             isPassingCut_jer_up = 1 ;
 
-           if ungroomed_jet_pt_jer_dn > 200. and discriminantCut and tmp_jet_mass_jer_dn >= rrv_mass_j.getMin() and tmp_jet_mass_jer_dn<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jer_dn >= rrv_mass_lvj.getMin() and mass_lvj_jer_dn <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer_dn > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jer_dn >=2 and tmp_vbf_dEta_jer_dn > self.dEta_cut and tmp_vbf_Mjj_jer_dn > self.Mjj_cut:          
-            isPassingCut_jer_dn = 1 ;
+            if ungroomed_jet_pt_jer_dn > 200. and discriminantCut and tmp_jet_mass_jer_dn >= rrv_mass_j.getMin() and tmp_jet_mass_jer_dn<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jer_dn >= rrv_mass_lvj.getMin() and mass_lvj_jer_dn <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer_dn > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jer_dn >=2 and tmp_vbf_dEta_jer_dn > self.dEta_cut and tmp_vbf_Mjj_jer_dn > self.Mjj_cut:          
+             isPassingCut_jer_dn = 1 ;
            
           else:
               
            if ungroomed_jet_pt > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"nbjets_csvm_veto") < 1 and mass_lvj >= rrv_mass_lvj.getMin() and mass_lvj <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and njet < 2:
                
             isPassingCut = 1 ;
-           
-           if ungroomed_jet_pt_jes_up > 200. and discriminantCut and tmp_jet_mass_jes_up >= rrv_mass_j.getMin() and tmp_jet_mass_jes_up<=rrv_mass_j.getMax() and getattr(treeIn,"nbjets_csvm_veto") < 1 and mass_lvj_jes_up >= rrv_mass_lvj.getMin() and mass_lvj_jes_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and njet_jes_up < 2:
 
-            isPassingCut_jes_up = 1 ;
+           if label != "WJets01" and label != "WJets1" :
 
+            if ungroomed_jet_pt_jes_up > 200. and discriminantCut and tmp_jet_mass_jes_up >= rrv_mass_j.getMin() and tmp_jet_mass_jes_up<=rrv_mass_j.getMax() and getattr(treeIn,"nbjets_csvm_veto") < 1 and mass_lvj_jes_up >= rrv_mass_lvj.getMin() and mass_lvj_jes_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and njet_jes_up < 2:
+
+             isPassingCut_jes_up = 1 ;
           
-           if ungroomed_jet_pt_jes_dn > 200. and discriminantCut and tmp_jet_mass_jes_dn >= rrv_mass_j.getMin() and tmp_jet_mass_jes_dn<=rrv_mass_j.getMax() and getattr(treeIn,"nbjets_csvm_veto") < 1 and mass_lvj_jes_dn >= rrv_mass_lvj.getMin() and mass_lvj_jes_dn <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_dn > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and njet_jes_dn < 2:
-            isPassingCut_jes_dn = 1 ;
+            if ungroomed_jet_pt_jes_dn > 200. and discriminantCut and tmp_jet_mass_jes_dn >= rrv_mass_j.getMin() and tmp_jet_mass_jes_dn<=rrv_mass_j.getMax() and getattr(treeIn,"nbjets_csvm_veto") < 1 and mass_lvj_jes_dn >= rrv_mass_lvj.getMin() and mass_lvj_jes_dn <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_dn > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and njet_jes_dn < 2:
+             isPassingCut_jes_dn = 1 ;
 
-           if ungroomed_jet_pt_jer > 200. and discriminantCut and tmp_jet_mass_jer >= rrv_mass_j.getMin() and tmp_jet_mass_jer<=rrv_mass_j.getMax() and getattr(treeIn,"nbjets_csvm_veto") < 1 and mass_lvj_jer >= rrv_mass_lvj.getMin() and mass_lvj_jer <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and njet_jer < 2:
-            isPassingCut_jer = 1;
+            if ungroomed_jet_pt_jer > 200. and discriminantCut and tmp_jet_mass_jer >= rrv_mass_j.getMin() and tmp_jet_mass_jer<=rrv_mass_j.getMax() and getattr(treeIn,"nbjets_csvm_veto") < 1 and mass_lvj_jer >= rrv_mass_lvj.getMin() and mass_lvj_jer <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and njet_jer < 2:
+             isPassingCut_jer = 1;
 
-           if ungroomed_jet_pt_jer_up > 200. and discriminantCut and tmp_jet_mass_jer_up >= rrv_mass_j.getMin() and tmp_jet_mass_jer_up<=rrv_mass_j.getMax() and getattr(treeIn,"nbjets_csvm_veto") < 1 and mass_lvj_jer_up >= rrv_mass_lvj.getMin() and mass_lvj_jer_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and njet_jer_up < 2:
-            isPassingCut_jer_up = 1 ;
+            if ungroomed_jet_pt_jer_up > 200. and discriminantCut and tmp_jet_mass_jer_up >= rrv_mass_j.getMin() and tmp_jet_mass_jer_up<=rrv_mass_j.getMax() and getattr(treeIn,"nbjets_csvm_veto") < 1 and mass_lvj_jer_up >= rrv_mass_lvj.getMin() and mass_lvj_jer_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and njet_jer_up < 2:
+             isPassingCut_jer_up = 1 ;
 
-           if ungroomed_jet_pt_jer_dn > 200. and discriminantCut and tmp_jet_mass_jer_dn >= rrv_mass_j.getMin() and tmp_jet_mass_jer_dn<=rrv_mass_j.getMax() and getattr(treeIn,"nbjets_csvm_veto") < 1 and mass_lvj_jer_dn >= rrv_mass_lvj.getMin() and mass_lvj_jer_dn <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer_dn > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and njet_jer_dn < 2:
-            isPassingCut_jer_dn = 1 ;
+            if ungroomed_jet_pt_jer_dn > 200. and discriminantCut and tmp_jet_mass_jer_dn >= rrv_mass_j.getMin() and tmp_jet_mass_jer_dn<=rrv_mass_j.getMax() and getattr(treeIn,"nbjets_csvm_veto") < 1 and mass_lvj_jer_dn >= rrv_mass_lvj.getMin() and mass_lvj_jer_dn <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jer_dn > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and njet_jer_dn < 2:
+             isPassingCut_jer_dn = 1 ;
            
           
           if isPassingCut !=0 or isPassingCut_jes_up!=0 or isPassingCut_jes_dn!=0 or isPassingCut_jer!=0 or isPassingCut_jer_up!=0 or isPassingCut_jer_dn!=0 :
@@ -1173,18 +1191,19 @@ class doFit_wj_and_wlvj:
 
              
              ## JES UP
+             if label != "WJets01" and label != "WJets1" :
              
-             rrv_mass_lvj.setVal(mass_lvj_jes_up);
-             rrv_mass_j.setVal(tmp_jet_mass_jes_up);
+              rrv_mass_lvj.setVal(mass_lvj_jes_up);
+              rrv_mass_j.setVal(tmp_jet_mass_jes_up);
 
-             if tmp_jet_mass_jes_up >= self.mj_sideband_lo_min and tmp_jet_mass_jes_up < self.mj_sideband_lo_max and isPassingCut_jes_up == 1:
+              if tmp_jet_mass_jes_up >= self.mj_sideband_lo_min and tmp_jet_mass_jes_up < self.mj_sideband_lo_max and isPassingCut_jes_up == 1:
                  rdataset_sb_lo_mlvj_jes_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_sb_lo_mlvj_jes_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
                  data_category.setLabel("sideband");
                  combData_jes_up.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
                  combData4fit_jes_up.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
 
-             if tmp_jet_mass_jes_up >= self.mj_signal_min and tmp_jet_mass_jes_up < self.mj_signal_max and isPassingCut_jes_up == 1:
+              if tmp_jet_mass_jes_up >= self.mj_signal_min and tmp_jet_mass_jes_up < self.mj_signal_max and isPassingCut_jes_up == 1:
                  rdataset_signal_region_mlvj_jes_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_signal_region_mlvj_jes_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
                  data_category.setLabel("signal_region");
@@ -1194,13 +1213,14 @@ class doFit_wj_and_wlvj:
                  if mass_lvj_jes_up >=self.mlvj_signal_min and mass_lvj_jes_up <self.mlvj_signal_max: 
                    hnum_2region_jes_up.Fill(0,tmp_event_weight);
                    
-             if tmp_jet_mass_jes_up >= self.mj_sideband_hi_min and tmp_jet_mass_jes_up < self.mj_sideband_hi_max and isPassingCut_jes_up == 1:
+              if tmp_jet_mass_jes_up >= self.mj_sideband_hi_min and tmp_jet_mass_jes_up < self.mj_sideband_hi_max and isPassingCut_jes_up == 1:
                  rdataset_sb_hi_mlvj_jes_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_sb_hi_mlvj_jes_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
 
-             if isPassingCut_jes_up == 1: 
-              rdataset_mj_jes_up.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
-              rdataset4fit_mj_jes_up.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+              if isPassingCut_jes_up == 1: 
+               rdataset_mj_jes_up.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+               rdataset4fit_mj_jes_up.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+               
               if tmp_jet_mass_jes_up >=self.mj_sideband_lo_min and tmp_jet_mass_jes_up <self.mj_sideband_lo_max: 
                  hnum_4region_jes_up.Fill(-1,tmp_event_weight );
               if tmp_jet_mass_jes_up >=self.mj_signal_min and tmp_jet_mass_jes_up <self.mj_signal_max : 
@@ -1210,18 +1230,18 @@ class doFit_wj_and_wlvj:
               hnum_4region_jes_up.Fill(2,tmp_event_weight);
 
 
-             ### jes dn
-             rrv_mass_lvj.setVal(mass_lvj_jes_dn);
-             rrv_mass_j.setVal(tmp_jet_mass_jes_dn);
+              ### jes dn
+              rrv_mass_lvj.setVal(mass_lvj_jes_dn);
+              rrv_mass_j.setVal(tmp_jet_mass_jes_dn);
 
-             if tmp_jet_mass_jes_dn >= self.mj_sideband_lo_min and tmp_jet_mass_jes_dn < self.mj_sideband_lo_max and isPassingCut_jes_dn == 1:
+              if tmp_jet_mass_jes_dn >= self.mj_sideband_lo_min and tmp_jet_mass_jes_dn < self.mj_sideband_lo_max and isPassingCut_jes_dn == 1:
                  rdataset_sb_lo_mlvj_jes_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_sb_lo_mlvj_jes_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
                  data_category.setLabel("sideband");
                  combData_jes_dn.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
                  combData4fit_jes_dn.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
 
-             if tmp_jet_mass_jes_dn >= self.mj_signal_min and tmp_jet_mass_jes_dn < self.mj_signal_max and isPassingCut_jes_dn == 1:
+              if tmp_jet_mass_jes_dn >= self.mj_signal_min and tmp_jet_mass_jes_dn < self.mj_signal_max and isPassingCut_jes_dn == 1:
                  rdataset_signal_region_mlvj_jes_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_signal_region_mlvj_jes_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
                  data_category.setLabel("signal_region");
@@ -1232,34 +1252,34 @@ class doFit_wj_and_wlvj:
                    hnum_2region_jes_dn.Fill(0,tmp_event_weight);
                    
 
-             if tmp_jet_mass_jes_dn >= self.mj_sideband_hi_min and tmp_jet_mass_jes_dn < self.mj_sideband_hi_max and isPassingCut_jes_dn == 1:
+              if tmp_jet_mass_jes_dn >= self.mj_sideband_hi_min and tmp_jet_mass_jes_dn < self.mj_sideband_hi_max and isPassingCut_jes_dn == 1:
                  rdataset_sb_hi_mlvj_jes_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_sb_hi_mlvj_jes_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
 
-             if isPassingCut_jes_dn == 1: 
-              rdataset_mj_jes_dn.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
-              rdataset4fit_mj_jes_dn.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
-              if tmp_jet_mass_jes_dn >=self.mj_sideband_lo_min and tmp_jet_mass_jes_dn <self.mj_sideband_lo_max: 
+              if isPassingCut_jes_dn == 1: 
+               rdataset_mj_jes_dn.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+               rdataset4fit_mj_jes_dn.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+               if tmp_jet_mass_jes_dn >=self.mj_sideband_lo_min and tmp_jet_mass_jes_dn <self.mj_sideband_lo_max: 
                  hnum_4region_jes_dn.Fill(-1,tmp_event_weight );
-              if tmp_jet_mass_jes_dn >=self.mj_signal_min and tmp_jet_mass_jes_dn <self.mj_signal_max : 
-                 hnum_4region_jes_dn.Fill(0,tmp_event_weight);
-              if tmp_jet_mass_jes_dn >=self.mj_sideband_hi_min and tmp_jet_mass_jes_dn <self.mj_sideband_hi_max: 
+               if tmp_jet_mass_jes_dn >=self.mj_signal_min and tmp_jet_mass_jes_dn <self.mj_signal_max : 
+                  hnum_4region_jes_dn.Fill(0,tmp_event_weight);
+               if tmp_jet_mass_jes_dn >=self.mj_sideband_hi_min and tmp_jet_mass_jes_dn <self.mj_sideband_hi_max: 
                  hnum_4region_jes_dn.Fill(1,tmp_event_weight);
-              hnum_4region_jes_dn.Fill(2,tmp_event_weight);
+               hnum_4region_jes_dn.Fill(2,tmp_event_weight);
 
 
-             ########################JER
-             rrv_mass_lvj.setVal(mass_lvj_jer);
-             rrv_mass_j.setVal(tmp_jet_mass_jer);
+              ########################JER
+              rrv_mass_lvj.setVal(mass_lvj_jer);
+              rrv_mass_j.setVal(tmp_jet_mass_jer);
 
-             if tmp_jet_mass_jer >= self.mj_sideband_lo_min and tmp_jet_mass_jer < self.mj_sideband_lo_max and isPassingCut_jer == 1:
+              if tmp_jet_mass_jer >= self.mj_sideband_lo_min and tmp_jet_mass_jer < self.mj_sideband_lo_max and isPassingCut_jer == 1:
                  rdataset_sb_lo_mlvj_jer.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_sb_lo_mlvj_jer.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
                  data_category.setLabel("sideband");
                  combData_jer.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
                  combData4fit_jer.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
 
-             if tmp_jet_mass_jer >= self.mj_signal_min and tmp_jet_mass_jer < self.mj_signal_max and isPassingCut_jer == 1:
+              if tmp_jet_mass_jer >= self.mj_signal_min and tmp_jet_mass_jer < self.mj_signal_max and isPassingCut_jer == 1:
                  rdataset_signal_region_mlvj_jer.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_signal_region_mlvj_jer.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
                  data_category.setLabel("signal_region");
@@ -1269,33 +1289,33 @@ class doFit_wj_and_wlvj:
                  if mass_lvj_jer >=self.mlvj_signal_min and mass_lvj_jer <self.mlvj_signal_max: 
                    hnum_2region_jer.Fill(0,tmp_event_weight);
                    
-             if tmp_jet_mass_jer >= self.mj_sideband_hi_min and tmp_jet_mass_jer < self.mj_sideband_hi_max and isPassingCut_jer == 1:
+              if tmp_jet_mass_jer >= self.mj_sideband_hi_min and tmp_jet_mass_jer < self.mj_sideband_hi_max and isPassingCut_jer == 1:
                  rdataset_sb_hi_mlvj_jer.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_sb_hi_mlvj_jer.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
 
-             if isPassingCut_jer == 1: 
-              rdataset_mj_jer.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
-              rdataset4fit_mj_jer.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
-              if tmp_jet_mass_jer >=self.mj_sideband_lo_min and tmp_jet_mass_jer <self.mj_sideband_lo_max: 
+              if isPassingCut_jer == 1: 
+               rdataset_mj_jer.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+               rdataset4fit_mj_jer.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+               if tmp_jet_mass_jer >=self.mj_sideband_lo_min and tmp_jet_mass_jer <self.mj_sideband_lo_max: 
                  hnum_4region_jer.Fill(-1,tmp_event_weight );
-              if tmp_jet_mass_jer >=self.mj_signal_min and tmp_jet_mass_jer <self.mj_signal_max : 
+               if tmp_jet_mass_jer >=self.mj_signal_min and tmp_jet_mass_jer <self.mj_signal_max : 
                  hnum_4region_jer.Fill(0,tmp_event_weight);
-              if tmp_jet_mass_jer >=self.mj_sideband_hi_min and tmp_jet_mass_jer <self.mj_sideband_hi_max: 
+               if tmp_jet_mass_jer >=self.mj_sideband_hi_min and tmp_jet_mass_jer <self.mj_sideband_hi_max: 
                  hnum_4region_jer.Fill(1,tmp_event_weight);
-              hnum_4region_jer.Fill(2,tmp_event_weight);
+               hnum_4region_jer.Fill(2,tmp_event_weight);
 
-             ########################JER_UP
-             rrv_mass_lvj.setVal(mass_lvj_jer_up);
-             rrv_mass_j.setVal(tmp_jet_mass_jer_up);
+              ########################JER_UP
+              rrv_mass_lvj.setVal(mass_lvj_jer_up);
+              rrv_mass_j.setVal(tmp_jet_mass_jer_up);
 
-             if tmp_jet_mass_jer_up >= self.mj_sideband_lo_min and tmp_jet_mass_jer_up < self.mj_sideband_lo_max and isPassingCut_jer_up == 1:
+              if tmp_jet_mass_jer_up >= self.mj_sideband_lo_min and tmp_jet_mass_jer_up < self.mj_sideband_lo_max and isPassingCut_jer_up == 1:
                  rdataset_sb_lo_mlvj_jer_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_sb_lo_mlvj_jer_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
                  data_category.setLabel("sideband");
                  combData_jer_up.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
                  combData4fit_jer_up.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
 
-             if tmp_jet_mass_jer_up >= self.mj_signal_min and tmp_jet_mass_jer_up < self.mj_signal_max and isPassingCut_jer_up == 1:
+              if tmp_jet_mass_jer_up >= self.mj_signal_min and tmp_jet_mass_jer_up < self.mj_signal_max and isPassingCut_jer_up == 1:
                  rdataset_signal_region_mlvj_jer_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_signal_region_mlvj_jer_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
                  data_category.setLabel("signal_region");
@@ -1305,33 +1325,33 @@ class doFit_wj_and_wlvj:
                  if mass_lvj_jer_up >=self.mlvj_signal_min and mass_lvj_jer_up <self.mlvj_signal_max: 
                    hnum_2region_jer_up.Fill(0,tmp_event_weight);
                    
-             if tmp_jet_mass_jer_up >= self.mj_sideband_hi_min and tmp_jet_mass_jer_up < self.mj_sideband_hi_max and isPassingCut_jer_up == 1:
+              if tmp_jet_mass_jer_up >= self.mj_sideband_hi_min and tmp_jet_mass_jer_up < self.mj_sideband_hi_max and isPassingCut_jer_up == 1:
                  rdataset_sb_hi_mlvj_jer_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_sb_hi_mlvj_jer_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
 
-             if isPassingCut_jer_up == 1: 
-              rdataset_mj_jer_up.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
-              rdataset4fit_mj_jer_up.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
-              if tmp_jet_mass_jer_up >=self.mj_sideband_lo_min and tmp_jet_mass_jer_up <self.mj_sideband_lo_max: 
+              if isPassingCut_jer_up == 1: 
+               rdataset_mj_jer_up.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+               rdataset4fit_mj_jer_up.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+               if tmp_jet_mass_jer_up >=self.mj_sideband_lo_min and tmp_jet_mass_jer_up <self.mj_sideband_lo_max: 
                  hnum_4region_jer_up.Fill(-1,tmp_event_weight );
-              if tmp_jet_mass_jer_up >=self.mj_signal_min and tmp_jet_mass_jer_up <self.mj_signal_max : 
+               if tmp_jet_mass_jer_up >=self.mj_signal_min and tmp_jet_mass_jer_up <self.mj_signal_max : 
                  hnum_4region_jer_up.Fill(0,tmp_event_weight);
-              if tmp_jet_mass_jer_up >=self.mj_sideband_hi_min and tmp_jet_mass_jer_up <self.mj_sideband_hi_max: 
+               if tmp_jet_mass_jer_up >=self.mj_sideband_hi_min and tmp_jet_mass_jer_up <self.mj_sideband_hi_max: 
                  hnum_4region_jer_up.Fill(1,tmp_event_weight);
-              hnum_4region_jer_up.Fill(2,tmp_event_weight);
+               hnum_4region_jer_up.Fill(2,tmp_event_weight);
 
-             ########################JER_DN
-             rrv_mass_lvj.setVal(mass_lvj_jer_dn);
-             rrv_mass_j.setVal(tmp_jet_mass_jer_dn);
+              ########################JER_DN
+              rrv_mass_lvj.setVal(mass_lvj_jer_dn);
+              rrv_mass_j.setVal(tmp_jet_mass_jer_dn);
 
-             if tmp_jet_mass_jer_dn >= self.mj_sideband_lo_min and tmp_jet_mass_jer_dn < self.mj_sideband_lo_max and isPassingCut_jer_dn == 1:
+              if tmp_jet_mass_jer_dn >= self.mj_sideband_lo_min and tmp_jet_mass_jer_dn < self.mj_sideband_lo_max and isPassingCut_jer_dn == 1:
                  rdataset_sb_lo_mlvj_jer_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_sb_lo_mlvj_jer_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
                  data_category.setLabel("sideband");
                  combData_jer_dn.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
                  combData4fit_jer_dn.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
 
-             if tmp_jet_mass_jer_dn >= self.mj_signal_min and tmp_jet_mass_jer_dn < self.mj_signal_max and isPassingCut_jer_dn == 1:
+              if tmp_jet_mass_jer_dn >= self.mj_signal_min and tmp_jet_mass_jer_dn < self.mj_signal_max and isPassingCut_jer_dn == 1:
                  rdataset_signal_region_mlvj_jer_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_signal_region_mlvj_jer_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
                  data_category.setLabel("signal_region");
@@ -1341,20 +1361,20 @@ class doFit_wj_and_wlvj:
                  if mass_lvj_jer_dn >=self.mlvj_signal_min and mass_lvj_jer_dn <self.mlvj_signal_max: 
                    hnum_2region_jer_dn.Fill(0,tmp_event_weight);
                    
-             if tmp_jet_mass_jer_dn >= self.mj_sideband_hi_min and tmp_jet_mass_jer_dn < self.mj_sideband_hi_max and isPassingCut_jer_dn == 1:
+              if tmp_jet_mass_jer_dn >= self.mj_sideband_hi_min and tmp_jet_mass_jer_dn < self.mj_sideband_hi_max and isPassingCut_jer_dn == 1:
                  rdataset_sb_hi_mlvj_jer_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_sb_hi_mlvj_jer_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
 
-             if isPassingCut_jer_dn == 1: 
-              rdataset_mj_jer_dn.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
-              rdataset4fit_mj_jer_dn.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
-              if tmp_jet_mass_jer_dn >=self.mj_sideband_lo_min and tmp_jet_mass_jer_dn <self.mj_sideband_lo_max: 
+              if isPassingCut_jer_dn == 1: 
+               rdataset_mj_jer_dn.add( RooArgSet( rrv_mass_j ), tmp_event_weight );
+               rdataset4fit_mj_jer_dn.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
+               if tmp_jet_mass_jer_dn >=self.mj_sideband_lo_min and tmp_jet_mass_jer_dn <self.mj_sideband_lo_max: 
                  hnum_4region_jer_dn.Fill(-1,tmp_event_weight );
-              if tmp_jet_mass_jer_dn >=self.mj_signal_min and tmp_jet_mass_jer_dn <self.mj_signal_max : 
+               if tmp_jet_mass_jer_dn >=self.mj_signal_min and tmp_jet_mass_jer_dn <self.mj_signal_max : 
                  hnum_4region_jer_dn.Fill(0,tmp_event_weight);
-              if tmp_jet_mass_jer_dn >=self.mj_sideband_hi_min and tmp_jet_mass_jer_dn <self.mj_sideband_hi_max: 
+               if tmp_jet_mass_jer_dn >=self.mj_sideband_hi_min and tmp_jet_mass_jer_dn <self.mj_sideband_hi_max: 
                  hnum_4region_jer_dn.Fill(1,tmp_event_weight);
-              hnum_4region_jer_dn.Fill(2,tmp_event_weight);
+               hnum_4region_jer_dn.Fill(2,tmp_event_weight);
           
                                                                            
         ## scale 4fit dataset in order to have the right luminosity normalization
@@ -1395,119 +1415,117 @@ class doFit_wj_and_wlvj:
         getattr(self.workspace4fit_,"import")(combData4fit); combData4fit.Print();
         
         ###################jes_up
-        print "########### jes up ###########";
-        rrv_scale_to_lumi_jes_up = RooRealVar("rrv_scale_to_lumi"+label+"massvbf_jes_up_"+self.channel,"rrv_scale_to_lumi"+label+"massvbf_jes_up_"+self.channel,tmp_scale_to_lumi);
-        rrv_scale_to_lumi_jes_up.Print();
-        getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_jes_up);
+        if label != "WJets01" and label != "WJets1" :
+   
+         print "########### jes up ###########";
+         rrv_scale_to_lumi_jes_up = RooRealVar("rrv_scale_to_lumi"+label+"massvbf_jes_up_"+self.channel,"rrv_scale_to_lumi"+label+"massvbf_jes_up_"+self.channel,tmp_scale_to_lumi);
+         rrv_scale_to_lumi_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_jes_up);
 
-        rrv_number_dataset_signal_region_mlvj_jes_up = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jes_up"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"massvbf_jes_up"+"_"+self.channel+"_mlvj",hnum_2region_jes_up.GetBinContent(1));       
-        rrv_number_dataset_AllRange_mlvj_jes_up = RooRealVar("rrv_number_dataset_AllRange"+label+"massvbf_jes_up"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"massvbf_jes_up"+"_"+self.channel+"_mlvj",hnum_2region_jes_up.GetBinContent(2));
+         rrv_number_dataset_signal_region_mlvj_jes_up = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jes_up"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"massvbf_jes_up"+"_"+self.channel+"_mlvj",hnum_2region_jes_up.GetBinContent(1));       
+         rrv_number_dataset_AllRange_mlvj_jes_up = RooRealVar("rrv_number_dataset_AllRange"+label+"massvbf_jes_up"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"massvbf_jes_up"+"_"+self.channel+"_mlvj",hnum_2region_jes_up.GetBinContent(2));
                
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jes_up); rrv_number_dataset_signal_region_mlvj_jes_up.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jes_up); rrv_number_dataset_AllRange_mlvj_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jes_up); rrv_number_dataset_signal_region_mlvj_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jes_up); rrv_number_dataset_AllRange_mlvj_jes_up.Print();
                        
-        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jes_up); rdataset_sb_lo_mlvj_jes_up.Print();
-        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jes_up); rdataset_signal_region_mlvj_jes_up.Print();
-        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jes_up); rdataset_sb_hi_mlvj_jes_up.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jes_up); rdataset4fit_sb_lo_mlvj_jes_up.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jes_up); rdataset4fit_signal_region_mlvj_jes_up.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jes_up); rdataset4fit_sb_hi_mlvj_jes_up.Print();
-        getattr(self.workspace4fit_,"import")(combData_jes_up); combData_jes_up.Print();
-        getattr(self.workspace4fit_,"import")(combData4fit_jes_up); combData4fit_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jes_up); rdataset_sb_lo_mlvj_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jes_up); rdataset_signal_region_mlvj_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jes_up); rdataset_sb_hi_mlvj_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jes_up); rdataset4fit_sb_lo_mlvj_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jes_up); rdataset4fit_signal_region_mlvj_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jes_up); rdataset4fit_sb_hi_mlvj_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(combData_jes_up); combData_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(combData4fit_jes_up); combData4fit_jes_up.Print();
 
-        ####################jes_dn
-        print "########### jes dn ###########";
-        rrv_scale_to_lumi_jes_dn = RooRealVar("rrv_scale_to_lumi"+label+"massvbf_jes_dn_"+self.channel,"rrv_scale_to_lumi"+label+"massvbf_jes_dn_"+self.channel,tmp_scale_to_lumi);
-        rrv_scale_to_lumi_jes_dn.Print();
-        getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_jes_dn);
+         ####################jes_dn
+         print "########### jes dn ###########";
+         rrv_scale_to_lumi_jes_dn = RooRealVar("rrv_scale_to_lumi"+label+"massvbf_jes_dn_"+self.channel,"rrv_scale_to_lumi"+label+"massvbf_jes_dn_"+self.channel,tmp_scale_to_lumi);
+         rrv_scale_to_lumi_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_jes_dn);
 
 
-        rrv_number_dataset_signal_region_mlvj_jes_dn = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jes_dn"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"massvbf_jes_dn"+"_"+self.channel+"_mlvj",hnum_2region_jes_dn.GetBinContent(1));       
-        rrv_number_dataset_AllRange_mlvj_jes_dn = RooRealVar("rrv_number_dataset_AllRange"+label+"massvbf_jes_dn"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"massvbf_jes_dn"+"_"+self.channel+"_mlvj",hnum_2region_jes_dn.GetBinContent(2));
+         rrv_number_dataset_signal_region_mlvj_jes_dn = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jes_dn"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"massvbf_jes_dn"+"_"+self.channel+"_mlvj",hnum_2region_jes_dn.GetBinContent(1));       
+         rrv_number_dataset_AllRange_mlvj_jes_dn = RooRealVar("rrv_number_dataset_AllRange"+label+"massvbf_jes_dn"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"massvbf_jes_dn"+"_"+self.channel+"_mlvj",hnum_2region_jes_dn.GetBinContent(2));
                
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jes_dn); rrv_number_dataset_signal_region_mlvj_jes_dn.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jes_dn); rrv_number_dataset_AllRange_mlvj_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jes_dn); rrv_number_dataset_signal_region_mlvj_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jes_dn); rrv_number_dataset_AllRange_mlvj_jes_dn.Print();
+                       
+         getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jes_dn); rdataset_sb_lo_mlvj_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jes_dn); rdataset_signal_region_mlvj_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jes_dn); rdataset_sb_hi_mlvj_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jes_dn); rdataset4fit_sb_lo_mlvj_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jes_dn); rdataset4fit_signal_region_mlvj_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jes_dn); rdataset4fit_sb_hi_mlvj_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(combData_jes_dn); combData_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(combData4fit_jes_dn); combData4fit_jes_dn.Print();
+
+         ####################jer
+         print "########### jer ###########";
+         rrv_scale_to_lumi_jer = RooRealVar("rrv_scale_to_lumi"+label+"massvbf_jer_"+self.channel,"rrv_scale_to_lumi"+label+"massvbf_jer_"+self.channel,tmp_scale_to_lumi);
+         rrv_scale_to_lumi_jer.Print();
+         getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_jer);
+
+         rrv_number_dataset_signal_region_mlvj_jer = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jer"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"massvbf_jer"+"_"+self.channel+"_mlvj",hnum_2region_jer.GetBinContent(1));       
+         rrv_number_dataset_AllRange_mlvj_jer = RooRealVar("rrv_number_dataset_AllRange"+label+"massvbf_jer"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"massvbf_jer"+"_"+self.channel+"_mlvj",hnum_2region_jer.GetBinContent(2));
+               
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jer); rrv_number_dataset_signal_region_mlvj_jer.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jer); rrv_number_dataset_AllRange_mlvj_jer.Print();
+        
+         getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jer); rdataset_sb_lo_mlvj_jer.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jer); rdataset_signal_region_mlvj_jer.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jer); rdataset_sb_hi_mlvj_jer.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jer); rdataset4fit_sb_lo_mlvj_jer.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jer); rdataset4fit_signal_region_mlvj_jer.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jer); rdataset4fit_sb_hi_mlvj_jer.Print();
+         getattr(self.workspace4fit_,"import")(combData_jer); combData_jer.Print();
+         getattr(self.workspace4fit_,"import")(combData4fit_jer); combData4fit_jer.Print();
+
+         ####################jer_up
+         print "########### jer up ###########";
+         rrv_scale_to_lumi_jer_up = RooRealVar("rrv_scale_to_lumi"+label+"massvbf_jer_up_"+self.channel,"rrv_scale_to_lumi"+label+"massvbf_jer_up_"+self.channel,tmp_scale_to_lumi);
+         rrv_scale_to_lumi_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_jer_up);
+
+         rrv_scale_to_lumi_jer_up = RooRealVar("rrv_scale_to_lumi"+label+"massvbf_jer_up_"+self.channel,"rrv_scale_to_lumi"+label+"massvbf_jer_up_"+self.channel,tmp_scale_to_lumi);
+         rrv_scale_to_lumi_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_jer_up);
+
+         rrv_number_dataset_signal_region_mlvj_jer_up = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jer_up"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"massvbf_jer_up"+"_"+self.channel+"_mlvj",hnum_2region_jer_up.GetBinContent(1));       
+         rrv_number_dataset_AllRange_mlvj_jer_up = RooRealVar("rrv_number_dataset_AllRange"+label+"massvbf_jer_up"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"massvbf_jer_up"+"_"+self.channel+"_mlvj",hnum_2region_jer_up.GetBinContent(2));
+               
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jer_up); rrv_number_dataset_signal_region_mlvj_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jer_up); rrv_number_dataset_AllRange_mlvj_jer_up.Print();
+        
+         getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jer_up); rdataset_sb_lo_mlvj_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jer_up); rdataset_signal_region_mlvj_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jer_up); rdataset_sb_hi_mlvj_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jer_up); rdataset4fit_sb_lo_mlvj_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jer_up); rdataset4fit_signal_region_mlvj_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jer_up); rdataset4fit_sb_hi_mlvj_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(combData_jer_up); combData_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(combData4fit_jer_up); combData4fit_jer_up.Print();
+
+         ####################jer_dn
+         print "########### jer dn ###########";
+         rrv_scale_to_lumi_jer_dn = RooRealVar("rrv_scale_to_lumi"+label+"massvbf_jer_dn_"+self.channel,"rrv_scale_to_lumi"+label+"massvbf_jer_dn_"+self.channel,tmp_scale_to_lumi);
+         rrv_scale_to_lumi_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_jer_dn);
+
+         rrv_number_dataset_signal_region_mlvj_jer_dn = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jer_dn"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"massvbf_jer_dn"+"_"+self.channel+"_mlvj",hnum_2region_jer_dn.GetBinContent(1));       
+         rrv_number_dataset_AllRange_mlvj_jer_dn = RooRealVar("rrv_number_dataset_AllRange"+label+"massvbf_jer_dn"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"massvbf_jer_dn"+"_"+self.channel+"_mlvj",hnum_2region_jer_dn.GetBinContent(2));
+               
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jer_dn); rrv_number_dataset_signal_region_mlvj_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jer_dn); rrv_number_dataset_AllRange_mlvj_jer_dn.Print();
         
                
-        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jes_dn); rdataset_sb_lo_mlvj_jes_dn.Print();
-        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jes_dn); rdataset_signal_region_mlvj_jes_dn.Print();
-        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jes_dn); rdataset_sb_hi_mlvj_jes_dn.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jes_dn); rdataset4fit_sb_lo_mlvj_jes_dn.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jes_dn); rdataset4fit_signal_region_mlvj_jes_dn.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jes_dn); rdataset4fit_sb_hi_mlvj_jes_dn.Print();
-        getattr(self.workspace4fit_,"import")(combData_jes_dn); combData_jes_dn.Print();
-        getattr(self.workspace4fit_,"import")(combData4fit_jes_dn); combData4fit_jes_dn.Print();
-
-        ####################jer
-        print "########### jer ###########";
-        rrv_scale_to_lumi_jer = RooRealVar("rrv_scale_to_lumi"+label+"massvbf_jer_"+self.channel,"rrv_scale_to_lumi"+label+"massvbf_jer_"+self.channel,tmp_scale_to_lumi);
-        rrv_scale_to_lumi_jer.Print();
-        getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_jer);
-
-
-        rrv_number_dataset_signal_region_mlvj_jer = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jer"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"massvbf_jer"+"_"+self.channel+"_mlvj",hnum_2region_jer.GetBinContent(1));       
-        rrv_number_dataset_AllRange_mlvj_jer = RooRealVar("rrv_number_dataset_AllRange"+label+"massvbf_jer"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"massvbf_jer"+"_"+self.channel+"_mlvj",hnum_2region_jer.GetBinContent(2));
-               
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jer); rrv_number_dataset_signal_region_mlvj_jer.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jer); rrv_number_dataset_AllRange_mlvj_jer.Print();
-        
-        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jer); rdataset_sb_lo_mlvj_jer.Print();
-        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jer); rdataset_signal_region_mlvj_jer.Print();
-        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jer); rdataset_sb_hi_mlvj_jer.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jer); rdataset4fit_sb_lo_mlvj_jer.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jer); rdataset4fit_signal_region_mlvj_jer.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jer); rdataset4fit_sb_hi_mlvj_jer.Print();
-        getattr(self.workspace4fit_,"import")(combData_jer); combData_jer.Print();
-        getattr(self.workspace4fit_,"import")(combData4fit_jer); combData4fit_jer.Print();
-
-
-        ####################jer_up
-        print "########### jer up ###########";
-        rrv_scale_to_lumi_jer_up = RooRealVar("rrv_scale_to_lumi"+label+"massvbf_jer_up_"+self.channel,"rrv_scale_to_lumi"+label+"massvbf_jer_up_"+self.channel,tmp_scale_to_lumi);
-        rrv_scale_to_lumi_jer_up.Print();
-        getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_jer_up);
-
-        rrv_scale_to_lumi_jer_up = RooRealVar("rrv_scale_to_lumi"+label+"massvbf_jer_up_"+self.channel,"rrv_scale_to_lumi"+label+"massvbf_jer_up_"+self.channel,tmp_scale_to_lumi);
-        rrv_scale_to_lumi_jer_up.Print();
-        getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_jer_up);
-
-
-        rrv_number_dataset_signal_region_mlvj_jer_up = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jer_up"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"massvbf_jer_up"+"_"+self.channel+"_mlvj",hnum_2region_jer_up.GetBinContent(1));       
-        rrv_number_dataset_AllRange_mlvj_jer_up = RooRealVar("rrv_number_dataset_AllRange"+label+"massvbf_jer_up"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"massvbf_jer_up"+"_"+self.channel+"_mlvj",hnum_2region_jer_up.GetBinContent(2));
-               
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jer_up); rrv_number_dataset_signal_region_mlvj_jer_up.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jer_up); rrv_number_dataset_AllRange_mlvj_jer_up.Print();
-        
-        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jer_up); rdataset_sb_lo_mlvj_jer_up.Print();
-        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jer_up); rdataset_signal_region_mlvj_jer_up.Print();
-        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jer_up); rdataset_sb_hi_mlvj_jer_up.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jer_up); rdataset4fit_sb_lo_mlvj_jer_up.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jer_up); rdataset4fit_signal_region_mlvj_jer_up.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jer_up); rdataset4fit_sb_hi_mlvj_jer_up.Print();
-        getattr(self.workspace4fit_,"import")(combData_jer_up); combData_jer_up.Print();
-        getattr(self.workspace4fit_,"import")(combData4fit_jer_up); combData4fit_jer_up.Print();
-
-        ####################jer_dn
-        print "########### jer dn ###########";
-        rrv_scale_to_lumi_jer_dn = RooRealVar("rrv_scale_to_lumi"+label+"massvbf_jer_dn_"+self.channel,"rrv_scale_to_lumi"+label+"massvbf_jer_dn_"+self.channel,tmp_scale_to_lumi);
-        rrv_scale_to_lumi_jer_dn.Print();
-        getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_jer_dn);
-
-        rrv_number_dataset_signal_region_mlvj_jer_dn = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jer_dn"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"massvbf_jer_dn"+"_"+self.channel+"_mlvj",hnum_2region_jer_dn.GetBinContent(1));       
-        rrv_number_dataset_AllRange_mlvj_jer_dn = RooRealVar("rrv_number_dataset_AllRange"+label+"massvbf_jer_dn"+"_"+self.channel+"_mlvj","rrv_number_dataset_AllRange"+label+"massvbf_jer_dn"+"_"+self.channel+"_mlvj",hnum_2region_jer_dn.GetBinContent(2));
-               
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_jer_dn); rrv_number_dataset_signal_region_mlvj_jer_dn.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_AllRange_mlvj_jer_dn); rrv_number_dataset_AllRange_mlvj_jer_dn.Print();
-        
-               
-        getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jer_dn); rdataset_sb_lo_mlvj_jer_dn.Print();
-        getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jer_dn); rdataset_signal_region_mlvj_jer_dn.Print();
-        getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jer_dn); rdataset_sb_hi_mlvj_jer_dn.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jer_dn); rdataset4fit_sb_lo_mlvj_jer_dn.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jer_dn); rdataset4fit_signal_region_mlvj_jer_dn.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jer_dn); rdataset4fit_sb_hi_mlvj_jer_dn.Print();
-        getattr(self.workspace4fit_,"import")(combData_jer_dn); combData_jer_dn.Print();
-        getattr(self.workspace4fit_,"import")(combData4fit_jer_dn); combData4fit_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_sb_lo_mlvj_jer_dn); rdataset_sb_lo_mlvj_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_jer_dn); rdataset_signal_region_mlvj_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_sb_hi_mlvj_jer_dn); rdataset_sb_hi_mlvj_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_sb_lo_mlvj_jer_dn); rdataset4fit_sb_lo_mlvj_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_jer_dn); rdataset4fit_signal_region_mlvj_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_sb_hi_mlvj_jer_dn); rdataset4fit_sb_hi_mlvj_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(combData_jer_dn); combData_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(combData4fit_jer_dn); combData4fit_jer_dn.Print();
           
         self.file_out.write("\n%s events number in m_lvj from dataset: %s"%(label,rdataset_signal_region_mlvj.sumEntries()))
                              
@@ -1525,80 +1543,77 @@ class doFit_wj_and_wlvj:
         getattr(self.workspace4fit_,"import")(rdataset_mj); rdataset_mj.Print();
         getattr(self.workspace4fit_,"import")(rdataset4fit_mj); rdataset4fit_mj.Print();
          
-        #####jes_up
-        #prepare m_j dataset       
-        print "########### jes up ###########";
-        rrv_number_dataset_sb_lo_mj_jes_up = RooRealVar("rrv_number_dataset_sb_lo"+label+"massvbf_jes_up"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"massvbf_jes_up"+"_"+self.channel+"_mj",hnum_4region_jes_up.GetBinContent(1));
-        rrv_number_dataset_signal_region_mj_jes_up = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jes_up"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"massvbf_jes_up"+"_"+self.channel+"_mj",hnum_4region_jes_up.GetBinContent(2));        
-        rrv_number_dataset_sb_hi_mj_jes_up = RooRealVar("rrv_number_dataset_sb_hi"+label+"massvbf_jes_up"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"massvbf_jes_up"+"_"+self.channel+"_mj",hnum_4region_jes_up.GetBinContent(3));        
+        if label != "WJets01" and label != "WJets1" :
+         #####jes_up
+         #prepare m_j dataset       
+         print "########### jes up ###########";
+         rrv_number_dataset_sb_lo_mj_jes_up = RooRealVar("rrv_number_dataset_sb_lo"+label+"massvbf_jes_up"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"massvbf_jes_up"+"_"+self.channel+"_mj",hnum_4region_jes_up.GetBinContent(1));
+         rrv_number_dataset_signal_region_mj_jes_up = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jes_up"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"massvbf_jes_up"+"_"+self.channel+"_mj",hnum_4region_jes_up.GetBinContent(2));        
+         rrv_number_dataset_sb_hi_mj_jes_up = RooRealVar("rrv_number_dataset_sb_hi"+label+"massvbf_jes_up"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"massvbf_jes_up"+"_"+self.channel+"_mj",hnum_4region_jes_up.GetBinContent(3));        
 
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jes_up); rrv_number_dataset_sb_lo_mj_jes_up.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jes_up); rrv_number_dataset_signal_region_mj_jes_up.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jes_up); rrv_number_dataset_sb_hi_mj_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jes_up); rrv_number_dataset_sb_lo_mj_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jes_up); rrv_number_dataset_signal_region_mj_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jes_up); rrv_number_dataset_sb_hi_mj_jes_up.Print();
         
-        getattr(self.workspace4fit_,"import")(rdataset_mj_jes_up); rdataset_mj_jes_up.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jes_up); rdataset4fit_mj_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_mj_jes_up); rdataset_mj_jes_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jes_up); rdataset4fit_mj_jes_up.Print();
 
-        #####jes_dn
+         #####jes_dn
     
-        #prepare m_j dataset       
-        print "########### jes dn ###########";
-        rrv_number_dataset_sb_lo_mj_jes_dn = RooRealVar("rrv_number_dataset_sb_lo"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj",hnum_4region_jes_dn.GetBinContent(1));
-        rrv_number_dataset_signal_region_mj_jes_dn = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj",hnum_4region_jes_dn.GetBinContent(2));        
-        rrv_number_dataset_sb_hi_mj_jes_dn = RooRealVar("rrv_number_dataset_sb_hi"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj",hnum_4region_jes_dn.GetBinContent(3));        
+         #prepare m_j dataset       
+         print "########### jes dn ###########";
+         rrv_number_dataset_sb_lo_mj_jes_dn = RooRealVar("rrv_number_dataset_sb_lo"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj",hnum_4region_jes_dn.GetBinContent(1));
+         rrv_number_dataset_signal_region_mj_jes_dn = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj",hnum_4region_jes_dn.GetBinContent(2));        
+         rrv_number_dataset_sb_hi_mj_jes_dn = RooRealVar("rrv_number_dataset_sb_hi"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"massvbf_jes_dn"+"_"+self.channel+"_mj",hnum_4region_jes_dn.GetBinContent(3));        
 
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jes_dn); rrv_number_dataset_sb_lo_mj_jes_dn.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jes_dn); rrv_number_dataset_signal_region_mj_jes_dn.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jes_dn); rrv_number_dataset_sb_hi_mj_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jes_dn); rrv_number_dataset_sb_lo_mj_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jes_dn); rrv_number_dataset_signal_region_mj_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jes_dn); rrv_number_dataset_sb_hi_mj_jes_dn.Print();
         
-        getattr(self.workspace4fit_,"import")(rdataset_mj_jes_dn); rdataset_mj_jes_dn.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jes_dn); rdataset4fit_mj_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_mj_jes_dn); rdataset_mj_jes_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jes_dn); rdataset4fit_mj_jes_dn.Print();
 
+        #####jer        
+         #prepare m_j dataset       
+         print "########### jer ###########";
+         rrv_number_dataset_sb_lo_mj_jer = RooRealVar("rrv_number_dataset_sb_lo"+label+"massvbf_jer"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"massvbf_jer"+"_"+self.channel+"_mj",hnum_4region_jer.GetBinContent(1));
+         rrv_number_dataset_signal_region_mj_jer = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jer"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"massvbf_jer"+"_"+self.channel+"_mj",hnum_4region_jer.GetBinContent(2));        
+         rrv_number_dataset_sb_hi_mj_jer = RooRealVar("rrv_number_dataset_sb_hi"+label+"massvbf_jer"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"massvbf_jer"+"_"+self.channel+"_mj",hnum_4region_jer.GetBinContent(3));        
 
-        #####jer
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jer); rrv_number_dataset_sb_lo_mj_jer.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jer); rrv_number_dataset_signal_region_mj_jer.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jer); rrv_number_dataset_sb_hi_mj_jer.Print();
         
-        #prepare m_j dataset       
-        print "########### jer ###########";
-        rrv_number_dataset_sb_lo_mj_jer = RooRealVar("rrv_number_dataset_sb_lo"+label+"massvbf_jer"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"massvbf_jer"+"_"+self.channel+"_mj",hnum_4region_jer.GetBinContent(1));
-        rrv_number_dataset_signal_region_mj_jer = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jer"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"massvbf_jer"+"_"+self.channel+"_mj",hnum_4region_jer.GetBinContent(2));        
-        rrv_number_dataset_sb_hi_mj_jer = RooRealVar("rrv_number_dataset_sb_hi"+label+"massvbf_jer"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"massvbf_jer"+"_"+self.channel+"_mj",hnum_4region_jer.GetBinContent(3));        
-
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jer); rrv_number_dataset_sb_lo_mj_jer.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jer); rrv_number_dataset_signal_region_mj_jer.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jer); rrv_number_dataset_sb_hi_mj_jer.Print();
-        
-        getattr(self.workspace4fit_,"import")(rdataset_mj_jer); rdataset_mj_jer.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jer); rdataset4fit_mj_jer.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_mj_jer); rdataset_mj_jer.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jer); rdataset4fit_mj_jer.Print();
 
         #####jer_up
+         #prepare m_j dataset       
+         print "########### jer up ###########";
+         rrv_number_dataset_sb_lo_mj_jer_up = RooRealVar("rrv_number_dataset_sb_lo"+label+"massvbf_jer_up"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"massvbf_jer_up"+"_"+self.channel+"_mj",hnum_4region_jer_up.GetBinContent(1));
+         rrv_number_dataset_signal_region_mj_jer_up = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jer_up"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"massvbf_jer_up"+"_"+self.channel+"_mj",hnum_4region_jer_up.GetBinContent(2));        
+         rrv_number_dataset_sb_hi_mj_jer_up = RooRealVar("rrv_number_dataset_sb_hi"+label+"massvbf_jer_up"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"massvbf_jer_up"+"_"+self.channel+"_mj",hnum_4region_jer_up.GetBinContent(3));        
 
-        #prepare m_j dataset       
-        print "########### jer up ###########";
-        rrv_number_dataset_sb_lo_mj_jer_up = RooRealVar("rrv_number_dataset_sb_lo"+label+"massvbf_jer_up"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"massvbf_jer_up"+"_"+self.channel+"_mj",hnum_4region_jer_up.GetBinContent(1));
-        rrv_number_dataset_signal_region_mj_jer_up = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jer_up"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"massvbf_jer_up"+"_"+self.channel+"_mj",hnum_4region_jer_up.GetBinContent(2));        
-        rrv_number_dataset_sb_hi_mj_jer_up = RooRealVar("rrv_number_dataset_sb_hi"+label+"massvbf_jer_up"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"massvbf_jer_up"+"_"+self.channel+"_mj",hnum_4region_jer_up.GetBinContent(3));        
-
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jer_up); rrv_number_dataset_sb_lo_mj_jer_up.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jer_up); rrv_number_dataset_signal_region_mj_jer_up.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jer_up); rrv_number_dataset_sb_hi_mj_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jer_up); rrv_number_dataset_sb_lo_mj_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jer_up); rrv_number_dataset_signal_region_mj_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jer_up); rrv_number_dataset_sb_hi_mj_jer_up.Print();
         
-        getattr(self.workspace4fit_,"import")(rdataset_mj_jer_up); rdataset_mj_jer_up.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jer_up); rdataset4fit_mj_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_mj_jer_up); rdataset_mj_jer_up.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jer_up); rdataset4fit_mj_jer_up.Print();
 
-        #####jer_dn
+         #####jer_dn
+         #prepare m_j dataset       
+         print "########### jer dn ###########";
+         rrv_number_dataset_sb_lo_mj_jer_dn = RooRealVar("rrv_number_dataset_sb_lo"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj",hnum_4region_jer_dn.GetBinContent(1));
+         rrv_number_dataset_signal_region_mj_jer_dn = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj",hnum_4region_jer_dn.GetBinContent(2));        
+         rrv_number_dataset_sb_hi_mj_jer_dn = RooRealVar("rrv_number_dataset_sb_hi"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj",hnum_4region_jer_dn.GetBinContent(3));        
 
-        #prepare m_j dataset       
-        print "########### jer dn ###########";
-        rrv_number_dataset_sb_lo_mj_jer_dn = RooRealVar("rrv_number_dataset_sb_lo"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj","rrv_number_dataset_sb_lo"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj",hnum_4region_jer_dn.GetBinContent(1));
-        rrv_number_dataset_signal_region_mj_jer_dn = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj",hnum_4region_jer_dn.GetBinContent(2));        
-        rrv_number_dataset_sb_hi_mj_jer_dn = RooRealVar("rrv_number_dataset_sb_hi"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj","rrv_number_dataset_sb_hi"+label+"massvbf_jer_dn"+"_"+self.channel+"_mj",hnum_4region_jer_dn.GetBinContent(3));        
-
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jer_dn); rrv_number_dataset_sb_lo_mj_jer_dn.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jer_dn); rrv_number_dataset_signal_region_mj_jer_dn.Print();
-        getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jer_dn); rrv_number_dataset_sb_hi_mj_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_lo_mj_jer_dn); rrv_number_dataset_sb_lo_mj_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_jer_dn); rrv_number_dataset_signal_region_mj_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj_jer_dn); rrv_number_dataset_sb_hi_mj_jer_dn.Print();
         
-        getattr(self.workspace4fit_,"import")(rdataset_mj_jer_dn); rdataset_mj_jer_dn.Print();
-        getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jer_dn); rdataset4fit_mj_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset_mj_jer_dn); rdataset_mj_jer_dn.Print();
+         getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jer_dn); rdataset4fit_mj_jer_dn.Print();
     
     ##### Prepare the workspace for the limit and to store info to be printed in the datacard
     def prepare_limit(self,mode,isTTbarFloating = 0, isVVFloating = 0, isSTopFloating = 0, isWW_EWKFloating = 0):
@@ -2183,15 +2198,13 @@ self.channel));
                 
             datacard_out.write( "\n-------------------------------- " )
 
-            datacard_out.write( "\nQCDscale_ggH lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH))
-
-            datacard_out.write( "\nQCDscale_ggH1in lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH1in))
+            datacard_out.write( "\nQCDscale_ggH01in lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH01in))
 
             datacard_out.write( "\nQCDscale_ggH2in lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH2in))   
 
             datacard_out.write( "\npdf_gg       lnN   %0.3f     -             -        -       -       -     -"%(1.+self.pdf_gg))
 
-            datacard_out.write( "\nQCDscale_ggH_ACCEPT lnN %0.3f   -             -        -       -       -     -"%(1.+self.hwwlnJ_pdfAcc_gg) )
+            datacard_out.write( "\nQCDscale_ggH_ACCEPT lnN %0.3f   -             -        -       -       -     -"%(1.+self.QCDScale_ggH_ACCEPT) )
 
             datacard_out.write( "\nintf_ggH  lnN      %0.3f     -             -        -       -       -     -"%(1.+self.interference_ggH_uncertainty) )
 
@@ -2217,11 +2230,11 @@ self.channel));
 
             datacard_out.write( "\n-------------------------------- " )
             
-            datacard_out.write( "\nQCDscale_vbfH lnN  -         %0.3f         -        -       -       -     -"%(1.+self.QCDscale_vbfH) )
+            datacard_out.write( "\nQCDscale_qqH lnN  -         %0.3f         -        -       -       -     -"%(1.+self.QCDscale_qqH) )
 
-            datacard_out.write( "\npdf_qqbar     lnN  -         %0.3f         -        -       -       -     -"%(1.+self.pdf_vbf))
+            datacard_out.write( "\npdf_qqbar     lnN  -         %0.3f         -        -       -       -     -"%(1.+self.pdf_qqbar))
 
-            datacard_out.write( "\nQCDscale_qqH_ACCEPT lnN -      %0.3f         -        -       -       -     -"%(1.+self.hwwlnJ_pdfAcc_vbf))
+            datacard_out.write( "\nQCDscale_qqH_ACCEPT lnN -      %0.3f         -        -       -       -     -"%(1.+self.QCDScale_qqH_ACCEPT))
 
             datacard_out.write( "\nintf_vbfH lnN      -         %0.3f         -        -       -       -     -"%(1.+self.interference_vbfH_uncertainty) )
 
@@ -2249,23 +2262,21 @@ self.channel));
 
             datacard_out.write( "\n-------------------------------- " )
 
-            datacard_out.write( "\nQCDscale_ggH lnN   %0.3f        -      -      -       -       -     -"%(1.+self.QCDscale_ggH))
-
-            datacard_out.write( "\nQCDscale_ggH1in lnN   %0.3f     -      -      -       -       -     -"%(1.+self.QCDscale_ggH1in))
+            datacard_out.write( "\nQCDscale_gg01Hin lnN   %0.3f        -      -      -       -       -     -"%(1.+self.QCDscale_ggH01in))
 
             datacard_out.write( "\nQCDscale_ggH2in lnN   %0.3f     -      -      -       -       -     -"%(1.+self.QCDscale_ggH2in))   
 
             datacard_out.write( "\npdf_gg       lnN   %0.3f     -     -       -       -       -     -"%(1.+self.pdf_gg))
 
-            datacard_out.write( "\nQCDscale_ggH_ACCEPT lnN %0.3f   -       -        -       -       -     -"%(1.+self.hwwlnJ_pdfAcc_gg) )
+            datacard_out.write( "\nQCDscale_ggH_ACCEPT lnN %0.3f   -       -        -       -       -     -"%(1.+self.QCDScale_ggH_ACCEPT) )
 
             datacard_out.write( "\nintf_ggH  lnN      %0.3f     -       -        -       -       -     -"%(1.+self.interference_ggH_uncertainty) )
             
-            datacard_out.write( "\nQCDscale_vbfH lnN  -         %0.3f         -        -       -       -     -"%(1.+self.QCDscale_vbfH) )
+            datacard_out.write( "\nQCDscale_qqH lnN  -         %0.3f         -        -       -       -     -"%(1.+self.QCDscale_qqH) )
 
             datacard_out.write( "\npdf_qqbar     lnN  -         %0.3f         -        -       -       -     -"%(1.+self.pdf_vbf))
 
-            datacard_out.write( "\nQCDscale_qqH_ACCEPT lnN -      %0.3f         -        -       -       -     -"%(1.+self.hwwlnJ_pdfAcc_vbf))
+            datacard_out.write( "\nQCDscale_qqH_ACCEPT lnN -      %0.3f         -        -       -       -     -"%(1.+self.QCDScale_qqH_ACCEPT))
 
             datacard_out.write( "\nintf_vbfH lnN      -         %0.3f         -        -       -       -     -"%(1.+self.interference_vbfH_uncertainty) )
 
@@ -2518,7 +2529,7 @@ self.channel));
         print "nPar=%s, chiSquare=%s/%s"%(nparameters, ChiSquare.getVal()*(Nbin - nparameters), (Nbin - nparameters) );
 
         parameters_list = RooArgList();
-        draw_canvas_with_pull(mplot,mplot_pull,parameters_list,"plots_%s_%s_g1/m_lvj_fitting/"%(self.channel,self.wtagger_label),"check_worksapce","",channel,0,1,GetLumi());
+        draw_canvas_with_pull(mplot,mplot_pull,parameters_list,"plots_%s_%s_g1/mlvj_fitting/"%(self.channel,self.wtagger_label),"check_worksapce","",channel,0,1,GetLumi());
 
 
         ################################        
@@ -2529,7 +2540,7 @@ self.channel));
         scale_number_Total_background_MC = rrv_number_WJets.getVal()/data_obs.sumEntries();
         model_pdf_WJets.plotOn(mplot_wjet,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Name("WJets"), RooFit.LineColor(self.color_palet["WJets"]), RooFit.VLines());
         draw_error_band_ws(data_obs,model_pdf_WJets,rrv_x.GetName(),rrv_number_WJets,self.FloatingParams_wjet,workspace,mplot_wjet,self.color_palet["Uncertainty"],"F");
-        draw_canvas(mplot_wjet,"plots_%s_%s_g1/m_lvj_fitting/"%(self.channel,self.wtagger_label),"wjet_shape",self.channel,GetLumi(),0,1,0);
+        draw_canvas(mplot_wjet,"plots_%s_%s_g1/mlvj_fitting/"%(self.channel,self.wtagger_label),"wjet_shape",self.channel,GetLumi(),0,1,0);
         
 
     ######## +++++++++++
@@ -2582,6 +2593,7 @@ self.channel));
     def fit_WJets(self):
         print "######################### fit_WJets ########################"        
         self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0")# to get the shape of m_lvj
+        if not options.jetBin == "_2jet": self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets1")# to get the shape of m_lvj
         self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets01")# to get the shape of m_lvj
 
         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_up","ErfExp",self.channel,self.wtagger_label,1);        
@@ -2596,6 +2608,8 @@ self.channel));
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets01",self.mj_shape["WJets01"],self.channel,self.wtagger_label,1);
+        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.jetBin == "_2jet": fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets1",self.mj_shape["WJets1"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
@@ -2613,6 +2627,8 @@ self.channel));
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets01","_sb_lo",self.mlvj_shape["WJets01"],self.channel,self.wtagger_label,1,0,0,0,"_WJets01");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.jetBin == "_2jet": fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets1_mc,"_WJets1","_sb_lo",self.mlvj_shape["WJets1"],self.channel,self.wtagger_label,1,0,0,0,"_WJets01");
+        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,1,0,0,0,"_WJets0");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
@@ -2629,6 +2645,7 @@ self.channel));
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets01","_signal_region",self.mlvj_shape["WJets01"],self.channel,self.wtagger_label,1,0,0,0,"_WJets01");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.jetBin == "_2jet": fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets1_mc,"_WJets1","_signal_region",self.mlvj_shape["WJets1"],self.channel,self.wtagger_label,1,0,0,0,"_WJets01");
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0","_signal_region",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,1,0,0,0,"_WJets0");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
         
@@ -2924,6 +2941,8 @@ self.channel));
 
       fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets01","","_sb_lo",self.mlvj_shape["WJets01"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+      if not options.jetBin == "_2jet": fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets1","","_sb_lo",self.mlvj_shape["WJets1"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
+      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
       fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0","","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
@@ -2942,6 +2961,8 @@ self.channel));
       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
       get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4fit_,"_WJets01",self.mlvj_shape["WJets01"],"","_mlvj","4fit",self.channel,self.wtagger_label,1);
+      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+      if not options.jetBin == "_2jet": get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4fit_,"_WJets1",self.mlvj_shape["WJets1"],"","_mlvj","4fit",self.channel,self.wtagger_label,1);
       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
       get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4fit_,"_WJets0",self.mlvj_shape["WJets0"],self.mlvj_shape["WJets01"],"_mlvj","4fit",self.channel,self.wtagger_label,1);
       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
