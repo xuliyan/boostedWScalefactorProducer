@@ -1631,7 +1631,7 @@ class doFit_wj_and_wlvj:
 
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_fitting_signal_region_WJets0_%s_mlvj"%(self.channel)).clone("rate_WJets_for_counting"))
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_fitting_signal_region_VV_%s_mlvj"%(self.channel)).clone("rate_VV_for_counting"))
-        getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_fitting_signal_region_WW_EWK_%s_mlvj"%(self.channel)).clone("rate_WW_EWK_for_counting"))        
+        if options.jetBin == "_2jet" : getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_fitting_signal_region_WW_EWK_%s_mlvj"%(self.channel)).clone("rate_WW_EWK_for_counting"))        
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_fitting_signal_region_TTbar_%s_mlvj"%(self.channel)).clone("rate_TTbar_for_counting"))
         getattr(self.workspace4limit_,"import")(self.workspace4fit_.var("rrv_number_fitting_signal_region_STop_%s_mlvj"%(self.channel)).clone("rate_STop_for_counting"))
 
@@ -2179,82 +2179,145 @@ class doFit_wj_and_wlvj:
           datacard_out.write("\nshapes TTbar CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
           datacard_out.write("\nshapes STop CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
           datacard_out.write("\nshapes VV CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
-          datacard_out.write("\nshapes WW_EWK CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
+          if options.jetBin == "_2jet" : datacard_out.write("\nshapes WW_EWK CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
           datacard_out.write("\nshapes data_obs CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(), 
 self.channel));
           datacard_out.write( "\n--------------- ")
           
 
          if signalchannel == "ggH":
-            datacard_out.write( "\nbin                CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s   CMS_%s"%(self.channel,self.channel,self.channel,self.channel,self.channel,self.channel));
-            datacard_out.write( "\nprocess            %s        WJets    TTbar    STop    VV     WW_EWK"%(self.higgs_sample))
-            datacard_out.write( "\nprocess            -1                 1        2        3       4     5" )
+            if options.jetBin == "_2jet" : 
+             datacard_out.write( "\nbin                CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s   CMS_%s"%(self.channel,self.channel,self.channel,self.channel,self.channel,self.channel));
+             datacard_out.write( "\nprocess            %s        WJets    TTbar    STop    VV     WW_EWK"%(self.higgs_sample))
+             datacard_out.write( "\nprocess            -1                 1        2        3       4     5" )
 
-            if mode == "unbin":
+             if mode == "unbin":
                 datacard_out.write( "\nrate          %0.2f          %0.2f   %0.2f    %0.2f    %0.2f     %0.2f "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_unbin").getVal()));
 
-            elif mode == "counting":
+             elif mode == "counting":
                 datacard_out.write( "\nrate          %0.2f          %0.2f   %0.2f    %0.2f    %0.2f    %0.2f "%(self.workspace4limit_.var("rate_%s_for_counting"%(self.higgs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_counting").getVal(), self.workspace4limit_.var("rate_TTbar_for_counting").getVal(), self.workspace4limit_.var("rate_STop_for_counting").getVal(), self.workspace4limit_.var("rate_VV_for_counting").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_counting").getVal()));
                 
-            datacard_out.write( "\n-------------------------------- " )
+             datacard_out.write( "\n-------------------------------- " ) 
 
-            datacard_out.write( "\nQCDscale_ggH01in lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH01in))
+             datacard_out.write( "\nQCDscale_ggH01in lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH01in))
 
-            datacard_out.write( "\nQCDscale_ggH2in lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH2in))   
+             datacard_out.write( "\nQCDscale_ggH2in lnN   %0.3f     -             -        -       -       -     -"%(1.+self.QCDscale_ggH2in))   
 
-            datacard_out.write( "\npdf_gg       lnN   %0.3f     -             -        -       -       -     -"%(1.+self.pdf_gg))
+             datacard_out.write( "\npdf_gg       lnN   %0.3f     -             -        -       -       -     -"%(1.+self.pdf_gg))
 
-            datacard_out.write( "\nQCDscale_ggH_ACCEPT lnN %0.3f   -             -        -       -       -     -"%(1.+self.QCDScale_ggH_ACCEPT) )
+             datacard_out.write( "\nQCDscale_ggH_ACCEPT lnN %0.3f   -             -        -       -       -     -"%(1.+self.QCDScale_ggH_ACCEPT) )
 
-            datacard_out.write( "\nintf_ggH  lnN      %0.3f     -             -        -       -       -     -"%(1.+self.interference_ggH_uncertainty) )
+             datacard_out.write( "\nintf_ggH  lnN      %0.3f     -             -        -       -       -     -"%(1.+self.interference_ggH_uncertainty) )
 
-            datacard_out.write( "\nCMS_hwwlvj_STop  lnN       -         -             -        -       %0.3f   -     -"%(1+self.XS_STop_uncertainty) )
+             datacard_out.write( "\nCMS_hwwlvj_STop  lnN       -         -             -               %0.3f   -  -   "%(1+self.XS_STop_uncertainty) )
 
-            datacard_out.write( "\nCMS_hwwlvj_VV    lnN       -         -             -        -       -       %0.3f    -"%(1+self.XS_VV_uncertainty) )
+             datacard_out.write( "\nCMS_hwwlvj_VV    lnN       -         -             -        -              %0.3f    "%(1+self.XS_VV_uncertainty) )
 
-            datacard_out.write( "\nCMS_hwwlvj_WW_EWK    lnN       -         -             -        -       -       -     %0.3f"%(1+self.XS_WW_EWK_uncertainty))
+             datacard_out.write( "\nCMS_hwwlvj_WW_EWK    lnN       -         -             -        -              -     %0.3f"%(1+self.XS_WW_EWK_uncertainty))
 
-            datacard_out.write( "\nCMS_hwwlvj_TTbar    lnN       -         -             -        %0.3f       -       -     -"%(1+self.XS_TTbar_uncertainty) )
+             datacard_out.write( "\n#CMS_hwwlvj_TTbar    lnN       -         -                     %0.3f       -       -     -"%(1+self.XS_TTbar_uncertainty) )
+
+            else:
+
+             datacard_out.write( "\nbin                CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s "%(self.channel,self.channel,self.channel,self.channel,self.channel));
+             datacard_out.write( "\nprocess            %s        WJets    TTbar    STop    VV "%(self.higgs_sample))
+             datacard_out.write( "\nprocess            -1                 1        2        3       4   " )
+
+             if mode == "unbin":
+                datacard_out.write( "\nrate          %0.2f          %0.2f   %0.2f    %0.2f    %0.2f  "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal()));
+
+             elif mode == "counting":
+                datacard_out.write( "\nrate          %0.2f          %0.2f   %0.2f    %0.2f    %0.2f"%(self.workspace4limit_.var("rate_%s_for_counting"%(self.higgs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_counting").getVal(), self.workspace4limit_.var("rate_TTbar_for_counting").getVal(), self.workspace4limit_.var("rate_STop_for_counting").getVal(), self.workspace4limit_.var("rate_VV_for_counting").getVal()));
+                
+             datacard_out.write( "\n-------------------------------- " ) 
+
+             datacard_out.write( "\nQCDscale_ggH01in lnN   %0.3f     -             -        -       -       -     "%(1.+self.QCDscale_ggH01in))
+
+             datacard_out.write( "\nQCDscale_ggH2in lnN   %0.3f     -             -        -       -       -     "%(1.+self.QCDscale_ggH2in))   
+
+             datacard_out.write( "\npdf_gg       lnN   %0.3f     -             -        -       -       -     "%(1.+self.pdf_gg))
+
+             datacard_out.write( "\nQCDscale_ggH_ACCEPT lnN %0.3f   -             -        -       -       -     "%(1.+self.QCDScale_ggH_ACCEPT) )
+
+             datacard_out.write( "\nintf_ggH  lnN      %0.3f     -             -        -       -       -     "%(1.+self.interference_ggH_uncertainty) )
+
+             datacard_out.write( "\nCMS_hwwlvj_STop  lnN       -         -             -               %0.3f   -     "%(1+self.XS_STop_uncertainty) )
+
+             datacard_out.write( "\nCMS_hwwlvj_VV    lnN       -         -             -        -              %0.3f    "%(1+self.XS_VV_uncertainty) )
+
+             datacard_out.write( "\n#CMS_hwwlvj_TTbar    lnN       -         -                     %0.3f       -       -     "%(1+self.XS_TTbar_uncertainty) )
 
  
          elif signalchannel=="vbfH":
-            datacard_out.write( "\nbin                CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s   CMS_%s"%(self.channel,self.channel,self.channel,self.channel,self.channel,self.channel));
-            datacard_out.write( "\nprocess            %s        WJets    TTbar    STop    VV     WW_EWK"%(self.vbfhiggs_sample));
-            datacard_out.write( "\nprocess            -1            1        2     3       4     5" );
+            if options.jetBin == "_2jet":  
+             datacard_out.write( "\nbin                CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s   CMS_%s"%(self.channel,self.channel,self.channel,self.channel,self.channel,self.channel));
+             datacard_out.write( "\nprocess            %s        WJets    TTbar    STop    VV     WW_EWK"%(self.vbfhiggs_sample));
+             datacard_out.write( "\nprocess            -1            1        2     3       4     5" );
 
-            if mode == "unbin":
-                datacard_out.write( "\nrate            %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f"%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_unbin").getVal()  ) )
+             if mode == "unbin":
+                datacard_out.write( "\nrate            %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f"%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_unbin").getVal()))
 
-            elif mode == "counting":
-                datacard_out.write( "\nrate            %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f"%(self.workspace4limit_.var("rate_%s_for_counting"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_counting").getVal(), self.workspace4limit_.var("rate_TTbar_for_counting").getVal(), self.workspace4limit_.var("rate_STop_for_counting").getVal(), self.workspace4limit_.var("rate_VV_for_counting").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_counting").getVal()  ) )
+             elif mode == "counting":
+                datacard_out.write( "\nrate            %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f"%(self.workspace4limit_.var("rate_%s_for_counting"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_counting").getVal(), self.workspace4limit_.var("rate_TTbar_for_counting").getVal(), self.workspace4limit_.var("rate_STop_for_counting").getVal(), self.workspace4limit_.var("rate_VV_for_counting").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_counting").getVal()))
 
-            datacard_out.write( "\n-------------------------------- " )
+             datacard_out.write( "\n-------------------------------- " )
             
-            datacard_out.write( "\nQCDscale_qqH lnN  -         %0.3f         -        -       -       -     -"%(1.+self.QCDscale_qqH) )
+             datacard_out.write( "\nQCDscale_qqH lnN           %0.3f         -        -       -       -     -"%(1.+self.QCDscale_qqH) )
 
-            datacard_out.write( "\npdf_qqbar     lnN  -         %0.3f         -        -       -       -     -"%(1.+self.pdf_qqbar))
+             datacard_out.write( "\npdf_qqbar     lnN           %0.3f         -        -       -       -     -"%(1.+self.pdf_qqbar))
 
-            datacard_out.write( "\nQCDscale_qqH_ACCEPT lnN -      %0.3f         -        -       -       -     -"%(1.+self.QCDScale_qqH_ACCEPT))
+             datacard_out.write( "\nQCDscale_qqH_ACCEPT lnN       %0.3f         -        -       -       -     -"%(1.+self.QCDScale_qqH_ACCEPT))
 
-            datacard_out.write( "\nintf_vbfH lnN      -         %0.3f         -        -       -       -     -"%(1.+self.interference_vbfH_uncertainty) )
+             datacard_out.write( "\nintf_vbfH lnN               %0.3f         -        -       -       -     -"%(1.+self.interference_vbfH_uncertainty) )
 
-            datacard_out.write( "\nCMS_hwwlvj_STop  lnN       -         -             -        -       %0.3f   -     -"%(1+self.XS_STop_uncertainty) )
+             datacard_out.write( "\nCMS_hwwlvj_STop  lnN                -             -        -       %0.3f   -     -"%(1+self.XS_STop_uncertainty) )
 
-            datacard_out.write( "\nCMS_hwwlvj_VV    lnN       -         -             -        -       -       %0.3f    -"%(1+self.XS_VV_uncertainty) )
+             datacard_out.write( "\nCMS_hwwlvj_VV    lnN                -             -        -       -       %0.3f    -"%(1+self.XS_VV_uncertainty) )
 
-            datacard_out.write( "\nCMS_hwwlvj_WW_EWK    lnN       -         -             -        -       -       -     %0.3f"%(1+self.XS_WW_EWK_uncertainty))
+             datacard_out.write( "\nCMS_hwwlvj_WW_EWK    lnN                -             -        -       -       -     %0.3f"%(1+self.XS_WW_EWK_uncertainty))
 
-            datacard_out.write( "\nCMS_hwwlvj_TTbar    lnN       -         -             -        %0.3f       -       -     -"%(1+self.XS_TTbar_uncertainty) )
+             datacard_out.write( "\n#CMS_hwwlvj_TTbar    lnN                -             -        %0.3f       -       -     -"%(1+self.XS_TTbar_uncertainty) )
+
+
+            else:  
+             datacard_out.write( "\nbin                CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s "%(self.channel,self.channel,self.channel,self.channel,self.channel));
+             datacard_out.write( "\nprocess            %s        WJets    TTbar    STop    VV     "%(self.vbfhiggs_sample));
+             datacard_out.write( "\nprocess            -1            1        2     3       4     " );
+
+             if mode == "unbin":
+                datacard_out.write( "\nrate            %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal()))
+
+             elif mode == "counting":
+                datacard_out.write( "\nrate            %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    "%(self.workspace4limit_.var("rate_%s_for_counting"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_counting").getVal(), self.workspace4limit_.var("rate_TTbar_for_counting").getVal(), self.workspace4limit_.var("rate_STop_for_counting").getVal(), self.workspace4limit_.var("rate_VV_for_counting").getVal()))
+
+             datacard_out.write( "\n-------------------------------- " )
+            
+             datacard_out.write( "\nQCDscale_qqH lnN           %0.3f         -        -       -       -     "%(1.+self.QCDscale_qqH) )
+
+             datacard_out.write( "\npdf_qqbar     lnN           %0.3f         -        -       -       -     "%(1.+self.pdf_qqbar))
+
+             datacard_out.write( "\nQCDscale_qqH_ACCEPT lnN       %0.3f         -        -       -       -     "%(1.+self.QCDScale_qqH_ACCEPT))
+
+             datacard_out.write( "\nintf_vbfH lnN               %0.3f         -        -       -       -     "%(1.+self.interference_vbfH_uncertainty) )
+
+             datacard_out.write( "\nCMS_hwwlvj_STop  lnN                -            -        -       %0.3f   -     "%(1+self.XS_STop_uncertainty) )
+
+             datacard_out.write( "\nCMS_hwwlvj_VV    lnN                -             -        -       -       %0.3f    "%(1+self.XS_VV_uncertainty) )
+
+             datacard_out.write( "\n#CMS_hwwlvj_TTbar    lnN              -            -        %0.3f       -       -     "%(1+self.XS_TTbar_uncertainty) )
 
  
+ 
          elif signalchannel=="ggHvbfH":
-
-            datacard_out.write( "\nbin                CMS_%s    CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s   CMS_%s"%(self.channel,self.channel,self.channel,self.channel,self.channel,self.channel,self.channel));            
-            datacard_out.write( "\nprocess            %s    %s       WJets    TTbar    STop    VV    WW_EWK"%(self.higgs_sample,self.vbfhiggs_sample) )
-            datacard_out.write( "\nprocess            -1        0             1        2        3       4    5" )
+             
+            if options.jetBin == "_2jet":
+                
+             datacard_out.write( "\nbin                CMS_%s    CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s  CMS_%s"%(self.channel,self.channel,self.channel,self.channel,self.channel,self.channel,self.channel));            
+             datacard_out.write( "\nprocess            %s    %s       WJets    TTbar    STop    VV   WW_EWK "%(self.higgs_sample,self.vbfhiggs_sample));
+             datacard_out.write( "\nprocess            -1        0             1        2        3       4   5" );
 
             if mode == "unbin":
-                datacard_out.write( "\nrate               %0.2f    %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_unbin").getVal()  ) )
+                datacard_out.write( "\nrate               %0.2f    %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_unbin").getVal()))
 
             elif mode == "counting":
                 datacard_out.write( "\nrate               %0.2f    %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f"%(self.workspace4limit_.var("rate_%s_for_counting"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_%s_for_counting"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_counting").getVal(), self.workspace4limit_.var("rate_TTbar_for_counting").getVal(), self.workspace4limit_.var("rate_STop_for_counting").getVal(), self.workspace4limit_.var("rate_VV_for_counting").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_counting").getVal()  ) )
@@ -2288,48 +2351,129 @@ self.channel));
 
             datacard_out.write( "\n#CMS_hwwlvj_TTbar    lnN       -         -             -        %0.3f       -       -     -"%(1+self.XS_TTbar_uncertainty) )
 
-         datacard_out.write( "\nlumi_8TeV     lnN       %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f   %0.3f"%(1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty) )
-
-         datacard_out.write( "\nCMS_trigger_%s lnN     %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f    %0.3f"%(self.channel,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty, 1+self.lep_trigger_uncertainty ) );
-
-         datacard_out.write( "\nCMS_eff_%s lnN       %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f    %0.3f"%(self.channel, 1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty, 1+self.lep_eff_uncertainty ) );
-
-         datacard_out.write( "\nCMS_Top_norm_%s lnN    -         -             -        %0.3f   %0.3f   -      -"%(self.channel,1+self.rrv_wtagger_eff_reweight_forT.getError(), 1+self.rrv_wtagger_eff_reweight_forT.getError() ) );
-
-         datacard_out.write( "\nCMS_wtagger lnN     %0.3f     %0.3f         -        -       -       %0.3f    %0.3f"%(1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError() ) );
-            
-         ### nousiance for the bkg
-         ### WJets normaliztion due to data fit and alternate modellization
-         if self.number_WJets_insideband >0:
-            datacard_out.write( "\nWjet_Norm_%s_%s lnN %0.3f     -  %0.3f           -      -        -      -"%(self.channel,options.jetBin,self.number_WJets_insideband, getattr(self,"datadriven_alpha_WJets_%s"%(mode))));
          else:
+
+             datacard_out.write( "\nbin                CMS_%s    CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s  "%(self.channel,self.channel,self.channel,self.channel,self.channel,self.channel));            
+             datacard_out.write( "\nprocess            %s    %s       WJets    TTbar    STop    VV    "%(self.higgs_sample,self.vbfhiggs_sample) )
+             datacard_out.write( "\nprocess            -1        0             1        2        3       4   " )
+
+             if mode == "unbin":
+                datacard_out.write( "\nrate               %0.2f    %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal()));
+
+             elif mode == "counting":
+                datacard_out.write( "\nrate               %0.2f    %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    "%(self.workspace4limit_.var("rate_%s_for_counting"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_%s_for_counting"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_counting").getVal(), self.workspace4limit_.var("rate_TTbar_for_counting").getVal(), self.workspace4limit_.var("rate_STop_for_counting").getVal(), self.workspace4limit_.var("rate_VV_for_counting").getVal()));
+
+
+             datacard_out.write( "\n-------------------------------- " )
+
+             datacard_out.write( "\nQCDscale_gg01Hin lnN   %0.3f        -      -      -       -       -     "%(1.+self.QCDscale_ggH01in))
+
+             datacard_out.write( "\nQCDscale_ggH2in lnN   %0.3f     -      -      -       -       -     "%(1.+self.QCDscale_ggH2in))   
+
+             datacard_out.write( "\npdf_gg       lnN   %0.3f     -     -       -       -       -     "%(1.+self.pdf_gg))
+
+             datacard_out.write( "\nQCDscale_ggH_ACCEPT lnN %0.3f   -       -        -       -       -     "%(1.+self.QCDScale_ggH_ACCEPT) )
+
+             datacard_out.write( "\nintf_ggH  lnN      %0.3f     -       -        -       -       -     "%(1.+self.interference_ggH_uncertainty) )
+            
+             datacard_out.write( "\nQCDscale_qqH lnN  -         %0.3f         -        -       -       -     "%(1.+self.QCDscale_qqH) )
+
+             datacard_out.write( "\npdf_qqbar     lnN  -         %0.3f         -        -       -       -     "%(1.+self.pdf_vbf))
+
+             datacard_out.write( "\nQCDscale_qqH_ACCEPT lnN -      %0.3f         -        -       -       -     "%(1.+self.QCDScale_qqH_ACCEPT))
+
+             datacard_out.write( "\nintf_vbfH lnN      -         %0.3f         -        -       -       -     "%(1.+self.interference_vbfH_uncertainty) )
+
+             datacard_out.write( "\nCMS_hwwlvj_STop  lnN       -         -      -        -       %0.3f   -     "%(1+self.XS_STop_uncertainty) )
+
+             datacard_out.write( "\nCMS_hwwlvj_VV    lnN       -         -      -        -       -       %0.3f    "%(1+self.XS_VV_uncertainty) )
+
+             datacard_out.write( "\n#CMS_hwwlvj_TTbar    lnN       -         -             -        %0.3f       -       -     -"%(1+self.XS_TTbar_uncertainty) )
+            
+         if options.jetBin == "_2jet":
+          datacard_out.write( "\nlumi_8TeV     lnN       %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f   %0.3f"%(1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty) )
+
+          datacard_out.write( "\nCMS_trigger_%s lnN     %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f    %0.3f"%(self.channel,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty, 1+self.lep_trigger_uncertainty ) );
+
+          datacard_out.write( "\nCMS_eff_%s lnN       %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f    %0.3f"%(self.channel, 1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty, 1+self.lep_eff_uncertainty ) );
+
+          datacard_out.write( "\nCMS_Top_norm_%s lnN    -         -             -        %0.3f   %0.3f   -      -"%(self.channel,1+self.rrv_wtagger_eff_reweight_forT.getError(), 1+self.rrv_wtagger_eff_reweight_forT.getError() ) );
+
+          datacard_out.write( "\nCMS_wtagger lnN     %0.3f     %0.3f         -        -       -       %0.3f    %0.3f"%(1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError() ) );
+            
+          ### nousiance for the bkg
+          ### WJets normaliztion due to data fit and alternate modellization
+          if self.number_WJets_insideband >0:
+            datacard_out.write( "\nWjet_Norm_%s_%s lnN %0.3f     -  %0.3f           -      -        -      -"%(self.channel,options.jetBin,self.number_WJets_insideband, getattr(self,"datadriven_alpha_WJets_%s"%(mode))));
+          else:
             datacard_out.write( "\nWjet_Norm_%s_%s lnN     -         -             %0.3f    -       -       -      -"%(self.channel,options.jetBin, 1+ self.workspace4limit_.var("rate_WJets_for_unbin").getError()/self.workspace4limit_.var("rate_WJets_for_unbin").getVal() ) );
 
 
-         ## jet mass systematic scaling up and down vbf jets detajj, mjj, and pt selection effect
-         if self.ggH_normalization_uncertainty_from_jet_scale!=0 and self.vbf_normalization_uncertainty_from_jet_scale!=0 and self.WJets_normalization_uncertainty_from_jet_scale!=0 and self.TTbar_normalization_uncertainty_from_jet_scale!=0 and self.STop_normalization_uncertainty_from_jet_scale!=0 and self.VV_normalization_uncertainty_from_jet_scale!=0 : 
+          ## jet mass systematic scaling up and down vbf jets detajj, mjj, and pt selection effect
+          if self.ggH_normalization_uncertainty_from_jet_scale!=0 and self.vbf_normalization_uncertainty_from_jet_scale!=0 and self.WJets_normalization_uncertainty_from_jet_scale!=0 and self.TTbar_normalization_uncertainty_from_jet_scale!=0 and self.STop_normalization_uncertainty_from_jet_scale!=0 and self.VV_normalization_uncertainty_from_jet_scale!=0 : 
 
-          datacard_out.write( "\nCMS_scale_j lnN   %0.3f     %0.3f     %0.3f/%0.3f    %0.3f/%0.3f   %0.3f/%0.3f   %0.3f/%0.3f    %0.3f/%0.3f"%(1+self.ggH_normalization_uncertainty_from_jet_scale, 1+self.vbf_normalization_uncertainty_from_jet_scale, 1-self.WJets_normalization_uncertainty_from_jet_scale, 1+self.WJets_normalization_uncertainty_from_jet_scale, 1+self.TTbar_normalization_uncertainty_from_jet_scale, 1-self.TTbar_normalization_uncertainty_from_jet_scale, 1+self.STop_normalization_uncertainty_from_jet_scale, 1-self.STop_normalization_uncertainty_from_jet_scale, 1+self.VV_normalization_uncertainty_from_jet_scale, 1-self.VV_normalization_uncertainty_from_jet_scale, 1+self.WW_EWK_normalization_uncertainty_from_jet_scale, 1-self.WW_EWK_normalization_uncertainty_from_jet_scale ) )        
+           datacard_out.write( "\nCMS_scale_j lnN   %0.3f     %0.3f     %0.3f/%0.3f    %0.3f/%0.3f   %0.3f/%0.3f   %0.3f/%0.3f    %0.3f/%0.3f"%(1+self.ggH_normalization_uncertainty_from_jet_scale, 1+self.vbf_normalization_uncertainty_from_jet_scale, 1-self.WJets_normalization_uncertainty_from_jet_scale, 1+self.WJets_normalization_uncertainty_from_jet_scale, 1+self.TTbar_normalization_uncertainty_from_jet_scale, 1-self.TTbar_normalization_uncertainty_from_jet_scale, 1+self.STop_normalization_uncertainty_from_jet_scale, 1-self.STop_normalization_uncertainty_from_jet_scale, 1+self.VV_normalization_uncertainty_from_jet_scale, 1-self.VV_normalization_uncertainty_from_jet_scale, 1+self.WW_EWK_normalization_uncertainty_from_jet_scale, 1-self.WW_EWK_normalization_uncertainty_from_jet_scale ) )        
 
-         if self.ggH_normalization_uncertainty_from_jet_res!=0 and self.vbf_normalization_uncertainty_from_jet_res!=0 and self.WJets_normalization_uncertainty_from_jet_res!=0 and self.TTbar_normalization_uncertainty_from_jet_res!=0 and self.STop_normalization_uncertainty_from_jet_res!=0 and self.VV_normalization_uncertainty_from_jet_res!=0 :
+          if self.ggH_normalization_uncertainty_from_jet_res!=0 and self.vbf_normalization_uncertainty_from_jet_res!=0 and self.WJets_normalization_uncertainty_from_jet_res!=0 and self.TTbar_normalization_uncertainty_from_jet_res!=0 and self.STop_normalization_uncertainty_from_jet_res!=0 and self.VV_normalization_uncertainty_from_jet_res!=0 :
              
-          datacard_out.write( "\nCMS_res_j lnN   %0.3f     %0.3f     %0.3f/%0.3f    %0.3f/%0.3f   %0.3f/%0.3f   %0.3f/%0.3f    %0.3f/%0.3f"%(1+self.ggH_normalization_uncertainty_from_jet_res, 1+self.vbf_normalization_uncertainty_from_jet_res, 1-self.WJets_normalization_uncertainty_from_jet_res, 1+self.WJets_normalization_uncertainty_from_jet_res, 1+self.TTbar_normalization_uncertainty_from_jet_res, 1-self.TTbar_normalization_uncertainty_from_jet_res, 1+self.STop_normalization_uncertainty_from_jet_res, 1-self.STop_normalization_uncertainty_from_jet_res, 1+self.VV_normalization_uncertainty_from_jet_res, 1-self.VV_normalization_uncertainty_from_jet_res, 1+self.WW_EWK_normalization_uncertainty_from_jet_res, 1-self.WW_EWK_normalization_uncertainty_from_jet_res ) )        
+           datacard_out.write( "\nCMS_res_j lnN   %0.3f     %0.3f     %0.3f/%0.3f    %0.3f/%0.3f   %0.3f/%0.3f   %0.3f/%0.3f    %0.3f/%0.3f"%(1+self.ggH_normalization_uncertainty_from_jet_res, 1+self.vbf_normalization_uncertainty_from_jet_res, 1-self.WJets_normalization_uncertainty_from_jet_res, 1+self.WJets_normalization_uncertainty_from_jet_res, 1+self.TTbar_normalization_uncertainty_from_jet_res, 1-self.TTbar_normalization_uncertainty_from_jet_res, 1+self.STop_normalization_uncertainty_from_jet_res, 1-self.STop_normalization_uncertainty_from_jet_res, 1+self.VV_normalization_uncertainty_from_jet_res, 1-self.VV_normalization_uncertainty_from_jet_res, 1+self.WW_EWK_normalization_uncertainty_from_jet_res, 1-self.WW_EWK_normalization_uncertainty_from_jet_res ) )        
 
-         if self.ggH_normalization_uncertainty_from_lep_scale!=0 and self.vbf_normalization_uncertainty_from_lep_scale!=0 and self.WJets_normalization_uncertainty_from_lep_scale!=0 and self.TTbar_normalization_uncertainty_from_lep_scale!=0 and self.STop_normalization_uncertainty_from_lep_scale!=0 and self.VV_normalization_uncertainty_from_lep_scale!=0 : 
+          if self.ggH_normalization_uncertainty_from_lep_scale!=0 and self.vbf_normalization_uncertainty_from_lep_scale!=0 and self.WJets_normalization_uncertainty_from_lep_scale!=0 and self.TTbar_normalization_uncertainty_from_lep_scale!=0 and self.STop_normalization_uncertainty_from_lep_scale!=0 and self.VV_normalization_uncertainty_from_lep_scale!=0 : 
 
-          datacard_out.write( "\nCMS_scale_l lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f    %0.3f"%(self.ggH_normalization_uncertainty_from_lep_scale, self.vbf_normalization_uncertainty_from_lep_scale, self.WJets_normalization_uncertainty_from_lep_scale, self.TTbar_normalization_uncertainty_from_lep_scale, self.STop_normalization_uncertainty_from_lep_scale, self.VV_normalization_uncertainty_from_lep_scale, self.WW_EWK_normalization_uncertainty_from_lep_scale ) )        
-
-
-         if self.ggH_normalization_uncertainty_from_lep_res!=0 and self.vbf_normalization_uncertainty_from_lep_res!=0 and self.WJets_normalization_uncertainty_from_lep_res!=0 and self.TTbar_normalization_uncertainty_from_lep_res!=0 and self.STop_normalization_uncertainty_from_lep_res!=0 and self.VV_normalization_uncertainty_from_lep_res!=0 : 
-
-          datacard_out.write( "\nCMS_res_l lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f    %0.3f"%(self.ggH_normalization_uncertainty_from_lep_res, self.vbf_normalization_uncertainty_from_lep_res, self.WJets_normalization_uncertainty_from_lep_res, self.TTbar_normalization_uncertainty_from_lep_res, self.STop_normalization_uncertainty_from_lep_res, self.VV_normalization_uncertainty_from_lep_res, self.WW_EWK_normalization_uncertainty_from_lep_res ) )
+           datacard_out.write( "\nCMS_scale_l lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f    %0.3f"%(self.ggH_normalization_uncertainty_from_lep_scale, self.vbf_normalization_uncertainty_from_lep_scale, self.WJets_normalization_uncertainty_from_lep_scale, self.TTbar_normalization_uncertainty_from_lep_scale, self.STop_normalization_uncertainty_from_lep_scale, self.VV_normalization_uncertainty_from_lep_scale, self.WW_EWK_normalization_uncertainty_from_lep_scale ) )        
 
 
-         if self.ggH_normalization_uncertainty_from_btag!=0 and self.vbf_normalization_uncertainty_from_btag!=0 and self.WJets_normalization_uncertainty_from_btag!=0 and self.TTbar_normalization_uncertainty_from_btag!=0 and self.STop_normalization_uncertainty_from_btag!=0 and self.VV_normalization_uncertainty_from_btag!=0 : 
+          if self.ggH_normalization_uncertainty_from_lep_res!=0 and self.vbf_normalization_uncertainty_from_lep_res!=0 and self.WJets_normalization_uncertainty_from_lep_res!=0 and self.TTbar_normalization_uncertainty_from_lep_res!=0 and self.STop_normalization_uncertainty_from_lep_res!=0 and self.VV_normalization_uncertainty_from_lep_res!=0 : 
 
-          datacard_out.write( "\nCMS_btag_eff lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f    %0.3f"%(self.ggH_normalization_uncertainty_from_btag, self.vbf_normalization_uncertainty_from_btag, self.WJets_normalization_uncertainty_from_btag, self.TTbar_normalization_uncertainty_from_btag, self.STop_normalization_uncertainty_from_btag, self.VV_normalization_uncertainty_from_btag, self.WW_EWK_normalization_uncertainty_from_btag ) )                  
+           datacard_out.write( "\nCMS_res_l lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f    %0.3f"%(self.ggH_normalization_uncertainty_from_lep_res, self.vbf_normalization_uncertainty_from_lep_res, self.WJets_normalization_uncertainty_from_lep_res, self.TTbar_normalization_uncertainty_from_lep_res, self.STop_normalization_uncertainty_from_lep_res, self.VV_normalization_uncertainty_from_lep_res, self.WW_EWK_normalization_uncertainty_from_lep_res ) )
 
 
+          if self.ggH_normalization_uncertainty_from_btag!=0 and self.vbf_normalization_uncertainty_from_btag!=0 and self.WJets_normalization_uncertainty_from_btag!=0 and self.TTbar_normalization_uncertainty_from_btag!=0 and self.STop_normalization_uncertainty_from_btag!=0 and self.VV_normalization_uncertainty_from_btag!=0 : 
+
+           datacard_out.write( "\nCMS_btag_eff lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f    %0.3f"%(self.ggH_normalization_uncertainty_from_btag, self.vbf_normalization_uncertainty_from_btag, self.WJets_normalization_uncertainty_from_btag, self.TTbar_normalization_uncertainty_from_btag, self.STop_normalization_uncertainty_from_btag, self.VV_normalization_uncertainty_from_btag, self.WW_EWK_normalization_uncertainty_from_btag ) )                  
+
+         else:
+ 
+          datacard_out.write( "\nlumi_8TeV     lnN       %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f  "%(1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty) )
+
+          datacard_out.write( "\nCMS_trigger_%s lnN     %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f   "%(self.channel,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty) );
+
+          datacard_out.write( "\nCMS_eff_%s lnN       %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f   "%(self.channel, 1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty) );
+
+          datacard_out.write( "\nCMS_Top_norm_%s lnN    -         -             -        %0.3f   %0.3f   -      "%(self.channel,1+self.rrv_wtagger_eff_reweight_forT.getError(), 1+self.rrv_wtagger_eff_reweight_forT.getError()));
+
+          datacard_out.write( "\nCMS_wtagger lnN     %0.3f     %0.3f         -        -       -       %0.3f    "%(1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError()) );
+            
+          ### nousiance for the bkg
+          ### WJets normaliztion due to data fit and alternate modellization
+          if self.number_WJets_insideband >0:
+            datacard_out.write( "\nWjet_Norm_%s_%s lnN %0.3f     -  %0.3f           -      -        -      "%(self.channel,options.jetBin,self.number_WJets_insideband, getattr(self,"datadriven_alpha_WJets_%s"%(mode))));
+          else:
+            datacard_out.write( "\nWjet_Norm_%s_%s lnN     -         -             %0.3f    -       -       -      "%(self.channel,options.jetBin, 1+ self.workspace4limit_.var("rate_WJets_for_unbin").getError()/self.workspace4limit_.var("rate_WJets_for_unbin").getVal() ) );
+
+
+          ## jet mass systematic scaling up and down vbf jets detajj, mjj, and pt selection effect
+          if self.ggH_normalization_uncertainty_from_jet_scale!=0 and self.vbf_normalization_uncertainty_from_jet_scale!=0 and self.WJets_normalization_uncertainty_from_jet_scale!=0 and self.TTbar_normalization_uncertainty_from_jet_scale!=0 and self.STop_normalization_uncertainty_from_jet_scale!=0 and self.VV_normalization_uncertainty_from_jet_scale!=0 : 
+
+           datacard_out.write( "\nCMS_scale_j lnN   %0.3f     %0.3f     %0.3f/%0.3f    %0.3f/%0.3f   %0.3f/%0.3f   %0.3f/%0.3f    "%(1+self.ggH_normalization_uncertainty_from_jet_scale, 1+self.vbf_normalization_uncertainty_from_jet_scale, 1-self.WJets_normalization_uncertainty_from_jet_scale, 1+self.WJets_normalization_uncertainty_from_jet_scale, 1+self.TTbar_normalization_uncertainty_from_jet_scale, 1-self.TTbar_normalization_uncertainty_from_jet_scale, 1+self.STop_normalization_uncertainty_from_jet_scale, 1-self.STop_normalization_uncertainty_from_jet_scale, 1+self.VV_normalization_uncertainty_from_jet_scale, 1-self.VV_normalization_uncertainty_from_jet_scale) )        
+
+          if self.ggH_normalization_uncertainty_from_jet_res!=0 and self.vbf_normalization_uncertainty_from_jet_res!=0 and self.WJets_normalization_uncertainty_from_jet_res!=0 and self.TTbar_normalization_uncertainty_from_jet_res!=0 and self.STop_normalization_uncertainty_from_jet_res!=0 and self.VV_normalization_uncertainty_from_jet_res!=0 :
+             
+           datacard_out.write( "\nCMS_res_j lnN   %0.3f     %0.3f     %0.3f/%0.3f    %0.3f/%0.3f   %0.3f/%0.3f   %0.3f/%0.3f  "%(1+self.ggH_normalization_uncertainty_from_jet_res, 1+self.vbf_normalization_uncertainty_from_jet_res, 1-self.WJets_normalization_uncertainty_from_jet_res, 1+self.WJets_normalization_uncertainty_from_jet_res, 1+self.TTbar_normalization_uncertainty_from_jet_res, 1-self.TTbar_normalization_uncertainty_from_jet_res, 1+self.STop_normalization_uncertainty_from_jet_res, 1-self.STop_normalization_uncertainty_from_jet_res, 1+self.VV_normalization_uncertainty_from_jet_res, 1-self.VV_normalization_uncertainty_from_jet_res) )        
+
+          if self.ggH_normalization_uncertainty_from_lep_scale!=0 and self.vbf_normalization_uncertainty_from_lep_scale!=0 and self.WJets_normalization_uncertainty_from_lep_scale!=0 and self.TTbar_normalization_uncertainty_from_lep_scale!=0 and self.STop_normalization_uncertainty_from_lep_scale!=0 and self.VV_normalization_uncertainty_from_lep_scale!=0 : 
+
+           datacard_out.write( "\nCMS_scale_l lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f    "%(self.ggH_normalization_uncertainty_from_lep_scale, self.vbf_normalization_uncertainty_from_lep_scale, self.WJets_normalization_uncertainty_from_lep_scale, self.TTbar_normalization_uncertainty_from_lep_scale, self.STop_normalization_uncertainty_from_lep_scale, self.VV_normalization_uncertainty_from_lep_scale) )        
+
+
+          if self.ggH_normalization_uncertainty_from_lep_res!=0 and self.vbf_normalization_uncertainty_from_lep_res!=0 and self.WJets_normalization_uncertainty_from_lep_res!=0 and self.TTbar_normalization_uncertainty_from_lep_res!=0 and self.STop_normalization_uncertainty_from_lep_res!=0 and self.VV_normalization_uncertainty_from_lep_res!=0 : 
+
+           datacard_out.write( "\nCMS_res_l lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f    "%(self.ggH_normalization_uncertainty_from_lep_res, self.vbf_normalization_uncertainty_from_lep_res, self.WJets_normalization_uncertainty_from_lep_res, self.TTbar_normalization_uncertainty_from_lep_res, self.STop_normalization_uncertainty_from_lep_res, self.VV_normalization_uncertainty_from_lep_res) )
+
+
+          if self.ggH_normalization_uncertainty_from_btag!=0 and self.vbf_normalization_uncertainty_from_btag!=0 and self.WJets_normalization_uncertainty_from_btag!=0 and self.TTbar_normalization_uncertainty_from_btag!=0 and self.STop_normalization_uncertainty_from_btag!=0 and self.VV_normalization_uncertainty_from_btag!=0 : 
+
+           datacard_out.write( "\nCMS_btag_eff lnN   %0.3f     %0.3f     %0.3f    %0.3f   %0.3f   %0.3f "%(self.ggH_normalization_uncertainty_from_btag, self.vbf_normalization_uncertainty_from_btag, self.WJets_normalization_uncertainty_from_btag, self.TTbar_normalization_uncertainty_from_btag, self.STop_normalization_uncertainty_from_btag, self.VV_normalization_uncertainty_from_btag) )                  
 
          if mode == "unbin":
             for i in range(len(params_list)):
