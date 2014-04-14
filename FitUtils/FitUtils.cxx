@@ -1135,6 +1135,8 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
      number_WJets_sb_lo = dynamic_cast<RooRealVar*>( workspace->var(("rrv_number"+label+mlvj_region+mlvj_shape["WJets01"]+"_"+channel+"_mlvj").c_str())->clone(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str()));
     else if (TString(label).Contains("WJets0"))
      number_WJets_sb_lo = dynamic_cast<RooRealVar*>( workspace->var(("rrv_number"+label+mlvj_region+mlvj_shape["WJets0"]+"_"+channel+"_mlvj").c_str())->clone(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str()));
+    else if (TString(label).Contains("WJets1"))
+     number_WJets_sb_lo = dynamic_cast<RooRealVar*>( workspace->var(("rrv_number"+label+mlvj_region+mlvj_shape["WJets1"]+"_"+channel+"_mlvj").c_str())->clone(("rrv_number"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str()));
 
     model_WJets = new RooExtendPdf(("model"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str(),("model"+label+mlvj_region+mlvj_model+"_from_fitting_"+channel+"_mlvj").c_str(),*model_pdf_WJets,*number_WJets_sb_lo);
 
@@ -1457,7 +1459,7 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
    model_pdf_WJets_deco->getParameters(rdataset_data_mlvj)->Print("");
    workspace->import(*model_pdf_WJets_deco);
 
-   if(not TString(label).Contains("_jes") and not TString(label).Contains("_jer") and not TString(label).Contains("WJets01")){
+   if(not TString(label).Contains("_jes") and not TString(label).Contains("_jer") and not TString(label).Contains("WJets01") and not TString(label).Contains("WJets1")){
 
      RooPlot* mplot_sys = rrv_mass_lvj->frame( RooFit::Bins(int(rrv_mass_lvj->getBins())));           
 
