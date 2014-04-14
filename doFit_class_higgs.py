@@ -2316,40 +2316,40 @@ self.channel));
              datacard_out.write( "\nprocess            %s    %s       WJets    TTbar    STop    VV   WW_EWK "%(self.higgs_sample,self.vbfhiggs_sample));
              datacard_out.write( "\nprocess            -1        0             1        2        3       4   5" );
 
-            if mode == "unbin":
+             if mode == "unbin":
                 datacard_out.write( "\nrate               %0.2f    %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_unbin").getVal()))
 
-            elif mode == "counting":
+             elif mode == "counting":
                 datacard_out.write( "\nrate               %0.2f    %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f"%(self.workspace4limit_.var("rate_%s_for_counting"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_%s_for_counting"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_counting").getVal(), self.workspace4limit_.var("rate_TTbar_for_counting").getVal(), self.workspace4limit_.var("rate_STop_for_counting").getVal(), self.workspace4limit_.var("rate_VV_for_counting").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_counting").getVal()  ) )
 
 
-            datacard_out.write( "\n-------------------------------- " )
+             datacard_out.write( "\n-------------------------------- " )
 
-            datacard_out.write( "\nQCDscale_gg01Hin lnN   %0.3f        -      -      -       -       -     -"%(1.+self.QCDscale_ggH01in))
+             datacard_out.write( "\nQCDscale_gg01Hin lnN   %0.3f        -      -      -       -       -     -"%(1.+self.QCDscale_ggH01in))
 
-            datacard_out.write( "\nQCDscale_ggH2in lnN   %0.3f     -      -      -       -       -     -"%(1.+self.QCDscale_ggH2in))   
+             datacard_out.write( "\nQCDscale_ggH2in lnN   %0.3f     -      -      -       -       -     -"%(1.+self.QCDscale_ggH2in))   
 
-            datacard_out.write( "\npdf_gg       lnN   %0.3f     -     -       -       -       -     -"%(1.+self.pdf_gg))
+             datacard_out.write( "\npdf_gg       lnN   %0.3f     -     -       -       -       -     -"%(1.+self.pdf_gg))
 
-            datacard_out.write( "\nQCDscale_ggH_ACCEPT lnN %0.3f   -       -        -       -       -     -"%(1.+self.QCDScale_ggH_ACCEPT) )
+             datacard_out.write( "\nQCDscale_ggH_ACCEPT lnN %0.3f   -       -        -       -       -     -"%(1.+self.QCDScale_ggH_ACCEPT) )
 
-            datacard_out.write( "\nintf_ggH  lnN      %0.3f     -       -        -       -       -     -"%(1.+self.interference_ggH_uncertainty) )
+             datacard_out.write( "\nintf_ggH  lnN      %0.3f     -       -        -       -       -     -"%(1.+self.interference_ggH_uncertainty) )
             
-            datacard_out.write( "\nQCDscale_qqH lnN  -         %0.3f         -        -       -       -     -"%(1.+self.QCDscale_qqH) )
+             datacard_out.write( "\nQCDscale_qqH lnN  -         %0.3f         -        -       -       -     -"%(1.+self.QCDscale_qqH) )
 
-            datacard_out.write( "\npdf_qqbar     lnN  -         %0.3f         -        -       -       -     -"%(1.+self.pdf_vbf))
+             datacard_out.write( "\npdf_qqbar     lnN  -         %0.3f         -        -       -       -     -"%(1.+self.pdf_vbf))
 
-            datacard_out.write( "\nQCDscale_qqH_ACCEPT lnN -      %0.3f         -        -       -       -     -"%(1.+self.QCDScale_qqH_ACCEPT))
+             datacard_out.write( "\nQCDscale_qqH_ACCEPT lnN -      %0.3f         -        -       -       -     -"%(1.+self.QCDScale_qqH_ACCEPT))
 
-            datacard_out.write( "\nintf_vbfH lnN      -         %0.3f         -        -       -       -     -"%(1.+self.interference_vbfH_uncertainty) )
+             datacard_out.write( "\nintf_vbfH lnN      -         %0.3f         -        -       -       -     -"%(1.+self.interference_vbfH_uncertainty) )
 
-            datacard_out.write( "\nCMS_hwwlvj_STop  lnN       -         -      -        -       %0.3f   -     -"%(1+self.XS_STop_uncertainty) )
+             datacard_out.write( "\nCMS_hwwlvj_STop  lnN       -         -      -        -       %0.3f   -     -"%(1+self.XS_STop_uncertainty) )
 
-            datacard_out.write( "\nCMS_hwwlvj_VV    lnN       -         -      -        -       -       %0.3f    -"%(1+self.XS_VV_uncertainty) )
+             datacard_out.write( "\nCMS_hwwlvj_VV    lnN       -         -      -        -       -       %0.3f    -"%(1+self.XS_VV_uncertainty) )
 
-            datacard_out.write( "\nCMS_hwwlvj_WW_EWK    lnN       -         -             -        -       -       -     %0.3f"%(1+self.XS_WW_EWK_uncertainty))
+             datacard_out.write( "\nCMS_hwwlvj_WW_EWK    lnN       -         -             -        -       -       -     %0.3f"%(1+self.XS_WW_EWK_uncertainty))
 
-            datacard_out.write( "\n#CMS_hwwlvj_TTbar    lnN       -         -             -        %0.3f       -       -     -"%(1+self.XS_TTbar_uncertainty) )
+             datacard_out.write( "\n#CMS_hwwlvj_TTbar    lnN       -         -             -        %0.3f       -       -     -"%(1+self.XS_TTbar_uncertainty) )
 
          else:
 
