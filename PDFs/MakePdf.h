@@ -82,7 +82,7 @@ struct SystematicUncertaintyEXO{ const double mean_signal_uncertainty_jet_scale 
 
 struct SystematicUncertaintyHiggs_01jetBin{
 
-                                  /////// effect on the mean 
+                                  /////// effect on the mean --> from exo numbers
                                   const double mean_signal_uncertainty_jet_scale_ggH_600  = 0.013;
                                   const double mean_signal_uncertainty_jet_scale_ggH_700  = 0.013;
                                   const double mean_signal_uncertainty_jet_scale_ggH_800  = 0.013;
