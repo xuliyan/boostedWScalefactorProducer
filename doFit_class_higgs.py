@@ -2378,7 +2378,7 @@ self.channel));
             
              datacard_out.write( "\nQCDscale_qqH lnN  -         %0.3f         -        -       -       -     "%(1.+self.QCDscale_qqH) )
 
-             datacard_out.write( "\npdf_qqbar     lnN  -         %0.3f         -        -       -       -     "%(1.+self.pdf_vbf))
+             datacard_out.write( "\npdf_qqbar     lnN  -         %0.3f         -        -       -       -     "%(1.+self.pdf_qqH))
 
              datacard_out.write( "\nQCDscale_qqH_ACCEPT lnN -      %0.3f         -        -       -       -     "%(1.+self.QCDScale_qqH_ACCEPT))
 
