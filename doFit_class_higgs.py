@@ -795,7 +795,7 @@ class doFit_wj_and_wlvj:
         rdataset4fit_signal_region_mlvj = RooDataSet("rdataset4fit"+label+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
         rdataset4fit_sb_hi_mlvj     = RooDataSet("rdataset4fit"+label+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
 
-        if label != "WJets01" and label != "WJets1" :
+        if label != "_WJets01" and label != "_WJets1" :
 
          #dataset of jes_up
          rdataset_mj_jes_up  = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jes_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
@@ -867,7 +867,7 @@ class doFit_wj_and_wlvj:
         combData = RooDataSet("combData"+label+"_"+self.channel,"combData"+label+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
         combData4fit = RooDataSet("combData4fit"+label+"_"+self.channel,"combData4fit"+label+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
         
-        if label != "WJets01" and label != "WJets1" :
+        if label != "_WJets01" and label != "_WJets1" :
 
          ## jes_up
          combData_jes_up = RooDataSet("combData"+label+"massvbf_jes_up"+"_"+self.channel,"combData"+label+"massvbf_jes_up"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
@@ -894,7 +894,7 @@ class doFit_wj_and_wlvj:
         hnum_4region = TH1D("hnum_4region"+label+"_"+self.channel,"hnum_4region"+label+"_"+self.channel,4,-1.5,2.5);# m_j   -1: sb_lo; 0:signal_region; 1: sb_hi; 2:total        
         hnum_2region = TH1D("hnum_2region"+label+"_"+self.channel,"hnum_2region"+label+"_"+self.channel,2,-0.5,1.5);# m_lvj  0: signal_region; 1: total
 
-        if label != "WJets01" and label != "WJets1" :
+        if label != "_WJets01" and label != "_WJets1" :
 
          hnum_4region_jes_up = TH1D("hnum_4region"+label+"massvbf_jes_up"+"_"+self.channel,"hnum_4region"+label+"massvbf_jes_up"+"_"+self.channel,4,-1.5,2.5);  
          hnum_2region_jes_up = TH1D("hnum_2region"+label+"massvbf_jes_up"+"_"+self.channel,"hnum_2region"+label+"massvbf_jes_up"+"_"+self.channel,2,-0.5,1.5);
@@ -951,7 +951,7 @@ class doFit_wj_and_wlvj:
           mass_lvj = getattr(treeIn,"mass_lvj_type0_met");
 
           
-          if label != "WJets01" and label != "WJets1" :
+          if label != "_WJets01" and label != "_WJets1" :
 
            # jet mass jes_up
            tmp_jet_mass_jes_up = getattr(treeIn, "jet_mass_pr_jes_up");
@@ -1039,7 +1039,7 @@ class doFit_wj_and_wlvj:
            if ungroomed_jet_pt > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj >= rrv_mass_lvj.getMin() and mass_lvj <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet >=2 and tmp_vbf_dEta > self.dEta_cut and tmp_vbf_Mjj > self.Mjj_cut:
             isPassingCut = 1 ;
 
-           if label != "WJets01" and label != "WJets1" :
+           if label != "_WJets01" and label != "_WJets1" :
            
             if ungroomed_jet_pt_jes_up > 200. and discriminantCut and tmp_jet_mass_jes_up >= rrv_mass_j.getMin() and tmp_jet_mass_jes_up<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jes_up >= rrv_mass_lvj.getMin() and mass_lvj_jes_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jes_up >=2 and tmp_vbf_dEta_jes_up > self.dEta_cut and tmp_vbf_Mjj_jes_up > self.Mjj_cut :
               isPassingCut_jes_up = 1 ;
@@ -1063,7 +1063,7 @@ class doFit_wj_and_wlvj:
                
             isPassingCut = 1 ;
 
-           if label != "WJets01" and label != "WJets1" :
+           if label != "_WJets01" and label != "_WJets1" :
 
             if ungroomed_jet_pt_jes_up > 200. and discriminantCut and tmp_jet_mass_jes_up >= rrv_mass_j.getMin() and tmp_jet_mass_jes_up<=rrv_mass_j.getMax() and getattr(treeIn,"nbjets_csvm_veto") < 1 and mass_lvj_jes_up >= rrv_mass_lvj.getMin() and mass_lvj_jes_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and njet_jes_up < 2:
 
@@ -1191,7 +1191,7 @@ class doFit_wj_and_wlvj:
 
              
              ## JES UP
-             if label != "WJets01" and label != "WJets1" :
+             if label != "_WJets01" and label != "_WJets1" :
              
               rrv_mass_lvj.setVal(mass_lvj_jes_up);
               rrv_mass_j.setVal(tmp_jet_mass_jes_up);
@@ -1415,7 +1415,7 @@ class doFit_wj_and_wlvj:
         getattr(self.workspace4fit_,"import")(combData4fit); combData4fit.Print();
         
         ###################jes_up
-        if label != "WJets01" and label != "WJets1" :
+        if label != "_WJets01" and label != "_WJets1" :
    
          print "########### jes up ###########";
          rrv_scale_to_lumi_jes_up = RooRealVar("rrv_scale_to_lumi"+label+"massvbf_jes_up_"+self.channel,"rrv_scale_to_lumi"+label+"massvbf_jes_up_"+self.channel,tmp_scale_to_lumi);
@@ -1543,7 +1543,7 @@ class doFit_wj_and_wlvj:
         getattr(self.workspace4fit_,"import")(rdataset_mj); rdataset_mj.Print();
         getattr(self.workspace4fit_,"import")(rdataset4fit_mj); rdataset4fit_mj.Print();
          
-        if label != "WJets01" and label != "WJets1" :
+        if label != "_WJets01" and label != "_WJets1" :
          #####jes_up
          #prepare m_j dataset       
          print "########### jes up ###########";
@@ -2609,7 +2609,7 @@ self.channel));
 
         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets01",self.mj_shape["WJets01"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        if not options.jetBin == "_2jet": fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets1",self.mj_shape["WJets1"],self.channel,self.wtagger_label,1);
+        if not options.jetBin == "_2jet": fit_mj_single_MC(self.workspace4fit_,self.file_WJets1_mc,"_WJets1",self.mj_shape["WJets1"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
@@ -2988,14 +2988,14 @@ self.channel));
       get_mlvj_normalization_insignalregion(self.workspace4fit_,"_WJets0",self.mlvj_shape["WJets0"],"_signal_region",self.channel,1);  
       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-      self.prepare_limit("sideband_correction_method1",0,1)
-      self.read_workspace()
+      self.prepare_limit("sideband_correction_method1",0,1);
+      self.read_workspace();
       os.system("rm tmp2.root");
        
     ####### +++++++++++++++
     def analysis_sideband_correction_method1_without_shape_and_psmodel_systermatic(self):
         self.fit_AllSamples_Mj_and_Mlvj()
-        self.get_data()
+        self.get_data()BBB
         self.fit_WJetsNormalization_in_Mj_signal_region("_WJets0");
         self.fit_mlvj_in_Mj_sideband("_WJets0","_sb_lo", self.MODEL_4_mlvj,1)
         self.prepare_limit("sideband_correction_method1")
