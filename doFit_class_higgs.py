@@ -1740,7 +1740,7 @@ class doFit_wj_and_wlvj:
         fix_Pdf(self.workspace4limit_.pdf("TTbar_%s"%(self.channel)), RooArgSet(rrv_x)); 
         fix_Pdf(self.workspace4limit_.pdf("STop_%s"%(self.channel)),  RooArgSet(rrv_x)); 
         fix_Pdf(self.workspace4limit_.pdf("VV_%s"%(self.channel)),    RooArgSet(rrv_x));
-        fix_Pdf(self.workspace4limit_.pdf("WW_EWK_%s"%(self.channel)),RooArgSet(rrv_x));         
+        if options.jetBin == "_2jet": fix_Pdf(self.workspace4limit_.pdf("WW_EWK_%s"%(self.channel)),RooArgSet(rrv_x));         
         fix_Pdf(self.workspace4limit_.pdf("WJets_%s"%(self.channel)), RooArgSet(rrv_x)); 
         fix_Pdf(self.workspace4limit_.pdf(self.higgs_sample+"_%s"%(self.channel)),    RooArgSet(rrv_x));
         fix_Pdf(self.workspace4limit_.pdf(self.vbfhiggs_sample+"_%s"%(self.channel)), RooArgSet(rrv_x));
@@ -3071,16 +3071,16 @@ self.channel));
       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
       ### fit data in the mlvj low sideband with two different models      
-      #fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jes_up","massvbf_jes_up","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
-      #self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-      #fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jes_dn","massvbf_jes_dn","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
-      #self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-      #fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jer_up","massvbf_jer_up","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
-      #self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-      #fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jer_dn","massvbf_jer_dn","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
-      #self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-      #fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jer","massvbf_jer","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
-      #self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+      fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jes_up","massvbf_jes_up","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
+      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+      fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jes_dn","massvbf_jes_dn","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
+      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+      fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jer_up","massvbf_jer_up","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
+      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+      fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jer_dn","massvbf_jer_dn","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
+      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+      fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jer","massvbf_jer","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
+      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
 
       fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets01","","_sb_lo",self.mlvj_shape["WJets01"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
