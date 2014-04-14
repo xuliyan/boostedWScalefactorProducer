@@ -2593,7 +2593,7 @@ self.channel));
     def fit_WJets(self):
         print "######################### fit_WJets ########################"        
         self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0")# to get the shape of m_lvj
-        if not options.jetBin == "_2jet": self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets1")# to get the shape of m_lvj
+        if not options.jetBin == "_2jet": self.get_mj_and_mlvj_dataset(self.file_WJets1_mc,"_WJets1")# to get the shape of m_lvj
         self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets01")# to get the shape of m_lvj
 
         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_up","ErfExp",self.channel,self.wtagger_label,1);        
