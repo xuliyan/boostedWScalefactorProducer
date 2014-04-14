@@ -526,14 +526,14 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
          model_STop   = get_STop_mj_Model(workspace,"_STop"+mass_scale,mj_shape["STop"],channel);
          model_VV     = get_VV_mj_Model(workspace,"_VV"+mass_scale,mj_shape["VV"],channel);
          if( jetBin =="_2jet")   model_WW_EWK = get_WW_EWK_mj_Model(workspace,"_WW_EWK"+mass_scale,mj_shape["WW_EWK"],channel);
-	 model_TTbar  = get_TTbar_mj_Model(workspace,label+mass_scale,mj_shape[std::string(TString(label).ReplaceAll("_",""))],channel,0);
+	 model_TTbar  = get_TTbar_mj_Model(workspace,label,model,channel,0);
    }
    else{
          model_TTbar  = get_TTbar_mj_Model(workspace,"_TTbar"+mass_scale,mj_shape["TTbar"],channel);
          model_STop   = get_STop_mj_Model(workspace,"_STop"+mass_scale,mj_shape["STop"],channel);
          model_VV     = get_VV_mj_Model(workspace,"_VV"+mass_scale,mj_shape["VV"],channel);
          if( jetBin =="_2jet")   model_WW_EWK = get_WW_EWK_mj_Model(workspace,"_WW_EWK"+mass_scale,mj_shape["WW_EWK"],channel);
-	 model_WJets  = get_WJets_mj_Model(workspace,label+mass_scale,mj_shape[std::string(TString(label).ReplaceAll("_",""))],channel,0,jetBin);
+	 model_WJets  = get_WJets_mj_Model(workspace,label,model,channel,0,jetBin);
   }
 
   //## Total Pdf and fit only in sideband
@@ -1002,11 +1002,11 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
 
   //## print the different sample normalizations
 
-  get_mj_normalization_insignalregion(workspace,"_data","",channel);
-  get_mj_normalization_insignalregion(workspace,"_TTbar",mj_shape["TTbar"],channel);
-  get_mj_normalization_insignalregion(workspace,"_STop",mj_shape["STop"],channel);
-  get_mj_normalization_insignalregion(workspace,"_VV",mj_shape["VV"],channel);
-  get_mj_normalization_insignalregion(workspace,"_WW_EWK",mj_shape["WW_EWK"],channel);
+  get_mj_normalization_insignalregion(workspace,"_data"+mass_scale,"",channel);
+  get_mj_normalization_insignalregion(workspace,"_TTbar"+mass_scale,mj_shape["TTbar"],channel);
+  get_mj_normalization_insignalregion(workspace,"_STop"+mass_scale,mj_shape["STop"],channel);
+  get_mj_normalization_insignalregion(workspace,"_VV"+mass_scale,mj_shape["VV"],channel);
+  get_mj_normalization_insignalregion(workspace,"_WW_EWK"+mass_scale,mj_shape["WW_EWK"],channel);
   get_mj_normalization_insignalregion(workspace,label,model,channel);
            
                 
