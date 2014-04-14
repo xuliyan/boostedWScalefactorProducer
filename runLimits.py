@@ -100,8 +100,8 @@ if options.makeCards and options.turnOnAnalysis:
 
 elif not options.turnOnAnalysis and options.makeCards:
 
- shape    =  ["Exp","Exp","Exp","Exp","Exp"] ## basic shape
- shapeAlt =  ["Pow","Pow","Pow","Pow","Pow"] ## alternate one
+ shapeAlt    =  ["Exp","Exp","Exp","Exp","Exp"] ## basic shape
+ shape       =  ["Pow","Pow","Pow","Pow","Pow"] ## alternate one
 
 ################## options for bias Study
 
@@ -232,13 +232,11 @@ def submitBatchJob( command, fn ):
   outScript.write("\n"+'cp '+currentDir+'/doFit_class_higgs.py ./');
   outScript.write("\n"+'ls');  
   outScript.write("\n"+"unbuffer "+command+" > "+currentDir+"/output"+fn+".txt");
-  outScript.write("\n"+'tar -cvzf outputFrom_'+fn+'.tar.gz *');    
-  outScript.write("\n"+'cp outputFrom_'+fn+'.tar.gz '+currentDir);    
   outScript.close();
          
   os.system("chmod 777 "+currentDir+"/"+fn+".sh");
   
-  os.system("qsub -V -d "+currentDir+" -q production "+currentDir+"/"+fn+".sh");
+  os.system("qsub -V -d "+currentDir+" -q shortcms "+currentDir+"/"+fn+".sh");
   
 
 # ----------------------------------------
