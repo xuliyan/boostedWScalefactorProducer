@@ -100,8 +100,8 @@ if options.makeCards and options.turnOnAnalysis:
 
 elif not options.turnOnAnalysis and options.makeCards:
 
- shape    =  ["Exp","Exp","Exp","Exp","Exp"] ## basic shape
- shapeAlt =  ["Pow","Pow","Pow","Pow","Pow"] ## alternate one
+ shapeAlt    =  ["Exp","Exp","Exp","Exp","Exp"] ## basic shape
+ shape       =  ["Pow","Pow","Pow","Pow","Pow"] ## alternate one
 
 ################## options for bias Study
 
@@ -232,13 +232,11 @@ def submitBatchJob( command, fn ):
   outScript.write("\n"+'cp '+currentDir+'/doFit_class_higgs.py ./');
   outScript.write("\n"+'ls');  
   outScript.write("\n"+"unbuffer "+command+" > "+currentDir+"/output"+fn+".txt");
-  outScript.write("\n"+'tar -cvzf outputFrom_'+fn+'.tar.gz *');    
-  outScript.write("\n"+'cp outputFrom_'+fn+'.tar.gz '+currentDir);    
   outScript.close();
          
   os.system("chmod 777 "+currentDir+"/"+fn+".sh");
   
-  os.system("qsub -V -d "+currentDir+" -q production "+currentDir+"/"+fn+".sh");
+  os.system("qsub -V -d "+currentDir+" -q shortcms "+currentDir+"/"+fn+".sh");
   
 
 # ----------------------------------------
@@ -422,11 +420,8 @@ if __name__ == '__main__':
                     command = "python doFit_class_higgs.py %s ggH%03d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew %01d --inPath %s/ --jetBin %s --channel %s --pseudodata %d --closuretest %d "%(CHAN, mass[i], ccmlo[i], ccmhi[i], mjlo[i], mjhi[i], mlo[i], mhi[i], shape[i], shapeAlt[i], cprime[j], BRnew[k], os.getcwd(), options.jetBin, options.channel,options.pseudodata,options.closuretest);
                     print command ;
 
-                    unbinnedCard = options.odir+"/cards_%s/hwwlvj_ggH%03d_%s_%02d_%02d_unbin.txt"%(options.channel,mass[i],options.channel,cprime[j],BRnew[k]);
-                    fileExists = os.path.isfile(unbinnedCard)
-                    print "fileExists: ",fileExists,", cards: ", unbinnedCard
-                    if options.batchMode and not fileExists:
-                        fn = "fitScript_%s_%03d_%02d_%02d"%(options.channel,mass[i],cprime[j],BRnew[k]);
+                    if options.batchMode :
+                        fn = "fitScript_%s_%03d_%02d_%02d_%s"%(options.channel,mass[i],cprime[j],BRnew[k],shape[i]);
                         submitBatchJob( command, fn );
                     if not options.batchMode: 
                         os.system(command);
