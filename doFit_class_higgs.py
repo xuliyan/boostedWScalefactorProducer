@@ -2995,11 +2995,11 @@ self.channel));
     ####### +++++++++++++++
     def analysis_sideband_correction_method1_without_shape_and_psmodel_systermatic(self):
         self.fit_AllSamples_Mj_and_Mlvj()
-        self.get_data()BBB
+        self.get_data();
         self.fit_WJetsNormalization_in_Mj_signal_region("_WJets0");
-        self.fit_mlvj_in_Mj_sideband("_WJets0","_sb_lo", self.MODEL_4_mlvj,1)
-        self.prepare_limit("sideband_correction_method1")
-        self.read_workspace(1)
+        self.fit_mlvj_in_Mj_sideband("_WJets0","_sb_lo", self.MODEL_4_mlvj,1);
+        self.prepare_limit("sideband_correction_method1");
+        self.read_workspace(1);
 
 
 ### funtion to run the analysis without systematics
