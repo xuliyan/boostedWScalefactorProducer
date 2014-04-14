@@ -196,7 +196,7 @@ def submitBatchJob( command, fn ):
   condorScript.write("\n"+"Executable = "+fn+".sh")
   condorScript.write("\n"+'Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000')
   condorScript.write("\n"+'Should_Transfer_Files = YES')
-  condorScript.write("\n"+'Transfer_Input_Files = doFit_class.py, BiasStudy/do_fitBias_vbf.py')    
+  condorScript.write("\n"+'Transfer_Input_Files = doFit_class_higgs.py, BiasStudy/do_fitBias_vbf.py')    
   condorScript.write("\n"+'WhenToTransferOutput  = ON_EXIT_OR_EVICT')
   condorScript.write("\n"+'Output = out_$(Cluster).stdout')
   condorScript.write("\n"+'Error  = out_$(Cluster).stderr')
@@ -214,7 +214,7 @@ def submitBatchJob( command, fn ):
   outScript.write("\n"+'eval `scram runtime -sh`');
   outScript.write("\n"+'cd -');
   outScript.write("\n"+'cp '+currentDir+'/BiasStudy/do_fitBias_vbf.py ./');
-  outScript.write("\n"+'cp '+currentDir+'/doFit_class.py ./');
+  outScript.write("\n"+'cp '+currentDir+'/doFit_class_higgs.py ./');
   outScript.write("\n"+'export PATH=${PATH}:'+currentDir);
   outScript.write("\n"+'echo ${PATH}');
   outScript.write("\n"+'ls');  
@@ -234,7 +234,7 @@ def submitBatchJob( command, fn ):
   outScript.write("\n"+'eval `scram runtime -sh`');
   outScript.write("\n"+'cd -');
   outScript.write("\n"+'cp '+currentDir+'/BiasStudy/do_fitBias_vbf.py ./');
-  outScript.write("\n"+'cp '+currentDir+'doFit_class.py ./');
+  outScript.write("\n"+'cp '+currentDir+'/doFit_class_higgs.py ./');
   outScript.write("\n"+'export PATH=${PATH}:'+currentDir);
   outScript.write("\n"+'echo ${PATH}');
   outScript.write("\n"+'ls');  
@@ -426,7 +426,7 @@ if __name__ == '__main__':
                     
                     time.sleep(0.3);
                     
-                    command = "python doFit_class_higgs.py %s ggH%03d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew %01d --inPath %s --jetBin %s --channel %s --pseudodata %d --closuretest %d "%(CHAN, mass[i], ccmlo[i], ccmhi[i], mjlo[i], mjhi[i], mlo[i], mhi[i], shape[i], shapeAlt[i], cprime[j], BRnew[k], os.getcwd(), options.jetBin, options.channel,options.pseudodata,options.closuretest);
+                    command = "python doFit_class_higgs.py %s ggH%03d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew %01d --inPath %s/ --jetBin %s --channel %s --pseudodata %d --closuretest %d "%(CHAN, mass[i], ccmlo[i], ccmhi[i], mjlo[i], mjhi[i], mlo[i], mhi[i], shape[i], shapeAlt[i], cprime[j], BRnew[k], os.getcwd(), options.jetBin, options.channel,options.pseudodata,options.closuretest);
                     print command ;
 
                     unbinnedCard = options.odir+"/cards_%s/hwwlvj_ggH%03d_%s_%02d_%02d_unbin.txt"%(options.channel,mass[i],options.channel,cprime[j],BRnew[k]);
