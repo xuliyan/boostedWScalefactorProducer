@@ -3052,7 +3052,7 @@ self.channel));
         self.fit_Signal();
         self.fit_STop();
         self.fit_VV();
-        if options.jetBin: self.fit_WW_EWK();        
+        if options.jetBin == "_2jet": self.fit_WW_EWK();        
         self.fit_WJets();
         self.fit_TTbar();
 
