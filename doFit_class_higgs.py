@@ -327,8 +327,8 @@ class doFit_wj_and_wlvj:
         print "mean correction for the W peak : ",self.mean_shift," Resolution correction : ",self.sigma_scale
         
         #result files: The event number, parameters and error write into a txt file. The dataset and pdfs write into a root file
-        if not os.path.isdir("cards_%s"%(self.channel)): os.system("mkdir cards_%s"%(self.channel));
-        self.rlt_DIR = "cards_%s/"%(self.channel)
+        if not os.path.isdir("cards_%s_%s"%(self.channel,self.mlvj_shape["WJets0"])): os.system("mkdir cards_%s_%s"%(self.channel,self.mlvj_shape["WJets0"]));
+        self.rlt_DIR = "cards_%s_%s/"%(self.channel,self.mlvj_shape["WJets0"]);
 
         self.file_rlt_txt                   = self.rlt_DIR+"other_hwwlvj_%s_%s%s_%02d_%02d.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
         self.file_rlt_root                  = self.rlt_DIR+"hwwlvj_%s_%s%s_%02d_%02d_workspace.root"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
