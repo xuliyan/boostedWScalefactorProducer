@@ -231,7 +231,7 @@ def submitBatchJob( command, fn ):
   outScript.write("\n"+'cp '+currentDir+'/BiasStudy/do_fitBias_vbf.py ./');
   outScript.write("\n"+'cp '+currentDir+'/doFit_class_higgs.py ./');
   outScript.write("\n"+'ls');  
-  outScript.write("\n"+command);
+  outScript.write("\n"+"unbuffer "+command+" > "+currentDir+"/output"+fn+".txt");
   outScript.write("\n"+'tar -cvzf outputFrom_'+fn+'.tar.gz *');    
   outScript.write("\n"+'cp outputFrom_'+fn+'.tar.gz '+currentDir);    
   outScript.close();
