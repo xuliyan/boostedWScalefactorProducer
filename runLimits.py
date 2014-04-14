@@ -196,7 +196,7 @@ def submitBatchJob( command, fn ):
   condorScript.write("\n"+"Executable = "+fn+".sh")
   condorScript.write("\n"+'Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000')
   condorScript.write("\n"+'Should_Transfer_Files = YES')
-  condorScript.write("\n"+'Transfer_Input_Files = doFit_class_higgs.py, BiasStudy/do_fitBias_vbf.py')    
+  condorScript.write("\n"+'Transfer_Input_Files = doFit_class_higgs.py, BiasStudy/do_fitBias_vbf.py, AutoDict_std__map_std__string_std__string__cxx.so')    
   condorScript.write("\n"+'WhenToTransferOutput  = ON_EXIT_OR_EVICT')
   condorScript.write("\n"+'Output = out_$(Cluster).stdout')
   condorScript.write("\n"+'Error  = out_$(Cluster).stderr')
@@ -212,20 +212,15 @@ def submitBatchJob( command, fn ):
   outScript.write('#!/bin/bash');
   outScript.write("\n"+'cd '+currentDir);
   outScript.write("\n"+'eval `scram runtime -sh`');
-  outScript.write("\n"+'cd -');
-  outScript.write("\n"+'cp '+currentDir+'/BiasStudy/do_fitBias_vbf.py ./');
-  outScript.write("\n"+'cp '+currentDir+'/doFit_class_higgs.py ./');
   outScript.write("\n"+'export PATH=${PATH}:'+currentDir);
   outScript.write("\n"+'echo ${PATH}');
   outScript.write("\n"+'ls');  
   outScript.write("\n"+command);
   outScript.write("\n"+'rm *.out');  
-  outScript.write("\n"+'tar -cvzf outputFrom_'+fn+'.tar.gz *');    
-  outScript.write("\n"+'cp outputFrom_'+fn+'.tar.gz '+currentDir+"/");    
   outScript.close();
          
   os.system("chmod 777 "+currentDir+"/"+fn+".sh"); 
-  os.system("bsub -q 1nd -cwd "+currentDir+" "+fn+".sh");
+  os.system("bsub -q 8nh -cwd "+currentDir+" "+fn+".sh");
 
  elif not options.lxbatchCern and options.herculesMilano:
 
@@ -235,8 +230,6 @@ def submitBatchJob( command, fn ):
   outScript.write("\n"+'cd -');
   outScript.write("\n"+'cp '+currentDir+'/BiasStudy/do_fitBias_vbf.py ./');
   outScript.write("\n"+'cp '+currentDir+'/doFit_class_higgs.py ./');
-  outScript.write("\n"+'export PATH=${PATH}:'+currentDir);
-  outScript.write("\n"+'echo ${PATH}');
   outScript.write("\n"+'ls');  
   outScript.write("\n"+command);
   outScript.write("\n"+'tar -cvzf outputFrom_'+fn+'.tar.gz *');    
