@@ -525,14 +525,14 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
          model_WJets  = get_WJets_mj_Model(workspace,"_WJets0"+mass_scale,mj_shape["WJets0"],channel,1,jetBin);
          model_STop   = get_STop_mj_Model(workspace,"_STop"+mass_scale,mj_shape["STop"],channel);
          model_VV     = get_VV_mj_Model(workspace,"_VV"+mass_scale,mj_shape["VV"],channel);
-         if( jetBin =="_2jet")   model_WW_EWK = get_WW_EWK_mj_Model(workspace,"_WW_EWK"+mass_scale,mj_shape["WW_EWK"],channel);
+         if( jetBin == "_2jet")   model_WW_EWK = get_WW_EWK_mj_Model(workspace,"_WW_EWK"+mass_scale,mj_shape["WW_EWK"],channel);
 	 model_TTbar  = get_TTbar_mj_Model(workspace,label,model,channel,0);
    }
    else{
          model_TTbar  = get_TTbar_mj_Model(workspace,"_TTbar"+mass_scale,mj_shape["TTbar"],channel);
          model_STop   = get_STop_mj_Model(workspace,"_STop"+mass_scale,mj_shape["STop"],channel);
          model_VV     = get_VV_mj_Model(workspace,"_VV"+mass_scale,mj_shape["VV"],channel);
-         if( jetBin =="_2jet")   model_WW_EWK = get_WW_EWK_mj_Model(workspace,"_WW_EWK"+mass_scale,mj_shape["WW_EWK"],channel);
+         if( jetBin == "_2jet")   model_WW_EWK = get_WW_EWK_mj_Model(workspace,"_WW_EWK"+mass_scale,mj_shape["WW_EWK"],channel);
 	 model_WJets  = get_WJets_mj_Model(workspace,label,model,channel,0,jetBin);
   }
 
@@ -1006,7 +1006,7 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
   get_mj_normalization_insignalregion(workspace,"_TTbar"+mass_scale,mj_shape["TTbar"],channel);
   get_mj_normalization_insignalregion(workspace,"_STop"+mass_scale,mj_shape["STop"],channel);
   get_mj_normalization_insignalregion(workspace,"_VV"+mass_scale,mj_shape["VV"],channel);
-  get_mj_normalization_insignalregion(workspace,"_WW_EWK"+mass_scale,mj_shape["WW_EWK"],channel);
+  if(jetBin == "_2jet") get_mj_normalization_insignalregion(workspace,"_WW_EWK"+mass_scale,mj_shape["WW_EWK"],channel);
   get_mj_normalization_insignalregion(workspace,label,model,channel);
            
                 
@@ -1902,7 +1902,7 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
    }
      
    //### Add the legend
-   TLegend* leg = legend4Plot(mplot,0,-0.07,0.02,0.01,0.,1,channel);
+   TLegend* leg = legend4Plot(mplot,-1,-0.07,0.02,0.01,0.,1,channel);
    mplot->addObject(leg);
 
    //## set the Y axis in arbitrary unit
