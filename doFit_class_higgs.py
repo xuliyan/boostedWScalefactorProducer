@@ -2457,9 +2457,9 @@ self.channel));
           ### nousiance for the bkg
           ### WJets normaliztion due to data fit and alternate modellization
           if self.number_WJets_insideband >0:
-            datacard_out.write( "\nWjet_Norm_%s_%s lnN %0.3f     -  %0.3f           -      -        -      "%(self.channel,options.jetBin,self.number_WJets_insideband, getattr(self,"datadriven_alpha_WJets_%s"%(mode))));
+            datacard_out.write( "\nWjet_Norm_%s lnN %0.3f     -  %0.3f           -      -        -      "%(self.channel,self.number_WJets_insideband, getattr(self,"datadriven_alpha_WJets_%s"%(mode))));
           else:
-            datacard_out.write( "\nWjet_Norm_%s_%s lnN     -         -             %0.3f    -       -       -      "%(self.channel,options.jetBin, 1+ self.workspace4limit_.var("rate_WJets_for_unbin").getError()/self.workspace4limit_.var("rate_WJets_for_unbin").getVal() ) );
+            datacard_out.write( "\nWjet_Norm_%s lnN     -         -             %0.3f    -       -       -      "%(self.channel,1+ self.workspace4limit_.var("rate_WJets_for_unbin").getError()/self.workspace4limit_.var("rate_WJets_for_unbin").getVal() ) );
 
 
           ## jet mass systematic scaling up and down vbf jets detajj, mjj, and pt selection effect
