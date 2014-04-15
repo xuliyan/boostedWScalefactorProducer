@@ -95,13 +95,13 @@ else:
  
 if options.makeCards and options.turnOnAnalysis:
  
- shape    =  ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"] ## basic shape
- shapeAlt =  ["ErfPow2_v1", "ErfPow2_v1","ErfPow2_v1","ErfPow2_v1","ErfPow2_v1"] ## alternate one
+ shapeAlt =  ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"] ## basic shape
+ shape    =  ["ErfPow2_v1", "ErfPow2_v1","ErfPow2_v1","ErfPow2_v1","ErfPow2_v1"] ## alternate one
 
 elif not options.turnOnAnalysis and options.makeCards:
 
- shapeAlt    =  ["Exp","Exp","Exp","Exp","Exp"] ## basic shape
- shape       =  ["Pow","Pow","Pow","Pow","Pow"] ## alternate one
+ shapeAlt  =  ["Exp","Exp","Exp","Exp","Exp"] ## basic shape
+ shape     =  ["Pow","Pow","Pow","Pow","Pow"] ## alternate one
 
 ################## options for bias Study
 
@@ -110,18 +110,18 @@ if options.biasStudy:
  if not options.turnOnAnalysis and not options.fitjetmass:
 
   shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
-#  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
+  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
 #  shape_gen = ["Pow2","Pow2","Pow2","Pow2","Pow2"]    
-  shape_fit = ["Pow2","Pow2","Pow2","Pow2","Pow2"]
+#  shape_fit = ["Pow2","Pow2","Pow2","Pow2","Pow2"]
 #  shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
 #  shape_fit = ["Pow","Pow","Pow","Pow","Pow"]
 
  elif options.turnOnAnalysis and not options.fitjetmass:
 
   shape_gen = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"];    
-#  shape_fit = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"];
+  shape_fit = ["ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1","ErfExp_v1"];
 #  shape_gen = ["ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1"];    
-  shape_fit = ["ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1"];
+#  shape_fit = ["ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1","ErfPowExp_v1"];
 #  shape_gen = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"];    
 #  shape_fit = ["ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1","ErfPow_v1"];
 
@@ -136,8 +136,8 @@ if options.biasStudy:
 
  isMC      = [0,0,0,0,0];
 
-BRnew  = [0];
-cprime = [10];
+BRnew  = [00,01,02,03,04,05];
+cprime = [01,02,03,05,07,10];
   
 ##############################################
 
