@@ -226,7 +226,7 @@ class doFit_wj_and_wlvj:
              self.file_WJets0_mc = ("ofile_WJets_exclusive_Pythia.root");
              self.file_WJets1_mc = ("ofile_WJets_Herwig.root");
             else: 
-             self.file_WJets0_mc = ("ofile_WJets_Pythia100.root");
+             self.file_WJets0_mc = ("ofile_WJets_Pythia180.root");
              self.file_WJets1_mc = ("ofile_WJets_Herwig.root");
         else:
             if options.jetBin == "_2jet" :
@@ -234,7 +234,7 @@ class doFit_wj_and_wlvj:
              self.file_WJets1_mc = ("ofile_WJets_exclusive_Pythia.root");
             else:
              self.file_WJets0_mc = ("ofile_WJets_Herwig.root");
-             self.file_WJets1_mc = ("ofile_WJets_Pythia100.root");
+             self.file_WJets1_mc = ("ofile_WJets_Pythia180.root");
                 
 
         self.file_VV_mc     = ("ofile_VV.root");# WW+WZ
@@ -330,7 +330,7 @@ class doFit_wj_and_wlvj:
         if not os.path.isdir("cards_%s_%s"%(self.channel,self.mlvj_shape["WJets0"])): os.system("mkdir cards_%s_%s"%(self.channel,self.mlvj_shape["WJets0"]));
         self.rlt_DIR = "cards_%s_%s/"%(self.channel,self.mlvj_shape["WJets0"]);
 
-        if options.jetBin != "_2jet" : 
+        if options.jetBin == "_2jet" : 
          self.file_rlt_txt                   = self.rlt_DIR+"other_hwwlvj_%s_%s%s_%02d_%02d.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
          self.file_rlt_root                  = self.rlt_DIR+"hwwlvj_%s_%s%s_%02d_%02d_workspace.root"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
          self.file_datacard_unbin_ggHvbfH    = self.rlt_DIR+"hwwlvj_%s_%s%s_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
