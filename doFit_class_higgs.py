@@ -80,7 +80,8 @@ class doFit_wj_and_wlvj:
         self.mj_shape["TTbar"]   = "2Gaus_ErfExp";
         self.mj_shape["VV"]      = "2_2Gaus";
         self.mj_shape["WW_EWK"]  = "2_2Gaus";
-        self.mj_shape["STop"]    = "ErfExp";
+        if options.jetBin == "_2jet":  self.mj_shape["STop"]    = "ErfExp";
+        else: self.mj_shape["STop"]    = "2Gaus"; 
         self.mj_shape["WJets0"]  = "ErfExp";
         self.mj_shape["WJets1"]  = "ErfExp";
         self.mj_shape["WJets01"] = "User1";
@@ -1153,8 +1154,10 @@ class doFit_wj_and_wlvj:
              if not label=="_data":
                      if TString(label).Contains("_TTbar") or TString(label).Contains("_STop") :
                          tmp_event_weight = tmp_event_weight*self.rrv_wtagger_eff_reweight_forT.getVal();
+                         tmp_event_weight4fit = tmp_event_weight*self.rrv_wtagger_eff_reweight_forT.getVal();
                      elif TString(label).Contains("_ggH") or TString(label).Contains("_vbfH") or TString(label).Contains("_VV") or TString(label).Contains("_WW_EWK") :
                          tmp_event_weight = tmp_event_weight*self.rrv_wtagger_eff_reweight_forV.getVal();
+                         tmp_event_weight4fit = tmp_event_weight*self.rrv_wtagger_eff_reweight_forV.getVal();
 
              tmp_event_weight        = tmp_event_weight* getattr(treeIn,"btag_weight"); ## add the btag weight 
              tmp_event_weight4fit    = tmp_event_weight4fit* getattr(treeIn,"btag_weight"); ## add the btag weight 
