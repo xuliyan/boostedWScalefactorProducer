@@ -227,7 +227,7 @@ class doFit_wj_and_wlvj:
              self.file_WJets0_mc = ("ofile_WJets_exclusive_Pythia.root");
              self.file_WJets1_mc = ("ofile_WJets_Herwig.root");
             else: 
-             self.file_WJets0_mc = ("ofile_WJets_Pythia180.root");
+             self.file_WJets0_mc = ("ofile_WJets_Pythia100.root");
              self.file_WJets1_mc = ("ofile_WJets_Herwig.root");
         else:
             if options.jetBin == "_2jet" :
@@ -235,7 +235,7 @@ class doFit_wj_and_wlvj:
              self.file_WJets1_mc = ("ofile_WJets_exclusive_Pythia.root");
             else:
              self.file_WJets0_mc = ("ofile_WJets_Herwig.root");
-             self.file_WJets1_mc = ("ofile_WJets_Pythia180.root");
+             self.file_WJets1_mc = ("ofile_WJets_Pythia100.root");
                 
 
         self.file_VV_mc     = ("ofile_VV.root");# WW+WZ
