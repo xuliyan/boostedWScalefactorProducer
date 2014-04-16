@@ -1631,7 +1631,7 @@ class doFit_wj_and_wlvj:
          getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jer_dn); rdataset4fit_mj_jer_dn.Print();
          
     ##### Prepare the workspace for the limit and to store info to be printed in the datacard
-    def prepare_limit(self,mode,isTTbarFloating = 0, isVVFloating = 0, isSTopFloating = 0, isWW_EWKFloating = 0):
+    def prepare_limit(self,mode,isTTbarFloating = 1, isVVFloating = 0, isSTopFloating = 0, isWW_EWKFloating = 0):
 
         print "####################### prepare_limit for %s method ####################"%(mode);
 
@@ -3170,7 +3170,7 @@ self.channel));
       get_mlvj_normalization_insignalregion(self.workspace4fit_,"_WJets0",self.mlvj_shape["WJets0"],"_signal_region",self.channel,1);  
       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-      self.prepare_limit("sideband_correction_method1",0,1);
+      self.prepare_limit("sideband_correction_method1",1,1);
       self.read_workspace();
       os.system("rm tmp2.root");
        
