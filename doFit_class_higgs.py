@@ -271,7 +271,7 @@ class doFit_wj_and_wlvj:
 	if self.channel=="mu" and self.wtagger_label=="HP":
           if options.pseudodata == 1:
            self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",1.);
-           self.rrv_wtagger_eff_reweight_forT.setError(0.338);
+           self.rrv_wtagger_eff_reweight_forT.setError(0.06);
            self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",1.);
            self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
           elif options.pseudodata == 0 and  options.jetBin == "_2jet":
@@ -288,7 +288,7 @@ class doFit_wj_and_wlvj:
         if self.channel=="el" and self.wtagger_label=="HP":
           if options.pseudodata == 1:
            self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",1.);
-           self.rrv_wtagger_eff_reweight_forT.setError(0.369);
+           self.rrv_wtagger_eff_reweight_forT.setError(0.08);
            self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",1.);
            self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
           elif options.pseudodata == 0 and options.jetBin == "_2jet":
