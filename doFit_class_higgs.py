@@ -547,13 +547,13 @@ class doFit_wj_and_wlvj:
         self.lep_eff_uncertainty     = 0.02;
 
         #### increase shape uncertainty
-        self.shape_para_error_WJets0 = 2.0;
-        self.shape_para_error_TTbar  = 2.0;
+        self.shape_para_error_WJets0 = 5.0;
+        self.shape_para_error_TTbar  = 5.0;
 
         if self.higgs_sample == "ggH600" or self.higgs_sample == "ggH700":
-            self.shape_para_error_alpha = 2.0;
+            self.shape_para_error_alpha = 5.0;
         else:
-            self.shape_para_error_alpha = 2.0;
+            self.shape_para_error_alpha = 5.0;
         
         # shape parameter uncertainty
         self.FloatingParams = RooArgList("floatpara_list");
@@ -2040,9 +2040,9 @@ class doFit_wj_and_wlvj:
                 self.FloatingParams_wjet.add(self.workspace4limit_.var("Deco_WJets0_sim_%s_%s_%s_mlvj_eig5"%(self.mlvj_shape["WJets0"],self.channel,self.wtagger_label)) );
 
                 if isTTbarFloating!=0:
-                   self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_%s_mlvj_eig0"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)) );
-                   self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_%s_mlvj_eig1"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)) );
-                   self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_%s_mlvj_eig2"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)) );
+                   self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region%s_%s_%s_mlvj_eig0"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)) );
+                   self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region%s_%s_%s_mlvj_eig1"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)) );
+                   self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region%s_%s_%s_mlvj_eig2"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)) );
 
           if self.MODEL_4_mlvj=="ErfPow2_v1" or self.MODEL_4_mlvj=="ErfPowExp_v1" :
 
@@ -2077,10 +2077,10 @@ class doFit_wj_and_wlvj:
                 self.FloatingParams_wjet.add(self.workspace4limit_.var("Deco_WJets0_sim_%s_%s_%s_mlvj_eig7"%(self.mlvj_shape["WJets0"],self.channel,self.wtagger_label)) );
 
                 if isTTbarFloating!=0:
-                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_%s_mlvj_eig0"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)));
-                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_%s_mlvj_eig1"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)));
-                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_%s_mlvj_eig2"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)));
-                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_%s_mlvj_eig3"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)));
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region%s_%s_%s_mlvj_eig0"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)));
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region%s_%s_%s_mlvj_eig1"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)));
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region%s_%s_%s_mlvj_eig2"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)));
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region%s_%s_%s_mlvj_eig3"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)));
 
           if self.MODEL_4_mlvj=="Exp" or self.MODEL_4_mlvj=="Pow" :
 
@@ -2097,7 +2097,7 @@ class doFit_wj_and_wlvj:
                 self.FloatingParams_wjet.add(self.workspace4limit_.var("Deco_WJets0_sim_%s_%s_%s_mlvj_eig1"%(self.mlvj_shape["WJets0"],self.channel,self.wtagger_label)) );
 
                 if isTTbarFloating!=0:
-                  self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_%s_mlvj_eig0"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)));
+                  self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region%s_%s_%s_mlvj_eig0"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)));
 
 
           if self.MODEL_4_mlvj=="ExpN" or self.MODEL_4_mlvj=="ExpTail" or self.MODEL_4_mlvj=="Pow2" :
@@ -2121,7 +2121,7 @@ class doFit_wj_and_wlvj:
                 self.FloatingParams_wjet.add(self.workspace4limit_.var("Deco_WJets0_sim_%s_%s_%s_mlvj_eig3"%(self.mlvj_shape["WJets0"],self.channel,self.wtagger_label)) );
 
                 if isTTbarFloating!=0:
-                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region_%s_%s_%s_mlvj_eig0"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)));
+                     self.FloatingParams.add(self.workspace4limit_.var("Deco_TTbar_signal_region%s_%s_%s_mlvj_eig0"%(self.mlvj_shape["TTbar"],self.channel,self.wtagger_label)));
 
  
         self.FloatingParams.add(self.workspace4limit_.var("CMS_sig_p1_jes_ggH"));
