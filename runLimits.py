@@ -10,7 +10,7 @@ import ROOT
 
 from optparse import OptionParser
 from subprocess import Popen
-from ROOT import gROOT, gStyle, gSystem, TLatex, TGaxis, TPaveText
+from ROOT import gROOT, gStyle, gSystem, TLatex, TGaxis, TPaveText, TH2D, TColor, gPad
 
 ROOT.gStyle.SetPadRightMargin(0.16);
 
@@ -146,8 +146,8 @@ if options.biasStudy:
 #BRnew  = [00,01,02,03,04,05];
 #cprime = [01,02,03,05,07,10];
 
-cprime = [10]
-BRnew  = [00]
+cprime = [01,02,03,05,07,10]
+BRnew  = [00,01,02,03,04,05]
   
 ########################################
 ###### Make Asymptotic Limit Plot ######
@@ -156,7 +156,6 @@ BRnew  = [00]
 def getAsymLimits(file):
         
  f = ROOT.TFile(file);
- print file
  t = f.Get("limit"); 
  entries = t.GetEntries();
     
@@ -168,8 +167,7 @@ def getAsymLimits(file):
   t_quantileExpected = t.quantileExpected;
   t_limit = t.limit;
         
-  #print "limit: ", t_limit, ", quantileExpected: ",t_quantileExpected;
-        
+  #print "limit: ", t_limit, ", quantileExpected: ",t_quantileExpected;        
   if t_quantileExpected == -1.: lims[0] = t_limit;
   elif t_quantileExpected >= 0.024 and t_quantileExpected <= 0.026: lims[1] = t_limit;
   elif t_quantileExpected >= 0.15 and t_quantileExpected <= 0.17: lims[2] = t_limit;            
@@ -426,9 +424,15 @@ def setStyle():
   gStyle.SetTitleFillColor(10);
   gStyle.SetTitleFontSize(0.05);
 
+  gStyle.SetOptStat(0);
+  gStyle.SetOptTitle(0)
+  gStyle.SetOptFit(1)
+
+
 ##############################
 #### Make SM Limits Plots ####  
 ##############################  
+
 def makeSMLimitPlot(SIGCH):
 
     cprime = 10;
@@ -528,18 +532,6 @@ def makeSMLimitPlot(SIGCH):
                                        
     if not options.blindObservedLine:     leg2.AddEntry(curGraph_obs,"Asympt. CL_{S} Observed","LP")
 
-    #xaxis2 = TGaxis(790.0,0.005,810,0.005,699.0,701.0,100,"UI");
-    #xaxis2.Draw();
-    #t800 =  TPaveText(0.135,0.108,0.18,0.108,"brNDC");
-    #t800.SetFillColor(ROOT.kWhite);
-    #t800.SetTextSize(0.045);
-    #t800.SetTextAlign(11);
-    #t800.SetTextFont(42);
-    #t800.SetBorderSize(0);
-    #t800.AddText("600");
-    #t800.Draw();
-
-    #ROOT.gPad.SetLogy();
 
     can_SM.Update();
     can_SM.RedrawAxis();
@@ -569,15 +561,13 @@ def makeSMLimitPlot(SIGCH):
 
     os.system("mkdir -p %s/limitFigs/"%(os.getcwd()));
 
-    can_SM.SaveAs("./limitFigs/SMLim_%s.png"%(options.channel));
-    can_SM.SaveAs("./limitFigs/SMLim_%s.pdf"%(options.channel));
-    can_SM.SaveAs("./limitFigs/SMLim_%s.C"%(options.channel));
+    can_SM.SaveAs("limitFigs/SMLim_%s.png"%(options.channel));
+    can_SM.SaveAs("limitFigs/SMLim_%s.pdf"%(options.channel));
                        
 
 ##############################################
 ### Make the BSM Limit plot vs mass and c' ###
-##############################################
-    
+##############################################    
 def makeBSMLimitPlotMass(SIGCH):
 
     print "module ===> makeBSMLimits_vsMass";
@@ -800,21 +790,20 @@ def makeBSMLimitPlotMass(SIGCH):
     
     can_BSMsig.SaveAs("limitFigs/BSMLim%s_%s_Sigma.png"%(SIGCH,options.channel));
     can_BSMsig.SaveAs("limitFigs/BSMLim%s_%s_Sigma.pdf"%(SIGCH,options.channel));
-    can_BSMsig.SaveAs("limitFigs/BSMLim%s_%s_Sigma.root"%(SIGCH,options.channel));
 
 
 ###############################################
 ### Make the BSM Limit plot vs c' and brNew ###
 ###############################################
-def makeBSMLimitPlotBRnew(SIGCH):
+    
+def makeBSMLimitPlotBRnew(SIGCH,mass):
 
     print "module ===> makeBSMLimits_vsBRnew";
 
     curcolors = [1,2,210,4,6,12,7];
-    brnews   = [00,01,02,03,04,05];
-    brnews_x = [0,0.1,0.2,0.3,0.4,0.5];
+    BRnew_x = [0,0.1,0.2,0.3,0.4,0.5];
     massindex = {600:0,700:1,800:2,900:3,1000:4}
-    nPoints = len(brnews);
+    nPoints = len(BRnew);
     massXS  = [];
 
     if SIGCH == "" or SIGCH == "_2jet":
@@ -848,9 +837,7 @@ def makeBSMLimitPlotBRnew(SIGCH):
     tGraphs_csXbr_obs = [];
     tGraphs_csXbr_th = [];
 
-    for imass in mass:
-
-     for j in range(len(cprime)):
+    for j in range(len(cprime)):
 
         xbins           = array('f', [0.]);
         ybins_exp       = array('f', [0.]);
@@ -859,18 +846,18 @@ def makeBSMLimitPlotBRnew(SIGCH):
         ybins_csXbr_obs = array('f', [0.]);
         ybins_csXbr_th  = array('f', [0.]);
 
-        for i in range(len(brnews)):
-            curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(imass,options.channel,SIGCH,cprime[j],brnews[i],imass);
+        for i in range(len(BRnew)):
+            curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass,options.channel,SIGCH,cprime[j],BRnew[i],mass);
             curAsymLimits = getAsymLimits(curFile);
-            xbins.append(brnews_x[i]);
+            xbins.append(BRnew_x[i]);
             ybins_exp.append( curAsymLimits[3] );
             ybins_obs.append( curAsymLimits[0] );
-            ybins_csXbr_exp.append( curAsymLimits[3]*massXS[massindex[imass]]*cprime[j]*0.1*(1-brnews[i]*0.1)*massBRWW[massindex[imass]] );
-            ybins_csXbr_obs.append( curAsymLimits[0]*massXS[massindex[imass]]*cprime[j]*0.1*(1-brnews[i]*0.1)*massBRWW[massindex[imass]] );
-            ybins_csXbr_th.append( 1.*massXS[massindex[imass]]*cprime[j]*0.1*(1-brnews[i]*0.1)*massBRWW[massindex[imass]] );
+            ybins_csXbr_exp.append( curAsymLimits[3]*massXS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]] );
+            ybins_csXbr_obs.append( curAsymLimits[0]*massXS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]] );
+            ybins_csXbr_th.append( 1.*massXS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]] );
 
             if gridMax < curAsymLimits[3]: gridMax = curAsymLimits[3];
-            cscur = ( curAsymLimits[3]*massXS[massindex[imass]]*cprime[j]*0.1*(1-brnews[i]*0.1)*massBRWW[massindex[imass]] );
+            cscur = ( curAsymLimits[3]*massXS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]] );
             if gridMaxSig < cscur: gridMaxSig = cscur;
 
         curGraph_exp = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_exp);
@@ -908,31 +895,31 @@ def makeBSMLimitPlotBRnew(SIGCH):
         tGraphs_csXbr_obs.append(curGraph_csXbr_obs);
         tGraphs_csXbr_th.append(curGraph_csXbr_th);
 
-     setStyle();
-     can_BSM = ROOT.TCanvas("can_BSM_BR","can_BSM",630,600);
-     hrl_BSM = can_BSM.DrawFrame(0.,0.0,0.51,gridMax*1.5);
+    setStyle();
+    can_BSM = ROOT.TCanvas("can_BSM_BR","can_BSM",630,600);
+    hrl_BSM = can_BSM.DrawFrame(0.,0.0,0.51,gridMax*1.5);
 
-     hrl_BSM.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{SM}");
-     hrl_BSM.GetYaxis().SetTitleOffset(1.35);
-     hrl_BSM.GetYaxis().SetTitleSize(0.045);
-     hrl_BSM.GetYaxis().SetTitleFont(42);
+    hrl_BSM.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{SM}");
+    hrl_BSM.GetYaxis().SetTitleOffset(1.35);
+    hrl_BSM.GetYaxis().SetTitleSize(0.045);
+    hrl_BSM.GetYaxis().SetTitleFont(42);
 
-     hrl_BSM.GetXaxis().SetTitle("BR_{new}");
-     hrl_BSM.GetXaxis().SetTitleSize(0.045);
-     hrl_BSM.GetXaxis().SetTitleFont(42);
+    hrl_BSM.GetXaxis().SetTitle("BR_{new}");
+    hrl_BSM.GetXaxis().SetTitleSize(0.045);
+    hrl_BSM.GetXaxis().SetTitleFont(42);
 
-     hrl_BSM.GetYaxis().SetNdivisions(505);
-     can_BSM.SetGridx(1);
-     can_BSM.SetGridy(1);
+    hrl_BSM.GetYaxis().SetNdivisions(505);
+    can_BSM.SetGridx(1);
+    can_BSM.SetGridy(1);
 
-     leg2 = ROOT.TLegend(0.25,0.65,0.75,0.85);
-     leg2.SetFillColor(0);
-     leg2.SetShadowColor(0);
-     leg2.SetTextFont(42);
-     leg2.SetTextSize(0.028);
-     leg2.SetNColumns(2);
+    leg2 = ROOT.TLegend(0.25,0.65,0.75,0.85);
+    leg2.SetFillColor(0);
+    leg2.SetShadowColor(0);
+    leg2.SetTextFont(42);
+    leg2.SetTextSize(0.028);
+    leg2.SetNColumns(2);
 
-     for k in range(len(cprime)):
+    for k in range(len(cprime)):
         tGraphs_exp[k].SetLineStyle(1);
         tGraphs_exp[k].SetLineColor(curcolors[k]);
         tGraphs_exp[k].SetMarkerColor(curcolors[k]);
@@ -945,73 +932,70 @@ def makeBSMLimitPlotBRnew(SIGCH):
         y = ROOT.Double(0.);
         for ipoint in range(tGraphs_exp[k].GetN()):
            tGraphs_exp[k].GetPoint(ipoint,x,y)
-           print ipoint,"  ",x,"  ",y ;
         if not options.blindObservedLine: tGraphs_obs[k].Draw("PL");
 
         tmplabel = "exp., C'^{ 2} = %1.1f    "%( float((cprime[k])/10.) )
         leg2.AddEntry(tGraphs_exp[k],tmplabel,"L")
 
 
-     can_BSM.Update();
-     can_BSM.RedrawAxis();
-     can_BSM.RedrawAxis("g");
-     can_BSM.Update();
+    can_BSM.Update();
+    can_BSM.RedrawAxis();
+    can_BSM.RedrawAxis("g");
+    can_BSM.Update();
 
-     banner = TPaveText( 0.145, 0.953, 0.76, 0.975, "brNDC");
-     banner.SetFillColor(ROOT.kWhite);
-     banner.SetTextSize(0.038);
-     banner.SetTextAlign(11);
-     banner.SetTextFont(62);
-     banner.SetBorderSize(0);
-     leftText = "CMS Preliminary";
-     banner.AddText(leftText);
-     banner.Draw();
+    banner = TPaveText( 0.145, 0.953, 0.76, 0.975, "brNDC");
+    banner.SetFillColor(ROOT.kWhite);
+    banner.SetTextSize(0.038);
+    banner.SetTextAlign(11);
+    banner.SetTextFont(62);
+    banner.SetBorderSize(0);
+    leftText = "CMS Preliminary";
+    banner.AddText(leftText);
+    banner.Draw();
 
-     label_sqrt = TPaveText(0.5,0.953,0.96,0.975, "brNDC");
-     label_sqrt.SetFillColor(ROOT.kWhite);
-     label_sqrt.SetBorderSize(0);
-     label_sqrt.SetTextSize(0.038);
-     label_sqrt.SetTextFont(62);
-     label_sqrt.SetTextAlign(31); # align right                                                                                                                                         
-     label_sqrt.AddText("L = 19.3 fb^{-1} at #sqrt{s} = 8 TeV");
+    label_sqrt = TPaveText(0.5,0.953,0.96,0.975, "brNDC");
+    label_sqrt.SetFillColor(ROOT.kWhite);
+    label_sqrt.SetBorderSize(0);
+    label_sqrt.SetTextSize(0.038);
+    label_sqrt.SetTextFont(62);
+    label_sqrt.SetTextAlign(31); # align right                                                                                                                                         
+    label_sqrt.AddText("L = 19.3 fb^{-1} at #sqrt{s} = 8 TeV");
 
-     banner2 = TLatex(0.17,0.91,("Higgs Mass, %i GeV/c^{2}"%(imass)));
-     banner2.SetNDC(); banner2.SetTextSize(0.028);
+    banner2 = TLatex(0.17,0.91,("Higgs Mass, %i GeV/c^{2}"%(mass)));
+    banner2.SetNDC(); banner2.SetTextSize(0.028);
 
-     leg2.Draw();
-     banner.Draw();
-     banner2.Draw();
-     label_sqrt.Draw();
+    leg2.Draw();
+    banner.Draw();
+    banner2.Draw();
+    label_sqrt.Draw();
 
-     can_BSM.SaveAs("limitFigs/BSMLim%s_Mu_vsBRnew_%i.png"%(SIGCH,imass));
-     can_BSM.SaveAs("limitFigs/BSMLim%s_Mu_vsBRnew_%i.pdf"%(SIGCH,imass));
+    can_BSM.SaveAs("limitFigs/BSMLim%s_Mu_vsBRnew_%i.png"%(SIGCH,mass));
+    can_BSM.SaveAs("limitFigs/BSMLim%s_Mu_vsBRnew_%i.pdf"%(SIGCH,mass));
 
-     ##################################  
-     setStyle();
-     can_BSMsig = ROOT.TCanvas("can_BSM_Sig","can_BSM",630,600);
-     hrl_BSMSig = can_BSMsig.DrawFrame(0.,0.0,0.51,gridMaxSig*1.5);
+    can_BSMsig = ROOT.TCanvas("can_BSM_Sig","can_BSM",630,600);
+    hrl_BSMSig = can_BSMsig.DrawFrame(0.,0.0,0.51,gridMaxSig*1.5);
 
-     hrl_BSMSig.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{SM}");
-     hrl_BSMSig.GetYaxis().SetTitleOffset(1.35);
-     hrl_BSMSig.GetYaxis().SetTitleSize(0.045);
-     hrl_BSMSig.GetYaxis().SetTitleFont(42);
+    hrl_BSMSig.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{SM}");
+    hrl_BSMSig.GetYaxis().SetTitleOffset(1.35);
+    hrl_BSMSig.GetYaxis().SetTitleSize(0.045);
+    hrl_BSMSig.GetYaxis().SetTitleFont(42);
 
-     hrl_BSMSig.GetXaxis().SetTitle("BR_{new}");
-     hrl_BSMSig.GetXaxis().SetTitleSize(0.045);
-     hrl_BSMSig.GetXaxis().SetTitleFont(42);
+    hrl_BSMSig.GetXaxis().SetTitle("BR_{new}");
+    hrl_BSMSig.GetXaxis().SetTitleSize(0.045);
+    hrl_BSMSig.GetXaxis().SetTitleFont(42);
 
-     hrl_BSMSig.GetYaxis().SetNdivisions(505);
-     can_BSMsig.SetGridx(1);
-     can_BSMsig.SetGridy(1);
+    hrl_BSMSig.GetYaxis().SetNdivisions(505);
+    can_BSMsig.SetGridx(1);
+    can_BSMsig.SetGridy(1);
 
-     leg2 = ROOT.TLegend(0.25,0.65,0.75,0.85);
-     leg2.SetFillColor(0);
-     leg2.SetShadowColor(0);
-     leg2.SetTextFont(42);
-     leg2.SetTextSize(0.028);
-     leg2.SetNColumns(2);
+    leg2 = ROOT.TLegend(0.25,0.65,0.75,0.85);
+    leg2.SetFillColor(0);
+    leg2.SetShadowColor(0);
+    leg2.SetTextFont(42);
+    leg2.SetTextSize(0.028);
+    leg2.SetNColumns(2);
 
-     for k in range(len(cprime)):
+    for k in range(len(cprime)):
         tGraphs_csXbr_exp[k].SetLineStyle(2);
         tGraphs_csXbr_exp[k].SetLineColor(curcolors[k]);
         tGraphs_csXbr_obs[k].SetLineColor(curcolors[k]);
@@ -1026,14 +1010,203 @@ def makeBSMLimitPlotBRnew(SIGCH):
         leg2.AddEntry(tGraphs_csXbr_exp[k],tmplabel,"L")
         tmplabel = "obs., C'^{ 2} = %1.1f"%( float((cprime[k])/10.) );
 
-     leg2.Draw();
-     banner.Draw();
-     banner2.Draw();
-     label_sqrt.Draw();
+    leg2.Draw();
+    banner.Draw();
+    banner2.Draw();
+    label_sqrt.Draw();
      
-     can_BSMsig.SaveAs("limitFigs/BSMLim%s_Sigma_vsBRnew_%i.png"%(SIGCH,imass));
-     can_BSMsig.SaveAs("limitFigs/BSMLim%s_Sigma_vsBRnew_%i.pdf"%(SIGCH,imass));
+    can_BSMsig.SaveAs("limitFigs/BSMLim%s_Sigma_vsBRnew_%i.png"%(SIGCH,mass));
+    can_BSMsig.SaveAs("limitFigs/BSMLim%s_Sigma_vsBRnew_%i.pdf"%(SIGCH,mass));
+
+#############################################
+### Make the BSM 2D Scane vs c' and brNew ###
+#############################################
+
+def makeBSMLimitPlot2D( SIGCH, mass ):
+
+
+    Number = 8;
+    Red    = array('f',[0.3,0.0,0.0,0.2,0.6,1.0,1.0,0.8]);
+    Green  = array('f',[0.,0.0,0.5,1.0,1.0,1.0,0.5,0.0]);
+    Blue   = array('f',[0.6,1.0,1.0,0.6,0.2,0.0,0.0,0.0]);
+    Stops  = array('f',[0.,0.125,0.25,0.375,0.50,0.675,0.75,0.875]);
+#    TColor.CreateGradientColorTable(Number,Stops,Red,Green,Blue,100);
+    massBRWW = [5.58E-01,5.77E-01,5.94E-01,6.09E-01,6.21E-01];            
+
+    print "module ===> makeBSMLimits_2D";
+
+    massindex = {600:0,700:1,800:2,900:3,1000:4}
+    mass_XS  = [];
+    BRnew_y = [0,0.1,0.2,0.3,0.4,0.5];
+    cprime_x = [0.1,0.2,0.3,0.5,0.7,1.0];
+
+    if SIGCH == "" or SIGCH == "_2jet":
+        mass_XS.append((0.5230+0.09688));
+        mass_XS.append((0.2288+0.06330));
+        mass_XS.append((0.1095+0.04365));
+        mass_XS.append((0.05684+0.03164));
+        mass_XS.append((0.03163+0.02399));
+    elif SIGCH == "_ggH":
+        mass_XS.append((0.5230));
+        mass_XS.append((0.2288));
+        mass_XS.append((0.1095));
+        mass_XS.append((0.05684));
+        mass_XS.append((0.03163));
+    elif SIGCH == "_vbfH":
+        mass_XS.append((0.09688));
+        mass_XS.append((0.06330));
+        mass_XS.append((0.04365));
+        mass_XS.append((0.03164));
+        mass_XS.append((0.02399));
+    else:
+        print "problem!"
         
+    h2d_exp = TH2D("h2d_exp","",len(cprime_x),cprime_x[0]-0.05,cprime_x[len(cprime_x)-1]+0.05,len(BRnew_y),BRnew_y[0]-0.05,BRnew_y[len(BRnew_y)-1]+0.05);
+    h2d_obs = TH2D("h2d_obs","",len(cprime_x),cprime_x[0]-0.05,cprime_x[len(cprime_x)-1]+0.05,len(BRnew_y),BRnew_y[0]-0.05,BRnew_y[len(BRnew_y)-1]+0.05);
+    h2d_csXbr_exp = TH2D("h2d_csXbr_exp","",len(cprime_x),cprime_x[0]-0.05,cprime_x[len(cprime_x)-1]+0.05,len(BRnew_y),BRnew_y[0]-0.05,BRnew_y[len(BRnew_y)-1]+0.05);
+    h2d_csXbr_obs = TH2D("h2d_csXbr_obs","",len(cprime_x),cprime_x[0]-0.05,cprime_x[len(cprime_x)-1]+0.05,len(BRnew_y),BRnew_y[0]-0.05,BRnew_y[len(BRnew_y)-1]+0.05);
+
+    for j in range(len(cprime)):
+        for i in range(len(BRnew)):
+            curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass,options.channel,SIGCH,cprime[j],BRnew[i],mass);
+            curAsymLimits = getAsymLimits(curFile);
+            h2d_exp.SetBinContent(i+1,j+1,curAsymLimits[3]);
+            h2d_obs.SetBinContent(i+1,j+1,curAsymLimits[0]);
+            h2d_csXbr_exp.SetBinContent(i+1,j+1,curAsymLimits[3]*mass_XS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]]);
+            h2d_csXbr_obs.SetBinContent(i+1,j+1,curAsymLimits[0]*mass_XS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]]);
+
+
+    h2d_obs.GetXaxis().SetTitle("C^{'}");
+    h2d_csXbr_exp.GetXaxis().SetTitle("C^{'}");
+    h2d_csXbr_obs.GetXaxis().SetTitle("C^{'}");
+
+    h2d_exp.GetYaxis().SetTitle("BR_{new}");
+    h2d_obs.GetYaxis().SetTitle("BR_{new}");
+    h2d_csXbr_exp.GetYaxis().SetTitle("BR_{new}");
+    h2d_csXbr_obs.GetYaxis().SetTitle("BR_{new}");
+
+
+    h2d_exp.SetLineStyle(0);
+    h2d_exp.SetMarkerStyle(20);
+    h2d_exp.GetXaxis().SetTitle("C^{'}");
+    h2d_exp.GetXaxis().SetNdivisions(504);
+    h2d_exp.GetXaxis().SetLabelFont(42);
+    h2d_exp.GetXaxis().SetLabelOffset(0.007);
+    h2d_exp.GetXaxis().SetLabelSize(0.045);
+    h2d_exp.GetXaxis().SetTitleSize(0.06);
+    h2d_exp.GetXaxis().SetTitleOffset(1.02);
+    h2d_exp.GetXaxis().SetTitleFont(42);
+    h2d_exp.GetYaxis().SetTitle("BR_{new}");
+    h2d_exp.GetYaxis().SetNdivisions(9);
+    h2d_exp.GetYaxis().SetLabelFont(42);
+    h2d_exp.GetYaxis().SetLabelOffset(0.007);
+    h2d_exp.GetYaxis().SetLabelSize(0.045);
+    h2d_exp.GetYaxis().SetTitleSize(0.06);
+    h2d_exp.GetYaxis().SetTitleOffset(1.25);
+    h2d_exp.GetYaxis().SetTitleFont(42);
+    h2d_exp.GetZaxis().SetTitle("signal strenght excluded at 95% C.L");
+    h2d_exp.GetZaxis().SetLabelFont(42);
+    h2d_exp.GetZaxis().SetLabelSize(0.03);
+    h2d_exp.GetZaxis().SetTitleOffset(1);
+    h2d_exp.GetZaxis().SetTitleFont(42);
+    h2d_exp.GetZaxis().SetTitleSize(0.05);
+
+
+    banner = TPaveText( 0.145, 0.953, 0.76, 0.975, "brNDC");
+    banner.SetFillColor(ROOT.kWhite);
+    banner.SetTextSize(0.038);
+    banner.SetTextAlign(11);
+    banner.SetTextFont(62);
+    banner.SetBorderSize(0);
+    leftText = "CMS Preliminary";
+    banner.AddText(leftText);
+    banner.Draw();
+
+    label_sqrt = TPaveText(0.5,0.953,0.96,0.975, "brNDC");
+    label_sqrt.SetFillColor(ROOT.kWhite);
+    label_sqrt.SetBorderSize(0);
+    label_sqrt.SetTextSize(0.038);
+    label_sqrt.SetTextFont(62);
+    label_sqrt.SetTextAlign(31); # align right                                                                                                                                         
+    label_sqrt.AddText("L = 19.3 fb^{-1} at #sqrt{s} = 8 TeV");
+    
+    banner2 = TLatex(0.17,0.91,("Higgs mass, %i GeV"%(mass)));
+    banner2.SetNDC(); banner2.SetTextSize(0.028);
+
+    can1_BSM2D = ROOT.TCanvas("can1_BSM2D","can1_BSM2D",1,1,630,576);
+    can1_BSM2D.SetHighLightColor(2);
+    can1_BSM2D.SetFillColor(0);
+    can1_BSM2D.SetBorderMode(0);
+    can1_BSM2D.SetBorderSize(2);
+    can1_BSM2D.SetGridx();
+    can1_BSM2D.SetGridy();
+    can1_BSM2D.SetTickx(1);
+    can1_BSM2D.SetTicky(1);
+    can1_BSM2D.SetLeftMargin(0.15);
+    can1_BSM2D.SetRightMargin(0.17);
+    can1_BSM2D.SetTopMargin(0.05);
+    can1_BSM2D.SetBottomMargin(0.15);
+    can1_BSM2D.SetFrameFillStyle(0);
+    can1_BSM2D.SetFrameBorderMode(0);
+    can1_BSM2D.SetFrameFillStyle(0);
+    can1_BSM2D.SetFrameBorderMode(0);
+
+    h2d_exp.Draw("colz");
+    banner.Draw();
+    label_sqrt.Draw();
+    banner2.Draw();
+
+    gPad.Update();
+    palette = h2d_exp.GetListOfFunctions().FindObject("palette"); 
+    myx1=palette.GetX1NDC() +0.01;
+    myx2=palette.GetX2NDC() +0.01;
+    palette.SetX1NDC(myx1);
+    palette.SetX2NDC(myx2);
+                                                                                             
+    can1_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpMu_%i.png"%(SIGCH,mass));
+    can1_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpMu_%i.pdf"%(SIGCH,mass));
+    can1_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpMu_%i.root"%(SIGCH,mass));
+
+    if not options.blindObservedLine:
+        can2_BSM2D = ROOT.TCanvas("can2_BSM2D","can2_BSM2D",1,1,630,576);
+        can2_BSM2D.SetHighLightColor(2);
+        can2_BSM2D.SetFillColor(0);
+        can2_BSM2D.SetBorderMode(0);
+        can2_BSM2D.SetBorderSize(2);
+        can2_BSM2D.SetGridx();
+        can2_BSM2D.SetGridy();
+        can2_BSM2D.SetTickx(1);
+        can2_BSM2D.SetTicky(1);
+        can2_BSM2D.SetLeftMargin(0.15);
+        can2_BSM2D.SetRightMargin(0.17);
+        can2_BSM2D.SetTopMargin(0.05);
+        can2_BSM2D.SetBottomMargin(0.15);
+        can2_BSM2D.SetFrameFillStyle(0);
+        can2_BSM2D.SetFrameBorderMode(0);
+        can2_BSM2D.SetFrameFillStyle(0);
+        can2_BSM2D.SetFrameBorderMode(0);
+
+        h2d_obs.Draw("colz");
+        banner.Draw();
+        banner2.Draw();
+        can2_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsMu_%i.png"%(SIGCH,mass));
+        can2_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsMu_%i.pdf"%(SIGCH,mass));
+
+    can3_BSM2D = ROOT.TCanvas("can3_BSM2D","can3_BSM2D",630,600);
+    h2d_csXbr_exp.Draw("colz");
+    banner.Draw();
+    banner2.Draw();
+    can3_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpSigma_%i.png"%(SIGCH,mass));
+    can3_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpSigma_%i.pdf"%(SIGCH,mass));
+
+    if not options.blindObservedLine:
+        can4_BSM2D = ROOT.TCanvas("can4_BSM2D","can4_BSM2D",630,600);
+        h2d_csXbr_obs.Draw("colz");
+        banner.Draw();
+        banner2.Draw();
+        can4_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsSigma_%i.png"%(SIGCH,mass));
+        can4_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsSigma_%i.pdf"%(SIGCH,mass));
+
 
 ##################################
 ########### Main Code ############
@@ -1052,16 +1225,14 @@ if __name__ == '__main__':
     moreCombineOpts = "";
     print "channel ",CHAN," directiory ",DIR," signal channel ",SIGCH," more options ",moreCombineOpts ;
     
-    ###############    
     if options.makeCards:
-        if not os.path.isdir(DIR): os.system("mkdir "+DIR);
+        if not os.path.isdir(DIR):
+            os.system("mkdir "+DIR);
         else: 
             print "Directory "+DIR+" already exists...";
-            #sys.exit(0);
 
     if options.computeLimits or options.plotLimits: os.chdir(DIR);
 
-    # put in functionality to test just one mass point or just one cprime
     nMasses = len(mass);
     mLo = 0;
     mHi = nMasses;
@@ -1091,8 +1262,10 @@ if __name__ == '__main__':
     if options.injectSingalStrenght == 0 : rMin = -5 ; rMax = 5 ;
     else: rMin = - 50 ; rMax = 50
 
+    #######################################################
     # ======= make the datacards running the fit =======  #
-
+    #######################################################
+    
     if options.makeCards:
         if not os.path.isdir("log"): os.system("mkdir log" );
         for i in range(mLo,mHi):
@@ -1117,7 +1290,9 @@ if __name__ == '__main__':
                     if not options.batchMode: 
                         os.system(command);
 
-    # =====================================
+    #########################################
+    # ===================================== #
+    #########################################
 
     if options.computeLimits:
 
@@ -1272,8 +1447,10 @@ if __name__ == '__main__':
                         os.system(runCmmd);
                        
 
-
+    ####################################################
     # =================== Bias Analysis ============== #
+    ####################################################
+    
     if options.biasStudy:
 
         for i in range(mLo,mHi): 
@@ -1301,12 +1478,29 @@ if __name__ == '__main__':
             else: 
              os.system(command);
 
+    #############################################################
     # =================== Plot of the Limit  ================== #
-
+    #############################################################
+    
     if options.plotLimits:
 
-      if options.makeSMLimitPlot == 1:       makeSMLimitPlot(SIGCH);
-      if options.makeBSMLimitPlotMass == 1:  makeBSMLimitPlotMass(SIGCH);
-      if options.makeBSMLimitPlotBRnew == 1: makeBSMLimitPlotBRnew(SIGCH);
-      if options.makeBSMLimitPlot2D == 1:    makeBSMLimitPlot2D(SIGCH);
+      if options.makeSMLimitPlot == 1:
+          makeSMLimitPlot(SIGCH);
+
+      if options.makeBSMLimitPlotMass == 1:
+          makeBSMLimitPlotMass(SIGCH);
+
+      if options.makeBSMLimitPlotBRnew == 1:
+          makeBSMLimitPlotBRnew(SIGCH,600);
+#          makeBSMLimitPlotBRnew(SIGCH,700);
+#          makeBSMLimitPlotBRnew(SIGCH,800);
+#          makeBSMLimitPlotBRnew(SIGCH,900);
+#          makeBSMLimitPlotBRnew(SIGCH,1000);
+
+      if options.makeBSMLimitPlot2D == 1:
+          makeBSMLimitPlot2D(SIGCH,600);
+#          makeBSMLimitPlot2D(SIGCH,700);
+#          makeBSMLimitPlot2D(SIGCH,800);
+#          makeBSMLimitPlot2D(SIGCH,900);
+#          makeBSMLimitPlot2D(SIGCH,1000);
       
