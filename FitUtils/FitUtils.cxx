@@ -271,7 +271,7 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
 
 
 //## Define the Extended Pdf for and mlvj fit giving: label, fit model name, list constraint, range to be fitted and do the decorrelation
-void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileName, const std::string & label, const std::string & in_range, const std::string & mlvj_model, const std::string & channel, const std::string & wtagger_label, const int & deco, const int & show_constant_parameter, const int & logy, const int & ismc, const std::string & label_origin){
+void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileName, const std::string & label, const std::string & in_range, const std::string & mlvj_model, const std::string & channel, const std::string & wtagger_label, const int & deco, const int & show_constant_parameter, const int & logy, const int & ismc, const std::string & label_origin, const std::string & FTest_output_txt){
 
       std::cout<<"############### Fit mlvj single MC sample "<<fileName<<" "<<label<<" "<<mlvj_model<<" "<<in_range<<" ##################"<<std::endl;
       //## imporparam_generatedt variable and dataset         
@@ -332,13 +332,20 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
       }
         
       mplot->GetYaxis()->SetRangeUser(1e-2,mplot->GetMaximum()*1.2);
-      /*
-      if options.shapetest == 1:
-       file_out_FTest.write(" ###################### \n");
-       file_out_FTest.write(" Model pdf %s"%(model.GetName()));
-       file_out_FTest.write(" Chi2 Chi2var %0.2f "%(chi_over_ndf));
-       file_out_FTest.write(" Residual %0.2f   Nbin %0.2f nparameters %0.2f \n"%(residual,Nbin,nparameters));
-      */
+     
+      if( FTest_output_txt != ""){
+       std::ofstream file_out_FTest ;  
+       file_out_FTest.open(FTest_output_txt.c_str(),fstream::app);
+       std::cout<<" model pdf ----> dump file ftest "<<std::endl;
+       file_out_FTest << " ###################### \n";
+       file_out_FTest << " Model pdf "+std::string(model->GetName())+" \n";
+
+       TString Line ; Line.Form(" Chi2 Chi2var %f \n",chi_over_ndf);
+       file_out_FTest << std::string(Line.Data()); 
+       Line.Form(" Residual %f  Nbin %d  nparameters %d \n",residual,Nbin,nparameters);
+       file_out_FTest << std::string(Line.Data());
+       file_out_FTest.close();
+      }
 
       //##Add Chisquare to mplot_pull   
       TString command; command.Form("#chi^{2}/ndf = %0.2f ",float(chi_over_ndf));                                                                                
@@ -1088,7 +1095,7 @@ void get_mj_normalization_insignalregion(RooWorkspace* workspace, const std::str
 
 
 //Method to fit data mlvj shape in the sideband -> first step for the background extraction of the shape                                                                           
-void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> color_palet, std::map<std::string,std::string> mlvj_shape, const std::string & label, const std::string & mass_scale, const std::string & mlvj_region, const std::string & mlvj_model, const std::string & channel, const std::string & wtagger, const int & ttbarcontrolregion, const int & logy, const int & pseudodata, const std::string & jetBin){
+void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> color_palet, std::map<std::string,std::string> mlvj_shape, const std::string & label, const std::string & mass_scale, const std::string & mlvj_region, const std::string & mlvj_model, const std::string & channel, const std::string & wtagger, const int & ttbarcontrolregion, const int & logy, const int & pseudodata, const std::string & jetBin, const std::string & FTest_output_txt){
 
   std::cout<<"############### Fit mlvj in mj sideband: "<<label<<" "<<mlvj_region<<" "<<mlvj_model<<" ##################"<<std::endl;
 
@@ -1426,12 +1433,19 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
    }
    mplot->GetYaxis()->SetRangeUser(1e-2,mplot->GetMaximum()*1.2);
 
-   /*if shapetest == 1:
-     file_out_FTest.write(" ###################### \n");
-     file_out_FTest.write(" Model pdf %s"%(model_data->GetName()));
-     file_out_FTest.write(" Chi2 Chi2var %0.2f "%(chi_over_ndf));
-     file_out_FTest.write(" Residual %0.2f   Nbin %0.2f nparameters %0.2f \n"%(residual,Nbin,nparameters));
-   */
+   if( FTest_output_txt != ""){
+       std::ofstream file_out_FTest ;  
+       file_out_FTest.open(FTest_output_txt.c_str(),fstream::app);
+       file_out_FTest << " ###################### \n";
+       file_out_FTest << " Model pdf "+std::string(model_data->GetName())+" \n";
+
+       TString Line ; Line.Form(" Chi2 Chi2var %f \n",chi_over_ndf);
+       file_out_FTest << std::string(Line.Data()); 
+       Line.Form(" Residual %f  Nbin %d  nparameters %d \n",residual,Nbin,nparameters);
+       file_out_FTest << std::string(Line.Data());
+       file_out_FTest.close();
+   }
+
    //Add Chisquare to mplot_pull                                                                                                                                             
    TString Name ; Name.Form("#chi^{2}/ndf = %0.2f ",chi_over_ndf);
    TLatex* cs2 = new TLatex(0.75,0.8,Name.Data());
