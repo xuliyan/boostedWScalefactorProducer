@@ -1821,49 +1821,18 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
 
       // levelled exp for W+jets bkg fit
       if( model == "ExpTail" ){
-            std::cout<<"########### ExpTai = levelled exp funtion for W+jets mlvj ############"<<std::endl;
-            RooRealVar* rrv_s_ExpTail = NULL ;
-            RooRealVar* rrv_a_ExpTail = NULL ;
+            
+        std::cout<<"########### ExpTail = Levelled exp funtion for W+jets mlvj ############"<<std::endl;
 
-            if(wtagger_label == "LP"){
-             rrv_s_ExpTail = new RooRealVar(("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(), 250,-1.e6,1e6);
-             rrv_a_ExpTail = new RooRealVar(("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(), 1e-1,-1.e-2,1e6);
-           }
-            else{
-	      if(channel+spectrum == "el"){
-		if(ismc == 1 and TString(label).Contains("sb_lo")){
-                   rrv_s_ExpTail = new RooRealVar(("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(), 139,0.,355);
-                   rrv_a_ExpTail = new RooRealVar(("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(), 2e-2,-1.e-2,5.5e-2);                     
-		}
-                else if(ismc == 1 and TString(label).Contains("signal_region")){
-                   rrv_s_ExpTail = new RooRealVar(("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(), 162,18,395);
-                   rrv_a_ExpTail = new RooRealVar(("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(), 1.6e-2,-1.e-2,5.5e-2);
-		}
-                else if(ismc == 0){  
-                     rrv_s_ExpTail = new RooRealVar(("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(), 161,70,240);
-                     rrv_a_ExpTail = new RooRealVar(("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(), 8e-3,-1e-2,1.3e-1);
-		}
-             }
-             if(channel+spectrum == "mu" or channel+spectrum == "em"){
-		  if( ismc == 1 and TString(label).Contains("sb_lo")){
-                   rrv_s_ExpTail = new RooRealVar(("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(), 99,10,255);
-                   rrv_a_ExpTail = new RooRealVar(("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(), 3e-2,-1e-2,7.5e-2);                        
-		  }
-                  else if( ismc == 1 and TString(label).Contains("signal_region")){
-                   rrv_s_ExpTail = new RooRealVar(("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(), 110,20,242);
-                   rrv_a_ExpTail = new RooRealVar(("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(), 2.9e-2,-1e-2,7.5e-2);
-		  }
-                  else if( ismc == 0 ){  
-                     rrv_s_ExpTail = new RooRealVar(("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(), 161,40,280);
-                     rrv_a_ExpTail = new RooRealVar(("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(), 8e-3,-1e-2,1.3e-1);    
-		  }
-             }
-	   }
+        RooRealVar* rrv_s_ExpTail = new RooRealVar(("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_s_ExpTail"+label+"_"+channel+spectrum).c_str(), 250,-1.e6,1e6);
+        RooRealVar* rrv_a_ExpTail = new RooRealVar(("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(),("rrv_a_ExpTail"+label+"_"+channel+spectrum).c_str(), 1e-1,-1.e-2,1e6);
 
+        
 	RooExpTailPdf* model_pdf = new RooExpTailPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_s_ExpTail,*rrv_a_ExpTail);
         
         return model_pdf ;
-        }
+
+      }
  
       if(model == "Exp_v3"){
 
@@ -2597,7 +2566,7 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
             RooRealVar* rrv_c1 = new RooRealVar(("rrv_c1_2Pow"+label+"_"+channel+spectrum).c_str(),("rrv_c1_2Pow"+label+"_"+channel+spectrum).c_str(), 0, -5 , 5);
             RooRealVar* rrv_frac = new RooRealVar(("rrv_frac_2Pow"+label+"_"+channel+spectrum).c_str(),("rrv_frac_2Pow"+label+"_"+channel+spectrum).c_str(),0.5,0.,1.);
             TString formula;
-            formula.Form("TMath)::Power(%s,-%s)+%s*TMath::Power(%s,-%s)",rrv_x->GetName(),rrv_c0->GetName(),rrv_frac->GetName(),rrv_x->GetName(),rrv_c1->GetName());
+            formula.Form("TMath::Power(%s,-%s)+%s*TMath::Power(%s,-%s)",rrv_x->GetName(),rrv_c0->GetName(),rrv_frac->GetName(),rrv_x->GetName(),rrv_c1->GetName());
   
             RooGenericPdf* model_pdf = new RooGenericPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),formula.Data(),RooArgList(*rrv_x,*rrv_c0,*rrv_c1,*rrv_frac));
             
