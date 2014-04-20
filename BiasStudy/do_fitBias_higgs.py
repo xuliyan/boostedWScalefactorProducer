@@ -100,13 +100,13 @@ class doBiasStudy_mlvj:
         self.mj_shape["WJets01"] = "User1";
 
         self.mlvj_shape = ROOT.std.map(ROOT.std.string,ROOT.std.string) () ;
-        self.mlvj_shape["TTbar"]   = fit_model;
-        self.mlvj_shape["VV"]      = fit_model;
-        self.mlvj_shape["WW_EWK"]  = fit_model;
-        self.mlvj_shape["STop"]    = fit_model;
-        self.mlvj_shape["WJets0"]  = fit_model;
-        self.mlvj_shape["WJets1"]  = fit_model;
-        self.mlvj_shape["WJets01"] = fit_model;
+        self.mlvj_shape["TTbar"]   = generation_model;
+        self.mlvj_shape["VV"]      = generation_model;
+        self.mlvj_shape["WW_EWK"]  = generation_model;
+        self.mlvj_shape["STop"]    = generation_model;
+        self.mlvj_shape["WJets0"]  = generation_model;
+        self.mlvj_shape["WJets1"]  = generation_model;
+        self.mlvj_shape["WJets01"] = generation_model;
         self.mlvj_shape["ggH"]     = "CB_v1";
         self.mlvj_shape["vbfH"]    = "CB_v1";
 
@@ -740,7 +740,7 @@ class doBiasStudy_mlvj:
 
        fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",mlvj_region,"ErfExp_v1",self.channel,self.wtagger_label,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin,self.file_FTestFile_txt);
        fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",mlvj_region,"ErfExpTail",self.channel,self.wtagger_label,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin,self.file_FTestFile_txt);
-       fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",mlvj_region,"ErfExp_v3",self.channel,self.wtagger_label,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin,self.file_FTestFile_txt);
+#       fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",mlvj_region,"ErfExp_v3",self.channel,self.wtagger_label,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin,self.file_FTestFile_txt);
        fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",mlvj_region,"Erf2Exp",self.channel,self.wtagger_label,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin,self.file_FTestFile_txt);
 
        fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",mlvj_region,"ErfPow_v1",self.channel,self.wtagger_label,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin,self.file_FTestFile_txt);
@@ -756,7 +756,7 @@ class doBiasStudy_mlvj:
 
       else: 
 
-       get_mj_and_mlvj_dataset(self.file_VV_mc,"_VV", "jet_mass_pr");
+       self.get_mj_and_mlvj_dataset(self.file_VV_mc,"_VV", "jet_mass_pr");
        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_VV_mc,"_VV",mlvj_region,"Exp",self.channel,self.wtagger_label,1,0,0,0,"_VV");
  
        self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STop");
@@ -770,7 +770,7 @@ class doBiasStudy_mlvj:
         fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WW_EWK_mc,"_WW_EWK",mlvj_region,"Exp",self.channel,self.wtagger_label,1,0,0,0,"_WW_EWK");
 
        self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0");
-       fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0,"_WJets0",mlvj_region,"Exp",self.channel,self.wtagger_label,1,0,0,0,"_WJets0");
+       fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",mlvj_region,"Exp",self.channel,self.wtagger_label,1,0,0,0,"_WJets0");
 
        self.get_mj_and_mlvj_dataset(self.file_data,"_data");
        
@@ -785,7 +785,7 @@ class doBiasStudy_mlvj:
        fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",mlvj_region,"2Pow",self.channel,self.wtagger_label,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin,self.file_FTestFile_txt);
 
        fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",mlvj_region,"Chebychev_v2",self.channel,self.wtagger_label,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin,self.file_FTestFile_txt);
-       fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",mlvj_region,"Chebychev_v3",self.channel,self.wtagger_label,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin,self.file_FTestFile_txt);
+       #fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",mlvj_region,"Chebychev_v3",self.channel,self.wtagger_label,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin,self.file_FTestFile_txt);
        fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",mlvj_region,"Chebychev_v4",self.channel,self.wtagger_label,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin,self.file_FTestFile_txt);
 
 
