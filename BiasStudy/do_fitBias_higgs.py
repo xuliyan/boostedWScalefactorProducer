@@ -94,10 +94,12 @@ class doBiasStudy_mlvj:
         self.mj_shape["VV"]      = "2_2Gaus";
         self.mj_shape["WW_EWK"]  = "2_2Gaus";
         if options.jetBin == "_2jet":  self.mj_shape["STop"]    = "ErfExp";
-        else: self.mj_shape["STop"]    = "2Gaus";
+        else: self.mj_shape["STop"]    = "2Gaus_ErfExp";
         self.mj_shape["WJets0"]  = "ErfExp";
         self.mj_shape["WJets1"]  = "ErfExp";
-        self.mj_shape["WJets01"] = "User1";
+        self.mj_shape["WJets01"] = "User1";        
+        self.mj_shape["ggH"]     = "2Gaus";
+        self.mj_shape["vbfH"]    = "2Gaus";
 
         self.mlvj_shape = ROOT.std.map(ROOT.std.string,ROOT.std.string) () ;
         self.mlvj_shape["TTbar"]   = generation_model;
@@ -647,11 +649,6 @@ class doBiasStudy_mlvj:
        fit_mlvj_model_single_MC(self.workspace4bias_,fileName,label,"_signal_region","ErfChebychev_v4",self.channel,self.wtagger_label,1,0,0,0,label,self.file_FTestFile_txt);
        self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
-#       fit_mlvj_model_single_MC(self.workspace4bias_,fileName,label,"_sb_lo","Keys",self.channel,self.wtagger_label,1,0,0,0,label,self.file_FTestFile_txt);
-#       self.workspace4bias_.writeToFile(self.tmpFile.GetName());
-#       fit_mlvj_model_single_MC(self.workspace4bias_,fileName,label,"_signal_region","Keys",self.channel,self.wtagger_label,1,0,0,0,label,self.file_FTestFile_txt);
-#       self.workspace4bias_.writeToFile(self.tmpFile.GetName());
-
       else:
 
        self.get_mj_and_mlvj_dataset(fileName,label)# to get the shape of m_lvj                                                                                             
@@ -710,11 +707,6 @@ class doBiasStudy_mlvj:
        self.workspace4bias_.writeToFile(self.tmpFile.GetName());
        fit_mlvj_model_single_MC(self.workspace4bias_,fileName,label,"_signal_region","Chebychev_v4",self.channel,self.wtagger_label,1,0,0,0,label,self.file_FTestFile_txt);
        self.workspace4bias_.writeToFile(self.tmpFile.GetName());
-
-#       fit_mlvj_model_single_MC(self.workspace4bias_,fileName,label,"_sb_lo","Keys",self.channel,self.wtagger_label,1,0,0,0,label,self.file_FTestFile_txt);
-#       self.workspace4bias_.writeToFile(self.tmpFile.GetName());
-#       fit_mlvj_model_single_MC(self.workspace4bias_,fileName,label,"_signal_region","Keys",self.channel,self.wtagger_label,1,0,0,0,label,self.file_FTestFile_txt);
-#       self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
      else:
 
@@ -816,154 +808,153 @@ class doBiasStudy_mlvj:
      ###### get the signal and fit it     
      self.get_mj_and_mlvj_dataset(self.file_ggH ,"_%s"%(self.ggH_sample),"jet_mass_pr")# to get the shape of m_lvj
      self.get_mj_and_mlvj_dataset(self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"jet_mass_pr")# to get the shape of m_lvj
-
-     tmp_file = TFile("tmp.root","RECREATE"); 
-     self.workspace4bias_.writeToFile(tmp_file.GetName());
+     self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
      if fitjetmass:
-	fit_mj_single_MC(self.workspace4bias_,self.file_ggH,"_%s"%(self.ggH_sample),"2Gaus",self.channel,self.wtagger_label,1);
-        self.workspace4bias_.writeToFile(tmp_file.GetName());
-	fit_mj_single_MC(self.workspace4bias_,self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"2Gaus",self.channel,self.wtagger_label,1);
-        self.workspace4bias_.writeToFile(tmp_file.GetName());
+        fit_mj_single_MC(self.workspace4bias_,self.file_ggH,"_%s"%(self.ggH_sample),self.mj_shape["ggH"],self.channel,self.wtagger_label,1);                
+        self.workspace4bias_.writeToFile(self.tmpFile.GetName());
+        fit_mj_single_MC(self.workspace4bias_,self.file_vbfH,"_%s"%(self.vbfhiggs_sample),self.mj_shape["vbfH"],self.channel,self.wtagger_label,1);                
+        self.workspace4bias_.writeToFile(self.tmpFile.GetName());
      else:
-        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_ggH,"_%s"%(self.ggH_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,1);
-        self.workspace4bias_.writeToFile(tmp_file.GetName());
-        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,1);
-        self.workspace4bias_.writeToFile(tmp_file.GetName());
+        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_ggH,"_%s"%(self.ggH_sample),"_signal_region",self.mlvj_shape["ggH"],self.channel,self.wtagger_label,1,0,0,0,"_ggH"); 
+        self.workspace4bias_.writeToFile(self.tmpFile.GetName());
+        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region",self.mlvj_shape["vbfH"],self.channel,self.wtagger_label,1,0,0,0,"_vbfH");   
+        self.workspace4bias_.writeToFile(self.tmpFile.GetName());
      
      ####### Monte Carlo Analysis
      if options.isMC and options.ttbarcontrolregion:
       self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbar")# to get the shape of m_lvj                                                                                               
-      fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,1);
-      self.workspace4bias_.writeToFile(tmp_file.GetName());
+      fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_TTbar");   
+      self.workspace4bias_.writeToFile(self.tmpFile.GetName());
       if options.fgen != options.fres:
-          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,1);
-          self.workspace4bias_.writeToFile(tmp_file.GetName());
+          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fres,self.channel,self.wtagger_label,1,0,0,0,"_TTbar");   
+          self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
      elif options.isMC and not options.ttbarcontrolregion:    
       self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0","jet_mass_pr")# to get the shape of m_lvj                                                                               
-      fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,1);      
-      self.workspace4bias_.writeToFile(tmp_file.GetName());
+      fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_WJets0");   
+      self.workspace4bias_.writeToFile(self.tmpFile.GetName());
       if options.fgen != options.fres:
-       fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,1);
-       self.workspace4bias_.writeToFile(tmp_file.GetName());
+       fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fres,self.channel,self.wtagger_label,1,0,0,0,"_WJets0");   
+       self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
       if options.mlvjregion == "_signal_region":
-       fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,self.channel,self.wtagger_label,0,0,1);      
-       self.workspace4bias_.writeToFile(tmp_file.GetName());
+       fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_WJets0");   
+       self.workspace4bias_.writeToFile(self.tmpFile.GetName());
        ## calculate the alpha factor
        #get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fgen,spectrum,"4bias",self.channel,self.wtagger_label,1); 
-       self.workspace4bias_.writeToFile(tmp_file.GetName());
+       self.workspace4bias_.writeToFile(self.tmpFile.GetName());
        if options.fgen != options.fres:
-        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fres,self.channel,self.wtagger_label,0,0,1);
-        self.workspace4bias_.writeToFile(tmp_file.GetName());
+        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fres,self.channel,self.wtagger_label,1,0,0,0,"_WJets0");   
+        self.workspace4bias_.writeToFile(self.tmpFile.GetName());
         ## calculate the alpha factor
         #get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fres,spectrum,"4bias",self.channel,self.wtagger_label,1); 
-        self.workspace4bias_.writeToFile(tmp_file.GetName());
+        self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
      elif not options.isMC:
       
       ###### get diboson and fit it 
       self.get_mj_and_mlvj_dataset(self.file_VV_mc,"_VV","jet_mass_pr");      
       if fitjetmass:
-          fit_mj_single_MC(self.workspace4bias_,self.file_VV_mc,"_VV","2_2Gaus",self.channel,self.wtagger_label);
-          self.workspace4bias_.writeToFile(tmp_file.GetName());   
+          fit_mj_single_MC(self.workspace4bias_,self.file_VV_mc,"_VV",self.mj_shape["VV"],self.channel,self.wtagger_label,1);                
+          self.workspace4bias_.writeToFile(self.tmpFile.GetName());   
       else:
-          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_VV_mc,"_VV",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,1); 
-          self.workspace4bias_.writeToFile(tmp_file.GetName());   
+          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_VV_mc,"_VV",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_VV"); 
+          self.workspace4bias_.writeToFile(self.tmpFile.GetName());   
           if options.fgen != options.fres:
-           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_VV_mc,"_VV",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,1); 
-           self.workspace4bias_.writeToFile(tmp_file.GetName());
+           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_VV_mc,"_VV",options.mlvjregion,options.fres,self.channel,self.wtagger_label,1,0,0,0,"_VV"); 
+           self.workspace4bias_.writeToFile(self.tmpFile.GetName());
    
 
       ####### get SingleTop and fit it
       self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STop")# to get the shape of m_lvj                                                                                                 
       if fitjetmass: 
 	  if options.ttbarcontrolregion:
-	     fit_mj_single_MC(self.workspace4bias_,self.file_STop_mc,"_STop","ErfExpGaus_sp",self.channel,self.wtagger_label);
-             self.workspace4bias_.writeToFile(tmp_file.GetName());
+             self.mj_shape["STop"] = "ErfExpGaus_sp" ; 
+             fit_mj_single_MC(self.workspace4bias_,self.file_STop_mc,"_STop",self.mj_shape["STop"],self.channel,self.wtagger_label,1);                
+             self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 	  else:
-             fit_mj_single_MC(self.workspace4bias_,self.file_STop_mc,"_STop","2Gaus_ErfExp",self.channel,self.wtagger_label);		   
-             self.workspace4bias_.writeToFile(tmp_file.GetName());
+             fit_mj_single_MC(self.workspace4bias_,self.file_STop_mc,"_STop",self.mj_shape["STop"],self.channel,self.wtagger_label,1);                
+             self.workspace4bias_.writeToFile(self.tmpFile.GetName());
       else:
-          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_STop_mc,"_STop",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,1);
-          self.workspace4bias_.writeToFile(tmp_file.GetName());
+          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_STop_mc,"_STop",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_STop"); 
+          self.workspace4bias_.writeToFile(self.tmpFile.GetName());
           if options.fgen != options.fres:  
-           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_STop_mc,"_STop",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,1);                  
-           self.workspace4bias_.writeToFile(tmp_file.GetName());
+           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_STop_mc,"_STop",options.mlvjregion,options.fres,self.channel,self.wtagger_label,1,0,0,0,"_STop"); 
+           self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
       ######## get WW EWK and fit it in the sb
       if options.jetBin == "_2jet":    
      
        self.get_mj_and_mlvj_dataset(self.file_WW_EWK_mc,"_WW_EWK","jet_mass_pr")# to get the shape of m_lvj                                                                             
        if fitjetmass:
-          fit_mj_single_MC(self.workspace4bias_,self.file_WW_EWK_mc,"_WW_EWK","2Gaus",self.channel,self.wtagger_label); 
-          self.workspace4bias_.writeToFile(tmp_file.GetName());
+          fit_mj_single_MC(self.workspace4bias_,self.file_WW_EWK_mc,"_WW_EWK",self.mj_shape["WW_EWK"],self.channel,self.wtagger_label,1);                
+          self.workspace4bias_.writeToFile(self.tmpFile.GetName());
        else:
-          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WW_EWK_mc,"_WW_EWK",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,1);
-          self.workspace4bias_.writeToFile(tmp_file.GetName());
+          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WW_EWK_mc,"_WW_EWK",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_WW_EWK"); 
+          self.workspace4bias_.writeToFile(self.tmpFile.GetName());
           if options.fgen != options.fres: 
-           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WW_EWK_mc,"_WW_EWK",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,1);
-           self.workspace4bias_.writeToFile(tmp_file.GetName());
+           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WW_EWK_mc,"_WW_EWK",options.mlvjregion,options.fres,self.channel,self.wtagger_label,1,0,0,0,"_WW_EWK"); 
+           self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
       ###### get WJets and fit it in the sb
       self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0","jet_mass_pr")# to get the shape of m_lvj                                                                               
       if fitjetmass: 
-	   fit_mj_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.fgen,self.channel,self.wtagger_label,1);
-           self.workspace4bias_.writeToFile(tmp_file.GetName());
+           fit_mj_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.fgen,self.channel,self.wtagger_label,1);                
+           self.workspace4bias_.writeToFile(self.tmpFile.GetName());
            if options.fgen != options.fres:
-            fit_mj_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.fres,self.channel,self.wtagger_label,1);
-            self.workspace4bias_.writeToFile(tmp_file.GetName());
+            fit_mj_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.fres,self.channel,self.wtagger_label,1);                
+            self.workspace4bias_.writeToFile(self.tmpFile.GetName());
       else: 
-           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,1);
-           self.workspace4bias_.writeToFile(tmp_file.GetName());
+           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_WJets0"); 
+           self.workspace4bias_.writeToFile(self.tmpFile.GetName());
            if options.fgen != options.fres:
-            fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,1);
-            self.workspace4bias_.writeToFile(tmp_file.GetName());
+            fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fres,self.channel,self.wtagger_label,1,0,0,0,"_WJets0"); 
+            self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
            if options.mlvjregion == "_signal_region":
-             fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,self.channel,self.wtagger_label,0,0,1);      
-             self.workspace4bias_.writeToFile(tmp_file.GetName());
+             fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_WJets0"); 
+             self.workspace4bias_.writeToFile(self.tmpFile.GetName());
              ## calculate the alpha factor
              #get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fgen,spectrum,"4bias",self.channel,self.wtagger_label,1); 
-             self.workspace4bias_.writeToFile(tmp_file.GetName());
+             self.workspace4bias_.writeToFile(self.tmpFile.GetName());
              if options.fgen != options.fres:
-               fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fres,self.channel,self.wtagger_label,0,0,1);
-               self.workspace4bias_.writeToFile(tmp_file.GetName());
+               fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fres,self.channel,self.wtagger_label,1,0,0,0,"_WJets0"); 
+               self.workspace4bias_.writeToFile(self.tmpFile.GetName());
                ## calculate the alpha factor
                #get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fres,spectrum,"4bias",self.channel,self.wtagger_label,1); 
-               self.workspace4bias_.writeToFile(tmp_file.GetName());
+               self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
 	
       ######## get TTbar and fit it
       self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbar")# to get the shape of m_lvj                                                                                               
       if fitjetmass: 
-       if options.ttbarcontrolregion :    
-          fit_mj_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.fgen,self.channel,self.wtagger_label,1);
-          self.workspace4bias_.writeToFile(tmp_file.GetName());
+        if options.ttbarcontrolregion :    
+          fit_mj_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.fgen,self.channel,self.wtagger_label,1);                
+          self.workspace4bias_.writeToFile(self.tmpFile.GetName());
           if options.fgen != options.fres:
-           fit_mj_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.fres,self.channel,self.wtagger_label,1);
-           self.workspace4bias_.writeToFile(tmp_file.GetName());
-       else:
-          fit_mj_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar","2Gaus_ErfExp",self.channel,self.wtagger_label);	   		   
-          self.workspace4bias_.writeToFile(tmp_file.GetName());
+           fit_mj_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.fres,self.channel,self.wtagger_label,1);                
+           self.workspace4bias_.writeToFile(self.tmpFile.GetName());
+        else:
+          fit_mj_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
+          self.workspace4bias_.writeToFile(self.tmpFile.GetName());
       else:
-          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,1);
-          self.workspace4bias_.writeToFile(tmp_file.GetName());
+          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_TTbar"); 
+          self.workspace4bias_.writeToFile(self.tmpFile.GetName());
           if options.fgen != options.fres:
-              fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,1);
-              self.workspace4bias_.writeToFile(tmp_file.GetName());
+              fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fres,self.channel,self.wtagger_label,1,0,0,0,"_TTbar"); 
+              self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
       ##### get data in sb and fit it                                                                                                                                              
       self.get_mj_and_mlvj_dataset(self.file_data,"_data", "jet_mass_pr"); ## global fit of data in the sidand fixing non dominant bkg
       if fitjetmass :
-         fit_WJetsNormalization_in_Mj_signal_region(self.workspace4bias_,self.color_palet,label,"",options.fgen,self.channel,self.wtagger_label,options.ttbarcontrolregion,options.pseudodata,self.mj_signal_min,self.mj_signal_max,options.jetBin); ## fit jet mass distribution
-         self.workspace4bias_.writeToFile(tmp_file.GetName());
+         fit_WJetsNormalization_in_Mj_signal_region(self.workspace4bias_,self.color_palet,self.mj_shape,label,"",options.fgen,self.channel,self.wtagger_label,options.ttbarcontrolregion,options.pseudodata,self.mj_signal_min,self.mj_signal_max,options.jetBin); ## fit jet mass distribution                 
+         self.workspace4bias_.writeToFile(self.tmpFile.GetName());
       else:      
-         fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,label,options.mlvjregion,options.fgen,self.channel,self.wtagger_label,options.fgen,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin); ## sideband or TTbar signal region fit
-         self.workspace4bias_.writeToFile(tmp_file.GetName());
-         fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,label,options.mlvjregion,options.fres,self.channel,self.wtagger_label,options.fgen,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin); ## sideband or TTbar signal region fit
-         self.workspace4bias_.writeToFile(tmp_file.GetName());
+         fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,options.ttbarcontrolregion,options.pseudodata,options.jetBin);               
+         self.workspace4bias_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",options.mlvjregion,options.fres,self.channel,self.wtagger_label,options.ttbarcontrolregion,options.pseudodata,options.jetBin);
+         self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
      ####### fix the backgrund models for the generation
      print "#############################################################################################";
