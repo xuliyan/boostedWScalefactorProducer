@@ -273,7 +273,7 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
 //## Define the Extended Pdf for and mlvj fit giving: label, fit model name, list constraint, range to be fitted and do the decorrelation
 void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileName, const std::string & label, const std::string & in_range, const std::string & mlvj_model, const std::string & channel, const std::string & wtagger_label, const int & deco, const int & show_constant_parameter, const int & logy, const int & ismc, const std::string & label_origin, const std::string & FTest_output_txt){
 
-      std::cout<<"############### Fit mlvj single MC sample "<<fileName<<" "<<label<<" "<<mlvj_model<<" "<<in_range<<" ##################"<<std::endl;
+      std::cout<<"############### Fit mlvj single MC sample "<<fileName<<" "<<label<<" "<<mlvj_model<<" "<<in_range<<" deco "<<deco<<" ##################"<<std::endl;
       //## imporparam_generatedt variable and dataset         
       RooRealVar* rrv_mass_lvj = workspace->var("rrv_mass_lvj");
 
@@ -297,6 +297,9 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
       //## set the name of the result of the fit and put it in the workspace
       rfresult->SetName(("rfresult"+label+in_range+"_"+channel+"_mlvj").c_str());
 
+      workspace->import(*model);
+      workspace->import(*rfresult);
+      
       //## plot the result
       RooPlot* mplot = rrv_mass_lvj->frame(RooFit::Title(("M_{lvj"+in_range+"} fitted by "+mlvj_model).c_str()), RooFit::Bins(int(rrv_mass_lvj->getBins())));
       rdataset->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
@@ -397,9 +400,6 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
 
       command.Form("plots_%s_%s_g1/other/",channel.c_str(),wtagger_label.c_str());
       draw_canvas_with_pull(mplot_sys,mplot_pull,new RooArgList(*parameters_list),std::string(command.Data()),"m_lvj_extended"+label+in_range,mlvj_model,channel,0,logy,GetLumi());
-
-      workspace->import(*model);
-      workspace->import(*rfresult);
 
       if(deco){
        std::cout<<"################### Decorrelated mlvj single mc shape ################"<<std::endl;
@@ -503,10 +503,13 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
        workspace->import(*model_pdf_deco);
 
       }
-
+      
+      std::cout<<"rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj"<<std::endl;
+      std::cout<<"rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj"<<std::endl;
       workspace->var(("rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->setVal(workspace->var(("rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->getVal()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal());
       workspace->var(("rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->setError(workspace->var(("rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->getError()*workspace->var(("rrv_scale_to_lumi"+label_origin+"_"+channel+in_range+"_mlvj").c_str())->getVal() );
       workspace->var(("rrv_number"+label+in_range+mlvj_model+"_"+channel+"_mlvj").c_str())->Print();
+      
 
 }
 
