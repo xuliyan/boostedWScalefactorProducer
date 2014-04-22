@@ -117,9 +117,9 @@ if options.biasStudy:
  if not options.turnOnAnalysis and not options.fitjetmass:
 
   shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
-  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
+#  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
 #  shape_gen = ["Pow2","Pow2","Pow2","Pow2","Pow2"]    
-#  shape_fit = ["Pow2","Pow2","Pow2","Pow2","Pow2"]
+  shape_fit = ["Pow2","Pow2","Pow2","Pow2","Pow2"]
 #  shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
 #  shape_fit = ["Pow","Pow","Pow","Pow","Pow"]
 
@@ -209,7 +209,7 @@ def submitBatchJob( command, fn ):
   condorScript.write("\n"+"Executable = "+fn+".sh")
   condorScript.write("\n"+'Requirements = Memory >= 199 &&OpSys == "LINUX"&& (Arch != "DUMMY" )&& Disk > 1000000')
   condorScript.write("\n"+'Should_Transfer_Files = YES')
-  condorScript.write("\n"+'Transfer_Input_Files = doFit_class_higgs.py, BiasStudy/do_fitBias_vbf.py, AutoDict_std__map_std__string_std__string__cxx.so')    
+  condorScript.write("\n"+'Transfer_Input_Files = doFit_class_higgs.py, BiasStudy/do_fitBias_higgs.py, AutoDict_std__map_std__string_std__string__cxx.so')    
   condorScript.write("\n"+'WhenToTransferOutput  = ON_EXIT_OR_EVICT')
   condorScript.write("\n"+'Output = out_$(Cluster).stdout')
   condorScript.write("\n"+'Error  = out_$(Cluster).stderr')
@@ -241,7 +241,7 @@ def submitBatchJob( command, fn ):
   outScript.write("\n"+'cd '+currentDir);
   outScript.write("\n"+'eval `scram runtime -sh`');
   outScript.write("\n"+'cd -');
-  outScript.write("\n"+'cp '+currentDir+'/BiasStudy/do_fitBias_vbf.py ./');
+  outScript.write("\n"+'cp '+currentDir+'/BiasStudy/do_fitBias_higgs.py ./');
   outScript.write("\n"+'cp '+currentDir+'/doFit_class_higgs.py ./');
   outScript.write("\n"+'ls');  
   outScript.write("\n"+"unbuffer "+command+" > /gwteray/users/gerosa/output"+fn+".txt");
@@ -1461,7 +1461,11 @@ if __name__ == '__main__':
             print "--------------------------------------------------";                
             print "--------------------------------------------------";  
 
-            command = "python do_fitBias_higgs.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d --inflatejobstatistic %d --scalesignalwidth %0.1f --injectSingalStrenght %0.1f --jetBin %s"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],options.nToys,isMC[i],0,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit,options.inflatejobstatistic,options.scalesignalwidth,options.injectSingalStrenght,options.jetBin); 
+            if options.jetBin == "_2jet" :
+             command = "python BiasStudy/do_fitBias_higgs.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d --inflatejobstatistic %d --scalesignalwidth %0.1f --injectSingalStrenght %0.1f --jetBin %s"%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],options.nToys,isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit,options.inflatejobstatistic,options.scalesignalwidth,options.injectSingalStrenght,options.jetBin);
+            else:
+             command = "python BiasStudy/do_fitBias_higgs.py ggH%d %d %d %d %d -b --pseudodata %d --fgen %s --fres %s --nexp %d --isMC %d --storeplot %d --channel %s --inPath %s --ttbarcontrolregion %d --fitjetmass %d --mlvjregion %s --onlybackgroundfit %d --inflatejobstatistic %d --scalesignalwidth %0.1f --injectSingalStrenght %0.1f "%(mass[i],mlo[i],mhi[i],mjlo[i],mjhi[i],options.pseudodata,shape_gen[i],shape_fit[i],options.nToys,isMC[i],1,options.channel,os.getcwd(),options.ttbarcontrolregion,options.fitjetmass,options.mlvjregion,options.onlybackgroundfit,options.inflatejobstatistic,options.scalesignalwidth,options.injectSingalStrenght);
+                
             print command ;
             if options.batchMode:
              suffix = options.channel;
