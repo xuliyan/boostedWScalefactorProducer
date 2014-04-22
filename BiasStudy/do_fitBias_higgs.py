@@ -594,9 +594,9 @@ class doBiasStudy_mlvj:
 
        self.get_mj_and_mlvj_dataset(fileName,label)# to get the shape of m_lvj                                                                                             
 
-       fit_mlvj_model_single_MC(self.workspace4bias_,fileName,label,"_sb_lo","ErfExp_v1",self.channel,self.wtagger_label,1,0,0,0,label,self.file_FTestFile_txt);
+       fit_mlvj_model_single_MC(self.workspace4bias_,fileName,label,"_sb_lo","ErfExp_v1",self.channel,self.wtagger_label,0,0,0,0,label,self.file_FTestFile_txt);
        self.workspace4bias_.writeToFile(self.tmpFile.GetName());
-       fit_mlvj_model_single_MC(self.workspace4bias_,fileName,label,"_signal_region","ErfExp_v1",self.channel,self.wtagger_label,1,0,0,0,label,self.file_FTestFile_txt);
+       fit_mlvj_model_single_MC(self.workspace4bias_,fileName,label,"_signal_region","ErfExp_v1",self.channel,self.wtagger_label,0,0,0,0,label,self.file_FTestFile_txt);
        self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
        fit_mlvj_model_single_MC(self.workspace4bias_,fileName,label,"_sb_lo","ErfExpTail",self.channel,self.wtagger_label,1,0,0,0,label,self.file_FTestFile_txt);
@@ -816,36 +816,36 @@ class doBiasStudy_mlvj:
         fit_mj_single_MC(self.workspace4bias_,self.file_vbfH,"_%s"%(self.vbfhiggs_sample),self.mj_shape["vbfH"],self.channel,self.wtagger_label,1);                
         self.workspace4bias_.writeToFile(self.tmpFile.GetName());
      else:
-        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_ggH,"_%s"%(self.ggH_sample),"_signal_region",self.mlvj_shape["ggH"],self.channel,self.wtagger_label,1,0,0,0,"_ggH"); 
+        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_ggH,"_%s"%(self.ggH_sample),"_signal_region",self.mlvj_shape["ggH"],self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.ggH_sample)); 
         self.workspace4bias_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region",self.mlvj_shape["vbfH"],self.channel,self.wtagger_label,1,0,0,0,"_vbfH");   
+        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region",self.mlvj_shape["vbfH"],self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));   
         self.workspace4bias_.writeToFile(self.tmpFile.GetName());
      
      ####### Monte Carlo Analysis
      if options.isMC and options.ttbarcontrolregion:
       self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbar")# to get the shape of m_lvj                                                                                               
-      fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_TTbar");   
+      fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,0,0,"_TTbar");   
       self.workspace4bias_.writeToFile(self.tmpFile.GetName());
       if options.fgen != options.fres:
-          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fres,self.channel,self.wtagger_label,1,0,0,0,"_TTbar");   
+          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,0,0,"_TTbar");   
           self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
      elif options.isMC and not options.ttbarcontrolregion:    
       self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets0","jet_mass_pr")# to get the shape of m_lvj                                                                               
-      fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_WJets0");   
+      fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");   
       self.workspace4bias_.writeToFile(self.tmpFile.GetName());
       if options.fgen != options.fres:
-       fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fres,self.channel,self.wtagger_label,1,0,0,0,"_WJets0");   
+       fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");   
        self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
       if options.mlvjregion == "_signal_region":
-       fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_WJets0");   
+       fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");   
        self.workspace4bias_.writeToFile(self.tmpFile.GetName());
        ## calculate the alpha factor
        #get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fgen,spectrum,"4bias",self.channel,self.wtagger_label,1); 
        self.workspace4bias_.writeToFile(self.tmpFile.GetName());
        if options.fgen != options.fres:
-        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fres,self.channel,self.wtagger_label,1,0,0,0,"_WJets0");   
+        fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fres,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");   
         self.workspace4bias_.writeToFile(self.tmpFile.GetName());
         ## calculate the alpha factor
         #get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fres,spectrum,"4bias",self.channel,self.wtagger_label,1); 
@@ -859,10 +859,10 @@ class doBiasStudy_mlvj:
           fit_mj_single_MC(self.workspace4bias_,self.file_VV_mc,"_VV",self.mj_shape["VV"],self.channel,self.wtagger_label,1);                
           self.workspace4bias_.writeToFile(self.tmpFile.GetName());   
       else:
-          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_VV_mc,"_VV",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_VV"); 
+          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_VV_mc,"_VV",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,0,0,"_VV"); 
           self.workspace4bias_.writeToFile(self.tmpFile.GetName());   
           if options.fgen != options.fres:
-           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_VV_mc,"_VV",options.mlvjregion,options.fres,self.channel,self.wtagger_label,1,0,0,0,"_VV"); 
+           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_VV_mc,"_VV",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,0,0,"_VV"); 
            self.workspace4bias_.writeToFile(self.tmpFile.GetName());
    
 
@@ -877,10 +877,10 @@ class doBiasStudy_mlvj:
              fit_mj_single_MC(self.workspace4bias_,self.file_STop_mc,"_STop",self.mj_shape["STop"],self.channel,self.wtagger_label,1);                
              self.workspace4bias_.writeToFile(self.tmpFile.GetName());
       else:
-          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_STop_mc,"_STop",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_STop"); 
+          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_STop_mc,"_STop",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,0,0,"_STop"); 
           self.workspace4bias_.writeToFile(self.tmpFile.GetName());
           if options.fgen != options.fres:  
-           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_STop_mc,"_STop",options.mlvjregion,options.fres,self.channel,self.wtagger_label,1,0,0,0,"_STop"); 
+           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_STop_mc,"_STop",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,0,0,"_STop"); 
            self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
       ######## get WW EWK and fit it in the sb
@@ -891,10 +891,10 @@ class doBiasStudy_mlvj:
           fit_mj_single_MC(self.workspace4bias_,self.file_WW_EWK_mc,"_WW_EWK",self.mj_shape["WW_EWK"],self.channel,self.wtagger_label,1);                
           self.workspace4bias_.writeToFile(self.tmpFile.GetName());
        else:
-          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WW_EWK_mc,"_WW_EWK",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_WW_EWK"); 
+          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WW_EWK_mc,"_WW_EWK",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK"); 
           self.workspace4bias_.writeToFile(self.tmpFile.GetName());
           if options.fgen != options.fres: 
-           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WW_EWK_mc,"_WW_EWK",options.mlvjregion,options.fres,self.channel,self.wtagger_label,1,0,0,0,"_WW_EWK"); 
+           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WW_EWK_mc,"_WW_EWK",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK"); 
            self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
       ###### get WJets and fit it in the sb
@@ -906,20 +906,20 @@ class doBiasStudy_mlvj:
             fit_mj_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.fres,self.channel,self.wtagger_label,1);                
             self.workspace4bias_.writeToFile(self.tmpFile.GetName());
       else: 
-           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_WJets0"); 
+           fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,0,0,"_WJets0"); 
            self.workspace4bias_.writeToFile(self.tmpFile.GetName());
            if options.fgen != options.fres:
-            fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fres,self.channel,self.wtagger_label,1,0,0,0,"_WJets0"); 
+            fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,0,0,"_WJets0"); 
             self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
            if options.mlvjregion == "_signal_region":
-             fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_WJets0"); 
+             fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fgen,self.channel,self.wtagger_label,0,0,0,0,"_WJets0"); 
              self.workspace4bias_.writeToFile(self.tmpFile.GetName());
              ## calculate the alpha factor
              #get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fgen,spectrum,"4bias",self.channel,self.wtagger_label,1); 
              self.workspace4bias_.writeToFile(self.tmpFile.GetName());
              if options.fgen != options.fres:
-               fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fres,self.channel,self.wtagger_label,1,0,0,0,"_WJets0"); 
+               fit_mlvj_model_single_MC(self.workspace4bias_,self.file_WJets0_mc,"_WJets0","_sb_lo",options.fres,self.channel,self.wtagger_label,0,0,0,0,"_WJets0"); 
                self.workspace4bias_.writeToFile(self.tmpFile.GetName());
                ## calculate the alpha factor
                #get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4bias_,label,options.fres,spectrum,"4bias",self.channel,self.wtagger_label,1); 
@@ -939,10 +939,10 @@ class doBiasStudy_mlvj:
           fit_mj_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
           self.workspace4bias_.writeToFile(self.tmpFile.GetName());
       else:
-          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,1,0,0,0,"_TTbar"); 
+          fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,0,0,0,0,"_TTbar"); 
           self.workspace4bias_.writeToFile(self.tmpFile.GetName());
           if options.fgen != options.fres:
-              fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fres,self.channel,self.wtagger_label,1,0,0,0,"_TTbar"); 
+              fit_mlvj_model_single_MC(self.workspace4bias_,self.file_TTbar_mc,"_TTbar",options.mlvjregion,options.fres,self.channel,self.wtagger_label,0,0,0,0,"_TTbar"); 
               self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
       ##### get data in sb and fit it                                                                                                                                              
@@ -950,10 +950,11 @@ class doBiasStudy_mlvj:
       if fitjetmass :
          fit_WJetsNormalization_in_Mj_signal_region(self.workspace4bias_,self.color_palet,self.mj_shape,label,"",options.fgen,self.channel,self.wtagger_label,options.ttbarcontrolregion,options.pseudodata,self.mj_signal_min,self.mj_signal_max,options.jetBin); ## fit jet mass distribution                 
          self.workspace4bias_.writeToFile(self.tmpFile.GetName());
-      else:      
-         fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,options.ttbarcontrolregion,options.pseudodata,options.jetBin);               
+      else:
+         self.workspace4bias_.Print(); 
+         fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",options.mlvjregion,options.fgen,self.channel,self.wtagger_label,options.ttbarcontrolregion,options.pseudodata,1,options.jetBin,"");
          self.workspace4bias_.writeToFile(self.tmpFile.GetName());
-         fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",options.mlvjregion,options.fres,self.channel,self.wtagger_label,options.ttbarcontrolregion,options.pseudodata,options.jetBin);
+         fit_mlvj_in_Mj_sideband(self.workspace4bias_,self.color_palet,self.mlvj_shape,label,"",options.mlvjregion,options.fres,self.channel,self.wtagger_label,options.ttbarcontrolregion,1,options.pseudodata,options.jetBin,"");
          self.workspace4bias_.writeToFile(self.tmpFile.GetName());
 
      ####### fix the backgrund models for the generation
@@ -961,56 +962,60 @@ class doBiasStudy_mlvj:
      print "################ Begin of the toy analysis -> fix Pdf to what is pre-fitted #################";
      print "#############################################################################################";
 
-     fix_Model(self.workspace4bias_,"_%s"%self.ggH_sample,signal_region,spectrum,signal_model,self.channel);
-     fix_Model(self.workspace4bias_,"_%s"%self.vbfhiggs_sample,signal_region,spectrum,signal_model,self.channel);
-     
+     if options.fitjetmass : 
+      fix_Model(self.workspace4bias_,"_%s"%(self.ggH_sample),signal_region,spectrum,self.mj_shape["ggH"],self.channel,"",0);
+      fix_Model(self.workspace4bias_,"_%s"%(self.vbfhiggs_sample),signal_region,spectrum,self.mj_shape["vbfH"],self.channel,"",0);
+     else: 
+      fix_Model(self.workspace4bias_,"_%s"%(self.ggH_sample),signal_region,spectrum,self.mlvj_shape["ggH"],self.channel,"",0);
+      fix_Model(self.workspace4bias_,"_%s"%(self.vbfhiggs_sample),signal_region,spectrum,self.mlvj_shape["vbfH"],self.channel,"",0);
+            
      if options.isMC == 0  and options.ttbarcontrolregion == 0 and not options.fitjetmass :
 
-      fix_Model(self.workspace4bias_,"_TTbar",options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,"_TTbar",options.mlvjregion,spectrum,options.fres,self.channel);
-      fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,options.fres,self.channel);
-      fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,options.fres,self.channel);
+      fix_Model(self.workspace4bias_,"_TTbar",options.mlvjregion,spectrum,options.fgen,self.channel,"",0);
+      fix_Model(self.workspace4bias_,"_TTbar",options.mlvjregion,spectrum,options.fres,self.channel,"",0);
+      fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,options.fgen,self.channel,"",0);
+      fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,options.fres,self.channel,"",0);
+      fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,options.fgen,self.channel,"",0);
+      fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,options.fres,self.channel,"",0);
 
       if options.jetBin == "_2jet":    
-       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fgen,self.channel);
-       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fres,self.channel);
+       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fgen,self.channel,"",0);
+       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fres,self.channel,"",0);
 
-      fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fgen,self.channel);
+      fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fgen,self.channel,"",0);
       if options.fgen != options.fres : 
-       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fres,self.channel);
+       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fres,self.channel,"",0);
 
      elif options.isMC == 0  and options.ttbarcontrolregion == 1 and not options.fitjetmass:
 
-      fix_Model(self.workspace4bias_,"_WJets0",options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,"_WJets0",options.mlvjregion,spectrum,options.fres,self.channel);
-      fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,options.fres,self.channel);
-      fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,options.fgen,self.channel);
-      fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,options.fres,self.channel);
-
+      fix_Model(self.workspace4bias_,"_WJets0",options.mlvjregion,spectrum,options.fgen,self.channel,"",0);
+      fix_Model(self.workspace4bias_,"_WJets0",options.mlvjregion,spectrum,options.fres,self.channel,"",0);
+      fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,options.fgen,self.channel,"",0);
+      fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,options.fres,self.channel,"",0);
+      fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,options.fgen,self.channel,"",0);
+      fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,options.fres,self.channel,"",0);
+ 
       if options.jetBin == "_2jet":    
-       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fgen,self.channel);
-       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fres,self.channel);
+       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.gen,self.channel,"",0);
+       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,options.fres,self.channel,"",0);
 
-      fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fgen,self.channel);
+      fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fgen,self.channel,"",0);
       if options.fgen != options.fres : 
-       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fres,self.channel);
-
+       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fres,self.channel,"",0);
+ 
      elif options.fitjetmass and not options.ttbarcontrolregion:
 
-      fix_Model(self.workspace4bias_,"_TTbar",options.mlvjregion,spectrum,"",self.channel);
-      fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,"",self.channel);
-      fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,"",self.channel);
+      fix_Model(self.workspace4bias_,"_TTbar",options.mlvjregion,spectrum,self.mj_shape["TTbar"],self.channel,"",0);
+      fix_Model(self.workspace4bias_,"_STop",options.mlvjregion,spectrum,self.mj_shape["STop"],self.channel,"",0);
+      fix_Model(self.workspace4bias_,"_VV",options.mlvjregion,spectrum,self.mj_shape["VV"],self.channel,"",0);
 
       if options.jetBin == "_2jet":    
-       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,"",self.channel);
-
-      fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fgen,self.channel);
+       fix_Model(self.workspace4bias_,"_WW_EWK",options.mlvjregion,spectrum,self.mj_shape["WW_EWK"],self.channel,"",0);
+ 
+      fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fgen,self.channel,"",0);
       if options.fgen != options.fres : 
-       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fres,self.channel);
-
+       fix_Model(self.workspace4bias_,label,options.mlvjregion,spectrum,options.fres,self.channel,"",0);
+ 
      elif options.fitjetmass and options.ttbarcontrolregion:
 
       fix_Model(self.workspace4bias_,"_WJets0",options.mlvjregion,spectrum,"",self.channel);
@@ -1037,27 +1042,28 @@ class doBiasStudy_mlvj:
       
      if fitjetmass:
 
-      model_signal_ggH = MakeGeneralPdf(self.workspace4bias_,"_%s%s_fit"%(self.ggH_sample,signal_region+"2Gaus"),"2Gaus",spectrum,self.wtagger_label,self.channel);  
+      model_signal_ggH = MakeGeneralPdf(self.workspace4bias_,"_%s%s_fit"%(self.ggH_sample,signal_region+self.mj_shape["ggH"]),self.mj_shape["ggH"],spectrum,self.wtagger_label,self.channel);  
       model_signal_ggH.Print();     
-      clone_Model(self.workspace4bias_,model_signal_ggH,"_%s"%self.ggH_sample,signal_region,spectrum,"2Gaus",self.channel);      
+      clone_Model(self.workspace4bias_,model_signal_ggH,"_%s"%self.ggH_sample,signal_region,spectrum,self.mj_shape["ggH"],self.channel);      
       getattr(self.workspace4bias_,"import")(model_signal_ggH); 
     
       rrv_number_signal_signal_fit_ggH = RooRealVar("rrv_number_signal_region_fit_ggH","rrv_number_signal_region_fit_ggH",0,-1e8,1e8);
-      rrv_number_signal_signal_fit_ggH.setVal(self.workspace4bias_.var("rrv_number_"+self.ggH_sample+signal_region+"2Gaus_"+self.channel+spectrum).getVal());
-      rrv_number_signal_signal_fit_ggH.setError(self.workspace4bias_.var("rrv_number_"+self.ggH_sample+signal_region+"2Gaus_"+self.channel+spectrum).getError());
+      print "rrv_number_"+self.ggH_sample+signal_region+self.mj_shape["ggH"]+self.channel+spectrum ; 
+      rrv_number_signal_signal_fit_ggH.setVal(self.workspace4bias_.var("rrv_number_"+self.ggH_sample+signal_region+self.mj_shape["ggH"]+"_"+self.channel+spectrum).getVal());
+      rrv_number_signal_signal_fit_ggH.setError(self.workspace4bias_.var("rrv_number_"+self.ggH_sample+signal_region+self.mj_shape["ggH"]+"_"+self.channel+spectrum).getError());
       rrv_number_signal_signal_fit_ggH.Print();
       getattr(self.workspace4bias_,"import")(rrv_number_signal_signal_fit_ggH);
 
      else:
-      model_signal_ggH = MakeGeneralPdf(self.workspace4bias_,"_%s%s_fit"%(self.ggH_sample,signal_region+"CB_v1"),"CB_v1",spectrum,self.wtagger_label,self.channel);  
+      model_signal_ggH = MakeGeneralPdf(self.workspace4bias_,"_%s%s_fit"%(self.ggH_sample,signal_region+self.mlvj_shape["ggH"]),self.mlvj_shape["ggH"],spectrum,self.wtagger_label,self.channel);  
       model_signal_ggH.Print();     
  
-      clone_Model(self.workspace4bias_,model_signal_ggH,"_%s"%self.ggH_sample,signal_region,spectrum,"CB_v1",self.channel);      
+      clone_Model(self.workspace4bias_,model_signal_ggH,"_%s"%self.ggH_sample,signal_region,spectrum,self.mlvj_shape["ggH"],self.channel);      
       getattr(self.workspace4bias_,"import")(model_signal_ggH); 
 
       rrv_number_signal_signal_fit_ggH = RooRealVar("rrv_number_signal_region_fit_ggH","rrv_number_signal_region_fit_ggH",0,-1e8,1e8);
-      rrv_number_signal_signal_fit_ggH.setVal(self.workspace4bias_.var("rrv_number_"+self.ggH_sample+signal_region+"CB_v1_"+self.channel+spectrum).getVal());
-      rrv_number_signal_signal_fit_ggH.setError(self.workspace4bias_.var("rrv_number_"+self.ggH_sample+signal_region+"CB_v1_"+self.channel+spectrum).getError());
+      rrv_number_signal_signal_fit_ggH.setVal(self.workspace4bias_.var("rrv_number_"+self.ggH_sample+signal_region+self.mlvj_shape["ggH"]+"_"+self.channel+spectrum).getVal());
+      rrv_number_signal_signal_fit_ggH.setError(self.workspace4bias_.var("rrv_number_"+self.ggH_sample+signal_region+self.mlvj_shape["ggH"]+"_"+self.channel+spectrum).getError());
       rrv_number_signal_signal_fit_ggH.Print();
       getattr(self.workspace4bias_,"import")(rrv_number_signal_signal_fit_ggH);
      
@@ -1066,28 +1072,28 @@ class doBiasStudy_mlvj:
      constrainslist_signal_vbfH = RooArgList();
 
      if fitjetmass:
-      model_signal_vbfH = MakeGeneralPdf(self.workspace4bias_,"_%s%s_fit"%(self.vbfhiggs_sample,signal_region+"2Gaus"),"2Gaus",spectrum,self.wtagger_label,self.channel);  
+      model_signal_vbfH = MakeGeneralPdf(self.workspace4bias_,"_%s%s_fit"%(self.vbfhiggs_sample,signal_region+self.mj_shape["vbfH"]),self.mj_shape["vbfH"],spectrum,self.wtagger_label,self.channel);  
       model_signal_vbfH.Print();        
 
-      clone_Model(self.workspace4bias_,model_signal_vbfH,"_%s"%self.vbfhiggs_sample,signal_region,spectrum,"2Gaus",self.channel);      
+      clone_Model(self.workspace4bias_,model_signal_vbfH,"_%s"%self.vbfhiggs_sample,signal_region,spectrum,self.mj_shape["vbfH"],self.channel);      
       getattr(self.workspace4bias_,"import")(model_signal_vbfH); 
 
       rrv_number_signal_signal_fit_vbfH = RooRealVar("rrv_number_signal_region_fit_vbfH","rrv_number_signal_region_fit_vbfH",0,-1e8,1e8);
-      rrv_number_signal_signal_fit_vbfH.setVal(self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+signal_region+"2Gaus_"+self.channel+spectrum).getVal());
-      rrv_number_signal_signal_fit_vbfH.setError(self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+signal_region+"2Gaus_"+self.channel+spectrum).getError());
+      rrv_number_signal_signal_fit_vbfH.setVal(self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+signal_region+self.mj_shape["vbfH"]+"_"+self.channel+spectrum).getVal());
+      rrv_number_signal_signal_fit_vbfH.setError(self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+signal_region+self.mj_shape["vbfH"]+"_"+self.channel+spectrum).getError());
       rrv_number_signal_signal_fit_vbfH.Print();
       getattr(self.workspace4bias_,"import")(rrv_number_signal_signal_fit_vbfH);
 
      else: 
-      model_signal_vbfH = MakeGeneralPdf(self.workspace4bias_,"_%s%s_fit"%(self.vbfhiggs_sample,signal_region+"CB_v1"),"CB_v1",spectrum,self.wtagger_label,self.channel);  
+      model_signal_vbfH = MakeGeneralPdf(self.workspace4bias_,"_%s%s_fit"%(self.vbfhiggs_sample,signal_region+self.mlvj_shape["vbfH"]),self.mlvj_shape["vbfH"],spectrum,self.wtagger_label,self.channel);  
       model_signal_vbfH.Print();        
 
-      clone_Model(self.workspace4bias_,model_signal_vbfH,"_%s"%self.vbfhiggs_sample,signal_region,spectrum,"CB_v1",self.channel);      
+      clone_Model(self.workspace4bias_,model_signal_vbfH,"_%s"%self.vbfhiggs_sample,signal_region,spectrum,self.mlvj_shape["vbfH"],self.channel);      
       getattr(self.workspace4bias_,"import")(model_signal_vbfH); 
 
       rrv_number_signal_signal_fit_vbfH = RooRealVar("rrv_number_signal_region_fit_vbfH","rrv_number_signal_region_fit_vbfH",0,-1e8,1e8);
-      rrv_number_signal_signal_fit_vbfH.setVal(self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+signal_region+"CB_v1_"+self.channel+spectrum).getVal());
-      rrv_number_signal_signal_fit_vbfH.setError(self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+signal_region+"CB_v1_"+self.channel+spectrum).getError());
+      rrv_number_signal_signal_fit_vbfH.setVal(self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+signal_region+self.mlvj_shape["vbfH"]+"_"+self.channel+spectrum).getVal());
+      rrv_number_signal_signal_fit_vbfH.setError(self.workspace4bias_.var("rrv_number_"+self.vbfhiggs_sample+signal_region+self.mlvj_shape["vbfH"]+"_"+self.channel+spectrum).getError());
       rrv_number_signal_signal_fit_vbfH.Print();
       getattr(self.workspace4bias_,"import")(rrv_number_signal_signal_fit_vbfH);
 
@@ -1151,7 +1157,7 @@ class doBiasStudy_mlvj:
       print "###########################################################";
       print "################ Call the toy class tool ##################";
       print "###########################################################";
-      os.system("rm tmp.root");      
+      os.system("rm tmp2.root");      
       self.outputFile.cd();
       mcWjetTreeResult = biasModelAnalysis(RooArgSet(self.workspace4bias_.var("rrv_mass_lvj")),
                                            generation_model_wjet,
@@ -1166,7 +1172,7 @@ class doBiasStudy_mlvj:
       mcWjetTreeResult.setSignalInjection(model_total_signal,(rrv_number_signal_signal_fit_ggH.getVal()+rrv_number_signal_signal_fit_vbfH.getVal())*options.injectSingalStrenght,options.scalesignalwidth);
       mcWjetTreeResult.generateAndFitToys(int(numevents_mc));
       mcWjetTreeResult.createBranches(options.fgen,options.fres,options.ttbarcontrolregion);
-      mcWjetTreeResult.fillBranches(options.ttbarcontrolregion,options.fitjetmass,self.workspace4bias_,options.jetBin);
+      mcWjetTreeResult.fillBranches(options.ttbarcontrolregion,options.fitjetmass,self.workspace4bias_,self.mlvj_shape,options.jetBin);
       self.outputTree.Write();
 
       ratePlotsToStore = 0 ;
@@ -1194,44 +1200,43 @@ class doBiasStudy_mlvj:
 
       ### take the models for the background component
       if fitjetmass: 
-
-       model_VV_backgrounds     = get_VV_mj_Model(self.workspace4bias_,"_VV","",self.channel)
-       model_STop_backgrounds   = get_STop_mj_Model(self.workspace4bias_,"_STop","",self.channel);
+       model_VV_backgrounds     = get_VV_mj_Model(self.workspace4bias_,"_VV",self.mj_shape["VV"],self.channel)
+       model_STop_backgrounds   = get_STop_mj_Model(self.workspace4bias_,"_STop",self.mj_shape["STop"],self.channel);
 
        if options.jetBin == "_2jet":    
-        model_WW_EWK_backgrounds = get_WW_EWK_mj_Model(self.workspace4bias_,"_WW_EWK","",self.channel);
+        model_WW_EWK_backgrounds = get_WW_EWK_mj_Model(self.workspace4bias_,"_WW_EWK",self.mj_shape["WW_EWK"],self.channel);
        
        ## inflate the number of events and print them
-       self.workspace4bias_.var("rrv_number_VV_%s_mj"%(self.channel)).setVal(self.workspace4bias_.var("rrv_number_VV_%s_mj"%(self.channel)).getVal()*options.inflatejobstatistic);
-       self.workspace4bias_.var("rrv_number_STop_%s_mj"%(self.channel)).setVal(self.workspace4bias_.var("rrv_number_STop_%s_mj"%(self.channel)).getVal()*options.inflatejobstatistic);
-       print "VV number ",self.workspace4bias_.var("rrv_number_VV_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
-       print "STop number ",self.workspace4bias_.var("rrv_number_STop_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+       self.workspace4bias_.var("rrv_number_VV%s_%s_mj"%(self.mj_shape["VV"],self.channel)).setVal(self.workspace4bias_.var("rrv_number_VV%s_%s_mj"%(self.mj_shape["VV"],self.channel)).getVal()*options.inflatejobstatistic);
+       self.workspace4bias_.var("rrv_number_STop%s_%s_mj"%(self.mj_shape["STop"],self.channel)).setVal(self.workspace4bias_.var("rrv_number_STop%s_%s_mj"%(self.mj_shape["STop"],self.channel)).getVal()*options.inflatejobstatistic);
+       print "VV number ",self.workspace4bias_.var("rrv_number_VV%s_%s_mj"%(self.mj_shape["VV"],self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+       print "STop number ",self.workspace4bias_.var("rrv_number_STop%s_%s_mj"%(self.mj_shape["STop"],self.channel)).getVal()," inflate ",options.inflatejobstatistic;
 
        if options.jetBin == "_2jet":    
-        self.workspace4bias_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).setVal(self.workspace4bias_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).getVal()*options.inflatejobstatistic);
-        print "WW_EWK number ",self.workspace4bias_.var("rrv_number_WW_EWK_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+        self.workspace4bias_.var("rrv_number_WW_EWK%s_%s_mj"%(self.mj_shape["WW_EWK"],self.channel)).setVal(self.workspace4bias_.var("rrv_number_WW_EWK%s_%s_mj"%(self.mj_shape["WW_EWK"],self.channel)).getVal()*options.inflatejobstatistic);
+        print "WW_EWK number ",self.workspace4bias_.var("rrv_number_WW_EWK%s_%s_mj"%(self.mj_shape["WW_EWK"],self.channel)).getVal()," inflate ",options.inflatejobstatistic;
 
 
        if options.ttbarcontrolregion:
 
         model_TTbar_backgrounds  = get_TTbar_mj_Model(self.workspace4bias_,label,options.fgen,self.channel);
-        model_WJets_backgrounds  = get_WJets_mj_Model(self.workspace4bias_,"_WJets0","",self.channel,1,options.jetBin);
+        model_WJets_backgrounds  = get_WJets_mj_Model(self.workspace4bias_,"_WJets0",self.mj_shape["WJets0"],self.channel,1);
 
-        self.workspace4bias_.var("rrv_number_WJets0_%s_mj"%(self.channel)).setVal(self.workspace4bias_.var("rrv_number_WJets0_%s_mj"%(self.channel)).getVal()*options.inflatejobstatistic)
+        self.workspace4bias_.var("rrv_number_WJets0%s_%s_mj"%(self.mj_shape["WJets0"],self.channel)).setVal(self.workspace4bias_.var("rrv_number_WJets0%s_%s_mj"%(self.mj_shape["WJets0"],self.channel)).getVal()*options.inflatejobstatistic)
         self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).getVal()*options.inflatejobstatistic);
 
-        print "WJets number ",self.workspace4bias_.var("rrv_number_WJets0_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+        print "WJets number ",self.workspace4bias_.var("rrv_number_WJets0%s_%s_mj"%(self.mj_shape["WJets0"],self.channel)).getVal()," inflate ",options.inflatejobstatistic;
         print "TTbar number ",self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
 
        else:
 
-        model_TTbar_backgrounds  = get_TTbar_mj_Model(self.workspace4bias_,"_TTbar","",self.channel);           
+        model_TTbar_backgrounds  = get_TTbar_mj_Model(self.workspace4bias_,"_TTbar",self.mj_shape["TTbar"],self.channel);           
         model_WJets_backgrounds  = get_WJets_mj_Model(self.workspace4bias_,label,options.fgen,self.channel,1,options.jetBin);
 
-        self.workspace4bias_.var("rrv_number_TTbar_%s_mj"%(self.channel)).setVal(self.workspace4bias_.var("rrv_number_TTbar_%s_mj"%(self.channel)).getVal()*options.inflatejobstatistic)
+        self.workspace4bias_.var("rrv_number_TTbar%s_%s_mj"%(self.mj_shape["TTbar"],self.channel)).setVal(self.workspace4bias_.var("rrv_number_TTbar%s_%s_mj"%(self.mj_shape["TTbar"],self.channel)).getVal()*options.inflatejobstatistic)
         self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).setVal(self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).getVal()*options.inflatejobstatistic)
 
-        print "WJets number ",self.workspace4bias_.var("rrv_number_TTbar_%s_mj"%(self.channel)).getVal()," inflate ",options.inflatejobstatistic;
+        print "WJets number ",self.workspace4bias_.var("rrv_number_TTbar%s_%s_mj"%(self.mj_shape["TTbar"],self.channel)).getVal()," inflate ",options.inflatejobstatistic;
         print "TTbar number ",self.workspace4bias_.var("rrv_number%s%s_%s_mj"%(label,options.fgen,self.channel)).getVal()," inflate ",options.inflatejobstatistic;
 
       else:	       
@@ -1356,7 +1361,7 @@ class doBiasStudy_mlvj:
        mcWjetTreeResult.generateAndFitToys(int(numevents_data),"sb_lo,sb_hi");
        self.outputFile.cd();
        mcWjetTreeResult.createBranches(options.fgen,options.fres,options.ttbarcontrolregion);
-       mcWjetTreeResult.fillBranches(options.ttbarcontrolregion,options.fitjetmass,self.workspace4bias_,options.jetBin);
+       mcWjetTreeResult.fillBranches(options.ttbarcontrolregion,options.fitjetmass,self.workspace4bias_,self.mj_shape,options.jetBin);
       else:
        self.outputFile.cd();
        mcWjetTreeResult = biasModelAnalysis(RooArgSet(self.workspace4bias_.var("rrv_mass_lvj")),
@@ -1372,7 +1377,7 @@ class doBiasStudy_mlvj:
        mcWjetTreeResult.generateAndFitToys(int(numevents_data));
        self.outputFile.cd();
        mcWjetTreeResult.createBranches(options.fgen,options.fres,options.ttbarcontrolregion);
-       mcWjetTreeResult.fillBranches(options.ttbarcontrolregion,options.fitjetmass,self.workspace4bias_,options.jetBin);
+       mcWjetTreeResult.fillBranches(options.ttbarcontrolregion,options.fitjetmass,self.workspace4bias_,self.mlvj_shape,options.jetBin);
 
 
       ratePlotsToStore = 0 ;
