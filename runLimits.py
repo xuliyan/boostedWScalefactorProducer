@@ -50,6 +50,9 @@ parser.add_option('--jetBin',      action="store", type="string", dest="jetBin",
 parser.add_option('--turnOnAnalysis',       action="store", type="int",  dest="turnOnAnalysis",      default=0)
 parser.add_option('--injectSingalStrenght', action="store", type=float,  dest="injectSingalStrenght", default=1., help='inject a singal in the toy generation')
 
+parser.add_option('--higgsCombination', action="store", type="int", dest="higgsCombination", default=0)
+
+
 ###### options for Bias test in the combination tool
 parser.add_option('--nToys',        action="store", type="int",    dest="nToys",       default=0)
 parser.add_option('--crossedToys',  action="store", type="int",    dest="crossedToys", default=0)
@@ -1312,6 +1315,13 @@ if __name__ == '__main__':
                      combineCmmd = "combineCards.py hwwlvj_ggH%03d_el%s_%02d_%02d_unbin.txt hwwlvj_ggH%03d_mu%s_%02d_%02d_unbin.txt > hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k]);
                      print "combineCmmd ",combineCmmd; 
                      os.system(combineCmmd);
+
+                    if options.higgsCombination == 1:
+                     options.channel = "combo" ; 
+                     combineCmmd = "combineCards.py hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt hwwlvj_ggH%03d_em_2jet%s_%02d_%02d_unbin.txt > hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k],mass[i],options.channel,SIGCH,cprime[j],BRnew[k]);
+                     print "combineCmmd ",combineCmmd; 
+                     os.system(combineCmmd);
+                        
 
                     ########################################
                     ####### Generate only options ##########
