@@ -112,7 +112,7 @@ class doBiasStudy_mlvj:
         self.mlvj_shape["ggH"]     = "CB_v1";
         self.mlvj_shape["vbfH"]    = "CB_v1";
 
-        self.tmpFile = TFile("tmp2.root","RECREATE");
+        self.tmpFile = TFile("tmp.root","RECREATE");
         self.tmpFile.cd();
                                                                                                                                                                 
         print "###################### construnctor ############################# ";
@@ -150,6 +150,7 @@ class doBiasStudy_mlvj:
         self.fit_model = fit_model ;
 
         suffix = "";
+        suffix = "_"+options.channel ;
         if options.jetBin == "_2jet": suffix = suffix + "_2jet";
         if options.ttbarcontrolregion : suffix = suffix+"_ttbar";
         if options.fitjetmass         : suffix = suffix+"_jetmass";
@@ -425,12 +426,12 @@ class doBiasStudy_mlvj:
            if options.ttbarcontrolregion == 0 or TString(in_file_name).Contains("ggH") or TString(in_file_name).Contains("vbfH"):
           
             if ungroomed_jet_pt > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj >= rrv_mass_lvj.getMin() and mass_lvj <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and ( getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had_max  or getattr(treeIn,"mass_ungroomedjet_closerjet") < self.top_veto_had_min ) and ( getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep_max or getattr(treeIn,"mass_leptonic_closerjet") < self.top_veto_lep_min) and njet >=2 and tmp_vbf_dEta > self.dEta_cut and tmp_vbf_Mjj > self.Mjj_cut:
-             isPassingCut = 2 ;
+             isPassingCut = 1 ;
 
            else:
 
             if ungroomed_jet_pt > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and ( getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") > 0.679 or getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV") > 0.679 ) and mass_lvj >= rrv_mass_lvj.getMin() and mass_lvj <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and ( getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had_max  or getattr(treeIn,"mass_ungroomedjet_closerjet") < self.top_veto_had_min ) and ( getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep_max or getattr(treeIn,"mass_leptonic_closerjet") < self.top_veto_lep_min) and njet >=2 and tmp_vbf_dEta > self.dEta_cut and tmp_vbf_Mjj > self.Mjj_cut:
-             isPassingCut = 2 ;
+             isPassingCut = 1 ;
              
 
           else:
@@ -1395,7 +1396,6 @@ class doBiasStudy_mlvj:
 
       self.outputTree.Write();
       self.outputFile.Close();
-      os.system("rm tmp.root");      
 
 #### Main code     
 if __name__ == "__main__":
