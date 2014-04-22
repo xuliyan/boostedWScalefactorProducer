@@ -143,8 +143,6 @@ if options.biasStudy:
 
  isMC      = [0,0,0,0,0];
 
-#BRnew  = [00,01,02,03,04,05];
-#cprime = [01,02,03,05,07,10];
 
 cprime = [01,02,03,05,07,10]
 BRnew  = [00,01,02,03,04,05]
@@ -507,7 +505,7 @@ def makeSMLimitPlot(SIGCH):
     hrl_SM.GetYaxis().SetTitleSize(0.045);
     hrl_SM.GetYaxis().SetTitleFont(42);
 
-    hrl_SM.GetXaxis().SetTitle("M_{H} (GeV/c^{2})");
+    hrl_SM.GetXaxis().SetTitle("M_{H} (GeV)");
     hrl_SM.GetXaxis().SetTitleSize(0.045);
     hrl_SM.GetXaxis().SetTitleFont(42);
 
@@ -672,7 +670,7 @@ def makeBSMLimitPlotMass(SIGCH):
     hrl_BSM.GetYaxis().SetTitleSize(0.045);
     hrl_BSM.GetYaxis().SetTitleFont(42);
 
-    hrl_BSM.GetXaxis().SetTitle("M_{H} (GeV/c^{2})");
+    hrl_BSM.GetXaxis().SetTitle("M_{H} (GeV)");
     hrl_BSM.GetXaxis().SetTitleSize(0.045);
     hrl_BSM.GetXaxis().SetTitleFont(42);
 
@@ -711,7 +709,7 @@ def makeBSMLimitPlotMass(SIGCH):
     can_BSM.RedrawAxis();
     can_BSM.RedrawAxis("g");
     can_BSM.Update();
-
+    
     banner = TPaveText( 0.145, 0.953, 0.76, 0.975, "brNDC");
     banner.SetFillColor(ROOT.kWhite);
     banner.SetTextSize(0.036);
@@ -737,14 +735,14 @@ def makeBSMLimitPlotMass(SIGCH):
     can_BSM.SaveAs("limitFigs/BSMLim%s_%s.pdf"%(SIGCH,options.channel));
 
     can_BSMsig = ROOT.TCanvas("can_BSMsig","can_BSMsig",630,600);
-    hrl_BSMsig = can_BSMsig.DrawFrame(599,0.0,1001,gridMaxSig*1.5);
+    hrl_BSMsig = can_BSMsig.DrawFrame(599,0.001,1001,gridMaxSig*15);
 
-    hrl_BSMsig.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{SM}");
+    hrl_BSMsig.GetYaxis().SetTitle("#sigma #times BR_{WW}");
     hrl_BSMsig.GetYaxis().SetTitleOffset(1.35);
     hrl_BSMsig.GetYaxis().SetTitleSize(0.045);
     hrl_BSMsig.GetYaxis().SetTitleFont(42);
 
-    hrl_BSMsig.GetXaxis().SetTitle("M_{H} (GeV/c^{2})");
+    hrl_BSMsig.GetXaxis().SetTitle("M_{H} (GeV)");
     hrl_BSMsig.GetXaxis().SetTitleSize(0.045);
     hrl_BSMsig.GetXaxis().SetTitleFont(42);
 
@@ -752,7 +750,7 @@ def makeBSMLimitPlotMass(SIGCH):
     can_BSMsig.SetGridx(1);
     can_BSMsig.SetGridy(1);
 
-    leg2 = ROOT.TLegend(0.25,0.65,0.75,0.85);
+    leg2 = ROOT.TLegend(0.25,0.70,0.75,0.88);
     leg2.SetFillColor(0);
     leg2.SetShadowColor(0);
     leg2.SetTextFont(42);
@@ -763,7 +761,8 @@ def makeBSMLimitPlotMass(SIGCH):
     can_BSMsig.RedrawAxis();
     can_BSMsig.RedrawAxis("g");
     can_BSMsig.Update();
-
+    ROOT.gPad.SetLogy();
+    
     for k in range(len(cprime)):
         tGraphs_csXbr_exp[k].SetLineStyle(1);
         tGraphs_csXbr_exp[k].SetLineColor(curcolors[k]);
@@ -889,6 +888,10 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
         curGraph_exp.SetMarkerStyle(24);
         curGraph_exp.SetMarkerColor(ROOT.kBlack);
 
+        curGraph_csXbr_exp.SetMarkerSize(1);
+        curGraph_csXbr_exp.SetMarkerStyle(24);
+        curGraph_csXbr_exp.SetMarkerColor(ROOT.kBlack);
+
         tGraphs_exp.append(curGraph_exp);
         tGraphs_obs.append(curGraph_obs);
         tGraphs_csXbr_exp.append(curGraph_csXbr_exp);
@@ -897,7 +900,7 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
 
     setStyle();
     can_BSM = ROOT.TCanvas("can_BSM_BR","can_BSM",630,600);
-    hrl_BSM = can_BSM.DrawFrame(0.,0.0,0.51,gridMax*1.5);
+    hrl_BSM = can_BSM.DrawFrame(0.0,0.0,0.5,gridMax*1.5);
 
     hrl_BSM.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{SM}");
     hrl_BSM.GetYaxis().SetTitleOffset(1.35);
@@ -919,7 +922,7 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
     leg2.SetTextSize(0.028);
     leg2.SetNColumns(2);
 
-    for k in range(len(cprime)):
+    for k in range(len(cprime)): 
         tGraphs_exp[k].SetLineStyle(1);
         tGraphs_exp[k].SetLineColor(curcolors[k]);
         tGraphs_exp[k].SetMarkerColor(curcolors[k]);
@@ -927,11 +930,7 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
         tGraphs_obs[k].SetMarkerColor(curcolors[k]);
         tGraphs_exp[k].SetLineWidth(2);
         tGraphs_obs[k].SetLineWidth(2);
-        tGraphs_exp[k].Draw("L");
-        x = ROOT.Double(0.);
-        y = ROOT.Double(0.);
-        for ipoint in range(tGraphs_exp[k].GetN()):
-           tGraphs_exp[k].GetPoint(ipoint,x,y)
+        tGraphs_exp[k].Draw("PL");
         if not options.blindObservedLine: tGraphs_obs[k].Draw("PL");
 
         tmplabel = "exp., C'^{ 2} = %1.1f    "%( float((cprime[k])/10.) )
@@ -961,7 +960,7 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
     label_sqrt.SetTextAlign(31); # align right                                                                                                                                         
     label_sqrt.AddText("L = 19.3 fb^{-1} at #sqrt{s} = 8 TeV");
 
-    banner2 = TLatex(0.17,0.91,("Higgs Mass, %i GeV/c^{2}"%(mass)));
+    banner2 = TLatex(0.17,0.91,("Higgs Mass, %i GeV"%(mass)));
     banner2.SetNDC(); banner2.SetTextSize(0.028);
 
     leg2.Draw();
@@ -973,9 +972,9 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
     can_BSM.SaveAs("limitFigs/BSMLim%s_Mu_vsBRnew_%i.pdf"%(SIGCH,mass));
 
     can_BSMsig = ROOT.TCanvas("can_BSM_Sig","can_BSM",630,600);
-    hrl_BSMSig = can_BSMsig.DrawFrame(0.,0.0,0.51,gridMaxSig*1.5);
+    hrl_BSMSig = can_BSMsig.DrawFrame(0.,0.0,0.5,gridMaxSig*1.5);
 
-    hrl_BSMSig.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{SM}");
+    hrl_BSMSig.GetYaxis().SetTitle("#sigma #times BR_{WW}");
     hrl_BSMSig.GetYaxis().SetTitleOffset(1.35);
     hrl_BSMSig.GetYaxis().SetTitleSize(0.045);
     hrl_BSMSig.GetYaxis().SetTitleFont(42);
@@ -996,13 +995,14 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
     leg2.SetNColumns(2);
 
     for k in range(len(cprime)):
-        tGraphs_csXbr_exp[k].SetLineStyle(2);
+        tGraphs_csXbr_exp[k].SetLineStyle(1);
         tGraphs_csXbr_exp[k].SetLineColor(curcolors[k]);
         tGraphs_csXbr_obs[k].SetLineColor(curcolors[k]);
-        tGraphs_csXbr_th[k].SetLineStyle(3);
+        tGraphs_csXbr_th[k].SetLineStyle(2);
         tGraphs_csXbr_th[k].SetLineColor(curcolors[k]);
         tGraphs_csXbr_exp[k].SetLineWidth(2);
         tGraphs_csXbr_obs[k].SetLineWidth(2);
+        tGraphs_csXbr_exp[k].SetMarkerColor(curcolors[k]);
         tGraphs_csXbr_exp[k].Draw("PL");
         if not options.blindObservedLine: tGraphs_csXbr_obs[k].Draw("PL");
 
@@ -1030,7 +1030,6 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     Green  = array('f',[0.,0.0,0.5,1.0,1.0,1.0,0.5,0.0]);
     Blue   = array('f',[0.6,1.0,1.0,0.6,0.2,0.0,0.0,0.0]);
     Stops  = array('f',[0.,0.125,0.25,0.375,0.50,0.675,0.75,0.875]);
-#    TColor.CreateGradientColorTable(Number,Stops,Red,Green,Blue,100);
     massBRWW = [5.58E-01,5.77E-01,5.94E-01,6.09E-01,6.21E-01];            
 
     print "module ===> makeBSMLimits_2D";
@@ -1070,10 +1069,10 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
         for i in range(len(BRnew)):
             curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass,options.channel,SIGCH,cprime[j],BRnew[i],mass);
             curAsymLimits = getAsymLimits(curFile);
-            h2d_exp.SetBinContent(i+1,j+1,curAsymLimits[3]);
-            h2d_obs.SetBinContent(i+1,j+1,curAsymLimits[0]);
-            h2d_csXbr_exp.SetBinContent(i+1,j+1,curAsymLimits[3]*mass_XS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]]);
-            h2d_csXbr_obs.SetBinContent(i+1,j+1,curAsymLimits[0]*mass_XS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]]);
+            h2d_exp.SetBinContent(j+1,i+1,curAsymLimits[3]);
+            h2d_obs.SetBinContent(j+1,i+1,curAsymLimits[0]);
+            h2d_csXbr_exp.SetBinContent(j+1,i+1,curAsymLimits[3]*mass_XS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]]);
+            h2d_csXbr_obs.SetBinContent(j+1,i+1,curAsymLimits[0]*mass_XS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]]);
 
 
     h2d_obs.GetXaxis().SetTitle("C^{'}");
@@ -1085,6 +1084,11 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     h2d_csXbr_exp.GetYaxis().SetTitle("BR_{new}");
     h2d_csXbr_obs.GetYaxis().SetTitle("BR_{new}");
 
+    h2d_csXbr_obs.GetZaxis().SetLimits(0,h2d_csXbr_obs.GetMaximum());
+    h2d_csXbr_exp.GetZaxis().SetLimits(0,h2d_csXbr_exp.GetMaximum());
+    h2d_exp.GetZaxis().SetLimits(0,h2d_exp.GetMaximum());
+    h2d_obs.GetZaxis().SetLimits(0,h2d_obs.GetMaximum());
+
 
     h2d_exp.SetLineStyle(0);
     h2d_exp.SetMarkerStyle(20);
@@ -1093,7 +1097,7 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     h2d_exp.GetXaxis().SetLabelFont(42);
     h2d_exp.GetXaxis().SetLabelOffset(0.007);
     h2d_exp.GetXaxis().SetLabelSize(0.045);
-    h2d_exp.GetXaxis().SetTitleSize(0.06);
+    h2d_exp.GetXaxis().SetTitleSize(0.045);
     h2d_exp.GetXaxis().SetTitleOffset(1.02);
     h2d_exp.GetXaxis().SetTitleFont(42);
     h2d_exp.GetYaxis().SetTitle("BR_{new}");
@@ -1101,7 +1105,7 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     h2d_exp.GetYaxis().SetLabelFont(42);
     h2d_exp.GetYaxis().SetLabelOffset(0.007);
     h2d_exp.GetYaxis().SetLabelSize(0.045);
-    h2d_exp.GetYaxis().SetTitleSize(0.06);
+    h2d_exp.GetYaxis().SetTitleSize(0.045);
     h2d_exp.GetYaxis().SetTitleOffset(1.25);
     h2d_exp.GetYaxis().SetTitleFont(42);
     h2d_exp.GetZaxis().SetTitle("signal strenght excluded at 95% C.L");
@@ -1112,9 +1116,9 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     h2d_exp.GetZaxis().SetTitleSize(0.05);
 
 
-    banner = TPaveText( 0.145, 0.953, 0.76, 0.975, "brNDC");
+    banner = TPaveText( 0.125, 0.953, 0.76, 0.975, "brNDC");
     banner.SetFillColor(ROOT.kWhite);
-    banner.SetTextSize(0.038);
+    banner.SetTextSize(0.033);
     banner.SetTextAlign(11);
     banner.SetTextFont(62);
     banner.SetBorderSize(0);
@@ -1122,10 +1126,10 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     banner.AddText(leftText);
     banner.Draw();
 
-    label_sqrt = TPaveText(0.5,0.953,0.96,0.975, "brNDC");
+    label_sqrt = TPaveText(0.45,0.953,0.89,0.975, "brNDC");
     label_sqrt.SetFillColor(ROOT.kWhite);
     label_sqrt.SetBorderSize(0);
-    label_sqrt.SetTextSize(0.038);
+    label_sqrt.SetTextSize(0.033);
     label_sqrt.SetTextFont(62);
     label_sqrt.SetTextAlign(31); # align right                                                                                                                                         
     label_sqrt.AddText("L = 19.3 fb^{-1} at #sqrt{s} = 8 TeV");
@@ -1304,7 +1308,7 @@ if __name__ == '__main__':
                     print "analyzing card: hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                     print "--------------------------------------------------";                
 
-                    if options.channel !="em":
+                    if options.channel =="em":
                      combineCmmd = "combineCards.py hwwlvj_ggH%03d_el%s_%02d_%02d_unbin.txt hwwlvj_ggH%03d_mu%s_%02d_%02d_unbin.txt > hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k]);
                      print "combineCmmd ",combineCmmd; 
                      os.system(combineCmmd);
@@ -1425,7 +1429,7 @@ if __name__ == '__main__':
                     ###############################
                       
                     elif options.systematics == 0:
-                       runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2 -S 0"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts);
+                       runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -S 0"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,options.channel,cprime[j],BRnew[k],moreCombineOpts);
                        print "runCmmd ",runCmmd ;
 
                        if options.batchMode:
@@ -1436,7 +1440,7 @@ if __name__ == '__main__':
                         os.system(runCmmd);
 
                     else: 
-                       runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_em%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,cprime[j],BRnew[k],moreCombineOpts);                                        
+                       runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],SIGCH,options.channel,cprime[j],BRnew[k],moreCombineOpts);                                        
                        print "runCmmd ",runCmmd;
 
                        if options.batchMode:
@@ -1497,15 +1501,15 @@ if __name__ == '__main__':
 
       if options.makeBSMLimitPlotBRnew == 1:
           makeBSMLimitPlotBRnew(SIGCH,600);
-#          makeBSMLimitPlotBRnew(SIGCH,700);
-#          makeBSMLimitPlotBRnew(SIGCH,800);
-#          makeBSMLimitPlotBRnew(SIGCH,900);
-#          makeBSMLimitPlotBRnew(SIGCH,1000);
+          makeBSMLimitPlotBRnew(SIGCH,700);
+          makeBSMLimitPlotBRnew(SIGCH,800);
+          makeBSMLimitPlotBRnew(SIGCH,900);
+          makeBSMLimitPlotBRnew(SIGCH,1000);
 
       if options.makeBSMLimitPlot2D == 1:
           makeBSMLimitPlot2D(SIGCH,600);
-#          makeBSMLimitPlot2D(SIGCH,700);
-#          makeBSMLimitPlot2D(SIGCH,800);
-#          makeBSMLimitPlot2D(SIGCH,900);
-#          makeBSMLimitPlot2D(SIGCH,1000);
+          makeBSMLimitPlot2D(SIGCH,700);
+          makeBSMLimitPlot2D(SIGCH,800);
+          makeBSMLimitPlot2D(SIGCH,900);
+          makeBSMLimitPlot2D(SIGCH,1000);
       
