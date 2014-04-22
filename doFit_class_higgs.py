@@ -410,10 +410,10 @@ class doFit_wj_and_wlvj:
 
         ### jet binning uncertainty 
         if options.jetBin == "_2jet":                                                
-         self.QCDscale_ggH01in  = 1.000;
+         self.QCDscale_ggH01in  = 0.000;
          self.QCDscale_ggH2in   = 0.190;
         else:
-         self.QCDscale_ggH01in  = 1.260;
+         self.QCDscale_ggH01in  = 0.0;
          self.QCDscale_ggH2in   = -0.060;
             
         self.QCDscale_qqH      = 0.0;
