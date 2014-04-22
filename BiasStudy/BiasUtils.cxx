@@ -275,7 +275,7 @@ void biasModelAnalysis::createBranches(const std::string & fgen, const std::stri
 }
 
 
-void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int & fitjetmass, RooWorkspace& workspace,const std::string & jetBin){
+void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int & fitjetmass, RooWorkspace& workspace, std::map<std::string,std::string> & shapes, const std::string & jetBin){
                                                                                                                                                    
   RooArgList*  notconstantparameters = NULL;   
   RooDataHist* data_binned = NULL; 
@@ -298,6 +298,7 @@ void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int &
 
   RooRealVar* x ;
 
+
   if(fitjetmass) x = dynamic_cast<RooRealVar*>((*this).observables_->find("rrv_mass_j"));
   else  x = dynamic_cast<RooRealVar*>((*this).observables_->find("rrv_mass_lvj")); 
 
@@ -305,16 +306,16 @@ void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int &
 
   if(fitjetmass){
 
-    pdfIntegral.Form("model_VV_%s_mj",channel_.c_str());     
+    pdfIntegral.Form("model_VV%s_%s_mj",shapes["VV"].c_str(),channel_.c_str());     
     fullint_VV = workspace.pdf(pdfIntegral.Data())->createIntegral(*x,*x);            
     signalint_VV = workspace.pdf(pdfIntegral.Data())->createIntegral(*x,*x,("signal_region"));                                     
 
-    pdfIntegral.Form("model_STop_%s_mj",channel_.c_str()); 
+    pdfIntegral.Form("model_STop%s_%s_mj",shapes["STop"].c_str(),channel_.c_str()); 
     fullint_STop = workspace.pdf(pdfIntegral.Data())->createIntegral(*x,*x);            
     signalint_STop = workspace.pdf(pdfIntegral.Data())->createIntegral(*x,*x,("signal_region"));                           
      
     if(jetBin == "_2jet"){
-     pdfIntegral.Form("model_WW_EWK_%s_mj",channel_.c_str()); 
+     pdfIntegral.Form("model_WW_EWK%s_%s_mj",shapes["WW_EWK"].c_str(),channel_.c_str()); 
      fullint_WW_EWK = workspace.pdf(pdfIntegral.Data())->createIntegral(*x,*x);            
      signalint_WW_EWK = workspace.pdf(pdfIntegral.Data())->createIntegral(*x,*x,("signal_region"));                         
     }
@@ -351,6 +352,7 @@ void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int &
       break ;
     }
 
+    std::cout<<" eneter toy "<<std::endl;
     for( int ipar = 0; ipar < param_->getSize() ; ipar++){    
 
      if(param_->at(ipar)->isConstant()) continue;
@@ -406,7 +408,7 @@ void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int &
        else if(TString(parlist_->at(ipar)->GetName()).Contains("number")){       
 	 if(fitjetmass){
 	   if( ttbarcontrolregion == 0){
-            pdfIntegral.Form("model_TTbar_%s_mj",channel_.c_str()); 
+	     pdfIntegral.Form("model_TTbar%s_%s_mj",shapes["TTbar"].c_str(),channel_.c_str()); 
 	    fullint_TTbar   = workspace.pdf(pdfIntegral.Data())->createIntegral(*x,*x);            
 	    signalint_TTbar = workspace.pdf(pdfIntegral.Data())->createIntegral(*x,*x,("signal_region"));                           
 	    fullint_WJets   = dynamic_cast<RooAbsReal*>((dynamic_cast<RooAddPdf*>((*this).fittedPdf_[iToy])->pdfList()).find(std::string("model"+label_+"_fit_"+channel_+spectrum_).c_str()))->createIntegral(*x,*x);            
@@ -414,7 +416,7 @@ void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int &
 	   }	      
 	   else{
 
-            pdfIntegral.Form("model_WJets0_%s_mj",channel_.c_str()); 
+	    pdfIntegral.Form("model_WJets0%s_%s_mj",shapes["WJets0"].c_str(),channel_.c_str()); 
 	    fullint_WJets    = workspace.pdf(pdfIntegral.Data())->createIntegral(*x,*x);            
 	    signalint_WJets  = workspace.pdf(pdfIntegral.Data())->createIntegral(*x,*x,("signal_region"));                           
 
@@ -433,34 +435,34 @@ void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int &
 	    //	    std::cout<<" Wjets SR "<<rrv_parlist->getVal()*signalint_WJets->getVal()/fullint_WJets->getVal()<<" error "<<mjet_fit_data_error<<" ngen SR "<<generatedData_[iToy]->sumEntries("1","signal_region")<<" VV SR "<<workspace.var(std::string("rrv_number_VV_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()<<" STop SR "<<workspace.var(std::string("rrv_number_STop_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()<<" WW_EWK "<<workspace.var(std::string("rrv_number_WW_EWK_"+channel_+"_mj").c_str())->getVal()*signalint_WW_EWK->getVal()/fullint_WW_EWK->getVal()<<" TTbar SR "<<workspace.var(std::string("rrv_number_TTbar_"+channel_+"_mj").c_str())->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal()<<std::endl;
           
             if(jetBin == "_2jet"){
-	    parameterResidual_[iPull] = (rrv_parlist->getVal()*signalint_WJets->getVal()/fullint_WJets->getVal()-generatedData_[iToy]->sumEntries("1","signal_region")+numberSignalEvents_+workspace.var(std::string("rrv_number_VV_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()+workspace.var(std::string("rrv_number_STop_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()+workspace.var(std::string("rrv_number_WW_EWK_"+channel_+"_mj").c_str())->getVal()*signalint_WW_EWK->getVal()/fullint_WW_EWK->getVal()+workspace.var(std::string("rrv_number_TTbar_"+channel_+"_mj").c_str())->getVal()*signalint_TTbar->getVal())/fullint_TTbar->getVal() ; 
+	    parameterResidual_[iPull] = (rrv_parlist->getVal()*signalint_WJets->getVal()/fullint_WJets->getVal()-generatedData_[iToy]->sumEntries("1","signal_region")+numberSignalEvents_+workspace.var(std::string("rrv_number_VV"+shapes["VV"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()+workspace.var(std::string("rrv_number_STop"+shapes["STop"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()+workspace.var(std::string("rrv_number_WW_EWK"+shapes["WW_EWK"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_WW_EWK->getVal()/fullint_WW_EWK->getVal()+workspace.var(std::string("rrv_number_TTbar"+shapes["TTbar"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_TTbar->getVal())/fullint_TTbar->getVal() ; 
 
-	    parameterPull_[iPull] = (rrv_parlist->getVal()*signalint_WJets->getVal()/fullint_WJets->getVal()-(generatedData_[iToy]->sumEntries("1","signal_region")-numberSignalEvents_-workspace.var(std::string("rrv_number_VV_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()-workspace.var(std::string("rrv_number_STop_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()-workspace.var(std::string("rrv_number_WW_EWK_"+channel_+"_mj").c_str())->getVal()*signalint_WW_EWK->getVal()/fullint_WW_EWK->getVal()-workspace.var(std::string("rrv_number_TTbar_"+channel_+"_mj").c_str())->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal()))/mjet_fit_data_error;
+	    parameterPull_[iPull] = (rrv_parlist->getVal()*signalint_WJets->getVal()/fullint_WJets->getVal()-(generatedData_[iToy]->sumEntries("1","signal_region")-numberSignalEvents_-workspace.var(std::string("rrv_number_VV"+shapes["VV"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()-workspace.var(std::string("rrv_number_STop"+shapes["STop"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()-workspace.var(std::string("rrv_number_WW_EWK"+shapes["WW_EWK"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_WW_EWK->getVal()/fullint_WW_EWK->getVal()-workspace.var(std::string("rrv_number_TTbar"+shapes["TTbar"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal()))/mjet_fit_data_error;
             iPull = iPull + 1 ;
 	    }
             else{
-	    parameterResidual_[iPull] = (rrv_parlist->getVal()*signalint_WJets->getVal()/fullint_WJets->getVal()-generatedData_[iToy]->sumEntries("1","signal_region")+numberSignalEvents_+workspace.var(std::string("rrv_number_VV_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()+workspace.var(std::string("rrv_number_STop_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()+workspace.var(std::string("rrv_number_TTbar_"+channel_+"_mj").c_str())->getVal()*signalint_TTbar->getVal())/fullint_TTbar->getVal() ; 
+	    parameterResidual_[iPull] = (rrv_parlist->getVal()*signalint_WJets->getVal()/fullint_WJets->getVal()-generatedData_[iToy]->sumEntries("1","signal_region")+numberSignalEvents_+workspace.var(std::string("rrv_number_VV"+shapes["VV"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()+workspace.var(std::string("rrv_number_STop"+shapes["STop"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()+workspace.var(std::string("rrv_number_TTbar"+shapes["TTbar"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_TTbar->getVal())/fullint_TTbar->getVal() ; 
 
-	    parameterPull_[iPull] = (rrv_parlist->getVal()*signalint_WJets->getVal()/fullint_WJets->getVal()-(generatedData_[iToy]->sumEntries("1","signal_region")-numberSignalEvents_-workspace.var(std::string("rrv_number_VV_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()-workspace.var(std::string("rrv_number_STop_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()-workspace.var(std::string("rrv_number_TTbar_"+channel_+"_mj").c_str())->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal()))/mjet_fit_data_error;
+	    parameterPull_[iPull] = (rrv_parlist->getVal()*signalint_WJets->getVal()/fullint_WJets->getVal()-(generatedData_[iToy]->sumEntries("1","signal_region")-numberSignalEvents_-workspace.var(std::string("rrv_number_VV"+shapes["VV"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()-workspace.var(std::string("rrv_number_STop"+shapes["STop"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()-workspace.var(std::string("rrv_number_TTbar"+shapes["TTbar"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal()))/mjet_fit_data_error;
             iPull = iPull + 1 ;
 
 	    }
-	  }
+	   }
           else{
   	   parameter_[iparNotConstant] = rrv_parlist->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal();                                                 
                                                                                  
 	   //	   std::cout<<" TTbar SR "<<rrv_parlist->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal()<<" error "<<mjet_fit_data_error<<" ngen SR "<<generatedData_[iToy]->sumEntries("1","signal_region")<<" VV SR "<<workspace.var(std::string("rrv_number_VV_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()<<" STop SR "<<workspace.var(std::string("rrv_number_STop_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()<<" WW_EWK "<<workspace.var(std::string("rrv_number_WW_EWK_"+channel_+"_mj").c_str())->getVal()*signalint_WW_EWK->getVal()/fullint_WW_EWK->getVal()<<" WJets SR "<<workspace.var(std::string("rrv_number_WJets0_"+channel_+"_mj").c_str())->getVal()*signalint_WJets->getVal()/fullint_WJets->getVal()<<std::endl;
 
            if(jetBin == "_2jet"){
- 	    parameterResidual_[iPull] = (rrv_parlist->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal()-generatedData_[iToy]->sumEntries("1","signal_region")+numberSignalEvents_+workspace.var(std::string("rrv_number_VV_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()+workspace.var(std::string("rrv_number_STop_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()+workspace.var(std::string("rrv_number_WW_EWK_"+channel_+"_mj").c_str())->getVal()*signalint_WW_EWK->getVal()/fullint_WW_EWK->getVal()+workspace.var(std::string("rrv_number_WJets0_"+channel_+"_mj").c_str())->getVal()*signalint_WJets->getVal())/fullint_WJets->getVal();
+ 	    parameterResidual_[iPull] = (rrv_parlist->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal()-generatedData_[iToy]->sumEntries("1","signal_region")+numberSignalEvents_+workspace.var(std::string("rrv_number_VV"+shapes["VV"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()+workspace.var(std::string("rrv_number_STop"+shapes["STop"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()+workspace.var(std::string("rrv_number_WW_EWK"+shapes["WW_EWK"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_WW_EWK->getVal()/fullint_WW_EWK->getVal()+workspace.var(std::string("rrv_number_WJets0"+shapes["WJets0"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_WJets->getVal())/fullint_WJets->getVal();
 
-	    parameterPull_[iPull] =(rrv_parlist->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal()-(generatedData_[iToy]->sumEntries("1","signal_region")-numberSignalEvents_-workspace.var(std::string("rrv_number_VV_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()-workspace.var(std::string("rrv_number_STop_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()-workspace.var(std::string("rrv_number_WW_EWK_"+channel_+"_mj").c_str())->getVal()*signalint_WW_EWK->getVal()/fullint_WW_EWK->getVal()-workspace.var(std::string("rrv_number_WJets0_"+channel_+"_mj").c_str())->getVal()*signalint_WJets->getVal()/fullint_WJets->getVal()))/mjet_fit_data_error;
+	    parameterPull_[iPull] =(rrv_parlist->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal()-(generatedData_[iToy]->sumEntries("1","signal_region")-numberSignalEvents_-workspace.var(std::string("rrv_number_VV"+shapes["VV"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()-workspace.var(std::string("rrv_number_STop"+shapes["STop"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()-workspace.var(std::string("rrv_number_WW_EWK"+shapes["WW_EWK"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_WW_EWK->getVal()/fullint_WW_EWK->getVal()-workspace.var(std::string("rrv_number_WJets0"+shapes["WJets0"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_WJets->getVal()/fullint_WJets->getVal()))/mjet_fit_data_error;
            iPull = iPull + 1 ;
 	   }
            else{
- 	    parameterResidual_[iPull] = (rrv_parlist->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal()-generatedData_[iToy]->sumEntries("1","signal_region")+numberSignalEvents_+workspace.var(std::string("rrv_number_VV_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()+workspace.var(std::string("rrv_number_STop_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()+workspace.var(std::string("rrv_number_WJets0_"+channel_+"_mj").c_str())->getVal()*signalint_WJets->getVal())/fullint_WJets->getVal();
+ 	    parameterResidual_[iPull] = (rrv_parlist->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal()-generatedData_[iToy]->sumEntries("1","signal_region")+numberSignalEvents_+workspace.var(std::string("rrv_number_VV"+shapes["VV"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()+workspace.var(std::string("rrv_number_STop"+shapes["STop"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()+workspace.var(std::string("rrv_number_WJets0"+shapes["WJets0"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_WJets->getVal())/fullint_WJets->getVal();
 
-	    parameterPull_[iPull] =(rrv_parlist->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal()-(generatedData_[iToy]->sumEntries("1","signal_region")-numberSignalEvents_-workspace.var(std::string("rrv_number_VV_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()-workspace.var(std::string("rrv_number_STop_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()-workspace.var(std::string("rrv_number_WW_EWK_"+channel_+"_mj").c_str())->getVal()*signalint_WW_EWK->getVal()/fullint_WW_EWK->getVal()-workspace.var(std::string("rrv_number_WJets0_"+channel_+"_mj").c_str())->getVal()*signalint_WJets->getVal()/fullint_WJets->getVal()))/mjet_fit_data_error;
+	    parameterPull_[iPull] =(rrv_parlist->getVal()*signalint_TTbar->getVal()/fullint_TTbar->getVal()-(generatedData_[iToy]->sumEntries("1","signal_region")-numberSignalEvents_-workspace.var(std::string("rrv_number_VV"+shapes["VV"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_VV->getVal()/fullint_VV->getVal()-workspace.var(std::string("rrv_number_STop"+shapes["STop"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_STop->getVal()/fullint_STop->getVal()-workspace.var(std::string("rrv_number_WJets0"+shapes["WJets0"]+"_"+channel_+"_mj").c_str())->getVal()*signalint_WJets->getVal()/fullint_WJets->getVal()))/mjet_fit_data_error;
            iPull = iPull + 1 ;
 
 	   }
@@ -480,9 +482,9 @@ void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int &
 	     if(jetBin == "_2jet"){
 	       parameter_[iparNotConstant] = rrv_parlist->getVal()+workspace.var(std::string("rrv_number_VV"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_STop"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_TTbar"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_WW_EWK"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal();
 
-	      parameterResidual_[iPull] = rrv_parlist->getVal()+workspace.var(std::string("rrv_number_VV"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_STop"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_TTbar"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_WW_EWK"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()-(dynamic_cast<RooRealVar*>(parlist_->find("ngen"))->getVal()-numberSignalEvents_);
+               parameterResidual_[iPull] = rrv_parlist->getVal()+workspace.var(std::string("rrv_number_VV"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_STop"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_TTbar"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_WW_EWK"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()-(dynamic_cast<RooRealVar*>(parlist_->find("ngen"))->getVal()-numberSignalEvents_);
 	     
-	      parameterPull_[iPull] = (rrv_parlist->getVal()+workspace.var(std::string("rrv_number_VV"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_WW_EWK"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_STop"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_TTbar"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_WW_EWK"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()-(dynamic_cast<RooRealVar*>(parlist_->find("ngen"))->getVal()-numberSignalEvents_))/rrv_parlist->getError(); 
+	       parameterPull_[iPull] = (rrv_parlist->getVal()+workspace.var(std::string("rrv_number_VV"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_WW_EWK"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_STop"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_TTbar"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_WW_EWK"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()-(dynamic_cast<RooRealVar*>(parlist_->find("ngen"))->getVal()-numberSignalEvents_))/rrv_parlist->getError(); 
 
 	      parameterError_[iparNotConstant] = rrv_parlist->getError();                                                                                          
 	     }
@@ -491,7 +493,7 @@ void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int &
 
 	      parameterResidual_[iPull] = rrv_parlist->getVal()+workspace.var(std::string("rrv_number_VV"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_STop"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_TTbar"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()-(dynamic_cast<RooRealVar*>(parlist_->find("ngen"))->getVal()-numberSignalEvents_);
 	     
-	      parameterPull_[iPull] = (rrv_parlist->getVal()+workspace.var(std::string("rrv_number_VV"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_WW_EWK"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_STop"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_TTbar"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()-(dynamic_cast<RooRealVar*>(parlist_->find("ngen"))->getVal()-numberSignalEvents_))/rrv_parlist->getError(); 
+	      parameterPull_[iPull] = (rrv_parlist->getVal()+workspace.var(std::string("rrv_number_VV"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_STop"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()+workspace.var(std::string("rrv_number_TTbar"+mlvjregion_+fgen_+"_"+channel_+spectrum_).c_str())->getVal()-(dynamic_cast<RooRealVar*>(parlist_->find("ngen"))->getVal()-numberSignalEvents_))/rrv_parlist->getError(); 
 
 	      parameterError_[iparNotConstant] = rrv_parlist->getError();                                                                                          
 
