@@ -352,7 +352,6 @@ void biasModelAnalysis::fillBranches(const int & ttbarcontrolregion, const int &
       break ;
     }
 
-    std::cout<<" eneter toy "<<std::endl;
     for( int ipar = 0; ipar < param_->getSize() ; ipar++){    
 
      if(param_->at(ipar)->isConstant()) continue;
