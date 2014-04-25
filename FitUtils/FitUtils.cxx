@@ -55,6 +55,42 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
      rfresult = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2"));
      rfresult->Print();
 
+     std::cout<<"####################################################"<<std::endl;
+     std::cout<<"######## Normalization Factor in mJ ################"<<std::endl;
+     std::cout<<"####################################################"<<std::endl;
+
+     //##### apply the correction of the mean and sigma from the ttbar control sample to the STop, TTbar and VV
+     RooArgSet* parameters_list = model_pdf->getParameters(*rdataset_mj);
+     TIter par = parameters_list->createIterator();
+     par.Reset();
+
+     SystematicUncertaintyHiggs_01jetBin higgsUncertainty;
+
+     RooRealVar* param = dynamic_cast<RooRealVar*>(par.Next());
+     while(param){
+	  if(TString(label).Contains("VV") or TString(label).Contains("WW_EWK") or TString(label).Contains("STop") or TString(label).Contains("TTbar")){
+	    if(TString(param->GetName()).Contains("rrv_mean1_gaus")){
+               param->setRange(param->getMin()+higgsUncertainty.mean_mj_shift,param->getMax()+higgsUncertainty.mean_mj_shift);
+               param->setVal(param->getVal()+higgsUncertainty.mean_mj_shift);
+
+	    }
+            if(TString(param->GetName()).Contains("rrv_deltamean_gaus")){
+                    param->setRange(param->getMin()-higgsUncertainty.mean_mj_shift,param->getMax()-higgsUncertainty.mean_mj_shift);
+                    param->setVal(param->getVal()-higgsUncertainty.mean_mj_shift);
+	    }
+            if(TString(param->GetName()).Contains("rrv_sigma1_gaus")){
+                    param->setVal(param->getVal()*higgsUncertainty.sigma_mj_smear);
+                    param->setRange(param->getMin()*higgsUncertainty.sigma_mj_smear,param->getMax()*higgsUncertainty.sigma_mj_smear);
+	    }
+            if(TString(param->GetName()).Contains("rrv_scalesigma_gaus")){
+                    param->setRange(param->getMin()/higgsUncertainty.sigma_mj_smear,param->getMax()/higgsUncertainty.sigma_mj_smear);
+                    param->setVal(param->getVal()/higgsUncertainty.sigma_mj_smear);
+	    }
+	  }
+          param = dynamic_cast<RooRealVar*>(par.Next());
+
+     }
+
      workspace->import(*model_pdf);
      workspace->import(*rfresult);
 
@@ -90,8 +126,6 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
      cs->SetTextSize(0.12);
      cs->AppendPad("same");
      mplot_pull->addObject(cs);
-
-     RooArgSet* parameters_list = model_pdf->getParameters(*rdataset_mj);
 
      TString command; 
      command.Form("mkdir -p plots_%s_%s_g1/mj_fitting/",channel.c_str(),wtagger_label.c_str());
@@ -144,7 +178,7 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
        draw_canvas_with_pull(mplot_sys,mplot_pull,new RooArgList(*parameters_list),std::string(command.Data()),"m_j_extended"+label+fileName,model,channel,0,0,GetLumi());
      }
 
-     if(deco){
+   if(deco){
       
       //############### comparison between only decorrelated shapes
       std::cout<<"################### Decorrelated mj single mc shape ################"<<std::endl;
@@ -198,74 +232,10 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
      
      }
 
-     std::cout<<"####################################################"<<std::endl;
-     std::cout<<"######## Normalization Factor in mJ ################"<<std::endl;
-     std::cout<<"####################################################"<<std::endl;
+  
+     workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setVal(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getVal()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
+     workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getError()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
 
-     //normalize the number of total events to lumi --> correct the number to scale to the lumi
-     if(additionalinformation == 1){
-         workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setVal(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getVal()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
-         workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getError()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
-
-         workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->Print();
-         
-         if(TString(label).Contains("ggH")){
-            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setVal( workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getVal());
-            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getError());
-            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->Print();
-         }
-         if(TString(label).Contains("vbfH")){
-            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setVal( workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getVal());
-            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getError());
-            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->Print();
-         }
-      }
-      else{
-         workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setVal(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getVal()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
-         workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getError()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
-
-         workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->Print();
-         
-         if(TString(label).Contains("ggH")){
-            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setVal( workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getVal());
-            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getError());
-            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->Print();
-         }
-         if(TString(label).Contains("vbfH")){
-            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setVal( workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getVal());
-            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getError());
-            workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->Print();
-        } 
-      }
-      //##### apply the correction of the mean and sigma from the ttbar control sample to the STop, TTbar and VV
-      TIter par = parameters_list->createIterator();
-      par.Reset();
-
-      SystematicUncertaintyHiggs_01jetBin higgsUncertainty;
-
-      RooRealVar* param = dynamic_cast<RooRealVar*>(par.Next());
-      while(param){
-	  if(TString(label).Contains("VV") or TString(label).Contains("WW_EWK") or TString(label).Contains("STop") or TString(label).Contains("TTbar")){
-	    if(TString(param->GetName()).Contains("rrv_mean1_gaus")){
-               param->setRange(param->getMin()+higgsUncertainty.mean_mj_shift,param->getMax()+higgsUncertainty.mean_mj_shift);
-               param->setVal(param->getVal()+higgsUncertainty.mean_mj_shift);
-	    }
-            if(TString(param->GetName()).Contains("rrv_deltamean_gaus")){
-                    param->setRange(param->getMin()-higgsUncertainty.mean_mj_shift,param->getMax()-higgsUncertainty.mean_mj_shift);
-                    param->setVal(param->getVal()-higgsUncertainty.mean_mj_shift);
-	    }
-            if(TString(param->GetName()).Contains("rrv_sigma1_gaus")){
-                    param->setVal(param->getVal()*higgsUncertainty.sigma_mj_smear);
-                    param->setRange(param->getMin()*higgsUncertainty.sigma_mj_smear,param->getMax()*higgsUncertainty.sigma_mj_smear);
-	    }
-            if(TString(param->GetName()).Contains("rrv_scalesigma_gaus")){
-                    param->setRange(param->getMin()/higgsUncertainty.sigma_mj_smear,param->getMax()/higgsUncertainty.sigma_mj_smear);
-                    param->setVal(param->getVal()/higgsUncertainty.sigma_mj_smear);
-	    }
-      }
-      param = dynamic_cast<RooRealVar*>(par.Next());
-
-   }
     
 }
 
@@ -900,7 +870,7 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
 
       Name.Form("model%s_%s_mj,model_STop%s%s_%s_mj,model_TTbar%s%s_%s_mj,model_VV%s%s_%s_mj",(label+model).c_str(),channel.c_str(),mass_scale.c_str(),mj_shape["STop"].c_str(),channel.c_str(),mass_scale.c_str(),mj_shape["TTbar"].c_str(),channel.c_str(),mass_scale.c_str(),mj_shape["VV"].c_str(),channel.c_str());
 
-     model_data->plotOn(mplot,RooFit::Name("VV"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["VV"]), RooFit::LineColor(kBlack),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
+      model_data->plotOn(mplot,RooFit::Name("VV"), RooFit::Components(Name.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["VV"]), RooFit::LineColor(kBlack),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
 
      Name.Form("model%s_%s_mj,model_STop%s%s_%s_mj,model_TTbar%s%s_%s_mj",(label+model).c_str(),channel.c_str(),mass_scale.c_str(),mj_shape["STop"].c_str(),channel.c_str(),mass_scale.c_str(),mj_shape["TTbar"].c_str(),channel.c_str());
 
