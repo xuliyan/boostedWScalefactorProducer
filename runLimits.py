@@ -146,10 +146,9 @@ if options.biasStudy:
 
  isMC      = [0,0,0,0,0];
 
-
 cprime = [01,02,03,05,07,10]
 BRnew  = [00,01,02,03,04,05]
-  
+
 ########################################
 ###### Make Asymptotic Limit Plot ######
 ########################################
@@ -578,16 +577,16 @@ def makeBSMLimitPlotMass(SIGCH):
     massCS  = [];
     if SIGCH == "" or SIGCH == "_2jet":
         massCS.append((0.5230+0.09688));
-        massCS.append((0.2288+0.06330));
-        massCS.append((0.1095+0.04365));
-        massCS.append((0.05684+0.03164));
-        massCS.append((0.03163+0.02399));
+        massCS.append((0.2290+0.06330));
+        massCS.append((0.1097+0.04365));
+        massCS.append((0.0571+0.03164));
+        massCS.append((0.0320+0.02399));
     elif SIGCH == "_ggH":
         massCS.append((0.5230));
-        massCS.append((0.2288));
-        massCS.append((0.1095));
-        massCS.append((0.05684));
-        massCS.append((0.03163));
+        massCS.append((0.2290));
+        massCS.append((0.1097));
+        massCS.append((0.0571));
+        massCS.append((0.0320));
     elif SIGCH == "_vbfH":
         massCS.append((0.09688));
         massCS.append((0.06330));
@@ -1028,19 +1027,16 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
 def makeBSMLimitPlot2D( SIGCH, mass ):
 
 
-    Number = 8;
-    Red    = array('f',[0.3,0.0,0.0,0.2,0.6,1.0,1.0,0.8]);
-    Green  = array('f',[0.,0.0,0.5,1.0,1.0,1.0,0.5,0.0]);
-    Blue   = array('f',[0.6,1.0,1.0,0.6,0.2,0.0,0.0,0.0]);
-    Stops  = array('f',[0.,0.125,0.25,0.375,0.50,0.675,0.75,0.875]);
+    stylePath = os.getenv("ROOTStyle");
+    gROOT.ProcessLine(".x "+stylePath+"/rootPalette.C");
+    
     massBRWW = [5.58E-01,5.77E-01,5.94E-01,6.09E-01,6.21E-01];            
-
     print "module ===> makeBSMLimits_2D";
 
     massindex = {600:0,700:1,800:2,900:3,1000:4}
     mass_XS  = [];
-    BRnew_y = [0,0.1,0.2,0.3,0.4,0.5];
-    cprime_x = [0.1,0.2,0.3,0.5,0.7,1.0];
+    BRnew_y  = array('d',[0,0.15,0.25,0.35,0.45,0.55]);
+    cprime_x = array('d',[0.,0.15,0.25,0.35,0.55,0.75,1.05]);
 
     if SIGCH == "" or SIGCH == "_2jet":
         mass_XS.append((0.5230+0.09688));
@@ -1063,10 +1059,10 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     else:
         print "problem!"
         
-    h2d_exp = TH2D("h2d_exp","",len(cprime_x),cprime_x[0]-0.05,cprime_x[len(cprime_x)-1]+0.05,len(BRnew_y),BRnew_y[0]-0.05,BRnew_y[len(BRnew_y)-1]+0.05);
-    h2d_obs = TH2D("h2d_obs","",len(cprime_x),cprime_x[0]-0.05,cprime_x[len(cprime_x)-1]+0.05,len(BRnew_y),BRnew_y[0]-0.05,BRnew_y[len(BRnew_y)-1]+0.05);
-    h2d_csXbr_exp = TH2D("h2d_csXbr_exp","",len(cprime_x),cprime_x[0]-0.05,cprime_x[len(cprime_x)-1]+0.05,len(BRnew_y),BRnew_y[0]-0.05,BRnew_y[len(BRnew_y)-1]+0.05);
-    h2d_csXbr_obs = TH2D("h2d_csXbr_obs","",len(cprime_x),cprime_x[0]-0.05,cprime_x[len(cprime_x)-1]+0.05,len(BRnew_y),BRnew_y[0]-0.05,BRnew_y[len(BRnew_y)-1]+0.05);
+    h2d_exp = TH2D("h2d_exp","",len(cprime_x)-1,cprime_x,len(BRnew_y)-1,BRnew_y);
+    h2d_obs = TH2D("h2d_obs","",len(cprime_x)-1,cprime_x,len(BRnew_y)-1,BRnew_y);
+    h2d_csXbr_exp = TH2D("h2d_csXbr_exp","",len(cprime_x)-1,cprime_x,len(BRnew_y)-1,BRnew_y);
+    h2d_csXbr_obs = TH2D("h2d_csXbr_obs","",len(cprime_x)-1,cprime_x,len(BRnew_y)-1,BRnew_y);
 
     for j in range(len(cprime)):
         for i in range(len(BRnew)):
@@ -1172,7 +1168,6 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
                                                                                              
     can1_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpMu_%i.png"%(SIGCH,mass));
     can1_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpMu_%i.pdf"%(SIGCH,mass));
-    can1_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpMu_%i.root"%(SIGCH,mass));
 
     if not options.blindObservedLine:
         can2_BSM2D = ROOT.TCanvas("can2_BSM2D","can2_BSM2D",1,1,630,576);
@@ -1199,7 +1194,49 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
         can2_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsMu_%i.png"%(SIGCH,mass));
         can2_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsMu_%i.pdf"%(SIGCH,mass));
 
-    can3_BSM2D = ROOT.TCanvas("can3_BSM2D","can3_BSM2D",630,600);
+    can3_BSM2D = ROOT.TCanvas("can3_BSM2D","can3_BSM2D",1,1,630,576);
+    can3_BSM2D.SetHighLightColor(2);
+    can3_BSM2D.SetFillColor(0);
+    can3_BSM2D.SetBorderMode(0);
+    can3_BSM2D.SetBorderSize(2);
+    can3_BSM2D.SetGridx();
+    can3_BSM2D.SetGridy();
+    can3_BSM2D.SetTickx(1);
+    can3_BSM2D.SetTicky(1);
+    can3_BSM2D.SetLeftMargin(0.15);
+    can3_BSM2D.SetRightMargin(0.17);
+    can3_BSM2D.SetTopMargin(0.05);
+    can3_BSM2D.SetBottomMargin(0.15);
+    can3_BSM2D.SetFrameFillStyle(0);
+    can3_BSM2D.SetFrameBorderMode(0);
+    can3_BSM2D.SetFrameFillStyle(0);
+    can3_BSM2D.SetFrameBorderMode(0);
+
+    h2d_csXbr_exp.SetLineStyle(0);
+    h2d_csXbr_exp.SetMarkerStyle(20);
+    h2d_csXbr_exp.GetXaxis().SetTitle("C^{'}");
+    h2d_csXbr_exp.GetXaxis().SetNdivisions(504);
+    h2d_csXbr_exp.GetXaxis().SetLabelFont(42);
+    h2d_csXbr_exp.GetXaxis().SetLabelOffset(0.007);
+    h2d_csXbr_exp.GetXaxis().SetLabelSize(0.045);
+    h2d_csXbr_exp.GetXaxis().SetTitleSize(0.045);
+    h2d_csXbr_exp.GetXaxis().SetTitleOffset(1.02);
+    h2d_csXbr_exp.GetXaxis().SetTitleFont(42);
+    h2d_csXbr_exp.GetYaxis().SetTitle("BR_{new}");
+    h2d_csXbr_exp.GetYaxis().SetNdivisions(9);
+    h2d_csXbr_exp.GetYaxis().SetLabelFont(42);
+    h2d_csXbr_exp.GetYaxis().SetLabelOffset(0.007);
+    h2d_csXbr_exp.GetYaxis().SetLabelSize(0.045);
+    h2d_csXbr_exp.GetYaxis().SetTitleSize(0.045);
+    h2d_csXbr_exp.GetYaxis().SetTitleOffset(1.25);
+    h2d_csXbr_exp.GetYaxis().SetTitleFont(42);
+    h2d_csXbr_exp.GetZaxis().SetTitle("#sigma #times BR_{WW}  excluded at 95% C.L");
+    h2d_csXbr_exp.GetZaxis().SetLabelFont(42);
+    h2d_csXbr_exp.GetZaxis().SetLabelSize(0.03);
+    h2d_csXbr_exp.GetZaxis().SetTitleOffset(1);
+    h2d_csXbr_exp.GetZaxis().SetTitleFont(42);
+    h2d_csXbr_exp.GetZaxis().SetTitleSize(0.05);
+
     h2d_csXbr_exp.Draw("colz");
     banner.Draw();
     banner2.Draw();
@@ -1208,12 +1245,273 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
 
     if not options.blindObservedLine:
         can4_BSM2D = ROOT.TCanvas("can4_BSM2D","can4_BSM2D",630,600);
+        can4_BSM2D.SetHighLightColor(2);
+        can4_BSM2D.SetFillColor(0);
+        can4_BSM2D.SetBorderMode(0);
+        can4_BSM2D.SetBorderSize(2);
+        can4_BSM2D.SetGridx();
+        can4_BSM2D.SetGridy();
+        can4_BSM2D.SetTickx(1);
+        can4_BSM2D.SetTicky(1);
+        can4_BSM2D.SetLeftMargin(0.15);
+        can4_BSM2D.SetRightMargin(0.17);
+        can4_BSM2D.SetTopMargin(0.05);
+        can4_BSM2D.SetBottomMargin(0.15);
+        can4_BSM2D.SetFrameFillStyle(0);
+        can4_BSM2D.SetFrameBorderMode(0);
+        can4_BSM2D.SetFrameFillStyle(0);
+        can4_BSM2D.SetFrameBorderMode(0);
         h2d_csXbr_obs.Draw("colz");
         banner.Draw();
         banner2.Draw();
         can4_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsSigma_%i.png"%(SIGCH,mass));
         can4_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsSigma_%i.pdf"%(SIGCH,mass));
 
+
+#############################################
+### Make the BSM 2D Scane vs c' and brNew ###
+#############################################
+
+def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
+
+
+    stylePath = os.getenv("ROOTStyle");
+    gROOT.ProcessLine(".x "+stylePath+"/rootPalette.C");
+
+    massBRWW = [5.58E-01,5.77E-01,5.94E-01,6.09E-01,6.21E-01];            
+
+    print "module ===> makeBSMLimits_2DMass";
+
+    massindex = {600:0,700:1,800:2,900:3,1000:4}
+    mass_XS  = [];
+    cprime_x = array('d',[0.1,0.2,0.3,0.5,0.7,1.0]);
+    mass_x   = array('d',[550,650,750,850,950,1050]);
+    
+    if SIGCH == "" or SIGCH == "_2jet":
+        mass_XS.append((0.5230+0.09688));
+        mass_XS.append((0.2288+0.06330));
+        mass_XS.append((0.1095+0.04365));
+        mass_XS.append((0.05684+0.03164));
+        mass_XS.append((0.03163+0.02399));
+    elif SIGCH == "_ggH":
+        mass_XS.append((0.5230));
+        mass_XS.append((0.2288));
+        mass_XS.append((0.1095));
+        mass_XS.append((0.05684));
+        mass_XS.append((0.03163));
+    elif SIGCH == "_vbfH":
+        mass_XS.append((0.09688));
+        mass_XS.append((0.06330));
+        mass_XS.append((0.04365));
+        mass_XS.append((0.03164));
+        mass_XS.append((0.02399));
+    else:
+        print "problem!"
+        
+    h2d_exp = TH2D("h2d_exp_brNew","",len(mass_x)-1,mass_x,len(cprime_x)-1,cprime_x);
+    h2d_obs = TH2D("h2d_obs_brNew","",len(mass_x)-1,mass_x,len(cprime_x)-1,cprime_x);
+    h2d_csXbr_exp = TH2D("h2d_csXbr_exp_brNew","",len(mass_x)-1,mass_x,len(cprime_x)-1,cprime_x);
+    h2d_csXbr_obs = TH2D("h2d_csXbr_obs_brNew","",len(mass_x)-1,mass_x,len(cprime_x)-1,cprime_x);
+
+    for j in range(len(mass)):
+        for i in range(len(cprime)):
+            curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[j],options.channel,SIGCH,cprime[i],brNew,mass[j]);
+            curAsymLimits = getAsymLimits(curFile);
+            h2d_exp.SetBinContent(j+1,i+1,curAsymLimits[3]);
+            h2d_obs.SetBinContent(j+1,i+1,curAsymLimits[0]);
+            h2d_csXbr_exp.SetBinContent(j+1,i+1,curAsymLimits[3]*mass_XS[massindex[mass[j]]]*cprime[i]*0.1*(1-brNew*0.1)*massBRWW[massindex[mass[j]]]);
+            h2d_csXbr_obs.SetBinContent(j+1,i+1,curAsymLimits[0]*mass_XS[massindex[mass[j]]]*cprime[i]*0.1*(1-brNew*0.1)*massBRWW[massindex[mass[j]]]);
+
+
+    h2d_obs.GetYaxis().SetTitle("C^{'}");
+    h2d_csXbr_exp.GetYaxis().SetTitle("C^{'}");
+    h2d_csXbr_obs.GetYaxis().SetTitle("C^{'}");
+    h2d_exp.GetYaxis().SetTitle("C^{'}");
+
+    h2d_exp.GetXaxis().SetTitle("m_{H} (GeV)");
+    h2d_obs.GetXaxis().SetTitle("m_{H} (GeV)");
+    h2d_csXbr_exp.GetYaxis().SetTitle("m_{H} (GeV)");
+    h2d_csXbr_obs.GetYaxis().SetTitle("m_{H} (GeV)");
+
+    h2d_csXbr_obs.GetZaxis().SetLimits(0,h2d_csXbr_obs.GetMaximum());
+    h2d_csXbr_exp.GetZaxis().SetLimits(0,h2d_csXbr_exp.GetMaximum());
+    h2d_exp.GetZaxis().SetLimits(0,h2d_exp.GetMaximum());
+    h2d_obs.GetZaxis().SetLimits(0,h2d_obs.GetMaximum());
+
+
+    h2d_exp.SetLineStyle(0);
+    h2d_exp.SetMarkerStyle(20);
+    h2d_exp.GetXaxis().SetNdivisions(504);
+    h2d_exp.GetXaxis().SetLabelFont(42);
+    h2d_exp.GetXaxis().SetLabelOffset(0.007);
+    h2d_exp.GetXaxis().SetLabelSize(0.045);
+    h2d_exp.GetXaxis().SetTitleSize(0.045);
+    h2d_exp.GetXaxis().SetTitleOffset(1.02);
+    h2d_exp.GetXaxis().SetTitleFont(42);
+    h2d_exp.GetYaxis().SetNdivisions(9);
+    h2d_exp.GetYaxis().SetLabelFont(42);
+    h2d_exp.GetYaxis().SetLabelOffset(0.007);
+    h2d_exp.GetYaxis().SetLabelSize(0.045);
+    h2d_exp.GetYaxis().SetTitleSize(0.045);
+    h2d_exp.GetYaxis().SetTitleOffset(1.25);
+    h2d_exp.GetYaxis().SetTitleFont(42);
+    h2d_exp.GetZaxis().SetTitle("signal strenght excluded at 95% C.L");
+    h2d_exp.GetZaxis().SetLabelFont(42);
+    h2d_exp.GetZaxis().SetLabelSize(0.03);
+    h2d_exp.GetZaxis().SetTitleOffset(1);
+    h2d_exp.GetZaxis().SetTitleFont(42);
+    h2d_exp.GetZaxis().SetTitleSize(0.05);
+
+
+    banner = TPaveText( 0.125, 0.953, 0.76, 0.975, "brNDC");
+    banner.SetFillColor(ROOT.kWhite);
+    banner.SetTextSize(0.033);
+    banner.SetTextAlign(11);
+    banner.SetTextFont(62);
+    banner.SetBorderSize(0);
+    leftText = "CMS Preliminary";
+    banner.AddText(leftText);
+    banner.Draw();
+
+    label_sqrt = TPaveText(0.45,0.953,0.89,0.975, "brNDC");
+    label_sqrt.SetFillColor(ROOT.kWhite);
+    label_sqrt.SetBorderSize(0);
+    label_sqrt.SetTextSize(0.033);
+    label_sqrt.SetTextFont(62);
+    label_sqrt.SetTextAlign(31); # align right                                                                                                                                         
+    label_sqrt.AddText("L = 19.3 fb^{-1} at #sqrt{s} = 8 TeV");
+    
+    banner2 = TLatex(0.17,0.91,("BR new = %0.1f"%(brNew)));
+    banner2.SetNDC(); banner2.SetTextSize(0.028);
+
+    can1_BSM2D = ROOT.TCanvas("can1_BSM2D","can1_BSM2D",1,1,630,576);
+    can1_BSM2D.SetHighLightColor(2);
+    can1_BSM2D.SetFillColor(0);
+    can1_BSM2D.SetBorderMode(0);
+    can1_BSM2D.SetBorderSize(2);
+    can1_BSM2D.SetGridx();
+    can1_BSM2D.SetGridy();
+    can1_BSM2D.SetTickx(1);
+    can1_BSM2D.SetTicky(1);
+    can1_BSM2D.SetLeftMargin(0.15);
+    can1_BSM2D.SetRightMargin(0.17);
+    can1_BSM2D.SetTopMargin(0.05);
+    can1_BSM2D.SetBottomMargin(0.15);
+    can1_BSM2D.SetFrameFillStyle(0);
+    can1_BSM2D.SetFrameBorderMode(0);
+    can1_BSM2D.SetFrameFillStyle(0);
+    can1_BSM2D.SetFrameBorderMode(0);
+
+    h2d_exp.Draw("colz");
+    banner.Draw();
+    label_sqrt.Draw();
+    banner2.Draw();
+
+    gPad.Update();
+    palette = h2d_exp.GetListOfFunctions().FindObject("palette"); 
+    myx1=palette.GetX1NDC() +0.01;
+    myx2=palette.GetX2NDC() +0.01;
+    palette.SetX1NDC(myx1);
+    palette.SetX2NDC(myx2);
+                                                                                             
+    can1_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpMu_brNew_%0.1f.png"%(SIGCH,brNew));
+    can1_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpMu_brNew_%0.1f.pdf"%(SIGCH,brNew));
+
+    if not options.blindObservedLine:
+        can2_BSM2D = ROOT.TCanvas("can2_BSM2D","can2_BSM2D",1,1,630,576);
+        can2_BSM2D.SetHighLightColor(2);
+        can2_BSM2D.SetFillColor(0);
+        can2_BSM2D.SetBorderMode(0);
+        can2_BSM2D.SetBorderSize(2);
+        can2_BSM2D.SetGridx();
+        can2_BSM2D.SetGridy();
+        can2_BSM2D.SetTickx(1);
+        can2_BSM2D.SetTicky(1);
+        can2_BSM2D.SetLeftMargin(0.15);
+        can2_BSM2D.SetRightMargin(0.17);
+        can2_BSM2D.SetTopMargin(0.05);
+        can2_BSM2D.SetBottomMargin(0.15);
+        can2_BSM2D.SetFrameFillStyle(0);
+        can2_BSM2D.SetFrameBorderMode(0);
+        can2_BSM2D.SetFrameFillStyle(0);
+        can2_BSM2D.SetFrameBorderMode(0);
+
+        h2d_obs.Draw("colz");
+        banner.Draw();
+        banner2.Draw();
+        can2_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsMu_brNew_%0.1f.png"%(SIGCH,brNew));
+        can2_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsMu_brNew_%0.1f.pdf"%(SIGCH,brNew));
+
+    can3_BSM2D = ROOT.TCanvas("can3_BSM2D","can3_BSM2D",1,1,630,576);
+    can3_BSM2D.SetHighLightColor(2);
+    can3_BSM2D.SetFillColor(0);
+    can3_BSM2D.SetBorderMode(0);
+    can3_BSM2D.SetBorderSize(2);
+    can3_BSM2D.SetGridx();
+    can3_BSM2D.SetGridy();
+    can3_BSM2D.SetTickx(1);
+    can3_BSM2D.SetTicky(1);
+    can3_BSM2D.SetLeftMargin(0.15);
+    can3_BSM2D.SetRightMargin(0.17);
+    can3_BSM2D.SetTopMargin(0.05);
+    can3_BSM2D.SetBottomMargin(0.15);
+    can3_BSM2D.SetFrameFillStyle(0);
+    can3_BSM2D.SetFrameBorderMode(0);
+    can3_BSM2D.SetFrameFillStyle(0);
+    can3_BSM2D.SetFrameBorderMode(0);
+
+    h2d_csXbr_exp.SetLineStyle(0);
+    h2d_csXbr_exp.SetMarkerStyle(20);
+    h2d_csXbr_exp.GetXaxis().SetNdivisions(504);
+    h2d_csXbr_exp.GetXaxis().SetLabelFont(42);
+    h2d_csXbr_exp.GetXaxis().SetLabelOffset(0.007);
+    h2d_csXbr_exp.GetXaxis().SetLabelSize(0.045);
+    h2d_csXbr_exp.GetXaxis().SetTitleSize(0.045);
+    h2d_csXbr_exp.GetXaxis().SetTitleOffset(1.02);
+    h2d_csXbr_exp.GetXaxis().SetTitleFont(42);
+    h2d_csXbr_exp.GetYaxis().SetNdivisions(9);
+    h2d_csXbr_exp.GetYaxis().SetLabelFont(42);
+    h2d_csXbr_exp.GetYaxis().SetLabelOffset(0.007);
+    h2d_csXbr_exp.GetYaxis().SetLabelSize(0.045);
+    h2d_csXbr_exp.GetYaxis().SetTitleSize(0.045);
+    h2d_csXbr_exp.GetYaxis().SetTitleOffset(1.25);
+    h2d_csXbr_exp.GetYaxis().SetTitleFont(42);
+    h2d_csXbr_exp.GetZaxis().SetTitle("#sigma #times BR_{WW}  excluded at 95% C.L");
+    h2d_csXbr_exp.GetZaxis().SetLabelFont(42);
+    h2d_csXbr_exp.GetZaxis().SetLabelSize(0.03);
+    h2d_csXbr_exp.GetZaxis().SetTitleOffset(1);
+    h2d_csXbr_exp.GetZaxis().SetTitleFont(42);
+    h2d_csXbr_exp.GetZaxis().SetTitleSize(0.05);
+
+    h2d_csXbr_exp.Draw("colz");
+    banner.Draw();
+    banner2.Draw();
+    can3_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpSigma_brNew_%0.1f.png"%(SIGCH,brNew));
+    can3_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpSigma_brNew_%0.1f.pdf"%(SIGCH,brNew));
+
+    if not options.blindObservedLine:
+        can4_BSM2D = ROOT.TCanvas("can4_BSM2D","can4_BSM2D",630,600);
+        can4_BSM2D.SetHighLightColor(2);
+        can4_BSM2D.SetFillColor(0);
+        can4_BSM2D.SetBorderMode(0);
+        can4_BSM2D.SetBorderSize(2);
+        can4_BSM2D.SetGridx();
+        can4_BSM2D.SetGridy();
+        can4_BSM2D.SetTickx(1);
+        can4_BSM2D.SetTicky(1);
+        can4_BSM2D.SetLeftMargin(0.15);
+        can4_BSM2D.SetRightMargin(0.17);
+        can4_BSM2D.SetTopMargin(0.05);
+        can4_BSM2D.SetBottomMargin(0.15);
+        can4_BSM2D.SetFrameFillStyle(0);
+        can4_BSM2D.SetFrameBorderMode(0);
+        can4_BSM2D.SetFrameFillStyle(0);
+        can4_BSM2D.SetFrameBorderMode(0);
+        h2d_csXbr_obs.Draw("colz");
+        banner.Draw();
+        banner2.Draw();
+        can4_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsSigma_brNew_%0.1f.png"%(SIGCH,brNew));
+        can4_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsSigma_brNew_%0.1f.pdf"%(SIGCH,brNew));
 
 ##################################
 ########### Main Code ############
@@ -1523,3 +1821,9 @@ if __name__ == '__main__':
           makeBSMLimitPlot2D(SIGCH,900);
           makeBSMLimitPlot2D(SIGCH,1000);
       
+          makeBSMLimitPlot2DBRnew(SIGCH,0);
+          makeBSMLimitPlot2DBRnew(SIGCH,0.1);
+          makeBSMLimitPlot2DBRnew(SIGCH,0.2);
+          makeBSMLimitPlot2DBRnew(SIGCH,0.3);
+          makeBSMLimitPlot2DBRnew(SIGCH,0.4);
+          makeBSMLimitPlot2DBRnew(SIGCH,0.5);
