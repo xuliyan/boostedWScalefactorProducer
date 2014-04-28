@@ -2770,15 +2770,15 @@ self.channel));
         if not options.jetBin == "_2jet": self.get_mj_and_mlvj_dataset(self.file_WJets1_mc,"_WJets1")# to get the shape of m_lvj
         self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets01")# to get the shape of m_lvj
 
-        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_up","ErfExp",self.channel,self.wtagger_label,1);        
+        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_up",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);        
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_dn","ErfExp",self.channel,self.wtagger_label,1);
+        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_dn",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer","ErfExp",self.channel,self.wtagger_label,1);        
+        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);        
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_up","ErfExp",self.channel,self.wtagger_label,1);
+        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_up",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_dn","ErfExp",self.channel,self.wtagger_label,1);
+        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_dn",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets01",self.mj_shape["WJets01"],self.channel,self.wtagger_label,1);
