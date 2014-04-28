@@ -142,7 +142,7 @@ class doFit_wj_and_wlvj:
         #narrow the BinWidth_mj and BinWidth_mlvj by a factor of 5. Because Higgs-Combination-Tools will generate a binned sample, so need the bin width narrow. So, as a easy solution, we will increase the bin-width by a factor of 5 when ploting m_j m_WW
 
         self.leg = TLegend();        
-        self.narrow_factor = 5;
+        self.narrow_factor = 10;
 
         ## correct the binning of mj
         self.BinWidth_mj = self.BinWidth_mj;
@@ -218,7 +218,7 @@ class doFit_wj_and_wlvj:
 
         self.PS_model = options.psmodel;
 
-        if options.pseudodata==1:
+        if options.pseudodata == 1:
             self.file_data = ("ofile_pseudodata.root");
         else:
             self.file_data  = ("ofile_data.root");
@@ -2818,7 +2818,7 @@ self.channel));
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets01","_signal_region",self.mlvj_shape["WJets01"],self.channel,self.wtagger_label,0,0,0,0,"_WJets01");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName()D);
+        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
         if not options.jetBin == "_2jet": fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets1_mc,"_WJets1","_signal_region",self.mlvj_shape["WJets1"],self.channel,self.wtagger_label,0,0,0,0,"_WJets01");
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0","_signal_region",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
