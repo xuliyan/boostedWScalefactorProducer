@@ -30,7 +30,7 @@ void fit_genHMass(RooWorkspace* workspace, const std::string & label, const std:
 
 
 void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, const std::string & label, const std::string & model,
-		      const std::string & channel,const std::string & wtagger_label,const int & additionalinformation, const int & deco){
+		      const std::string & channel,const std::string & wtagger_label,const int & additionalinformation, const int & deco, const int & pseudodata){
 
      std::cout<<"############### Fit mj single MC sample"<<fileName<<" "<<label<<"  "<<model<<" ##################"<<std::endl;
      //import variable and dataset
@@ -67,7 +67,8 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
      SystematicUncertaintyHiggs_01jetBin higgsUncertainty;
 
      RooRealVar* param = dynamic_cast<RooRealVar*>(par.Next());
-     while(param){
+     if( not pseudodata) {
+      while(param){
 	  if(TString(label).Contains("VV") or TString(label).Contains("WW_EWK") or TString(label).Contains("STop") or TString(label).Contains("TTbar")){
 	    if(TString(param->GetName()).Contains("rrv_mean1_gaus")){
                param->setRange(param->getMin()+higgsUncertainty.mean_mj_shift,param->getMax()+higgsUncertainty.mean_mj_shift);
@@ -89,8 +90,8 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
 	  }
           param = dynamic_cast<RooRealVar*>(par.Next());
 
+      }
      }
-
      workspace->import(*model_pdf);
      workspace->import(*rfresult);
 
