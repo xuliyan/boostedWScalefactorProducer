@@ -233,8 +233,8 @@ class doFit_wj_and_wlvj:
              self.file_WJets0_mc = ("ofile_WJets_exclusive_Pythia.root");
              self.file_WJets1_mc = ("ofile_WJets_Herwig.root");
             else: 
-             self.file_WJets0_mc = ("ofile_WJets_Pythia100.root");
-             self.file_WJets1_mc = ("ofile_WJets_Herwig.root");
+             self.file_WJets1_mc = ("ofile_WJets_Pythia100.root");
+             self.file_WJets0_mc = ("ofile_WJets_Herwig.root");
         else:
             if options.jetBin == "_2jet" :
              self.file_WJets0_mc = ("ofile_WJets_Herwig.root");
@@ -2935,8 +2935,8 @@ self.channel));
          fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer_dn","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
          self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWK","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,1,0,0,0,"_WW_EWK");
-         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWK","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,1,0,0,0,"_WW_EWK");
+        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
         
         print "________________________________________________________________________"
 
