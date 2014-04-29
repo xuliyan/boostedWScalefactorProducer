@@ -2601,7 +2601,7 @@ self.channel));
         ###### Final Plot of mWW invarant mass distribution #####
         #########################################################
         
-        mplot = rrv_x.frame(RooFit.Title("check_workspace"));
+        mplot = rrv_x.frame(RooFit.Title("check_workspace"),RooFit.Bins(int(rrv_x.getBins()/self.narrow_factor));
         data_obs.plotOn(mplot ,RooFit.DataError(RooAbsData.SumW2), RooFit.Name("data_invisible"),RooFit.Invisible());
 
         #### create the frame
