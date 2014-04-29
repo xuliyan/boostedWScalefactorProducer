@@ -40,6 +40,7 @@ parser.add_option('--pseudodata',  action='store', type="int",    dest='pseudoda
 parser.add_option('--fitSignal',   action='store', type="int",    dest='fitsignal',   default=0, help='fit only signal lineshape with a chosen model')
 parser.add_option('--category',    action="store", type="string", dest="category",    default="HP")
 parser.add_option('--jetBin',      action="store", type="string", dest="jetBin",      default="")
+parser.add_option('--skipJetSystematics',      action="store", type="int", dest="skipJetSystematics",  default=0)
 
 (options, args) = parser.parse_args()
 
@@ -804,7 +805,7 @@ class doFit_wj_and_wlvj:
         rdataset4fit_sb_hi_mlvj     = RooDataSet("rdataset4fit"+label+"_sb_hi"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"_sb_hi"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
 
         
-        if label != "_WJets01" and label != "_WJets1" :
+        if label != "_WJets01" and label != "_WJets1" and label !="_data" and not options.skipJetSystematics:
         
          #dataset of jes_up
          rdataset_mj_jes_up  = RooDataSet("rdataset"+label+"massvbf_jes_up"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_jes_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
@@ -877,7 +878,7 @@ class doFit_wj_and_wlvj:
         combData4fit = RooDataSet("combData4fit"+label+"_"+self.channel,"combData4fit"+label+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
 
 
-        if label != "_WJets01" and label != "_WJets1" :
+        if label != "_WJets01" and label != "_WJets1" and label !="_data" and not options.skipJetSystematics:
           
          ## jes_up
          combData_jes_up = RooDataSet("combData"+label+"massvbf_jes_up"+"_"+self.channel,"combData"+label+"massvbf_jes_up"+"_"+self.channel,RooArgSet(rrv_mass_lvj, data_category, rrv_weight),RooFit.WeightVar(rrv_weight) );
@@ -904,7 +905,7 @@ class doFit_wj_and_wlvj:
         hnum_4region = TH1D("hnum_4region"+label+"_"+self.channel,"hnum_4region"+label+"_"+self.channel,4,-1.5,2.5);# m_j   -1: sb_lo; 0:signal_region; 1: sb_hi; 2:total        
         hnum_2region = TH1D("hnum_2region"+label+"_"+self.channel,"hnum_2region"+label+"_"+self.channel,2,-0.5,1.5);# m_lvj  0: signal_region; 1: total
 
-        if label != "_WJets01" and label != "_WJets1" :
+        if label != "_WJets01" and label != "_WJets1" and label !="_data" and not options.skipJetSystematics:
 
          hnum_4region_jes_up = TH1D("hnum_4region"+label+"massvbf_jes_up"+"_"+self.channel,"hnum_4region"+label+"massvbf_jes_up"+"_"+self.channel,4,-1.5,2.5);  
          hnum_2region_jes_up = TH1D("hnum_2region"+label+"massvbf_jes_up"+"_"+self.channel,"hnum_2region"+label+"massvbf_jes_up"+"_"+self.channel,2,-0.5,1.5);
@@ -960,7 +961,7 @@ class doFit_wj_and_wlvj:
           pfMET    = getattr(treeIn,"pfMET");
           mass_lvj = getattr(treeIn,"mass_lvj_type0_met");
 
-          if label != "_WJets01" and label != "_WJets1" :
+          if label != "_WJets01" and label != "_WJets1" and label !="_data" and not options.skipJetSystematics:
 
            # jet mass jes_up
            tmp_jet_mass_jes_up = getattr(treeIn, "jet_mass_pr_jes_up");
@@ -1048,7 +1049,7 @@ class doFit_wj_and_wlvj:
            if ungroomed_jet_pt > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj >= rrv_mass_lvj.getMin() and mass_lvj <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet >=2 and tmp_vbf_dEta > self.dEta_cut and tmp_vbf_Mjj > self.Mjj_cut:
             isPassingCut = 1 ;
 
-           if label != "_WJets01" and label != "_WJets1" :
+           if label != "_WJets01" and label != "_WJets1" and label !="_data" and not options.skipJetSystematics:
            
             if ungroomed_jet_pt_jes_up > 200. and discriminantCut and tmp_jet_mass_jes_up >= rrv_mass_j.getMin() and tmp_jet_mass_jes_up<=rrv_mass_j.getMax() and getattr(treeIn,"vbf_maxpt_j1_bDiscriminatorCSV") < 0.679 and getattr(treeIn,"vbf_maxpt_j2_bDiscriminatorCSV")<0.679 and mass_lvj_jes_up >= rrv_mass_lvj.getMin() and mass_lvj_jes_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep and njet_jes_up >=2 and tmp_vbf_dEta_jes_up > self.dEta_cut and tmp_vbf_Mjj_jes_up > self.Mjj_cut :
               isPassingCut_jes_up = 1 ;
@@ -1072,7 +1073,7 @@ class doFit_wj_and_wlvj:
                
             isPassingCut = 1 ;
 
-           if label != "_WJets01" and label != "_WJets1" :
+           if label != "_WJets01" and label != "_WJets1" and label !="_data" and not options.skipJetSystematics:
 
             if ungroomed_jet_pt_jes_up > 200. and discriminantCut and tmp_jet_mass_jes_up >= rrv_mass_j.getMin() and tmp_jet_mass_jes_up<=rrv_mass_j.getMax() and getattr(treeIn,"nbjets_csvm_veto") < 1 and mass_lvj_jes_up >= rrv_mass_lvj.getMin() and mass_lvj_jes_up <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET_jes_up > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and njet_jes_up < 2:
 
@@ -1197,7 +1198,7 @@ class doFit_wj_and_wlvj:
               hnum_4region.Fill(2,tmp_event_weight);
 
              ## JES UP
-             if label != "_WJets01" and label != "_WJets1" :
+             if label != "_WJets01" and label != "_WJets1" and label !="_data" and not options.skipJetSystematics:
              
               rrv_mass_lvj.setVal(mass_lvj_jes_up);
               rrv_mass_j.setVal(tmp_jet_mass_jes_up);
@@ -1424,7 +1425,7 @@ class doFit_wj_and_wlvj:
         getattr(self.workspace4fit_,"import")(combData4fit); combData4fit.Print();
 
         ###################jes_up
-        if label != "_WJets01" and label != "_WJets1" :
+        if label != "_WJets01" and label != "_WJets1" and label !="_data" and not options.skipJetSystematics:
    
          print "########### jes up ###########";
          rrv_scale_to_lumi_jes_up = RooRealVar("rrv_scale_to_lumi"+label+"massvbf_jes_up_"+self.channel,"rrv_scale_to_lumi"+label+"massvbf_jes_up_"+self.channel,tmp_scale_to_lumi);
@@ -1551,7 +1552,7 @@ class doFit_wj_and_wlvj:
         getattr(self.workspace4fit_,"import")(rdataset_mj); rdataset_mj.Print();
         getattr(self.workspace4fit_,"import")(rdataset4fit_mj); rdataset4fit_mj.Print();
 
-        if label != "_WJets01" and label != "_WJets1" :
+        if label != "_WJets01" and label != "_WJets1" and label !="_data" and not options.skipJetSystematics:
          #####jes_up
          #prepare m_j dataset       
          print "########### jes up ###########";
@@ -2730,35 +2731,37 @@ self.channel));
         ### Build the dataset
         self.get_mj_and_mlvj_dataset(self.file_ggH,"_%s"%(self.higgs_sample));
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%smassvbf_jes_up"%(self.higgs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
+        if not options.skipJetSystematics:
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%smassvbf_jes_up"%(self.higgs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
 
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        self.workspace4fit_.Print();
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%smassvbf_jes_dn"%(self.higgs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%smassvbf_jer"%(self.higgs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%smassvbf_jer_up"%(self.higgs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%smassvbf_jer_dn"%(self.higgs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         self.workspace4fit_.Print();
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%smassvbf_jes_dn"%(self.higgs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%smassvbf_jer"%(self.higgs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%smassvbf_jer_up"%(self.higgs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%smassvbf_jer_dn"%(self.higgs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region",self.mlvj_shape["ggH"],self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
         self.get_mj_and_mlvj_dataset(self.file_vbfH,"_%s"%(self.vbfhiggs_sample));
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jes_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jes_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jer"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jer_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jer_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jes_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jes_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jer"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jer_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jer_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region",self.mlvj_shape["vbfH"],self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region",self.mlvj_shape["vbfH"],self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
     
         print "________________________________________________________________________"
         
@@ -2770,16 +2773,17 @@ self.channel));
         if not options.jetBin == "_2jet": self.get_mj_and_mlvj_dataset(self.file_WJets1_mc,"_WJets1")# to get the shape of m_lvj
         self.get_mj_and_mlvj_dataset(self.file_WJets0_mc,"_WJets01")# to get the shape of m_lvj
 
-        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_up",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);        
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_dn",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);        
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_up",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_dn",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_up",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);        
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_dn",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);        
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_up",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_dn",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets01",self.mj_shape["WJets01"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
@@ -2788,16 +2792,17 @@ self.channel));
         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_up","_sb_lo",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_dn","_sb_lo",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer","_sb_lo",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_up","_sb_lo",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_dn","_sb_lo",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_up","_sb_lo",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_dn","_sb_lo",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer","_sb_lo",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_up","_sb_lo",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_dn","_sb_lo",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets01","_sb_lo",self.mlvj_shape["WJets01"],self.channel,self.wtagger_label,0,0,0,0,"_WJets01");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
@@ -2806,16 +2811,17 @@ self.channel));
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_up","_signal_region",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_dn","_signal_region",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer","_signal_region",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_up","_signal_region",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_dn","_signal_region",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_up","_signal_region",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jes_dn","_signal_region",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer","_signal_region",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_up","_signal_region",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0massvbf_jer_dn","_signal_region",self.MODEL_4_mlvj,self.channel,self.wtagger_label,0,0,0,0,"_WJets0");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets01","_signal_region",self.mlvj_shape["WJets01"],self.channel,self.wtagger_label,0,0,0,0,"_WJets01");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
@@ -2832,44 +2838,47 @@ self.channel));
         ### Build the dataset        
         self.get_mj_and_mlvj_dataset(self.file_VV_mc,"_VV","jet_mass_pr")# to get the shape of m_lvj
 
-        fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jes_up",self.mj_shape["VV"],self.channel,self.wtagger_label,1);        
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jes_dn",self.mj_shape["VV"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer",self.mj_shape["VV"],self.channel,self.wtagger_label,1);        
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer_up",self.mj_shape["VV"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer_dn",self.mj_shape["VV"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jes_up",self.mj_shape["VV"],self.channel,self.wtagger_label,1);        
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jes_dn",self.mj_shape["VV"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer",self.mj_shape["VV"],self.channel,self.wtagger_label,1);        
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer_up",self.mj_shape["VV"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer_dn",self.mj_shape["VV"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV",self.mj_shape["VV"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jes_up","_sb_lo",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jes_dn","_sb_lo",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer","_sb_lo",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer_up","_sb_lo",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer_dn","_sb_lo",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jes_up","_sb_lo",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jes_dn","_sb_lo",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer","_sb_lo",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer_up","_sb_lo",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer_dn","_sb_lo",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV","_sb_lo",self.mlvj_shape["VV"],self.channel,self.wtagger_label,1,0,1,0,"_VV");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jes_up","_signal_region",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jes_dn","_signal_region",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer","_signal_region",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer_up","_signal_region",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer_dn","_signal_region",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jes_up","_signal_region",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jes_dn","_signal_region",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer","_signal_region",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer_up","_signal_region",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VVmassvbf_jer_dn","_signal_region",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV","_signal_region",self.mlvj_shape["VV"],self.channel,self.wtagger_label,0,0,0,0,"_VV");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
@@ -2884,47 +2893,50 @@ self.channel));
         ### Build the dataset        
         self.get_mj_and_mlvj_dataset(self.file_WW_EWK_mc,"_WW_EWK","jet_mass_pr")# to get the shape of m_lvj
 
-        fit_mj_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jes_up",self.mj_shape["WW_EWK"],self.channel,self.wtagger_label,1);        
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jes_dn",self.mj_shape["WW_EWK"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer",self.mj_shape["WW_EWK"],self.channel,self.wtagger_label,1);        
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer_up",self.mj_shape["WW_EWK"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer_dn",self.mj_shape["WW_EWK"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mj_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jes_up",self.mj_shape["WW_EWK"],self.channel,self.wtagger_label,1);        
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jes_dn",self.mj_shape["WW_EWK"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer",self.mj_shape["WW_EWK"],self.channel,self.wtagger_label,1);        
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer_up",self.mj_shape["WW_EWK"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer_dn",self.mj_shape["WW_EWK"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mj_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWK",self.mj_shape["WW_EWK"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jes_up","_sb_lo",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jes_dn","_sb_lo",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer","_sb_lo",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer_up","_sb_lo",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer_dn","_sb_lo",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jes_up","_sb_lo",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jes_dn","_sb_lo",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer","_sb_lo",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer_up","_sb_lo",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer_dn","_sb_lo",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWK","_sb_lo",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jes_up","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jes_dn","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer_up","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer_dn","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jes_up","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jes_dn","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer_up","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWKmassvbf_jer_dn","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,0,0,0,0,"_WW_EWK");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWK","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,1,0,0,0,"_WW_EWK");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_WW_EWK_mc,"_WW_EWK","_signal_region",self.mlvj_shape["WW_EWK"],self.channel,self.wtagger_label,1,0,0,0,"_WW_EWK");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
         
         print "________________________________________________________________________"
 
@@ -2938,86 +2950,92 @@ self.channel));
         self.get_mj_and_mlvj_dataset(self.file_TTbar_mc,"_TTbar")# to get the shape of m_lvj        
         self.get_mj_and_mlvj_dataset(self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo")# to get the shape of m_lvj
 
-        fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jes_up",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);        
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jes_dn",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);        
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer_up",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer_dn",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jes_up",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);        
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jes_dn",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);        
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer_up",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer_dn",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jes_up",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);        
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jes_dn",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);        
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer_up",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer_dn",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jes_up",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);        
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jes_dn",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);        
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer_up",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer_dn",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbar",self.mj_shape["TTbar"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jes_up","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jes_dn","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer_up","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer_dn","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jes_up","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jes_dn","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer_up","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer_dn","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
         
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jes_up","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jes_dn","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer_up","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer_dn","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jes_up","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jes_dn","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer_up","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer_dn","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbar","_sb_lo",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jes_up","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jes_dn","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer_up","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer_dn","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jes_up","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jes_dn","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer_up","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlomassvbf_jer_dn","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mcanlo_mc,"_TTbar_mcanlo","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar_mcanlo");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jes_up","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jes_dn","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer_up","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer_dn","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jes_up","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jes_dn","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer_up","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbarmassvbf_jer_dn","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbar","_signal_region",self.mlvj_shape["TTbar"],self.channel,self.wtagger_label,1,0,0,0,"_TTbar");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
@@ -3031,43 +3049,46 @@ self.channel));
         ### Build the dataset
         self.get_mj_and_mlvj_dataset(self.file_STop_mc,"_STop")# to get the shape of m_lvj
 
-        fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jes_up",self.mj_shape["STop"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jes_dn",self.mj_shape["STop"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer",self.mj_shape["STop"],self.channel,self.wtagger_label,1);        
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer_up",self.mj_shape["STop"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer_dn",self.mj_shape["STop"],self.channel,self.wtagger_label,1);
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jes_up",self.mj_shape["STop"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jes_dn",self.mj_shape["STop"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer",self.mj_shape["STop"],self.channel,self.wtagger_label,1);        
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer_up",self.mj_shape["STop"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer_dn",self.mj_shape["STop"],self.channel,self.wtagger_label,1);
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STop",self.mj_shape["STop"],self.channel,self.wtagger_label,1);
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jes_up","_sb_lo",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jes_dn","_sb_lo",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer","_sb_lo",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer_up","_sb_lo",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer_dn","_sb_lo",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
+        if not options.skipJetSystematics:
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jes_up","_sb_lo",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jes_dn","_sb_lo",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer","_sb_lo",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer_up","_sb_lo",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer_dn","_sb_lo",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STop","_sb_lo",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jes_up","_signal_region",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jes_dn","_signal_region",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer","_signal_region",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer_up","_signal_region",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-        fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer_dn","_signal_region",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
-        self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+        if not options.skipJetSystematics:
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jes_up","_signal_region",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jes_dn","_signal_region",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer","_signal_region",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer_up","_signal_region",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STopmassvbf_jer_dn","_signal_region",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
+         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_STop_mc,"_STop","_signal_region",self.mlvj_shape["STop"],self.channel,self.wtagger_label,1,0,0,0,"_STop");
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
@@ -3096,20 +3117,25 @@ self.channel));
       ### take the real data
       self.get_data();
       ### fit the WJets Normalization into the signal region -> no jet mass fluctuation has been done
-      self.fit_WJetsNorm(1);
+      if not options.skipJetSystematics:
+       self.fit_WJetsNorm(1);
+      else:
+       self.fit_WJetsNorm(0);
+          
       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
        
       ### fit data in the mlvj low sideband with two different models      
-      fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jes_up","massvbf_jes_up","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
-      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-      fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jes_dn","massvbf_jes_dn","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
-      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-      fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jer_up","massvbf_jer_up","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
-      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-      fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jer_dn","massvbf_jer_dn","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
-      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-      fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jer","massvbf_jer","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
-      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+      if not options.skipJetSystematics:
+       fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jes_up","massvbf_jes_up","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
+       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+       fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jes_dn","massvbf_jes_dn","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
+       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+       fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jer_up","massvbf_jer_up","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
+       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+       fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jer_dn","massvbf_jer_dn","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
+       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+       fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets0massvbf_jer","massvbf_jer","_sb_lo",self.mlvj_shape["WJets0"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
+       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
         
 
       fit_mlvj_in_Mj_sideband(self.workspace4fit_,self.color_palet,self.mlvj_shape,"_WJets01","","_sb_lo",self.mlvj_shape["WJets01"],self.channel,self.wtagger_label,0,1,options.pseudodata,options.jetBin);
@@ -3122,17 +3148,18 @@ self.channel));
      
       ### Prepare the workspace and datacards
       #### Call the alpha evaluation in automatic
+      if not options.skipJetSystematics:
       
-      get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4fit_,"_WJets0massvbf_jes_up",self.mlvj_shape["WJets0"],"","_mlvj","4fit",self.channel,self.wtagger_label,1);
-      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-      get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4fit_,"_WJets0massvbf_jes_dn",self.mlvj_shape["WJets0"],"","_mlvj","4fit",self.channel,self.wtagger_label,1);
-      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-      get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4fit_,"_WJets0massvbf_jer",self.mlvj_shape["WJets0"],"","_mlvj","4fit",self.channel,self.wtagger_label,1);
-      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-      get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4fit_,"_WJets0massvbf_jer_up",self.mlvj_shape["WJets0"],"","_mlvj","4fit",self.channel,self.wtagger_label,1);
-      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-      get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4fit_,"_WJets0massvbf_jer_dn",self.mlvj_shape["WJets0"],"","_mlvj","4fit",self.channel,self.wtagger_label,1);
-      self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+       get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4fit_,"_WJets0massvbf_jes_up",self.mlvj_shape["WJets0"],"","_mlvj","4fit",self.channel,self.wtagger_label,1);
+       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+       get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4fit_,"_WJets0massvbf_jes_dn",self.mlvj_shape["WJets0"],"","_mlvj","4fit",self.channel,self.wtagger_label,1);
+       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+       get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4fit_,"_WJets0massvbf_jer",self.mlvj_shape["WJets0"],"","_mlvj","4fit",self.channel,self.wtagger_label,1);
+       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+       get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4fit_,"_WJets0massvbf_jer_up",self.mlvj_shape["WJets0"],"","_mlvj","4fit",self.channel,self.wtagger_label,1);
+       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
+       get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4fit_,"_WJets0massvbf_jer_dn",self.mlvj_shape["WJets0"],"","_mlvj","4fit",self.channel,self.wtagger_label,1);
+       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
        
       get_WJets_mlvj_correction_sb_lo_to_signal_region(self.workspace4fit_,"_WJets01",self.mlvj_shape["WJets01"],"","_mlvj","4fit",self.channel,self.wtagger_label,1);
       self.workspace4fit_.writeToFile(self.tmpFile.GetName());
