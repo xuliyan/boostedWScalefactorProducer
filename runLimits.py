@@ -47,7 +47,8 @@ parser.add_option('--brNew',       action="store", type="int",    dest="brNew", 
 parser.add_option('--odir',        action="store", type="string", dest="odir",        default=".")
 parser.add_option('--sigChannel',  action="store", type="string", dest="sigChannel",  default="")
 parser.add_option('--jetBin',      action="store", type="string", dest="jetBin",      default="")
-parser.add_option('--turnOnAnalysis',       action="store", type="int",  dest="turnOnAnalysis",      default=0)
+parser.add_option('--skipJetSystematics',   action="store", type="int", dest="skipJetSystematics",    default=0)
+parser.add_option('--turnOnAnalysis',       action="store", type="int",  dest="turnOnAnalysis",       default=0)
 parser.add_option('--injectSingalStrenght', action="store", type=float,  dest="injectSingalStrenght", default=1., help='inject a singal in the toy generation')
 
 parser.add_option('--higgsCombination', action="store", type="int", dest="higgsCombination", default=0)
@@ -119,10 +120,10 @@ if options.biasStudy:
 
  if not options.turnOnAnalysis and not options.fitjetmass:
 
-  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
-#  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
-#  shape_gen = ["Pow2","Pow2","Pow2","Pow2","Pow2"]    
-  shape_fit = ["Pow2","Pow2","Pow2","Pow2","Pow2"]
+#  shape_gen = ["Exp","Exp","Exp","Exp","Exp"]    
+  shape_fit = ["Exp","Exp","Exp","Exp","Exp"]
+  shape_gen = ["Pow2","Pow2","Pow2","Pow2","Pow2"]    
+#  shape_fit = ["Pow2","Pow2","Pow2","Pow2","Pow2"]
 #  shape_gen = ["Pow","Pow","Pow","Pow","Pow"]    
 #  shape_fit = ["Pow","Pow","Pow","Pow","Pow"]
 
@@ -1586,7 +1587,7 @@ if __name__ == '__main__':
                     
                     time.sleep(0.3);
                     
-                    command = "python doFit_class_higgs.py %s ggH%03d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew %01d --inPath %s/ --jetBin %s --channel %s --pseudodata %d --closuretest %d "%(CHAN, mass[i], ccmlo[i], ccmhi[i], mjlo[i], mjhi[i], mlo[i], mhi[i], shape[i], shapeAlt[i], cprime[j], BRnew[k], os.getcwd(), options.jetBin, options.channel,options.pseudodata,options.closuretest);
+                    command = "python doFit_class_higgs.py %s ggH%03d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew %01d --inPath %s/ --jetBin %s --channel %s --pseudodata %d --closuretest %d --skipJetSystematics %d"%(CHAN, mass[i], ccmlo[i], ccmhi[i], mjlo[i], mjhi[i], mlo[i], mhi[i], shape[i], shapeAlt[i], cprime[j], BRnew[k], os.getcwd(), options.jetBin, options.channel,options.pseudodata,options.closuretest,options.skipJetSystematics);
                     print command ;
 
                     if options.batchMode :
