@@ -96,5 +96,19 @@
                           --channel em --massPoint 600 --jetBin _2jet  --nToys 1000 --inputGeneratedDataset ../<dacard_path>/Generated_SB --outputTree 1 --crossedToys 1
 
 
+##############################################################
+## Some useful sed and awk commands to manipulate datacards ##
+##############################################################
 
+
+1) change the shape parameter value on the fly:
+   example: sed -i "s/Deco_WJets0_sim_Exp_mu_HP_mlvj_eig0 param  0.0  5.0/Deco_WJets0_sim_Exp_mu_HP_mlvj_eig0 param  0.0  2.0/g" *.txt
       
+2) copy in the high mass paper repo
+
+   example: 
+   ls cards_el_Exp/ | grep 600 | grep -v _ggH_ | grep -v _vbfH_ | grep unbin | tr "_" " " | awk '{print "cp cards_el_Exp/"$1"@"$2"@"$3"@"$4"@"$5"@"$6" 600/cpsq"$4"_brnew"$5"/"}' | tr "@" "_"   | /bin/sh
+
+3) add jes and jet systematics line in case the code is run in the fast way:
+
+   ls | grep 1000 | grep _el_ | grep -v _ggH_ | grep -v _vbfH_ | grep unbin | awk '{print "sed -i \"s/Wjet_Norm_el   lnN     -         -    1.090     -      -        -/Wjet_Norm_el   lnN     -         -    1.090     -      -        -\\nCMS_scale_j lnN   1.034     1.072     0.971\\/1.029    1.052\\/0.948   1.054\\/0.946   1.037\\/0.963\\nCMS_res_j lnN   1.007     1.030     0.985\\/1.015    1.004\\/0.996   1.014\\/0.986   1.004\\/0.996/g\" " $1}' | /bin/sh
