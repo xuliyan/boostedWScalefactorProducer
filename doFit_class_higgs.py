@@ -380,7 +380,7 @@ class doFit_wj_and_wlvj:
         self.vpt_cut   = 200;
         self.bcut      = 0.679;
         if self.channel=="el":
-            self.pfMET_cut = 80; 
+            self.pfMET_cut = 50; 
             self.lpt_cut   = 35;        
         #deltaPhi_METj cut
         self.deltaPhi_METj_cut = 2.0;
@@ -2255,8 +2255,6 @@ self.channel));
 
              datacard_out.write( "\nCMS_hwwlvj_VV       lnN     -         -      -        -     %0.3f   "%(1+self.XS_VV_uncertainty));
 
-             datacard_out.write( "\n#CMS_hwwlvj_TTbar   lnN     -         -     %0.3f     -       -     "%(1+self.XS_TTbar_uncertainty));
-
  
          elif signalchannel=="vbfH":
             if options.jetBin == "_2jet":  
@@ -2286,8 +2284,6 @@ self.channel));
 
              datacard_out.write( "\nCMS_hwwlvj_WW_EWK    lnN       -             -        -         -       -     %0.3f  "%(1+self.XS_WW_EWK_uncertainty));
 
-             datacard_out.write( "\n#CMS_hwwlvj_TTbar    lnN       -             -        %0.3f     -       -       -  "%(1+self.XS_TTbar_uncertainty));
-
 
             else:  
              datacard_out.write( "\nbin                CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s "%(self.channel,self.channel,self.channel,self.channel,self.channel));
@@ -2313,8 +2309,6 @@ self.channel));
              datacard_out.write( "\nCMS_hwwlvj_STop     lnN      -           -        -     %0.3f     -     "%(1+self.XS_STop_uncertainty));
 
              datacard_out.write( "\nCMS_hwwlvj_VV       lnN      -           -        -       -      %0.3f  "%(1+self.XS_VV_uncertainty));
-
-             datacard_out.write( "\n#CMS_hwwlvj_TTbar   lnN      -           -      %0.3f     -       -     "%(1+self.XS_TTbar_uncertainty));
  
 
          elif signalchannel == "ggHvbfH":
@@ -2358,8 +2352,6 @@ self.channel));
 
              datacard_out.write( "\nCMS_hwwlvj_WW_EWK    lnN    -          -        -        -       -       -     %0.3f "%(1+self.XS_WW_EWK_uncertainty));
 
-             datacard_out.write( "\n#CMS_hwwlvj_TTbar    lnN    -          -        -       %0.3f    -       -       -   "%(1+self.XS_TTbar_uncertainty));
-
             else:
 
              datacard_out.write( "\nbin                CMS_%s    CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s  "%(self.channel,self.channel,self.channel,self.channel,self.channel,self.channel));            
@@ -2397,7 +2389,6 @@ self.channel));
 
              datacard_out.write( "\nCMS_hwwlvj_VV       lnN   -         -       -       -       -       %0.3f   "%(1+self.XS_VV_uncertainty));
 
-             datacard_out.write( "\n#CMS_hwwlvj_TTbar   lnN   -         -       -      %0.3f    -       -       "%(1+self.XS_TTbar_uncertainty));
             
          if options.jetBin == "_2jet":
              
