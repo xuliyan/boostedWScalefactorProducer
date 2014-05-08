@@ -840,287 +840,254 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
             return model_pdf ;
      }
  
-      // Crystal  ball shape for Bulk GR samples and higgs 
-      if(model == "CB_v1"){
-            std::cout<<"########### Crystal Ball for Higgs and  Bulk GR  mlvj ############"<<std::endl;
+     // Crystal  ball shape for Bulk GR samples and higgs 
+     if(model == "CB_v1"){
+      
+      std::cout<<"########### Crystal Ball for Higgs and  Bulk GR  mlvj ############"<<std::endl;
 
-            RooRealVar* rrv_mean_CB = NULL ;
-            RooRealVar* rrv_sigma_CB = NULL ;
-            RooRealVar* rrv_alpha_CB = NULL ;
-            RooRealVar* rrv_n_CB = NULL ;
+      RooRealVar* rrv_mean_CB = NULL ;
+      RooRealVar* rrv_sigma_CB = NULL ;
+      RooRealVar* rrv_alpha_CB = NULL ;
+      RooRealVar* rrv_n_CB = NULL ;
  
-            if(TString(label).Contains("H600")){
-                rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),600,580,620);
-                rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),67,10,80);
-                rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.,-4.,0.);
-                rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),20.,10,80 );
-            }
-            else if (TString(label).Contains("H700")){
-                rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),700,650,750);
-                rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),100,40,150);
-                rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1,-3,-0.1);
-                rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),20.,10,40);
-            }
-            else if (TString(label).Contains("ggH800")){
-                rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),780,700,850);
-                rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),140,90,160);
-                rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.,-4.,0.);
-                rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),5 , 2, 7);
-            }
-            else if (TString(label).Contains("vbfH800")){
-                rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),800,750,850);
-                rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),140,10,160);
-                rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.,-4.,0.);
-                rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),5 , 2, 7);
-            }
-            else if (TString(label).Contains("ggH900")){
-                rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),880,820,950);
-                rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),170,90,200);
-                rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.,-4.,4.);
-                rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(), 2., 0.5,5);
-            }
-            else if (TString(label).Contains("vbfH900")){
-                rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),900,880,950);
-                rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),170,10,200);
-                rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.,-4.,4.);
-                rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(), 2., 0.5,5);
-            }
-            else if (TString(label).Contains("ggH1000")){
-                rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),920,800,1150);
-                rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),200,10,300);
-                rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.,-7.,4.);
-                rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),2.,0.5,4);
-            }
-            else if (TString(label).Contains("vbfH1000")){
-                rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1000,800,1150);
-                rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),200,10,300);
-                rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.,-4.,4.);
-                rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),2.,0.5,4);
-            }
-            else{
-                if( TString(label).Contains("M600") and TString(label).Contains("BulkG_WW") and not          TString(label).Contains("M600_W")){
-                    rrv_mean_CB = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(), 600, 550, 650);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 30,10 ,80);
-                                       
-                }
-                else if ( TString(label).Contains("M700") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M700_W")){
-                    rrv_mean_CB = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(), 700, 600, 800);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 30,10 ,80);
-                                        
-                }
-                else if( TString(label).Contains("M800") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M800_W")){
-                   rrv_mean_CB = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(), 800, 600, 800);
-                   rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 40,10 ,90);
-                                        
-                }
-                else if (TString(label).Contains("M900") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M900_W") ){
-                   rrv_mean_CB = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(), 900, 600, 800);
-                   rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 40,10 ,90);
-                                        
-                }
-                else if (TString(label).Contains("M1000") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1000_W") ){
-                   rrv_mean_CB = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1000, 900,1100);
-                   rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 50,20 ,120);
-                                        
-                }
-                else if (TString(label).Contains("M1100") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1100_W") ){
-                   rrv_mean_CB = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1100,1000,1200);
-                   rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 50,20 ,120);
-                                        
-                }
-                else if (TString(label).Contains("M1200") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1200_W") ){
-                   rrv_mean_CB = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1200,1100,1300);
-                   rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 50,20 ,120);
-                                       
-                }
-                else if (TString(label).Contains("M1300") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1300_W") ){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1300,1200,1400);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),65,45,120);
-                         
-                }
-                else if (TString(label).Contains("M1400") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1400_W") ){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1400,1300,1500);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),70,45,130);
-                         
-                }
-                else if (TString(label).Contains("M1500") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1500_W") ){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1500,1400,1600);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),75,50,145);
-                                        
-                }
-                else if (TString(label).Contains("M1600") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1600_W") ){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1600,1500,1700);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),80,55,160);
-                         
-                }
-                else if (TString(label).Contains("M1700") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1700_W") ){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1700,1600,1800);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),85,60,175);
-                                            
-                }
-                else if (TString(label).Contains("M1800") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1800_W") ){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1800,1700,1900);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),90,65,190);
-                      
-                }
-                else if (TString(label).Contains("M1900") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1900_W") ){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1900,1800,2000);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),95,70,200);
-                       
-                }
-                else if (TString(label).Contains("M2000") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M2000_W") ){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2000,1900,2100);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),100,75,210);
-                       
-                }
-                else if (TString(label).Contains("M2100") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M2100_W") ){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2100,2000,2200);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),105,80,225);
-                      
-                }
-                else if (TString(label).Contains("M2200") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M2200_W") ){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2200,2100,2300);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),110,85,245);
-                      
-                }
-                else if (TString(label).Contains("M2300") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M2300_W") ){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2300,2200,2400);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),115,90,250);
-                        
-                }
-                else if (TString(label).Contains("M2400") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M2400_W") ){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2400,2300,2500);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),120,90,275);
-                       
-                }
-                else if (TString(label).Contains("M2500") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M2500_W") ){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2500,2400,2600);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),135,90,285);
-
-                }
-                else if(TString(label).Contains("M1000_W150") and TString(label).Contains("BulkG_WW")){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1000,500,1500);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 150,50 ,500);
-
-                }
-                else if (TString(label).Contains("M1000_W300") and TString(label).Contains("BulkG_WW")){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1000,500,1500);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 300,50 ,800);
-
-                }
-                else if (TString(label).Contains("M1000_W50") and TString(label).Contains("BulkG_WW")){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1000,500,1500);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 50,10 ,200);
-
-                }
-                else if (TString(label).Contains("M1500_W75") and TString(label).Contains("BulkG_WW")){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1500,1000,2000);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 75,50 ,250);
-
-                }
-                else if (TString(label).Contains("M1500_W225") and TString(label).Contains("BulkG_WW")){
-                    rrv_mean_CB  = new   RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1500,1000,2000);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 225,150 ,450);
-
-                }
-                else if (TString(label).Contains("M1500_W450") and TString(label).Contains("BulkG_WW")){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1500,1000,2000);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 450,400 ,700);
-
-                }
-                else if (TString(label).Contains("M2100_W105") and TString(label).Contains("BulkG_WW")){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2100,1500,2500);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 105,90 ,300);
-
-                }
-                else if (TString(label).Contains("M2100_W315") and TString(label).Contains("BulkG_WW")){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2100,1500,2500);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 315,250 ,600);
-
-                }
-                else if (TString(label).Contains("M2100_W630") and TString(label).Contains("BulkG_WW")){
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2100,1500,2500);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 630,550 ,900);
-
-                }
-                else{
-                    rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),700,550,2500);
-                    rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 50,20 ,120);
-               }
+      if(TString(label).Contains("H600")){
+         rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),600,580,620);
+         rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),67,10,80);
+         rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.,-4.,0.);
+         rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),20.,10,80 );
+      }
+      else if (TString(label).Contains("H700")){
+         rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),700,650,750);
+         rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),100,40,150);
+         rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1,-3,-0.1);
+         rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),20.,10,40);
+      }
+      else if (TString(label).Contains("ggH800")){
+         rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),780,700,850);
+         rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),140,90,160);
+         rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.,-4.,0.);
+         rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),5 , 2, 7);
+      }
+      else if (TString(label).Contains("vbfH800")){
+         rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),800,750,850);
+         rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),140,10,160);
+         rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.,-4.,0.);
+         rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),5 , 2, 7);
+      }
+      else if (TString(label).Contains("ggH900")){
+         rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),880,820,950);
+         rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),170,90,200);
+         rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.,-4.,4.);
+         rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(), 2., 0.5,5);
+      }
+      else if (TString(label).Contains("vbfH900")){
+         rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),900,880,950);
+         rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),170,10,200);
+         rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.,-4.,4.);
+         rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(), 2., 0.5,5);
+      }
+      else if (TString(label).Contains("ggH1000")){
+         rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),920,800,1150);
+         rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),200,10,300);
+         rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.,-7.,4.);
+         rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),2.,0.5,4);
+      }
+      else if (TString(label).Contains("vbfH1000")){
+         rrv_mean_CB  = new RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1000,800,1150);
+         rrv_sigma_CB = new RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),200,10,300);
+         rrv_alpha_CB = new RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),-1.,-4.,4.);
+         rrv_n_CB     = new RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),2.,0.5,4);
+      }
+      else{
+         if( TString(label).Contains("M600") and TString(label).Contains("BulkG_WW") and not          TString(label).Contains("M600_W")){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(), 600, 550, 650);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 30,10 ,80); 
+         }
+         else if ( TString(label).Contains("M700") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M700_W")){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(), 700, 600, 800);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 30,10 ,80);
+         }
+         else if( TString(label).Contains("M800") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M800_W")){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(), 800, 600, 800);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 40,10 ,90);
+         }
+         else if (TString(label).Contains("M900") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M900_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(), 900, 600, 800);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 40,10 ,90);
+         }
+         else if (TString(label).Contains("M1000") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1000_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1000, 900,1100);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 50,20 ,120);
+         }
+         else if (TString(label).Contains("M1100") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1100_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1100,1000,1200);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 50,20 ,120);
+         }
+         else if (TString(label).Contains("M1200") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1200_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1200,1100,1300);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 50,20 ,120);
+         }
+         else if (TString(label).Contains("M1300") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1300_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1300,1200,1400);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),65,45,120);
+         }
+         else if (TString(label).Contains("M1400") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1400_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1400,1300,1500);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),70,45,130);
+         }
+         else if (TString(label).Contains("M1500") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1500_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1500,1400,1600);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),75,50,145);
+         }
+         else if (TString(label).Contains("M1600") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1600_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1600,1500,1700);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),80,55,160);
+         }
+         else if (TString(label).Contains("M1700") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1700_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1700,1600,1800);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),85,60,175);
+         }
+         else if (TString(label).Contains("M1800") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1800_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1800,1700,1900);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),90,65,190);
+         }
+         else if (TString(label).Contains("M1900") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M1900_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1900,1800,2000);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),95,70,200);
+         }
+         else if (TString(label).Contains("M2000") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M2000_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2000,1900,2100);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),100,75,210);
+         }
+         else if (TString(label).Contains("M2100") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M2100_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2100,2000,2200);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),105,80,225);
+         }
+         else if (TString(label).Contains("M2200") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M2200_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2200,2100,2300);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),110,85,245);
+         }
+         else if (TString(label).Contains("M2300") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M2300_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2300,2200,2400);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),115,90,250);
+         }
+         else if (TString(label).Contains("M2400") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M2400_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2400,2300,2500);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),120,90,275);
+         }
+         else if (TString(label).Contains("M2500") and TString(label).Contains("BulkG_WW") and not TString(label).Contains("M2500_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2500,2400,2600);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),135,90,285);
+         }
+         else if(TString(label).Contains("M1000_W150") and TString(label).Contains("BulkG_WW")){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1000,500,1500);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 150,50 ,500);
+         }
+         else if (TString(label).Contains("M1000_W300") and TString(label).Contains("BulkG_WW")){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1000,500,1500);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 300,50 ,800);
+         }
+         else if (TString(label).Contains("M1000_W50") and TString(label).Contains("BulkG_WW")){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1000,500,1500);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 50,10 ,200);
+         }
+         else if (TString(label).Contains("M1500_W75") and TString(label).Contains("BulkG_WW")){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1500,1000,2000);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 75,50 ,250);
+         }
+         else if (TString(label).Contains("M1500_W225") and TString(label).Contains("BulkG_WW")){
+           rrv_mean_CB  = new   RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1500,1000,2000);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 225,150 ,450);
+         }
+         else if (TString(label).Contains("M1500_W450") and TString(label).Contains("BulkG_WW")){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1500,1000,2000);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 450,400 ,700);
+         }
+         else if (TString(label).Contains("M2100_W105") and TString(label).Contains("BulkG_WW")){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2100,1500,2500);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 105,90 ,300);
+         }
+         else if (TString(label).Contains("M2100_W315") and TString(label).Contains("BulkG_WW")){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2100,1500,2500);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 315,250 ,600);
+         }
+         else if (TString(label).Contains("M2100_W630") and TString(label).Contains("BulkG_WW")){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2100,1500,2500);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 630,550 ,900);
+         }
+         else{
+               rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),700,550,2500);
+               rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 50,20 ,120);
+         }
             
-            rrv_alpha_CB = new  RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),4,1,5);
-            rrv_n_CB     = new   RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),20.,10,40);
-            }                                                                            
+         rrv_alpha_CB = new  RooRealVar(("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha_CB"+label+"_"+channel+spectrum).c_str(),4,1,5);
+         rrv_n_CB     = new   RooRealVar(("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),("rrv_n_CB"+label+"_"+channel+spectrum).c_str(),20.,10,40);
+      }                                                                            
 
-            // experimental systematic uncertainty
-           std::string systematic_label ;
-          if( TString(label).Contains("ggH")) systematic_label = "_ggH" ;
-          else if ( TString(label).Contains("vbfH")) systematic_label = "_vbfH";
+      // experimental systematic uncertainty
+      std::string systematic_label ;
+      if( TString(label).Contains("ggH")) systematic_label = "_ggH" ;
+      else if ( TString(label).Contains("vbfH")) systematic_label = "_vbfH";
 
-          RooRealVar* rrv_mean_scale_p1 = new RooRealVar(("CMS_sig_p1_jes"+systematic_label).c_str(),("CMS_sig_p1_jes"+systematic_label).c_str(),0);
-          rrv_mean_scale_p1->setConstant(kTRUE);
+      RooRealVar* rrv_CMS_scale_j = new RooRealVar("CMS_scale_j","CMS_scale_j",0);
+      rrv_CMS_scale_j->setConstant(kTRUE);
 
-          RooRealVar* rrv_mean_scale_p2 = new RooRealVar(("CMS_sig_p1_jer"+systematic_label).c_str(),("CMS_sig_p1_jer"+systematic_label).c_str(),0);
-          rrv_mean_scale_p2->setConstant(kTRUE);
+      RooRealVar* rrv_CMS_res_j   = new RooRealVar("CMS_res_j","CMS_res_j",0);
+      rrv_CMS_res_j->setConstant(kTRUE);
 
-          SystematicUncertaintyHiggs_01jetBin systematic ;
+      SystematicUncertaintyHiggs_01jetBin systematic ;
      
-          RooRealVar* rrv_mean_scale_X1 = new RooRealVar(("rrv_mean_shift_scale_jes"+label+"_"+channel+spectrum).c_str(),("rrv_mean_shift_scale_jes"+label+"_"+channel+spectrum).c_str(),0);
-          RooRealVar* rrv_mean_scale_X2 = new RooRealVar(("rrv_mean_shift_scale_jer"+label+"_"+channel+spectrum).c_str(),("rrv_mean_shift_scale_jer"+label+"_"+channel+spectrum).c_str(),0);
+      RooRealVar* rrv_mean_scale_X1 = new RooRealVar(("rrv_mean_shift_scale_jes"+label+"_"+channel+spectrum).c_str(),("rrv_mean_shift_scale_jes"+label+"_"+channel+spectrum).c_str(),0);
+      RooRealVar* rrv_mean_scale_X2 = new RooRealVar(("rrv_mean_shift_scale_jer"+label+"_"+channel+spectrum).c_str(),("rrv_mean_shift_scale_jer"+label+"_"+channel+spectrum).c_str(),0);
 
-          if (TString(label).Contains("ggH") and TString(label).Contains("600")){
-             rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_600);
-             rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_600);
-          }
-          else if (TString(label).Contains("ggH") and TString(label).Contains("700")){
-            rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_700);
-            rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_700);
-          }
-          else if (TString(label).Contains("ggH") and TString(label).Contains("800")){
-           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_800);
-           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_800);
-          }
-          else if (TString(label).Contains("ggH") and TString(label).Contains("900")){
-           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_900);
-           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_900);
-          }
-          else if (TString(label).Contains("ggH") and TString(label).Contains("1000")){
-           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_1000);
-           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_1000);
-          }
-          else if (TString(label).Contains("vbfH") and TString(label).Contains("600")){
-           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_600);
-           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_600);
-          }
-          else if (TString(label).Contains("vbfH") and TString(label).Contains("700")){
-           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_700);
-           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_700);
-          }
-          else if (TString(label).Contains("vbfH") and TString(label).Contains("800")){
-           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_800);
-           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_800);
-          }
-          else if (TString(label).Contains("vbfH") and TString(label).Contains("900")){
-           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_900);
-           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_900);
-          }
-          else if (TString(label).Contains("vbfH") and TString(label).Contains("1000")){
-           rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_1000);
-           rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_1000);
-          }
+      if (TString(label).Contains("ggH") and TString(label).Contains("600")){
+          rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_600);
+          rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_600);
+      }
+      else if (TString(label).Contains("ggH") and TString(label).Contains("700")){
+          rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_700);
+          rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_700);
+      }
+      else if (TString(label).Contains("ggH") and TString(label).Contains("800")){
+          rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_800);
+          rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_800);
+      }
+      else if (TString(label).Contains("ggH") and TString(label).Contains("900")){
+          rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_900);
+          rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_900);
+      }
+      else if (TString(label).Contains("ggH") and TString(label).Contains("1000")){
+          rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_1000);
+          rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_ggH_1000);
+      }
+      else if (TString(label).Contains("vbfH") and TString(label).Contains("600")){
+          rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_600);
+          rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_600);
+      }
+      else if (TString(label).Contains("vbfH") and TString(label).Contains("700")){
+          rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_700);
+          rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_700);
+      }
+      else if (TString(label).Contains("vbfH") and TString(label).Contains("800")){
+          rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_800);
+          rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_800);
+      }
+      else if (TString(label).Contains("vbfH") and TString(label).Contains("900")){
+          rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_900);
+          rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_900);
+      }
+      else if (TString(label).Contains("vbfH") and TString(label).Contains("1000")){
+          rrv_mean_scale_X1->setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_1000);
+          rrv_mean_scale_X2->setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_1000);
+      }
 
-         rrv_mean_scale_X1->setConstant(kTRUE);
-         rrv_mean_scale_X2->setConstant(kTRUE);
+     rrv_mean_scale_X1->setConstant(kTRUE);
+     rrv_mean_scale_X2->setConstant(kTRUE);
 
-         RooFormulaVar* rrv_total_mean_CB = new RooFormulaVar(("rrv_total_mean_CB"+label+"_"+channel+spectrum).c_str(),"@0*(1+@1*@2)*(1+@3*@4)", RooArgList(*rrv_mean_CB,*rrv_mean_scale_p1,*rrv_mean_scale_X1,*rrv_mean_scale_p2,*rrv_mean_scale_X2));
+     RooFormulaVar* rrv_total_mean_CB = new RooFormulaVar(("rrv_total_mean_CB"+label+"_"+channel+spectrum).c_str(),"@0*(1+@1*@2)*(1+@3*@4)", RooArgList(*rrv_mean_CB,*rrv_CMS_scale_j,*rrv_mean_scale_X1,*rrv_CMS_res_j,*rrv_mean_scale_X2));
 
      ////////////////////
-            
-     RooRealVar* rrv_sigma_scale_p1 = new RooRealVar(("CMS_sig_p2_jes"+systematic_label).c_str(),("CMS_sig_p2_jes"+systematic_label).c_str(),0);
-     RooRealVar* rrv_sigma_scale_p2 = new RooRealVar(("CMS_sig_p2_jer"+systematic_label).c_str(),("CMS_sig_p2_jer"+systematic_label).c_str(),0);
-     rrv_sigma_scale_p1->setConstant(kTRUE);
-     rrv_sigma_scale_p2->setConstant(kTRUE);
- 
+             
      RooRealVar* rrv_sigma_scale_X1 = new RooRealVar(("rrv_sigma_shift_jes"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_shift_jes"+label+"_"+channel+spectrum).c_str(),0);
      RooRealVar* rrv_sigma_scale_X2 = new RooRealVar(("rrv_sigma_shift_jer"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_shift_jer"+label+"_"+channel+spectrum).c_str(),0);
 
@@ -1168,12 +1135,11 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
      rrv_sigma_scale_X1->setConstant(kTRUE);
      rrv_sigma_scale_X2->setConstant(kTRUE);
 
-     RooFormulaVar* rrv_total_sigma_CB = new RooFormulaVar(("rrv_total_sigma_CB"+label+"_"+channel+spectrum).c_str(),"@0*(1+@1*@2)*(1+@3*@4)", RooArgList(*rrv_sigma_CB,*rrv_sigma_scale_p1,*rrv_sigma_scale_X1,*rrv_sigma_scale_p2,*rrv_sigma_scale_X2));        
+     RooFormulaVar* rrv_total_sigma_CB = new RooFormulaVar(("rrv_total_sigma_CB"+label+"_"+channel+spectrum).c_str(),"@0*(1+@1*@2)*(1+@3*@4)", RooArgList(*rrv_sigma_CB,*rrv_sigma_scale_X1,*rrv_CMS_scale_j,*rrv_CMS_res_j,*rrv_sigma_scale_X2));        
            
      RooCBShape* model_pdf = new RooCBShape(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(), *rrv_x,*rrv_total_mean_CB,*rrv_total_sigma_CB,*rrv_alpha_CB,*rrv_n_CB);
-
             
-      return model_pdf ;
+     return model_pdf ;
             
     }
 
