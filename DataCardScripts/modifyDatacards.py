@@ -42,12 +42,11 @@ if __name__ == "__main__":
   os.system("sed -i \"s/CMS_scale_l/CMS_scale_m/g\" *_mu_*.txt");
   os.system("sed -i \"s/CMS_res_l/CMS_res_m/g\" *_mu_*.txt");
 
-  if options.skipJetSystematics :
-      
-   if options.pseudodata :   
-    os.system("ls | grep _mu_ | grep -v _ggH_ | grep -v _vbfH_ | grep unbin | awk '{print \"sed -i \"s/Wjet_Norm_m   lnN     -         -    1.044     -      -        -/Wjet_Norm_m   lnN     -         -    1.047     -      -        -\\nCMS_scale_j lnN   1.029     1.044     0.975\\/1.035    1.050\\/0.950   1.051\\/0.949   1.032\\/0.968\\nCMS_res_j lnN   1.008     1.035     0.992\\/1.008    1.004\\/0.996   1.009\\/0.991   1.007\\/0.993/g\" \" $1}' | /bin/sh");
-    os.system("ls | grep _mu_ | grep -v _ggH_ | grep -v _vbfH_ | grep unbin | awk '{print \"sed -i \"s/Wjet_Norm_m   lnN     -         -    1.047     -      -        -/Wjet_Norm_m   lnN     -         -    1.047     -      -        -\n CMS_scale_j lnN   1.029     1.044     0.975\\/1.035    1.050\\/0.950   1.051\\/0.949   1.032\\/0.968\\nCMS_res_j lnN   1.008     1.035     0.992\\/1.008    1.004\\/0.996   1.009\\/0.991   1.007\\/0.993/g\" \" $1}' | /bin/sh");
-
+  if options.pseudodata :   
+    os.system("ls | grep _mu_ | grep -v _ggH_ | grep -v _vbfH_ | grep unbin | awk '{print \"sed -i \\\"s/Wjet_Norm_m   lnN     -         -    1.044     -      -        -/Wjet_Norm_m   lnN     -         -    1.047     -      -        -\\nCMS_scale_j lnN   1.029     1.044     0.975\/1.035    1.050\/0.950   1.051\/0.949   1.032\/0.968\\nCMS_res_j lnN   1.008     1.035     0.992\/1.008    1.004\/0.996   1.009\/0.991   1.007\/0.993/g\\\" \" $1}' | /bin/sh");
+    os.system("ls | grep _mu_ | grep -v _ggH_ | grep -v _vbfH_ | grep unbin | awk '{print \"sed -i \\\"s/Wjet_Norm_m   lnN     -         -    1.047     -      -        -/Wjet_Norm_m   lnN     -         -    1.047     -      -        -\n CMS_scale_j lnN   1.029     1.044     0.975/1.035    1.050/0.950   1.051/0.949   1.032/0.968\\nCMS_res_j lnN   1.008     1.035     0.992/1.008    1.004/0.996   1.009/0.991   1.007/0.993/g\\\" \" $1}' | /bin/sh");
+  else:
+    os.system("ls | grep _mu_ | grep -v _ggH_ | grep -v _vbfH_ | grep unbin | awk '{print \"sed -i \\\"s/Wjet_Norm_m   lnN     -         -    1.042     -      -        -/Wjet_Norm_m   lnN     -         -    1.042     -      -        -\\nCMS_scale_j lnN   1.029     1.044     0.975\/1.035    1.050\/0.950   1.051\/0.949   1.032\/0.968\\nCMS_res_j lnN   1.008     1.035     0.992/1.008    1.004/0.996   1.009/0.991   1.007/0.993/g\\\" \" $1}' | /bin/sh");
  if options.channel == "el":
 
   os.system("sed -i \"#CMS_hwwlvj_TTbar   lnN   -         -       -      1.070    -       -/d\" *_el_*.txt");
@@ -65,6 +64,8 @@ if __name__ == "__main__":
     os.system("ls | grep _el_ | grep -v _ggH_ | grep -v _vbfH_ | grep unbin | awk '{print \"sed -i \"s/Wjet_Norm_e   lnN     -         -    1.096     -      -        -/Wjet_Norm_e   lnN     -         -    1.090     -      -        -\\nCMS_scale_j lnN   1.034     1.072     0.971\\/1.029    1.052\\/0.948   1.054\\/0.946   1.037\\/0.963\\nCMS_res_j lnN   1.007     1.030     0.985\\/1.015    1.004\\/0.996   1.014\\/0.986   1.004\\/0.996/g\" \" $1}' | /bin/sh");
     
     os.system("ls | grep _el_ | grep -v _ggH_ | grep -v _vbfH_ | grep unbin | awk '{print \"sed -i \"s/Wjet_Norm_e   lnN     -         -    1.090     -      -        -/Wjet_Norm_e   lnN     -         -    1.090     -      -        -\\nCMS_scale_j lnN   1.034     1.072     0.971\\/1.029    1.052\\/0.948   1.054\\/0.946   1.037\\/0.963\\nCMS_res_j lnN   1.007     1.030     0.985\\/1.015    1.004\\/0.996   1.014\\/0.986   1.004\\/0.996/g\" \" $1}' | /bin/sh");
+   else:
+    os.system("ls | grep _el_ | grep -v _ggH_ | grep -v _vbfH_ | grep unbin | awk '{print \"sed -i \"s/Wjet_Norm_e   lnN     -         -    1.087     -      -        -/Wjet_Norm_e   lnN     -         -    1.087     -      -        -\\nCMS_scale_j lnN   1.034     1.072     0.971\\/1.029    1.052\\/0.948   1.054\\/0.946   1.037\\/0.963\\nCMS_res_j lnN   1.007     1.030     0.985\\/1.015    1.004\\/0.996   1.014\\/0.986   1.004\\/0.996/g\" \" $1}' | /bin/sh");
 
  if options.channel == "em" and options.jetBin == "_2jet" :
 
@@ -78,6 +79,6 @@ if __name__ == "__main__":
   if options.skipJetSystematics :
 
    if options.pseudodata :   
-    os.system("ls | grep _em_2jet_ | grep -v _ggH_ | grep -v _vbfH_ | grep unbin | awk '{print \"sed -i \"s/Wjet_Norm_l_2jet lnN     -           -         1.283      -       -        -        -/Wjet_Norm_l_2jet lnN     -           -         1.283      -       -        -        -\\nCMS_scale_j lnN   1.065     1.043     0.959/1.041    1.071/0.929   1.071/0.929   1.075/0.925    1.046/0.954\\nCMS_res_j lnN   1.070     1.141     0.981/1.019    1.051/0.949   1.084/0.916   1.043/0.957    1.063/0.937/g\" \" $1}' | /bin/sh");
-   
-   
+    os.system("ls | grep _em_2jet_ | grep -v _ggH_ | grep -v _vbfH_ | grep unbin | awk '{print \"sed -i \"s/Wjet_Norm_l_2jet lnN     -           -         1.283      -       -        -        -/Wjet_Norm_l_2jet lnN     -           -         1.283      -       -        -        -\\nCMS_scale_j lnN   1.065     1.043     0.959\\/1.041    1.071\\/0.929   1.071\\/0.929   1.075\\/0.925    1.046\\/0.954\\nCMS_res_j lnN   1.070     1.141     0.981\\/1.019    1.051\\/0.949   1.084\\/0.916   1.043\\/0.957    1.063\\/0.937/g\" \" $1}' | /bin/sh");
+   else:
+    os.system("ls | grep _em_2jet_ | grep -v _ggH_ | grep -v _vbfH_ | grep unbin | awk '{print \"sed -i \"s/Wjet_Norm_l_2jet lnN     -           -         1.266      -       -        -        -/Wjet_Norm_l_2jet lnN     -           -         1.266      -       -        -        -\\nCMS_scale_j lnN   1.065     1.043     0.959\\/1.041    1.071\\/0.929   1.071\\/0.929   1.075\\/0.925    1.046\\/0.954\\nCMS_res_j lnN   1.070     1.141     0.981\\/1.019    1.051\\/0.949   1.084\\/0.916   1.043\\/0.957    1.063\\/0.937/g\" \" $1}' | /bin/sh");
