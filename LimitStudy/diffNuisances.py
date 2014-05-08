@@ -1,4 +1,4 @@
-
+#python diffNuisances.py file_haddato.root -g NOME_PLOT -t 's'
 #!/usr/bin/env python
 import re
 from sys import argv, stdout, stderr, exit
