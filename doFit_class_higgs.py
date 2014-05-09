@@ -545,13 +545,13 @@ class doFit_wj_and_wlvj:
         self.lep_eff_uncertainty     = 0.02;
 
         #### increase shape uncertainty
-        self.shape_para_error_WJets0 = 5.0;
-        self.shape_para_error_TTbar  = 5.0;
+        self.shape_para_error_WJets0 = 2.0;
+        self.shape_para_error_TTbar  = 2.0;
 
         if self.higgs_sample == "ggH600" or self.higgs_sample == "ggH700":
-            self.shape_para_error_alpha = 5.0;
+            self.shape_para_error_alpha = 2.0;
         else:
-            self.shape_para_error_alpha = 5.0;
+            self.shape_para_error_alpha = 2.0;
         
         # shape parameter uncertainty
         self.FloatingParams = RooArgList("floatpara_list");
@@ -1698,8 +1698,8 @@ class doFit_wj_and_wlvj:
           getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_WW_EWK_signal_region%s_%s_mlvj"%(self.mlvj_shape["WW_EWK"],self.channel)).clone("WW_EWK_%s"%(self.channel)));         
 
         ### signal shape
-        getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).clone(self.higgs_sample+"_%s"%(self.channel)))
-        getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region%s_%s_mlvj"%(self.vbfhiggs_sample,self.mlvj_shape["vbfH"],self.channel)).clone(self.vbfhiggs_sample+"_%s"%(self.channel)))
+        getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).clone("ggH_%s"%(self.channel)))
+        getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region%s_%s_mlvj"%(self.vbfhiggs_sample,self.mlvj_shape["vbfH"],self.channel)).clone("qqH_%s"%(self.channel)))
 
         ##create "fake data" for the limit
         rrv_x = self.workspace4limit_.var("rrv_mass_lvj");
@@ -1751,8 +1751,8 @@ class doFit_wj_and_wlvj:
         fix_Pdf(self.workspace4limit_.pdf("VV_%s"%(self.channel)),    RooArgSet(rrv_x));
         if options.jetBin == "_2jet": fix_Pdf(self.workspace4limit_.pdf("WW_EWK_%s"%(self.channel)),RooArgSet(rrv_x));         
         fix_Pdf(self.workspace4limit_.pdf("WJets_%s"%(self.channel)), RooArgSet(rrv_x)); 
-        fix_Pdf(self.workspace4limit_.pdf(self.higgs_sample+"_%s"%(self.channel)),    RooArgSet(rrv_x));
-        fix_Pdf(self.workspace4limit_.pdf(self.vbfhiggs_sample+"_%s"%(self.channel)), RooArgSet(rrv_x));
+        fix_Pdf(self.workspace4limit_.pdf("ggH_%s"%(self.channel)),   RooArgSet(rrv_x));
+        fix_Pdf(self.workspace4limit_.pdf("qqH_%s"%(self.channel)),   RooArgSet(rrv_x));
 
         ### print the workspace 4 limit 
         print " ############## Workspace for limit ";
@@ -2154,12 +2154,12 @@ class doFit_wj_and_wlvj:
           getattr(self.workspace4limit_,"import")(self.workspace4fit_.pdf("model_pdf_%s_signal_region%s_%s_mlvj"%(self.vbfhiggs_sample,self.mlvj_shape["vbfH"],self.channel)).clone(self.vbfhiggs_sample+"_%s"%(self.channel)))
 
           if signalchannel == "ggH":
-              datacard_out.write("\nshapes %s CMS_%s %s %s:$PROCESS_%s"%(self.higgs_sample,self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
+              datacard_out.write("\nshapes ggH CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
           elif signalchannel == "vbfH":
-              datacard_out.write("\nshapes %s CMS_%s %s %s:$PROCESS_%s"%(self.vbfhiggs_sample,self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
+              datacard_out.write("\nshapes qqH CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
           elif signalchannel == "ggHvbfH":
-              datacard_out.write("\nshapes %s CMS_%s %s %s:$PROCESS_%s"%(self.higgs_sample,self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
-              datacard_out.write("\nshapes %s CMS_%s %s %s:$PROCESS_%s"%(self.vbfhiggs_sample,self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
+              datacard_out.write("\nshapes ggH CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
+              datacard_out.write("\nshapes qqH CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
           
           datacard_out.write("\nshapes WJets CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
           datacard_out.write("\nshapes TTbar CMS_%s %s %s:$PROCESS_%s"%(self.channel,fnOnly,self.workspace4limit_.GetName(),self.channel));
@@ -2175,7 +2175,7 @@ self.channel));
              
             if options.jetBin == "_2jet" : 
              datacard_out.write( "\nbin                CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s   CMS_%s"%(self.channel,self.channel,self.channel,self.channel,self.channel,self.channel));
-             datacard_out.write( "\nprocess            %s        WJets    TTbar    STop    VV     WW_EWK"%(self.higgs_sample));
+             datacard_out.write( "\nprocess            ggH        WJets    TTbar    STop    VV     WW_EWK");
              datacard_out.write( "\nprocess            -1          1        2        3       4       5  " );
 
              if mode == "unbin":
@@ -2205,8 +2205,8 @@ self.channel));
             else:
 
              datacard_out.write( "\nbin                CMS_%s    CMS_%s   CMS_%s    CMS_%s   CMS_%s "%(self.channel,self.channel,self.channel,self.channel,self.channel));
-             datacard_out.write( "\nprocess            %s        WJets    TTbar     STop      VV    "%(self.higgs_sample));
-             datacard_out.write( "\nprocess            -1          1        2        3         4    " );
+             datacard_out.write( "\nprocess            ggH        WJets    TTbar     STop      VV   ");
+             datacard_out.write( "\nprocess            -1          1        2        3         4    ");
 
              if mode == "unbin":
                 datacard_out.write( "\nrate          %0.2f          %0.2f   %0.2f    %0.2f    %0.2f  "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal()));
@@ -2216,7 +2216,7 @@ self.channel));
                 
              datacard_out.write( "\n-------------------------------- " ); 
 
-             datacard_out.write( "\nQCDscale_ggH0in    lnN   %0.3f       -      -        -       -      "%(1.+self.QCDscale_ggH0in));
+             datacard_out.write( "\nQCDscale_ggH0in     lnN   %0.3f       -      -        -       -     "%(1.+self.QCDscale_ggH0in));
 
              datacard_out.write( "\nQCDscale_ggH2in     lnN   %0.3f       -      -        -       -     "%(1.+self.QCDscale_ggH2in));   
 
@@ -2234,8 +2234,8 @@ self.channel));
          elif signalchannel=="vbfH":
             if options.jetBin == "_2jet":  
              datacard_out.write( "\nbin                CMS_%s    CMS_%s   CMS_%s   CMS_%s   CMS_%s   CMS_%s"%(self.channel,self.channel,self.channel,self.channel,self.channel,self.channel));
-             datacard_out.write( "\nprocess            %s        WJets    TTbar    STop     VV       WW_EWK"%(self.vbfhiggs_sample));
-             datacard_out.write( "\nprocess            -1            1      2        3      4        5     " );
+             datacard_out.write( "\nprocess            qqH        WJets    TTbar    STop     VV      WW_EWK");
+             datacard_out.write( "\nprocess            -1            1      2        3      4        5     ");
 
              if mode == "unbin":
                 datacard_out.write( "\nrate            %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f"%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_unbin").getVal()))
@@ -2262,8 +2262,8 @@ self.channel));
 
             else:  
              datacard_out.write( "\nbin                CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s "%(self.channel,self.channel,self.channel,self.channel,self.channel));
-             datacard_out.write( "\nprocess            %s        WJets    TTbar    STop    VV     "%(self.vbfhiggs_sample));
-             datacard_out.write( "\nprocess            -1            1      2       3       4     " );
+             datacard_out.write( "\nprocess            qqH       WJets    TTbar    STop    VV     ");
+             datacard_out.write( "\nprocess            -1            1      2       3       4     ");
 
              if mode == "unbin":
                 datacard_out.write( "\nrate            %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal()))
@@ -2291,8 +2291,8 @@ self.channel));
             if options.jetBin == "_2jet":
                 
              datacard_out.write( "\nbin                CMS_%s    CMS_%s     CMS_%s   CMS_%s   CMS_%s   CMS_%s    CMS_%s"%(self.channel,self.channel,self.channel,self.channel,self.channel,self.channel,self.channel));            
-             datacard_out.write( "\nprocess            %s         %s        WJets     TTbar    STop       VV     WW_EWK   "%(self.higgs_sample,self.vbfhiggs_sample));
-             datacard_out.write( "\nprocess            -1         0           1          2       3         4     5       " );
+             datacard_out.write( "\nprocess            ggH        qqH        WJets     TTbar    STop       VV     WW_EWK ");
+             datacard_out.write( "\nprocess            -1         0           1          2       3         4     5       ");
 
              if mode == "unbin":
                 datacard_out.write( "\nrate               %0.2f    %0.2f         %0.2f   %0.2f    %0.2f    %0.2f    %0.2f "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal(), self.workspace4limit_.var("rate_WW_EWK_for_unbin").getVal()))
@@ -2330,8 +2330,8 @@ self.channel));
             else:
 
              datacard_out.write( "\nbin                CMS_%s    CMS_%s    CMS_%s   CMS_%s   CMS_%s  CMS_%s  "%(self.channel,self.channel,self.channel,self.channel,self.channel,self.channel));            
-             datacard_out.write( "\nprocess             %s        %s       WJets    TTbar    STop    VV    "%(self.higgs_sample,self.vbfhiggs_sample));
-             datacard_out.write( "\nprocess            -1         0          1        2        3      4    ");
+             datacard_out.write( "\nprocess            ggH       qqH       WJets    TTbar    STop    VV   ");
+             datacard_out.write( "\nprocess            -1        0          1        2        3      4    ");
 
              if mode == "unbin":
                 datacard_out.write( "\nrate               %0.2f    %0.2f         %0.2f   %0.2f    %0.2f    %0.2f  "%(self.workspace4limit_.var("rate_%s_for_unbin"%(self.higgs_sample)).getVal(),self.workspace4limit_.var("rate_%s_for_unbin"%(self.vbfhiggs_sample)).getVal(), self.workspace4limit_.var("rate_WJets_for_unbin").getVal(), self.workspace4limit_.var("rate_TTbar_for_unbin").getVal(), self.workspace4limit_.var("rate_STop_for_unbin").getVal(), self.workspace4limit_.var("rate_VV_for_unbin").getVal()));
@@ -2377,16 +2377,16 @@ self.channel));
 
           datacard_out.write( "\nCMS_eff_e      lnN       %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f    %0.3f"%(1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty, 1+self.lep_eff_uncertainty ) );
 
-          datacard_out.write( "\nCMS_TTbar_norm_2jet lnN       -          -            -        %0.3f   -   -            -"%(1+self.rrv_wtagger_eff_reweight_forT.getError(), 1+self.rrv_wtagger_eff_reweight_forT.getError() ) );
+          datacard_out.write( "\nCMS_TTbar_norm_2jet lnN       -          -            -        %0.3f   -   -            -"%(1+self.rrv_wtagger_eff_reweight_forT.getError()));
 
           datacard_out.write( "\nCMS_wtagger     lnN       %0.3f     %0.3f         -        -       -       %0.3f    %0.3f"%(1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError() ) );
             
           ### nousiance for the bkg
           ### WJets normaliztion due to data fit and alternate modellization
           if self.number_WJets_insideband >0:
-            datacard_out.write( "\nWjet_Norm_%s lnN     %0.3f       -         %0.3f      -       -        -        -  "%(options.jetBin,self.number_WJets_insideband, getattr(self,"datadriven_alpha_WJets_%s"%(mode))));
+            datacard_out.write( "\nWjet_Norm%s lnN     %0.3f       -         %0.3f      -       -        -        -  "%(options.jetBin,self.number_WJets_insideband, getattr(self,"datadriven_alpha_WJets_%s"%(mode))));
           else:              
-            datacard_out.write( "\nWjet_Norm_%s lnN     -           -         %0.3f      -       -        -        -  "%(options.jetBin, 1+ self.workspace4limit_.var("rate_WJets_for_unbin").getError()/self.workspace4limit_.var("rate_WJets_for_unbin").getVal() ) );
+            datacard_out.write( "\nWjet_Norm%s lnN     -           -         %0.3f      -       -        -        -  "%(options.jetBin, 1+ self.workspace4limit_.var("rate_WJets_for_unbin").getError()/self.workspace4limit_.var("rate_WJets_for_unbin").getVal() ) );
 
 
           ## jet mass systematic scaling up and down vbf jets detajj, mjj, and pt selection effect
@@ -2418,7 +2418,7 @@ self.channel));
 
          else:
  
-          datacard_out.write( "\nlumi_8TeV       lnN       %0.3f     %0.3f         -        -   %0.3f   %0.3f  "%(1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty) )
+          datacard_out.write( "\nlumi_8TeV       lnN       %0.3f     %0.3f         -        -   %0.3f   %0.3f  "%(1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty,1.+self.lumi_uncertainty) )
 
           if self.channel == "el" :
            datacard_out.write( "\nCMS_trigger_e  lnN       %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f   "%(1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty,1+self.lep_trigger_uncertainty) );
@@ -2431,9 +2431,9 @@ self.channel));
            datacard_out.write( "\nCMS_eff_m      lnN       %0.3f     %0.3f         -        %0.3f   %0.3f   %0.3f   "%(1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty,1+self.lep_eff_uncertainty) );
    
           if self.channel == "el" :
-           datacard_out.write( "\nCMS_TTbar_norm_e lnN         -         -           -        %0.3f   -   -      "%(1+self.rrv_wtagger_eff_reweight_forT.getError(), 1+self.rrv_wtagger_eff_reweight_forT.getError()));
+           datacard_out.write( "\nCMS_TTbar_norm_e lnN         -         -           -        %0.3f   -   -      "%(1+self.rrv_wtagger_eff_reweight_forT.getError()));
           elif self.channel == "mu":
-           datacard_out.write( "\nCMS_TTbar_norm_m lnN         -         -           -        %0.3f   -   -      "%(1+self.rrv_wtagger_eff_reweight_forT.getError(), 1+self.rrv_wtagger_eff_reweight_forT.getError()));
+           datacard_out.write( "\nCMS_TTbar_norm_m lnN         -         -           -        %0.3f   -   -      "%(1+self.rrv_wtagger_eff_reweight_forT.getError()));
               
           datacard_out.write( "\nCMS_wtagger     lnN       %0.3f     %0.3f         -        -       -       %0.3f    "%(1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError(), 1+self.rrv_wtagger_eff_reweight_forV.getError()) );
             
