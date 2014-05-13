@@ -76,6 +76,7 @@ parser.add_option('--makeBSMLimitPlotMass',  action="store", type="int",    dest
 parser.add_option('--makeBSMLimitPlotBRnew', action="store", type="int",    dest="makeBSMLimitPlotBRnew",  default=0)
 parser.add_option('--makeBSMLimitPlot2D',    action="store", type="int",    dest="makeBSMLimitPlot2D",     default=0)
 parser.add_option('--blindObservedLine',     action="store", type="int",    dest="blindObservedLine",      default=1)
+parser.add_option('--plotPValue',            action="store", type="int",    dest="plotPValue",             default=0)
 
 (options, args) = parser.parse_args()
 
@@ -429,6 +430,25 @@ def setStyle():
   gStyle.SetOptTitle(0)
   gStyle.SetOptFit(1)
 
+####################################################
+### Get PValue from combine -M ProfileLikelihood ###
+####################################################
+
+def getPValueFromCard( file ):
+
+ f = ROOT.TFile(file);
+ t = f.Get("limit");
+ entries = t.GetEntries();
+
+ lims = 1;
+
+ for i in range(1):
+
+  t.GetEntry(i);
+  lims = t.limit
+
+ return lims;
+
 
 ##############################
 #### Make SM Limits Plots ####  
@@ -564,8 +584,93 @@ def makeSMLimitPlot(SIGCH):
 
     can_SM.SaveAs("limitFigs/SMLim_%s.png"%(options.channel));
     can_SM.SaveAs("limitFigs/SMLim_%s.pdf"%(options.channel));
-                       
 
+##############################
+#### Make SM PValue Plots ####  
+##############################  
+
+def makeSMPValuePlot(SIGCH):
+
+    cprime = 10;
+    brnew  = 00;
+    nPoints = len(mass);
+    
+    xbins_obs     = array('f', [0.]);
+    xbins_exp     = array('f', [0.]);
+
+    ybins_obs     = array('f', [0.]);
+    ybins_exp     = array('f', [0.]);
+
+    setStyle();
+    
+    for i in range(len(mass)):
+	curFile_obs = "higgsCombinehwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+	curFile_exp = "higgsCombinehwwlvj_pval_exp_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+        xbins_obs.append(mass[i]); 
+        xbins_exp.append(mass[i]); 
+        ybins_obs.append(getPValueFromCard(curFile_obs));
+        ybins_exp.append(getPValueFromCard(curFile_exp));
+
+    gr_obs = ROOT.TGraphAsymmErrors(nPoints+1,xbins_obs,ybins_obs);
+    gr_exp = ROOT.TGraphAsymmErrors(nPoints+1,xbins_exp,ybins_exp);
+                    
+    gr_obs.SetLineColor(1); gr_obs.SetMarkerColor(1); gr_obs.SetMarkerStyle(20); gr_obs.SetLineWidth(3);gr_obs.SetMarkerSize(1.6);
+    gr_exp.SetLineColor(2); gr_exp.SetMarkerColor(2); gr_exp.SetMarkerStyle(20); gr_exp.SetLineWidth(3);gr_exp.SetMarkerSize(1.6);
+    gr_exp.SetLineStyle(8);
+
+    oneSLine = ROOT.TF1("oneSLine","1.58655253931457074e-01",mass[0],mass[len(mass)-1]);
+    oneSLine.SetLineColor(ROOT.kRed); oneSLine.SetLineWidth(2); oneSLine.SetLineStyle(2);
+    twoSLine = ROOT.TF1("twoSLine","2.27501319481792155e-02",mass[0],mass[len(mass)-1]);
+    twoSLine.SetLineColor(ROOT.kRed); twoSLine.SetLineWidth(2); twoSLine.SetLineStyle(2);
+    threeSLine = ROOT.TF1("threeSLine","1.34989803163009588e-03",mass[0],mass[len(mass)-1]);
+    threeSLine.SetLineColor(ROOT.kRed); threeSLine.SetLineWidth(2); threeSLine.SetLineStyle(2);
+    fourSLine = ROOT.TF1("fourSLine","3.16712418331199785e-05",mass[0],mass[len(mass)-1]);
+    fourSLine.SetLineColor(ROOT.kRed); fourSLine.SetLineWidth(2); fourSLine.SetLineStyle(2);
+
+    banner = TLatex(0.43,0.91,("CMS Preliminary, 19.3 fb^{-1} at #sqrt{s}=8TeV"));
+    banner.SetNDC(); banner.SetTextSize(0.028);
+
+    ban1s = TLatex(2400,1.58655253931457074e-01,("1 #sigma"));
+    ban1s.SetTextSize(0.028); ban1s.SetTextColor(2)
+    ban2s = TLatex(2400,2.27501319481792155e-02,("2 #sigma"));
+    ban2s.SetTextSize(0.028); ban2s.SetTextColor(2)
+    ban3s = TLatex(2400,1.34989803163009588e-03,("3 #sigma"));
+    ban3s.SetTextSize(0.028); ban3s.SetTextColor(2);
+    ban4s = TLatex(2400,3.16712418331199785e-05,("4 #sigma"));
+    ban4s.SetTextSize(0.028); ban4s.SetTextColor(2)
+
+    leg2 = ROOT.TLegend(0.2,0.2,0.5,0.35);
+    leg2.SetFillStyle(0);
+    leg2.SetBorderSize(1);
+    if options.jetBin == "":
+     leg2.AddEntry( gr_obs, "obs signif, %s "%options.channel, "pl" );
+     leg2.AddEntry( gr_exp, "exp signif, SM Higgs", "pl" );
+    else:
+     leg2.AddEntry( gr_obs, "obs signif, VBF "%options.channel, "pl" );
+     leg2.AddEntry( gr_exp, "exp signif, SM Higgs", "pl" );
+
+    can = ROOT.TCanvas("can","can",800,800);
+    hrl = can.DrawFrame(mass[0],1e-3,mass[len(mass)-1],0.6);
+    hrl.GetYaxis().SetTitle("p-value");
+    hrl.GetXaxis().SetTitle("m_{H} (GeV)");
+    can.SetGrid();
+    ROOT.gPad.SetLogy();
+    gr_obs.Draw("PL");
+    gr_exp.Draw("PLsame");
+    oneSLine.Draw("same");
+    twoSLine.Draw("same");
+    threeSLine.Draw("same");
+    fourSLine.Draw("same");
+    banner.Draw();
+    leg2.Draw();
+    ban1s.Draw();
+    ban2s.Draw();
+    ban3s.Draw();
+    ban4s.Draw();
+    can.SaveAs("limitFigs/SMPvals_%s.pdf"%(options.channel),"pdf");
+    can.SaveAs("limitFigs/SMPvals_%s.png"%(options.channel),"png");
+                    
+                                           
 ##############################################
 ### Make the BSM Limit plot vs mass and c' ###
 ##############################################    
@@ -1036,7 +1141,7 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
 
     massindex = {600:0,700:1,800:2,900:3,1000:4}
     mass_XS  = [];
-    BRnew_y  = array('d',[0,0.15,0.25,0.35,0.45,0.55]);
+    BRnew_y  = array('d',[0.,0.15,0.25,0.35,0.45,0.55]);
     cprime_x = array('d',[0.,0.15,0.25,0.35,0.55,0.75,1.05]);
 
     if SIGCH == "" or SIGCH == "_2jet":
@@ -1067,13 +1172,13 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
 
     for j in range(len(cprime)):
         for i in range(len(BRnew)):
-            curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass,options.channel,SIGCH,cprime[j],BRnew[i],mass);
+            curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass,options.channel,SIGCH,cprime[j],BRnew[i],mass);            
             curAsymLimits = getAsymLimits(curFile);
             h2d_exp.SetBinContent(j+1,i+1,curAsymLimits[3]);
             h2d_obs.SetBinContent(j+1,i+1,curAsymLimits[0]);
             h2d_csXbr_exp.SetBinContent(j+1,i+1,curAsymLimits[3]*mass_XS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]]);
             h2d_csXbr_obs.SetBinContent(j+1,i+1,curAsymLimits[0]*mass_XS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]]);
-
+            
 
     h2d_obs.GetXaxis().SetTitle("C^{'}");
     h2d_csXbr_exp.GetXaxis().SetTitle("C^{'}");
@@ -1617,7 +1722,7 @@ if __name__ == '__main__':
 
                     if options.higgsCombination == 1:
                      options.channel = "combo" ; 
-                     combineCmmd = "combineCards.py hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt hwwlvj_ggH%03d_em_2jet%s_%02d_%02d_unbin.txt > hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k],mass[i],options.channel,SIGCH,cprime[j],BRnew[k]);
+                     combineCmmd = "combineCards.py hwwlvj_ggH%03d_mu%s_%02d_%02d_unbin.txt hwwlvj_ggH%03d_el%s_%02d_%02d_unbin.txt hwwlvj_ggH%03d_em_2jet%s_%02d_%02d_unbin.txt > hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k],mass[i],options.channel,SIGCH,cprime[j],BRnew[k]);
                      print "combineCmmd ",combineCmmd; 
                      os.system(combineCmmd);
                         
@@ -1634,7 +1739,7 @@ if __name__ == '__main__':
                            runCmmd =  "combine -M GenerateOnly --saveToys -s -1 -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=%d "%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght);
                            print "runCmmd ",runCmmd;
                            if options.batchMode:
-                              fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                              fn = "combineScript_%s_%03d%s_%02d_%02d_iToy%d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k],iToy);
                               cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                               submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
                            else: 
@@ -1646,7 +1751,7 @@ if __name__ == '__main__':
                            runCmmd =  "combine -M GenerateOnly --saveToys -s -1 -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -t %d --expectSignal=%d "%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.nToys,options.injectSingalStrenght);
                            print "runCmmd ",runCmmd;
                            if options.batchMode:
-                              fn = "combineScript_%03d%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                              fn = "combineScript_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
                               cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                               submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
                            else: 
@@ -1678,7 +1783,7 @@ if __name__ == '__main__':
                              runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveToys --saveWithUncertainties --toysNoSystematics -s -1 -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin_%d -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=%d "%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],iToy,mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght);                     
                              print "runCmmd ",runCmmd;
                              if options.batchMode:
-                              fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                              fn = "combineScript_%s_%03d%s_%02d_%02d_iToy%d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k],iToy);
                               cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                               submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
                              else: 
@@ -1688,7 +1793,7 @@ if __name__ == '__main__':
                              runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveWithUncertainties  --toysNoSystematics --saveToys -s -1 -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -t %d --expectSignal=%d "%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.nToys,options.injectSingalStrenght);                     
                              print "runCmmd ",runCmmd;
                              if options.batchMode:
-                              fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],options.nToys);
+                              fn = "combineScript_%s_%03d%s_%02d_%02d_iToy%d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k],options.nToys);
                               cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                               submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
                              else: 
@@ -1711,7 +1816,7 @@ if __name__ == '__main__':
                                 iToy = iToy + 1 ;
                                 print "runCmmd ",runCmmd;                                
                                 if options.batchMode:
-                                  fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                                  fn = "combineScript_%s_%03d%s_%02d_%02d_iToy%d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k],iToy);
                                   cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                                   submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
                                 else: 
@@ -1724,7 +1829,7 @@ if __name__ == '__main__':
                                 runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveWithUncertainties -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -s -1 -t %d --toysFile %s/%s"%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.nToys,options.inputGeneratedDataset,name);                     
                                 print "runCmmd ",runCmmd;                                
                                 if options.batchMode:
-                                  fn = "combineScript_%03d%s_%02d_%02d_iToy%d"%(mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                                  fn = "combineScript_%s_%03d%s_%02d_%02d_iToy%d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k],iToy);
                                   cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                                   submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
                                 else: 
@@ -1742,23 +1847,35 @@ if __name__ == '__main__':
                        print "runCmmd ",runCmmd ;
 
                        if options.batchMode:
-                        fn = "combineScript_%03d%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                        fn = "combineScript_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
                         cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                         submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
                        else: 
                         os.system(runCmmd);
+
 
                     else: 
                        runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);                                        
                        print "runCmmd ",runCmmd;
 
                        if options.batchMode:
-                        fn = "combineScript_%03d%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                        fn = "combineScript_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
                         cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                         submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
                        else: 
                         os.system(runCmmd);
+
+                       runCmmd = "combine -M ProfileLikelihood --signif --pvalue -n hwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2\n"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
+                       runCmmd += "combine -M ProfileLikelihood --signif --pvalue -n hwwlvj_pval_exp_ggH%03d_%s%s_%02d_%02d_unbin -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=1"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
+                       print "runCmmd ",runCmmd;
                        
+                       if options.batchMode:
+                        fn = "combineScript_ProfileLikelihood_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
+                        submitBatchJobCombine(runCmmd, fn, mass[i], cprime[j], BRnew[k]);
+                       else:
+                        os.system(runCmmd);
+
+                                                                                                                               
 
     ####################################################
     # =================== Bias Analysis ============== #
@@ -1804,7 +1921,8 @@ if __name__ == '__main__':
 
       if options.makeSMLimitPlot == 1:
           makeSMLimitPlot(SIGCH);
-
+          if options.plotPValue == 1: makeSMPValuePlot(SIGCH);
+          
       if options.makeBSMLimitPlotMass == 1:
           makeBSMLimitPlotMass(SIGCH);
 
