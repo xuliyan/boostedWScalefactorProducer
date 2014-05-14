@@ -388,7 +388,7 @@ class doFit_wj_and_wlvj:
         self.top_veto_lep = 200 ;
         self.top_veto_had_min = 0 ;
         self.top_veto_lep_min = 0 ;
-        self.dEta_cut = 2.5 ;
+        self.dEta_cut = 3.0 ;
         self.Mjj_cut  = 250 ;
 
         # parameters of data-driven method to get the WJets background event number.
