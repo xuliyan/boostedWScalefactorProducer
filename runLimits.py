@@ -38,6 +38,7 @@ parser.add_option('--herculesMilano', action='store_true', dest='herculesMilano'
 ##### other basci options for all the methods 
 parser.add_option('--datacardDIR', action="store", type="string", dest="datacardDIR", default="")
 parser.add_option('--channel',     action="store", type="string", dest="channel",     default="em")
+parser.add_option('--queque',      action="store", type="string", dest="queque",      default="")
 parser.add_option('--pseudodata',  action="store", type="int",    dest="pseudodata",  default=0)
 parser.add_option('--systematics', action="store", type="int",    dest="systematics", default=1)
 parser.add_option('--massPoint',   action="store", type="int",    dest="massPoint",   default=-1)
@@ -234,9 +235,12 @@ def submitBatchJob( command, fn ):
   outScript.write("\n"+'rm *.out');  
   outScript.close();
          
-  os.system("chmod 777 "+currentDir+"/"+fn+".sh"); 
-  os.system("bsub -q 8nh -cwd "+currentDir+" "+fn+".sh");
-
+  os.system("chmod 777 "+currentDir+"/"+fn+".sh");
+  if options.queque != "":
+   os.system("bsub -q "+options.queque+" -cwd "+currentDir+" "+fn+".sh");
+  else:
+   os.system("bsub -q 8nh -cwd "+currentDir+" "+fn+".sh");
+      
  elif not options.lxbatchCern and options.herculesMilano:
 
   outScript.write('#!/bin/bash');
@@ -251,8 +255,11 @@ def submitBatchJob( command, fn ):
          
   os.system("chmod 777 "+currentDir+"/"+fn+".sh");
   
-  os.system("qsub -V -d "+currentDir+" -q shortcms "+currentDir+"/"+fn+".sh");
-  
+  if options.queque != "":
+   os.system("qsub -V -d "+currentDir+" -q "+options.queque+" "+currentDir+"/"+fn+".sh");
+  else:
+   os.system("qsub -V -d "+currentDir+" -q shortcms "+currentDir+"/"+fn+".sh");
+      
 
 ##########################################
 ###### Submit batch job for combine ######
@@ -317,7 +324,7 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
      outScript.write("\n"+'cd -');
      outScript.write("\n"+'ls');    
     
-     file1 = "hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass,SIGCH,cprime,BRnew);
+     file1 = "hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt"%(mass,options.channel,SIGCH,cprime,BRnew);
      file2 = "hwwlvj_ggH%03d_mu%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
      file3 = "hwwlvj_ggH%03d_el%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
      file4 = "hwwlvj_ggH%03d_em%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
@@ -332,8 +339,11 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
      outScript.write("\n "+"rm rootstats* ");
      outScript.close();
 
-     os.system("chmod 777 "+currentDir+"/"+fn+".sh"); 
-     os.system("bsub -q 8nh -cwd "+currentDir+" "+fn+".sh");
+     os.system("chmod 777 "+currentDir+"/"+fn+".sh");
+     if options.queque!="" :
+      os.system("bsub -q "+options.queque+" -cwd "+currentDir+" "+fn+".sh");
+     else: 
+      os.system("bsub -q 8nh -cwd "+currentDir+" "+fn+".sh");
 
     elif not options.lxbatchCern and options.herculesMilano: 
 
@@ -344,7 +354,7 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
      outScript.write("\n"+'cd -');
      outScript.write("\n"+'ls');    
     
-     file1 = "hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass,SIGCH,cprime,BRnew);
+     file1 = "hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt"%(mass,options.channel,SIGCH,cprime,BRnew);
      file2 = "hwwlvj_ggH%03d_mu%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
      file3 = "hwwlvj_ggH%03d_el%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
      file4 = "hwwlvj_ggH%03d_em%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
@@ -359,9 +369,13 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
      outScript.write("\n "+"rm rootstats* ");
      outScript.close();
 
-     os.system("chmod 777 "+currentDir+"/"+fn+".sh"); 
-     os.system("qsub -V -d "+currentDir+" -q shortcms "+currentDir+"/"+fn+".sh");
+     os.system("chmod 777 "+currentDir+"/"+fn+".sh");
 
+     if options.queque != "":
+      os.system("qsub -V -d "+currentDir+" -q "+options.queque+" "+currentDir+"/"+fn+".sh");
+     else:
+      os.system("qsub -V -d "+currentDir+" -q shortcms "+currentDir+"/"+fn+".sh");
+         
 
 #####################################
 ###### definition of the style ######
@@ -434,7 +448,7 @@ def setStyle():
 ### Get PValue from combine -M ProfileLikelihood ###
 ####################################################
 
-def getPValueFromCard( file ):
+def getPValueFromCard(file,observed):
 
  f = ROOT.TFile(file);
  t = f.Get("limit");
@@ -442,12 +456,11 @@ def getPValueFromCard( file ):
 
  lims = 1;
 
- for i in range(1):
-
+ for i in range(entries):
   t.GetEntry(i);
-  lims = t.limit
-
- return lims;
+  lims = t.limit ;
+      
+ return lims/entries;
 
 
 ##############################
@@ -541,7 +554,7 @@ def makeSMLimitPlot(SIGCH):
     if not options.blindObservedLine : curGraph_obs.Draw("PCsame");
     curGraph_exp.Draw("Csame");
 
-    leg2 = ROOT.TLegend(0.30,0.60,0.75,0.85);
+    leg2 = ROOT.TLegend(0.30,0.65,0.75,0.85);
     leg2.SetFillColor(0);
     leg2.SetShadowColor(0);
     leg2.SetTextFont(42);
@@ -608,8 +621,8 @@ def makeSMPValuePlot(SIGCH):
 	curFile_exp = "higgsCombinehwwlvj_pval_exp_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
         xbins_obs.append(mass[i]); 
         xbins_exp.append(mass[i]); 
-        ybins_obs.append(getPValueFromCard(curFile_obs));
-        ybins_exp.append(getPValueFromCard(curFile_exp));
+        ybins_obs.append(getPValueFromCard(curFile_obs,1));
+        ybins_exp.append(getPValueFromCard(curFile_exp,0));
 
     gr_obs = ROOT.TGraphAsymmErrors(nPoints+1,xbins_obs,ybins_obs);
     gr_exp = ROOT.TGraphAsymmErrors(nPoints+1,xbins_exp,ybins_exp);
@@ -627,8 +640,8 @@ def makeSMPValuePlot(SIGCH):
     fourSLine = ROOT.TF1("fourSLine","3.16712418331199785e-05",mass[0],mass[len(mass)-1]);
     fourSLine.SetLineColor(ROOT.kRed); fourSLine.SetLineWidth(2); fourSLine.SetLineStyle(2);
 
-    banner = TLatex(0.43,0.91,("CMS Preliminary, 19.3 fb^{-1} at #sqrt{s}=8TeV"));
-    banner.SetNDC(); banner.SetTextSize(0.028);
+    banner = TLatex(0.32,0.955,("CMS Preliminary, 19.3 fb^{-1} at #sqrt{s}=8TeV"));
+    banner.SetNDC(); banner.SetTextSize(0.035);
 
     ban1s = TLatex(2400,1.58655253931457074e-01,("1 #sigma"));
     ban1s.SetTextSize(0.028); ban1s.SetTextColor(2)
@@ -639,18 +652,21 @@ def makeSMPValuePlot(SIGCH):
     ban4s = TLatex(2400,3.16712418331199785e-05,("4 #sigma"));
     ban4s.SetTextSize(0.028); ban4s.SetTextColor(2)
 
-    leg2 = ROOT.TLegend(0.2,0.2,0.5,0.35);
+    leg2 = ROOT.TLegend(0.25,0.2,0.6,0.35);
     leg2.SetFillStyle(0);
     leg2.SetBorderSize(1);
+    leg2.SetTextFont(42);
+    leg2.SetTextSize(0.028);
+    
     if options.jetBin == "":
      leg2.AddEntry( gr_obs, "obs signif, %s "%options.channel, "pl" );
      leg2.AddEntry( gr_exp, "exp signif, SM Higgs", "pl" );
     else:
-     leg2.AddEntry( gr_obs, "obs signif, VBF "%options.channel, "pl" );
+     leg2.AddEntry( gr_obs, "obs signif, VBF e+mu", "pl" );
      leg2.AddEntry( gr_exp, "exp signif, SM Higgs", "pl" );
 
-    can = ROOT.TCanvas("can","can",800,800);
-    hrl = can.DrawFrame(mass[0],1e-3,mass[len(mass)-1],0.6);
+    can = ROOT.TCanvas("can","can",600,650);
+    hrl = can.DrawFrame(mass[0],1e-6,mass[len(mass)-1],1.);
     hrl.GetYaxis().SetTitle("p-value");
     hrl.GetXaxis().SetTitle("m_{H} (GeV)");
     can.SetGrid();
@@ -1865,15 +1881,22 @@ if __name__ == '__main__':
                        else: 
                         os.system(runCmmd);
 
-                       runCmmd = "combine -M ProfileLikelihood --signif --pvalue -n hwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2\n"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
-                       runCmmd += "combine -M ProfileLikelihood --signif --pvalue -n hwwlvj_pval_exp_ggH%03d_%s%s_%02d_%02d_unbin -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=1"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
-                       print "runCmmd ",runCmmd;
-                       
+                       runCmmd = "combine -M ProfileLikelihood --signif --pvalue -n hwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
+
                        if options.batchMode:
-                        fn = "combineScript_ProfileLikelihood_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
+                        fn = "combineScript_ProfileLikelihood_obs_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
                         submitBatchJobCombine(runCmmd, fn, mass[i], cprime[j], BRnew[k]);
                        else:
                         os.system(runCmmd);
+                       
+                       runCmmd = "combine -M ProfileLikelihood --signif --pvalue -n hwwlvj_pval_exp_ggH%03d_%s%s_%02d_%02d_unbin -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 --toysFreq -t -1 "%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
+                       print "runCmmd ",runCmmd;
+
+                       if options.batchMode:
+                         fn = "combineScript_ProfileLikelihood_exp_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
+                         submitBatchJobCombine(runCmmd, fn, mass[i], cprime[j], BRnew[k]);
+                       else:
+                         os.system(runCmmd);
 
                                                                                                                                
 
