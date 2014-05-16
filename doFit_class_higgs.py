@@ -215,7 +215,7 @@ class doFit_wj_and_wlvj:
         rrv_mass_lvj.setRange("signal_region",self.mlvj_signal_min,self.mlvj_signal_max);
 
         #prepare the data and mc files --> set the working directory and the files name
-        self.file_Directory = options.inPath+"./trainingtrees_%s/"%(self.channel);
+        self.file_Directory = "/gwteray/users/brianza/NUOVE_NTUPLE/trainingtrees_%s/"%(self.channel);
 
         self.PS_model = options.psmodel;
 
@@ -1121,21 +1121,27 @@ class doFit_wj_and_wlvj:
                 tmp_event_weight = tmp_event_weight*tmp_interference_weight_H1000
                 tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H1000
 
+
              if TString(label).Contains("vbfH600"):
-                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H600;
-                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H600;
+                intWeight=getIntWght("file_for_interpolation.root", 600, mass_lvj, float(options.cprime/10.))
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H600*intWeight;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H600*intWeight;
              if TString(label).Contains("vbfH700"):
-                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H700;
-                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H700;
+                intWeight=getIntWght("file_for_interpolation.root", 700, mass_lvj, float(options.cprime/10.))
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H700*intWeight;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H700*intWeight;
              if TString(label).Contains("vbfH800"):
-                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H800;
-                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H800;
+                intWeight=getIntWght("file_for_interpolation.root", 800, mass_lvj, float(options.cprime/10.))
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H800*intWeight;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H800*intWeight;
              if TString(label).Contains("vbfH900"):
-                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H900;
-                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H900;
+                intWeight=getIntWght("file_for_interpolation.root", 900, mass_lvj, float(options.cprime/10.))
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H900*intWeight;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H900*intWeight;
              if TString(label).Contains("vbfH1000"):
-                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H1000;
-                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H1000;
+                intWeight=getIntWght("file_for_interpolation.root", 1000, mass_lvj, float(options.cprime/10.))
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H1000*intWeight;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H1000*intWeight;
  
              # for multi-sample, like STop and VV. There are two sample, and two wSampleWeight_value.Use the least wSampleWeight as scale.
              tmp_event_weight4fit = tmp_event_weight4fit*treeIn.wSampleWeight/tmp_scale_to_lumi;
@@ -3087,6 +3093,7 @@ self.channel));
     def fit_AllSamples_Mj_and_Mlvj(self):
         print "################### fit_AllSamples_Mj_and_Mlvj #####################"
         self.fit_Signal();
+     #   raw_input("FERMAAAA");
         self.fit_STop();
         self.fit_VV();
         if options.jetBin == "_2jet": self.fit_WW_EWK();        
