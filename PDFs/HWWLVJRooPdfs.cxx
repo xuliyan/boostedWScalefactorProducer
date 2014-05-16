@@ -21,6 +21,8 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1F.h"
+#include "TH1.h"
+#include "TF1.h"
 #include "TChain.h"
 #include "TString.h"
 #include "TRandom3.h"
@@ -48,6 +50,7 @@
 #include "TH1D.h"
 #include "TRandom.h"
 #include "TGraph.h"
+#include "TGraph2D.h"
 #include "TGraphAsymmErrors.h"
 #include <iostream>
 using namespace std;
@@ -1428,4 +1431,6 @@ Double_t RooAlpha4AtanPowPdf::evaluate() const {
    Double_t widtha_tmp=widtha; if(widtha<1e-2){ widtha_tmp=1e-2;}
    return AtanPow(x,c,offset,width_tmp)/AtanPow(x,ca,offseta,widtha_tmp);
 } 
+
+
 
