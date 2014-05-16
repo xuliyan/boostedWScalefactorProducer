@@ -5,6 +5,9 @@
 
 #include "TString.h"
 #include "TGaxis.h"
+#include "TGraph2D.h"
+#include "TFile.h"
+#include "TF1.h"
 
 #include "RooRealVar.h"
 #include "RooFormulaVar.h"
@@ -52,3 +55,12 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace*, const std::
 
 void get_mlvj_normalization_insignalregion(RooWorkspace* ,const std::string & = "", const std::string & = "", const std::string & = "", const std::string & = "", const int & = 0);
 					
+///////////////////
+
+double crystalBallLowHigh (double* x, double* par);
+
+double doubleGausCrystalBallLowHighPlusExp (double* x, double* par);
+
+Double_t CrystalBallLowHighPlusExpDividedByCrystalBallLowHigh(Double_t *x,Double_t *par);
+
+Double_t getIntWght(std::string wFile , double realMass, double Hmass = 350, double cprime = 1.0);
