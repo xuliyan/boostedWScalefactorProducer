@@ -156,15 +156,15 @@ class doFit_wj_and_wlvj:
         in_mlvj_max        = in_mlvj_min+self.nbins_mlvj*self.BinWidth_mlvj;
 
         ## define jet mass variable
-        rrv_mass_j = RooRealVar("rrv_mass_j","pruned m_{J}",(in_mj_min+in_mj_max)/2.,in_mj_min,in_mj_max,"GeV/c^{2}");
+        rrv_mass_j = RooRealVar("rrv_mass_j","pruned m_{J}",(in_mj_min+in_mj_max)/2.,in_mj_min,in_mj_max,"GeV");
         rrv_mass_j.setBins(self.nbins_mj);
 
         ## define invariant mass WW variable
-        rrv_mass_lvj = RooRealVar("rrv_mass_lvj","m_{WW}",(in_mlvj_min+in_mlvj_max)/2.,in_mlvj_min,in_mlvj_max,"GeV/c^{2}");
+        rrv_mass_lvj = RooRealVar("rrv_mass_lvj","m_{WW}",(in_mlvj_min+in_mlvj_max)/2.,in_mlvj_min,in_mlvj_max,"GeV");
         rrv_mass_lvj.setBins(self.nbins_mlvj);
 
         ## generator higgs mass
-        rrv_mass_gen_WW = RooRealVar("rrv_mass_gen_WW","gen_m_{WW}",(in_mlvj_min+in_mlvj_max)/2.,in_mlvj_min,in_mlvj_max,"GeV/c^{2}");
+        rrv_mass_gen_WW = RooRealVar("rrv_mass_gen_WW","gen_m_{WW}",(in_mlvj_min+in_mlvj_max)/2.,in_mlvj_min,in_mlvj_max,"GeV");
         rrv_mass_gen_WW.setBins(self.nbins_mlvj);
 
         ## create the workspace and import them
@@ -215,7 +215,7 @@ class doFit_wj_and_wlvj:
         rrv_mass_lvj.setRange("signal_region",self.mlvj_signal_min,self.mlvj_signal_max);
 
         #prepare the data and mc files --> set the working directory and the files name
-        self.file_Directory = "/gwteray/users/brianza/NUOVE_NTUPLE/trainingtrees_%s/"%(self.channel);
+        self.file_Directory = "trainingtrees_%s/"%(self.channel);
 
         self.PS_model = options.psmodel;
 
@@ -1123,25 +1123,25 @@ class doFit_wj_and_wlvj:
 
 
              if TString(label).Contains("vbfH600"):
-                intWeight=getIntWght("file_for_interpolation.root", 600, mass_lvj, float(options.cprime/10.))
-                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H600*intWeight;
-                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H600*intWeight;
+                #intWeight=getIntWght("file_for_interpolation.root", 600, mass_lvj, float(options.cprime/10.))
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H600#*intWeight;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H600#*intWeight;
              if TString(label).Contains("vbfH700"):
-                intWeight=getIntWght("file_for_interpolation.root", 700, mass_lvj, float(options.cprime/10.))
-                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H700*intWeight;
-                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H700*intWeight;
+                #intWeight=getIntWght("file_for_interpolation.root", 700, mass_lvj, float(options.cprime/10.))
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H700#*intWeight;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H700#*intWeight;
              if TString(label).Contains("vbfH800"):
-                intWeight=getIntWght("file_for_interpolation.root", 800, mass_lvj, float(options.cprime/10.))
-                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H800*intWeight;
-                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H800*intWeight;
+                #intWeight=getIntWght("file_for_interpolation.root", 800, mass_lvj, float(options.cprime/10.))
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H800#*intWeight;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H800#*intWeight;
              if TString(label).Contains("vbfH900"):
-                intWeight=getIntWght("file_for_interpolation.root", 900, mass_lvj, float(options.cprime/10.))
-                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H900*intWeight;
-                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H900*intWeight;
+                #intWeight=getIntWght("file_for_interpolation.root", 900, mass_lvj, float(options.cprime/10.))
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H900#*intWeight;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H900#*intWeight;
              if TString(label).Contains("vbfH1000"):
-                intWeight=getIntWght("file_for_interpolation.root", 1000, mass_lvj, float(options.cprime/10.))
-                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H1000*intWeight;
-                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H1000*intWeight;
+                #intWeight=getIntWght("file_for_interpolation.root", 1000, mass_lvj, float(options.cprime/10.))
+                tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H1000#*intWeight;
+                tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H1000#*intWeight;
  
              # for multi-sample, like STop and VV. There are two sample, and two wSampleWeight_value.Use the least wSampleWeight as scale.
              tmp_event_weight4fit = tmp_event_weight4fit*treeIn.wSampleWeight/tmp_scale_to_lumi;
@@ -2665,22 +2665,20 @@ self.channel));
             model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("ggH#times%s, m_{H}=1TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["ggH"]), RooFit.LineStyle(2), RooFit.VLines());
             model_pdf_vbfH.plotOn(mplot,RooFit.Normalization(scale_number_vbfH*signal_scale),RooFit.Name("qqH#times%s, m_{H}=1TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["vbfH"]), RooFit.LineStyle( 9), RooFit.VLines());
 
-        data_obs.plotOn(mplot, RooFit.Name("data"), RooFit.MarkerSize(1.5), RooFit.DataError(RooAbsData.SumW2), RooFit.XErrorSize(0) );
+        GetDataPoissonInterval(data_obs,rrv_x,mplot,self.narrow_factor);
         model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Invisible(),RooFit.Name("model_mc"));
-
-        rfresult = RooFitResult() ;
-        mplot_pull = get_pull(rrv_x,mplot,data_obs,model_Total_background_MC,rfresult,"data","model_mc",0,1);
 
         self.FloatingParams.Print("v");
         if options.closuretest == 0:
-            draw_error_band_ws(data_obs,model_Total_background_MC,rrv_x.GetName(),rrv_number_Total_background_MC,self.FloatingParams,workspace,mplot,self.color_palet["Uncertainty"],"F");
+           errorband_ratio = draw_error_band_ws(data_obs,model_Total_background_MC,rrv_x.GetName(),rrv_number_Total_background_MC,self.FloatingParams,workspace,mplot,self.color_palet["Uncertainty"],"F",rrv_x.getBins(),self.narrow_factor);
         else:
-            draw_error_band_ws(data_obs,model_Total_background_MC,rrv_x.GetName(),rrv_number_Total_background_MC,self.FloatingParams,workspace,mplot,self.color_palet["Uncertainty"],"F");
+           errorband_ratio = draw_error_band_ws(data_obs,model_Total_background_MC,rrv_x.GetName(),rrv_number_Total_background_MC,self.FloatingParams,workspace,mplot,self.color_palet["Uncertainty"],"F",rrv_x.getBins(),self.narrow_factor);
 
         self.leg = legend4Plot(mplot,0,0.,0.06,0.16,0.,1,self.channel);
-            
+        rfresult = RooFitResult();
+        mplot_pull = get_ratio(rrv_x,data_obs,model_Total_background_MC,rfresult,0,self.narrow_factor,errorband_ratio);
         mplot.addObject(self.leg);
-        mplot.GetYaxis().SetRangeUser(1e-2,mplot.GetMaximum()*1.3);
+        mplot.GetYaxis().SetRangeUser(0,mplot.GetMaximum()*1.3);
 
         datahist = data_obs.binnedClone(data_obs.GetName()+"_binnedClone",data_obs.GetName()+"_binnedClone")
         Nbin = int(rrv_x.getBins()); 

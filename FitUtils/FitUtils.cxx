@@ -98,19 +98,20 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
 
      //## Plot the result
      RooPlot* mplot = rrv_mass_j->frame(RooFit::Title((label+" fitted by "+model).c_str()), RooFit::Bins(int(rrv_mass_j->getBins())));
-     rdataset_mj->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
+     rdataset_mj->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0),RooFit::Invisible());
 
      //## draw the error band for an extend pdf
      draw_error_band_extendPdf(rdataset_mj,model_pdf,rfresult,mplot,2,"L");
 
-     //## re-draw the dataset
-     rdataset_mj->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0),RooFit::Name("data"));
      //## draw the function
      model_pdf->plotOn(mplot,RooFit::Name("model_mc")); // remove RooFit.VLines() in order to get right pull in the 1st bin
 
+     //## re-draw the dataset
+     rdataset_mj->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0),RooFit::Name("data"));
+
      //## Get the pull
-     RooPlot* mplot_pull = get_pull(rrv_mass_j,mplot,rdataset_mj,model_pdf,rfresult,"data","model_mc",0,1);
-     mplot->GetYaxis()->SetRangeUser(1e-5,mplot->GetMaximum()*1.2);
+     RooPlot* mplot_pull = get_ratio(rrv_mass_j,rdataset_mj,model_pdf,rfresult,1,1);
+     mplot->GetYaxis()->SetRangeUser(0,mplot->GetMaximum()*1.2);
 
      //## CALCULATE CHI2
      RooDataHist* datahist = rdataset_mj->binnedClone((std::string(rdataset_mj->GetName())+"_binnedClone").c_str(),(std::string(rdataset_mj->GetName())+"_binnedClone").c_str());
@@ -139,9 +140,10 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
 
      if(label == "_STop" or label == "_VV" or label == "_WJets0" or label == "_WW_EWK" or label == "_TTbar"){
 
-       rdataset_mj->plotOn(mplot_sys,RooFit::Name("MC Events"),RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
+       rdataset_mj->plotOn(mplot_sys,RooFit::Name("MC Events"),RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0),RooFit::Invisible());
        model_pdf->plotOn(mplot_sys,RooFit::Name("Nominal MC"),RooFit::LineColor(kBlack));
        draw_error_band_extendPdf(rdataset_mj,model_pdf,rfresult,mplot_sys,kBlack,"F");
+       rdataset_mj->plotOn(mplot_sys,RooFit::Name("MC Events"), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0));
            
        std::cout<<"model"+label+"massvbf_jes_up"+model+"_"+channel+"_mj"<<"   "<<"rrv_scale_to_lumi"+label+"_"+channel<<std::endl;   
        if(workspace->pdf(("model"+label+"massvbf_jes_up"+model+"_"+channel+"_mj").c_str())) 
@@ -170,7 +172,7 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
        mplot_sys->addObject(leg);
        rdataset_mj->plotOn(mplot_sys,RooFit::Name("MC Events"), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0));
        model_pdf->plotOn(mplot_sys,RooFit::Name("Nominal MC"),RooFit::LineColor(kBlack));
-       mplot_sys->GetYaxis()->SetRangeUser(1e-2,mplot_sys->GetMaximum()*1.2);
+       mplot_sys->GetYaxis()->SetRangeUser(0,mplot_sys->GetMaximum()*1.2);
         
        command.Form("mkdir -p plots_%s_%s_g1/other/",channel.c_str(),wtagger_label.c_str());
        system(command.Data());
@@ -226,7 +228,7 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
       mplot_deco->addObject(legend);
       rdataset_mj->plotOn(mplot_deco,RooFit::Name("MC Events"),RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
       model_deco->plotOn(mplot_deco,RooFit::Name("Nominal MC"),RooFit::LineColor(kBlack));
-      mplot_deco->GetYaxis()->SetRangeUser(1e-2,mplot_deco->GetMaximum()*1.2);
+      mplot_deco->GetYaxis()->SetRangeUser(0,mplot_deco->GetMaximum()*1.2);
 
       command.Form("plots_%s_%s_g1/other/",channel.c_str(),wtagger_label.c_str());
       draw_canvas_with_pull(mplot_deco,mplot_pull,new RooArgList(*parameters_list),std::string(command.Data()),"m_j_shape"+label+fileName,model,channel,0,0,GetLumi());
@@ -273,14 +275,14 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
       
       //## plot the result
       RooPlot* mplot = rrv_mass_lvj->frame(RooFit::Title(("M_{lvj"+in_range+"} fitted by "+mlvj_model).c_str()), RooFit::Bins(int(rrv_mass_lvj->getBins())));
-      rdataset->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
+      rdataset->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0),RooFit::Invisible());
       //## plot the error band but don't store the canvas (only plotted without -b option
       if(mlvj_model != "CBBW_v1") draw_error_band_extendPdf(rdataset,model,rfresult,mplot,2,"L");
       model->plotOn(mplot,RooFit::Name("model_mc"));//#, RooFit.VLines()); in order to have the right pull
       rdataset->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0),RooFit::Name("data"));
 
       //## get the pull
-      RooPlot* mplot_pull = get_pull(rrv_mass_lvj,mplot,rdataset,model,rfresult,"data","model_mc",0,1);
+      RooPlot* mplot_pull = get_ratio(rrv_mass_lvj,rdataset,model,rfresult,1,1);
       RooArgSet* parameters_list = model->getParameters(*rdataset);
         
       //##CALCULATE CHI2                                                                                                                                                    
@@ -295,7 +297,6 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
       int nparameters   = rresult_param.getSize();
       RooAbsReal* ChiSquare = model->createChi2(*datahist,RooFit::Extended(kTRUE),RooFit::DataError(RooAbsData::Poisson));
       float chi_over_ndf  = ChiSquare->getVal()/(Nbin-nparameters);
-
         
       RooHist* residHist = mplot->residHist("data","model_mc");
       float residual = 0. ;
@@ -305,7 +306,7 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
         residual = residual + y*y ;
       }
         
-      mplot->GetYaxis()->SetRangeUser(1e-2,mplot->GetMaximum()*1.2);
+      mplot->GetYaxis()->SetRangeUser(0,mplot->GetMaximum()*1.2);
      
       if( FTest_output_txt != ""){
        std::ofstream file_out_FTest ;  
@@ -323,7 +324,7 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
 
       //##Add Chisquare to mplot_pull   
       TString command; command.Form("#chi^{2}/ndf = %0.2f ",float(chi_over_ndf));                                                                                
-      TLatex* cs2 = new TLatex(0.75,0.8,command.Data());
+      TLatex* cs2 = new TLatex(0.25,0.8,command.Data());
       cs2->SetNDC();
       cs2->SetTextSize(0.12);
       cs2->AppendPad("same");
@@ -367,7 +368,7 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
       mplot_sys->addObject(legend);
       rdataset->plotOn(mplot_sys,RooFit::Name("MC Events"),RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
       model->plotOn(mplot_sys,RooFit::Name("Nominal MC"),RooFit::LineColor(kBlack));
-      mplot_sys->GetYaxis()->SetRangeUser(1e-2,mplot_sys->GetMaximum()*1.2);
+      mplot_sys->GetYaxis()->SetRangeUser(0,mplot_sys->GetMaximum()*1.2);
 
       command.Form("plots_%s_%s_g1/other/",channel.c_str(),wtagger_label.c_str());
       draw_canvas_with_pull(mplot_sys,mplot_pull,new RooArgList(*parameters_list),std::string(command.Data()),"m_lvj_extended"+label+in_range,mlvj_model,channel,0,logy,GetLumi());
@@ -422,7 +423,7 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
 	rdataset->plotOn(mplot_deco, RooFit::Name("MC Events"), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0));
 
 	model_pdf->plotOn(mplot_deco,RooFit::Name("Nominal MC"),RooFit::LineColor(kBlack));
-	mplot_deco->GetYaxis()->SetRangeUser(1e-2,mplot_deco->GetMaximum()*1.2);
+	mplot_deco->GetYaxis()->SetRangeUser(0,mplot_deco->GetMaximum()*1.2);
 
         command.Form("plots_%s_%s_g1/other/",channel.c_str(),wtagger_label.c_str());
         draw_canvas_with_pull(mplot_deco,mplot_pull,new RooArgList(*parameters_list),std::string(command.Data()),"m_lvj_shape"+label+in_range,mlvj_model,channel,0,logy,GetLumi());
@@ -460,7 +461,7 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
          mplot_deco->addObject(leg);
          rdataset->plotOn(mplot_deco, RooFit::Name("MC Events"), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
          model_pdf->plotOn(mplot_deco,RooFit::Name("Nominal MC"),RooFit::LineColor(kBlack));
-         mplot_deco->GetYaxis()->SetRangeUser(1e-2,mplot_deco->GetMaximum()*1.2);
+         mplot_deco->GetYaxis()->SetRangeUser(0,mplot_deco->GetMaximum()*1.2);
 
          command.Form("plots_%s_%s_g1/other/",channel.c_str(),wtagger_label.c_str());
          draw_canvas_with_pull(mplot_deco,mplot_pull,new RooArgList(*parameters_list),std::string(command.Data()),"m_lvj_shape"+label+in_range,mlvj_model,channel,0,logy,GetLumi());
@@ -937,12 +938,12 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
   /// draw the error band using the sum of all the entries component MC + fit and the total error == Normalization for the fixed MC, shape + normalization for W+jets
   draw_error_band(rdataset_data_mj, model_data, rrv_number_data_mj,rfresult,mplot,color_palet["Uncertainty"],"F");
   model_data->plotOn(mplot,RooFit::Name("model_mc"),RooFit::Range(rrv_mass_j->getMin(),rrv_mass_j->getMax()),RooFit::NormRange("sb_lo,sb_hi"),RooFit::Invisible());
-                        
-  if (pseudodata == 1) rdataset_data_mj->plotOn( mplot ,RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0), RooFit::Name("data"));               
+
+  if (pseudodata == 1) rdataset_data_mj->plotOn( mplot ,RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0), RooFit::Name("data"));
   else GetDataPoissonInterval(rdataset_data_mj,rrv_mass_j,mplot);
-		
+                                       		
   // Get the pull and plot it
-  RooPlot* mplot_pull = get_pull(rrv_mass_j,mplot,rdataset_data_mj,model_data,rfresult,"data","model_mc",1,1);
+  RooPlot* mplot_pull = get_ratio(rrv_mass_j,rdataset_data_mj,model_data,rfresult,1,1);
   
   // signal window zone with vertical lines
   TLine* lowerLine = new TLine(mj_signal_min,0.,mj_signal_min,mplot->GetMaximum()*0.9); lowerLine->SetLineWidth(2); lowerLine->SetLineColor(kGray+2); lowerLine->SetLineStyle(9);
@@ -953,7 +954,7 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
   // legend of the plot
   TLegend* leg = legend4Plot(mplot,0,-0.2,0.07,0.04,0.,1,channel);
   mplot->addObject(leg);
-  mplot->GetYaxis()->SetRangeUser(1e-2,mplot->GetMaximum()*1.5);
+  mplot->GetYaxis()->SetRangeUser(0,mplot->GetMaximum()*1.5);
 
   // CALCULATE CHI2
   RooDataHist* datahist = rdataset_data_mj->binnedClone((std::string(rdataset_data_mj->GetName())+"_binnedClone").c_str(),(std::string(rdataset_data_mj->GetName())+"_binnedClone").c_str());
@@ -1370,20 +1371,19 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
    //draw the error band
    model_data->plotOn( mplot , RooFit::VLines(), RooFit::Invisible());
    model_data->plotOn( mplot , RooFit::Invisible(), RooFit::Name("model_mc"));
-   if(pseudodata == 1) rdataset_data_mlvj->plotOn( mplot , RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0), RooFit::Name("data"));     
+   if(pseudodata == 1) rdataset_data_mlvj->plotOn( mplot , RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0), RooFit::Name("data"));
    else rdataset_data_mlvj->plotOn( mplot , RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0), RooFit::Name("data"));
-     //GetDataPoissonInterval(rdataset_data_mlvj,rrv_mass_lvj,mplot);
 
    draw_error_band(rdataset_data_mlvj,model_data,rrv_number_data_sb_lo_mlvj,rfresult,mplot,color_palet["Uncertainty"],"F");
 
-   mplot->GetYaxis()->SetRangeUser(1e-2,mplot->GetMaximum()*1.2);
+   mplot->GetYaxis()->SetRangeUser(0,mplot->GetMaximum()*1.2);
             
    //Add the legend to the plot
    TLegend* leg = legend4Plot(mplot,0,0.,0.06,0.16,0.,1,channel);
    mplot->addObject(leg);
 
    //### get the pull plot and store the canvas
-   RooPlot* mplot_pull = get_pull(rrv_mass_lvj,mplot,rdataset_data_mlvj,model_data,rfresult,"data","model_mc",1,1);
+   RooPlot* mplot_pull = get_ratio(rrv_mass_lvj,rdataset_data_mlvj,model_data,rfresult,1,1);
    RooArgSet* parameters_list = model_data->getParameters(rdataset_data_mlvj);
 
    //CALCULATE CHI2                                                                                                                                               
@@ -1406,7 +1406,7 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
          residHist->GetPoint(iPoint,x,y); 
          residual = residual + y*y ;
    }
-   mplot->GetYaxis()->SetRangeUser(1e-2,mplot->GetMaximum()*1.2);
+   mplot->GetYaxis()->SetRangeUser(0,mplot->GetMaximum()*1.2);
 
    if( FTest_output_txt != ""){
        std::ofstream file_out_FTest ;  
@@ -1789,10 +1789,10 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
     //plot just W+Jets sb distribution
     rdataset_WJets_sb_lo_mlvj->plotOn(mplot_sb_lo,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0),RooFit::Name("data"));
     model_pdf_sb_lo_WJets->plotOn(mplot_sb_lo ,RooFit::Name("model_mc"));
-    RooPlot* mplot_pull_sideband = get_pull(rrv_x,mplot_sb_lo,rdataset_WJets_sb_lo_mlvj,model_pdf_sb_lo_WJets,rfresult,"data","model_mc",0,1);
+    RooPlot* mplot_pull_sideband = get_ratio(rrv_x,rdataset_WJets_sb_lo_mlvj,model_pdf_sb_lo_WJets,rfresult,0,1);
 
     RooArgSet* parameters_list     = model_pdf_sb_lo_WJets->getParameters(rdataset_WJets_sb_lo_mlvj);
-    mplot_sb_lo->GetYaxis()->SetRangeUser(1e-2,mplot_sb_lo->GetMaximum()*1.2);
+    mplot_sb_lo->GetYaxis()->SetRangeUser(0,mplot_sb_lo->GetMaximum()*1.2);
 
     std::string NameDir  = "plots_"+channel+"_"+wtagger+"_g1";
     std::string NamePlot = "m_lvj"+label+"_sb_lo_sim";
@@ -1807,8 +1807,10 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
     model_pdf_signal_region_WJets->plotOn(mplot_signal_region, RooFit::Name("model_mc"));
     RooPlot* mplot_pull_signal_region = get_pull(rrv_x,mplot_signal_region,rdataset_WJets_signal_region_mlvj,model_pdf_signal_region_WJets,rfresult,"data","model_mc",0,1);
 
+
+      
     parameters_list = model_pdf_signal_region_WJets->getParameters(rdataset_WJets_signal_region_mlvj);
-    mplot_signal_region->GetYaxis()->SetRangeUser(1e-2,mplot_signal_region->GetMaximum()*1.2);
+    mplot_signal_region->GetYaxis()->SetRangeUser(0,mplot_signal_region->GetMaximum()*1.2);
 
     NamePlot = "m_lvj"+label+"_signal_regionsim";
     draw_canvas_with_pull(mplot_signal_region,mplot_pull_signal_region,new RooArgList(*parameters_list),NameDir,NamePlot,mlvj_model,channel,0,1,GetLumi());
@@ -2006,27 +2008,17 @@ double doubleGausCrystalBallLowHighPlusExp (double* x, double* par) {
   //[4] = n
   //[5] = alpha2
   //[6] = n2
-
   //[7] = R = ratio between exponential and CB
   //[8] = tau = tau falling of exponential
 
  double xx = x[0];
-
-// double mean = par[1] ; // mean
-// double sigmaP = par[2] ; // sigma of the positive side of the gaussian
-// double sigmaN = par[3] ; // sigma of the negative side of the gaussian
-// double alpha = par[4] ; // junction point on the positive side of the gaussian
-// double n = par[5] ; // power of the power law on the positive side of the gaussian
-// double alpha2 = par[6] ; // junction point on the negative side of the gaussian
-// double n2 = par[7] ; // power of the power law on the negative side of the gaussian
-
- double mean = par[1] ; // mean
-  double sigmaP = par[2] ; // sigma of the positive side of the gaussian | they are the same!!!
-  double sigmaN = par[2] ; // sigma of the negative side of the gaussian |
- double alpha = par[3] ; // junction point on the positive side of the gaussian
- double n = par[4] ; // power of the power law on the positive side of the gaussian
-  double alpha2 = par[5] ; // junction point on the negative side of the gaussian
-  double n2 = par[6] ; // power of the power law on the negative side of the gaussian
+ double mean   = par[1] ; // mean
+ double sigmaP = par[2] ; // sigma of the positive side of the gaussian | they are the same!!!
+ double sigmaN = par[2] ; // sigma of the negative side of the gaussian |
+ double alpha  = par[3] ; // junction point on the positive side of the gaussian
+ double n      = par[4] ; // power of the power law on the positive side of the gaussian
+ double alpha2 = par[5] ; // junction point on the negative side of the gaussian
+ double n2     = par[6] ; // power of the power law on the negative side of the gaussian
 
  double R = par[7] ;
  double tau = par[8] ;
@@ -2037,19 +2029,17 @@ double doubleGausCrystalBallLowHighPlusExp (double* x, double* par) {
   double B = n/fabs(alpha) - fabs(alpha);
 
   return par[0] * ( (1-R)*(A * pow(B + (xx-mean)/sigmaP, -1.*n)) + R * exp(-xx/tau));
- }
 
-  else if ((xx-mean)/sigmaN < -1.*fabs(alpha2)) {
+ }
+ else if ((xx-mean)/sigmaN < -1.*fabs(alpha2)) {
   double A = pow(n2/fabs(alpha2), n2) * exp(-0.5 * alpha2*alpha2);
   double B = n2/fabs(alpha2) - fabs(alpha2);
 
   return par[0] * ( (1-R)*(A * pow(B - (xx-mean)/sigmaN, -1.*n2)) + R * exp(-xx/tau));
-  }
-
+ }
  else if ((xx-mean) > 0) {
    return par[0] * ( (1-R)*exp(-1. * (xx-mean)*(xx-mean) / (2*sigmaP*sigmaP) ) + R * exp(-xx/tau));
-  }
-
+ }
  else {
    return par[0] * ( (1-R)*exp(-1. * (xx-mean)*(xx-mean) / (2*sigmaN*sigmaN) ) + R * exp(-xx/tau));
  }
@@ -2067,54 +2057,50 @@ Double_t CrystalBallLowHighPlusExpDividedByCrystalBallLowHigh(Double_t *x,Double
 
 
 Double_t getIntWght(std::string wFile , double realMass, double Hmass , double cprime ) {
-    TString *readfile = new TString (wFile); //file with the values of the all parameters
-    TFile* SI = new TFile(readfile->Data());
-    Double_t fill_param[16]; // 9 + 7 = 16
+   
+ TString *readfile = new TString (wFile); //file with the values of the all parameters
+ TFile* SI = new TFile(readfile->Data());
 
-    TGraph2D* variables_S[7];
-    TGraph2D* variables_SI[9];
-    TF1* crystal_Icorr_qqH;
+ TGraph2D* variables_S[7];
+ TGraph2D* variables_SI[9];
+ TF1* crystal_Icorr_qqH;
 
-  TString parameters_normal [9] = {"Log_Norm","Mean_CB","Sigma_CB","alphaR_CB","nR_CB","alphaL_CB","nL_CB","R","Tau"};
+ TString parameters_normal [9] = {"Log_Norm","Mean_CB","Sigma_CB","alphaR_CB","nR_CB","alphaL_CB","nL_CB","R","Tau"};
 
-    for (int i=0; i<9; i++) {
-     TString *name = new TString (parameters_normal[i]);
-     name->Append("_SI.txt");
-     variables_SI[i] = (TGraph2D*)SI->Get(name->Data());
-    }
-    for (int i=0; i<7; i++) {
+ for (int i=0; i<9; i++) {
+    TString *name = new TString (parameters_normal[i]);
+    name->Append("_SI.txt");
+    variables_SI[i] = (TGraph2D*)SI->Get(name->Data());
+ }
+ for (int i=0; i<7; i++) {
      TString *name = new TString (parameters_normal[i]);
      name->Append("_S.txt");
      variables_S[i] = (TGraph2D*)SI->Get(name->Data());
-    }
+ }
 
-    crystal_Icorr_qqH = new TF1("crystal_Icorr_qqH",CrystalBallLowHighPlusExpDividedByCrystalBallLowHigh,0,3000,16);
+ crystal_Icorr_qqH = new TF1("crystal_Icorr_qqH",CrystalBallLowHighPlusExpDividedByCrystalBallLowHigh,0,3000,16);
 
-    for (int iVar = 0; iVar<9; iVar++) {
-      if (parameters_normal[iVar].Contains("Norm")) {
-           crystal_Icorr_qqH->SetParameter(iVar, exp(variables_SI[iVar]->Interpolate(realMass, cprime)));
-      }
-      else {
-           crystal_Icorr_qqH->SetParameter(iVar, variables_SI[iVar]->Interpolate(realMass, cprime));
-      }
-    }
+ for (int iVar = 0; iVar<9; iVar++) {
+      
+  if (parameters_normal[iVar].Contains("Norm")) 
+      crystal_Icorr_qqH->SetParameter(iVar, exp(variables_SI[iVar]->Interpolate(realMass, cprime)));  
+  else crystal_Icorr_qqH->SetParameter(iVar, variables_SI[iVar]->Interpolate(realMass, cprime));
+      
+ }
 
-    for (int iVar = 0; iVar<7; iVar++) {
-      if (parameters_normal[iVar].Contains("Norm")) {
-     	   crystal_Icorr_qqH->SetParameter(iVar+9, exp(variables_S[iVar]->Interpolate(realMass, cprime)));
-      }
-      else {
-     	   crystal_Icorr_qqH->SetParameter(iVar+9, variables_S[iVar]->Interpolate(realMass, cprime));
-      }
-    }
+ for (int iVar = 0; iVar<7; iVar++) {      
+  if (parameters_normal[iVar].Contains("Norm")) 
+      crystal_Icorr_qqH->SetParameter(iVar+9, exp(variables_S[iVar]->Interpolate(realMass, cprime)));      
+  else crystal_Icorr_qqH->SetParameter(iVar+9, variables_S[iVar]->Interpolate(realMass, cprime));
+      
+ }
 
+ Double_t wInt;
+ wInt = 1.;
+ wInt = crystal_Icorr_qqH->Eval(Hmass);
 
-    Double_t wInt;
-    wInt = 1.;
-    wInt = crystal_Icorr_qqH->Eval(Hmass);
-
-    SI->Close();
+ SI->Close();
    
-   return wInt;
+ return wInt;
 
 }

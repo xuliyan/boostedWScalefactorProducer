@@ -1,20 +1,23 @@
 #include "PlotUtils.h"
 
-void GetDataPoissonInterval(const RooAbsData* data, RooRealVar* rrv_x, RooPlot* mplot){
+void GetDataPoissonInterval(const RooAbsData* data, RooRealVar* rrv_x, RooPlot* mplot, const int & RebinFactor){
  
   TString Title ; Title.Form("%s_binnedClone",data->GetName());
   RooDataHist* datahist   = new RooDataHist(Title.Data(),Title.Data(),*rrv_x,*((RooDataSet*)data));
   TH1* data_histo         = datahist->createHistogram("histo_data",*rrv_x) ;
+  data_histo->Rebin(RebinFactor);
   RooHist* data_plot  = new RooHist(*data_histo);
-  data_plot->SetMarkerStyle(20);
-  data_plot->SetMarkerSize(1.5);
   data_plot->SetName("data");
 
   double alpha = 1 - 0.6827;
+
+  RooHist* data_plot_2  = new RooHist();
+
   for( int iPoint = 0 ; iPoint < data_plot->GetN(); iPoint++){
 
    double N = data_plot->GetY()[iPoint];
    double L , U ;
+   if(data_plot->GetY()[iPoint]!=0) data_plot_2->SetPoint(iPoint,data_plot->GetX()[iPoint],data_plot->GetY()[iPoint]);
    if(N==0) L = 0;
    else L = (ROOT::Math::gamma_quantile(alpha/2,N,1.));
    U =  ROOT::Math::gamma_quantile_c(alpha/2,N+1,1);
@@ -24,14 +27,17 @@ void GetDataPoissonInterval(const RooAbsData* data, RooRealVar* rrv_x, RooPlot* 
    data_plot->SetPointEXhigh(iPoint,0);
   }
 
-   mplot->addPlotable(data_plot,"PE");
+   mplot->addPlotable(data_plot,"E");
+   data_plot_2->SetMarkerStyle(20);
+   data_plot_2->SetMarkerSize(1.5);
+   mplot->addPlotable(data_plot_2,"P0");
 
 }
 
 
 
 // in order to get the pull
-RooPlot* get_pull(RooRealVar* rrv_x, RooPlot* mplot_orig, RooDataSet* rdataset, RooAbsPdf* model, RooFitResult* rfresult, const std::string & dataname, const std::string & modelname, const int & makeBand, const int & narrow_factor){
+RooPlot* get_pull(RooRealVar* rrv_x, RooPlot* mplot_orig, RooDataSet* rdataset, RooAbsPdf* model, RooFitResult* rfresult, const std::string & dataname, const std::string & modelname, const int & makeBand, const int & narrow_factor, std::vector<TObject*>* addtoPlot){
 
   std::cout<<"############### draw the pull plot ########################"<<std::endl;
   RooHist* hpull = mplot_orig->pullHist(dataname.c_str(),modelname.c_str());
@@ -42,9 +48,9 @@ RooPlot* get_pull(RooRealVar* rrv_x, RooPlot* mplot_orig, RooDataSet* rdataset, 
   double err_x_low = 0.; double err_x_high = 0. ;
   for( int ipoint = 0 ;  ipoint < hpull->GetN(); ipoint++){
     hpull->GetPoint(ipoint,x,y);
-    err_x_low = hpull->GetErrorXlow(ipoint);
+    err_x_low  = hpull->GetErrorXlow(ipoint);
     err_x_high = hpull->GetErrorXhigh(ipoint);
-    err_y_low = hpull->GetErrorYlow(ipoint);
+    err_y_low  = hpull->GetErrorYlow(ipoint);
     err_y_high = hpull->GetErrorYhigh(ipoint);
     if(y == 0){
       hpull->SetPoint(ipoint,x,10);
@@ -61,7 +67,14 @@ RooPlot* get_pull(RooRealVar* rrv_x, RooPlot* mplot_orig, RooDataSet* rdataset, 
   if(makeBand) draw_error_band_extendPdf_pull(rdataset,model,rfresult,mplot_pull);
 
   mplot_pull->addObject(medianLine);        
-  mplot_pull->addPlotable(hpull,"P");
+
+  if(addtoPlot != NULL){
+   for(unsigned int i = 0; i < addtoPlot->size(); i++){
+    if(addtoPlot->at(i) != NULL and i == 0) mplot_pull->addObject(addtoPlot->at(i),"E2");
+    else if(addtoPlot->at(i) !=NULL) mplot_pull->addObject(addtoPlot->at(i),"L");
+   }
+  }
+  mplot_pull->addPlotable(hpull,"P0");
   mplot_pull->SetTitle("");
   mplot_pull->GetXaxis()->SetTitle("");
   mplot_pull->GetYaxis()->SetRangeUser(-5,5);
@@ -78,9 +91,97 @@ RooPlot* get_pull(RooRealVar* rrv_x, RooPlot* mplot_orig, RooDataSet* rdataset, 
 }
 
 
+// in order to get the pull
+RooPlot* get_ratio(RooRealVar* rrv_x, RooDataSet* rdataset, RooAbsPdf* model, RooFitResult* rfresult, const int & makeBand, const int & narrow_factor,std::vector<TObject*>* addtoPlot){
+
+  std::cout<<"############### draw the ratio plot ########################"<<std::endl;
+  TString Title ; Title.Form("%s_binnedClone",rdataset->GetName());
+  RooDataHist* datahist   = new RooDataHist(Title.Data(),Title.Data(),*rrv_x,*((RooDataSet*)rdataset));
+  TH1* data_histo         = datahist->createHistogram("histo_data",*rrv_x) ;
+  data_histo->Rebin(narrow_factor);
+  RooHist* data_plot      = new RooHist(*data_histo);
+  
+  data_plot->SetMarkerStyle(20);
+  data_plot->SetMarkerSize(1.5);
+  data_plot->SetName("data");
+
+  double alpha = 1 - 0.6827;
+  for( int iPoint = 0 ; iPoint < data_plot->GetN(); iPoint++){
+   double N = data_plot->GetY()[iPoint];
+   double L , U ;
+   if(N==0) L = 0;
+   else L = (ROOT::Math::gamma_quantile(alpha/2,N,1.));
+   U =  ROOT::Math::gamma_quantile_c(alpha/2,N+1,1);
+   data_plot->SetPointEYlow(iPoint,N-L);
+   data_plot->SetPointEYhigh(iPoint,U-N);
+   data_plot->SetPointEXlow(iPoint,0);
+   data_plot->SetPointEXhigh(iPoint,0);
+  }
+
+  RooHist* ratio_plot  = new RooHist();
+  double x = 0 ; double y = 0 ;
+  double err_y_low = 0.; double err_y_high = 0. ;
+  double err_x_low = 0.; double err_x_high = 0. ;
+
+  /// Create a Graph for the central background prediction                                                                                                                                
+  TGraph *bkgpred = new TGraph(data_histo->GetNbinsX());
+  for(int i = 0 ; i<= data_histo->GetNbinsX() ; i++){    
+    rrv_x->setVal(data_histo->GetBinCenter(i+1));    
+    bkgpred->SetPoint(i,data_histo->GetBinCenter(i+1),model->expectedEvents(*rrv_x)*model->getVal(*rrv_x)*(rrv_x->getBinWidth(i)*narrow_factor));
+  }
+
+  
+  for( int ipoint = 0 ;  ipoint < data_plot->GetN(); ipoint++){
+    data_plot->GetPoint(ipoint,x,y);
+    err_x_low  = data_plot->GetErrorXlow(ipoint);
+    err_x_high = data_plot->GetErrorXhigh(ipoint);
+    err_y_low  = data_plot->GetErrorYlow(ipoint);
+    err_y_high = data_plot->GetErrorYhigh(ipoint);
+    ratio_plot->SetPoint(ipoint,x,y/bkgpred->GetY()[ipoint]);  
+    ratio_plot->SetPointEXlow(ipoint,err_x_low);   
+    ratio_plot->SetPointEXhigh(ipoint,err_x_high);
+    ratio_plot->SetPointEYlow(ipoint,err_y_low/bkgpred->GetY()[ipoint]);
+    ratio_plot->SetPointEYhigh(ipoint,err_y_high/bkgpred->GetY()[ipoint]);
+   
+  }
+        
+  RooPlot* mplot_ratio = rrv_x->frame(RooFit::Title("Pull Distribution"), RooFit::Bins(int(rrv_x->getBins()/narrow_factor)));
+  
+  TLine* medianLine = new TLine(rrv_x->getMin(),1.,rrv_x->getMax(),1); 
+  medianLine->SetLineWidth(2); 
+  medianLine->SetLineColor(kRed);
+
+  if(makeBand) draw_error_band_extendPdf_ratio(rdataset,model,rfresult,mplot_ratio,6,int(rrv_x->getBins()/narrow_factor));
+
+  if(addtoPlot != NULL){
+   for(unsigned int i =0; i < addtoPlot->size(); i++){
+    if(addtoPlot->at(i) != NULL and i == 0) mplot_ratio->addObject(addtoPlot->at(i),"E2");
+    else if(addtoPlot->at(i) !=NULL) mplot_ratio->addObject(addtoPlot->at(i),"L");
+   }
+  }
+
+  mplot_ratio->addObject(medianLine);        
+  mplot_ratio->addPlotable(ratio_plot,"P0");
+  mplot_ratio->SetTitle("");
+  mplot_ratio->GetXaxis()->SetTitle("");
+  mplot_ratio->GetYaxis()->SetRangeUser(0.,2.);
+  mplot_ratio->GetYaxis()->SetTitleSize(0.10);
+  mplot_ratio->GetYaxis()->SetLabelSize(0.10);
+  mplot_ratio->GetXaxis()->SetTitleSize(0.10);
+  mplot_ratio->GetXaxis()->SetLabelSize(0.10);
+  mplot_ratio->GetYaxis()->SetTitleOffset(0.40);
+  mplot_ratio->GetYaxis()->SetTitle("Data/Exp");
+  mplot_ratio->GetYaxis()->CenterTitle();
+
+  return mplot_ratio;
+
+}
+
+
 RooPlot* get_pull_ws(RooRealVar* rrv_x, RooPlot* mplot_orig, TGraphAsymmErrors* plot_graph, const std::string & dataname, const std::string & modelname, const int & narrow_factor){
 
- std::cout<<"############### draw the pull plot ########################"<<std::endl;
+ std::cout<<"############### draw the ratio plot ########################"<<std::endl;
+
  RooHist* hpull = mplot_orig->pullHist(dataname.c_str(),modelname.c_str());
  double x = 0. ; double y = 0. ;
  double err_y_low = 0. ; double err_y_high = 0. ;
@@ -106,7 +207,7 @@ RooPlot* get_pull_ws(RooRealVar* rrv_x, RooPlot* mplot_orig, TGraphAsymmErrors* 
 
  mplot_pull->addObject(plot_graph,"E3");        
  mplot_pull->addObject(medianLine);        
- mplot_pull->addPlotable(hpull,"P");
+ mplot_pull->addPlotable(hpull,"P0");
  mplot_pull->SetTitle("");
  mplot_pull->GetXaxis()->SetTitle("");
  mplot_pull->GetYaxis()->SetRangeUser(-5,5);
@@ -182,9 +283,9 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
   std::string objNameLeg_signal_graviton = "";
   std::string legHeader ; 
   
-  if(channel == "mu")      legHeader="(#mu#nu, 1JHP)";
-  else if(channel == "el") legHeader="(e#nu, 1JHP)";
-  else if(channel == "em") legHeader="(l#nu, 1JHP)";
+  if(channel == "mu")      legHeader="(#mu#nu)";
+  else if(channel == "el") legHeader="(e#nu)";
+  else if(channel == "em") legHeader="(l#nu)";
 
   for( int obj = 0 ; obj < int(plot->numItems()); obj++){
           
@@ -529,6 +630,8 @@ void draw_canvas_with_pull(RooPlot* mplot, RooPlot* mplot_pull, RooArgList* para
     rlt_file = rlt_file.Append("_"+in_model_name+"_with_pull.png");
   }
   
+  pad2->Update();
+  cMassFit.Update();
   cMassFit.SaveAs(rlt_file.Data());
   rlt_file.ReplaceAll(".png",".pdf");
   cMassFit.SaveAs(rlt_file.Data());
