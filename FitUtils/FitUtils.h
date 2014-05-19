@@ -63,4 +63,4 @@ double doubleGausCrystalBallLowHighPlusExp (double* x, double* par);
 
 Double_t CrystalBallLowHighPlusExpDividedByCrystalBallLowHigh(Double_t *x,Double_t *par);
 
-Double_t getIntWght(std::string wFile , double realMass, double Hmass = 350, double cprime = 1.0);
+Double_t getIntWght(std::string wFile , double realMass, double Hmass = 350, double cprime = 1.0, double BRnew = 0.0);
