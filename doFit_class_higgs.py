@@ -780,8 +780,8 @@ class doFit_wj_and_wlvj:
             self.vbf_normalization_uncertainty_from_jet_res   = ((TMath.Abs(rrv_vbfmassvbf_jer_up.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassvbf_jer_dn.getVal()-rrv_vbf.getVal() )+TMath.Abs(rrv_vbfmassvbf_jer.getVal()-rrv_vbf.getVal() ) )/3.)/rrv_vbf.getVal();         
             print "Total Uncertainty on vbfH due to jer: uncertainty ",self.vbf_normalization_uncertainty_from_jet_res;
 
-            self.interference_vbfH_uncertainty = ((TMath.Abs(rrv_vbfmassvbf_int_up.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassvbf_int_dn.getVal()-rrv_vbf.getVal() ) )/2.)/rrv_vbf.getVal();         
-            print "Total Uncertainty on vbfH due to interference: uncertainty ",self.interference_vbfH_uncertainty;
+         self.interference_vbfH_uncertainty = ((TMath.Abs(rrv_vbfmassvbf_int_up.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassvbf_int_dn.getVal()-rrv_vbf.getVal() ) )/2.)/rrv_vbf.getVal();         
+         print "Total Uncertainty on vbfH due to interference: uncertainty ",self.interference_vbfH_uncertainty;
 
     ##### Method used to cycle on the events and for the dataset to be fitted
     def get_mj_and_mlvj_dataset(self,in_file_name, label, jet_mass="jet_mass_pr"):# to get the shape of m_lvj
@@ -1141,6 +1141,7 @@ class doFit_wj_and_wlvj:
                 tmp_event_weight = tmp_event_weight*tmp_interference_weight_H1000
                 tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H1000
 
+                print label;
 
              if TString(label).Contains("vbfH600"):
                 intWeight=getIntWght("file_for_interpolation.root", 600, mass_WW_gen, options.cprime/10., options.BRnew/10.)

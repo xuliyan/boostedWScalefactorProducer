@@ -2132,7 +2132,11 @@ Double_t getIntWght(std::string wFile , double realMass, double Hmass , double c
     wInt = 1.;
     wInt = crystal_Icorr_qqH->Eval(Hmass);
 
-    SI->Close();
+    //        SI->Close("R");
+
+	// delete crystal_Icorr_qqH;
+        delete SI;
+
    return wInt;
 
 }
