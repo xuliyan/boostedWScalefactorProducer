@@ -1372,7 +1372,7 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
    model_data->plotOn( mplot , RooFit::VLines(), RooFit::Invisible());
    model_data->plotOn( mplot , RooFit::Invisible(), RooFit::Name("model_mc"));
    if(pseudodata == 1) rdataset_data_mlvj->plotOn( mplot , RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0), RooFit::Name("data"));
-   else rdataset_data_mlvj->plotOn( mplot , RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0), RooFit::Name("data"));
+   else GetDataPoissonInterval(rdataset_data_mlvj,rrv_mass_lvj,mplot);
 
    draw_error_band(rdataset_data_mlvj,model_data,rrv_number_data_sb_lo_mlvj,rfresult,mplot,color_palet["Uncertainty"],"F");
 
