@@ -39,16 +39,6 @@ if len(args) == 0:
 ## open the input file 
 file = ROOT.TFile(args[0])
 
-tree_s = file.Get("tree_fit_sb")
-tree_b = file.Get("tree_fit_b")
-prefit = file.Get("nuisances_prefit")
-fit_s  = file.Get("fit_s")
-fit_b  = file.Get("fit_b")
-
-if tree_s == None or tree_s.ClassName() != "TTree": raise RuntimeError, "File %s does not contain the output of the signal fit tree 'fit_s'" % args[0]
-if tree_b == None or tree_b.ClassName() != "TTree": raise RuntimeError, "File %s does not contain the output of the background fit tree 'fit_b'" % args[0]
-if prefit == None or prefit.ClassName() != "RooArgSet": raise RuntimeError, "File %s does not contain the prefit nuisances 'nuisances_prefit'" % args[0]
-
 nuis_histo_list_s  = [];
 pulls_s            = [];
 pulls_name_s       = [];
@@ -60,8 +50,18 @@ pulls_name_b       = [];
 errors_b           = [];
 
 isFlagged = {};
-table = {};
-sig_x = [];
+table     = {};
+
+prefit = file.Get("nuisances_prefit")
+fit_s  = file.Get("fit_s")
+fit_b  = file.Get("fit_b")
+
+tree_s = file.Get("tree_fit_sb")
+tree_b = file.Get("tree_fit_b")
+
+if tree_s == None or tree_s.ClassName() != "TTree": raise RuntimeError, "File %s does not contain the output of the signal fit tree 'fit_s'" % args[0]
+if tree_b == None or tree_b.ClassName() != "TTree": raise RuntimeError, "File %s does not contain the output of the background fit tree 'fit_b'" % args[0]
+if prefit == None or prefit.ClassName() != "RooArgSet": raise RuntimeError, "File %s does not contain the prefit nuisances 'nuisances_prefit'" % args[0]
 
 branches_list_b = tree_b.GetListOfBranches()
 branches_list_s = tree_s.GetListOfBranches()
@@ -86,49 +86,61 @@ for i in range (branches_list_s.GetEntries()):
       if options.abs: row += [ "%.2f +/- %.2f" % (nuis_p.getVal(), nuis_p.getError()) ]
 
     for fit_name, nuis_x in [('b',(branches_list_s.FindObject(hname_s)).GetName()),('s',hname_s)]:
+
      if fit_name == 's' and fpf_s.find(nuis_x) == None:
         row += [ " n/a " ]
      elif fit_name == 'b' and fpf_b.find(nuis_x) == None:
         row += [ " n/a " ]
      elif fit_name == 's' and fpf_s.find(nuis_x) != None:                 
+
         histo_nuis_s       = ROOT.TH1F(nuis_x+"_s","",100,-5,5);          
+        histo_nuis_sigma_s = ROOT.TH1F(nuis_x+"_sigma_s","",100,-5,5);    
         tree_s.Draw(nuis_x+" >> "+nuis_x+"_s", "" ,"goff");
-        if nuis_x != "mu" :       
-          nuis_x_sigma_s     = (branches_list_s.FindObject("sigma_from_fit_"+nuis_x)).GetName();
-          histo_nuis_sigma_s = ROOT.TH1F(nuis_x_sigma_s+"_s","",100,-5,5);    
-          if nuis_x_sigma_s !="" : tree_s.Draw(nuis_x_sigma_s+" >> "+nuis_x_sigma_s+"_s", "" ,"goff");
-        nuis_histo_list_s.append(histo_nuis_s);
+
         if nuis_x != "mu" :
-         pulls_name_s.append(nuis_x);            
-         row += [ "%+.2f +/- %.2f" % (histo_nuis_s.GetMean(), histo_nuis_sigma_s.GetMean())];
-         pulls_s.append(float(histo_nuis_s.GetMean()-nuis_p.getVal())/histo_nuis_sigma_s.GetMean());
-         errors_s.append(histo_nuis_sigma_s.GetMean()/nuis_p.getError());
+          if branches_list_s.FindObject("sigma_from_fit_"+nuis_x):   
+           nuis_x_sigma_s     = (branches_list_s.FindObject("sigma_from_fit_"+nuis_x)).GetName();
+           tree_s.Draw(nuis_x_sigma_s+" >> "+histo_nuis_sigma_s.GetName(), "" ,"goff");
+          else:
+            nuis_x_sigma_s =  fpf_s.find(nuis_x);
+            histo_nuis_sigma_s.Fill(nuis_x_sigma_s.getError());
+                             
+          pulls_name_s.append(nuis_x);            
+          row += [ "%+.2f +/- %.2f" % (histo_nuis_s.GetMean(), histo_nuis_sigma_s.GetMean())];
+          pulls_s.append(float(histo_nuis_s.GetMean()-nuis_p.getVal())/histo_nuis_sigma_s.GetMean());
+          errors_s.append(histo_nuis_sigma_s.GetMean()/nuis_p.getError());
 
-         if options.abs:
-          row[-1] += " (%+4.2fsig, %4.2f)" % (pulls_s[len(pulls_s)-1],errors_s[len(errors_s)-1]);
-         else:
-          row[-1] = " %+4.2f, %4.2f" % (pulls_s[len(pulls_s)-1],errors_s[len(errors_s)-1]);
+          if options.abs:
+           row[-1] += " (%+4.2fsig, %4.2f)" % (pulls_s[len(pulls_s)-1],errors_s[len(errors_s)-1]);
+          else:
+           row[-1] = " %+4.2f, %4.2f" % (pulls_s[len(pulls_s)-1],errors_s[len(errors_s)-1]);
 
-         if(abs(pulls_s[len(pulls_s)-1]) > options.vtol2 or abs(errors_s[len(errors_s)-1]-1) > options.stol2):
-           isFlagged[(nuis_p.GetName(),fit_name)] = 2;
-           flag = True;
-         elif(abs(pulls_s[len(pulls_s)-1]) > options.vtol or abs(errors_s[len(errors_s)-1]-1) > options.stol):
-          if options.all: isFlagged[(nuis_p.GetName(),fit_name)] = 1
-          flag = True
-         elif options.all:
-          flag = True
-        
+          if(abs(pulls_s[len(pulls_s)-1]) > options.vtol2 or abs(errors_s[len(errors_s)-1]-1) > options.stol2):
+            isFlagged[(nuis_p.GetName(),fit_name)] = 2;
+            flag = True;
+          elif(abs(pulls_s[len(pulls_s)-1]) > options.vtol or abs(errors_s[len(errors_s)-1]-1) > options.stol):
+            if options.all: isFlagged[(nuis_p.GetName(),fit_name)] = 1
+            flag = True
+          elif options.all:
+            flag = True
+             
      elif fit_name == 'b' and fpf_b.find(nuis_x) != None:
+
         histo_nuis_b       = ROOT.TH1F(nuis_x+"_b","",100,-5,5);          
+        histo_nuis_sigma_b = ROOT.TH1F(nuis_x+"_sigma_b","",100,-5,5);    
         tree_b.Draw(nuis_x+" >> "+nuis_x+"_b", "" ,"goff");
     
-        if nuis_x != "mu" :       
-         nuis_x_sigma_b     = (branches_list_b.FindObject("sigma_from_fit_"+nuis_x)).GetName();
-         histo_nuis_sigma_b = ROOT.TH1F(nuis_x_sigma_b+"_b","",100,-5,5);    
-         if nuis_x_sigma_b !="" : tree_s.Draw(nuis_x_sigma_b+" >> "+nuis_x_sigma_b+"_b", "" ,"goff");
-        nuis_histo_list_b.append(histo_nuis_b);
+        if nuis_x != "mu":
+            
+          if branches_list_b.FindObject("sigma_from_fit_"+nuis_x) :       
+             nuis_x_sigma_b     = (branches_list_b.FindObject("sigma_from_fit_"+nuis_x)).GetName();
+             tree_b.Draw(nuis_x_sigma_b+" >> "+histo_nuis_sigma_b.GetName(), "" ,"goff");
+          else:    
+             nuis_x_sigma_b =  fpf_b.find(nuis_x);
+             histo_nuis_sigma_b.Fill(nuis_x_sigma_b.getError());
 
-        if nuis_x != "mu" :
+          nuis_histo_list_b.append(histo_nuis_b);
+
           pulls_name_b.append(nuis_x);            
           row += [ "%+.2f +/- %.2f" % (histo_nuis_b.GetMean(),histo_nuis_sigma_b.GetMean())];
           pulls_b.append(float(histo_nuis_b.GetMean()-nuis_p.getVal())/histo_nuis_sigma_b.GetMean());
