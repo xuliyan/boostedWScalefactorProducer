@@ -50,7 +50,7 @@ parser.add_option('--sigChannel',  action="store", type="string", dest="sigChann
 parser.add_option('--jetBin',      action="store", type="string", dest="jetBin",      default="")
 parser.add_option('--skipJetSystematics',   action="store", type="int", dest="skipJetSystematics",    default=0)
 parser.add_option('--turnOnAnalysis',       action="store", type="int",  dest="turnOnAnalysis",       default=0)
-parser.add_option('--injectSingalStrenght', action="store", type=float,  dest="injectSingalStrenght", default=1., help='inject a singal in the toy generation')
+parser.add_option('--injectSingalStrenght', action="store", type=float,  dest="injectSingalStrenght", default=0., help='inject a singal in the toy generation')
 
 parser.add_option('--higgsCombination', action="store", type="int", dest="higgsCombination", default=0)
 
@@ -454,14 +454,13 @@ def getPValueFromCard(file,observed):
  t = f.Get("limit");
  entries = t.GetEntries();
 
- lims = 1;
+ lims = 0;
 
  for i in range(entries):
   t.GetEntry(i);
-  lims = t.limit ;
-      
- return lims/entries;
+  lims += t.limit ;
 
+ return lims/entries;
 
 ##############################
 #### Make SM Limits Plots ####  
@@ -488,7 +487,7 @@ def makeSMLimitPlot(SIGCH):
         ybins_obs.append( curAsymLimits[0] );
         ybins_2s.append( curAsymLimits[1] );
 	ybins_1s.append( curAsymLimits[2] );
-
+        
     for i in range( len(mass)-1, -1, -1 ):
 	curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
 	curAsymLimits = getAsymLimits(curFile);
@@ -496,7 +495,7 @@ def makeSMLimitPlot(SIGCH):
         ybins_2s.append( curAsymLimits[5] );
 	ybins_1s.append( curAsymLimits[4] );
                                                                     
-
+    
     curGraph_exp = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_exp);
     curGraph_obs = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_obs);
     curGraph_1s  = ROOT.TGraphAsymmErrors(nPoints*2+1,xbins_env,ybins_1s);
@@ -639,18 +638,18 @@ def makeSMPValuePlot(SIGCH):
     threeSLine.SetLineColor(ROOT.kRed); threeSLine.SetLineWidth(2); threeSLine.SetLineStyle(2);
     fourSLine = ROOT.TF1("fourSLine","3.16712418331199785e-05",mass[0],mass[len(mass)-1]);
     fourSLine.SetLineColor(ROOT.kRed); fourSLine.SetLineWidth(2); fourSLine.SetLineStyle(2);
-
+    
     banner = TLatex(0.32,0.955,("CMS Preliminary, 19.3 fb^{-1} at #sqrt{s}=8TeV"));
     banner.SetNDC(); banner.SetTextSize(0.035);
 
-    ban1s = TLatex(2400,1.58655253931457074e-01,("1 #sigma"));
-    ban1s.SetTextSize(0.028); ban1s.SetTextColor(2)
-    ban2s = TLatex(2400,2.27501319481792155e-02,("2 #sigma"));
-    ban2s.SetTextSize(0.028); ban2s.SetTextColor(2)
-    ban3s = TLatex(2400,1.34989803163009588e-03,("3 #sigma"));
-    ban3s.SetTextSize(0.028); ban3s.SetTextColor(2);
-    ban4s = TLatex(2400,3.16712418331199785e-05,("4 #sigma"));
-    ban4s.SetTextSize(0.028); ban4s.SetTextColor(2)
+    ban1s = TLatex(950,1.58655253931457074e-01,("1 #sigma"));
+    ban1s.SetTextSize(0.028); ban1s.SetTextColor(1)
+    ban2s = TLatex(950,2.27501319481792155e-02,("2 #sigma"));
+    ban2s.SetTextSize(0.028); ban2s.SetTextColor(1)
+    ban3s = TLatex(950,1.34989803163009588e-03,("3 #sigma"));
+    ban3s.SetTextSize(0.028); ban3s.SetTextColor(1);
+    ban4s = TLatex(950,3.16712418331199785e-05,("4 #sigma"));
+    ban4s.SetTextSize(0.028); ban4s.SetTextColor(1)
 
     leg2 = ROOT.TLegend(0.25,0.2,0.6,0.35);
     leg2.SetFillStyle(0);
@@ -665,6 +664,9 @@ def makeSMPValuePlot(SIGCH):
      leg2.AddEntry( gr_obs, "obs signif, VBF e+mu", "pl" );
      leg2.AddEntry( gr_exp, "exp signif, SM Higgs", "pl" );
 
+    zeroLine = ROOT.TF1("zeroLine","0.5",mass[0],mass[len(mass)-1]);
+    zeroLine.SetLineColor(ROOT.kBlue); oneSLine.SetLineWidth(2);
+
     can = ROOT.TCanvas("can","can",600,650);
     hrl = can.DrawFrame(mass[0],1e-6,mass[len(mass)-1],1.);
     hrl.GetYaxis().SetTitle("p-value");
@@ -673,6 +675,7 @@ def makeSMPValuePlot(SIGCH):
     ROOT.gPad.SetLogy();
     gr_obs.Draw("PL");
     gr_exp.Draw("PLsame");
+    zeroLine.Draw("same");
     oneSLine.Draw("same");
     twoSLine.Draw("same");
     threeSLine.Draw("same");
@@ -1881,25 +1884,28 @@ if __name__ == '__main__':
                        else: 
                         os.system(runCmmd);
 
-                       runCmmd = "combine -M ProfileLikelihood --signif --pvalue -n hwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
+                      
+                       if options.plotPValue == 1 : 
 
-                       if options.batchMode:
-                        fn = "combineScript_ProfileLikelihood_obs_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
-                        submitBatchJobCombine(runCmmd, fn, mass[i], cprime[j], BRnew[k]);
-                       else:
-                        os.system(runCmmd);
-                       
-                       runCmmd = "combine -M ProfileLikelihood --signif --pvalue -n hwwlvj_pval_exp_ggH%03d_%s%s_%02d_%02d_unbin -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 --toysFreq -t -1 "%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
-                       print "runCmmd ",runCmmd;
+                        runCmmd = "combine -M ProfileLikelihood --signif --pvalue -n hwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
+                        print "runCmmd ",runCmmd;
 
-                       if options.batchMode:
-                         fn = "combineScript_ProfileLikelihood_exp_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
+                        if options.batchMode:
+                         fn = "combineScript_ProfileLikelihood_obs_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
                          submitBatchJobCombine(runCmmd, fn, mass[i], cprime[j], BRnew[k]);
-                       else:
+                        else:
                          os.system(runCmmd);
 
-                                                                                                                               
+                        for iToy in range(options.nToys):
+                         runCmmd = "combine -M ProfileLikelihood --signif --pvalue -n hwwlvj_pval_exp_ggH%03d_%s%s_%02d_%02d_unbin_%d -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 --toysFreq -t 1 --expectSignal=1 -s -1 "%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],iToy,mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
+                         print "runCmmd ",runCmmd;
 
+                         if options.batchMode:
+                           fn = "combineScript_ProfileLikelihood_exp_%s_%03d%s_%02d_%02d_%d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                           submitBatchJobCombine(runCmmd, fn, mass[i], cprime[j], BRnew[k]);
+                         else:
+                          os.system(runCmmd);
+                                                                                                                               
     ####################################################
     # =================== Bias Analysis ============== #
     ####################################################
