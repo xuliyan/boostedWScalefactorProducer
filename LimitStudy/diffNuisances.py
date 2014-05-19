@@ -26,7 +26,7 @@ parser.add_option("--stol", "--sig-tolerance", dest="stol", default=0.10, type="
 parser.add_option("--vtol2", "--val-tolerance2", dest="vtol2", default=2.0, type="float", help="Report severely nuisances whose value changes by more than this amount of sigmas")
 parser.add_option("--stol2", "--sig-tolerance2", dest="stol2", default=0.50, type="float", help="Report severely nuisances whose sigma changes by more than this amount")
 parser.add_option("-a", "--all",      dest="all", default=False, action="store_true", help="Print all nuisances, even the ones which are unchanged w.r.t. pre-fit values.")
-parser.add_option("-A", "--absolute", dest="abs", default=True,  action="store_true", help="Report also absolute values of nuisance values and errors, not only the ones normalized to the input sigma")
+parser.add_option("-A", "--absolute", dest="abs", default=False,  action="store_true", help="Report also absolute values of nuisance values and errors, not only the ones normalized to the input sigma")
 parser.add_option("-p", "--poi",      dest="poi",    default="r",    type="string",  help="Name of signal strength parameter (default is 'r' as per text2workspace.py)")
 parser.add_option("-f", "--format",   dest="format", default="text", type="string",  help="Output format ('text', 'latex', 'twiki'")
 parser.add_option("-g", "--histogram", dest="plotfile", default=None, type="string", help="If true, plot the pulls of the nuisances to the given file.")
@@ -72,30 +72,25 @@ fpf_b = fit_b.floatParsFinal()
 ### Loop on signal tree
 
 for i in range (branches_list_s.GetEntries()):
-
   hname_s = branches_list_s[i].GetName();    
-
   row    = [];
   flag   = False;
   nuis_p = prefit.find(hname_s);
 
-
   if ( hname_s.find("nll")==-1 and hname_s.find("n_exp")==-1 and hname_s.find("status")==-1 and hname_s.find("In")==-1 and hname_s.find("sigma")==-1):
 
     if nuis_p == None:
-      if not options.abs: continue
+      if not options.abs: continue      
     else: 
       mean_p, sigma_p = (nuis_p.getVal(), nuis_p.getError())
       if options.abs: row += [ "%.2f +/- %.2f" % (nuis_p.getVal(), nuis_p.getError()) ]
-      
-    for fit_name, nuis_x in [('b', (branches_list_s.FindObject(hname_s)).GetName()), ('s',hname_s)]:
 
+    for fit_name, nuis_x in [('b',(branches_list_s.FindObject(hname_s)).GetName()),('s',hname_s)]:
      if fit_name == 's' and fpf_s.find(nuis_x) == None:
         row += [ " n/a " ]
      elif fit_name == 'b' and fpf_b.find(nuis_x) == None:
         row += [ " n/a " ]
      elif fit_name == 's' and fpf_s.find(nuis_x) != None:                 
-        row += [ "%+.2f +/- %.2f" % (fpf_s.find(nuis_x).getVal(), fpf_s.find(nuis_x).getError()) ]
         histo_nuis_s       = ROOT.TH1F(nuis_x+"_s","",100,-5,5);          
         tree_s.Draw(nuis_x+" >> "+nuis_x+"_s", "" ,"goff");
         if nuis_x != "mu" :       
@@ -108,6 +103,7 @@ for i in range (branches_list_s.GetEntries()):
          row += [ "%+.2f +/- %.2f" % (histo_nuis_s.GetMean(), histo_nuis_sigma_s.GetMean())];
          pulls_s.append(float(histo_nuis_s.GetMean()-nuis_p.getVal())/histo_nuis_sigma_s.GetMean());
          errors_s.append(histo_nuis_sigma_s.GetMean()/nuis_p.getError());
+
          if options.abs:
           row[-1] += " (%+4.2fsig, %4.2f)" % (pulls_s[len(pulls_s)-1],errors_s[len(errors_s)-1]);
          else:
@@ -115,7 +111,7 @@ for i in range (branches_list_s.GetEntries()):
 
          if(abs(pulls_s[len(pulls_s)-1]) > options.vtol2 or abs(errors_s[len(errors_s)-1]-1) > options.stol2):
            isFlagged[(nuis_p.GetName(),fit_name)] = 2;
-           flag = True
+           flag = True;
          elif(abs(pulls_s[len(pulls_s)-1]) > options.vtol or abs(errors_s[len(errors_s)-1]-1) > options.stol):
           if options.all: isFlagged[(nuis_p.GetName(),fit_name)] = 1
           flag = True
@@ -123,7 +119,6 @@ for i in range (branches_list_s.GetEntries()):
           flag = True
         
      elif fit_name == 'b' and fpf_b.find(nuis_x) != None:
-        row += [ "%+.2f +/- %.2f" % (fpf_b.find(nuis_x).getVal(), fpf_b.find(nuis_x).getError()) ]                                                            
         histo_nuis_b       = ROOT.TH1F(nuis_x+"_b","",100,-5,5);          
         tree_b.Draw(nuis_x+" >> "+nuis_x+"_b", "" ,"goff");
     
@@ -135,14 +130,13 @@ for i in range (branches_list_s.GetEntries()):
 
         if nuis_x != "mu" :
           pulls_name_b.append(nuis_x);            
-          row += [ "%+.2f +/- %.2f" % (histo_nuis_b.GetMean(), histo_nuis_b.GetMean())];
+          row += [ "%+.2f +/- %.2f" % (histo_nuis_b.GetMean(),histo_nuis_sigma_b.GetMean())];
           pulls_b.append(float(histo_nuis_b.GetMean()-nuis_p.getVal())/histo_nuis_sigma_b.GetMean());
           errors_b.append(histo_nuis_sigma_b.GetMean()/nuis_p.getError());
           if options.abs:
            row[-1] += " (%+4.2fsig, %4.2f)" % (pulls_b[len(pulls_b)-1],errors_b[len(errors_b)-1]);
           else:
            row[-1] = " %+4.2f, %4.2f" % (pulls_b[len(pulls_b)-1],errors_b[len(errors_b)-1]);
-
           if(abs(pulls_b[len(pulls_b)-1]) > options.vtol2 or abs(errors_b[len(errors_b)-1]-1) > options.stol2):
             isFlagged[(nuis_p.GetName(),fit_name)] = 2;
             flag = True;
@@ -150,8 +144,10 @@ for i in range (branches_list_s.GetEntries()):
            if options.all: isFlagged[(nuis_p.GetName(),fit_name)] = 1
            flag = True;
           elif options.all:
-            flag = True
-     if flag or options.all: table[nuis_p.GetName()] = row;
+           flag = True;
+    row += [ "%+4.2f"  % fit_s.correlation(nuis_p.GetName(), options.poi) ]            
+    if flag or options.all:
+        table[nuis_p.GetName()] = row;
 
 ### print table
 fmtstring = "%-40s %15s %15s %10s"
@@ -219,8 +215,7 @@ names.sort()
 highlighters = { 1:highlight, 2:morelight };
 
 for n in names:
- v = table[n];
- print v
+ v = table[n]
  if options.format == "latex": n = n.replace(r"_", r"\_")
  if pmsub != None: v = [ re.sub(pmsub[0], pmsub[1], i) for i in v ]
  if sigsub != None: v = [ re.sub(sigsub[0], sigsub[1], i) for i in v ]
