@@ -2008,17 +2008,27 @@ double doubleGausCrystalBallLowHighPlusExp (double* x, double* par) {
   //[4] = n
   //[5] = alpha2
   //[6] = n2
+
   //[7] = R = ratio between exponential and CB
   //[8] = tau = tau falling of exponential
 
  double xx = x[0];
- double mean   = par[1] ; // mean
- double sigmaP = par[2] ; // sigma of the positive side of the gaussian | they are the same!!!
- double sigmaN = par[2] ; // sigma of the negative side of the gaussian |
- double alpha  = par[3] ; // junction point on the positive side of the gaussian
- double n      = par[4] ; // power of the power law on the positive side of the gaussian
- double alpha2 = par[5] ; // junction point on the negative side of the gaussian
- double n2     = par[6] ; // power of the power law on the negative side of the gaussian
+
+// double mean = par[1] ; // mean
+// double sigmaP = par[2] ; // sigma of the positive side of the gaussian
+// double sigmaN = par[3] ; // sigma of the negative side of the gaussian
+// double alpha = par[4] ; // junction point on the positive side of the gaussian
+// double n = par[5] ; // power of the power law on the positive side of the gaussian
+// double alpha2 = par[6] ; // junction point on the negative side of the gaussian
+// double n2 = par[7] ; // power of the power law on the negative side of the gaussian
+
+ double mean = par[1] ; // mean
+  double sigmaP = par[2] ; // sigma of the positive side of the gaussian | they are the same!!!
+  double sigmaN = par[2] ; // sigma of the negative side of the gaussian |
+ double alpha = par[3] ; // junction point on the positive side of the gaussian
+ double n = par[4] ; // power of the power law on the positive side of the gaussian
+  double alpha2 = par[5] ; // junction point on the negative side of the gaussian
+  double n2 = par[6] ; // power of the power law on the negative side of the gaussian
 
  double R = par[7] ;
  double tau = par[8] ;
@@ -2029,17 +2039,19 @@ double doubleGausCrystalBallLowHighPlusExp (double* x, double* par) {
   double B = n/fabs(alpha) - fabs(alpha);
 
   return par[0] * ( (1-R)*(A * pow(B + (xx-mean)/sigmaP, -1.*n)) + R * exp(-xx/tau));
-
  }
- else if ((xx-mean)/sigmaN < -1.*fabs(alpha2)) {
+
+  else if ((xx-mean)/sigmaN < -1.*fabs(alpha2)) {
   double A = pow(n2/fabs(alpha2), n2) * exp(-0.5 * alpha2*alpha2);
   double B = n2/fabs(alpha2) - fabs(alpha2);
 
   return par[0] * ( (1-R)*(A * pow(B - (xx-mean)/sigmaN, -1.*n2)) + R * exp(-xx/tau));
- }
+  }
+
  else if ((xx-mean) > 0) {
    return par[0] * ( (1-R)*exp(-1. * (xx-mean)*(xx-mean) / (2*sigmaP*sigmaP) ) + R * exp(-xx/tau));
- }
+  }
+
  else {
    return par[0] * ( (1-R)*exp(-1. * (xx-mean)*(xx-mean) / (2*sigmaN*sigmaN) ) + R * exp(-xx/tau));
  }
@@ -2049,58 +2061,78 @@ double doubleGausCrystalBallLowHighPlusExp (double* x, double* par) {
 //---- division of CBLowHighPlusExp with CBLowHigh ----
 Double_t CrystalBallLowHighPlusExpDividedByCrystalBallLowHigh(Double_t *x,Double_t *par) {
  double den = crystalBallLowHigh (x, par + 9) ; // signal only
- if (den == 0) return -1. ;
+  if (den == 0) return -1. ;
  double num = doubleGausCrystalBallLowHighPlusExp (x, par) ; // signal and interference
+
+ double alpha = par[16];
+ double beta = par[17];
+
+ double S = den;
+ double I = (num - alpha*S)/sqrt(alpha);
+
+ if (S != 0) {
+   return (alpha*S + sqrt(alpha)*I) / S;
+ }
+
  return num / den ;
  // return num;
 }
 
 
-Double_t getIntWght(std::string wFile , double realMass, double Hmass , double cprime ) {
-   
- TString *readfile = new TString (wFile); //file with the values of the all parameters
- TFile* SI = new TFile(readfile->Data());
+Double_t getIntWght(std::string wFile , double realMass, double Hmass , double cprime, double BRnew ) {
 
- TGraph2D* variables_S[7];
- TGraph2D* variables_SI[9];
- TF1* crystal_Icorr_qqH;
+    TString *readfile = new TString (wFile); //file with the values of the all parameters
+    TFile* SI = new TFile(readfile->Data());
+    Double_t fill_param[16]; // 9 + 7 = 16
 
- TString parameters_normal [9] = {"Log_Norm","Mean_CB","Sigma_CB","alphaR_CB","nR_CB","alphaL_CB","nL_CB","R","Tau"};
+    TGraph2D* variables_S[7];
+    TGraph2D* variables_SI[9];
+    TF1* crystal_Icorr_qqH;
 
- for (int i=0; i<9; i++) {
-    TString *name = new TString (parameters_normal[i]);
-    name->Append("_SI.txt");
-    variables_SI[i] = (TGraph2D*)SI->Get(name->Data());
- }
- for (int i=0; i<7; i++) {
+    double alpha = cprime * (1-BRnew);
+    double beta = cprime / (1-BRnew);
+
+  TString parameters_normal [9] = {"Norm","Mean_CB","Sigma_CB","alphaR_CB","nR_CB","alphaL_CB","nL_CB","R","Tau"};
+
+    for (int i=0; i<9; i++) {
+     TString *name = new TString (parameters_normal[i]);
+     name->Append("_SI.txt");
+     variables_SI[i] = (TGraph2D*)SI->Get(name->Data());
+    }
+    for (int i=0; i<7; i++) {
      TString *name = new TString (parameters_normal[i]);
      name->Append("_S.txt");
      variables_S[i] = (TGraph2D*)SI->Get(name->Data());
- }
+    }
 
- crystal_Icorr_qqH = new TF1("crystal_Icorr_qqH",CrystalBallLowHighPlusExpDividedByCrystalBallLowHigh,0,3000,16);
+    crystal_Icorr_qqH = new TF1("crystal_Icorr_qqH",CrystalBallLowHighPlusExpDividedByCrystalBallLowHigh,0,3000,16+2);
 
- for (int iVar = 0; iVar<9; iVar++) {
-      
-  if (parameters_normal[iVar].Contains("Norm")) 
-      crystal_Icorr_qqH->SetParameter(iVar, exp(variables_SI[iVar]->Interpolate(realMass, cprime)));  
-  else crystal_Icorr_qqH->SetParameter(iVar, variables_SI[iVar]->Interpolate(realMass, cprime));
-      
- }
+    for (int iVar = 0; iVar<9; iVar++) {
+      if (parameters_normal[iVar].Contains("Norm")) {
+           crystal_Icorr_qqH->SetParameter(iVar, exp(variables_SI[iVar]->Interpolate(realMass, beta)));
+      }
+      else {
+           crystal_Icorr_qqH->SetParameter(iVar, variables_SI[iVar]->Interpolate(realMass, beta));
+      }
+    }
 
- for (int iVar = 0; iVar<7; iVar++) {      
-  if (parameters_normal[iVar].Contains("Norm")) 
-      crystal_Icorr_qqH->SetParameter(iVar+9, exp(variables_S[iVar]->Interpolate(realMass, cprime)));      
-  else crystal_Icorr_qqH->SetParameter(iVar+9, variables_S[iVar]->Interpolate(realMass, cprime));
-      
- }
+    for (int iVar = 0; iVar<7; iVar++) {
+      if (parameters_normal[iVar].Contains("Norm")) {
+     	   crystal_Icorr_qqH->SetParameter(iVar+9, exp(variables_S[iVar]->Interpolate(realMass, beta)));
+      }
+      else {
+     	   crystal_Icorr_qqH->SetParameter(iVar+9, variables_S[iVar]->Interpolate(realMass, beta));
+      }
+    }
 
- Double_t wInt;
- wInt = 1.;
- wInt = crystal_Icorr_qqH->Eval(Hmass);
+    crystal_Icorr_qqH->SetParameter(6+9+1, alpha);
+    crystal_Icorr_qqH->SetParameter(6+9+2, beta);
 
- SI->Close();
-   
- return wInt;
+    Double_t wInt;
+    wInt = 1.;
+    wInt = crystal_Icorr_qqH->Eval(Hmass);
+
+    SI->Close();
+   return wInt;
 
 }
