@@ -594,8 +594,19 @@ class doFit_wj_and_wlvj:
         rrv_WJets0.Print();
         print "Total Uncertainty in WJtes0 due to fit and shape: uncertainty ",total_uncertainty/rrv_WJets0.getVal();
 
-        if scaleJetMass :
+        #uncertainty due to the VBF interference
+        rrv_vbf                = self.workspace4fit_.var("rrv_number_dataset_signal_region_%s_%s_mj"%(self.vbfhiggs_sample,self.channel))
+        rrv_vbfmassvbf_int_up  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_int_up_%s_mj"%(self.vbfhiggs_sample,self.channel))
+        rrv_vbfmassvbf_int_dn  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_int_dn_%s_mj"%(self.vbfhiggs_sample,self.channel)) 
 
+        rrv_vbf.Print();
+        rrv_vbfmassvbf_int_up.Print();
+        rrv_vbfmassvbf_int_dn.Print();      
+
+        self.interference_vbfH_uncertainty = ((TMath.Abs(rrv_vbfmassvbf_int_up.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassvbf_int_dn.getVal()-rrv_vbf.getVal() ) )/2.)/rrv_vbf.getVal();         
+        print "Total Uncertainty on vbfH due to interference: uncertainty ",self.interference_vbfH_uncertainty;
+
+        if scaleJetMass :
 
          fit_WJetsNormalization_in_Mj_signal_region(self.workspace4fit_,self.color_palet,self.mj_shape,"_WJets0massvbf_jes_up","massvbf_jes_up",self.mj_shape["WJets0"],self.channel,self.wtagger_label,0,options.pseudodata,self.mj_signal_min,self.mj_signal_max,options.jetBin); ## fit jet mass distribution
          self.workspace4fit_.writeToFile(self.tmpFile.GetName());
@@ -751,26 +762,18 @@ class doFit_wj_and_wlvj:
 
 
          #jet mass uncertainty on vbf normalizatio
-         rrv_vbf                = self.workspace4fit_.var("rrv_number_dataset_signal_region_%s_%s_mj"%(self.vbfhiggs_sample,self.channel))
+
          rrv_vbfmassvbf_jes_up  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jes_up_%s_mj"%(self.vbfhiggs_sample,self.channel))
          rrv_vbfmassvbf_jes_dn  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jes_dn_%s_mj"%(self.vbfhiggs_sample,self.channel))
          rrv_vbfmassvbf_jer_up  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_up_%s_mj"%(self.vbfhiggs_sample,self.channel))
          rrv_vbfmassvbf_jer_dn  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_dn_%s_mj"%(self.vbfhiggs_sample,self.channel))
          rrv_vbfmassvbf_jer     = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_%s_mj"%(self.vbfhiggs_sample,self.channel))
 
-	 #uncertainty due to the VBF interference
-         rrv_vbfmassvbf_int_up  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_int_up_%s_mj"%(self.vbfhiggs_sample,self.channel))
-         rrv_vbfmassvbf_int_dn  = self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_int_dn_%s_mj"%(self.vbfhiggs_sample,self.channel)) 
-
-         rrv_vbf.Print();
          rrv_vbfmassvbf_jes_up.Print();
          rrv_vbfmassvbf_jes_dn.Print();        
          rrv_vbfmassvbf_jer_up.Print();        
          rrv_vbfmassvbf_jer_dn.Print();        
          rrv_vbfmassvbf_jer.Print();   
-
-         rrv_vbfmassvbf_int_up.Print();
-         rrv_vbfmassvbf_int_dn.Print();      
 
          #jet mass uncertainty on vbf normalization
          if(self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jes_up_%s_mj"%(self.vbfhiggs_sample,self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jes_dn_%s_mj"%(self.vbfhiggs_sample,self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_up_%s_mj"%(self.vbfhiggs_sample,self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_dn_%s_mj"%(self.vbfhiggs_sample,self.channel)) and self.workspace4fit_.var("rrv_number_dataset_signal_region_%smassvbf_jer_%s_mj"%(self.vbfhiggs_sample,self.channel))):
@@ -780,8 +783,6 @@ class doFit_wj_and_wlvj:
             self.vbf_normalization_uncertainty_from_jet_res   = ((TMath.Abs(rrv_vbfmassvbf_jer_up.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassvbf_jer_dn.getVal()-rrv_vbf.getVal() )+TMath.Abs(rrv_vbfmassvbf_jer.getVal()-rrv_vbf.getVal() ) )/3.)/rrv_vbf.getVal();         
             print "Total Uncertainty on vbfH due to jer: uncertainty ",self.vbf_normalization_uncertainty_from_jet_res;
 
-         self.interference_vbfH_uncertainty = ((TMath.Abs(rrv_vbfmassvbf_int_up.getVal()-rrv_vbf.getVal())+TMath.Abs(rrv_vbfmassvbf_int_dn.getVal()-rrv_vbf.getVal() ) )/2.)/rrv_vbf.getVal();         
-         print "Total Uncertainty on vbfH due to interference: uncertainty ",self.interference_vbfH_uncertainty;
 
     ##### Method used to cycle on the events and for the dataset to be fitted
     def get_mj_and_mlvj_dataset(self,in_file_name, label, jet_mass="jet_mass_pr"):# to get the shape of m_lvj
@@ -809,7 +810,18 @@ class doFit_wj_and_wlvj:
          rdataset_signal_region_mlvj_int_dn = RooDataSet("rdataset"+label+"massvbf_int_dn"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"massvbf_int_dn"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
          rdataset4fit_signal_region_mlvj_int_up = RooDataSet("rdataset4fit"+label+"massvbf_int_up"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_int_up"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
          rdataset4fit_signal_region_mlvj_int_dn = RooDataSet("rdataset4fit"+label+"massvbf_int_dn"+"_signal_region"+"_"+self.channel+"_mlvj","rdataset4fit"+label+"massvbf_int_dn"+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
-                            
+
+         rdataset_mj_int_up  = RooDataSet("rdataset"+label+"massvbf_int_up"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_int_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+         rdataset4fit_mj_int_up = RooDataSet("rdataset4fit"+label+"massvbf_int_up"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_int_up"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+         rdataset_mj_int_dn  = RooDataSet("rdataset"+label+"massvbf_int_dn"+"_"+self.channel+"_mj","rdataset"+label+"massvbf_int_dn"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+         rdataset4fit_mj_int_dn = RooDataSet("rdataset4fit"+label+"massvbf_int_dn"+"_"+self.channel+"_mj","rdataset4fit"+label+"massvbf_int_dn"+"_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) );
+
+         hnum_2region_int_up = TH1D("hnum_2region"+label+"massvbf_int_up"+"_"+self.channel,"hnum_2region"+label+"massvbf_int_up"+"_"+self.channel,2,-0.5,1.5);
+         hnum_2region_int_dn = TH1D("hnum_2region"+label+"massvbf_int_dn"+"_"+self.channel,"hnum_2region"+label+"massvbf_int_dn"+"_"+self.channel,2,-0.5,1.5);
+         
+         hnum_4region_int_up = TH1D("hnum_4region"+label+"massvbf_int_up"+"_"+self.channel,"hnum_4region"+label+"massvbf_int_up"+"_"+self.channel,4,-1.5,2.5);
+         hnum_4region_int_dn = TH1D("hnum_4region"+label+"massvbf_int_dn"+"_"+self.channel,"hnum_4region"+label+"massvbf_int_dn"+"_"+self.channel,4,-1.5,2.5);
+         
         #dataset of m_lvj -> before and after vbf cuts -> central object value
         rdataset_sb_lo_mlvj     = RooDataSet("rdataset"+label+"_sb_lo"+"_"+self.channel+"_mlvj","rdataset"+label+"_sb_lo"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
         rdataset_signal_region_mlvj = RooDataSet("rdataset"+label+"_signal_region"+"_"+self.channel+"_mlvj","rdataset"+label+"_signal_region"+"_"+self.channel+"_mlvj",RooArgSet(rrv_mass_lvj,rrv_weight),RooFit.WeightVar(rrv_weight) ); 
@@ -1277,8 +1289,14 @@ class doFit_wj_and_wlvj:
                  combData.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
                  combData4fit.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
                  hnum_2region.Fill(1,tmp_event_weight);
+                 if TString(label).Contains("vbfH"):
+                       hnum_2region_int_up.Fill(1,tmp_event_weightUp);
+                       hnum_2region_int_dn.Fill(1,tmp_event_weightDn);                 
                  if mass_lvj >=self.mlvj_signal_min and mass_lvj <self.mlvj_signal_max: 
                    hnum_2region.Fill(0,tmp_event_weight);
+                   if TString(label).Contains("vbfH"):
+                       hnum_2region_int_up.Fill(0,tmp_event_weightUp);
+                       hnum_2region_int_dn.Fill(0,tmp_event_weightDn);
 
              if tmp_jet_mass >= self.mj_sideband_hi_min and tmp_jet_mass < self.mj_sideband_hi_max and isPassingCut == 1:
                  rdataset_sb_hi_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
@@ -1289,11 +1307,23 @@ class doFit_wj_and_wlvj:
               rdataset4fit_mj.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
               if tmp_jet_mass >=self.mj_sideband_lo_min and tmp_jet_mass <self.mj_sideband_lo_max: 
                  hnum_4region.Fill(-1,tmp_event_weight );
+                 if TString(label).Contains("vbfH"):
+                     hnum_4region_int_up.Fill(-1,tmp_event_weightUp );
+                     hnum_4region_int_dn.Fill(-1,tmp_event_weightDn );                 
               if tmp_jet_mass >=self.mj_signal_min and tmp_jet_mass <self.mj_signal_max : 
                  hnum_4region.Fill(0,tmp_event_weight);
+                 if TString(label).Contains("vbfH"):
+                     hnum_4region_int_up.Fill(0,tmp_event_weightUp );
+                     hnum_4region_int_dn.Fill(0,tmp_event_weightDn );                 
               if tmp_jet_mass >=self.mj_sideband_hi_min and tmp_jet_mass <self.mj_sideband_hi_max: 
                  hnum_4region.Fill(1,tmp_event_weight);
+                 if TString(label).Contains("vbfH"):
+                     hnum_4region_int_up.Fill(1,tmp_event_weightUp );
+                     hnum_4region_int_dn.Fill(1,tmp_event_weightDn );                 
               hnum_4region.Fill(2,tmp_event_weight);
+              if TString(label).Contains("vbfH"):
+                     hnum_4region_int_up.Fill(2,tmp_event_weightUp );
+                     hnum_4region_int_dn.Fill(2,tmp_event_weightDn );                 
 
              ## JES UP
              if label != "_WJets01" and label != "_WJets1" and label !="_data" and not options.skipJetSystematics:
@@ -1523,10 +1553,22 @@ class doFit_wj_and_wlvj:
         getattr(self.workspace4fit_,"import")(combData4fit); combData4fit.Print();
 
         if TString(label).Contains("vbfH"):
+             rrv_number_dataset_signal_region_mlvj_int_up = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_int_up"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"massvbf_int_up"+"_"+self.channel+"_mlvj",hnum_2region_int_up.GetBinContent(1));
+             rrv_number_dataset_signal_region_mlvj_int_dn = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_int_dn"+"_"+self.channel+"_mlvj","rrv_number_dataset_signal_region"+label+"massvbf_int_dn"+"_"+self.channel+"_mlvj",hnum_2region_int_dn.GetBinContent(1));
+             rrv_number_dataset_signal_region_mj_int_up = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_int_up"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"massvbf_int_up"+"_"+self.channel+"_mj",hnum_4region_int_up.GetBinContent(2));
+             rrv_number_dataset_signal_region_mj_int_dn = RooRealVar("rrv_number_dataset_signal_region"+label+"massvbf_int_dn"+"_"+self.channel+"_mj","rrv_number_dataset_signal_region"+label+"massvbf_int_dn"+"_"+self.channel+"_mj",hnum_4region_int_dn.GetBinContent(2));                                  
+             getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_int_up); rrv_number_dataset_signal_region_mlvj_int_up.Print();
+             getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mlvj_int_dn); rrv_number_dataset_signal_region_mlvj_int_dn.Print();      
              getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_int_up); rdataset_signal_region_mlvj_int_up.Print();
              getattr(self.workspace4fit_,"import")(rdataset_signal_region_mlvj_int_dn); rdataset_signal_region_mlvj_int_dn.Print();
              getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_int_up); rdataset4fit_signal_region_mlvj_int_up.Print();
-             getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_int_dn); rdataset4fit_signal_region_mlvj_int_dn.Print();                          
+             getattr(self.workspace4fit_,"import")(rdataset4fit_signal_region_mlvj_int_dn); rdataset4fit_signal_region_mlvj_int_dn.Print();
+             getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_int_up); rrv_number_dataset_signal_region_mj_int_up.Print();
+             getattr(self.workspace4fit_,"import")(rrv_number_dataset_signal_region_mj_int_dn); rrv_number_dataset_signal_region_mj_int_dn.Print();
+             getattr(self.workspace4fit_,"import")(rdataset_mj_int_dn); rdataset_mj_int_dn.Print();
+             getattr(self.workspace4fit_,"import")(rdataset4fit_mj_int_dn); rdataset4fit_mj_int_dn.Print();
+             getattr(self.workspace4fit_,"import")(rdataset_mj_int_up); rdataset_mj_int_up.Print();
+             getattr(self.workspace4fit_,"import")(rdataset4fit_mj_int_up); rdataset4fit_mj_int_up.Print();                          
 
 
         ###################jes_up
