@@ -26,6 +26,7 @@ parser.add_option('-b', action='store_true', dest='noX', default=False, help='no
 parser.add_option('--makeCards',     action='store_true', dest='makeCards',         default=False, help='options to produce datacards and workspaces via fitting analysis')
 parser.add_option('--computeLimits', action='store_true', dest='computeLimits',     default=False, help='basic option in order to compute asymptotic limits')
 parser.add_option('--plotLimits',    action='store_true', dest='plotLimits',        default=False, help='basic option to plot asymptotic and pvalue')
+parser.add_option('--computePvalue', action='store_true', dest='computePvalue',     default=False, help='basic option to plot asymptotic and pvalue')
 parser.add_option('--biasStudy',     action='store_true', dest='biasStudy',         default=False, help='basic option to perform bias study with our own tool')
 parser.add_option('--maximumLikelihoodFit', action='store_true', dest='maximumLikelihoodFit', default=False, help='basic option to run max Likelihood fit inside combination tool')
 parser.add_option('--generateOnly',  action='store_true', dest='generateOnly', default=False, help='basic option to run the only generation with combiner')
@@ -163,6 +164,8 @@ def getAsymLimits(file):
  entries = t.GetEntries();
     
  lims = [0,0,0,0,0,0];
+
+ limit_entries = 0;  
     
  for i in range(entries):
         
@@ -171,13 +174,20 @@ def getAsymLimits(file):
   t_limit = t.limit;
         
   #print "limit: ", t_limit, ", quantileExpected: ",t_quantileExpected;        
-  if t_quantileExpected == -1.: lims[0] = t_limit;
-  elif t_quantileExpected >= 0.024 and t_quantileExpected <= 0.026: lims[1] = t_limit;
-  elif t_quantileExpected >= 0.15 and t_quantileExpected <= 0.17: lims[2] = t_limit;            
-  elif t_quantileExpected == 0.5: lims[3] = t_limit;            
-  elif t_quantileExpected >= 0.83 and t_quantileExpected <= 0.85: lims[4] = t_limit;
-  elif t_quantileExpected >= 0.974 and t_quantileExpected <= 0.976: lims[5] = t_limit;
+  if t_quantileExpected == -1.: lims[0] += t_limit; 
+  elif t_quantileExpected >= 0.024 and t_quantileExpected <= 0.026: lims[1] += t_limit;
+  elif t_quantileExpected >= 0.15 and t_quantileExpected <= 0.17: lims[2] += t_limit;            
+  elif t_quantileExpected == 0.5: lims[3] += t_limit; limit_entries += 1 ;            
+  elif t_quantileExpected >= 0.83 and t_quantileExpected <= 0.85: lims[4] += t_limit;
+  elif t_quantileExpected >= 0.974 and t_quantileExpected <= 0.976: lims[5] += t_limit;
   else: print "Unknown quantile!"
+
+ lims[0] = lims[0]/limit_entries ;
+ lims[1] = lims[1]/limit_entries ;
+ lims[2] = lims[2]/limit_entries ;
+ lims[3] = lims[3]/limit_entries ;
+ lims[4] = lims[4]/limit_entries ;
+ lims[5] = lims[5]/limit_entries ;
     
  return lims;
 
@@ -466,10 +476,8 @@ def getPValueFromCard(file,observed):
 #### Make SM Limits Plots ####  
 ##############################  
 
-def makeSMLimitPlot(SIGCH):
+def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
 
-    cprime = 10;
-    brnew = 00;
     nPoints = len(mass);
     
     xbins     = array('f', [0.]); xbins_env = array('f', [0.]);
@@ -487,7 +495,7 @@ def makeSMLimitPlot(SIGCH):
         ybins_obs.append( curAsymLimits[0] );
         ybins_2s.append( curAsymLimits[1] );
 	ybins_1s.append( curAsymLimits[2] );
-        
+
     for i in range( len(mass)-1, -1, -1 ):
 	curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
 	curAsymLimits = getAsymLimits(curFile);
@@ -533,7 +541,7 @@ def makeSMLimitPlot(SIGCH):
     setStyle();
     
     can_SM = ROOT.TCanvas("can_SM","can_SM",630,600);
-    hrl_SM = can_SM.DrawFrame(599,0.0,1001,12.0);
+    hrl_SM = can_SM.DrawFrame(599,0.0,1001,ROOT.TMath.MaxElement(curGraph_2s.GetN(),curGraph_2s.GetY())*1.2);
 
     hrl_SM.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{SM}");
     hrl_SM.GetYaxis().SetTitleOffset(1.35);
@@ -593,18 +601,16 @@ def makeSMLimitPlot(SIGCH):
     label_sqrt.Draw();
 
     os.system("mkdir -p %s/limitFigs/"%(os.getcwd()));
-
-    can_SM.SaveAs("limitFigs/SMLim_%s.png"%(options.channel));
-    can_SM.SaveAs("limitFigs/SMLim_%s.pdf"%(options.channel));
+    
+    can_SM.SaveAs("limitFigs/SMLim_%s_%02d_%02d.png"%(options.channel,cprime,brnew));
+    can_SM.SaveAs("limitFigs/SMLim_%s_%02d_%02d.pdf"%(options.channel,cprime,brnew));
 
 ##############################
 #### Make SM PValue Plots ####  
 ##############################  
 
-def makeSMPValuePlot(SIGCH):
+def makeSMPValuePlot(SIGCH,cprime = 10,brnew = 00):
 
-    cprime = 10;
-    brnew  = 00;
     nPoints = len(mass);
     
     xbins_obs     = array('f', [0.]);
@@ -686,8 +692,10 @@ def makeSMPValuePlot(SIGCH):
     ban2s.Draw();
     ban3s.Draw();
     ban4s.Draw();
-    can.SaveAs("limitFigs/SMPvals_%s.pdf"%(options.channel),"pdf");
-    can.SaveAs("limitFigs/SMPvals_%s.png"%(options.channel),"png");
+
+    os.system("mkdir -p %s/limitFigs/"%(os.getcwd()));
+    can.SaveAs("limitFigs/SMPvals_%s_%02d_%02d.pdf"%(options.channel,cprime,brnew),"pdf");
+    can.SaveAs("limitFigs/SMPvals_%s_%02d_%02d.png"%(options.channel,cprime,brnew),"png");
                     
                                            
 ##############################################
@@ -1734,6 +1742,11 @@ if __name__ == '__main__':
                     print "analyzing card: hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                     print "--------------------------------------------------";                
 
+                    ###############################################
+                    ####### Combine single channel cards ##########
+                    ###############################################
+
+
                     if options.channel =="em" and options.jetBin != "_2jet" :
                      combineCmmd = "combineCards.py hwwlvj_ggH%03d_el%s_%02d_%02d_unbin.txt hwwlvj_ggH%03d_mu%s_%02d_%02d_unbin.txt > hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k],mass[i],SIGCH,cprime[j],BRnew[k]);
                      print "combineCmmd ",combineCmmd; 
@@ -1791,7 +1804,12 @@ if __name__ == '__main__':
                        if options.nToys == 0 and options.crossedToys == 0 : 
                         runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveWithUncertainties --saveToys -s -1 -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -t %d --expectSignal=%d "%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.nToys,options.injectSingalStrenght);                     
                         print "runCmmd ",runCmmd;
-
+                        if options.batchMode:
+                           fn = "combineScript_%s_%03d%s_%02d_%02d_iToy%d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                           submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
+                        else:   
+                         os.system(runCmmd);
+                         
                        ######################################################## 
                        #### run many toys and fits with the same datacards  ###
                        ########################################################
@@ -1820,8 +1838,9 @@ if __name__ == '__main__':
                              continue ;
 
                        ##################################
-                       ##### Make the crossed toys ##### 
+                       ###### Make the crossed toys ##### 
                        ##################################  
+
                        elif options.nToys != 0 and options.crossedToys == 1 :
 
                           os.system("ls "+options.inputGeneratedDataset+" | grep root | grep higgsCombine | grep ggH"+str(mass[i])+" > list_temp.txt"); 
@@ -1861,7 +1880,7 @@ if __name__ == '__main__':
                     #### Asymptotic Limit part  ###
                     ###############################
                       
-                    elif options.systematics == 0:
+                    elif options.systematics == 0 and not options.computePvalue == 1:
                        runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -S 0"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
                        print "runCmmd ",runCmmd ;
 
@@ -1873,19 +1892,44 @@ if __name__ == '__main__':
                         os.system(runCmmd);
 
 
-                    else: 
-                       runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);                                        
-                       print "runCmmd ",runCmmd;
+                    elif not options.computePvalue == 1:
 
-                       if options.batchMode:
-                        fn = "combineScript_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
-                        cardStem = "hwwlvj_ggH%03d_em%s_%02d_%02d"%(mass[i],SIGCH,cprime[j],BRnew[k]);
-                        submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
-                       else: 
-                        os.system(runCmmd);
+                       #############################################
+                       ###### run Asymptotic on the final card ##### 
+                       #############################################  
 
+                       if options.nToys == 0: 
+                        runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);                                        
+                        print "runCmmd ",runCmmd;
+
+                        if options.batchMode:
+                         fn = "combineScript_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
+                         submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
+                        else: 
+                         os.system(runCmmd);
+
+                       else:
+
+                       #############################################
+                       ###### run Asymptotic making many toys  ##### 
+                       #############################################  
+
+                        for iToy in range(options.nToys):   
+                         runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin_%d -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -t 1 -s -1"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],iToy,mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);                                        
+                         print "runCmmd ",runCmmd;
+
+                         if options.batchMode:
+                          fn = "combineScript_%s_%03d%s_%02d_%02d_iToy%d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                          submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
+                         else: 
+                          os.system(runCmmd);
+                           
                       
-                       if options.plotPValue == 1 : 
+                    elif options.computePvalue == 1: 
+
+                       ##################################################
+                       ###### run the observed and expected pvalue  ##### 
+                       ##################################################  
 
                         runCmmd = "combine -M ProfileLikelihood --signif --pvalue -n hwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
                         print "runCmmd ",runCmmd;
@@ -1949,13 +1993,88 @@ if __name__ == '__main__':
     if options.plotLimits:
 
       if options.makeSMLimitPlot == 1:
-          makeSMLimitPlot(SIGCH);
+          #makeSMLimitPlot(SIGCH,10,0);
           if options.plotPValue == 1: makeSMPValuePlot(SIGCH);
-          
+
+          #makeSMLimitPlot(SIGCH,01,00);
+          #makeSMLimitPlot(SIGCH,01,01);
+          #makeSMLimitPlot(SIGCH,01,02);
+          #makeSMLimitPlot(SIGCH,01,03);
+          #makeSMLimitPlot(SIGCH,01,04);
+          #makeSMLimitPlot(SIGCH,01,05);
+          #makeSMLimitPlot(SIGCH,02,00);
+          #makeSMLimitPlot(SIGCH,02,01);
+          #makeSMLimitPlot(SIGCH,02,02);
+          #makeSMLimitPlot(SIGCH,02,03);
+          #makeSMLimitPlot(SIGCH,02,04);
+          #makeSMLimitPlot(SIGCH,02,05);
+          #makeSMLimitPlot(SIGCH,03,00);
+          #makeSMLimitPlot(SIGCH,03,01);
+          #makeSMLimitPlot(SIGCH,03,02);
+          #makeSMLimitPlot(SIGCH,03,03);
+          #makeSMLimitPlot(SIGCH,03,04);
+          #makeSMLimitPlot(SIGCH,03,05);
+          #makeSMLimitPlot(SIGCH,05,00);
+          #makeSMLimitPlot(SIGCH,05,01);
+          #makeSMLimitPlot(SIGCH,05,02);
+          #makeSMLimitPlot(SIGCH,05,03);
+          #makeSMLimitPlot(SIGCH,05,04);
+          #makeSMLimitPlot(SIGCH,05,05);
+          #makeSMLimitPlot(SIGCH,07,00);
+          #makeSMLimitPlot(SIGCH,07,01);
+          #makeSMLimitPlot(SIGCH,07,02);
+          #makeSMLimitPlot(SIGCH,07,03);
+          #makeSMLimitPlot(SIGCH,07,04);
+          #makeSMLimitPlot(SIGCH,07,05);
+          #makeSMLimitPlot(SIGCH,10,00);
+          #makeSMLimitPlot(SIGCH,10,01);
+          #makeSMLimitPlot(SIGCH,10,02);
+          #makeSMLimitPlot(SIGCH,10,03);
+          #makeSMLimitPlot(SIGCH,10,04);
+          #makeSMLimitPlot(SIGCH,10,05);
+
+          if options.plotPValue == 1:
+              makeSMPValuePlot(SIGCH,10,01);
+              makeSMPValuePlot(SIGCH,10,02);
+              makeSMPValuePlot(SIGCH,10,03);
+              makeSMPValuePlot(SIGCH,10,04);
+              makeSMPValuePlot(SIGCH,10,05);
+              makeSMPValuePlot(SIGCH,01,00);
+              makeSMPValuePlot(SIGCH,01,01);
+              makeSMPValuePlot(SIGCH,01,02);
+              makeSMPValuePlot(SIGCH,01,03);
+              makeSMPValuePlot(SIGCH,01,04);
+              makeSMPValuePlot(SIGCH,01,05);
+              makeSMPValuePlot(SIGCH,02,00);
+              makeSMPValuePlot(SIGCH,02,01);
+              makeSMPValuePlot(SIGCH,02,02);
+              makeSMPValuePlot(SIGCH,02,03);
+              makeSMPValuePlot(SIGCH,02,04);
+              makeSMPValuePlot(SIGCH,02,05);
+              makeSMPValuePlot(SIGCH,03,00);
+              makeSMPValuePlot(SIGCH,03,01);
+              makeSMPValuePlot(SIGCH,03,02);
+              makeSMPValuePlot(SIGCH,03,03);
+              makeSMPValuePlot(SIGCH,03,04);
+              makeSMPValuePlot(SIGCH,03,05);
+              makeSMPValuePlot(SIGCH,05,00);
+              makeSMPValuePlot(SIGCH,05,01);
+              makeSMPValuePlot(SIGCH,05,02);
+              makeSMPValuePlot(SIGCH,05,03);
+              makeSMPValuePlot(SIGCH,05,04);
+              makeSMPValuePlot(SIGCH,05,05);
+              makeSMPValuePlot(SIGCH,07,00);
+              makeSMPValuePlot(SIGCH,07,01);
+              makeSMPValuePlot(SIGCH,07,02);
+              makeSMPValuePlot(SIGCH,07,03);
+              makeSMPValuePlot(SIGCH,07,04);
+              makeSMPValuePlot(SIGCH,07,05);
+
       if options.makeBSMLimitPlotMass == 1:
           makeBSMLimitPlotMass(SIGCH);
-
+                 
       if options.makeBSMLimitPlotBRnew == 1:
+          
           makeBSMLimitPlotBRnew(SIGCH,600);
           makeBSMLimitPlotBRnew(SIGCH,700);
           makeBSMLimitPlotBRnew(SIGCH,800);
