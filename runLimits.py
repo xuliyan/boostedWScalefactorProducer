@@ -714,29 +714,42 @@ def makeSignalStrenghtPlot(SIGCH,cprime = 10,brnew = 00):
     ybins_mu         = array('f', []);
     ybins_mu_err_up  = array('f', []);
     ybins_mu_err_dn  = array('f', []);
+    ybins_mu_err_up_2s  = array('f', []);
+    ybins_mu_err_dn_2s  = array('f', []);
+    ybins_mu_ratio   = array('f', []);
+    xbins_obs     = array('f', [0.]);
+    ybins_obs     = array('f', [0.]);
 
     setStyle();
-    
+        
     for i in range(len(mass)):
 
      curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.MaxLikelihoodFit.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
-
+ 
      f = ROOT.TFile(curFile);
      t = f.Get("limit");
      entries = t.GetEntries();
 
-     mu = 0; mu_err_up = 0 ; mu_err_dn = 0 ; effect_entry = 0 ;
+     mu = 0;
+     effect_entry = 0 ;
+     mu_err_up = 0 ; mu_err_dn = 0 ;
+     mu_err_up_2s = 0 ; mu_err_dn_2s = 0 ;
+     
      mu_temp = 0 ;  
      for ientry in range(t.GetEntries()):
        t.GetEntry(ientry);
        if t.quantileExpected == 0.5 : mu += t.limit ;  effect_entry += 1; mu_temp = t.limit ; continue ; 
-       if t.quantileExpected > 0.15 and t.quantileExpected < 0.17 : mu_err_dn += abs(t.limit-mu_temp) ;  continue ;
-       if t.quantileExpected > 0.83 and t.quantileExpected < 0.85 : mu_err_up += abs(t.limit-mu_temp) ;  continue ;
+       if t.quantileExpected > 0.15 and t.quantileExpected < 0.17 : mu_err_dn += abs(t.limit-mu_temp) ; continue ;
+       if t.quantileExpected > 0.83 and t.quantileExpected < 0.85 : mu_err_up += abs(t.limit-mu_temp) ; continue ;
+       if t.quantileExpected >= 0.024 and t.quantileExpected <= 0.026: mu_err_up_2s += abs(t.limit-mu_temp) ; continue ;
+       if t.quantileExpected >= 0.974 and t.quantileExpected <= 0.976: mu_err_dn_2s += abs(t.limit-mu_temp) ; continue ;
                          
      mu = mu/effect_entry;
      mu_err_dn = mu_err_dn/effect_entry;
      mu_err_up = mu_err_up/effect_entry;
-
+     mu_err_dn_2s = mu_err_dn_2s/effect_entry;
+     mu_err_up_2s = mu_err_up_2s/effect_entry;
+     
      xbins_mu.append(mass[i]); 
      xbins_mu_err_up.append(0.); 
      xbins_mu_err_dn.append(0.); 
@@ -744,10 +757,40 @@ def makeSignalStrenghtPlot(SIGCH,cprime = 10,brnew = 00):
      ybins_mu.append(mu);
      ybins_mu_err_up.append(mu_err_up);
      ybins_mu_err_dn.append(mu_err_dn);
+     ybins_mu_err_up_2s.append(mu_err_up_2s);
+     ybins_mu_err_dn_2s.append(mu_err_dn_2s);
 
-    gr_mu = ROOT.TGraphAsymmErrors(nPoints,xbins_mu,ybins_mu,xbins_mu_err_dn,xbins_mu_err_up,ybins_mu_err_dn,ybins_mu_err_up);
+     if mu >= 0 : ybins_mu_ratio.append(mu/mu_err_dn);
+     else:        ybins_mu_ratio.append(mu/mu_err_up);
+
+     if options.plotPValue == 1:
+	curFile_obs = "higgsCombinehwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+        xbins_obs.append(mass[i]); 
+        ybins_obs.append(getPValueFromCard(curFile_obs,1));
+
                     
-    gr_mu.SetLineColor(1); gr_mu.SetMarkerColor(1); gr_mu.SetMarkerStyle(20); gr_mu.SetLineWidth(3);gr_mu.SetMarkerSize(1.6);
+    gr_mu_1 = ROOT.TGraphAsymmErrors(nPoints,xbins_mu,ybins_mu);
+    gr_mu_1.SetLineColor(1); gr_mu_1.SetMarkerColor(1); gr_mu_1.SetMarkerStyle(20); gr_mu_1.SetLineWidth(3);gr_mu_1.SetMarkerSize(1.6);
+
+    gr_mu_ratio = ROOT.TGraphAsymmErrors(nPoints,xbins_mu,ybins_mu_ratio);
+    gr_mu_ratio.SetLineColor(1); gr_mu_ratio.SetMarkerColor(1); gr_mu_ratio.SetMarkerStyle(20); gr_mu_ratio.SetLineWidth(3);gr_mu_ratio.SetMarkerSize(1.6);
+
+    gr_mu_1_1s = ROOT.TGraphAsymmErrors(nPoints,xbins_mu,ybins_mu,xbins_mu_err_dn,xbins_mu_err_up,ybins_mu_err_dn,ybins_mu_err_up);
+    gr_mu_1_1s.SetLineColor(1); gr_mu_1_1s.SetMarkerColor(1); gr_mu_1_1s.SetMarkerStyle(20); gr_mu_1_1s.SetLineWidth(5); gr_mu_1_1s.SetMarkerSize(1.6);
+
+    gr_mu_1_2s = ROOT.TGraphAsymmErrors(nPoints,xbins_mu,ybins_mu,xbins_mu_err_dn,xbins_mu_err_up,ybins_mu_err_dn_2s,ybins_mu_err_up_2s);
+    gr_mu_1_2s.SetLineColor(ROOT.kBlue); gr_mu_1_2s.SetMarkerColor(ROOT.kBlue); gr_mu_1_2s.SetMarkerStyle(20); gr_mu_1_2s.SetLineWidth(3); gr_mu_1_2s.SetMarkerSize(1.6);
+
+    gr_mu_zero_1s = ROOT.TGraphAsymmErrors(nPoints,xbins_mu,xbins_mu_err_up,xbins_mu_err_dn,xbins_mu_err_up,ybins_mu_err_dn,ybins_mu_err_up);
+    gr_mu_zero_2s = ROOT.TGraphAsymmErrors(nPoints,xbins_mu,xbins_mu_err_up,xbins_mu_err_dn,xbins_mu_err_up,ybins_mu_err_dn_2s,ybins_mu_err_up_2s);
+    
+    gr_mu_zero_1s.SetFillStyle(3001);
+    gr_mu_zero_1s.SetFillColor(ROOT.kRed);
+    gr_mu_zero_2s.SetFillStyle(3002);
+    gr_mu_zero_2s.SetFillColor(210);
+
+    gr_obs = ROOT.TGraphAsymmErrors(nPoints+1,xbins_obs,ybins_obs);                    
+    gr_obs.SetLineColor(ROOT.kBlue); gr_obs.SetMarkerColor(ROOT.kBlue); gr_obs.SetMarkerStyle(28); gr_obs.SetLineWidth(3);gr_obs.SetMarkerSize(1.6);
 
     oneSLine0 = ROOT.TF1("oneSLine","0",mass[0]-50,mass[len(mass)-1]+50);
     oneSLine0.SetLineColor(ROOT.kRed); oneSLine0.SetLineWidth(2);
@@ -771,27 +814,71 @@ def makeSignalStrenghtPlot(SIGCH,cprime = 10,brnew = 00):
     leg2.SetTextSize(0.028);
     
     if options.jetBin == "":
-     leg2.AddEntry( gr_mu, "signal strenght %s "%options.channel, "pl" );
+     leg2.AddEntry( gr_mu_1, "signal strenght %s "%options.channel, "pl" );
     else:
-     leg2.AddEntry( gr_mu, "signal strenght, VBF e+#mu", "pl" );
-
+     leg2.AddEntry( gr_mu_1, "signal strenght, VBF e+#mu", "pl" );
 
     can = ROOT.TCanvas("can","can",600,650);
-    hrl = can.DrawFrame(mass[0]-50,-5,mass[len(mass)-1]+50,5);
-    hrl.GetYaxis().SetTitle("modified signal strenght");
+    hrl = can.DrawFrame(mass[0],-5,mass[len(mass)-1],5);
+    hrl.GetYaxis().SetTitle("signal strenght");
     hrl.GetXaxis().SetTitle("m_{H} (GeV)");
     can.SetGrid();
-    gr_mu.Draw("P");
+    gr_mu_1.Draw("P");
+    gr_mu_zero_2s.Draw("e3same");
+    gr_mu_zero_1s.Draw("e3same"); 
+    gr_mu_1.Draw("Psame");
+    oneSLine0.Draw("same");
+   
+    banner.Draw();
+    leg2.Draw();
+
+    os.system("mkdir -p %s/limitFigs/"%(os.getcwd()));
+    can.SaveAs("limitFigs/signal_strenght_band_%s%s_%02d_%02d.pdf"%(options.channel,SIGCH,cprime,brnew),"pdf");
+    can.SaveAs("limitFigs/signal_strenght_band_%s%s_%02d_%02d.png"%(options.channel,SIGCH,cprime,brnew),"png");
+
+    can_2 = ROOT.TCanvas("can_2","can_2",600,650);
+    hrl_2 = can_2.DrawFrame(mass[0]-50,-5,mass[len(mass)-1]+50,5);
+    hrl_2.GetYaxis().SetTitle("signal strenght");
+    hrl_2.GetXaxis().SetTitle("m_{H} (GeV)");
+    can_2.SetGrid();
+    gr_mu_1_2s.Draw("P");
+    gr_mu_1_1s.Draw("P"); 
+    oneSLine0.Draw("same");
+    oneSLine1.Draw("same");
+    oneSLine2.Draw("same");
+    oneSLine3.Draw("same");
+   
+    banner.Draw();
+    leg2.Draw();
+
+    os.system("mkdir -p %s/limitFigs/"%(os.getcwd()));
+    can_2.SaveAs("limitFigs/signal_strenght_%s%s_%02d_%02d.pdf"%(options.channel,SIGCH,cprime,brnew),"pdf");
+    can_2.SaveAs("limitFigs/signal_strenght_%s%s_%02d_%02d.png"%(options.channel,SIGCH,cprime,brnew),"png");
+
+
+    can_ratio = ROOT.TCanvas("can_ratio","can_ratio",600,650);
+    hrl_ratio = can_ratio.DrawFrame(mass[0]-50,-5,mass[len(mass)-1]+50,5);
+    hrl_ratio.GetYaxis().SetTitle("#mu/#sigma_{#mu}");
+    hrl_ratio.GetXaxis().SetTitle("m_{H} (GeV)");
+    can_ratio.SetGrid();
+    leg2.Clear()
+    if options.jetBin == "":
+     leg2.AddEntry( gr_mu_ratio, "#sigma_{#mu}/#mu %s "%options.channel, "pl" );
+    else:
+     leg2.AddEntry( gr_mu_ratio, "#sigma_{#mu}/#mu, VBF e+#mu", "pl" );
+    gr_mu_ratio.Draw("P");
+    if options.plotPValue == 1 : gr_obs.Draw("P"); leg2.AddEntry( gr_obs, "local significance", "pl" );
+    
     oneSLine0.Draw("same");
     oneSLine1.Draw("same");
     oneSLine2.Draw("same");
     oneSLine3.Draw("same");
     banner.Draw();
     leg2.Draw();
-
+    
     os.system("mkdir -p %s/limitFigs/"%(os.getcwd()));
-    can.SaveAs("limitFigs/signal_strenght_%s%s_%02d_%02d.pdf"%(options.channel,SIGCH,cprime,brnew),"pdf");
-    can.SaveAs("limitFigs/signal_strenght_%s%s_%02d_%02d.png"%(options.channel,SIGCH,cprime,brnew),"png");
+    can_ratio.SaveAs("limitFigs/signal_strenght_ratio_%s%s_%02d_%02d.pdf"%(options.channel,SIGCH,cprime,brnew),"pdf");
+    can_ratio.SaveAs("limitFigs/signal_strenght_ratio_%s%s_%02d_%02d.png"%(options.channel,SIGCH,cprime,brnew),"png");
 
 #################################
 ### make likelihood scan plot ###
@@ -1853,7 +1940,7 @@ if __name__ == '__main__':
         nBRnews = 1;    
 
 
-    if options.injectSingalStrenght == 0 : rMin = -5 ; rMax = 5 ;
+    if options.injectSingalStrenght == 0 : rMin = -10 ; rMax = 10 ;
     else: rMin = - 50 ; rMax = 50
 
     #######################################################
@@ -1958,7 +2045,7 @@ if __name__ == '__main__':
                        #################################################
                         
                        if options.nToys == 0 and options.crossedToys == 0 : 
-                        runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveWithUncertainties  -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2"%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);                     
+                        runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveWithUncertainties  -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2  --robustFit=1 --do95=1"%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);                     
                         print "runCmmd ",runCmmd;
                         if options.batchMode:
                            fn = "combineScript_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
@@ -1973,7 +2060,7 @@ if __name__ == '__main__':
                        elif options.nToys != 0 and options.crossedToys == 0 :
                           if options.outputTree == 0:  
                            for iToy in range(options.nToys):
-                             runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveToys --saveWithUncertainties --toysNoSystematics -s -1 -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin_%d -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=%d "%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],iToy,mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght);                     
+                             runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveToys --saveWithUncertainties --toysNoSystematics -s -1 -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin_%d -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -t 1 --expectSignal=%d --robustFit=1 --do95=1"%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],iToy,mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.injectSingalStrenght);                     
                              print "runCmmd ",runCmmd;
                              if options.batchMode:
                               fn = "combineScript_%s_%03d%s_%02d_%02d_iToy%d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k],iToy);
@@ -1983,7 +2070,7 @@ if __name__ == '__main__':
                               os.system(runCmmd);
                            continue ;
                           else:
-                             runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveWithUncertainties  --toysNoSystematics --saveToys -s -1 -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -t %d --expectSignal=%d "%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.nToys,options.injectSingalStrenght);                     
+                             runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveWithUncertainties  --toysNoSystematics --saveToys -s -1 -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -t %d --expectSignal=%d --robustFit=1 --do95=1"%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.nToys,options.injectSingalStrenght);                     
                              print "runCmmd ",runCmmd;
                              if options.batchMode:
                               fn = "combineScript_%s_%03d%s_%02d_%02d_iToy%d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k],options.nToys);
@@ -2006,7 +2093,7 @@ if __name__ == '__main__':
                             for line in input_list:
                              for name in line.split():
                                 if iToy >= options.nToys: continue ; 
-                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveWithUncertainties -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin_%d -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -s -1 -t 1  --toysFile %s/%s "%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],iToy,mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.inputGeneratedDataset,name);
+                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveWithUncertainties -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin_%d -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -s -1 -t 1  --toysFile %s/%s --robustFit=1 --do95=1"%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],iToy,mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.inputGeneratedDataset,name);
                                 iToy = iToy + 1 ;
                                 print "runCmmd ",runCmmd;                                
                                 if options.batchMode:
@@ -2017,10 +2104,10 @@ if __name__ == '__main__':
                                   os.system(runCmmd);
 
                           else:
-                             with open("list_temp.txt") as input_list:
+                           with open("list_temp.txt") as input_list:
                               for line in input_list:
                                for name in line.split():                                                                       
-                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveWithUncertainties -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -s -1 -t %d --toysFile %s/%s"%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.nToys,options.inputGeneratedDataset,name);                     
+                                runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveWithUncertainties -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -s -1 -t %d --toysFile %s/%s --robustFit=1 --do95=1"%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.nToys,options.inputGeneratedDataset,name);                     
                                 print "runCmmd ",runCmmd;                                
                                 if options.batchMode:
                                   fn = "combineScript_%s_%03d%s_%02d_%02d_iToy%d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k],iToy);
@@ -2087,7 +2174,7 @@ if __name__ == '__main__':
                        ###### run the observed and expected pvalue  ##### 
                        ##################################################  
 
-                        runCmmd = "combine -M ProfileLikelihood --signif --pvalue -n hwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
+                        runCmmd = "combine -M ProfileLikelihood --signif -n hwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
                         print "runCmmd ",runCmmd;
 
                         if options.batchMode:
