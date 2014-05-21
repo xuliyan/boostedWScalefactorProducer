@@ -30,6 +30,7 @@ parser.add_option('--computePvalue', action='store_true', dest='computePvalue', 
 parser.add_option('--biasStudy',     action='store_true', dest='biasStudy',         default=False, help='basic option to perform bias study with our own tool')
 parser.add_option('--maximumLikelihoodFit', action='store_true', dest='maximumLikelihoodFit', default=False, help='basic option to run max Likelihood fit inside combination tool')
 parser.add_option('--generateOnly',  action='store_true', dest='generateOnly', default=False, help='basic option to run the only generation with combiner')
+parser.add_option('--makeLikelihoodScan', action='store_true', dest='makeLikelihoodScan', default=False, help='basic option to run the likelihood scan')
 
 ##### submit jobs to condor, lxbatch and hercules 
 parser.add_option('--batchMode',      action='store_true', dest='batchMode',      default=False, help='to run jobs on condor fnal')
@@ -79,6 +80,8 @@ parser.add_option('--makeBSMLimitPlotBRnew', action="store", type="int",    dest
 parser.add_option('--makeBSMLimitPlot2D',    action="store", type="int",    dest="makeBSMLimitPlot2D",     default=0)
 parser.add_option('--blindObservedLine',     action="store", type="int",    dest="blindObservedLine",      default=1)
 parser.add_option('--plotPValue',            action="store", type="int",    dest="plotPValue",             default=0)
+parser.add_option('--plotSignalStrenght',    action="store", type="int",    dest="plotSignalStrenght",     default=0)
+parser.add_option('--plotLikelihoodScan',    action="store", type="int",    dest="plotLikelihoodScan",     default=0)
 
 (options, args) = parser.parse_args()
 
@@ -480,9 +483,9 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
 
     nPoints = len(mass);
     
-    xbins     = array('f', [0.]); xbins_env = array('f', [0.]);
-    ybins_exp = array('f', [0.]); ybins_obs = array('f', [0.]);
-    ybins_1s  = array('f', [0.]); ybins_2s  = array('f', [0.]);
+    xbins     = array('f', []); xbins_env = array('f', []);
+    ybins_exp = array('f', []); ybins_obs = array('f', []);
+    ybins_1s  = array('f', []); ybins_2s  = array('f', []);
 
     setStyle();
     
@@ -504,10 +507,10 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
 	ybins_1s.append( curAsymLimits[4] );
                                                                     
     
-    curGraph_exp = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_exp);
-    curGraph_obs = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_obs);
-    curGraph_1s  = ROOT.TGraphAsymmErrors(nPoints*2+1,xbins_env,ybins_1s);
-    curGraph_2s  = ROOT.TGraphAsymmErrors(nPoints*2+1,xbins_env,ybins_2s);
+    curGraph_exp = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_exp);
+    curGraph_obs = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_obs);
+    curGraph_1s  = ROOT.TGraphAsymmErrors(nPoints*2,xbins_env,ybins_1s);
+    curGraph_2s  = ROOT.TGraphAsymmErrors(nPoints*2,xbins_env,ybins_2s);
 
 
     curGraph_obs.SetMarkerStyle(20);
@@ -613,11 +616,11 @@ def makeSMPValuePlot(SIGCH,cprime = 10,brnew = 00):
 
     nPoints = len(mass);
     
-    xbins_obs     = array('f', [0.]);
-    xbins_exp     = array('f', [0.]);
+    xbins_obs     = array('f', []);
+    xbins_exp     = array('f', []);
 
-    ybins_obs     = array('f', [0.]);
-    ybins_exp     = array('f', [0.]);
+    ybins_obs     = array('f', []);
+    ybins_exp     = array('f', []);
 
     setStyle();
     
@@ -629,8 +632,8 @@ def makeSMPValuePlot(SIGCH,cprime = 10,brnew = 00):
         ybins_obs.append(getPValueFromCard(curFile_obs,1));
         ybins_exp.append(getPValueFromCard(curFile_exp,0));
 
-    gr_obs = ROOT.TGraphAsymmErrors(nPoints+1,xbins_obs,ybins_obs);
-    gr_exp = ROOT.TGraphAsymmErrors(nPoints+1,xbins_exp,ybins_exp);
+    gr_obs = ROOT.TGraphAsymmErrors(nPoints,xbins_obs,ybins_obs);
+    gr_exp = ROOT.TGraphAsymmErrors(nPoints,xbins_exp,ybins_exp);
                     
     gr_obs.SetLineColor(1); gr_obs.SetMarkerColor(1); gr_obs.SetMarkerStyle(20); gr_obs.SetLineWidth(3);gr_obs.SetMarkerSize(1.6);
     gr_exp.SetLineColor(2); gr_exp.SetMarkerColor(2); gr_exp.SetMarkerStyle(20); gr_exp.SetLineWidth(3);gr_exp.SetMarkerSize(1.6);
@@ -696,7 +699,160 @@ def makeSMPValuePlot(SIGCH,cprime = 10,brnew = 00):
     os.system("mkdir -p %s/limitFigs/"%(os.getcwd()));
     can.SaveAs("limitFigs/SMPvals_%s_%02d_%02d.pdf"%(options.channel,cprime,brnew),"pdf");
     can.SaveAs("limitFigs/SMPvals_%s_%02d_%02d.png"%(options.channel,cprime,brnew),"png");
+
+####################################
+#### Make Signal Strenght Plots ####  
+####################################  
+
+def makeSignalStrenghtPlot(SIGCH,cprime = 10,brnew = 00):
+
+    nPoints = len(mass);
+    
+    xbins_mu         = array('f', []);
+    xbins_mu_err_up  = array('f', []);
+    xbins_mu_err_dn  = array('f', []);
+    ybins_mu         = array('f', []);
+    ybins_mu_err_up  = array('f', []);
+    ybins_mu_err_dn  = array('f', []);
+
+    setStyle();
+    
+    for i in range(len(mass)):
+
+     curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.MaxLikelihoodFit.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+
+     f = ROOT.TFile(curFile);
+     t = f.Get("limit");
+     entries = t.GetEntries();
+
+     mu = 0; mu_err_up = 0 ; mu_err_dn = 0 ; effect_entry = 0 ;
+     mu_temp = 0 ;  
+     for ientry in range(t.GetEntries()):
+       t.GetEntry(ientry);
+       if t.quantileExpected == 0.5 : mu += t.limit ;  effect_entry += 1; mu_temp = t.limit ; continue ; 
+       if t.quantileExpected > 0.15 and t.quantileExpected < 0.17 : mu_err_dn += abs(t.limit-mu_temp) ;  continue ;
+       if t.quantileExpected > 0.83 and t.quantileExpected < 0.85 : mu_err_up += abs(t.limit-mu_temp) ;  continue ;
+                         
+     mu = mu/effect_entry;
+     mu_err_dn = mu_err_dn/effect_entry;
+     mu_err_up = mu_err_up/effect_entry;
+
+     xbins_mu.append(mass[i]); 
+     xbins_mu_err_up.append(0.); 
+     xbins_mu_err_dn.append(0.); 
+
+     ybins_mu.append(mu);
+     ybins_mu_err_up.append(mu_err_up);
+     ybins_mu_err_dn.append(mu_err_dn);
+
+    gr_mu = ROOT.TGraphAsymmErrors(nPoints,xbins_mu,ybins_mu,xbins_mu_err_dn,xbins_mu_err_up,ybins_mu_err_dn,ybins_mu_err_up);
                     
+    gr_mu.SetLineColor(1); gr_mu.SetMarkerColor(1); gr_mu.SetMarkerStyle(20); gr_mu.SetLineWidth(3);gr_mu.SetMarkerSize(1.6);
+
+    oneSLine0 = ROOT.TF1("oneSLine","0",mass[0]-50,mass[len(mass)-1]+50);
+    oneSLine0.SetLineColor(ROOT.kRed); oneSLine0.SetLineWidth(2);
+    oneSLine1 = ROOT.TF1("oneSLine","1",mass[0]-50,mass[len(mass)-1]+50);
+    oneSLine1.SetLineColor(ROOT.kRed); oneSLine1.SetLineWidth(2); oneSLine1.SetLineStyle(2);
+    oneSLine2 = ROOT.TF1("oneSLine","2",mass[0]-50,mass[len(mass)-1]+50);
+    oneSLine2.SetLineColor(ROOT.kRed); oneSLine2.SetLineWidth(2); oneSLine2.SetLineStyle(2);
+    oneSLine3 = ROOT.TF1("oneSLine","3",mass[0]-50,mass[len(mass)-1]+50);
+    oneSLine3.SetLineColor(ROOT.kRed); oneSLine3.SetLineWidth(2); oneSLine3.SetLineStyle(2);
+    
+    banner = TLatex(0.32,0.955,("CMS Preliminary, 19.3 fb^{-1} at #sqrt{s}=8TeV"));
+    banner.SetNDC(); banner.SetTextSize(0.035);
+
+    ban1s = TLatex(950,1.,("#mu SM"));
+    ban1s.SetTextSize(0.028); ban1s.SetTextColor(1)
+
+    leg2 = ROOT.TLegend(0.25,0.2,0.6,0.35);
+    leg2.SetFillStyle(0);
+    leg2.SetBorderSize(1);
+    leg2.SetTextFont(42);
+    leg2.SetTextSize(0.028);
+    
+    if options.jetBin == "":
+     leg2.AddEntry( gr_mu, "signal strenght %s "%options.channel, "pl" );
+    else:
+     leg2.AddEntry( gr_mu, "signal strenght, VBF e+#mu", "pl" );
+
+
+    can = ROOT.TCanvas("can","can",600,650);
+    hrl = can.DrawFrame(mass[0]-50,-5,mass[len(mass)-1]+50,5);
+    hrl.GetYaxis().SetTitle("modified signal strenght");
+    hrl.GetXaxis().SetTitle("m_{H} (GeV)");
+    can.SetGrid();
+    gr_mu.Draw("P");
+    oneSLine0.Draw("same");
+    oneSLine1.Draw("same");
+    oneSLine2.Draw("same");
+    oneSLine3.Draw("same");
+    banner.Draw();
+    leg2.Draw();
+
+    os.system("mkdir -p %s/limitFigs/"%(os.getcwd()));
+    can.SaveAs("limitFigs/signal_strenght_%s%s_%02d_%02d.pdf"%(options.channel,SIGCH,cprime,brnew),"pdf");
+    can.SaveAs("limitFigs/signal_strenght_%s%s_%02d_%02d.png"%(options.channel,SIGCH,cprime,brnew),"png");
+
+#################################
+### make likelihood scan plot ###
+#################################    
+
+def makeLikelihoodScanPlot(SIGCH,cprime,brnew):
+
+    nPoints = len(mass);
+    
+    setStyle();
+
+    banner = TLatex(0.32,0.955,("CMS Preliminary, 19.3 fb^{-1} at #sqrt{s}=8TeV"));
+    banner.SetNDC(); banner.SetTextSize(0.035);
+
+    leg2 = ROOT.TLegend(0.55,0.65,0.8,0.85);
+    leg2.SetFillStyle(0);
+    leg2.SetBorderSize(1);
+    leg2.SetTextFont(42);
+    leg2.SetTextSize(0.028);
+    
+
+    for i in range(len(mass)):
+
+	curFile = "higgsCombinehwwlvj_LikelihoodScan_ggH%03d_%s%s_%02d_%02d_unbin.MultiDimFit.mH%02d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+        f = ROOT.TFile(curFile);
+        t = f.Get("limit");
+        
+        xbins_mu = array('f',[]); 
+        ybins_mu = array('f',[]); 
+
+        for ientry in range(t.GetEntries()):
+         if ientry == 0 : continue ;   
+         t.GetEntry(ientry);   
+         xbins_mu.append(t.r); 
+         ybins_mu.append(2*t.deltaNLL); 
+
+        gr_mu = ROOT.TGraph(t.GetEntries()-1,xbins_mu,ybins_mu);
+        gr_mu.Sort();
+                                    
+        gr_mu.SetLineWidth(2);
+        gr_mu.SetLineColor(2);
+        gr_mu.SetMarkerStyle(20);
+
+        if options.jetBin == "":
+         leg2.AddEntry(gr_mu, "#mu Likelihood scan %s "%options.channel, "pl" );
+        else:
+         leg2.AddEntry(gr_mu, "#mu Likelihood scan, VBF e+#mu", "pl" );
+
+        can = ROOT.TCanvas("can_%d"%(mass[i]),"can_%d"%(mass[i]),600,650);
+        gr_mu.GetYaxis().SetTitle("-2#Delta ln(L)");
+        gr_mu.GetXaxis().SetTitle("signal strenght");
+        can.SetGrid();
+        gr_mu.Draw("AC");
+        banner.Draw();
+        leg2.Draw();
+
+        os.system("mkdir -p %s/limitFigs/"%(os.getcwd()));
+        can.SaveAs("limitFigs/LikelihoodScan_%03d_%s%s_%02d_%02d.pdf"%(mass[i],options.channel,SIGCH,cprime,brnew),"pdf");
+        can.SaveAs("limitFigs/LikelihoodScan_%03d_%s%s_%02d_%02d.png"%(mass[i],options.channel,SIGCH,cprime,brnew),"png");
+        leg2.Clear();
+    
                                            
 ##############################################
 ### Make the BSM Limit plot vs mass and c' ###
@@ -742,9 +898,9 @@ def makeBSMLimitPlotMass(SIGCH):
     
     for j in range(len(cprime)):
 
-        xbins           = array('f', [0.]); ybins_exp       = array('f', [0.]);
-        ybins_obs       = array('f', [0.]); ybins_csXbr_exp = array('f', [0.]);
-        ybins_csXbr_obs = array('f', [0.]); ybins_csXbr_th  = array('f', [0.]);
+        xbins           = array('f', []); ybins_exp       = array('f', []);
+        ybins_obs       = array('f', []); ybins_csXbr_exp = array('f', []);
+        ybins_csXbr_obs = array('f', []); ybins_csXbr_th  = array('f', []);
 
         for i in range(len(mass)):
             curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime[j],brnew,mass[i]);
@@ -764,8 +920,8 @@ def makeBSMLimitPlotMass(SIGCH):
             if gridMaxSig < cscur:
                 gridMaxSig = cscur;
 
-        curGraph_exp = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_exp);
-        curGraph_obs = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_obs);
+        curGraph_exp = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_exp);
+        curGraph_obs = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_obs);
         curGraph_obs.SetMarkerStyle(20);
         curGraph_obs.SetLineWidth(3);
         curGraph_obs.SetLineStyle(1);
@@ -778,9 +934,9 @@ def makeBSMLimitPlotMass(SIGCH):
         curGraph_exp.SetMarkerStyle(24);
         curGraph_exp.SetMarkerColor(ROOT.kBlack);
 
-        curGraph_csXbr_exp = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_csXbr_exp);
-        curGraph_csXbr_obs = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_csXbr_obs);
-        curGraph_csXbr_th  = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_csXbr_th);
+        curGraph_csXbr_exp = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_csXbr_exp);
+        curGraph_csXbr_obs = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_csXbr_obs);
+        curGraph_csXbr_th  = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_csXbr_th);
         curGraph_csXbr_exp.SetLineStyle(10);
         curGraph_csXbr_exp.SetLineWidth(2);
         curGraph_csXbr_obs.SetLineWidth(2);
@@ -973,12 +1129,12 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
 
     for j in range(len(cprime)):
 
-        xbins           = array('f', [0.]);
-        ybins_exp       = array('f', [0.]);
-        ybins_obs       = array('f', [0.]);
-        ybins_csXbr_exp = array('f', [0.]);
-        ybins_csXbr_obs = array('f', [0.]);
-        ybins_csXbr_th  = array('f', [0.]);
+        xbins           = array('f', []);
+        ybins_exp       = array('f', []);
+        ybins_obs       = array('f', []);
+        ybins_csXbr_exp = array('f', []);
+        ybins_csXbr_obs = array('f', []);
+        ybins_csXbr_th  = array('f', []);
 
         for i in range(len(BRnew)):
             curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass,options.channel,SIGCH,cprime[j],BRnew[i],mass);
@@ -994,8 +1150,8 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
             cscur = ( curAsymLimits[3]*massXS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]] );
             if gridMaxSig < cscur: gridMaxSig = cscur;
 
-        curGraph_exp = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_exp);
-        curGraph_obs = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_obs);
+        curGraph_exp = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_exp);
+        curGraph_obs = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_obs);
         curGraph_obs.SetMarkerStyle(20);
         curGraph_obs.SetLineWidth(3);
         curGraph_obs.SetLineStyle(1);
@@ -1008,9 +1164,9 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
         curGraph_exp.SetMarkerStyle(24);
         curGraph_exp.SetMarkerColor(ROOT.kBlack);
 
-        curGraph_csXbr_exp = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_csXbr_exp);
-        curGraph_csXbr_obs = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_csXbr_obs);
-        curGraph_csXbr_th  = ROOT.TGraphAsymmErrors(nPoints+1,xbins,ybins_csXbr_th);
+        curGraph_csXbr_exp = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_csXbr_exp);
+        curGraph_csXbr_obs = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_csXbr_obs);
+        curGraph_csXbr_th  = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_csXbr_th);
         curGraph_obs.SetMarkerStyle(20);
         curGraph_obs.SetLineWidth(3);
         curGraph_obs.SetLineStyle(1);
@@ -1802,10 +1958,10 @@ if __name__ == '__main__':
                        #################################################
                         
                        if options.nToys == 0 and options.crossedToys == 0 : 
-                        runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveWithUncertainties --saveToys -s -1 -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -t %d --expectSignal=%d "%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts,options.nToys,options.injectSingalStrenght);                     
+                        runCmmd =  "combine -M MaxLikelihoodFit --minimizerAlgo Minuit2 --minimizerStrategy 2 --rMin %d --rMax %d --saveNormalizations --saveWithUncertainties  -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2"%(rMin,rMax,mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);                     
                         print "runCmmd ",runCmmd;
                         if options.batchMode:
-                           fn = "combineScript_%s_%03d%s_%02d_%02d_iToy%d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k],iToy);
+                           fn = "combineScript_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
                            submitBatchJobCombine( runCmmd, fn, mass[i], cprime[j], BRnew[k] );
                         else:   
                          os.system(runCmmd);
@@ -1880,7 +2036,7 @@ if __name__ == '__main__':
                     #### Asymptotic Limit part  ###
                     ###############################
                       
-                    elif options.systematics == 0 and not options.computePvalue == 1:
+                    elif options.systematics == 0 and not options.computePvalue == 1 and not options.makeLikelihoodScan == 1:
                        runCmmd = "combine -M Asymptotic --minimizerAlgo Minuit2 --minosAlgo stepping -n hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2 -S 0"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
                        print "runCmmd ",runCmmd ;
 
@@ -1892,7 +2048,7 @@ if __name__ == '__main__':
                         os.system(runCmmd);
 
 
-                    elif not options.computePvalue == 1:
+                    elif not options.computePvalue == 1 and not options.makeLikelihoodScan == 1:
 
                        #############################################
                        ###### run Asymptotic on the final card ##### 
@@ -1925,7 +2081,7 @@ if __name__ == '__main__':
                           os.system(runCmmd);
                            
                       
-                    elif options.computePvalue == 1: 
+                    elif options.computePvalue == 1 and not options.makeLikelihoodScan == 1: 
 
                        ##################################################
                        ###### run the observed and expected pvalue  ##### 
@@ -1947,6 +2103,17 @@ if __name__ == '__main__':
                          if options.batchMode:
                            fn = "combineScript_ProfileLikelihood_exp_%s_%03d%s_%02d_%02d_%d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k],iToy);
                            submitBatchJobCombine(runCmmd, fn, mass[i], cprime[j], BRnew[k]);
+                         else:
+                          os.system(runCmmd);
+
+                    elif options.makeLikelihoodScan == 1:
+                        
+                         runCmmd = "combine -M MultiDimFit -n hwwlvj_LikelihoodScan_ggH%03d_%s%s_%02d_%02d_unbin -m %03d -d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt  --algo=grid --points=150 --setPhysicsModelParameterRanges r=-1,5 %s"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
+                         print "runCmmd ",runCmmd;
+ 
+                         if options.batchMode:
+                          fn = "combineScript_LikelihoodScan_%s_%03d%s_%02d_%02d"%(options.channel,mass[i],SIGCH,cprime[j],BRnew[k]);
+                          submitBatchJobCombine(runCmmd, fn, mass[i], cprime[j], BRnew[k]);
                          else:
                           os.system(runCmmd);
                                                                                                                                
@@ -1993,8 +2160,7 @@ if __name__ == '__main__':
     if options.plotLimits:
 
       if options.makeSMLimitPlot == 1:
-          #makeSMLimitPlot(SIGCH,10,0);
-          if options.plotPValue == 1: makeSMPValuePlot(SIGCH);
+          makeSMLimitPlot(SIGCH,10,0);
 
           #makeSMLimitPlot(SIGCH,01,00);
           #makeSMLimitPlot(SIGCH,01,01);
@@ -2034,41 +2200,42 @@ if __name__ == '__main__':
           #makeSMLimitPlot(SIGCH,10,05);
 
           if options.plotPValue == 1:
-              makeSMPValuePlot(SIGCH,10,01);
-              makeSMPValuePlot(SIGCH,10,02);
-              makeSMPValuePlot(SIGCH,10,03);
-              makeSMPValuePlot(SIGCH,10,04);
-              makeSMPValuePlot(SIGCH,10,05);
-              makeSMPValuePlot(SIGCH,01,00);
-              makeSMPValuePlot(SIGCH,01,01);
-              makeSMPValuePlot(SIGCH,01,02);
-              makeSMPValuePlot(SIGCH,01,03);
-              makeSMPValuePlot(SIGCH,01,04);
-              makeSMPValuePlot(SIGCH,01,05);
-              makeSMPValuePlot(SIGCH,02,00);
-              makeSMPValuePlot(SIGCH,02,01);
-              makeSMPValuePlot(SIGCH,02,02);
-              makeSMPValuePlot(SIGCH,02,03);
-              makeSMPValuePlot(SIGCH,02,04);
-              makeSMPValuePlot(SIGCH,02,05);
-              makeSMPValuePlot(SIGCH,03,00);
-              makeSMPValuePlot(SIGCH,03,01);
-              makeSMPValuePlot(SIGCH,03,02);
-              makeSMPValuePlot(SIGCH,03,03);
-              makeSMPValuePlot(SIGCH,03,04);
-              makeSMPValuePlot(SIGCH,03,05);
-              makeSMPValuePlot(SIGCH,05,00);
-              makeSMPValuePlot(SIGCH,05,01);
-              makeSMPValuePlot(SIGCH,05,02);
-              makeSMPValuePlot(SIGCH,05,03);
-              makeSMPValuePlot(SIGCH,05,04);
-              makeSMPValuePlot(SIGCH,05,05);
-              makeSMPValuePlot(SIGCH,07,00);
-              makeSMPValuePlot(SIGCH,07,01);
-              makeSMPValuePlot(SIGCH,07,02);
-              makeSMPValuePlot(SIGCH,07,03);
-              makeSMPValuePlot(SIGCH,07,04);
-              makeSMPValuePlot(SIGCH,07,05);
+               makeSMPValuePlot(SIGCH);
+#              makeSMPValuePlot(SIGCH,10,01);
+#              makeSMPValuePlot(SIGCH,10,02);
+#              makeSMPValuePlot(SIGCH,10,03);
+#              makeSMPValuePlot(SIGCH,10,04);
+#              makeSMPValuePlot(SIGCH,10,05);
+#              makeSMPValuePlot(SIGCH,01,00);
+#              makeSMPValuePlot(SIGCH,01,01);
+#              makeSMPValuePlot(SIGCH,01,02);
+#              makeSMPValuePlot(SIGCH,01,03);
+#              makeSMPValuePlot(SIGCH,01,04);
+#              makeSMPValuePlot(SIGCH,01,05);
+#              makeSMPValuePlot(SIGCH,02,00);
+#              makeSMPValuePlot(SIGCH,02,01);
+#              makeSMPValuePlot(SIGCH,02,02);
+#              makeSMPValuePlot(SIGCH,02,03);
+#              makeSMPValuePlot(SIGCH,02,04);
+#              makeSMPValuePlot(SIGCH,02,05);
+#              makeSMPValuePlot(SIGCH,03,00);
+#              makeSMPValuePlot(SIGCH,03,01);
+#              makeSMPValuePlot(SIGCH,03,02);
+#              makeSMPValuePlot(SIGCH,03,03);
+#              makeSMPValuePlot(SIGCH,03,04);
+#              makeSMPValuePlot(SIGCH,03,05);
+#              makeSMPValuePlot(SIGCH,05,00);
+#              makeSMPValuePlot(SIGCH,05,01);
+#              makeSMPValuePlot(SIGCH,05,02);
+#              makeSMPValuePlot(SIGCH,05,03);
+#              makeSMPValuePlot(SIGCH,05,04);
+#              makeSMPValuePlot(SIGCH,05,05);
+#              makeSMPValuePlot(SIGCH,07,00);
+#              makeSMPValuePlot(SIGCH,07,01);
+#              makeSMPValuePlot(SIGCH,07,02);
+#              makeSMPValuePlot(SIGCH,07,03);
+#              makeSMPValuePlot(SIGCH,07,04);
+#              makeSMPValuePlot(SIGCH,07,05);
 
       if options.makeBSMLimitPlotMass == 1:
           makeBSMLimitPlotMass(SIGCH);
@@ -2094,3 +2261,10 @@ if __name__ == '__main__':
           makeBSMLimitPlot2DBRnew(SIGCH,0.3);
           makeBSMLimitPlot2DBRnew(SIGCH,0.4);
           makeBSMLimitPlot2DBRnew(SIGCH,0.5);
+
+      if options.plotSignalStrenght == 1:
+          makeSignalStrenghtPlot(SIGCH,10,00);
+
+      if options.plotLikelihoodScan == 1:
+          makeLikelihoodScanPlot(SIGCH,10,00);
+          
