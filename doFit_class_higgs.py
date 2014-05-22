@@ -101,7 +101,7 @@ class doFit_wj_and_wlvj:
         self.mlvj_shape["WJets1"]  = fit_model;
         self.mlvj_shape["WJets01"] = fit_model_alter;
         self.mlvj_shape["ggH"]     = "CB_v1";
-        self.mlvj_shape["vbfH"]    = "CB_v1";
+        self.mlvj_shape["vbfH"]    = "SCB_Exp_v1";
 
         self.tmpFile = TFile("tmp2.root","RECREATE");
         self.tmpFile.cd();
@@ -1152,8 +1152,6 @@ class doFit_wj_and_wlvj:
              if TString(label).Contains("ggH1000"):
                 tmp_event_weight = tmp_event_weight*tmp_interference_weight_H1000
                 tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H1000
-
-                print label;
 
              if TString(label).Contains("vbfH600"):
                 intWeight=getIntWght("file_for_interpolation.root", 600, mass_WW_gen, options.cprime/10., options.BRnew/10.)
@@ -2881,20 +2879,20 @@ self.channel));
         self.get_mj_and_mlvj_dataset(self.file_vbfH,"_%s"%(self.vbfhiggs_sample));
 
         if not options.skipJetSystematics:
-         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jes_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jes_up"%(self.vbfhiggs_sample),"_signal_region","SCB_Exp_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
          self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jes_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jes_dn"%(self.vbfhiggs_sample),"_signal_region","SCB_Exp_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
          self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jer"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jer"%(self.vbfhiggs_sample),"_signal_region","SCB_Exp_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
          self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jer_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jer_up"%(self.vbfhiggs_sample),"_signal_region","SCB_Exp_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
          self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jer_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_jer_dn"%(self.vbfhiggs_sample),"_signal_region","SCB_Exp_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
          self.workspace4fit_.writeToFile(self.tmpFile.GetName());
 
-         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_int_up"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_int_up"%(self.vbfhiggs_sample),"_signal_region","SCB_Exp_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
          self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_int_dn"%(self.vbfhiggs_sample),"_signal_region","CB_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));      
+         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%smassvbf_int_dn"%(self.vbfhiggs_sample),"_signal_region","SCB_Exp_v1",self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));      
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region",self.mlvj_shape["vbfH"],self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
@@ -3236,7 +3234,7 @@ self.channel));
     def fit_AllSamples_Mj_and_Mlvj(self):
         print "################### fit_AllSamples_Mj_and_Mlvj #####################"
         self.fit_Signal();
-     #   raw_input("FERMAAAA");
+#        raw_input("FERMAAAA");
         self.fit_STop();
         self.fit_VV();
         if options.jetBin == "_2jet": self.fit_WW_EWK();        
