@@ -89,11 +89,11 @@ struct SystematicUncertaintyHiggs_01jetBin{
                                   const double mean_signal_uncertainty_jet_scale_ggH_900  = 0.013;
                                   const double mean_signal_uncertainty_jet_scale_ggH_1000 = 0.013;
 
-                                  const double mean_signal_uncertainty_jet_scale_vbfH_600  = 0.013;
-                                  const double mean_signal_uncertainty_jet_scale_vbfH_700  = 0.013;
+                                  const double mean_signal_uncertainty_jet_scale_vbfH_600  = 0.011;
+                                  const double mean_signal_uncertainty_jet_scale_vbfH_700  = 0.009;
                                   const double mean_signal_uncertainty_jet_scale_vbfH_800  = 0.013;
-                                  const double mean_signal_uncertainty_jet_scale_vbfH_900  = 0.013;
-                                  const double mean_signal_uncertainty_jet_scale_vbfH_1000 = 0.013;
+                                  const double mean_signal_uncertainty_jet_scale_vbfH_900  = 0.012;
+                                  const double mean_signal_uncertainty_jet_scale_vbfH_1000 = 0.001;
 
                                   const double mean_signal_uncertainty_jet_res_ggH_600  = 0.005;
                                   const double mean_signal_uncertainty_jet_res_ggH_700  = 0.005;
@@ -101,11 +101,11 @@ struct SystematicUncertaintyHiggs_01jetBin{
                                   const double mean_signal_uncertainty_jet_res_ggH_900  = 0.005;
                                   const double mean_signal_uncertainty_jet_res_ggH_1000 = 0.005;
 
-                                  const double mean_signal_uncertainty_jet_res_vbfH_600  = 0.005;
+                                  const double mean_signal_uncertainty_jet_res_vbfH_600  = 0.006;
                                   const double mean_signal_uncertainty_jet_res_vbfH_700  = 0.005;
-                                  const double mean_signal_uncertainty_jet_res_vbfH_800  = 0.005;
-                                  const double mean_signal_uncertainty_jet_res_vbfH_900  = 0.005;
-                                  const double mean_signal_uncertainty_jet_res_vbfH_1000 = 0.005;
+                                  const double mean_signal_uncertainty_jet_res_vbfH_800  = 0.006;
+                                  const double mean_signal_uncertainty_jet_res_vbfH_900  = 0.012;
+                                  const double mean_signal_uncertainty_jet_res_vbfH_1000 = 0.014;
 
 
                                   /////// effect on the sigma 
@@ -115,11 +115,11 @@ struct SystematicUncertaintyHiggs_01jetBin{
                                   const double sigma_signal_uncertainty_jet_scale_ggH_900  = 0.030;
                                   const double sigma_signal_uncertainty_jet_scale_ggH_1000 = 0.030;
 
-                                  const double sigma_signal_uncertainty_jet_scale_vbfH_600  = 0.030;
-                                  const double sigma_signal_uncertainty_jet_scale_vbfH_700  = 0.030;
+                                  const double sigma_signal_uncertainty_jet_scale_vbfH_600  = 0.051;
+                                  const double sigma_signal_uncertainty_jet_scale_vbfH_700  = 0.022;
                                   const double sigma_signal_uncertainty_jet_scale_vbfH_800  = 0.030;
-                                  const double sigma_signal_uncertainty_jet_scale_vbfH_900  = 0.030;
-                                  const double sigma_signal_uncertainty_jet_scale_vbfH_1000 = 0.030;
+                                  const double sigma_signal_uncertainty_jet_scale_vbfH_900  = 0.057;
+                                  const double sigma_signal_uncertainty_jet_scale_vbfH_1000 = 0.015;
 
                                   const double sigma_signal_uncertainty_jet_res_ggH_600  = 0.050;
                                   const double sigma_signal_uncertainty_jet_res_ggH_700  = 0.050;
@@ -127,11 +127,11 @@ struct SystematicUncertaintyHiggs_01jetBin{
                                   const double sigma_signal_uncertainty_jet_res_ggH_900  = 0.050;
                                   const double sigma_signal_uncertainty_jet_res_ggH_1000 = 0.050;
 
-                                  const double sigma_signal_uncertainty_jet_res_vbfH_600  = 0.050;
-                                  const double sigma_signal_uncertainty_jet_res_vbfH_700  = 0.050;
-                                  const double sigma_signal_uncertainty_jet_res_vbfH_800  = 0.050;
-                                  const double sigma_signal_uncertainty_jet_res_vbfH_900  = 0.050;
-                                  const double sigma_signal_uncertainty_jet_res_vbfH_1000 = 0.050;
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_600  = 0.145;
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_700  = 0.101;
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_800  = 0.096;
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_900  = 0.099;
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_1000 = 0.056;
 
                                   const double mean_mj_shift = 1.4 ;
                                   const double sigma_mj_smear = 1.16 ;
@@ -147,11 +147,11 @@ struct SystematicUncertaintyHiggs_2jetBin{
                                   const double mean_signal_uncertainty_jet_scale_ggH_900  = 0.023;
                                   const double mean_signal_uncertainty_jet_scale_ggH_1000 = 0.020;
 
-                                  const double mean_signal_uncertainty_jet_scale_vbfH_600  = 0.043;
-                                  const double mean_signal_uncertainty_jet_scale_vbfH_700  = 0.039;
-                                  const double mean_signal_uncertainty_jet_scale_vbfH_800  = 0.036;
-                                  const double mean_signal_uncertainty_jet_scale_vbfH_900  = 0.032;
-                                  const double mean_signal_uncertainty_jet_scale_vbfH_1000 = 0.027;
+                                  const double mean_signal_uncertainty_jet_scale_vbfH_600  = 0.045;
+                                  const double mean_signal_uncertainty_jet_scale_vbfH_700  = 0.033;
+                                  const double mean_signal_uncertainty_jet_scale_vbfH_800  = 0.016;
+                                  const double mean_signal_uncertainty_jet_scale_vbfH_900  = 0.012;
+                                  const double mean_signal_uncertainty_jet_scale_vbfH_1000 = 0.030;
 
                                   const double mean_signal_uncertainty_jet_res_ggH_600  = 0.006;
                                   const double mean_signal_uncertainty_jet_res_ggH_700  = 0.004;
@@ -159,11 +159,11 @@ struct SystematicUncertaintyHiggs_2jetBin{
                                   const double mean_signal_uncertainty_jet_res_ggH_900  = 0.007;
                                   const double mean_signal_uncertainty_jet_res_ggH_1000 = 0.002;
 
-                                  const double mean_signal_uncertainty_jet_res_vbfH_600  = 0.007;
-                                  const double mean_signal_uncertainty_jet_res_vbfH_700  = 0.003;
-                                  const double mean_signal_uncertainty_jet_res_vbfH_800  = 0.006;
-                                  const double mean_signal_uncertainty_jet_res_vbfH_900  = 0.003;
-                                  const double mean_signal_uncertainty_jet_res_vbfH_1000 = 0.003;
+                                  const double mean_signal_uncertainty_jet_res_vbfH_600  = 0.019;
+                                  const double mean_signal_uncertainty_jet_res_vbfH_700  = 0.012;
+                                  const double mean_signal_uncertainty_jet_res_vbfH_800  = 0.031;
+                                  const double mean_signal_uncertainty_jet_res_vbfH_900  = 0.036;
+                                  const double mean_signal_uncertainty_jet_res_vbfH_1000 = 0.046;
 
 
                                   /////// effect on the sigma 
@@ -173,11 +173,11 @@ struct SystematicUncertaintyHiggs_2jetBin{
                                   const double sigma_signal_uncertainty_jet_scale_ggH_900  = 0.023;
                                   const double sigma_signal_uncertainty_jet_scale_ggH_1000 = 0.017;
 
-                                  const double sigma_signal_uncertainty_jet_scale_vbfH_600  = 0.080;
-                                  const double sigma_signal_uncertainty_jet_scale_vbfH_700  = 0.030;
-                                  const double sigma_signal_uncertainty_jet_scale_vbfH_800  = 0.040;
-                                  const double sigma_signal_uncertainty_jet_scale_vbfH_900  = 0.016;
-                                  const double sigma_signal_uncertainty_jet_scale_vbfH_1000 = 0.015;
+                                  const double sigma_signal_uncertainty_jet_scale_vbfH_600  = 0.036;
+                                  const double sigma_signal_uncertainty_jet_scale_vbfH_700  = 0.049;
+                                  const double sigma_signal_uncertainty_jet_scale_vbfH_800  = 0.085;
+                                  const double sigma_signal_uncertainty_jet_scale_vbfH_900  = 0.123;
+                                  const double sigma_signal_uncertainty_jet_scale_vbfH_1000 = 0.086;
 
                                   const double sigma_signal_uncertainty_jet_res_ggH_600  = 0.153;
                                   const double sigma_signal_uncertainty_jet_res_ggH_700  = 0.163;
@@ -185,11 +185,11 @@ struct SystematicUncertaintyHiggs_2jetBin{
                                   const double sigma_signal_uncertainty_jet_res_ggH_900  = 0.077;
                                   const double sigma_signal_uncertainty_jet_res_ggH_1000 = 0.057;
 
-                                  const double sigma_signal_uncertainty_jet_res_vbfH_600  = 0.215;
-                                  const double sigma_signal_uncertainty_jet_res_vbfH_700  = 0.195;
-                                  const double sigma_signal_uncertainty_jet_res_vbfH_800  = 0.158;
-                                  const double sigma_signal_uncertainty_jet_res_vbfH_900  = 0.098;
-                                  const double sigma_signal_uncertainty_jet_res_vbfH_1000 = 0.064;
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_600  = 0.272;
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_700  = 0.309;
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_800  = 0.263;
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_900  = 0.191;
+                                  const double sigma_signal_uncertainty_jet_res_vbfH_1000 = 0.170;
 
                                   const double mean_mj_shift = 1.4 ;
                                   const double sigma_mj_smear = 1.16 ;
