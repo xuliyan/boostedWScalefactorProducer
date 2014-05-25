@@ -831,7 +831,7 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
             RooRealVar* rrv_alpha2_SCB = new RooRealVar(("rrv_alpha2_SCB"+label+"_"+channel+spectrum).c_str(),("rrv_alpha2_SCB"+label+"_"+channel+spectrum).c_str(),2,0.5,4);
             RooRealVar* rrv_n1_SCB     = new RooRealVar(("rrv_n1_SCB"+label+"_"+channel+spectrum).c_str(),("rrv_n1_SCB"+label+"_"+channel+spectrum).c_str(),2,0.,4);
             RooRealVar* rrv_n2_SCB     = new RooRealVar(("rrv_n2_SCB"+label+"_"+channel+spectrum).c_str(),("rrv_n2_SCB"+label+"_"+channel+spectrum).c_str(),2,0.,4);
-            RooRealVar* frac           = new RooRealVar(("rrv_frac_SSCB"+label+"_"+channel+spectrum).c_str(),("rrv_frac_SSCB"+label+"_"+channel+spectrum).c_str(),0.5);
+            RooRealVar* rrv_frac_SSCB           = new RooRealVar(("rrv_frac_SSCB"+label+"_"+channel+spectrum).c_str(),("rrv_frac_SSCB"+label+"_"+channel+spectrum).c_str(),0.5);
 
 
       // experimental systematic uncertainty
@@ -909,20 +909,20 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
      RooFormulaVar* rrv_total_sigma_SCB = new RooFormulaVar(("rrv_total_sigma_CB"+label+"_"+channel+spectrum).c_str(),"@0*(1+@1*@2)*(1+@3*@4)", RooArgList(*rrv_sigma_SCB,*rrv_sigma_scale_X1,*rrv_CMS_scale_j,*rrv_CMS_res_j,*rrv_sigma_scale_X2));        
 
 
-            RooCBShape* scb1 = new RooCBShape(("model_pdf_scb1"+label+"_"+channel+spectrum).c_str(),("model_pdf_scb1"+label+"_"+channel+spectrum).c_str(), *rrv_x,*rrv_total_mean_SCB,*rrv_total_sigma_SCB,*rrv_alpha1_SCB,*rrv_n1_SCB);
-            RooCBShape* scb2 = new  RooCBShape(("model_pdf_scb2"+label+"_"+channel+spectrum).c_str(),("model_pdf_scb2"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_total_mean_SCB,*rrv_total_sigma_SCB,*rrv_alpha2_SCB,*rrv_n2_SCB);
-            RooAddPdf* model_pdf = new  RooAddPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),RooArgList(*scb1,*scb2),RooArgList(*frac));
+            RooCBShape* model_pdf_scb1 = new RooCBShape(("model_pdf_scb1"+label+"_"+channel+spectrum).c_str(),("model_pdf_scb1"+label+"_"+channel+spectrum).c_str(), *rrv_x,*rrv_total_mean_SCB,*rrv_total_sigma_SCB,*rrv_alpha1_SCB,*rrv_n1_SCB);
+            RooCBShape* model_pdf_scb2 = new  RooCBShape(("model_pdf_scb2"+label+"_"+channel+spectrum).c_str(),("model_pdf_scb2"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_total_mean_SCB,*rrv_total_sigma_SCB,*rrv_alpha2_SCB,*rrv_n2_SCB);
+            RooAddPdf* model_pdf_SCB = new  RooAddPdf(("model_pdf_SCB"+label+"_"+channel+spectrum).c_str(),("model_pdf_SCB"+label+"_"+channel+spectrum).c_str(),RooArgList(*model_pdf_scb1,*model_pdf_scb2),RooArgList(*rrv_frac_SSCB));
 
         RooRealVar* rrv_c_Exp = new RooRealVar(("rrv_c_Exp"+label+"_"+channel+spectrum).c_str(),("rrv_c_Exp"+label+"_"+channel+spectrum).c_str(),-0.00229,-0.010,-0.001);
 
         RooExponential* model_Exp = new RooExponential(("model_Exp"+label+"_"+channel+spectrum).c_str(),("model_Exp"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_c_Exp);
 
-        RooRealVar* rrv_frac2     = new RooRealVar(("rrv_frac"+label+"_"+channel+spectrum).c_str(),("rrv_frac"+label+"_"+channel+spectrum).c_str(),0.05,0,1);
+        RooRealVar* rrv_frac2     = new RooRealVar(("rrv_frac2"+label+"_"+channel+spectrum).c_str(),("rrv_frac2"+label+"_"+channel+spectrum).c_str(),0.05,0,1);
 	//	rrv_frac->setConstant(kTRUE);
 
-        RooAddPdf* model_pdf2  = new RooAddPdf(("model_pdf2"+label+"_"+channel+spectrum).c_str(),("model_pdf2"+label+"_"+channel+spectrum).c_str(), RooArgList(*model_Exp,*model_pdf), RooArgList(*rrv_frac2));
+        RooAddPdf* model_pdf  = new RooAddPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(), RooArgList(*model_Exp,*model_pdf_SCB), RooArgList(*rrv_frac2));
             
-            return model_pdf2 ;
+            return model_pdf ;
      }
 
      //Double Crystal ball shape (for VBF interference)
