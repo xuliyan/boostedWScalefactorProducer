@@ -1958,9 +1958,7 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
    }
 }
 
-
 //---crystal ball: for the signal -----
-
 double crystalBallLowHigh (double* x, double* par) {
   //[0] = N
   //[1] = mean
@@ -2131,11 +2129,7 @@ Double_t getIntWght(std::string wFile , double realMass, double Hmass , double c
     Double_t wInt;
     wInt = 1.;
     wInt = crystal_Icorr_qqH->Eval(Hmass);
-
-    //        SI->Close("R");
-
-	// delete crystal_Icorr_qqH;
-        delete SI;
+    delete SI;
 
    return wInt;
 

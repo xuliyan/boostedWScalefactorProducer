@@ -38,6 +38,9 @@ void change_dataset_to_histpdf(RooWorkspace*,RooRealVar*,RooDataSet*);
 
 TH1F* change_dataset_to_histogram(RooRealVar*, RooDataSet*, const std::string & = "", const int & = 1);
 
+RooAbsPdf* MakeModelTTbarControlSample(RooWorkspace* ,const std::string & ="", const std::string & = "", const std::string & = "_mj", const std::string & ="");
+
+
 //////////
 
 RooAbsPdf* get_mj_Model        (RooWorkspace*,const std::string & = "",const std::string & = "em");

@@ -41,6 +41,59 @@ RooGaussian* addConstraint(RooRealVar* rrv_x, RooRealVar* x_mean, RooRealVar* x_
 
 //////////////////
 
+// ---------------------------------------------                                                                                                                                    
+RooAbsPdf* make_Model_for_ttbar_controlsample(RooWorkspace* workspace ,const std::string & label ="", const std::string & modelName = "", const std::string & spectrum = "_mj", const std::string & channel = "em", const std::string & wtagger = "HP", const std::string & information =""){
+
+  std::cout<<" "<<std::endl;
+  std::cout<<"###################################################################################"<<std::endl;
+  std::cout<<" ## make_Model_for_ttbar_controlsample : "<<label<<" "<<modelName<<" "<<information<<" "<<std::endl;
+  std::cout<<"###################################################################################"<<std::endl;
+  std::cout<<" "<<std::endl;
+
+  RooRealVar* rrv_number_total = NULL , *eff_ttbar = NULL , rrv_number = NULL ;
+
+  if(TString(label).Contains("_ttbar_data") and not TString(label).Contains("failtau2tau1cut")){
+    rrv_number_total = new RooRealVar(("rrv_number_total_ttbar_data"+info+"_"+channel).c_str(),("rrv_number_total_ttbar_data"+info+"_"+channel).c_str(),500,0.,1e7);
+    eff_ttbar        = new RooRealVar(("eff_ttbar_data"+info+"_"+channel).c_str(),("eff_ttbar_data"+info+"_"+channel).c_str(),0.7,0.3,0.9);
+    rrv_number       = new RooFormulaVar(("rrv_number"+label+"_"+channel+mass_spectrum).c_str(), "@0*@1", RooArgList(rrv_number_total,eff_ttbar));
+  }
+
+  else if(TString(label).Contains("_ttbar_data") and TString(label).Contains("failtau2tau1cut")){
+    rrv_number_total = workspace->var(("rrv_number_total_ttbar_data"+info+"_"+channel).c_str());
+    eff_ttbar        = workspace->var(("eff_ttbar_data"+info+"_"+channel).c_str());
+    rrv_number       = new RooFormulaVar(("rrv_number"+label+"_"+channel+mass_spectrum)._str(), "(1-@0)*@1", RooArgList(eff_ttbar,rrv_number_total));
+  }
+  else if(TString(label).Contains("_ttbar_TotalMC") and not TString(label).Contains("failtau2tau1cut")){
+    rrv_number_total = new RooRealVar(("rrv_number_total_ttbar_TotalMC"+info+"_"+channel).c_str(),("rrv_number_total_ttbar_TotalMC"+info+"_"+channel).c_str(),500,0.,1e7);
+    eff_ttbar        = new RooRealVar(("eff_ttbar_TotalMC"+info+"_"+channel).c_str(),("eff_ttbar_TotalMC"+info+"_"+channel).c_str(),0.7,0.3,0.9);
+    rrv_number       = new RooFormulaVar(("rrv_number"+label+"_"+channel+mass_spectrum).c_str(), "@0*@1", RooArgList(eff_ttbar,rrv_number_total));
+  }
+  else if(TString(label).Contains("_ttbar_TotalMC") and TString(label).Contains("failtau2tau1cut")){
+    rrv_number_total = workspace->var(("rrv_number_total_ttbar_TotalMC"+info+"_"+channel).c_str());
+    eff_ttbar        = workspace->var(("eff_ttbar_TotalMC"+info+"_"+channel).c_str());
+    rrv_number       = new RooFormulaVar(("rrv_number"+label+"_"+channel+mass_spectrum).c_str(), "(1-@0)*@1", RooArgList(eff_ttbar,rrv_number_total)) ;
+  }
+
+  rrv_number_total->Print();
+  eff_ttbar->Print();
+  rrv_number->Print();
+
+  RooArgList* constraint ;
+  RooAbsPdf* model_pdf = MakeGeneralPdf(workspace,label,modelName,spectrum,wtagger,channel,constraint,false);
+
+  std::cout<<" model Pdf :"<<std::endl;
+  model_pdf->Print();
+  std::cout<<" extended PDF :"<<std::endl;
+  RooExtendPdf* model = new RooExtendPdf(("model"+label+"_"+channel+spectrum).c_str(),("model"+label+"_"+channel+spectrum).c_str(),model_pdf,rrv_number);
+
+  workspace->import(*model);
+  std::cout<<"model"+label+"_"+channel+spectrum<<std::endl;
+  workspace->pdf(("model"+label+"_"+channel+spectrum).c_str())->Print();
+  return workspace->pdf(("model"+label+"_"+channel+spectrum).c_str());
+
+}
+
+
 //## change a dataset to a histpdf roofit object
 void change_dataset_to_histpdf(RooWorkspace* workspace,RooRealVar* x,RooDataSet* dataset){
  
