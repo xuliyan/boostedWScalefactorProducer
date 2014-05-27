@@ -224,16 +224,22 @@ RooPlot* get_pull_ws(RooRealVar* rrv_x, RooPlot* mplot_orig, TGraphAsymmErrors* 
 }
 
 // method for draw the banner
-TLatex* banner4Plot(const std::string & channel, const float & lumi, const int & iswithpull){
+TLatex* banner4Plot(const std::string & channel, const float & lumi, const int & iswithpull, const int & forPaper){
 
  std::cout<<"############### draw the banner ########################"<<std::endl;
  TString bannerName;
- if(channel=="mu") 
+ if(channel=="mu" and not forPaper) 
   bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu #nu",lumi);
- else if(channel=="el") 
+ else if(channel=="mu" and forPaper == 1)
+   bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu#nu ",lumi); 
+ else if(channel=="el" and not forPaper) 
   bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow e #nu",lumi);
- else if(channel=="em")  
+ else if(channel=="el" and forPaper == 1) 
+   bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow e#nu ",lumi); 
+ else if(channel=="em" and not forPaper)  
   bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow l #nu",lumi);
+ else if(channel=="em" and forPaper == 1) 
+   bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow l#nu ",lumi); 
  
  TLatex* banner = NULL ;
  

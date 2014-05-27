@@ -35,7 +35,7 @@ RooPlot* get_ratio(RooRealVar*, RooDataSet*, RooAbsPdf*, RooFitResult* , const i
 
 RooPlot* get_pull_ws(RooRealVar*, RooPlot*, TGraphAsymmErrors* , const std::string & = "data", const std::string & = "model_mc", const int & = 1);
 
-TLatex* banner4Plot(const std::string & = "mu", const float & = 19.5, const int & = 1);
+TLatex* banner4Plot(const std::string & = "mu", const float & = 19.5, const int & = 1, const int & = 0);
 
 TLegend* legend4Plot(RooPlot*, const int & = 0, const double & = 0, const double & = 0,  const double & = 0, const double & = 0, const int & = 1, const std::string & = "mu" );
 
