@@ -47,11 +47,11 @@ parser.add_option('--tau2tau1cut', action="store", type="float",dest="tau2tau1cu
 
 (options, args) = parser.parse_args()
 
-
 ROOT.gSystem.Load(options.inPath+"/PlotStyle/Util_cxx.so")
-ROOT.gSystem.Load(options.inPath+"/PlotStyle/Util_cxx.so")
+ROOT.gSystem.Load(options.inPath+"/PlotStyle/PlotUtils_cxx.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/PdfDiagonalizer_cc.so")
 ROOT.gSystem.Load(options.inPath+"/PDFs/HWWLVJRooPdfs_cxx.so")
+ROOT.gSystem.Load(options.inPath+"/PDFs/MakePdf_cxx.so")
 ROOT.gSystem.Load(options.inPath+"/BiasStudy/BiasUtils_cxx.so")
 ROOT.gSystem.Load(options.inPath+"/FitUtils/FitUtils_cxx.so")
 
@@ -61,7 +61,7 @@ from ROOT import MakeGeneralPdf, MakeExtendedModel, get_TTbar_mj_Model, get_STop
 
 from ROOT import setTDRStyle, get_pull, draw_canvas, draw_canvas_with_pull, legend4Plot, GetDataPoissonInterval, GetLumi, draw_error_band_ws
 
-from ROOT import fit_mj_single_MC, fit_mlvj_model_single_MC, fit_WJetsNormalization_in_Mj_signal_region, fit_mlvj_in_Mj_sideband, get_WJets_mlvj_correction_sb_lo_to_signal_region, get_mlvj_normalization_insignalregion, fit_genHMass, SystematicUncertaintyHiggs_2jetBin, SystematicUncertaintyHiggs_01jetBin
+from ROOT import fit_mj_single_MC, fit_mlvj_model_single_MC, fit_WJetsNormalization_in_Mj_signal_region, fit_mlvj_in_Mj_sideband, get_WJets_mlvj_correction_sb_lo_to_signal_region, get_mlvj_normalization_insignalregion, fit_genHMass, SystematicUncertaintyHiggs_2jetBin, SystematicUncertaintyHiggs_01jetBin, ScaleFactorTTbarControlSampleFit,DrawScaleFactorTTbarControlSample
 
 from ROOT import *
 
@@ -82,9 +82,6 @@ class doFit_wj_and_wlvj:
         print "## Constructor of the fit object doFit_wj_and_wlvj ##";
         print "#####################################################";
         print " ";
-
-        #set plots style
-        self.setTDRStyle();
 
         RooAbsPdf.defaultIntegratorConfig().setEpsRel(1e-9);
         RooAbsPdf.defaultIntegratorConfig().setEpsAbs(1e-9);
@@ -114,6 +111,19 @@ class doFit_wj_and_wlvj:
         self.mj_shape["WJets0"]              = "ErfExp";
         self.mj_shape["WJets0_fail"]         = "Exp";
         self.mj_shape["WJets0_extremefail"]  = "Exp";
+
+        self.mj_shape["bkg_data"]         = "ErfExp_ttbar";
+        self.mj_shape["bkg_data_fail"]    = "ErfExp_ttbar_failtau2tau1cut";
+        self.mj_shape["signal_data"]      = "2Gaus_ttbar" ;
+        self.mj_shape["signal_data_fail"] = "GausChebychev_ttbar_failtau2tau1cut";
+        self.mj_shape["bkg_mc"]           = "ErfExp_ttbar";
+        self.mj_shape["bkg_mc_fail"]      = "ErfExp_ttbar_failtau2tau1cut";
+        self.mj_shape["signal_mc"]        = "2Gaus_ttbar" ;
+        self.mj_shape["signal_mc_fail"]   = "GausChebychev_ttbar_failtau2tau1cut";
+        self.mj_shape["data_extremefail"]     = "Exp_ttbar_extremefailtau2tau1cut";
+        self.mj_shape["data_bkg_extremefail"] = "Exp_bkg_extremefailtau2tau1cut";
+        self.mj_shape["mc_extremefail"]       = "Exp_ttbar_extremefailtau2tau1cut";
+        self.mj_shape["mc_bkg_extremefail"]   = "Exp_bkg_extremefailtau2tau1cut";
 
         ### Set the mj binning for plots
         self.BinWidth_mj = 5.;
@@ -589,7 +599,7 @@ class doFit_wj_and_wlvj:
         print "#################################"
         self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_data,"_data");
         self.fit_mj_TTbar_controlsample(self.file_data);
-        self.ScaleFactor_forPureWJet_TTbar_controlsample(self.file_data);
+        ScaleFactorTTbarControlSampleFit(self.workspace4fit_,self.mj_shape,self.color_palet,"",self.channel,self.wtagger_label,options.ca8_ungroomed_pt_min,options.ca8_ungroomed_pt_max);
 
       else:
 
@@ -643,7 +653,7 @@ class doFit_wj_and_wlvj:
 
           self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_data,"_data_herwig");
           self.fit_mj_TTbar_controlsample(self.file_data,"_herwig");
-          self.ScaleFactor_forPureWJet_TTbar_controlsample(self.file_data,"_herwig");
+          ScaleFactorTTbarControlSampleFit(self.workspace4fit_,self.mj_shape,self.color_palet,"",self.channel,self.wtagger_label,options.ca8_ungroomed_pt_min,options.ca8_ungroomed_pt_max);
 
 
 class doFit_wj_and_wlvj_simultaneous:
@@ -672,7 +682,7 @@ class doFit_wj_and_wlvj_simultaneous:
         sample_type.defineType("el_fail");
         rrv_weight = RooRealVar("rrv_weight","rrv_weight",0. ,10000000.) 
 
-
+        #### take the datasets 
         rdataset_data_mu_mj      = self.workspace4fit_.data("rdataset_data"+label+"_mu_mj");
         rdataset_data_el_mj      = self.workspace4fit_.data("rdataset_data"+label+"_el_mj");
         rdataset_data_mu_mj_fail = self.workspace4fit_.data("rdataset_data"+label+"_failtau2tau1cut_mu_mj"); 
@@ -680,18 +690,19 @@ class doFit_wj_and_wlvj_simultaneous:
  
         rrv_mass_j   = self.workspace4fit_.var("rrv_mass_j");
 
+        ## combined dataset fill
         combData_data = RooDataSet("combData_data"+label,"combData_data"+label,RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight),RooFit.Index(sample_type),RooFit.Import("mu_pass",rdataset_data_mu_mj),RooFit.Import("el_pass",rdataset_data_el_mj),RooFit.Import("mu_fail",rdataset_data_mu_mj_fail),RooFit.Import("el_fail",rdataset_data_el_mj_fail) );
         combData_data.Print();
 
-        rdataset_TotalMC_mu_mj = self.workspace4fit_.data("rdataset_TotalMC"+label+"_mu_mj");
-        rdataset_TotalMC_el_mj = self.workspace4fit_.data("rdataset_TotalMC"+label+"_el_mj");
+        rdataset_TotalMC_mu_mj      = self.workspace4fit_.data("rdataset_TotalMC"+label+"_mu_mj");
+        rdataset_TotalMC_el_mj      = self.workspace4fit_.data("rdataset_TotalMC"+label+"_el_mj");
         rdataset_TotalMC_mu_mj_fail = self.workspace4fit_.data("rdataset_TotalMC"+label+"_failtau2tau1cut_mu_mj"); 
         rdataset_TotalMC_el_mj_fail = self.workspace4fit_.data("rdataset_TotalMC"+label+"_failtau2tau1cut_el_mj"); 
 
         combData_TotalMC = RooDataSet("combData_TotalMC"+label,"combData_TotalMC"+label,RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight),RooFit.Index(sample_type),RooFit.Import("mu_pass",rdataset_TotalMC_mu_mj),RooFit.Import("el_pass",rdataset_TotalMC_el_mj),RooFit.Import("mu_fail",rdataset_TotalMC_mu_mj_fail),RooFit.Import("el_fail",rdataset_TotalMC_el_mj_fail) );
         combData_TotalMC.Print();
 
-        # fit data
+        # fit data --> import the pdf from the single fits and define the simultaneous total pdf
         model_data_mu      = self.workspace4fit_.pdf("model_data"+label+"_mu");
         model_data_fail_mu = self.workspace4fit_.pdf("model_data"+label+"_failtau2tau1cut_mu");
         model_data_el      = self.workspace4fit_.pdf("model_data"+label+"_el");
@@ -713,7 +724,7 @@ class doFit_wj_and_wlvj_simultaneous:
         rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_data_em));
         rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_data_em));
 
-        # fit TotalMC
+        # fit TotalMC --> define the simultaneous total pdf
         model_TotalMC_mu      = self.workspace4fit_.pdf("model_TotalMC"+label+"_mu");
         model_TotalMC_fail_mu = self.workspace4fit_.pdf("model_TotalMC"+label+"_failtau2tau1cut_mu");
         model_TotalMC_el      = self.workspace4fit_.pdf("model_TotalMC"+label+"_el");
@@ -736,12 +747,14 @@ class doFit_wj_and_wlvj_simultaneous:
         rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em));
         rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em));
 
-        self.boostedW_fitter_el.draw_ScaleFactor_forPureWJet_TTbar_controlsample(self.boostedW_fitter_el.file_data,label,0);
-        self.boostedW_fitter_mu.draw_ScaleFactor_forPureWJet_TTbar_controlsample(self.boostedW_fitter_mu.file_data,label,0);
+        ## draw the plots
+        DrawScaleFactorTTbarControlSample(self.workspace4fit_,self.color_palet,label,"mu",self.wtagger_label,options.ca8_ungroomed_pt_min,options.ca8_ungroomed_pt_max);
+        DrawScaleFactorTTbarControlSample(self.workspace4fit_,self.color_palet,label,"el",self.wtagger_label,options.ca8_ungroomed_pt_min,options.ca8_ungroomed_pt_max);
 
         rfresult_TotalMC.Print();
         rfresult_data.Print();
-         
+
+        ### take the efficienty value from the fits in both data nad mc         
         rrv_eff_MC_el   = self.workspace4fit_.var("eff_ttbar_TotalMC"+label+"_el");
         rrv_eff_MC_mu   = self.workspace4fit_.var("eff_ttbar_TotalMC"+label+"_mu");
         rrv_mean_MC_el  = self.workspace4fit_.var("rrv_mean1_gaus_ttbar_TotalMC"+label+"_el");
@@ -757,6 +770,7 @@ class doFit_wj_and_wlvj_simultaneous:
         rrv_mean_MC_el.Print()  ; rrv_mean_data_el.Print();  
         rrv_sigma_MC_el.Print() ; rrv_sigma_data_el.Print();  
 
+        ## compute the scale factors and uncertainty for HP
         pure_wtagger_sf_el = rrv_eff_data_el.getVal()/rrv_eff_MC_el.getVal(); 
         pure_wtagger_sf_mu = rrv_eff_data_mu.getVal()/rrv_eff_MC_mu.getVal(); 
         pure_wtagger_mean_shift_el    = rrv_mean_data_el.getVal()-rrv_mean_MC_el.getVal();
@@ -779,8 +793,9 @@ class doFit_wj_and_wlvj_simultaneous:
         self.boostedW_fitter_el.file_out_ttbar_control.write( "\nPure W-tagger SF of el %s     : %0.3f +/- %0.3f"%(label,pure_wtagger_sf_el, pure_wtagger_sf_el_err));
         self.boostedW_fitter_el.file_out_ttbar_control.write( "\nPure W-tagger SF of mu %s        : %0.3f +/- %0.3f"%(label,pure_wtagger_sf_mu, pure_wtagger_sf_mu_err));
         self.boostedW_fitter_el.file_out_ttbar_control.write( "\nPure W-tagger mean shift el %s    : %0.3f +/- %0.3f"%(label,pure_wtagger_mean_shift_el, pure_wtagger_mean_shift_err_el));
-        self.boostedW_fitter_el.file_out_ttbar_control.write( "\nPure W-tagger sigma enlarge el %s : %0.3f +/- %0.3f"%(label,pure_wtagger_sigma_enlarge_el, pure_wtagger_sigma_enlarge_err_el))M
+        self.boostedW_fitter_el.file_out_ttbar_control.write( "\nPure W-tagger sigma enlarge el %s : %0.3f +/- %0.3f"%(label,pure_wtagger_sigma_enlarge_el, pure_wtagger_sigma_enlarge_err_el));
 
+        ## take the extreme fail informations
         rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_el_mj = self.workspace4fit_.var("rrv_number_ttbar_TotalMC"+label+"_extremefailtau2tau1cut_el_mj");
         rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_mu_mj = self.workspace4fit_.var("rrv_number_ttbar_TotalMC"+label+"_extremefailtau2tau1cut_mu_mj");
         rrv_number_ttbar_data_extremefailtau2tau1cut_el_mj = self.workspace4fit_.var("rrv_number_ttbar_data"+label+"_extremefailtau2tau1cut_el_mj");
@@ -831,11 +846,7 @@ class doFit_wj_and_wlvj_simultaneous:
         self.boostedW_fitter_mu.file_out_ttbar_control.write("\neff_MC_mu_extremefail_error %s: %f"%(label,tmp_eff_MC_mu_extremefail_error));
         self.boostedW_fitter_mu.file_out_ttbar_control.write("\neff_data_mu_extremefail_error %s: %f"%(label,tmp_eff_data_mu_extremefail_error));
         
-        rrv_eff_MC_el.Print();
-        rrv_eff_MC_mu.Print();
-        rrv_eff_data_el.Print();
-        rrv_eff_data_mu.Print();
-
+        ## Low purity scale factors LP
         tmp_eff_MC_el_LP = 1.-rrv_eff_MC_el.getVal()-tmp_eff_MC_el_extremefail;
         tmp_eff_MC_mu_LP = 1.-rrv_eff_MC_mu.getVal()-tmp_eff_MC_mu_extremefail;
         tmp_eff_data_el_LP =1.-rrv_eff_data_el.getVal()-tmp_eff_data_el_extremefail;
@@ -912,7 +923,4 @@ if __name__ == '__main__':
     elif options.fitwtagger:
         print 'fitwtagger for %s sample'%(channel)
         control_sample(channel,options.herwig,options.ttbarMC);
- 
-        
-
-
+         
