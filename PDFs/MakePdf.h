@@ -28,17 +28,17 @@
 
 #include "HWWLVJRooPdfs.h"
 
-RooAbsPdf* MakeGeneralPdf(RooWorkspace* ,const std::string & = "", const std::string & = "", const std::string & = "_mj", const std::string & = "em", const std::string & = "HP", RooArgList* = NULL, const int & = 0);
+RooAbsPdf* MakeGeneralPdf(RooWorkspace* ,const std::string & = "", const std::string & = "", const std::string & = "_mj", const std::string & = "em", const std::string & = "HP",  std::vector<std::string>* = NULL, const int & = 0);
 
-RooExtendPdf* MakeExtendedModel(RooWorkspace*, const std::string & = "", const std::string & = "", const std::string & = "_mj", const std::string & = "em", const std::string & wtagger_label = "HP", RooArgList* = NULL, const int & = 0, const int & = 500);
+RooExtendPdf* MakeExtendedModel(RooWorkspace*, const std::string & = "", const std::string & = "", const std::string & = "_mj", const std::string & = "em", const std::string & wtagger_label = "HP",  std::vector<std::string>* = NULL, const int & = 0, const int & = 500);
 
-RooGaussian* addConstraint(RooRealVar*, RooRealVar*, RooRealVar*, std::vector<std::string> &);
+RooGaussian* addConstraint(RooRealVar*, double, double,  std::vector<std::string>*);
 
 void change_dataset_to_histpdf(RooWorkspace*,RooRealVar*,RooDataSet*);
 
 TH1F* change_dataset_to_histogram(RooRealVar*, RooDataSet*, const std::string & = "", const int & = 1);
 
-RooAbsPdf* MakeModelTTbarControlSample(RooWorkspace* workspace ,const std::string & = "", const std::string & = "", const std::string & = "_mj", const std::string & = "em", const std::string & = "HP", const std::string & = "", RooArgList* = NULL);
+RooAbsPdf* MakeModelTTbarControlSample(RooWorkspace* workspace ,const std::string & = "", const std::string & = "", const std::string & = "_mj", const std::string & = "em", const std::string & = "HP", const std::string & = "", std::vector<std::string>* = NULL);
 
 //////////
 

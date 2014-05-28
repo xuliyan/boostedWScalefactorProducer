@@ -55,7 +55,7 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace*, const std::
 
 void get_mlvj_normalization_insignalregion(RooWorkspace* ,const std::string & = "", const std::string & = "", const std::string & = "", const std::string & = "", const int & = 0);
 
-void ScaleFactorTTbarControlSampleFit(RooWorkspace*, std::map<std::string,std::string >, std::map<std::string,int>, const std::string & ="", const std::string & ="mu", const std::string & wtagger ="HP", const double & = 200, const double & = 2000);
+void ScaleFactorTTbarControlSampleFit(RooWorkspace*, std::map<std::string,std::string >, std::map<std::string,int>, std::vector<std::string>* = NULL, std::vector<std::string>* = NULL, const std::string & ="", const std::string & ="mu", const std::string & wtagger ="HP", const double & = 200, const double & = 2000);
 
 void DrawScaleFactorTTbarControlSample(RooWorkspace*,  std::map<std::string,int>,  const std::string & ="", const std::string & ="mu", const std::string & ="HP",const double & = 200, const double & = 2000);
 					

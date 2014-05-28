@@ -6,7 +6,7 @@ void fit_genHMass(RooWorkspace* workspace, const std::string & label, const std:
 
   RooRealVar* rrv_mass_gen_WW = workspace->var("rrv_mass_gen_WW");
   RooDataSet* rdataset = (RooDataSet*) workspace->data(("rdataset4fit"+label+"_genHMass_"+channel).c_str());
-  RooArgList* constraint_list = NULL;
+  std::vector<std::string>* constraint_list = new std::vector<std::string> ();
 
   RooAbsPdf* model_pdf = MakeExtendedModel(workspace,label+model,model,spectrum,channel,wtagger,constraint_list);
   rdataset->Print();
@@ -42,7 +42,7 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
      rdataset_mj->Print();
 
      //## make the extended model
-     RooArgList* constraint_list = new RooArgList(); 
+     std::vector<std::string>* constraint_list = new std::vector<std::string>(); 
      RooExtendPdf* model_pdf = NULL ; 
      if(additionalinformation == 1)
          model_pdf = MakeExtendedModel(workspace,label+model,model,"_mj",channel,wtagger_label,constraint_list);
@@ -257,7 +257,7 @@ void fit_mlvj_model_single_MC(RooWorkspace* workspace, const std::string & fileN
       else if ( TString(workspace->GetName()).Contains("4fit"))
         rdataset = (RooDataSet*) workspace->data(("rdataset4fit"+label+in_range+"_"+channel+"_mlvj").c_str());
 
-      RooArgList* constraintlist = new RooArgList();
+      std::vector<std::string>* constraintlist = new std::vector<std::string>();
 
       //## make the extended pdf model
       RooExtendPdf* model = MakeExtendedModel(workspace,label+in_range+mlvj_model,mlvj_model,"_mlvj",channel,wtagger_label,constraintlist,ismc);
@@ -1097,7 +1097,7 @@ void fit_mlvj_in_Mj_sideband(RooWorkspace* workspace, std::map<std::string,int> 
   if(jetBin == "_2jet") workspace->var(("rrv_number_WW_EWK"+mass_scale+mlvj_region+mlvj_shape["WW_EWK"]+"_"+channel+"_mlvj").c_str())->Print();
 
   //Make the Pdf for the WJets                                                                                                                                                     
-  RooArgList*   constraint = NULL;
+  std::vector<std::string>*   constraint = NULL;
   RooRealVar*   number_WJets_sb_lo = NULL; 
   RooRealVar*   number_TTbar_signal_region = NULL;
   RooExtendPdf* model_WJets = NULL; 
@@ -1959,9 +1959,9 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
 
 
 // method to do fail and pass fit for the scale factor evaluation                                                                                                                      
-void ScaleFactorTTbarControlSampleFit(RooWorkspace* workspace, std::map<std::string,std::string > mj_shape, std::map<std::string,int> color_palet, const std::string & label, const std::string & channel, const std::string & wtagger, const double & ca8_ungroomed_pt_min, const double & ca8_ungroomed_pt_max){
+void ScaleFactorTTbarControlSampleFit(RooWorkspace* workspace, std::map<std::string,std::string > mj_shape, std::map<std::string,int> color_palet, std::vector<std::string>* constraintlist_data, std::vector<std::string>* constraintlist_MC, const std::string & label, const std::string & channel, const std::string & wtagger, const double & ca8_ungroomed_pt_min, const double & ca8_ungroomed_pt_max){
 
-  std::cout<<" ############################## Pass: dataset #################################### "<<std::endl;
+  std::cout<<"############################## Pass: dataset #################################### "<<std::endl;
 
   RooRealVar* rrv_mass_j = workspace->var("rrv_mass_j");
   RooDataSet* rdataset_data_mj  = (RooDataSet*) workspace->data(("rdataset_data"+ label+"_"+channel+"_mj").c_str());
@@ -1975,7 +1975,7 @@ void ScaleFactorTTbarControlSampleFit(RooWorkspace* workspace, std::map<std::str
   change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_VV_mj);
   change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_WJets_mj);
   
-  std::cout<<" ############################### Pass: Histograms for plotting reasons  ################################### "<<std::endl;
+  std::cout<<"############################### Pass: Histograms for plotting reasons  ################################### "<<std::endl;
   RooAbsPdf* model_histpdf_TTbar = workspace->pdf((std::string(rdataset_TTbar_mj->GetName())+"_histpdf").c_str());
   RooAbsPdf* model_histpdf_STop  = workspace->pdf((std::string(rdataset_STop_mj->GetName())+"_histpdf").c_str());
   RooAbsPdf* model_histpdf_VV    = workspace->pdf((std::string(rdataset_VV_mj->GetName())+"_histpdf").c_str());
@@ -1990,8 +1990,7 @@ void ScaleFactorTTbarControlSampleFit(RooWorkspace* workspace, std::map<std::str
   RooAddPdf* model_TTbar_STop_VV_WJets = new RooAddPdf(("model_TTbar_STop_VV_WJets"+label+"_"+channel).c_str(),("model_TTbar_STop_VV_WJets"+label+"_"+channel).c_str(),RooArgList(*model_histpdf_TTbar,*model_histpdf_STop,*model_histpdf_VV,*model_histpdf_WJets),RooArgList(*number_TTbar,*number_STop,*number_VV,*number_WJets));
   workspace->import(*model_TTbar_STop_VV_WJets);
   
-
-  std::cout<<" ############################## Fail: dataset #################################### "<<std::endl;
+  std::cout<<"############################## Fail: dataset #################################### "<<std::endl;
   RooDataSet* rdataset_data_mj_fail  = (RooDataSet*) workspace->data(("rdataset_data"+label+"_"+"failtau2tau1cut_"+channel+"_mj").c_str());
   RooDataSet* rdataset_TTbar_mj_fail = (RooDataSet*) workspace->data(("rdataset_TTbar"+label+"_"+"failtau2tau1cut_"+channel+"_mj").c_str());
   RooDataSet* rdataset_STop_mj_fail  = (RooDataSet*) workspace->data(("rdataset_STop"+label+"_"+"failtau2tau1cut_"+channel+"_mj").c_str());
@@ -2003,7 +2002,7 @@ void ScaleFactorTTbarControlSampleFit(RooWorkspace* workspace, std::map<std::str
   change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_VV_mj_fail);
   change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_WJets_mj_fail);
 
-  std::cout<<" ############################### Fail: model ################################### "<<std::endl;
+  std::cout<<"############################### Fail: model ################################### "<<std::endl;
   RooAbsPdf* model_histpdf_TTbar_fail = workspace->pdf((std::string(rdataset_TTbar_mj_fail->GetName())+"_histpdf").c_str());
   RooAbsPdf* model_histpdf_STop_fail  = workspace->pdf((std::string(rdataset_STop_mj_fail->GetName())+"_histpdf").c_str());
   RooAbsPdf* model_histpdf_VV_fail    = workspace->pdf((std::string(rdataset_VV_mj_fail->GetName())+"_histpdf").c_str());
@@ -2029,39 +2028,37 @@ channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TT
 
 
   /// All the shape parameters and normalization are fixed                                                                                                                          
-  std::cout<<" ############################### Pass: Single MC model ################################### "<<std::endl;
+  std::cout<<"############################### Pass: Single MC model ################################### "<<std::endl;
   RooAbsPdf* model_STop  = get_STop_mj_Model(workspace,"_STop"+label,mj_shape["STop"],channel);
   RooAbsPdf* model_VV    = get_VV_mj_Model(workspace,"_VV"+label,mj_shape["VV"],channel);
   RooAbsPdf* model_WJets = get_General_mj_Model(workspace,"_WJets0"+label,mj_shape["WJets0"],channel);
 
-  std::cout<<" ############################### Fail: Single MC model ################################### "<<std::endl;
-  RooAbsPdf* model_STop_fail  = get_STop_mj_Model(workspace,"_STop"+label+"_failtau2tau1cut",mj_shape["STop"],channel);
-  RooAbsPdf* model_VV_fail    = get_VV_mj_Model(workspace,"_VV"+label+"_failtau2tau1cut",mj_shape["VV"],channel);
-  RooAbsPdf* model_WJets_fail = get_General_mj_Model(workspace,"_WJets0"+label+"_failtau2tau1cut",mj_shape["WJets0"],channel);
+  std::cout<<"############################### Fail: Single MC model ################################### "<<std::endl;
+  RooAbsPdf* model_STop_fail  = get_STop_mj_Model(workspace,"_STop"+label+"_failtau2tau1cut",mj_shape["STop_fail"],channel);
+  RooAbsPdf* model_VV_fail    = get_VV_mj_Model(workspace,"_VV"+label+"_failtau2tau1cut",mj_shape["VV_fail"],channel);
+  RooAbsPdf* model_WJets_fail = get_General_mj_Model(workspace,"_WJets0"+label+"_failtau2tau1cut",mj_shape["WJets0_fail"],channel);
 
-  RooArgList* constrainslist_data = NULL;
-  
   /// Model for unmatched events passing and failing the cut --> ErfExp                                                                                                              
-  std::cout<<" ############################### Pass: TTbar in Data Bkg ################################### "<<std::endl;
-  RooAbsPdf* model_bkg_data = MakeExtendedModel(workspace,"_bkg_data"+label,mj_shape["bkg_data"],"_mj",channel,wtagger,constrainslist_data);
-  std::cout<<" ############################### Fail: TTbar in Data Bkg ################################### "<<std::endl;
-  RooAbsPdf* model_bkg_data_fail = MakeExtendedModel(workspace,"_bkg_data"+label+"_failtau2tau1cut",mj_shape["bkg_data_fail"],"_mj",channel,wtagger,constrainslist_data);
+  std::cout<<"############################### Pass: TTbar in Data Bkg ################################### "<<std::endl;
+  RooAbsPdf* model_bkg_data = MakeExtendedModel(workspace,"_bkg_data"+label,mj_shape["bkg_data"],"_mj",channel,wtagger,constraintlist_data);
+  std::cout<<"############################### Fail: TTbar in Data Bkg ################################### "<<std::endl;
+  RooAbsPdf* model_bkg_data_fail = MakeExtendedModel(workspace,"_bkg_data"+label+"_failtau2tau1cut",mj_shape["bkg_data_fail"],"_mj",channel,wtagger,constraintlist_data);
   // Model for matched events passing and failing the cut --> 2Gaus_ttbar and GausChebychev_ttbar_failtau2tau1cut                                                                   
-  std::cout<<" ############################### Pass: Data ttbar resonant component ################################### "<<std::endl;
-  RooAbsPdf* model_ttbar_data = MakeModelTTbarControlSample(workspace,"_ttbar_data"+label,mj_shape["signal_data"],"_mj",channel,wtagger,label,constrainslist_data);    
-  std::cout<<" ############################### Fail: Data ttbar resonant component ################################### "<<std::endl;
-  RooAbsPdf* model_ttbar_data_fail = MakeModelTTbarControlSample(workspace,"_ttbar_data"+label+"_failtau2tau1cut",mj_shape["signal_data_fail"],"_mj",channel,wtagger,label,constrainslist_data);
+  std::cout<<"############################### Pass: Data ttbar resonant component ################################### "<<std::endl;
+  RooAbsPdf* model_ttbar_data = MakeModelTTbarControlSample(workspace,"_ttbar_data"+label,mj_shape["signal_data"],"_mj",channel,wtagger,label,constraintlist_data);    
+  std::cout<<"############################### Fail: Data ttbar resonant component ################################### "<<std::endl;
+  RooAbsPdf* model_ttbar_data_fail = MakeModelTTbarControlSample(workspace,"_ttbar_data"+label+"_failtau2tau1cut",mj_shape["signal_data_fail"],"_mj",channel,wtagger,label,constraintlist_data);
 
 
-  std::cout<<" ############################### Total Data Pdf Fail ################################### "<<std::endl;
+  std::cout<<"############################### Total Data Pdf Fail ################################### "<<std::endl;
   RooAbsPdf* model_data_fail = new RooAddPdf(("model_data"+label+"_"+"failtau2tau1cut"+"_"+channel).c_str(),("model_data+"+label+"_"+"failtau2tau1cut"+"_"+channel).c_str(),RooArgList(*model_ttbar_data_fail,*model_bkg_data_fail,*model_STop_fail,*model_VV_fail,*model_WJets_fail));
-  std::cout<<" ############################### Total Data Pdf Pass ################################### "<<std::endl;
+  std::cout<<"############################### Total Data Pdf Pass ################################### "<<std::endl;
   RooAbsPdf* model_data      = new RooAddPdf(("model_data"+label+"_"+channel).c_str(),("model_data"+label+"_"+channel).c_str(), RooArgList(*model_ttbar_data,*model_bkg_data,*model_STop,*model_VV,*model_WJets));
 
   workspace->import(*model_data);
   workspace->import(*model_data_fail);
   
-  std::cout<<" ############################### Data Event Category ################################### "<<std::endl;
+  std::cout<<"############################### Data Event Category ################################### "<<std::endl;
   RooCategory* category_p_f = workspace->cat(("category_p_f"+label+"_"+channel).c_str());
 
   ///### Define the simultaneous fit                                                                                                                                                    
@@ -2073,29 +2070,32 @@ channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TT
   RooDataSet* combData_p_f_data = (RooDataSet*) workspace->data(("combData_p_f_data"+label+"_"+channel).c_str());
   combData_p_f_data->Print();
 
+  std::cout<<" model data "<<model_data<<" model data fail "<<model_data_fail<<std::endl;
+
   std::cout<<" ############################### Data Total Fit ################################### "<<std::endl;
   RooArgSet* pdfconstrainslist_data = new RooArgSet(("pdfconstrainslist_data"+label+"_"+channel).c_str());
-  for(int i = 0; i < constrainslist_data->getSize(); i++){
-    workspace->pdf(constrainslist_data->at(i)->GetName())->Print();
-    pdfconstrainslist_data->add(*workspace->pdf(constrainslist_data->at(i)->GetName()));
+  if(constraintlist_data!=NULL){
+   for(unsigned int i = 0; i < constraintlist_data->size(); i++){
+     workspace->pdf(constraintlist_data->at(i).c_str())->Print();
+     pdfconstrainslist_data->add(*workspace->pdf(constraintlist_data->at(i).c_str()));
+   }
   }
-        
+  std::cout<<"Fit ################ "<<std::endl;       
   RooFitResult* rfresult_data = NULL;
   rfresult_data = simPdf_data->fitTo(*combData_p_f_data,RooFit::Save(kTRUE),RooFit::Range("controlsample_fitting_range"),RooFit::ExternalConstraints(*pdfconstrainslist_data),RooFit::Minimizer("Minuit2"), RooFit::SumW2Error(kTRUE));
   rfresult_data = simPdf_data->fitTo(*combData_p_f_data,RooFit::Save(kTRUE),RooFit::Range("controlsample_fitting_range"),RooFit::ExternalConstraints(*pdfconstrainslist_data),RooFit::Minimizer("Minuit2"), RooFit::SumW2Error(kTRUE));
   rfresult_data->Print();
   
   /// fit TotalMC                                                                                                                                                                       
-  RooArgList* constrainslist_TotalMC = NULL ;
 
   std::cout<< " ############################### Pass: MC TTbar Bkg ################################### "<<std::endl;
-  RooAbsPdf* model_bkg_TotalMC = MakeExtendedModel(workspace,"_bkg_TotalMC"+label,mj_shape["bkg_mc"],"_mj",channel,wtagger,constrainslist_TotalMC);
+  RooAbsPdf* model_bkg_TotalMC = MakeExtendedModel(workspace,"_bkg_TotalMC"+label,mj_shape["bkg_mc"],"_mj",channel,wtagger,constraintlist_MC);
   std::cout<< " ############################### Fail: MC TTbar Bkg ################################### "<<std::endl;
-  RooAbsPdf* model_bkg_TotalMC_fail = MakeExtendedModel(workspace,"_bkg_TotalMC"+label+"_failtau2tau1cut",mj_shape["bkg_mc_fail"],"_mj",channel,wtagger,constrainslist_TotalMC);
+  RooAbsPdf* model_bkg_TotalMC_fail = MakeExtendedModel(workspace,"_bkg_TotalMC"+label+"_failtau2tau1cut",mj_shape["bkg_mc_fail"],"_mj",channel,wtagger,constraintlist_MC);
   std::cout<< " ############################### Pass: MC ttbar Resonant ################################### "<<std::endl;
-  RooAbsPdf* model_ttbar_TotalMC  = MakeModelTTbarControlSample(workspace,"_ttbar_TotalMC "+label,mj_shape["signal_mc"],"_mj",channel,wtagger,label,constrainslist_TotalMC ); 
+  RooAbsPdf* model_ttbar_TotalMC  = MakeModelTTbarControlSample(workspace,"_ttbar_TotalMC"+label,mj_shape["signal_mc"],"_mj",channel,wtagger,label,constraintlist_MC ); 
   std::cout<< " ############################### Fail: MC ttbar Resonant ################################### "<<std::endl;
-  RooAbsPdf* model_ttbar_TotalMC_fail  = MakeModelTTbarControlSample(workspace,"_ttbar_TotalMC"+label+"_failtau2tau1cut",mj_shape["signal_mc_fail"],"_mj",channel,wtagger,label,constrainslist_TotalMC);                                                                                                                      
+  RooAbsPdf* model_ttbar_TotalMC_fail  = MakeModelTTbarControlSample(workspace,"_ttbar_TotalMC"+label+"_failtau2tau1cut",mj_shape["signal_mc_fail"],"_mj",channel,wtagger,label,constraintlist_MC);                                                                                                                      
   std::cout<< " ############################### Fail: MC total PDF ################################### "<<std::endl;
   RooAddPdf* model_TotalMC_fail = new RooAddPdf(("model_TotalMC"+label+"_"+"failtau2tau1cut"+"_"+channel).c_str(),("model_TotalMC"+label+"_"+"failtau2tau1cut"+"_"+channel).c_str(),RooArgList(*model_ttbar_TotalMC_fail,*model_bkg_TotalMC_fail,*model_STop_fail,*model_VV_fail,*model_WJets_fail));
   std::cout<< " ############################### Pass: MC total PDF ################################### "<<std::endl;
@@ -2114,13 +2114,17 @@ channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TT
   std::cout<< " ############################### MC Total Fit ################################### "<<std::endl;
   RooFitResult* rfresult_TotalMC = NULL ;
   RooArgSet* pdfconstrainslist_TotalMC = new RooArgSet(("pdfconstrainslist_TotalMC"+label+"_"+channel).c_str());
-  for( int i = 0; i < constrainslist_TotalMC->getSize() ; i++){
-    workspace->pdf(constrainslist_TotalMC->at(i)->GetName())->Print();
-    pdfconstrainslist_TotalMC->add(*workspace->pdf(constrainslist_TotalMC->at(i)->GetName()));
-    rfresult_TotalMC = simPdf_TotalMC->fitTo(*combData_p_f_TotalMC,RooFit::Save(kTRUE), RooFit::Range("controlsample_fitting_range"),RooFit::ExternalConstraints(*pdfconstrainslist_TotalMC), RooFit::Minimizer("Minuit2"));
-    rfresult_TotalMC = simPdf_TotalMC->fitTo(*combData_p_f_TotalMC,RooFit::Save(kTRUE), RooFit::Range("controlsample_fitting_range"),RooFit::ExternalConstraints(*pdfconstrainslist_TotalMC), RooFit::Minimizer("Minuit2"));
-    rfresult_TotalMC->Print();
+  if(constraintlist_MC!=NULL){
+   for(unsigned int i = 0; i < constraintlist_MC->size() ; i++){
+     workspace->pdf(constraintlist_MC->at(i).c_str())->Print();
+     pdfconstrainslist_TotalMC->add(*workspace->pdf(constraintlist_MC->at(i).c_str()));
+   }
   }
+
+  rfresult_TotalMC = simPdf_TotalMC->fitTo(*combData_p_f_TotalMC,RooFit::Save(kTRUE), RooFit::Range("controlsample_fitting_range"),RooFit::ExternalConstraints(*pdfconstrainslist_TotalMC), RooFit::Minimizer("Minuit2"));
+  rfresult_TotalMC = simPdf_TotalMC->fitTo(*combData_p_f_TotalMC,RooFit::Save(kTRUE), RooFit::Range("controlsample_fitting_range"),RooFit::ExternalConstraints(*pdfconstrainslist_TotalMC), RooFit::Minimizer("Minuit2"));
+  rfresult_TotalMC->Print();
+  
          
   RooPlot* xframe_data             = rrv_mass_j->frame( RooFit::Bins(int(rrv_mass_j->getBins())));
   RooPlot* xframe_data_fail        = rrv_mass_j->frame( RooFit::Bins(int(rrv_mass_j->getBins())));
@@ -2128,11 +2132,12 @@ channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TT
 
   TString cut ;
   cut.Form("category_p_f%s_%s==category_p_f%s_%s::pass",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
-  combData_p_f_data->plotOn(xframe_data,RooFit::Name("data invisi"),RooFit::Cut(cut.Data()),RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
-  cut.Form("category_p_f%s_%s==category_p_f%s_%s::fail",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
-  combData_p_f_data->plotOn(xframe_data_fail,RooFit::Name("data invisi"), RooFit::Cut(cut.Data()), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
-  
+  combData_p_f_data->plotOn(xframe_data,RooFit::Name("data_invisible"),RooFit::Cut(cut.Data()),RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
+
+  //#############################################################  
   ///plot total pass mc normalizing it to data, passing + failing                                                                                                                   
+  //#############################################################  
+
   if(TString(label).Contains("herwig"))    
     model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("TTbar_herwig"),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"+label]), RooFit::LineColor(kBlack), RooFit::VLines());
   else
@@ -2145,20 +2150,39 @@ channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TT
   cut.Form("%s",model_histpdf_WJets->GetName());
   model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("WJets"),RooFit::Components(cut.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WJets"]), RooFit::LineColor(kBlack), RooFit::VLines());
 
-  // plot total pass mc normalizing it to data, passing + failing                                                                                                                   
-  if(TString(label).Contains("herwig"))
-    model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("TTbar_herwig"),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"+label]), RooFit::LineColor(kBlack), RooFit::VLines());
-  else
-    model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("TTbar"),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"+label]), RooFit::LineColor(kBlack), RooFit::VLines());
-
-  cut.Form("%s,%s,%s",model_histpdf_STop->GetName(),model_histpdf_VV->GetName(),model_histpdf_WJets->GetName());
-  model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("STop"),RooFit::Components(cut.Data()),RooFit::DrawOption("F"),RooFit::FillColor(color_palet["STop"]), RooFit::LineColor(kBlack), RooFit::VLines());
-  cut.Form("%s,%s",model_histpdf_VV->GetName(),model_histpdf_WJets->GetName());
-  model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("VV"),RooFit::Components(cut.Data()),RooFit::DrawOption("F"),RooFit::FillColor(color_palet["VV"]), RooFit::LineColor(kBlack), RooFit::VLines());
+  //pass plots
+  model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("TTbar_line_invisible"), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());  
+  cut.Form("%s,%s,%s",model_histpdf_STop->GetName(), model_histpdf_VV->GetName(), model_histpdf_WJets->GetName());       
+  model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("STop_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
+  cut.Form("%s,%s",model_histpdf_VV->GetName(),model_histpdf_WJets->GetName());      
+  model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("VV_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
   cut.Form("%s",model_histpdf_WJets->GetName());
-  model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("WJets"),RooFit::Components(cut.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WJets"]), RooFit::LineColor(kBlack), RooFit::VLines());
+  model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("WJets_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
+
+  // plot data again                                                                                                                                                                 
+  cut.Form("category_p_f%s_%s==category_p_f%s_%s::pass",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
+  combData_p_f_data->plotOn(xframe_data,RooFit::Name("data"), RooFit::Cut(cut.Data()), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0));
+
+  // plot mc fit function                                                                                                                                                            
+  cut.Form("category_p_f%s_%s==category_p_f%s_%s::pass",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
+  combData_p_f_TotalMC->plotOn(xframe_data,RooFit::Name("TotalMC_invisible"), RooFit::Cut(cut.Data()), RooFit::MarkerColor(kWhite), RooFit::LineColor(kWhite), RooFit::Invisible() , RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
+
+  simPdf_TotalMC->plotOn(xframe_data,RooFit::Name("total MC fit"),RooFit::Slice(*category_p_f,"pass"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),RooFit::NormRange("controlsample_fitting_range"), RooFit::LineStyle(kDashed));
+  cut.Form("%s,%s,%s,%s",model_bkg_TotalMC->GetName(),model_STop->GetName(),model_VV->GetName(),model_WJets->GetName());
+  simPdf_TotalMC->plotOn(xframe_data,RooFit::Name("MC fit bkg"),RooFit::Slice(*category_p_f,"pass"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),RooFit::NormRange("controlsample_fitting_range"), RooFit::Components(cut.Data()), RooFit::LineColor(kRed), RooFit::LineStyle(kDashed));
+
+  // plot data fit function
+  cut.Form("category_p_f%s_%s==category_p_f%s_%s::pass",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());                                                    
+  combData_p_f_data->plotOn(xframe_data,RooFit::Name("data_invisible"),RooFit::Cut(cut.Data()),RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
+
+  simPdf_data->plotOn(xframe_data,RooFit::Name("total data fit"),RooFit::Slice(*category_p_f,"pass"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"));
+  cut.Form("%s,%s,%s,%s",model_bkg_data->GetName(),model_STop->GetName(),model_VV->GetName(),model_WJets->GetName());
+  simPdf_data->plotOn(xframe_data,RooFit::Name("data fit bkg"),RooFit::Slice(*category_p_f,"pass"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"), RooFit::Components(cut.Data()), RooFit::LineColor(kRed));
 
   ///plot total fail mc normalizing it to data, passing + failing                                                                                                                   
+  cut.Form("category_p_f%s_%s==category_p_f%s_%s::fail",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
+  combData_p_f_data->plotOn(xframe_data_fail,RooFit::Name("data_invisible"), RooFit::Cut(cut.Data()), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
+
   if(TString(label).Contains("herwig"))
    model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("TTbar_herwig"), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"+label]), RooFit::LineColor(kBlack), RooFit::VLines());
   else
@@ -2171,29 +2195,19 @@ channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TT
   cut.Form("%s", model_histpdf_WJets_fail->GetName());
   model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("WJets"),RooFit::Components(cut.Data()), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WJets"]), RooFit::LineColor(kBlack), RooFit::VLines());
 
-  // plot data again                                                                                                                                                                 
-  cut.Form("category_p_f%s_%s==category_p_f%s_%s::pass",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
-  combData_p_f_data->plotOn(xframe_data,RooFit::Name("data"), RooFit::Cut(cut.Data()), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0));
+  //solid line
+  model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("TTbar_line_invisible"), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
+  cut.Form("%s,%s,%s",model_histpdf_STop_fail->GetName(), model_histpdf_VV_fail->GetName(), model_histpdf_WJets_fail->GetName());       
+  model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("STop_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
+  cut.Form("%s,%s",model_histpdf_VV_fail->GetName(), model_histpdf_WJets_fail->GetName());
+  model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("VV_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
+  cut.Form("%s", model_histpdf_WJets_fail->GetName());
+  model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("WJets_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
 
-  // plot mc fit function                                                                                                                                                            
-  cut.Form("category_p_f%s_%s==category_p_f%s_%s::pass",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
-  combData_p_f_TotalMC->plotOn(xframe_data,RooFit::Name("TotalMC invisi"), RooFit::Cut(cut.Data()), RooFit::MarkerColor(kWhite), RooFit::LineColor(kWhite), RooFit::Invisible() , RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
-
-  simPdf_TotalMC->plotOn(xframe_data,RooFit::Name("total MC fit"),RooFit::Slice(*category_p_f,"pass"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),RooFit::NormRange("controlsample_fitting_range"), RooFit::LineStyle(kDashed));
-  cut.Form("%s,%s,%s,%s",model_bkg_TotalMC->GetName(),model_STop->GetName(),model_VV->GetName(),model_WJets->GetName());
-  simPdf_TotalMC->plotOn(xframe_data,RooFit::Name("MC fit bkg"),RooFit::Slice(*category_p_f,"pass"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),RooFit::NormRange("controlsample_fitting_range"), RooFit::Components(cut.Data()), RooFit::LineColor(kRed), RooFit::LineStyle(kDashed));
-
-  // plot data fit function
-  cut.Form("category_p_f%s_%s==category_p_f%s_%s::pass",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());                                                    
-  combData_p_f_data->plotOn(xframe_data,RooFit::Name("data invisi"),RooFit::Cut(cut.Data()),RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
-
-  simPdf_data->plotOn(xframe_data,RooFit::Name("total data fit"),RooFit::Slice(*category_p_f,"pass"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"));
-  cut.Form("%s,%s,%s,%s",model_bkg_data->GetName(),model_STop->GetName(),model_VV->GetName(),model_WJets->GetName());
-  simPdf_data->plotOn(xframe_data,RooFit::Name("data fit bkg"),RooFit::Slice(*category_p_f,"pass"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"), RooFit::Components(cut.Data()), RooFit::LineColor(kRed));
   
   //fail plots -> plot MC fit                                                                                                                                          
   cut.Form("category_p_f%s_%s==category_p_f%s_%s::fail",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
-  combData_p_f_TotalMC->plotOn(xframe_data_fail,RooFit::Name("TotalMC invisi"), RooFit::Cut(cut.Data()), RooFit::MarkerColor(kWhite), RooFit::LineColor(kWhite), RooFit::Invisible(), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0));
+  combData_p_f_TotalMC->plotOn(xframe_data_fail,RooFit::Name("TotalMC_invisible"), RooFit::Cut(cut.Data()), RooFit::MarkerColor(kWhite), RooFit::LineColor(kWhite), RooFit::Invisible(), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0));
 
   simPdf_TotalMC->plotOn(xframe_data_fail,RooFit::Name("total MC fit"),RooFit::Slice(*category_p_f,"fail"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),RooFit::NormRange("controlsample_fitting_range"), RooFit::LineStyle(kDashed));
   cut.Form("%s,%s,%s,%s",model_bkg_TotalMC_fail->GetName(),model_STop_fail->GetName(),model_VV_fail->GetName(),model_WJets_fail->GetName());
@@ -2201,10 +2215,10 @@ channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TT
 
   //fail plots -> plot data fit                                                                                                                                                       
   cut.Form("category_p_f%s_%s==category_p_f%s_%s::fail",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
-  combData_p_f_data->plotOn(xframe_data_fail,RooFit::Name("data invisi"),RooFit::Cut(cut.Data()),RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
+  combData_p_f_data->plotOn(xframe_data_fail,RooFit::Name("data_invisible"),RooFit::Cut(cut.Data()),RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
 
   simPdf_data->plotOn(xframe_data_fail,RooFit::Name("total data fit"),RooFit::Slice(*category_p_f,"fail"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"));
-  simPdf_data->plotOn(xframe_data_fail,RooFit::Name("data fit invisi"),RooFit::Slice(*category_p_f,"fail"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"));
+  simPdf_data->plotOn(xframe_data_fail,RooFit::Name("data_fit_invisible"),RooFit::Slice(*category_p_f,"fail"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"));
   cut.Form("%s,%s,%s,%s",model_bkg_data_fail->GetName(),model_STop_fail->GetName(),model_VV_fail->GetName(),model_WJets_fail->GetName());
   simPdf_data->plotOn(xframe_data_fail,RooFit::Name("data fit bkg"),RooFit::Slice(*category_p_f,"fail"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"), RooFit::Components(cut.Data()),RooFit::LineColor(kRed));
 
@@ -2216,10 +2230,10 @@ channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TT
   upperLine = new TLine(105.,0.,105.,xframe_data_fail->GetMaximum()*0.7); upperLine->SetLineWidth(2); upperLine->SetLineColor(kBlack); upperLine->SetLineStyle(9);
   xframe_data_fail->addObject(lowerLine); xframe_data_fail->addObject(upperLine);
 
-  //make the legend                                                                                                                                                                  
-  TLegend* leg_data = legend4Plot(xframe_data,0,1,0.12);
+  //make the legend 
+  TLegend* leg_data = legend4Plot(xframe_data,0,-0.2,0.07,0.04,0.,1,channel);                                                                                          
   xframe_data->addObject(leg_data);
-  TLegend* leg_data_fail = legend4Plot(xframe_data_fail,0,1,0.12);
+  TLegend* leg_data_fail = legend4Plot(xframe_data_fail,0,-0.2,0.07,0.04,0.,1,channel);                                           
   xframe_data_fail->addObject(leg_data_fail);
 
   //add mean and width                                                                                                                                                                
@@ -2251,8 +2265,8 @@ channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TT
         //xframe_data.addObject(tl_data_sigma);                                                                                                                                        
     }
 
-    xframe_data->GetYaxis()->SetRangeUser(1e-2,xframe_data->GetMaximum()*1.4);
-    xframe_data_fail->GetYaxis()->SetRangeUser(1e-2,xframe_data_fail->GetMaximum()*1.4);
+    xframe_data->GetYaxis()->SetRangeUser(0.,xframe_data->GetMaximum()*1.3);
+    xframe_data_fail->GetYaxis()->SetRangeUser(0.,xframe_data_fail->GetMaximum()*1.3);
     TString nameDir;  nameDir.Form("plots_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_nearbyJets_v3/",channel.c_str(),wtagger.c_str(),wtagger.c_str());
     TString namePlot; namePlot.Form("control%s_%s_%s_pTbin_%d_%d",label.c_str(),wtagger.c_str(),channel.c_str(),int(ca8_ungroomed_pt_min),int(ca8_ungroomed_pt_max));
     draw_canvas(xframe_data,std::string(nameDir),std::string(namePlot),channel,GetLumi(),0,1,0);    
@@ -2301,12 +2315,12 @@ channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TT
     RooRealVar* rrv_scale_number_TTbar_STop_VV_WJets_extremefail = new RooRealVar(("rrv_scale_number_TTbar_STop_VV_WJets"+label+"_"+"extremefail").c_str(),("rrv_scale_number_TTbar_STop_VV_WJets"+label+"_"+"extremefail").c_str(),scale_number_TTbar_STop_VV_WJets_extremefail);
     workspace->import(*rrv_scale_number_TTbar_STop_VV_WJets_extremefail);
     
-    RooAbsPdf* model_STop_extremefail  = get_STop_mj_Model(workspace,"_STop"+label+"_"+"extremefailtau2tau1cut",mj_shape["STop"],channel);
-    RooAbsPdf* model_VV_extremefail    = get_VV_mj_Model(workspace,"_VV"+label+"_"+"extremefailtau2tau1cut",mj_shape["VV"],channel);
-    RooAbsPdf* model_WJets_extremefail = get_General_mj_Model(workspace,"_WJets0"+label+"_"+"extremefailtau2tau1cut",mj_shape["WJets0"],channel);
+    RooAbsPdf* model_STop_extremefail  = get_STop_mj_Model(workspace,"_STop"+label+"_"+"extremefailtau2tau1cut",mj_shape["STop_extremefail"],channel);
+    RooAbsPdf* model_VV_extremefail    = get_VV_mj_Model(workspace,"_VV"+label+"_"+"extremefailtau2tau1cut",mj_shape["VV_extremefail"],channel);
+    RooAbsPdf* model_WJets_extremefail = get_General_mj_Model(workspace,"_WJets0"+label+"_"+"extremefailtau2tau1cut",mj_shape["WJets0_extremefail"],channel);
 
 
-    RooArgList* constrainslist_data_LP = NULL;
+    std::vector<std::string>* constrainslist_data_LP = new std::vector<std::string>();
     RooAbsPdf* model_ttbar_data_extremefail = MakeExtendedModel(workspace,"_ttbar_data"+label+"_"+"extremefailtau2tau1cut",mj_shape["data_extremefail"],"_mj",channel,wtagger,constrainslist_data_LP);
     RooAbsPdf* model_bkg_data_extremefail   = MakeExtendedModel(workspace,"_bkg_data"+label+"_"+"extremefailtau2tau1cut",mj_shape["data_bkg_extremefail"],"_mj",channel,wtagger,constrainslist_data_LP);
 
@@ -2316,11 +2330,13 @@ channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TT
 
     //constraint the parameter in the extreme fail fit                                                                                                                                
     RooArgSet* pdfconstrainslist_data_LP = new RooArgSet(("pdfconstrainslist_data_LP"+label+"_"+channel).c_str());
-    for(int i = 0; i < constrainslist_data_LP->getSize(); i++){
-      workspace->pdf(constrainslist_data_LP->at(i)->GetName())->Print();
-      pdfconstrainslist_data_LP->add(*workspace->pdf(constrainslist_data_LP->at(i)->GetName()));
+    if(constrainslist_data_LP!=NULL){
+     for(unsigned int i = 0; i < constrainslist_data_LP->size(); i++){
+       workspace->pdf(constrainslist_data_LP->at(i).c_str())->Print();
+       pdfconstrainslist_data_LP->add(*workspace->pdf(constrainslist_data_LP->at(i).c_str()));
+     }
     }
-     
+   
     RooFitResult* rfresult_data_LP = model_data_extremefail->fitTo(*rdataset_data_mj_extremefail,RooFit::Save(kTRUE),RooFit::Range("controlsample_fitting_range"),RooFit::ExternalConstraints(*pdfconstrainslist_data_LP),RooFit::Minimizer("Minuit2"));
     rfresult_data_LP = model_data_extremefail->fitTo(*rdataset_data_mj_extremefail,RooFit::Save(kTRUE),RooFit::Range("controlsample_fitting_range"),RooFit::ExternalConstraints(*pdfconstrainslist_data_LP),RooFit::Minimizer("Minuit2"));
     rfresult_data_LP->Print();
@@ -2338,20 +2354,20 @@ channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TT
     rdataset_data_mj_extremefail->Print();
 
     //extremefail fit of the mc                                                                                                                                                       
-    RooArgList* constrainslist_TotalMC_LP = NULL;
+    std::vector<std::string>* constrainslist_TotalMC_LP = new std::vector<std::string>();
     RooAbsPdf*  model_ttbar_TotalMC_extremefail = MakeExtendedModel(workspace,"_ttbar_TotalMC"+label+"_"+"extremefailtau2tau1cut",mj_shape["mc_extremefail"],"_mj",channel,wtagger,constrainslist_TotalMC_LP);
-    RooArgList* tmp_constrainslist_TotalMC_LP = NULL;
     RooAbsPdf*  model_bkg_TotalMC_extremefail = MakeExtendedModel(workspace,"_bkg_TotalMC"+label+"_"+"extremefailtau2tau1cut",mj_shape["mc_bkg_extremefail"],"_mj",channel,wtagger,constrainslist_TotalMC_LP);
 
     RooAddPdf* model_TotalMC_extremefail = new RooAddPdf(("model_TotalMC"+label+"_"+"extremefailtau2tau1cut_"+channel).c_str(),("model_TotalMC"+label+"_"+"extremefailtau2tau1cut_"+channel).c_str(), RooArgList(*model_ttbar_TotalMC_extremefail,*model_bkg_TotalMC_extremefail,*model_STop_extremefail,*model_VV_extremefail,*model_WJets_extremefail));
     workspace->import(*model_TotalMC_extremefail);
 
     RooArgSet* pdfconstrainslist_TotalMC_LP = new RooArgSet(("pdfconstrainslist_TotalMC_LP_"+channel).c_str());
-    for(int i =0; i < tmp_constrainslist_TotalMC_LP->getSize(); i++){
-      workspace->pdf(tmp_constrainslist_TotalMC_LP->at(i)->GetName())->Print();
-      pdfconstrainslist_TotalMC_LP->add(*workspace->pdf(tmp_constrainslist_TotalMC_LP->at(i)->GetName()));
+    if(constrainslist_TotalMC_LP!=NULL){
+     for(unsigned int i =0; i < constrainslist_TotalMC_LP->size(); i++){
+      workspace->pdf(constrainslist_TotalMC_LP->at(i).c_str())->Print();
+      pdfconstrainslist_TotalMC_LP->add(*workspace->pdf(constrainslist_TotalMC_LP->at(i).c_str()));
+     }
     }
-       
 
     RooFitResult* rfresult_TotalMC_LP = model_TotalMC_extremefail->fitTo(*rdataset_TotalMC_mj_extremefail, RooFit::Save(kTRUE), RooFit::Range("controlsample_fitting_range"),RooFit::ExternalConstraints(*pdfconstrainslist_TotalMC_LP),RooFit::Minimizer("Minuit2"));
     rfresult_TotalMC_LP = model_TotalMC_extremefail->fitTo(*rdataset_TotalMC_mj_extremefail, RooFit::Save(kTRUE), RooFit::Range("controlsample_fitting_range"),RooFit::ExternalConstraints(*pdfconstrainslist_TotalMC_LP),RooFit::Minimizer("Minuit2"));
@@ -2367,47 +2383,29 @@ channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TT
     model_WJets_extremefail->Print();
     rdataset_TotalMC_mj_extremefail->Print();
 
-    //plot the extreme fail fit result + distribution                                                                                                                                 
-
-    rdataset_data_mj_extremefail->plotOn(xframe_data_extremefail, RooFit::Name("data invisi"), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
-
-    if(TString(label).Contains("herwig"))
-     model_TTbar_STop_VV_WJets_extremefail->plotOn(xframe_data_extremefail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_extremefail),RooFit::Name("TTbar_herwig"), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"+label]), RooFit::LineColor(kBlack), RooFit::VLines());
-    else
-     model_TTbar_STop_VV_WJets_extremefail->plotOn(xframe_data_extremefail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_extremefail),RooFit::Name("TTbar"), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"+label]), RooFit::LineColor(kBlack), RooFit::VLines());
-
-    cut.Form("%s,%s,%s",model_histpdf_STop_extremefail->GetName(), model_histpdf_VV_extremefail->GetName(), model_histpdf_WJets_extremefail->GetName());
-    model_TTbar_STop_VV_WJets_extremefail->plotOn(xframe_data_extremefail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_extremefail),RooFit::Name("STop"),RooFit::Components(cut.Data()), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["STop"]), RooFit::LineColor(kBlack), RooFit::VLines());
-
-    cut.Form("%s,%s",model_histpdf_VV_extremefail->GetName(),model_histpdf_WJets_extremefail->GetName());
-    model_TTbar_STop_VV_WJets_extremefail->plotOn(xframe_data_extremefail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_extremefail),RooFit::Name("VV"),RooFit::Components(cut.Data()), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["VV"]), RooFit::LineColor(kBlack), RooFit::VLines());
-
-    cut.Form("%s", model_histpdf_WJets_extremefail->GetName());
-    model_TTbar_STop_VV_WJets_extremefail->plotOn(xframe_data_extremefail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_extremefail),RooFit::Name("WJets"),RooFit::Components(cut.Data()),RooFit::DrawOption("F"),RooFit::FillColor(color_palet["WJets"]),RooFit::LineColor(kBlack),RooFit::VLines());
 
     rdataset_data_mj_extremefail->plotOn(xframe_data_extremefail, RooFit::Name("data"), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0));
-    rdataset_TotalMC_mj_extremefail->plotOn(xframe_data_extremefail,RooFit::Name("TotalMC invisi"), RooFit::MarkerColor(kWhite), RooFit::LineColor(kWhite), RooFit::Invisible(), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0));
+    rdataset_TotalMC_mj_extremefail->plotOn(xframe_data_extremefail,RooFit::Name("TotalMC_invisible"), RooFit::MarkerColor(kWhite), RooFit::LineColor(kWhite), RooFit::Invisible(), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0));
 
     model_TotalMC_extremefail->plotOn(xframe_data_extremefail,RooFit::Name("total MC fit"),RooFit::NormRange("controlsample_fitting_range"), RooFit::LineStyle(kDashed));
     cut.Form("%s,%s,%s,%s",model_bkg_TotalMC_extremefail->GetName(),model_STop_extremefail->GetName(),model_VV_extremefail->GetName(),model_WJets_extremefail->GetName());
     model_TotalMC_extremefail->plotOn(xframe_data_extremefail,RooFit::Name("MC fit bkg"),RooFit::NormRange("controlsample_fitting_range"), RooFit::Components(cut.Data()), RooFit::LineColor(kRed), RooFit::LineStyle(kDashed));
 
 
-    rdataset_data_mj_extremefail->plotOn(xframe_data_extremefail,RooFit::Name("data invisi"), RooFit::MarkerColor(kWhite), RooFit::LineColor(kWhite), RooFit::Invisible(), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
+    rdataset_data_mj_extremefail->plotOn(xframe_data_extremefail,RooFit::Name("data_invisible"), RooFit::MarkerColor(kWhite), RooFit::LineColor(kWhite), RooFit::Invisible(), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
 
     model_data_extremefail->plotOn(xframe_data_extremefail,RooFit::Name("total data fit"),RooFit::NormRange("controlsample_fitting_range"));
-    model_data_extremefail->plotOn(xframe_data_extremefail,RooFit::Name("data fit invisi"),RooFit::NormRange("controlsample_fitting_range"));
+    model_data_extremefail->plotOn(xframe_data_extremefail,RooFit::Name("data_fit_invisible"),RooFit::NormRange("controlsample_fitting_range"));
     cut.Form("%s,%s,%s,%s",model_bkg_data_extremefail->GetName(),model_STop_extremefail->GetName(),model_VV_extremefail->GetName(),model_WJets_extremefail->GetName());
     model_data_extremefail->plotOn(xframe_data_extremefail,RooFit::Name("data fit bkg"),RooFit::NormRange("controlsample_fitting_range"), RooFit::Components(cut.Data()), RooFit::LineColor(kRed));
 
-    xframe_data_extremefail->GetYaxis()->SetRangeUser(1e-2,xframe_data_extremefail->GetMaximum()*1.5);
-
-    TLegend* leg_data_extremefail = legend4Plot(xframe_data_extremefail,0,1,0.12);
+    xframe_data_extremefail->GetYaxis()->SetRangeUser(0.,xframe_data_extremefail->GetMaximum()*1.3);
+    TLegend* leg_data_extremefail = legend4Plot(xframe_data_extremefail,0,-0.2,0.07,0.04,0.,1,channel);                                           
     xframe_data_extremefail->addObject(leg_data_extremefail);
 
     nameDir.Form("plots_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_nearbyJets_v3/",channel.c_str(),wtagger.c_str(),wtagger.c_str());
     namePlot.Form("control%s_%s_%s_extremefail_pTbin_%d_%d",label.c_str(),wtagger.c_str(),channel.c_str(),int(ca8_ungroomed_pt_min),int(ca8_ungroomed_pt_max));
-    draw_canvas(xframe_data,std::string(nameDir),std::string(namePlot),channel,GetLumi(),0,1,0);    
+    draw_canvas(xframe_data_extremefail,std::string(nameDir),std::string(namePlot),channel,GetLumi(),0,1,0);    
 }
 
 
@@ -2445,7 +2443,6 @@ void DrawScaleFactorTTbarControlSample(RooWorkspace* workspace, std::map<std::st
   change_dataset_to_histpdf(workspace,rrv_mass_j, rdataset_VV_mj_fail);
   change_dataset_to_histpdf(workspace,rrv_mass_j, rdataset_WJets_mj_fail);
 
-  RooAbsPdf* model_histpdf_TTbar_fail = workspace->pdf((std::string(rdataset_TTbar_mj_fail->GetName())+"_histpdf").c_str());
   RooAbsPdf* model_histpdf_STop_fail  = workspace->pdf((std::string(rdataset_STop_mj_fail->GetName())+"_histpdf").c_str());
   RooAbsPdf* model_histpdf_VV_fail    = workspace->pdf((std::string(rdataset_VV_mj_fail->GetName())+"_histpdf").c_str());
   RooAbsPdf* model_histpdf_WJets_fail = workspace->pdf((std::string(rdataset_WJets_mj_fail->GetName())+"_histpdf").c_str());
@@ -2479,78 +2476,99 @@ void DrawScaleFactorTTbarControlSample(RooWorkspace* workspace, std::map<std::st
   RooPlot* xframe_data = rrv_mass_j->frame( RooFit::Bins(int(rrv_mass_j->getBins())));
   RooPlot* xframe_data_fail = rrv_mass_j->frame( RooFit::Bins(int(rrv_mass_j->getBins())));
 
-  //## plot data and mc on the frame
-  TString cut; cut.Form("category_p_f%s_%s==category_p_f%s_%s::pass",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
-  combData_p_f_data->plotOn(xframe_data,RooFit::Name("data invisi"), RooFit::Cut(cut.Data()), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
-  cut.Form("category_p_f%s_%s==category_p_f%s_%s::fail",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
-  combData_p_f_data->plotOn(xframe_data_fail,RooFit::Name("data invisi"), RooFit::Cut(cut.Data()), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
-        
-  //pass plot
-  if(TString(label.c_str()).Contains("herwig"))
-    model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("TTbar_herwig"),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"+label]), RooFit::LineColor(kBlack), RooFit::VLines());
-  else
-    model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("TTbar"),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"+label]), RooFit::LineColor(kBlack), RooFit::VLines());
-        
-  cut.Form("%s,%s,%s",model_histpdf_STop->GetName(), model_histpdf_VV->GetName(), model_histpdf_WJets->GetName());
-  model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("STop"),RooFit::Components(cut.Data()),RooFit::DrawOption("F"),RooFit::FillColor(color_palet["STop"]), RooFit::LineColor(kBlack), RooFit::VLines());
-  cut.Form("%s,%s",model_histpdf_VV->GetName(), model_histpdf_WJets->GetName());       
-  model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("VV"),RooFit::Components(cut.Data()), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["VV"]), RooFit::LineColor(kBlack), RooFit::VLines());
-  cut.Form("%s",model_histpdf_WJets->GetName());      
-  model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("WJets"),RooFit::Components(cut.Data()), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WJets"]), RooFit::LineColor(kBlack), RooFit::VLines());
 
-  //pass plots
-  model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("TTbar_line_invisible"), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
+    TString cut ;
+    cut.Form("category_p_f%s_%s==category_p_f%s_%s::pass",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
+    combData_p_f_data->plotOn(xframe_data,RooFit::Name("data_invisible"),RooFit::Cut(cut.Data()),RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
+
+    //#############################################################  
+    ///plot total pass mc normalizing it to data, passing + failing                                                                                                                   
+    //#############################################################  
+
+    if(TString(label).Contains("herwig"))    
+      model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("TTbar_herwig"),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"+label]), RooFit::LineColor(kBlack), RooFit::VLines());
+    else
+      model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("TTbar"),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"+label]), RooFit::LineColor(kBlack), RooFit::VLines());
   
-  cut.Form("%s,%s,%s",model_histpdf_STop->GetName(), model_histpdf_VV->GetName(), model_histpdf_WJets->GetName());       
-  model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("STop_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
-  cut.Form("%s,%s",model_histpdf_VV->GetName(),model_histpdf_WJets->GetName());      
-  model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("VV_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
-  cut.Form("%s",model_histpdf_WJets->GetName());
-  model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("WJets_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
+    cut.Form("%s,%s,%s",model_histpdf_STop->GetName(),model_histpdf_VV->GetName(), model_histpdf_WJets->GetName());
+    model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("STop"),RooFit::Components(cut.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["STop"]), RooFit::LineColor(kBlack), RooFit::VLines());
+    cut.Form("%s,%s",model_histpdf_VV->GetName(), model_histpdf_WJets->GetName());
+    model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("VV"),RooFit::Components(cut.Data()), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["VV"]), RooFit::LineColor(kBlack), RooFit::VLines());
+    cut.Form("%s",model_histpdf_WJets->GetName());
+    model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("WJets"),RooFit::Components(cut.Data()),RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WJets"]), RooFit::LineColor(kBlack), RooFit::VLines());
 
-  //fail plot
-  if(TString(label.c_str()).Contains("herwig"))
-    model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("TTbar_herwig"), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"+label]), RooFit::LineColor(kBlack), RooFit::VLines());
-  else
-    model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("TTbar"), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"+label]), RooFit::LineColor(kBlack), RooFit::VLines());
+    //pass plots
+    model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("TTbar_line_invisible"), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());  
+    cut.Form("%s,%s,%s",model_histpdf_STop->GetName(), model_histpdf_VV->GetName(), model_histpdf_WJets->GetName());       
+    model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("STop_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
+    cut.Form("%s,%s",model_histpdf_VV->GetName(),model_histpdf_WJets->GetName());      
+    model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("VV_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
+    cut.Form("%s",model_histpdf_WJets->GetName());
+    model_TTbar_STop_VV_WJets->plotOn(xframe_data,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets),RooFit::Name("WJets_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
 
-  cut.Form("%s,%s,%s",model_histpdf_STop_fail->GetName(), model_histpdf_VV_fail->GetName(), model_histpdf_WJets_fail->GetName());
-  model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("STop"),RooFit::Components(cut.Data()), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["STop"]), RooFit::LineColor(kBlack), RooFit::VLines());
-          
-  cut.Form("%s,%s",model_histpdf_VV_fail->GetName(), model_histpdf_WJets_fail->GetName());
-  model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("VV"),RooFit::Components(cut.Data()), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["VV"]), RooFit::LineColor(kBlack), RooFit::VLines());
-  cut.Form("%s", model_histpdf_WJets_fail->GetName());
-  model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("WJets"),RooFit::Components(cut.Data()), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WJets"]), RooFit::LineColor(kBlack), RooFit::VLines());
+    // plot data again                                                                                                                                                                 
+    cut.Form("category_p_f%s_%s==category_p_f%s_%s::pass",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
+    combData_p_f_data->plotOn(xframe_data,RooFit::Name("data"), RooFit::Cut(cut.Data()), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0));
 
-  //solid line
-  model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("TTbar_line_invisible"), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
-  cut.Form("%s,%s,%s",model_histpdf_STop_fail->GetName(), model_histpdf_VV_fail->GetName(), model_histpdf_WJets_fail->GetName());       
-  model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("STop_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
-  cut.Form("%s,%s",model_histpdf_VV_fail->GetName(), model_histpdf_WJets_fail->GetName());
-  model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("VV_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
-  cut.Form("%s", model_histpdf_WJets_fail->GetName());
-  model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("WJets_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
+    // plot mc fit function                                                                                                                                                            
+    cut.Form("category_p_f%s_%s==category_p_f%s_%s::pass",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
+    combData_p_f_TotalMC->plotOn(xframe_data,RooFit::Name("TotalMC_invisible"), RooFit::Cut(cut.Data()), RooFit::MarkerColor(kWhite), RooFit::LineColor(kWhite), RooFit::Invisible() , RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
 
-  cut.Form("category_p_f%s_%s==category_p_f%s_%s::pass",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
-  combData_p_f_data->plotOn(xframe_data,RooFit::Name("data"), RooFit::Cut(cut.Data()), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
-  cut.Form("category_p_f%s_%s==category_p_f%s_%s::fail",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
-  combData_p_f_data->plotOn(xframe_data_fail,RooFit::Name("data"), RooFit::Cut(cut.Data()), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
+    simPdf_TotalMC->plotOn(xframe_data,RooFit::Name("total MC fit"),RooFit::Slice(*category_p_f,"pass"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),RooFit::NormRange("controlsample_fitting_range"), RooFit::LineStyle(kDashed));     
+    cut.Form("model_bkg_TotalMC_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WJets0_%s_mj",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
+    simPdf_TotalMC->plotOn(xframe_data,RooFit::Name("MC fit bkg"),RooFit::Slice(*category_p_f,"pass"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),RooFit::NormRange("controlsample_fitting_range"), RooFit::Components(cut.Data()), RooFit::LineColor(kRed), RooFit::LineStyle(kDashed));
 
-  //plot mc fit
-  cut.Form("category_p_f%s_%s==category_p_f%s_%s::pass",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
-  combData_p_f_TotalMC->plotOn(xframe_data,RooFit::Name("TotalMC invisi"), RooFit::Cut(cut.Data()), RooFit::MarkerColor(kWhite), RooFit::LineColor(kWhite), RooFit::Invisible() , RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
+    // plot data fit function
+    cut.Form("category_p_f%s_%s==category_p_f%s_%s::pass",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());                                                    
+    combData_p_f_data->plotOn(xframe_data,RooFit::Name("data_invisible"),RooFit::Cut(cut.Data()),RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
 
-  simPdf_TotalMC->plotOn(xframe_data,RooFit::Name("total MC fit"),RooFit::Slice(*category_p_f,"pass"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),RooFit::NormRange("controlsample_fitting_range"), RooFit::LineStyle(kDashed));
-  cut.Form("model_bkg_TotalMC_failtau2tau1cut_%s_mj,model_STop_failtau2tau1cut_%s_mj,model_VV_failtau2tau1cut_%s_mj,model_WJets0_failtau2tau1cut_%s_mj",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
-  simPdf_TotalMC->plotOn(xframe_data_fail,RooFit::Name("MC fit bkg"),RooFit::Slice(*category_p_f,"fail"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),RooFit::NormRange("controlsample_fitting_range"), RooFit::Components(cut.Data()), RooFit::LineColor(kRed), RooFit::LineStyle(kDashed));
+    simPdf_data->plotOn(xframe_data,RooFit::Name("total data fit"),RooFit::Slice(*category_p_f,"pass"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"));
+    cut.Form("model_bkg_data_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WJets0_%s_mj",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
+    simPdf_data->plotOn(xframe_data,RooFit::Name("data fit bkg"),RooFit::Slice(*category_p_f,"pass"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"), RooFit::Components(cut.Data()), RooFit::LineColor(kRed));
+
+    ///plot total fail mc normalizing it to data, passing + failing                                                                                                                   
+    cut.Form("category_p_f%s_%s==category_p_f%s_%s::fail",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
+    combData_p_f_data->plotOn(xframe_data_fail,RooFit::Name("data_invisible"), RooFit::Cut(cut.Data()), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
+
+    if(TString(label).Contains("herwig"))
+     model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("TTbar_herwig"), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"+label]), RooFit::LineColor(kBlack), RooFit::VLines());
+    else
+     model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("TTbar"), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["TTbar"+label]), RooFit::LineColor(kBlack), RooFit::VLines());
+
+    cut.Form("%s,%s,%s",model_histpdf_STop_fail->GetName(),model_histpdf_VV_fail->GetName(),model_histpdf_WJets_fail->GetName());
+    model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("STop"),RooFit::Components(cut.Data()), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["STop"]), RooFit::LineColor(kBlack), RooFit::VLines());
+    cut.Form("%s,%s",model_histpdf_VV_fail->GetName(), model_histpdf_WJets_fail->GetName());  
+    model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("VV"),RooFit::Components(cut.Data()), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["VV"]), RooFit::LineColor(kBlack), RooFit::VLines());
+    cut.Form("%s", model_histpdf_WJets_fail->GetName());
+    model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("WJets"),RooFit::Components(cut.Data()), RooFit::DrawOption("F"), RooFit::FillColor(color_palet["WJets"]), RooFit::LineColor(kBlack), RooFit::VLines());
+
+    //solid line
+    model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("TTbar_line_invisible"), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
+    cut.Form("%s,%s,%s",model_histpdf_STop_fail->GetName(), model_histpdf_VV_fail->GetName(), model_histpdf_WJets_fail->GetName());       
+    model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("STop_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
+    cut.Form("%s,%s",model_histpdf_VV_fail->GetName(), model_histpdf_WJets_fail->GetName());
+    model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("VV_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
+    cut.Form("%s", model_histpdf_WJets_fail->GetName());
+    model_TTbar_STop_VV_WJets_fail->plotOn(xframe_data_fail,RooFit::Normalization(scale_number_TTbar_STop_VV_WJets_fail),RooFit::Name("WJets_line_invisible"),RooFit::Components(cut.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::VLines());
+
   
-  cut.Form("category_p_f%s_%s==category_p_f%s_%s::fail",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());          
-  combData_p_f_data->plotOn(xframe_data_fail,RooFit::Name("data invisi"), RooFit::Cut(cut.Data()), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0) );
+    //fail plots -> plot MC fit                                                                                                                                          
+    cut.Form("category_p_f%s_%s==category_p_f%s_%s::fail",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
+    combData_p_f_TotalMC->plotOn(xframe_data_fail,RooFit::Name("TotalMC_invisible"), RooFit::Cut(cut.Data()), RooFit::MarkerColor(kWhite), RooFit::LineColor(kWhite), RooFit::Invisible(), RooFit::MarkerSize(1.5), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0));
 
-  simPdf_data->plotOn(xframe_data_fail,RooFit::Name("total data fit"),RooFit::Slice(*category_p_f,"fail"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"));
-  simPdf_data->plotOn(xframe_data_fail,RooFit::Name("data fit invisi"),RooFit::Slice(*category_p_f,"fail"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"));
-  cut.Form("model_bkg_data_failtau2tau1cut_%s_mj,model_STop_failtau2tau1cut_%s_mj,model_VV_failtau2tau1cut_%s_mj,model_WJets0_failtau2tau1cut_%s_mj",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
-  simPdf_data->plotOn(xframe_data_fail,RooFit::Name("data fit bkg"),RooFit::Slice(*category_p_f,"fail"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"), RooFit::Components(cut.Data()), RooFit::LineColor(kRed));
+    simPdf_TotalMC->plotOn(xframe_data_fail,RooFit::Name("total MC fit"),RooFit::Slice(*category_p_f,"fail"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),RooFit::NormRange("controlsample_fitting_range"), RooFit::LineStyle(kDashed));
+
+    cut.Form("model_bkg_TotalMC_failtau2tau1cut_%s_mj,model_STop_failtau2tau1cut_%s_mj,model_VV_failtau2tau1cut_%s_mj,model_WJets0_failtau2tau1cut_%s_mj",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
+    simPdf_TotalMC->plotOn(xframe_data_fail,RooFit::Name("MC fit bkg"),RooFit::Slice(*category_p_f,"fail"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),RooFit::NormRange("controlsample_fitting_range"), RooFit::Components(cut.Data()), RooFit::LineColor(kRed), RooFit::LineStyle(kDashed));
+
+    //fail plots -> plot data fit                                                                                                                                                       
+    cut.Form("category_p_f%s_%s==category_p_f%s_%s::fail",label.c_str(),channel.c_str(),label.c_str(),channel.c_str());
+    combData_p_f_data->plotOn(xframe_data_fail,RooFit::Name("data_invisible"),RooFit::Cut(cut.Data()),RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0));
+
+    simPdf_data->plotOn(xframe_data_fail,RooFit::Name("total data fit"),RooFit::Slice(*category_p_f,"fail"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"));
+    simPdf_data->plotOn(xframe_data_fail,RooFit::Name("data_fit_invisible"),RooFit::Slice(*category_p_f,"fail"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"));
+    cut.Form("model_bkg_data_failtau2tau1cut_%s_mj,model_STop_failtau2tau1cut_%s_mj,model_VV_failtau2tau1cut_%s_mj,model_WJets0_failtau2tau1cut_%s_mj",channel.c_str(),channel.c_str(),channel.c_str(),channel.c_str());
+    simPdf_data->plotOn(xframe_data_fail,RooFit::Name("data fit bkg"),RooFit::Slice(*category_p_f,"fail"),RooFit::ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),RooFit::NormRange("controlsample_fitting_range"), RooFit::Components(cut.Data()),RooFit::LineColor(kRed));
       
   //signal window
   TLine* lowerLine = new TLine(65,0.,65,xframe_data->GetMaximum()*0.7); lowerLine->SetLineWidth(2); lowerLine->SetLineColor(kBlack); lowerLine->SetLineStyle(9);
@@ -2560,9 +2578,9 @@ void DrawScaleFactorTTbarControlSample(RooWorkspace* workspace, std::map<std::st
   upperLine = new TLine(105,0.,105,xframe_data_fail->GetMaximum()*0.7); upperLine->SetLineWidth(2); upperLine->SetLineColor(kBlack); upperLine->SetLineStyle(9);
   xframe_data_fail->addObject(lowerLine); xframe_data_fail->addObject(upperLine);
 
-  TLegend* leg_data = legend4Plot(xframe_data,0,1, 0.12);
+  TLegend* leg_data = legend4Plot(xframe_data,0,-0.2,0.07,0.04,0.,1,channel);                                                                                          
   xframe_data->addObject(leg_data);
-  TLegend* leg_data_fail = legend4Plot(xframe_data_fail,0,1,0.12);
+  TLegend* leg_data_fail = legend4Plot(xframe_data_fail,0,-0.2,0.07,0.04,0.,1,channel);                                           
   xframe_data_fail->addObject(leg_data_fail);
 
   std::string tmp_channel = "el";
@@ -2597,8 +2615,8 @@ void DrawScaleFactorTTbarControlSample(RooWorkspace* workspace, std::map<std::st
    // xframe_data.addObject(tl_data_mean); xframe_data.addObject(tl_data_sigma);
    }
 
-   xframe_data->GetYaxis()->SetRangeUser(1e-2,xframe_data->GetMaximum()*1.2);
-   xframe_data_fail->GetYaxis()->SetRangeUser(1e-2,xframe_data_fail->GetMaximum()*1.2);
+   xframe_data->GetYaxis()->SetRangeUser(1e-2,xframe_data->GetMaximum()*1.3);
+   xframe_data_fail->GetYaxis()->SetRangeUser(1e-2,xframe_data_fail->GetMaximum()*1.3);
 
    TString nameDir;  nameDir.Form("plots_%s_%s/m_j_fitting_TTbar_controlsample_wtaggercut%s_nearbyJets_v3/",channel.c_str(),wtagger.c_str(),wtagger.c_str());
    TString namePlot; namePlot.Form("control%s_%s_%s_pTbin_%d_%d",label.c_str(),wtagger.c_str(),channel.c_str(),int(ca8_ungroomed_pt_min),int(ca8_ungroomed_pt_max));
