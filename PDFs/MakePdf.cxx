@@ -381,11 +381,7 @@ void ShowParam_Pdf(RooAbsPdf* model_pdf, RooArgSet* argset_notparameter){
    TIter par = parameters->createIterator(); par.Reset();
    RooRealVar* param = dynamic_cast<RooRealVar*>(par.Next());
    while (param){
-       if(not param->isConstant()){
-          param->Print();
-          if ((param->getVal()-param->getMin())< param->getError()*1 or (param->getMax()- param->getVal())< param->getError()*1)
-                    param->Print();
-        }
+       if(not param->isConstant()) param->Print();        
         param = dynamic_cast<RooRealVar*>(par.Next());
     }
 }
