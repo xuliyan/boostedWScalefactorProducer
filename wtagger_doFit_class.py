@@ -176,9 +176,9 @@ class doFit_wj_and_wlvj:
         self.file_pseudodata_herwig = ("ofile_pseudodata4exo_herwig.root");
 
         if self.channel != "em":
-            self.file_WJets0_mc = ("ofile_WJets_Pythia100.root");
+            self.file_WJets0_mc = ("ofile_WJets_Pythia180.root");
         else:
-            self.file_WJets0_mc = ("ofile_WJets_Pythia100.root");
+            self.file_WJets0_mc = ("ofile_WJets_Pythia180.root");
 
         self.file_WJets1_mc = ("ofile_WJets_Herwig.root");
 
