@@ -49,7 +49,7 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
      else
          model_pdf = MakeExtendedModel(workspace,label,model,"_mj",channel,wtagger_label,constraint_list);
 
-     RooFitResult* rfresult = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::Extended(kTRUE),RooFit::SumW2Error(kTRUE));
+     RooFitResult* rfresult = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::Extended(kTRUE),RooFit::SumW2Error(kTRUE),RooFit::Minimizer("Minuit2"));
      rfresult = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2"));
      rfresult = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2"));
      rfresult->Print();
