@@ -55,6 +55,7 @@ parser.add_option('--turnOnAnalysis',       action="store", type="int",  dest="t
 parser.add_option('--injectSingalStrenght', action="store", type=float,  dest="injectSingalStrenght", default=0., help='inject a singal in the toy generation')
 
 parser.add_option('--higgsCombination', action="store", type="int", dest="higgsCombination", default=0)
+parser.add_option('--interferenceModel', action="store", type="string", dest="interferenceModel", default="1")
 
 
 ###### options for Bias test in the combination tool
@@ -153,8 +154,11 @@ if options.biasStudy:
 
  isMC      = [0,0,0,0,0];
 
+#cprime = [10]
+#BRnew = [00]
 cprime = [01,02,03,05,07,10]
 BRnew  = [00,01,02,03,04,05]
+#BRnew = [00]
 
 ########################################
 ###### Make Asymptotic Limit Plot ######
@@ -263,7 +267,7 @@ def submitBatchJob( command, fn ):
   outScript.write("\n"+'cp '+currentDir+'/BiasStudy/do_fitBias_higgs.py ./');
   outScript.write("\n"+'cp '+currentDir+'/doFit_class_higgs.py ./');
   outScript.write("\n"+'ls');  
-  outScript.write("\n"+"unbuffer "+command+" > /gwteray/users/gerosa/output"+fn+".txt");
+  outScript.write("\n"+"unbuffer "+command+" > /gwteray/users/brianza/output"+fn+".txt");
   outScript.close();
          
   os.system("chmod 777 "+currentDir+"/"+fn+".sh");
@@ -271,7 +275,7 @@ def submitBatchJob( command, fn ):
   if options.queque != "":
    os.system("qsub -V -d "+currentDir+" -q "+options.queque+" "+currentDir+"/"+fn+".sh");
   else:
-   os.system("qsub -V -d "+currentDir+" -q shortcms "+currentDir+"/"+fn+".sh");
+   os.system("qsub -V -d "+currentDir+" -q longcms "+currentDir+"/"+fn+".sh");
       
 
 ##########################################
@@ -387,7 +391,7 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
      if options.queque != "":
       os.system("qsub -V -d "+currentDir+" -q "+options.queque+" "+currentDir+"/"+fn+".sh");
      else:
-      os.system("qsub -V -d "+currentDir+" -q shortcms "+currentDir+"/"+fn+".sh");
+      os.system("qsub -V -d "+currentDir+" -q longcms "+currentDir+"/"+fn+".sh");
          
 
 #####################################
@@ -544,7 +548,7 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
     setStyle();
     
     can_SM = ROOT.TCanvas("can_SM","can_SM",630,600);
-    hrl_SM = can_SM.DrawFrame(599,0.0,1001,ROOT.TMath.MaxElement(curGraph_2s.GetN(),curGraph_2s.GetY())*1.2);
+    hrl_SM = can_SM.DrawFrame(599,0.0,1001,ROOT.TMath.MaxElement(curGraph_2s.GetN(),curGraph_2s.GetY())*1.8);
 
     hrl_SM.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{SM}");
     hrl_SM.GetYaxis().SetTitleOffset(1.35);
@@ -564,7 +568,7 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
     if not options.blindObservedLine : curGraph_obs.Draw("PCsame");
     curGraph_exp.Draw("Csame");
 
-    leg2 = ROOT.TLegend(0.30,0.65,0.75,0.85);
+    leg2 = ROOT.TLegend(0.30,0.75,0.75,0.92);
     leg2.SetFillColor(0);
     leg2.SetShadowColor(0);
     leg2.SetTextFont(42);
@@ -627,6 +631,7 @@ def makeSMPValuePlot(SIGCH,cprime = 10,brnew = 00):
     for i in range(len(mass)):
 	curFile_obs = "higgsCombinehwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
 	curFile_exp = "higgsCombinehwwlvj_pval_exp_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+        print "higgsCombinehwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
         xbins_obs.append(mass[i]); 
         xbins_exp.append(mass[i]); 
         ybins_obs.append(getPValueFromCard(curFile_obs,1));
@@ -990,6 +995,7 @@ def makeBSMLimitPlotMass(SIGCH):
         ybins_csXbr_obs = array('f', []); ybins_csXbr_th  = array('f', []);
 
         for i in range(len(mass)):
+         if (cprime[j]*0.1)<=(1-brnew*0.1):
             curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime[j],brnew,mass[i]);
 
             curAsymLimits = getAsymLimits(curFile);
@@ -1224,6 +1230,7 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
         ybins_csXbr_th  = array('f', []);
 
         for i in range(len(BRnew)):
+         if (cprime[j]*0.1)<=(1-BRnew[i]*0.1):
             curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass,options.channel,SIGCH,cprime[j],BRnew[i],mass);
             curAsymLimits = getAsymLimits(curFile);
             xbins.append(BRnew_x[i]);
@@ -1404,7 +1411,7 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
 
 
     stylePath = os.getenv("ROOTStyle");
-    gROOT.ProcessLine(".x "+stylePath+"/rootPalette.C");
+#    gROOT.ProcessLine(".x "+stylePath+"/rootPalette.C");
     
     massBRWW = [5.58E-01,5.77E-01,5.94E-01,6.09E-01,6.21E-01];            
     print "module ===> makeBSMLimits_2D";
@@ -1442,7 +1449,8 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
 
     for j in range(len(cprime)):
         for i in range(len(BRnew)):
-            curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass,options.channel,SIGCH,cprime[j],BRnew[i],mass);            
+         if (cprime[j]*0.1)<=(1-BRnew[i]*0.1):
+            curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass,options.channel,SIGCH,cprime[j],BRnew[i],mass); 
             curAsymLimits = getAsymLimits(curFile);
             h2d_exp.SetBinContent(j+1,i+1,curAsymLimits[3]);
             h2d_obs.SetBinContent(j+1,i+1,curAsymLimits[0]);
@@ -1652,7 +1660,7 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
 
 
     stylePath = os.getenv("ROOTStyle");
-    gROOT.ProcessLine(".x "+stylePath+"/rootPalette.C");
+#    gROOT.ProcessLine(".x "+stylePath+"/rootPalette.C");
 
     massBRWW = [5.58E-01,5.77E-01,5.94E-01,6.09E-01,6.21E-01];            
 
@@ -1691,6 +1699,7 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
 
     for j in range(len(mass)):
         for i in range(len(cprime)):
+         if (cprime[j]*0.1)<=(1-BRnew[i]*0.1):
             curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[j],options.channel,SIGCH,cprime[i],brNew,mass[j]);
             curAsymLimits = getAsymLimits(curFile);
             h2d_exp.SetBinContent(j+1,i+1,curAsymLimits[3]);
@@ -1706,8 +1715,8 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
 
     h2d_exp.GetXaxis().SetTitle("m_{H} (GeV)");
     h2d_obs.GetXaxis().SetTitle("m_{H} (GeV)");
-    h2d_csXbr_exp.GetYaxis().SetTitle("m_{H} (GeV)");
-    h2d_csXbr_obs.GetYaxis().SetTitle("m_{H} (GeV)");
+    h2d_csXbr_exp.GetYaxis().SetTitle("C'");
+    h2d_csXbr_obs.GetYaxis().SetTitle("C'");
 
     h2d_csXbr_obs.GetZaxis().SetLimits(0,h2d_csXbr_obs.GetMaximum());
     h2d_csXbr_exp.GetZaxis().SetLimits(0,h2d_csXbr_exp.GetMaximum());
@@ -1962,7 +1971,7 @@ if __name__ == '__main__':
                     
                     time.sleep(0.3);
                     
-                    command = "python doFit_class_higgs.py %s ggH%03d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew %01d --inPath %s/ --jetBin %s --channel %s --pseudodata %d --closuretest %d --skipJetSystematics %d"%(CHAN, mass[i], ccmlo[i], ccmhi[i], mjlo[i], mjhi[i], mlo[i], mhi[i], shape[i], shapeAlt[i], cprime[j], BRnew[k], os.getcwd(), options.jetBin, options.channel,options.pseudodata,options.closuretest,options.skipJetSystematics);
+                    command = "python doFit_class_higgs.py %s ggH%03d %02d %02d %02d %02d %02d %02d %s %s -b -m --cprime %01d --BRnew %01d --inPath %s/ --jetBin %s --channel %s --pseudodata %d --closuretest %d --skipJetSystematics %d --interferenceModel %s"%(CHAN, mass[i], ccmlo[i], ccmhi[i], mjlo[i], mjhi[i], mlo[i], mhi[i], shape[i], shapeAlt[i], cprime[j], BRnew[k], os.getcwd(), options.jetBin, options.channel,options.pseudodata,options.closuretest,options.skipJetSystematics,options.interferenceModel);
                     print command ;
 
                     if options.batchMode :
@@ -2174,7 +2183,7 @@ if __name__ == '__main__':
                        ###### run the observed and expected pvalue  ##### 
                        ##################################################  
 
-                        runCmmd = "combine -M ProfileLikelihood --signif -n hwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
+                        runCmmd = "combine -M ProfileLikelihood --signif --pvalue -n hwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin -m %03d hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt %s -v 2"%(mass[i],options.channel,SIGCH,cprime[j],BRnew[k],mass[i],mass[i],options.channel,SIGCH,cprime[j],BRnew[k],moreCombineOpts);
                         print "runCmmd ",runCmmd;
 
                         if options.batchMode:
@@ -2249,78 +2258,78 @@ if __name__ == '__main__':
       if options.makeSMLimitPlot == 1:
           makeSMLimitPlot(SIGCH,10,0);
 
-          #makeSMLimitPlot(SIGCH,01,00);
-          #makeSMLimitPlot(SIGCH,01,01);
-          #makeSMLimitPlot(SIGCH,01,02);
-          #makeSMLimitPlot(SIGCH,01,03);
-          #makeSMLimitPlot(SIGCH,01,04);
-          #makeSMLimitPlot(SIGCH,01,05);
-          #makeSMLimitPlot(SIGCH,02,00);
-          #makeSMLimitPlot(SIGCH,02,01);
-          #makeSMLimitPlot(SIGCH,02,02);
-          #makeSMLimitPlot(SIGCH,02,03);
-          #makeSMLimitPlot(SIGCH,02,04);
-          #makeSMLimitPlot(SIGCH,02,05);
-          #makeSMLimitPlot(SIGCH,03,00);
-          #makeSMLimitPlot(SIGCH,03,01);
-          #makeSMLimitPlot(SIGCH,03,02);
-          #makeSMLimitPlot(SIGCH,03,03);
-          #makeSMLimitPlot(SIGCH,03,04);
-          #makeSMLimitPlot(SIGCH,03,05);
-          #makeSMLimitPlot(SIGCH,05,00);
-          #makeSMLimitPlot(SIGCH,05,01);
-          #makeSMLimitPlot(SIGCH,05,02);
-          #makeSMLimitPlot(SIGCH,05,03);
-          #makeSMLimitPlot(SIGCH,05,04);
-          #makeSMLimitPlot(SIGCH,05,05);
-          #makeSMLimitPlot(SIGCH,07,00);
-          #makeSMLimitPlot(SIGCH,07,01);
-          #makeSMLimitPlot(SIGCH,07,02);
-          #makeSMLimitPlot(SIGCH,07,03);
-          #makeSMLimitPlot(SIGCH,07,04);
-          #makeSMLimitPlot(SIGCH,07,05);
-          #makeSMLimitPlot(SIGCH,10,00);
-          #makeSMLimitPlot(SIGCH,10,01);
-          #makeSMLimitPlot(SIGCH,10,02);
-          #makeSMLimitPlot(SIGCH,10,03);
-          #makeSMLimitPlot(SIGCH,10,04);
-          #makeSMLimitPlot(SIGCH,10,05);
+          makeSMLimitPlot(SIGCH,01,00);
+          makeSMLimitPlot(SIGCH,01,01);
+          makeSMLimitPlot(SIGCH,01,02);
+          makeSMLimitPlot(SIGCH,01,03);
+          makeSMLimitPlot(SIGCH,01,04);
+          makeSMLimitPlot(SIGCH,01,05);
+          makeSMLimitPlot(SIGCH,02,00);
+          makeSMLimitPlot(SIGCH,02,01);
+          makeSMLimitPlot(SIGCH,02,02);
+          makeSMLimitPlot(SIGCH,02,03);
+          makeSMLimitPlot(SIGCH,02,04);
+          makeSMLimitPlot(SIGCH,02,05);
+          makeSMLimitPlot(SIGCH,03,00);
+          makeSMLimitPlot(SIGCH,03,01);
+          makeSMLimitPlot(SIGCH,03,02);
+          makeSMLimitPlot(SIGCH,03,03);
+          makeSMLimitPlot(SIGCH,03,04);
+          makeSMLimitPlot(SIGCH,03,05);
+          makeSMLimitPlot(SIGCH,05,00);
+          makeSMLimitPlot(SIGCH,05,01);
+          makeSMLimitPlot(SIGCH,05,02);
+          makeSMLimitPlot(SIGCH,05,03);
+          makeSMLimitPlot(SIGCH,05,04);
+          makeSMLimitPlot(SIGCH,05,05);
+          makeSMLimitPlot(SIGCH,07,00);
+          makeSMLimitPlot(SIGCH,07,01);
+          makeSMLimitPlot(SIGCH,07,02);
+          makeSMLimitPlot(SIGCH,07,03);
+#          makeSMLimitPlot(SIGCH,07,04);
+#          makeSMLimitPlot(SIGCH,07,05);
+          makeSMLimitPlot(SIGCH,10,00);
+#          makeSMLimitPlot(SIGCH,10,01);
+#          makeSMLimitPlot(SIGCH,10,02);
+#          makeSMLimitPlot(SIGCH,10,03);
+#          makeSMLimitPlot(SIGCH,10,04);
+#          makeSMLimitPlot(SIGCH,10,05);
 
           if options.plotPValue == 1:
-               makeSMPValuePlot(SIGCH);
+              makeSMPValuePlot(SIGCH);
 #              makeSMPValuePlot(SIGCH,10,01);
 #              makeSMPValuePlot(SIGCH,10,02);
 #              makeSMPValuePlot(SIGCH,10,03);
 #              makeSMPValuePlot(SIGCH,10,04);
 #              makeSMPValuePlot(SIGCH,10,05);
-#              makeSMPValuePlot(SIGCH,01,00);
-#              makeSMPValuePlot(SIGCH,01,01);
-#              makeSMPValuePlot(SIGCH,01,02);
-#              makeSMPValuePlot(SIGCH,01,03);
-#              makeSMPValuePlot(SIGCH,01,04);
-#              makeSMPValuePlot(SIGCH,01,05);
-#              makeSMPValuePlot(SIGCH,02,00);
-#              makeSMPValuePlot(SIGCH,02,01);
-#              makeSMPValuePlot(SIGCH,02,02);
-#              makeSMPValuePlot(SIGCH,02,03);
-#              makeSMPValuePlot(SIGCH,02,04);
-#              makeSMPValuePlot(SIGCH,02,05);
-#              makeSMPValuePlot(SIGCH,03,00);
-#              makeSMPValuePlot(SIGCH,03,01);
-#              makeSMPValuePlot(SIGCH,03,02);
-#              makeSMPValuePlot(SIGCH,03,03);
-#              makeSMPValuePlot(SIGCH,03,04);
-#              makeSMPValuePlot(SIGCH,03,05);
-#              makeSMPValuePlot(SIGCH,05,00);
-#              makeSMPValuePlot(SIGCH,05,01);
-#              makeSMPValuePlot(SIGCH,05,02);
-#              makeSMPValuePlot(SIGCH,05,03);
-#              makeSMPValuePlot(SIGCH,05,04);
-#              makeSMPValuePlot(SIGCH,05,05);
-#              makeSMPValuePlot(SIGCH,07,00);
-#              makeSMPValuePlot(SIGCH,07,01);
-#              makeSMPValuePlot(SIGCH,07,02);
-#              makeSMPValuePlot(SIGCH,07,03);
+              makeSMPValuePlot(SIGCH,01,00);
+              makeSMPValuePlot(SIGCH,01,01);
+              makeSMPValuePlot(SIGCH,01,02);
+              makeSMPValuePlot(SIGCH,01,03);
+              makeSMPValuePlot(SIGCH,01,04);
+              makeSMPValuePlot(SIGCH,01,05);
+              makeSMPValuePlot(SIGCH,02,00);
+              makeSMPValuePlot(SIGCH,02,01);
+              makeSMPValuePlot(SIGCH,02,02);
+              makeSMPValuePlot(SIGCH,02,03);
+              makeSMPValuePlot(SIGCH,02,04);
+              makeSMPValuePlot(SIGCH,02,05);
+              makeSMPValuePlot(SIGCH,03,00);
+              makeSMPValuePlot(SIGCH,03,01);
+              makeSMPValuePlot(SIGCH,03,02);
+              makeSMPValuePlot(SIGCH,03,03);
+              makeSMPValuePlot(SIGCH,03,04);
+              makeSMPValuePlot(SIGCH,03,05);
+              makeSMPValuePlot(SIGCH,05,00);
+              makeSMPValuePlot(SIGCH,05,01);
+              makeSMPValuePlot(SIGCH,05,02);
+              makeSMPValuePlot(SIGCH,05,03);
+              makeSMPValuePlot(SIGCH,05,04);
+              makeSMPValuePlot(SIGCH,05,05);
+              makeSMPValuePlot(SIGCH,07,00);
+              makeSMPValuePlot(SIGCH,07,01);
+              makeSMPValuePlot(SIGCH,07,02);
+              makeSMPValuePlot(SIGCH,07,03);
 #              makeSMPValuePlot(SIGCH,07,04);
 #              makeSMPValuePlot(SIGCH,07,05);
 
