@@ -41,6 +41,7 @@ parser.add_option('--fitSignal',   action='store', type="int",    dest='fitsigna
 parser.add_option('--category',    action="store", type="string", dest="category",    default="HP")
 parser.add_option('--jetBin',      action="store", type="string", dest="jetBin",      default="")
 parser.add_option('--skipJetSystematics',      action="store", type="int", dest="skipJetSystematics",  default=0)
+parser.add_option('--interferenceModel',       action="store", type="string", dest="interferenceModel", default="1")
 
 (options, args) = parser.parse_args()
 
@@ -1153,10 +1154,19 @@ class doFit_wj_and_wlvj:
                 tmp_event_weight = tmp_event_weight*tmp_interference_weight_H1000
                 tmp_event_weight4fit = tmp_event_weight4fit*tmp_interference_weight_H1000
 
+             if options.interferenceModel=="1":
+                 cent="SET1/file_for_interpolation.root";
+                 up="SET1/file_for_interpolation_up.root";
+                 dn="SET1/file_for_interpolation_dn.root";
+             else:
+                 cent="SET2/file_for_interpolation.root";
+                 up="SET2/file_for_interpolation_up.root";
+                 dn="SET2/file_for_interpolation_dn.root";
+   
              if TString(label).Contains("vbfH600"):
-                intWeight=getIntWght("file_for_interpolation.root", 600, mass_WW_gen, options.cprime/10., options.BRnew/10.)
-                intWeightUp=getIntWght("file_for_interpolation_up.root", 600, mass_WW_gen, options.cprime/10., options.BRnew/10.)
-                intWeightDn=getIntWght("file_for_interpolation_dn.root", 600, mass_WW_gen, options.cprime/10., options.BRnew/10.)           
+                intWeight=getIntWght(cent, 600, mass_WW_gen, options.cprime/10., options.BRnew/10.)
+                intWeightUp=getIntWght(up, 600, mass_WW_gen, options.cprime/10., options.BRnew/10.)
+                intWeightDn=getIntWght(dn, 600, mass_WW_gen, options.cprime/10., options.BRnew/10.)           
 
                 tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H600*intWeight;
                 tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H600*intWeight;
@@ -1166,9 +1176,9 @@ class doFit_wj_and_wlvj:
                 tmp_event_weight4fitDn = tmp_event_weight4fitDn*treeIn.cps_Weight_H600*intWeightDn;                                
 
              if TString(label).Contains("vbfH700"):
-                intWeight=getIntWght("file_for_interpolation.root", 700, mass_WW_gen, options.cprime/10., options.BRnew/10.)
-                intWeightUp=getIntWght("file_for_interpolation_up.root", 700, mass_WW_gen, options.cprime/10., options.BRnew/10.)
-                intWeightDn=getIntWght("file_for_interpolation_dn.root", 700, mass_WW_gen, options.cprime/10., options.BRnew/10.)           
+                intWeight=getIntWght(cent, 700, mass_WW_gen, options.cprime/10., options.BRnew/10.)
+                intWeightUp=getIntWght(up, 700, mass_WW_gen, options.cprime/10., options.BRnew/10.)
+                intWeightDn=getIntWght(dn, 700, mass_WW_gen, options.cprime/10., options.BRnew/10.)           
 
                 tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H700*intWeight;
                 tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H700*intWeight;
@@ -1179,9 +1189,9 @@ class doFit_wj_and_wlvj:
 
 
              if TString(label).Contains("vbfH800"):
-                intWeight=getIntWght("file_for_interpolation.root", 800, mass_WW_gen, options.cprime/10., options.BRnew/10.)
-                intWeightUp=getIntWght("file_for_interpolation_up.root", 800, mass_WW_gen, options.cprime/10., options.BRnew/10.)
-                intWeightDn=getIntWght("file_for_interpolation_dn.root", 800, mass_WW_gen, options.cprime/10., options.BRnew/10.)           
+                intWeight=getIntWght(cent, 800, mass_WW_gen, options.cprime/10., options.BRnew/10.)
+                intWeightUp=getIntWght(up, 800, mass_WW_gen, options.cprime/10., options.BRnew/10.)
+                intWeightDn=getIntWght(dn, 800, mass_WW_gen, options.cprime/10., options.BRnew/10.)           
 
                 tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H800*intWeight;
                 tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H800*intWeight;
@@ -1191,9 +1201,9 @@ class doFit_wj_and_wlvj:
                 tmp_event_weight4fitDn = tmp_event_weight4fitDn*treeIn.cps_Weight_H800*intWeightDn;                                
 
              if TString(label).Contains("vbfH900"):
-                intWeight=getIntWght("file_for_interpolation.root", 900, mass_WW_gen, options.cprime/10., options.BRnew/10.)
-                intWeightUp=getIntWght("file_for_interpolation_up.root", 900, mass_WW_gen, options.cprime/10., options.BRnew/10.)
-                intWeightDn=getIntWght("file_for_interpolation_dn.root", 900, mass_WW_gen, options.cprime/10., options.BRnew/10.)           
+                intWeight=getIntWght(cent, 900, mass_WW_gen, options.cprime/10., options.BRnew/10.)
+                intWeightUp=getIntWght(up, 900, mass_WW_gen, options.cprime/10., options.BRnew/10.)
+                intWeightDn=getIntWght(dn, 900, mass_WW_gen, options.cprime/10., options.BRnew/10.)           
 
                 tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H900*intWeight;
                 tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H900*intWeight;
@@ -1204,9 +1214,9 @@ class doFit_wj_and_wlvj:
 
 
              if TString(label).Contains("vbfH1000"):
-                intWeight=getIntWght("file_for_interpolation.root", 1000, mass_WW_gen, options.cprime/10., options.BRnew/10.)
-                intWeightUp=getIntWght("file_for_interpolation_up.root", 1000, mass_WW_gen, options.cprime/10., options.BRnew/10.)
-                intWeightDn=getIntWght("file_for_interpolation_dn.root", 1000, mass_WW_gen, options.cprime/10., options.BRnew/10.)           
+                intWeight=getIntWght(cent, 1000, mass_WW_gen, options.cprime/10., options.BRnew/10.)
+                intWeightUp=getIntWght(up, 1000, mass_WW_gen, options.cprime/10., options.BRnew/10.)
+                intWeightDn=getIntWght(dn, 1000, mass_WW_gen, options.cprime/10., options.BRnew/10.)           
 
                 tmp_event_weight = tmp_event_weight*treeIn.cps_Weight_H1000*intWeight;
                 tmp_event_weight4fit = tmp_event_weight4fit*treeIn.cps_Weight_H1000*intWeight;
