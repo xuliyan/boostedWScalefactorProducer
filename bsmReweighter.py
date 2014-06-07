@@ -174,9 +174,9 @@ def lineshapeWidthReweight(point, meanSM, gammaSM, Cprime, massmin, massmax):
 #### used only for ggH samples ; input are the current value for the interference, the new lineshape parameters c' and BRnew
 def IntfRescale(curIntfRw,cPrime,BRnew):
 
-    curIoverS = curIntfRw - 1;
-    newWeight = 1 + ((1-BRnew)*curIoverS)/cPrime; ## scale as the inverse of the xs ; ratio of the two is the new weight to go to the new lineshape for ggH
-    if newWeight < 0: newWeight = 0.01;
-    ratio = newWeight/curIntfRw;
-        
-    return ratio;
+     curIoverS = curIntfRw - 1;
+     newWeight = 1 + ((1-BRnew)*curIoverS)/cPrime; ## scale as the inverse of the xs ; ratio of the two is the new weight to go to the new lineshape for ggH
+     if newWeight < 0: newWeight = 0.0;
+     ratio = newWeight/curIntfRw;
+
+     return ratio;
