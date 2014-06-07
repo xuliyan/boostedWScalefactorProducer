@@ -1915,7 +1915,7 @@ if __name__ == '__main__':
     moreCombineOpts = "";
     print "channel ",CHAN," directiory ",DIR," signal channel ",SIGCH," more options ",moreCombineOpts ;
     
-    if options.makeCards:
+    if options.makeCards and DIR != "":
         if not os.path.isdir(DIR):
             os.system("mkdir "+DIR);
         else: 

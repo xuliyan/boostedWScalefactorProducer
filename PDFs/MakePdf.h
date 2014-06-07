@@ -91,6 +91,12 @@ struct SystematicUncertaintyHiggs_01jetBin{
                                   const double mean_signal_uncertainty_jet_scale_ggH_900  = 0.013;
                                   const double mean_signal_uncertainty_jet_scale_ggH_1000 = 0.013;
 
+                                  const double mean_signal_uncertainty_interference_ggH_600  = 0.013;
+                                  const double mean_signal_uncertainty_interference_ggH_700  = 0.021;
+                                  const double mean_signal_uncertainty_interference_ggH_800  = 0.035;
+                                  const double mean_signal_uncertainty_interference_ggH_900  = 0.042;
+                                  const double mean_signal_uncertainty_interference_ggH_1000 = 0.055;
+
                                   const double mean_signal_uncertainty_jet_scale_vbfH_600  = 0.011;
                                   const double mean_signal_uncertainty_jet_scale_vbfH_700  = 0.009;
                                   const double mean_signal_uncertainty_jet_scale_vbfH_800  = 0.013;
@@ -148,6 +154,12 @@ struct SystematicUncertaintyHiggs_2jetBin{
                                   const double mean_signal_uncertainty_jet_scale_ggH_800  = 0.025;
                                   const double mean_signal_uncertainty_jet_scale_ggH_900  = 0.023;
                                   const double mean_signal_uncertainty_jet_scale_ggH_1000 = 0.020;
+
+                                  const double mean_signal_uncertainty_interference_ggH_600  = 0.013;
+                                  const double mean_signal_uncertainty_interference_ggH_700  = 0.021;
+                                  const double mean_signal_uncertainty_interference_ggH_800  = 0.035;
+                                  const double mean_signal_uncertainty_interference_ggH_900  = 0.042;
+                                  const double mean_signal_uncertainty_interference_ggH_1000 = 0.055;
 
                                   const double mean_signal_uncertainty_jet_scale_vbfH_600  = 0.045;
                                   const double mean_signal_uncertainty_jet_scale_vbfH_700  = 0.033;

@@ -1138,17 +1138,18 @@ class doFit_wj_and_wlvj:
              tmp_interference_weight_H900 = getattr(treeIn,"interference_Weight_H900");
              tmp_interference_weight_H1000 = getattr(treeIn,"interference_Weight_H1000");
 
-             tmp_interference_weight_H600_up= getattr(treeIn,"interference_Weight_H600_up");
-             tmp_interference_weight_H700_up= getattr(treeIn,"interference_Weight_H700_up");
-             tmp_interference_weight_H800_up= getattr(treeIn,"interference_Weight_H800_up");
-             tmp_interference_weight_H900_up= getattr(treeIn,"interference_Weight_H900_up");
-             tmp_interference_weight_H1000_up= getattr(treeIn,"interference_Weight_H1000_up");
+             if TString(label).Contains("ggH") or TString(label).Contains("vbfH"):
+              tmp_interference_weight_H600_up= getattr(treeIn,"interference_Weight_H600_up");
+              tmp_interference_weight_H700_up= getattr(treeIn,"interference_Weight_H700_up");
+              tmp_interference_weight_H800_up= getattr(treeIn,"interference_Weight_H800_up");
+              tmp_interference_weight_H900_up= getattr(treeIn,"interference_Weight_H900_up");
+              tmp_interference_weight_H1000_up= getattr(treeIn,"interference_Weight_H1000_up");
 
-             tmp_interference_weight_H600_dn= getattr(treeIn,"interference_Weight_H600_dn");
-             tmp_interference_weight_H700_dn= getattr(treeIn,"interference_Weight_H700_dn");
-             tmp_interference_weight_H800_dn= getattr(treeIn,"interference_Weight_H800_dn");
-             tmp_interference_weight_H900_dn= getattr(treeIn,"interference_Weight_H900_dn");
-             tmp_interference_weight_H1000_dn= getattr(treeIn,"interference_Weight_H1000_dn");
+              tmp_interference_weight_H600_dn= getattr(treeIn,"interference_Weight_H600_dn");
+              tmp_interference_weight_H700_dn= getattr(treeIn,"interference_Weight_H700_dn");
+              tmp_interference_weight_H800_dn= getattr(treeIn,"interference_Weight_H800_dn");
+              tmp_interference_weight_H900_dn= getattr(treeIn,"interference_Weight_H900_dn");
+              tmp_interference_weight_H1000_dn= getattr(treeIn,"interference_Weight_H1000_dn");
 
 
              ## added by Nhan, getting additional BSM weight
@@ -1327,12 +1328,13 @@ class doFit_wj_and_wlvj:
                          tmp_event_weightDn     = tmp_event_weightDn*self.rrv_wtagger_eff_reweight_forV.getVal();
                          tmp_event_weight4fitDn = tmp_event_weight4fitDn*self.rrv_wtagger_eff_reweight_forV.getVal();
 
-             tmp_event_weightUp        = tmp_event_weightUp* getattr(treeIn,"btag_weight"); ## add the btag weight 
-             tmp_event_weight4fitUp    = tmp_event_weight4fitUp* getattr(treeIn,"btag_weight"); ## add the btag weight
-             tmp_event_weightDn        = tmp_event_weightDn* getattr(treeIn,"btag_weight"); ## add the btag weight 
-             tmp_event_weight4fitDn    = tmp_event_weight4fitDn* getattr(treeIn,"btag_weight"); ## add the btag
-             tmp_event_weight          = tmp_event_weight* getattr(treeIn,"btag_weight"); ## add the btag weight 
-             tmp_event_weight4fit      = tmp_event_weight4fit* getattr(treeIn,"btag_weight"); ## add the btag weight
+             if TString(label).Contains("ggH") or TString(label).Contains("vbfH"):     
+              tmp_event_weightUp        = tmp_event_weightUp* getattr(treeIn,"btag_weight"); ## add the btag weight 
+              tmp_event_weight4fitUp    = tmp_event_weight4fitUp* getattr(treeIn,"btag_weight"); ## add the btag weight
+              tmp_event_weightDn        = tmp_event_weightDn* getattr(treeIn,"btag_weight"); ## add the btag weight 
+              tmp_event_weight4fitDn    = tmp_event_weight4fitDn* getattr(treeIn,"btag_weight"); ## add the btag
+              tmp_event_weight          = tmp_event_weight* getattr(treeIn,"btag_weight"); ## add the btag weight 
+              tmp_event_weight4fit      = tmp_event_weight4fit* getattr(treeIn,"btag_weight"); ## add the btag weight
 
  
 
@@ -1845,6 +1847,7 @@ class doFit_wj_and_wlvj:
          getattr(self.workspace4fit_,"import")(rdataset_mj_jer_dn); rdataset_mj_jer_dn.Print();
          getattr(self.workspace4fit_,"import")(rdataset4fit_mj_jer_dn); rdataset4fit_mj_jer_dn.Print();
 
+
     ##### Prepare the workspace for the limit and to store info to be printed in the datacard
     def prepare_limit(self,mode,isTTbarFloating = 1, isVVFloating = 0, isSTopFloating = 0, isWW_EWKFloating = 0):
 
@@ -1930,6 +1933,7 @@ class doFit_wj_and_wlvj:
         model_pdf_VV     = self.workspace4limit_.pdf("VV_%s"%(self.channel));
         model_pdf_TTbar  = self.workspace4limit_.pdf("TTbar_%s"%(self.channel));
         model_pdf_STop   = self.workspace4limit_.pdf("STop_%s"%(self.channel));
+
         if options.jetBin == "_2jet" :
          model_pdf_WW_EWK = self.workspace4limit_.pdf("WW_EWK_%s"%(self.channel));
 
@@ -1937,6 +1941,7 @@ class doFit_wj_and_wlvj:
         rrv_number_VV    = self.workspace4limit_.var("rate_VV_for_unbin");
         rrv_number_TTbar = self.workspace4limit_.var("rate_TTbar_for_unbin");
         rrv_number_STop = self.workspace4limit_.var("rate_STop_for_unbin");
+
         if options.jetBin == "_2jet" :
             rrv_number_WW_EWK = self.workspace4limit_.var("rate_WW_EWK_for_unbin");
 
@@ -2131,6 +2136,7 @@ class doFit_wj_and_wlvj:
 
            self.workspace4limit_.var("rrv_mean_shift_scale_jes_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_600);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_ggH_600);
+           self.workspace4limit_.var("rrv_mean_shift_scale_interference_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_interference_ggH_600);
                                                                                                                    
            self.workspace4limit_.var("rrv_mean_shift_scale_jes_%s_signal_region%s_%s_mlvj"%(self.vbfhiggs_sample,self.mlvj_shape["vbfH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_600);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer_%s_signal_region%s_%s_mlvj"%(self.vbfhiggs_sample,self.mlvj_shape["vbfH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_600);
@@ -2145,6 +2151,7 @@ class doFit_wj_and_wlvj:
 
            self.workspace4limit_.var("rrv_mean_shift_scale_jes_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_700);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_ggH_700);
+           self.workspace4limit_.var("rrv_mean_shift_scale_interference_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_interference_ggH_700);
                                                                                                                    
            self.workspace4limit_.var("rrv_mean_shift_scale_jes_%s_signal_region%s_%s_mlvj"%(self.vbfhiggs_sample,self.mlvj_shape["vbfH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_700);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer_%s_signal_region%s_%s_mlvj"%(self.vbfhiggs_sample,self.mlvj_shape["vbfH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_700);
@@ -2160,6 +2167,7 @@ class doFit_wj_and_wlvj:
 
            self.workspace4limit_.var("rrv_mean_shift_scale_jes_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_800);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_ggH_800);
+           self.workspace4limit_.var("rrv_mean_shift_scale_interference_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_interference_ggH_800);
                                                                                                                    
            self.workspace4limit_.var("rrv_mean_shift_scale_jes_%s_signal_region%s_%s_mlvj"%(self.vbfhiggs_sample,self.mlvj_shape["vbfH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_800);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer_%s_signal_region%s_%s_mlvj"%(self.vbfhiggs_sample,self.mlvj_shape["vbfH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_800);
@@ -2175,6 +2183,7 @@ class doFit_wj_and_wlvj:
 
            self.workspace4limit_.var("rrv_mean_shift_scale_jes_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_900);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_ggH_900);
+           self.workspace4limit_.var("rrv_mean_shift_scale_interference_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_interference_ggH_900);
                                                                                                                    
            self.workspace4limit_.var("rrv_mean_shift_scale_jes_%s_signal_region%s_%s_mlvj"%(self.vbfhiggs_sample,self.mlvj_shape["vbfH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_900);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer_%s_signal_region%s_%s_mlvj"%(self.vbfhiggs_sample,self.mlvj_shape["vbfH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_900);
@@ -2190,6 +2199,7 @@ class doFit_wj_and_wlvj:
 
            self.workspace4limit_.var("rrv_mean_shift_scale_jes_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_ggH_1000);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_ggH_1000);
+           self.workspace4limit_.var("rrv_mean_shift_scale_interference_%s_signal_region%s_%s_mlvj"%(self.higgs_sample,self.mlvj_shape["ggH"],self.channel)).setVal(systematic.mean_signal_uncertainty_interference_ggH_1000);
                                                                                                                    
            self.workspace4limit_.var("rrv_mean_shift_scale_jes_%s_signal_region%s_%s_mlvj"%(self.vbfhiggs_sample,self.mlvj_shape["vbfH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_scale_vbfH_1000);
            self.workspace4limit_.var("rrv_mean_shift_scale_jer_%s_signal_region%s_%s_mlvj"%(self.vbfhiggs_sample,self.mlvj_shape["vbfH"],self.channel)).setVal(systematic.mean_signal_uncertainty_jet_res_vbfH_1000);
@@ -2203,9 +2213,11 @@ class doFit_wj_and_wlvj:
 
         self.workspace4limit_.var("CMS_scale_j").setError(1);
         self.workspace4limit_.var("CMS_res_j").setError(1);
+        self.workspace4limit_.var("intf_ggH").setError(1);
 
         params_list.append(self.workspace4limit_.var("CMS_scale_j"));
         params_list.append(self.workspace4limit_.var("CMS_res_j"));
+        params_list.append(self.workspace4limit_.var("intf_ggH"));
 
         ### print the datacard                                       
         self.print_limit_datacard("unbin", "ggHvbfH",params_list);
@@ -2325,6 +2337,7 @@ class doFit_wj_and_wlvj:
  
         self.FloatingParams.add(self.workspace4limit_.var("CMS_scale_j"));
         self.FloatingParams.add(self.workspace4limit_.var("CMS_res_j"));
+        self.FloatingParams.add(self.workspace4limit_.var("intf_ggH"));
 
         ### Add the floating list to the combiner --> the pdf which are not fixed are floating by default
         getattr(self.workspace4limit_,"import")(self.FloatingParams);
@@ -2958,7 +2971,7 @@ self.channel));
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_ggH,"_%s"%(self.higgs_sample),"_signal_region",self.mlvj_shape["ggH"],self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.higgs_sample));
 
-
+        
         self.get_mj_and_mlvj_dataset(self.file_vbfH,"_%s"%(self.vbfhiggs_sample));
 
         if not options.skipJetSystematics:
@@ -2979,7 +2992,7 @@ self.channel));
 
         fit_mlvj_model_single_MC(self.workspace4fit_,self.file_vbfH,"_%s"%(self.vbfhiggs_sample),"_signal_region",self.mlvj_shape["vbfH"],self.channel,self.wtagger_label,0,0,0,0,"_%s"%(self.vbfhiggs_sample));
         self.workspace4fit_.writeToFile(self.tmpFile.GetName());
-    
+            
         print "________________________________________________________________________"
         
  
@@ -3316,8 +3329,7 @@ self.channel));
     ##### Fit of all the MC in both mj and mlvj : Signal, TTbar, STop, VV and Wjets
     def fit_AllSamples_Mj_and_Mlvj(self):
         print "################### fit_AllSamples_Mj_and_Mlvj #####################"
-        self.fit_Signal();
-#        raw_input("FERMAAAA");
+        self.fit_Signal();        
         self.fit_STop();
         self.fit_VV();
         if options.jetBin == "_2jet": self.fit_WW_EWK();        
@@ -3332,7 +3344,7 @@ self.channel));
       print "##################### Start sideband correction full analysis ##############";
       ### Fit all MC components in both mj and mlvj      
       self.fit_AllSamples_Mj_and_Mlvj();
-      ### take the real data
+      ### take the real data      
       self.get_data();
       ### fit the WJets Normalization into the signal region -> no jet mass fluctuation has been done
       if not options.skipJetSystematics:
@@ -3410,7 +3422,7 @@ self.channel));
 
       self.prepare_limit("sideband_correction_method1",1);
       self.read_workspace();
-       
+      
     ####### +++++++++++++++
     def analysis_sideband_correction_method1_without_shape_and_psmodel_systermatic(self):
         self.fit_AllSamples_Mj_and_Mlvj()
