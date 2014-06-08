@@ -55,7 +55,7 @@ parser.add_option('--turnOnAnalysis',       action="store", type="int",  dest="t
 parser.add_option('--injectSingalStrenght', action="store", type=float,  dest="injectSingalStrenght", default=0., help='inject a singal in the toy generation')
 
 parser.add_option('--higgsCombination', action="store", type="int", dest="higgsCombination", default=0)
-parser.add_option('--interferenceModel', action="store", type="string", dest="interferenceModel", default="1")
+parser.add_option('--interferenceModel', action="store", type="string", dest="interferenceModel", default="3")
 
 
 ###### options for Bias test in the combination tool
