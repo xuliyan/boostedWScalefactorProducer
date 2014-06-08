@@ -2728,22 +2728,25 @@ double doubleGausCrystalBallLowHighPlusExp (double* x, double* par) {
 
 //---- division of CBLowHighPlusExp with CBLowHigh ----
 Double_t CrystalBallLowHighPlusExpDividedByCrystalBallLowHigh(Double_t *x,Double_t *par) {
- double den = crystalBallLowHigh (x, par + 9) ; // signal only
-  if (den == 0) return -1. ;
- double num = doubleGausCrystalBallLowHighPlusExp (x, par) ; // signal and interference
 
- double alpha = par[16];
- double beta = par[17];
+ double den = crystalBallLowHigh (x, par + 9) ; // signal only                                                                                                  
+ if (den == 0) return -1. ;
+ double num = doubleGausCrystalBallLowHighPlusExp (x, par) ; // signal + I800 +I126  
+ double I126 = exponential (x,par+16); //interference from H126
+
+ double alpha = par[18];
+ double beta = par[19];
+ double zeta = par[20];
 
  double S = den;
- double I = (num - alpha*S)/sqrt(alpha);
+ double I = (num - alpha*S -sqrt(zeta)*I126)/sqrt(alpha);
 
  if (S != 0) {
-   return (alpha*S + sqrt(alpha)*I) / S;
+   return (alpha*S + sqrt(alpha)*I + sqrt(zeta)*I126) / S;
  }
 
  return num / den ;
- // return num;
+
 }
 
 
@@ -2751,16 +2754,19 @@ Double_t getIntWght(std::string wFile , double realMass, double Hmass , double c
 
     TString *readfile = new TString (wFile); //file with the values of the all parameters
     TFile* SI = new TFile(readfile->Data());
-    Double_t fill_param[16]; // 9 + 7 = 16
+    Double_t fill_param[18]; // 9 + 7 + 2 = 18
 
     TGraph2D* variables_S[7];
     TGraph2D* variables_SI[9];
+    TGraph2D* variables_I126[2];
     TF1* crystal_Icorr_qqH;
 
     double alpha = cprime * (1-BRnew);
     double beta = cprime / (1-BRnew);
+    double zeta = (1-cprime) * (1.-BRnew);
 
   TString parameters_normal [9] = {"Norm","Mean_CB","Sigma_CB","alphaR_CB","nR_CB","alphaL_CB","nL_CB","R","Tau"};
+  TString parameters_I126 [2] = {"N_exp","Tau_exp"};
 
     for (int i=0; i<9; i++) {
      TString *name = new TString (parameters_normal[i]);
@@ -2772,8 +2778,16 @@ Double_t getIntWght(std::string wFile , double realMass, double Hmass , double c
      name->Append("_S.txt");
      variables_S[i] = (TGraph2D*)SI->Get(name->Data());
     }
+    for (int i=0; i<2; i++) {
+      TString *name = new TString (parameters_I126[i]);
+      name->Append("_I126.txt");
+      name2->Append("_I126_histo");
+      variables_I126[i] = (TGraph2D*)SI->Get(name->Data());
+    }
 
-    crystal_Icorr_qqH = new TF1("crystal_Icorr_qqH",CrystalBallLowHighPlusExpDividedByCrystalBallLowHigh,0,3000,16+2);
+
+
+    crystal_Icorr_qqH = new TF1("crystal_Icorr_qqH",CrystalBallLowHighPlusExpDividedByCrystalBallLowHigh,0,3000,16+2+3);
 
     for (int iVar = 0; iVar<9; iVar++) {
       if (parameters_normal[iVar].Contains("Norm")) {
@@ -2793,8 +2807,13 @@ Double_t getIntWght(std::string wFile , double realMass, double Hmass , double c
       }
     }
 
-    crystal_Icorr_qqH->SetParameter(6+9+1, alpha);
-    crystal_Icorr_qqH->SetParameter(6+9+2, beta);
+    for (int iVar = 0; iVar<2; iVar++) {
+     	   crystal_Icorr_qqH->SetParameter(iVar+16, variables_I126[iVar]->Interpolate(realMass, beta));
+    }
+
+    crystal_Icorr_qqH->SetParameter(6+9+3, alpha);
+    crystal_Icorr_qqH->SetParameter(6+9+4, beta);
+    crystal_Icorr_qqH->SetParameter(6+9+5, zeta);
 
     Double_t wInt;
     wInt = 1.;
