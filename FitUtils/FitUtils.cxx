@@ -2796,7 +2796,6 @@ Double_t getIntWght(std::string wFile , double realMass, double Hmass , double c
     for (int i=0; i<2; i++) {
       TString *name = new TString (parameters_I126[i]);
       name->Append("_I126.txt");
-      name2->Append("_I126_histo");
       variables_I126[i] = (TGraph2D*)SI->Get(name->Data());
     }
 
