@@ -41,7 +41,7 @@ parser.add_option('--fitSignal',   action='store', type="int",    dest='fitsigna
 parser.add_option('--category',    action="store", type="string", dest="category",    default="HP")
 parser.add_option('--jetBin',      action="store", type="string", dest="jetBin",      default="")
 parser.add_option('--skipJetSystematics',      action="store", type="int", dest="skipJetSystematics",  default=0)
-parser.add_option('--interferenceModel',       action="store", type="string", dest="interferenceModel", default="1")
+parser.add_option('--interferenceModel',       action="store", type="string", dest="interferenceModel", default="3")
 
 (options, args) = parser.parse_args()
 
@@ -1206,10 +1206,14 @@ class doFit_wj_and_wlvj:
                  cent="SET1/file_for_interpolation.root";
                  up="SET1/file_for_interpolation_up.root";
                  dn="SET1/file_for_interpolation_dn.root";
-             else:
+             elif options.interferenceModel=="2":
                  cent="SET2/file_for_interpolation.root";
                  up="SET2/file_for_interpolation_up.root";
                  dn="SET2/file_for_interpolation_dn.root";
+             else:
+                 cent="SET3/file_for_interpolation.root";
+                 up="SET3/file_for_interpolation_up.root";
+                 dn="SET3/file_for_interpolation_dn.root";                 
    
              if TString(label).Contains("vbfH600"):
                 intWeight=getIntWght(cent, 600, mass_WW_gen, options.cprime/10., options.BRnew/10.)
