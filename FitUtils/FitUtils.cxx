@@ -2626,8 +2626,23 @@ void DrawScaleFactorTTbarControlSample(RooWorkspace* workspace, std::map<std::st
 
 }
 
+///////////////////////////
+
+/*** exponential for I126***/
+double exponential(double* x, double* par)
+{
+  //[0] = N   normalization factor                                                                                                                              
+  //[1] = lambda   slope                                                                                                                                        
+  double xx = x[0];
+  double N = par[0];
+  double lambda = par[1];
+
+  //std::cout << "N: " << N << "   lambda: " << lambda << std::endl;                                                                                            
+  return N * exp(-1.*lambda*xx);
+}
 
 
+////////////////////////
 //---crystal ball: for the signal -----
 double crystalBallLowHigh (double* x, double* par) {
   //[0] = N
