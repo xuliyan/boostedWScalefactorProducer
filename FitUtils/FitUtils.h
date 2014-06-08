@@ -61,6 +61,8 @@ void DrawScaleFactorTTbarControlSample(RooWorkspace*,  std::map<std::string,int>
 					
 ///////////////////
 
+double exponential (double* x, double* par);
+
 double crystalBallLowHigh (double* x, double* par);
 
 double doubleGausCrystalBallLowHighPlusExp (double* x, double* par);
