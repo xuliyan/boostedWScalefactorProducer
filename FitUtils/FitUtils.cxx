@@ -2778,7 +2778,7 @@ Double_t getIntWght(std::string wFile , double realMass, double Hmass , double c
 
     double alpha = cprime * (1-BRnew);
     double beta = cprime / (1-BRnew);
-    double zeta = (1-cprime) * (1.-BRnew);
+    double zeta = 1-cprime;
 
   TString parameters_normal [9] = {"Norm","Mean_CB","Sigma_CB","alphaR_CB","nR_CB","alphaL_CB","nL_CB","R","Tau"};
   TString parameters_I126 [2] = {"N_exp","Tau_exp"};
