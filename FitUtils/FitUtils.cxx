@@ -2754,13 +2754,13 @@ Double_t CrystalBallLowHighPlusExpDividedByCrystalBallLowHigh(Double_t *x,Double
  double zeta = par[20];
 
  double S = den;
- double I = (num - alpha*S -sqrt(zeta)*I126)/sqrt(alpha);
+ double I = (num - beta*S- sqrt(1-beta)*I126)/sqrt(beta);
 
- if (S != 0) {
-   return (alpha*S + sqrt(alpha)*I + sqrt(zeta)*I126) / S;
- }
+ double w = (alpha*S + sqrt(alpha)*I + sqrt(zeta)*I126) / S;
 
- return num / den ;
+
+  if (w<0)   return 0;
+  else       return w;
 
 }
 
