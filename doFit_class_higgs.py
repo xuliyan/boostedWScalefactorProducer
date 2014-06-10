@@ -2873,9 +2873,9 @@ self.channel));
 
 
         if self.higgs_sample == "ggH600" or self.higgs_sample == "ggH700":
-           signal_scale = 2;
+           signal_scale = 5;
         else: 
-           signal_scale = 2;
+           signal_scale = 5;
         
         if self.higgs_sample == "ggH600":
             model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("ggH#times%s, m_{H}=0.6TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["ggH"]), RooFit.LineStyle(2), RooFit.VLines());
@@ -2917,12 +2917,6 @@ self.channel));
         nparameters = self.FloatingParams.getSize();        
         ChiSquare = model_Total_background_MC.createChi2(datahist,RooFit.Extended(kTRUE),RooFit.DataError(RooAbsData.Poisson));
         chi_over_ndf= ChiSquare.getVal()/(Nbin - nparameters);
-        ## Add Chisquare to mplot_pull
-        cs = TLatex(0.75,0.8,"#chi^{2}/ndf = %0.2f "%(float(chi_over_ndf)));
-        cs.SetNDC();
-        cs.SetTextSize(0.12);
-        cs.AppendPad("same");
-        mplot_pull.addObject(cs)
 
         print "nPar=%s, chiSquare=%s/%s"%(nparameters, ChiSquare.getVal()*(Nbin - nparameters), (Nbin - nparameters) );
 
