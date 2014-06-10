@@ -154,7 +154,7 @@ if options.biasStudy:
 
  isMC      = [0,0,0,0,0];
 
-cprime = [01,02,03,05,07,10]
+cprime = [01,02,03,05,07]
 BRnew  = [00,01,02,03,04,05]
 #cprime = [10]
 #BRnew = [00]
@@ -491,7 +491,7 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
     ybins_1s  = array('f', []); ybins_2s  = array('f', []);
 
     setStyle();
-    
+     
     for i in range(len(mass)):
 	curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
 	curAsymLimits = getAsymLimits(curFile);
@@ -546,8 +546,8 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
 
     setStyle();
     
-    can_SM = ROOT.TCanvas("can_SM","can_SM",630,600);
-    hrl_SM = can_SM.DrawFrame(599,0.0,1001,ROOT.TMath.MaxElement(curGraph_2s.GetN(),curGraph_2s.GetY())*1.8);
+    can_SM = ROOT.TCanvas("can_SM","can_SM",600,650);
+    hrl_SM = can_SM.DrawFrame(599,0.0,1001,ROOT.TMath.MaxElement(curGraph_2s.GetN(),curGraph_2s.GetY())*1.2);
 
     hrl_SM.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{SM}");
     hrl_SM.GetYaxis().SetTitleOffset(1.35);
@@ -567,7 +567,7 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
     if not options.blindObservedLine : curGraph_obs.Draw("PCsame");
     curGraph_exp.Draw("Csame");
 
-    leg2 = ROOT.TLegend(0.30,0.75,0.75,0.92);
+    leg2 = ROOT.TLegend(0.3,0.65,0.75,0.9);
     leg2.SetFillColor(0);
     leg2.SetShadowColor(0);
     leg2.SetTextFont(42);
@@ -578,7 +578,6 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
     leg2.AddEntry(curGraph_2s, "Asympt. CL_{S} Expected #pm 2#sigma","LF")
                                        
     if not options.blindObservedLine:     leg2.AddEntry(curGraph_obs,"Asympt. CL_{S} Observed","LP")
-
 
     can_SM.Update();
     can_SM.RedrawAxis();
@@ -626,14 +625,15 @@ def makeSMPValuePlot(SIGCH,cprime = 10,brnew = 00):
     ybins_exp     = array('f', []);
 
     setStyle();
-    
+
     for i in range(len(mass)):
 	curFile_obs = "higgsCombinehwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
 	curFile_exp = "higgsCombinehwwlvj_pval_exp_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
-        print "higgsCombinehwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
         xbins_obs.append(mass[i]); 
         xbins_exp.append(mass[i]); 
+        print "higgsCombinehwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
         ybins_obs.append(getPValueFromCard(curFile_obs,1));
+        print "higgsCombinehwwlvj_pval_exp_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]); 
         ybins_exp.append(getPValueFromCard(curFile_exp,0));
 
     gr_obs = ROOT.TGraphAsymmErrors(nPoints,xbins_obs,ybins_obs);
@@ -711,7 +711,7 @@ def makeSMPValuePlot(SIGCH,cprime = 10,brnew = 00):
 def makeSignalStrenghtPlot(SIGCH,cprime = 10,brnew = 00):
 
     nPoints = len(mass);
-    
+
     xbins_mu         = array('f', []);
     xbins_mu_err_up  = array('f', []);
     xbins_mu_err_dn  = array('f', []);
@@ -903,7 +903,6 @@ def makeLikelihoodScanPlot(SIGCH,cprime,brnew):
     leg2.SetTextFont(42);
     leg2.SetTextSize(0.028);
     
-
     for i in range(len(mass)):
 
 	curFile = "higgsCombinehwwlvj_LikelihoodScan_ggH%03d_%s%s_%02d_%02d_unbin.MultiDimFit.mH%02d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
@@ -1418,7 +1417,7 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     massindex = {600:0,700:1,800:2,900:3,1000:4}
     mass_XS  = [];
     BRnew_y  = array('d',[0.,0.15,0.25,0.35,0.45,0.55]);
-    cprime_x = array('d',[0.,0.15,0.25,0.35,0.55,0.75,1.05]);
+    cprime_x = array('d',[0.,0.15,0.25,0.35,0.55,0.75]);
 
     if SIGCH == "" or SIGCH == "_2jet":
         mass_XS.append((0.5230+0.09688));
@@ -1440,7 +1439,9 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
         mass_XS.append((0.02399));
     else:
         print "problem!"
-        
+
+    setStyle();
+
     h2d_exp = TH2D("h2d_exp","",len(cprime_x)-1,cprime_x,len(BRnew_y)-1,BRnew_y);
     h2d_obs = TH2D("h2d_obs","",len(cprime_x)-1,cprime_x,len(BRnew_y)-1,BRnew_y);
     h2d_csXbr_exp = TH2D("h2d_csXbr_exp","",len(cprime_x)-1,cprime_x,len(BRnew_y)-1,BRnew_y);
@@ -1457,9 +1458,9 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
             h2d_csXbr_obs.SetBinContent(j+1,i+1,curAsymLimits[0]*mass_XS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]]);
             
 
-    h2d_obs.GetXaxis().SetTitle("C^{'}");
-    h2d_csXbr_exp.GetXaxis().SetTitle("C^{'}");
-    h2d_csXbr_obs.GetXaxis().SetTitle("C^{'}");
+    h2d_obs.GetXaxis().SetTitle("C^{'2}");
+    h2d_csXbr_exp.GetXaxis().SetTitle("C^{'2}");
+    h2d_csXbr_obs.GetXaxis().SetTitle("C^{'2}");
 
     h2d_exp.GetYaxis().SetTitle("BR_{new}");
     h2d_obs.GetYaxis().SetTitle("BR_{new}");
@@ -1474,7 +1475,7 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
 
     h2d_exp.SetLineStyle(0);
     h2d_exp.SetMarkerStyle(20);
-    h2d_exp.GetXaxis().SetTitle("C^{'}");
+    h2d_exp.GetXaxis().SetTitle("C^{'2}");
     h2d_exp.GetXaxis().SetNdivisions(504);
     h2d_exp.GetXaxis().SetLabelFont(42);
     h2d_exp.GetXaxis().SetLabelOffset(0.007);
@@ -1493,9 +1494,34 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     h2d_exp.GetZaxis().SetTitle("signal strenght excluded at 95% C.L");
     h2d_exp.GetZaxis().SetLabelFont(42);
     h2d_exp.GetZaxis().SetLabelSize(0.03);
-    h2d_exp.GetZaxis().SetTitleOffset(1);
+    h2d_exp.GetZaxis().SetTitleOffset(0.95);
     h2d_exp.GetZaxis().SetTitleFont(42);
     h2d_exp.GetZaxis().SetTitleSize(0.05);
+
+    h2d_obs.SetLineStyle(0);
+    h2d_obs.SetMarkerStyle(20);
+    h2d_obs.GetXaxis().SetTitle("C^{'2}");
+    h2d_obs.GetXaxis().SetNdivisions(504);
+    h2d_obs.GetXaxis().SetLabelFont(42);
+    h2d_obs.GetXaxis().SetLabelOffset(0.007);
+    h2d_obs.GetXaxis().SetLabelSize(0.045);
+    h2d_obs.GetXaxis().SetTitleSize(0.045);
+    h2d_obs.GetXaxis().SetTitleOffset(1.02);
+    h2d_obs.GetXaxis().SetTitleFont(42);
+    h2d_obs.GetYaxis().SetTitle("BR_{new}");
+    h2d_obs.GetYaxis().SetNdivisions(9);
+    h2d_obs.GetYaxis().SetLabelFont(42);
+    h2d_obs.GetYaxis().SetLabelOffset(0.007);
+    h2d_obs.GetYaxis().SetLabelSize(0.045);
+    h2d_obs.GetYaxis().SetTitleSize(0.045);
+    h2d_obs.GetYaxis().SetTitleOffset(1.25);
+    h2d_obs.GetYaxis().SetTitleFont(42);
+    h2d_obs.GetZaxis().SetTitle("signal strenght excluded at 95% C.L");
+    h2d_obs.GetZaxis().SetLabelFont(42);
+    h2d_obs.GetZaxis().SetLabelSize(0.03);
+    h2d_obs.GetZaxis().SetTitleOffset(0.95);
+    h2d_obs.GetZaxis().SetTitleFont(42);
+    h2d_obs.GetZaxis().SetTitleSize(0.05);
 
 
     banner = TPaveText( 0.125, 0.953, 0.76, 0.975, "brNDC");
@@ -1519,7 +1545,7 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     banner2 = TLatex(0.17,0.91,("Higgs mass, %i GeV"%(mass)));
     banner2.SetNDC(); banner2.SetTextSize(0.028);
 
-    can1_BSM2D = ROOT.TCanvas("can1_BSM2D","can1_BSM2D",1,1,630,576);
+    can1_BSM2D = ROOT.TCanvas("can1_BSM2D","can1_BSM2D",1,1,600,600);
     can1_BSM2D.SetHighLightColor(2);
     can1_BSM2D.SetFillColor(0);
     can1_BSM2D.SetBorderMode(0);
@@ -1531,7 +1557,7 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     can1_BSM2D.SetLeftMargin(0.15);
     can1_BSM2D.SetRightMargin(0.17);
     can1_BSM2D.SetTopMargin(0.05);
-    can1_BSM2D.SetBottomMargin(0.15);
+    can1_BSM2D.SetBottomMargin(0.1);
     can1_BSM2D.SetFrameFillStyle(0);
     can1_BSM2D.SetFrameBorderMode(0);
     can1_BSM2D.SetFrameFillStyle(0);
@@ -1553,7 +1579,7 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     can1_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpMu_%i.pdf"%(SIGCH,mass));
 
     if not options.blindObservedLine:
-        can2_BSM2D = ROOT.TCanvas("can2_BSM2D","can2_BSM2D",1,1,630,576);
+        can2_BSM2D = ROOT.TCanvas("can2_BSM2D","can2_BSM2D",1,1,600,600);
         can2_BSM2D.SetHighLightColor(2);
         can2_BSM2D.SetFillColor(0);
         can2_BSM2D.SetBorderMode(0);
@@ -1565,15 +1591,24 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
         can2_BSM2D.SetLeftMargin(0.15);
         can2_BSM2D.SetRightMargin(0.17);
         can2_BSM2D.SetTopMargin(0.05);
-        can2_BSM2D.SetBottomMargin(0.15);
+        can2_BSM2D.SetBottomMargin(0.1);
         can2_BSM2D.SetFrameFillStyle(0);
         can2_BSM2D.SetFrameBorderMode(0);
         can2_BSM2D.SetFrameFillStyle(0);
         can2_BSM2D.SetFrameBorderMode(0);
-
+ 
         h2d_obs.Draw("colz");
         banner.Draw();
+        label_sqrt.Draw();
         banner2.Draw();
+
+        gPad.Update();
+        palette = h2d_obs.GetListOfFunctions().FindObject("palette"); 
+        myx1=palette.GetX1NDC() +0.01;
+        myx2=palette.GetX2NDC() +0.01;
+        palette.SetX1NDC(myx1);
+        palette.SetX2NDC(myx2);
+        
         can2_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsMu_%i.png"%(SIGCH,mass));
         can2_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsMu_%i.pdf"%(SIGCH,mass));
 
@@ -1667,9 +1702,11 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
 
     massindex = {600:0,700:1,800:2,900:3,1000:4}
     mass_XS  = [];
-    cprime_x = array('d',[0.1,0.2,0.3,0.5,0.7,1.0]);
+    cprime_x = array('d',[0.1,0.2,0.3,0.5,0.75]);
     mass_x   = array('d',[550,650,750,850,950,1050]);
-    
+
+    setStyle();
+
     if SIGCH == "" or SIGCH == "_2jet":
         mass_XS.append((0.5230+0.09688));
         mass_XS.append((0.2288+0.06330));
@@ -1698,7 +1735,6 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
 
     for j in range(len(mass)):
         for i in range(len(cprime)):
-         if (cprime[j]*0.1)<=(1-BRnew[i]*0.1):
             curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[j],options.channel,SIGCH,cprime[i],brNew,mass[j]);
             curAsymLimits = getAsymLimits(curFile);
             h2d_exp.SetBinContent(j+1,i+1,curAsymLimits[3]);
@@ -1707,15 +1743,15 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
             h2d_csXbr_obs.SetBinContent(j+1,i+1,curAsymLimits[0]*mass_XS[massindex[mass[j]]]*cprime[i]*0.1*(1-brNew*0.1)*massBRWW[massindex[mass[j]]]);
 
 
-    h2d_obs.GetYaxis().SetTitle("C^{'}");
-    h2d_csXbr_exp.GetYaxis().SetTitle("C^{'}");
-    h2d_csXbr_obs.GetYaxis().SetTitle("C^{'}");
-    h2d_exp.GetYaxis().SetTitle("C^{'}");
+    h2d_obs.GetYaxis().SetTitle("C^{'2}");
+    h2d_csXbr_exp.GetYaxis().SetTitle("C^{'2}");
+    h2d_csXbr_obs.GetYaxis().SetTitle("C^{'2}");
+    h2d_exp.GetYaxis().SetTitle("C^{'2}");
 
     h2d_exp.GetXaxis().SetTitle("m_{H} (GeV)");
     h2d_obs.GetXaxis().SetTitle("m_{H} (GeV)");
-    h2d_csXbr_exp.GetYaxis().SetTitle("C'");
-    h2d_csXbr_obs.GetYaxis().SetTitle("C'");
+    h2d_csXbr_exp.GetYaxis().SetTitle("C^{'2}");
+    h2d_csXbr_obs.GetYaxis().SetTitle("C^{'2}");
 
     h2d_csXbr_obs.GetZaxis().SetLimits(0,h2d_csXbr_obs.GetMaximum());
     h2d_csXbr_exp.GetZaxis().SetLimits(0,h2d_csXbr_exp.GetMaximum());
@@ -1742,9 +1778,32 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
     h2d_exp.GetZaxis().SetTitle("signal strenght excluded at 95% C.L");
     h2d_exp.GetZaxis().SetLabelFont(42);
     h2d_exp.GetZaxis().SetLabelSize(0.03);
-    h2d_exp.GetZaxis().SetTitleOffset(1);
+    h2d_exp.GetZaxis().SetTitleOffset(0.95);
     h2d_exp.GetZaxis().SetTitleFont(42);
     h2d_exp.GetZaxis().SetTitleSize(0.05);
+
+    h2d_obs.SetLineStyle(0);
+    h2d_obs.SetMarkerStyle(20);
+    h2d_obs.GetXaxis().SetNdivisions(504);
+    h2d_obs.GetXaxis().SetLabelFont(42);
+    h2d_obs.GetXaxis().SetLabelOffset(0.007);
+    h2d_obs.GetXaxis().SetLabelSize(0.045);
+    h2d_obs.GetXaxis().SetTitleSize(0.045);
+    h2d_obs.GetXaxis().SetTitleOffset(1.02);
+    h2d_obs.GetXaxis().SetTitleFont(42);
+    h2d_obs.GetYaxis().SetNdivisions(9);
+    h2d_obs.GetYaxis().SetLabelFont(42);
+    h2d_obs.GetYaxis().SetLabelOffset(0.007);
+    h2d_obs.GetYaxis().SetLabelSize(0.045);
+    h2d_obs.GetYaxis().SetTitleSize(0.045);
+    h2d_obs.GetYaxis().SetTitleOffset(1.25);
+    h2d_obs.GetYaxis().SetTitleFont(42);
+    h2d_obs.GetZaxis().SetTitle("signal strenght excluded at 95% C.L");
+    h2d_obs.GetZaxis().SetLabelFont(42);
+    h2d_obs.GetZaxis().SetLabelSize(0.03);
+    h2d_obs.GetZaxis().SetTitleOffset(0.95);
+    h2d_obs.GetZaxis().SetTitleFont(42);
+    h2d_obs.GetZaxis().SetTitleSize(0.05);
 
 
     banner = TPaveText( 0.125, 0.953, 0.76, 0.975, "brNDC");
@@ -1768,7 +1827,7 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
     banner2 = TLatex(0.17,0.91,("BR new = %0.1f"%(brNew)));
     banner2.SetNDC(); banner2.SetTextSize(0.028);
 
-    can1_BSM2D = ROOT.TCanvas("can1_BSM2D","can1_BSM2D",1,1,630,576);
+    can1_BSM2D = ROOT.TCanvas("can1_BSM2D","can1_BSM2D",1,1,600,600);
     can1_BSM2D.SetHighLightColor(2);
     can1_BSM2D.SetFillColor(0);
     can1_BSM2D.SetBorderMode(0);
@@ -1780,7 +1839,7 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
     can1_BSM2D.SetLeftMargin(0.15);
     can1_BSM2D.SetRightMargin(0.17);
     can1_BSM2D.SetTopMargin(0.05);
-    can1_BSM2D.SetBottomMargin(0.15);
+    can1_BSM2D.SetBottomMargin(0.1);
     can1_BSM2D.SetFrameFillStyle(0);
     can1_BSM2D.SetFrameBorderMode(0);
     can1_BSM2D.SetFrameFillStyle(0);
@@ -1802,7 +1861,7 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
     can1_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpMu_brNew_%0.1f.pdf"%(SIGCH,brNew));
 
     if not options.blindObservedLine:
-        can2_BSM2D = ROOT.TCanvas("can2_BSM2D","can2_BSM2D",1,1,630,576);
+        can2_BSM2D = ROOT.TCanvas("can2_BSM2D","can2_BSM2D",1,1,600,600);
         can2_BSM2D.SetHighLightColor(2);
         can2_BSM2D.SetFillColor(0);
         can2_BSM2D.SetBorderMode(0);
@@ -1814,7 +1873,7 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
         can2_BSM2D.SetLeftMargin(0.15);
         can2_BSM2D.SetRightMargin(0.17);
         can2_BSM2D.SetTopMargin(0.05);
-        can2_BSM2D.SetBottomMargin(0.15);
+        can2_BSM2D.SetBottomMargin(0.1);
         can2_BSM2D.SetFrameFillStyle(0);
         can2_BSM2D.SetFrameBorderMode(0);
         can2_BSM2D.SetFrameFillStyle(0);
@@ -2255,86 +2314,73 @@ if __name__ == '__main__':
     if options.plotLimits:
 
       if options.makeSMLimitPlot == 1:
-          makeSMLimitPlot(SIGCH,10,0);
-
-          makeSMLimitPlot(SIGCH,01,00);
-#          makeSMLimitPlot(SIGCH,01,01);
-#          makeSMLimitPlot(SIGCH,01,02);
-#          makeSMLimitPlot(SIGCH,01,03);
-#          makeSMLimitPlot(SIGCH,01,04);
-#          makeSMLimitPlot(SIGCH,01,05);
-          makeSMLimitPlot(SIGCH,02,00);
-#          makeSMLimitPlot(SIGCH,02,01);
-#          makeSMLimitPlot(SIGCH,02,02);
-#          makeSMLimitPlot(SIGCH,02,03);
-#          makeSMLimitPlot(SIGCH,02,04);
-#          makeSMLimitPlot(SIGCH,02,05);
-          makeSMLimitPlot(SIGCH,03,00);
-#          makeSMLimitPlot(SIGCH,03,01);
-#          makeSMLimitPlot(SIGCH,03,02);
-#          makeSMLimitPlot(SIGCH,03,03);
-#          makeSMLimitPlot(SIGCH,03,04);
-#          makeSMLimitPlot(SIGCH,03,05);
-          makeSMLimitPlot(SIGCH,05,00);
-#          makeSMLimitPlot(SIGCH,05,01);
-#          makeSMLimitPlot(SIGCH,05,02);
-#          makeSMLimitPlot(SIGCH,05,03);
-#          makeSMLimitPlot(SIGCH,05,04);
-#          makeSMLimitPlot(SIGCH,05,05);
-          makeSMLimitPlot(SIGCH,07,00);
-#          makeSMLimitPlot(SIGCH,07,01);
-#          makeSMLimitPlot(SIGCH,07,02);
-#          makeSMLimitPlot(SIGCH,07,03);
-
-
-#          makeSMLimitPlot(SIGCH,07,04);
-#          makeSMLimitPlot(SIGCH,07,05);
           makeSMLimitPlot(SIGCH,10,00);
-#          makeSMLimitPlot(SIGCH,10,01);
-#          makeSMLimitPlot(SIGCH,10,02);
-#          makeSMLimitPlot(SIGCH,10,03);
-#          makeSMLimitPlot(SIGCH,10,04);
-#          makeSMLimitPlot(SIGCH,10,05);
+          makeSMLimitPlot(SIGCH,01,00);
+          makeSMLimitPlot(SIGCH,01,01);
+          makeSMLimitPlot(SIGCH,01,02);
+          makeSMLimitPlot(SIGCH,01,03);
+          makeSMLimitPlot(SIGCH,01,04);
+          makeSMLimitPlot(SIGCH,01,05);
+          makeSMLimitPlot(SIGCH,02,00);
+          makeSMLimitPlot(SIGCH,02,01);
+          makeSMLimitPlot(SIGCH,02,02);
+          makeSMLimitPlot(SIGCH,02,03);
+          makeSMLimitPlot(SIGCH,02,04);
+          makeSMLimitPlot(SIGCH,02,05);
+          makeSMLimitPlot(SIGCH,03,00);
+          makeSMLimitPlot(SIGCH,03,01);
+          makeSMLimitPlot(SIGCH,03,02);
+          makeSMLimitPlot(SIGCH,03,03);
+          makeSMLimitPlot(SIGCH,03,04);
+          makeSMLimitPlot(SIGCH,03,05);
+          makeSMLimitPlot(SIGCH,05,00);
+          makeSMLimitPlot(SIGCH,05,01);
+          makeSMLimitPlot(SIGCH,05,02);
+          makeSMLimitPlot(SIGCH,05,03);
+          makeSMLimitPlot(SIGCH,05,04);
+          makeSMLimitPlot(SIGCH,05,05);
+          makeSMLimitPlot(SIGCH,07,00);
+          makeSMLimitPlot(SIGCH,07,01);
+          makeSMLimitPlot(SIGCH,07,02);
+          makeSMLimitPlot(SIGCH,07,03);
+
 
           if options.plotPValue == 1:
-              makeSMPValuePlot(SIGCH);
-#              makeSMPValuePlot(SIGCH,10,01);
-#              makeSMPValuePlot(SIGCH,10,02);
-#              makeSMPValuePlot(SIGCH,10,03);
-#              makeSMPValuePlot(SIGCH,10,04);
-#              makeSMPValuePlot(SIGCH,10,05);
+              makeSMPValuePlot(SIGCH,10,00);
+              makeSMPValuePlot(SIGCH,10,01);
+              makeSMPValuePlot(SIGCH,10,02);
+              makeSMPValuePlot(SIGCH,10,03);
+              makeSMPValuePlot(SIGCH,10,04);
+              makeSMPValuePlot(SIGCH,10,05);
 
-#              makeSMPValuePlot(SIGCH,01,00);
-#              makeSMPValuePlot(SIGCH,01,01);
-#              makeSMPValuePlot(SIGCH,01,02);
-#              makeSMPValuePlot(SIGCH,01,03);
-#              makeSMPValuePlot(SIGCH,01,04);
-#              makeSMPValuePlot(SIGCH,01,05);
-#              makeSMPValuePlot(SIGCH,02,00);
-#              makeSMPValuePlot(SIGCH,02,01);
-#              makeSMPValuePlot(SIGCH,02,02);
-#              makeSMPValuePlot(SIGCH,02,03);
-#              makeSMPValuePlot(SIGCH,02,04);
-#              makeSMPValuePlot(SIGCH,02,05);
-#              makeSMPValuePlot(SIGCH,03,00);
-#              makeSMPValuePlot(SIGCH,03,01);
-#              makeSMPValuePlot(SIGCH,03,02);
-#              makeSMPValuePlot(SIGCH,03,03);
-#              makeSMPValuePlot(SIGCH,03,04);
-#              makeSMPValuePlot(SIGCH,03,05);
-#              makeSMPValuePlot(SIGCH,05,00);
-#              makeSMPValuePlot(SIGCH,05,01);
-#              makeSMPValuePlot(SIGCH,05,02);
-#              makeSMPValuePlot(SIGCH,05,03);
-#              makeSMPValuePlot(SIGCH,05,04);
-#              makeSMPValuePlot(SIGCH,05,05);
-#              makeSMPValuePlot(SIGCH,07,00);
-#              makeSMPValuePlot(SIGCH,07,01);
-#              makeSMPValuePlot(SIGCH,07,02);
-#              makeSMPValuePlot(SIGCH,07,03);
-
-#              makeSMPValuePlot(SIGCH,07,04);
-#              makeSMPValuePlot(SIGCH,07,05);
+              makeSMPValuePlot(SIGCH,01,00);
+              makeSMPValuePlot(SIGCH,01,01);
+              makeSMPValuePlot(SIGCH,01,02);
+              makeSMPValuePlot(SIGCH,01,03);
+              makeSMPValuePlot(SIGCH,01,04);
+              makeSMPValuePlot(SIGCH,01,05);
+              makeSMPValuePlot(SIGCH,02,00);
+              makeSMPValuePlot(SIGCH,02,01);
+              makeSMPValuePlot(SIGCH,02,02);
+              makeSMPValuePlot(SIGCH,02,03);
+              makeSMPValuePlot(SIGCH,02,04);
+              makeSMPValuePlot(SIGCH,02,05);
+              makeSMPValuePlot(SIGCH,03,00);
+              makeSMPValuePlot(SIGCH,03,01);
+              makeSMPValuePlot(SIGCH,03,02);
+              makeSMPValuePlot(SIGCH,03,03);
+              makeSMPValuePlot(SIGCH,03,04);
+              makeSMPValuePlot(SIGCH,03,05);
+              makeSMPValuePlot(SIGCH,05,00);
+              makeSMPValuePlot(SIGCH,05,01);
+              makeSMPValuePlot(SIGCH,05,02);
+              makeSMPValuePlot(SIGCH,05,03);
+              makeSMPValuePlot(SIGCH,05,04);
+              makeSMPValuePlot(SIGCH,05,05);
+              makeSMPValuePlot(SIGCH,07,00);
+              makeSMPValuePlot(SIGCH,07,01);
+              makeSMPValuePlot(SIGCH,07,02);
+              makeSMPValuePlot(SIGCH,07,03);
 
       if options.makeBSMLimitPlotMass == 1:
           makeBSMLimitPlotMass(SIGCH);
