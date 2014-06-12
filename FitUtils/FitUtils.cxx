@@ -2747,7 +2747,9 @@ Double_t CrystalBallLowHighPlusExpDividedByCrystalBallLowHigh(Double_t *x,Double
  double den = crystalBallLowHigh (x, par + 9) ; // SM signal 
  if (den == 0) return -1. ;
  double num = doubleGausCrystalBallLowHighPlusExp (x, par) ; // signal + I800 +I126  
- double I126 = exponential (x,par+16); //interference from H126
+
+ double I126_par[2]={-1.*par[16],par[17]};
+ double I126 = exponential (x,I126_par); //I126 is fitted as positive (BnoH-SBI125), so need to change the sign  
 
  double alpha = par[18];
  double beta = par[19];
