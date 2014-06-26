@@ -8,12 +8,13 @@ import time
 import subprocess
 import ROOT
 
-
 from optparse import OptionParser
 from subprocess import Popen
-from ROOT import gROOT, gStyle, gSystem, TLatex, TGaxis, TPaveText, TH2D, TColor, gPad, TGraph2D, TLine,TGraph
+from ROOT import gROOT, gStyle, gSystem, TLatex, TGaxis, TPaveText, TH2D, TColor, gPad, TGraph2D, TLine,TGraph,TList
 
 ROOT.gStyle.SetPadRightMargin(0.16);
+
+from collections import defaultdict
 
 ############################################
 #            Job steering                  #
@@ -1418,7 +1419,7 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
 ### Make the BSM 2D Scane vs c' and brNew ###
 ###################B##########################
 
-def makeBSMLimitPlot2D( SIGCH, mass ):
+def makeBSMLimitPlot2D( SIGCH, mass, contourListMassExp=0, contourListMassObs=0):
 
 
     stylePath = os.getenv("ROOTStyle");
@@ -1611,11 +1612,15 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     h2d_exp.GetXaxis().SetNdivisions(510);
     h2d_exp.GetYaxis().SetNdivisions(510); 
     h2d_exp.SetContour(h2d_exp.GetNbinsX()*h2d_exp.GetNbinsY());    
-    counturLevel = [2.];
-    if mass == 1000 :
-     counturLevel[0] = 4.;
-    elif mass == 900 :
-     counturLevel[0] = 3.;
+    counturLevel = [3.];
+#    if mass == 1000 :
+#     counturLevel[0] = 6.;
+#    elif mass == 900 :
+#     counturLevel[0] = 6.;
+#    elif mass == 800 :
+#     counturLevel[0] = 4.;
+#    elif mass == 700 :
+#     counturLevel[0] = 3.;
         
     h2d_exp.SetContour(1,array('d',counturLevel));    
     h2d_exp.Draw("cont,list");
@@ -1641,11 +1646,15 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     banner3.SetTextFont(42);
     banner3.SetBorderSize(0);
 
-    counturLevel = [3.];
-    if mass == 1000 :
-     counturLevel[0] = 6.;
-    elif mass == 900 :
-     counturLevel[0] = 5.;
+    counturLevel = [4.];
+#    if mass == 1000 :
+#     counturLevel[0] = 7.;
+#    elif mass == 900 :
+#     counturLevel[0] = 7.;
+#    elif mass == 800 :
+#     counturLevel[0] = 5.;
+#    elif mass == 700 :
+#     counturLevel[0] = 4.;
 
     h2d_exp.SetContour(1,array('d',counturLevel));    
     h2d_exp.Draw("cont,list");
@@ -1679,6 +1688,9 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
     can1_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpMu_%i.pdf"%(SIGCH,mass));
 
 
+    contourListMassExp[mass].append(counturList);
+    
+
     if not options.blindObservedLine:
 
      can2_BSM2D = ROOT.TCanvas("can2_BSM2D","can2_BSM2D",1,1,600,600);
@@ -1703,11 +1715,16 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
      h2d_obs.GetXaxis().SetNdivisions(510);
      h2d_obs.GetYaxis().SetNdivisions(510); 
      h2d_obs.SetContour(h2d_obs.GetNbinsX()*h2d_obs.GetNbinsY());
-     counturLevel = [2.];
-     if mass == 1000 :
-      counturLevel[0] = 4.;
-     elif mass == 900 :
-      counturLevel[0] = 3.;
+     counturLevel = [3.];
+#     if mass == 1000 :
+#      counturLevel[0] = 6.;
+#     elif mass == 900 :
+#      counturLevel[0] = 6.;
+#     elif mass == 800 :
+#      counturLevel[0] = 5.;
+#     elif mass == 700 :
+#      counturLevel[0] = 4.;
+
      h2d_obs.SetContour(1,array('d',counturLevel));    
      h2d_obs.Draw("cont,list");
      can2_BSM2D.Update();
@@ -1732,11 +1749,15 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
      banner3.SetTextFont(42);
      banner3.SetBorderSize(0);
 
-     counturLevel = [3.];
-     if mass == 1000 :
-      counturLevel[0] = 6.;
-     elif mass == 900 :
-      counturLevel[0] = 5.;
+     counturLevel = [4.];
+#     if mass == 1000 :
+#      counturLevel[0] = 7.;
+#     elif mass == 900 :
+#      counturLevel[0] = 7.;
+#     elif mass == 800 :
+#      counturLevel[0] = 6.;
+#     elif mass == 700 :
+#      counturLevel[0] = 4.;
      h2d_obs.SetContour(1,array('d',counturLevel));    
      h2d_obs.Draw("cont,list");
      can2_BSM2D.Update();
@@ -1767,11 +1788,13 @@ def makeBSMLimitPlot2D( SIGCH, mass ):
      can2_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsMu_%i.png"%(SIGCH,mass));
      can2_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsMu_%i.pdf"%(SIGCH,mass));
 
+     contourListMassObs[mass].append(counturList);
+
 #############################################
 ### Make the BSM 2D Scane vs c' and brNew ###
 #############################################
 
-def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
+def makeBSMLimitPlot2DBRnew( SIGCH, brNew, contourListBrNewExp =0, counturListBrNewObs =0 ):
 
 
     stylePath = os.getenv("ROOTStyle");
@@ -1964,15 +1987,15 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
     h2d_exp.GetXaxis().SetNdivisions(510);
     h2d_exp.GetYaxis().SetNdivisions(510); 
     h2d_exp.SetContour(h2d_exp.GetNbinsX()*h2d_exp.GetNbinsY());
-    counturLevel = [2.];
-    if brNew*0.1 == 0.2:
-     counturLevel[0] = 3.;
-    elif brNew*0.1 == 0.3:
-     counturLevel[0] = 4.;
-    elif brNew*0.1 == 0.4:
-     counturLevel[0] = 5.;
-    elif brNew*0.1 == 0.5:
-     counturLevel[0] = 6.;
+    counturLevel = [3.];
+#    if brNew*0.1 == 0.2:
+#     counturLevel[0] = 3.;
+#    elif brNew*0.1 == 0.3:
+#     counturLevel[0] = 4.;
+#    elif brNew*0.1 == 0.4:
+#     counturLevel[0] = 5.;
+#    elif brNew*0.1 == 0.5:
+#     counturLevel[0] = 6.;
         
     h2d_exp.SetContour(1,array('d',counturLevel));    
     h2d_exp.Draw("cont,list");
@@ -1988,7 +2011,6 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
                  if j == 0: counturList.Add(gr1.Clone());
                      
     h2d_exp.SetContour(h2d_exp.GetNbinsX()*h2d_exp.GetNbinsY());      
-
     banner3 = ROOT.TLegend(0.45,0.15,0.6,0.3);
     banner3.AddEntry(counturList.At(0),"%d #times #sigma_{Th} 95%s C.L. Limit"%(counturLevel[0],"%"),"l");
     banner3.SetTextSize(0.032);
@@ -1999,14 +2021,14 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
     banner3.SetBorderSize(0);
 
     counturLevel = [3.];
-    if brNew*0.1 == 0.2:
-     counturLevel[0] = 4.;
-    elif brNew*0.1 == 0.3:
-     counturLevel[0] = 6.;
-    elif brNew*0.1 == 0.4:
-     counturLevel[0] = 7.;
-    elif brNew*0.1 == 0.5:
-     counturLevel[0] = 8.;
+#    if brNew*0.1 == 0.2:
+#     counturLevel[0] = 4.;
+#    elif brNew*0.1 == 0.3:
+#     counturLevel[0] = 6.;
+#    elif brNew*0.1 == 0.4:
+#     counturLevel[0] = 7.;
+#    elif brNew*0.1 == 0.5:
+#     counturLevel[0] = 8.;
 
     h2d_exp.SetContour(1,array('d',counturLevel));    
     h2d_exp.Draw("cont,list");
@@ -2038,6 +2060,7 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
     can1_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpMu_brNew_%0.1f.png"%(SIGCH,brNew*0.1));
     can1_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ExpMu_brNew_%0.1f.pdf"%(SIGCH,brNew*0.1));
 
+    contourListBrNewExp[brNew*0.1].append(counturList) ;
 
     if not options.blindObservedLine:
 
@@ -2063,7 +2086,15 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
      h2d_obs.GetXaxis().SetNdivisions(510);
      h2d_obs.GetYaxis().SetNdivisions(510); 
      h2d_obs.SetContour(h2d_obs.GetNbinsX()*h2d_obs.GetNbinsY());
-     counturLevel = [2.];
+     counturLevel = [3.];
+#    if brNew*0.1 == 0.2:
+#     counturLevel[0] = 3.;
+#    elif brNew*0.1 == 0.3:
+#     counturLevel[0] = 4.;
+#    elif brNew*0.1 == 0.4:
+#     counturLevel[0] = 5.;
+#    elif brNew*0.1 == 0.5:
+#     counturLevel[0] = 6.;
      h2d_obs.SetContour(1,array('d',counturLevel));    
      h2d_obs.Draw("cont,list");
      can2_BSM2D.Update();
@@ -2088,7 +2119,16 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
      banner3.SetTextFont(42);
      banner3.SetBorderSize(0);
 
-     counturLevel = [3.];
+     counturLevel = [4.];
+#    if brNew*0.1 == 0.2:
+#     counturLevel[0] = 3.;
+#    elif brNew*0.1 == 0.3:
+#     counturLevel[0] = 4.;
+#    elif brNew*0.1 == 0.4:
+#     counturLevel[0] = 5.;
+#    elif brNew*0.1 == 0.5:
+#     counturLevel[0] = 6.;
+
      h2d_obs.SetContour(1,array('d',counturLevel));    
      h2d_obs.Draw("cont,list");
      can2_BSM2D.Update();
@@ -2117,8 +2157,287 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew):
      gPad.Update();
     
      can2_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsMu_brNew_%0.1f.png"%(SIGCH,brNew*0.1));
-     can2_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsMu_brNew_%0.1f.png"%(SIGCH,brNew*0.1));
+     can2_BSM2D.SaveAs("limitFigs/BSMLim%s_2D_ObsMu_brNew_%0.1f.pdf"%(SIGCH,brNew*0.1));
 
+     contourListBrNewObs[brNew*0.1].append(counturList);
+
+def makeContourPlotMass(contourListMassExp,contourListMassObs):
+
+  setStyle();
+
+  can1_BSM = ROOT.TCanvas("can1_BSM","can1_BSM",1,1,600,600);
+  can1_BSM.SetHighLightColor(2);
+  can1_BSM.SetFillColor(0);
+  can1_BSM.SetBorderMode(0);
+  can1_BSM.SetBorderSize(2);
+  can1_BSM.SetTickx(1);
+  can1_BSM.SetTicky(1);
+  can1_BSM.SetLeftMargin(0.15);
+  can1_BSM.SetRightMargin(0.095);
+  can1_BSM.SetTopMargin(0.05);
+  can1_BSM.SetBottomMargin(0.10);
+  can1_BSM.SetFrameFillStyle(0);
+  can1_BSM.SetFrameBorderMode(0);
+  can1_BSM.SetFrameFillStyle(0);
+  can1_BSM.SetFrameBorderMode(0); 
+
+  hrl = can1_BSM.DrawFrame(0.,BRnew[0]*0.1,cprime[len(cprime)-2]*0.1,BRnew[len(BRnew)-1]*0.1+0.3);
+  hrl.GetYaxis().SetTitle("BR_{new}");
+  hrl.GetXaxis().SetTitle("C^{'2}");
+  hrl.GetXaxis().SetNdivisions(504);
+  hrl.GetXaxis().SetLabelFont(42);
+  hrl.GetXaxis().SetLabelOffset(0.007);
+  hrl.GetXaxis().SetLabelSize(0.036);
+  hrl.GetXaxis().SetTitleSize(0.045);
+  hrl.GetXaxis().SetTitleOffset(1.02);
+  hrl.GetXaxis().SetNdivisions(510);
+  hrl.GetYaxis().SetNdivisions(510);
+  hrl.GetXaxis().SetTitleFont(42);
+  hrl.GetYaxis().SetLabelFont(42);
+  hrl.GetYaxis().SetLabelOffset(0.007);
+  hrl.GetYaxis().SetLabelSize(0.036);
+  hrl.GetYaxis().SetTitleSize(0.045);
+  hrl.GetYaxis().SetTitleOffset(1.35);
+  hrl.GetYaxis().SetTitleFont(42);
+  hrl.GetZaxis().SetTitle("signal strenght excluded at 95% C.L.");
+  hrl.GetZaxis().SetLabelFont(42);
+  hrl.GetZaxis().CenterTitle();
+  hrl.GetZaxis().SetLabelSize(0.025);
+  hrl.GetZaxis().SetTitleOffset(0.85);
+  hrl.GetZaxis().SetTitleFont(42);
+  hrl.GetZaxis().SetTitleSize(0.05);
+  hrl.Draw("z");
+
+  banner3 = ROOT.TLegend(0.243,0.63,0.69,0.92);
+
+  list_temp = TList(); graph_temp = TGraph();
+  list_temp = contourListMassExp[600];
+  list_temp = list_temp[0];
+  graph_temp = list_temp.At(0);
+  graph_temp.SetLineWidth(2);
+  graph_temp.SetLineStyle(7);
+  graph_temp.SetLineColor(ROOT.kBlack); 
+  graph_temp.Draw("l") 
+  banner3.AddEntry(graph_temp,"Expected 3 #times #sigma_{Th} m_{H}=600 GeV","l");
+
+  list_temp = contourListMassObs[600];
+  list_temp = list_temp[0];
+  graph_temp = list_temp.At(0);
+  graph_temp.SetLineWidth(2);
+  graph_temp.SetLineColor(ROOT.kBlack); 
+  graph_temp.Draw("lsame") 
+  banner3.AddEntry(graph_temp,"Observed 3 #times #sigma_{Th} m_{H}=600 GeV","l");
+
+  list_temp = contourListMassExp[700];
+  list_temp = list_temp[0];
+  graph_temp = list_temp.At(0);
+  graph_temp.SetLineWidth(2);
+  graph_temp.SetLineStyle(7);
+  graph_temp.SetLineColor(ROOT.kRed); 
+  graph_temp.Draw("lsame") 
+  banner3.AddEntry(graph_temp,"Expected 3 #times #sigma_{Th} m_{H}=700 GeV","l");
+
+  list_temp = contourListMassObs[700];
+  list_temp = list_temp[0];
+  graph_temp = list_temp.At(0);
+  graph_temp.SetLineWidth(2);
+  graph_temp.SetLineColor(ROOT.kRed); 
+  graph_temp.Draw("lsame") 
+  banner3.AddEntry(graph_temp,"Observed 3 #times #sigma_{Th} m_{H}=700 GeV","l");
+
+  list_temp = contourListMassExp[800];
+  list_temp = list_temp[0];
+  graph_temp = list_temp.At(0);
+  graph_temp.SetLineWidth(2);
+  graph_temp.SetLineStyle(7);
+  graph_temp.SetLineColor(ROOT.kBlue); 
+  graph_temp.Draw("lsame") 
+  banner3.AddEntry(graph_temp,"Expected 3 #times #sigma_{Th} m_{H}=800 GeV","l");
+
+  list_temp = contourListMassObs[900];
+  list_temp = list_temp[0];
+  graph_temp = list_temp.At(0);
+  graph_temp.SetLineWidth(2);
+  graph_temp.SetLineColor(ROOT.kBlue); 
+  graph_temp.Draw("lsame") 
+  banner3.AddEntry(graph_temp,"Observed 3 #times #sigma_{Th} m_{H}=800 GeV","l");
+
+  banner = TPaveText(0.185, 0.953, 0.66, 0.975, "brNDC");
+  banner.SetFillColor(ROOT.kWhite);
+  banner.SetTextSize(0.033);
+  banner.SetTextAlign(11);
+  banner.SetTextFont(62);
+  banner.SetBorderSize(0);
+  leftText = "CMS Preliminary";
+  banner.AddText(leftText);
+  banner.Draw();
+
+  label_sqrt = TPaveText(0.45,0.953,0.84,0.975, "brNDC");
+  label_sqrt.SetFillColor(ROOT.kWhite);
+  label_sqrt.SetBorderSize(0);
+  label_sqrt.SetTextSize(0.033);
+  label_sqrt.SetTextFont(62);
+  label_sqrt.SetTextAlign(31); # align right                                                                                                                                         
+  label_sqrt.AddText("L = 19.3 fb^{-1} at #sqrt{s} = 8 TeV");
+    
+  banner.Draw();
+  label_sqrt.Draw();
+
+  line = ROOT.TF1("line","0.5",0.,cprime[len(cprime)-2]*0.1);
+  line.SetLineWidth(2);
+  line.SetLineColor(ROOT.kMagenta);
+  
+  banner3.SetTextSize(0.032);
+  banner3.SetFillStyle(0);
+  banner3.SetFillColor(0);
+  banner3.SetShadowColor(0);
+  banner3.SetTextFont(42);
+  banner3.SetBorderSize(0);
+  banner3.Draw("same");
+  line.Draw("same")
+
+  can1_BSM.SaveAs("limitFigs/ContourMass.png");
+  can1_BSM.SaveAs("limitFigs/ContourMass.pdf");
+  can1_BSM.SaveAs("limitFigs/ContourMass.root");
+
+def makeContourPlotBrNew(contourListMassExp,contourListMassObs):
+
+  setStyle();
+
+  can1_BSM = ROOT.TCanvas("can1_BSM","can1_BSM",1,1,600,600);
+  can1_BSM.SetHighLightColor(2);
+  can1_BSM.SetFillColor(0);
+  can1_BSM.SetBorderMode(0);
+  can1_BSM.SetBorderSize(2);
+  can1_BSM.SetTickx(1);
+  can1_BSM.SetTicky(1);
+  can1_BSM.SetLeftMargin(0.15);
+  can1_BSM.SetRightMargin(0.095);
+  can1_BSM.SetTopMargin(0.05);
+  can1_BSM.SetBottomMargin(0.10);
+  can1_BSM.SetFrameFillStyle(0);
+  can1_BSM.SetFrameBorderMode(0);
+  can1_BSM.SetFrameFillStyle(0);
+  can1_BSM.SetFrameBorderMode(0); 
+
+  hrl = can1_BSM.DrawFrame(mass[0],0.,mass[len(mass)-1],cprime[len(cprime)-2]*0.1+0.4);
+  hrl.GetYaxis().SetTitle("C^{'2}");
+  hrl.GetXaxis().SetTitle("m_{H} (GeV)");
+  hrl.GetXaxis().SetNdivisions(504);
+  hrl.GetXaxis().SetLabelFont(42);
+  hrl.GetXaxis().SetLabelOffset(0.007);
+  hrl.GetXaxis().SetLabelSize(0.036);
+  hrl.GetXaxis().SetTitleSize(0.045);
+  hrl.GetXaxis().SetTitleOffset(1.02);
+  hrl.GetXaxis().SetNdivisions(510);
+  hrl.GetYaxis().SetNdivisions(510);
+  hrl.GetXaxis().SetTitleFont(42);
+  hrl.GetYaxis().SetLabelFont(42);
+  hrl.GetYaxis().SetLabelOffset(0.007);
+  hrl.GetYaxis().SetLabelSize(0.036);
+  hrl.GetYaxis().SetTitleSize(0.045);
+  hrl.GetYaxis().SetTitleOffset(1.35);
+  hrl.GetYaxis().SetTitleFont(42);
+  hrl.GetZaxis().SetTitle("signal strenght excluded at 95% C.L.");
+  hrl.GetZaxis().SetLabelFont(42);
+  hrl.GetZaxis().CenterTitle();
+  hrl.GetZaxis().SetLabelSize(0.025);
+  hrl.GetZaxis().SetTitleOffset(0.85);
+  hrl.GetZaxis().SetTitleFont(42);
+  hrl.GetZaxis().SetTitleSize(0.05);
+  hrl.Draw("z");
+
+  banner3 = ROOT.TLegend(0.22,0.66,0.80,0.91);
+
+  list_temp = TList(); graph_temp = TGraph();
+  list_temp = contourListMassExp[00];
+  list_temp = list_temp[0];
+  graph_temp = list_temp.At(0);
+  graph_temp.SetLineWidth(2);
+  graph_temp.SetLineStyle(7);
+  graph_temp.SetLineColor(ROOT.kBlack); 
+  graph_temp.Draw("l") 
+  banner3.AddEntry(graph_temp,"Expected 3 #times #sigma_{Th} BR_{new}=0","l");
+
+  list_temp = contourListMassObs[0.0];
+  list_temp = list_temp[0];
+  graph_temp = list_temp.At(0);
+  graph_temp.SetLineWidth(2);
+  graph_temp.SetLineColor(ROOT.kBlack); 
+  graph_temp.Draw("lsame") 
+  banner3.AddEntry(graph_temp,"Observed 3 #times #sigma_{Th} BR_{new}=0","l");
+
+  list_temp = contourListMassExp[0.1];
+  list_temp = list_temp[0];
+  graph_temp = list_temp.At(0);
+  graph_temp.SetLineWidth(2);
+  graph_temp.SetLineStyle(7);
+  graph_temp.SetLineColor(ROOT.kRed); 
+  graph_temp.Draw("lsame") 
+  banner3.AddEntry(graph_temp,"Expected 3 #times #sigma_{Th} BR_{new}=0.1","l");
+
+  list_temp = contourListMassObs[0.1];
+  list_temp = list_temp[0];
+  graph_temp = list_temp.At(0);
+  graph_temp.SetLineWidth(2);
+  graph_temp.SetLineColor(ROOT.kRed); 
+  graph_temp.Draw("lsame") 
+  banner3.AddEntry(graph_temp,"Observed 3 #times #sigma_{Th} BR_{new}=0.1","l");
+
+  list_temp = contourListMassExp[0.2];
+  list_temp = list_temp[0];
+  graph_temp = list_temp.At(0);
+  graph_temp.SetLineWidth(2);
+  graph_temp.SetLineStyle(7);
+  graph_temp.SetLineColor(ROOT.kBlue); 
+  graph_temp.Draw("lsame") 
+  banner3.AddEntry(graph_temp,"Expected 3 #times #sigma_{Th} BR_{new}=0.2","l");
+
+  list_temp = contourListMassObs[0.2];
+  list_temp = list_temp[0];
+  graph_temp = list_temp.At(0);
+  graph_temp.SetLineWidth(2);
+  graph_temp.SetLineColor(ROOT.kBlue); 
+  graph_temp.Draw("lsame") 
+  banner3.AddEntry(graph_temp,"Observed 3 #times #sigma_{Th} BR_{new}=0.2","l");
+
+  banner = TPaveText(0.185, 0.953, 0.66, 0.975, "brNDC");
+  banner.SetFillColor(ROOT.kWhite);
+  banner.SetTextSize(0.033);
+  banner.SetTextAlign(11);
+  banner.SetTextFont(62);
+  banner.SetBorderSize(0);
+  leftText = "CMS Preliminary";
+  banner.AddText(leftText);
+  banner.Draw();
+
+  label_sqrt = TPaveText(0.45,0.953,0.84,0.975, "brNDC");
+  label_sqrt.SetFillColor(ROOT.kWhite);
+  label_sqrt.SetBorderSize(0);
+  label_sqrt.SetTextSize(0.033);
+  label_sqrt.SetTextFont(62);
+  label_sqrt.SetTextAlign(31); # align right                                                                                                                                         
+  label_sqrt.AddText("L = 19.3 fb^{-1} at #sqrt{s} = 8 TeV");
+    
+  banner.Draw();
+  label_sqrt.Draw();
+
+  banner3.SetTextSize(0.032);
+  banner3.SetFillStyle(0);
+  banner3.SetFillColor(0);
+  banner3.SetShadowColor(0);
+  banner3.SetTextFont(42);
+  banner3.SetBorderSize(0);
+  banner3.Draw("same");
+
+  line = ROOT.TF1("line","0.7",mass[0],mass[len(mass)-1]);
+  line.SetLineWidth(2);
+  line.SetLineColor(ROOT.kMagenta);
+  line.Draw("same");
+
+  can1_BSM.SaveAs("limitFigs/ContourBrNew.png");
+  can1_BSM.SaveAs("limitFigs/ContourBrNew.pdf");
+  can1_BSM.SaveAs("limitFigs/ContourBrNew.root");
 
 ##################################
 ########### Main Code ############
@@ -2558,18 +2877,28 @@ if __name__ == '__main__':
           makeBSMLimitPlotBRnew(SIGCH,1000);
 
       if options.makeBSMLimitPlot2D == 1:
-          makeBSMLimitPlot2D(SIGCH,600);
-          makeBSMLimitPlot2D(SIGCH,700);
-          makeBSMLimitPlot2D(SIGCH,800);
-          makeBSMLimitPlot2D(SIGCH,900);
-          makeBSMLimitPlot2D(SIGCH,1000);
-      
-          makeBSMLimitPlot2DBRnew(SIGCH,00);
-          makeBSMLimitPlot2DBRnew(SIGCH,01);
-          makeBSMLimitPlot2DBRnew(SIGCH,02);
-          makeBSMLimitPlot2DBRnew(SIGCH,03);
-          makeBSMLimitPlot2DBRnew(SIGCH,04);
-          makeBSMLimitPlot2DBRnew(SIGCH,05);
+
+          contourListMassExp = defaultdict(list);          
+          contourListMassObs = defaultdict(list);          
+
+          makeBSMLimitPlot2D(SIGCH,600,contourListMassExp,contourListMassObs);
+          makeBSMLimitPlot2D(SIGCH,700,contourListMassExp,contourListMassObs);
+          makeBSMLimitPlot2D(SIGCH,800,contourListMassExp,contourListMassObs);
+          makeBSMLimitPlot2D(SIGCH,900,contourListMassExp,contourListMassObs);
+          makeBSMLimitPlot2D(SIGCH,1000,contourListMassExp,contourListMassObs);
+
+          contourListBrNewExp = defaultdict(list);          
+          contourListBrNewObs = defaultdict(list);          
+
+          makeBSMLimitPlot2DBRnew(SIGCH,00,contourListBrNewExp,contourListBrNewObs);
+          makeBSMLimitPlot2DBRnew(SIGCH,01,contourListBrNewExp,contourListBrNewObs);
+          makeBSMLimitPlot2DBRnew(SIGCH,02,contourListBrNewExp,contourListBrNewObs);
+          makeBSMLimitPlot2DBRnew(SIGCH,03,contourListBrNewExp,contourListBrNewObs);
+          makeBSMLimitPlot2DBRnew(SIGCH,04,contourListBrNewExp,contourListBrNewObs);
+          makeBSMLimitPlot2DBRnew(SIGCH,05,contourListBrNewExp,contourListBrNewObs);
+
+          makeContourPlotMass(contourListMassExp,contourListMassObs);
+          makeContourPlotBrNew(contourListBrNewExp,contourListBrNewObs);
 
       if options.plotSignalStrenght == 1:
           makeSignalStrenghtPlot(SIGCH,10,00);
