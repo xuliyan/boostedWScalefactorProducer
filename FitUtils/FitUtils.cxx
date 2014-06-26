@@ -2744,20 +2744,23 @@ double doubleGausCrystalBallLowHighPlusExp (double* x, double* par) {
 //---- division of CBLowHighPlusExp with CBLowHigh ----
 Double_t CrystalBallLowHighPlusExpDividedByCrystalBallLowHigh(Double_t *x,Double_t *par) {
 
- double den = crystalBallLowHigh (x, par + 9) ; // signal only                                                                                                  
+ double den = crystalBallLowHigh (x, par + 9) ; // SM signal 
  if (den == 0) return -1. ;
  double num = doubleGausCrystalBallLowHighPlusExp (x, par) ; // signal + I800 +I126  
- double I126 = exponential (x,par+16); //interference from H126
+
+ double I126 = exponential (x,par+16); //I126 is fitted as positive (BnoH-SBI125), so need to change the sign  
+ I126=-1.*I126;
 
  double alpha = par[18];
  double beta = par[19];
  double zeta = par[20];
 
- double S = den;
- double I = (num - beta*S- sqrt(1-beta)*I126)/sqrt(beta);
+ double S_par[7]={par[9],par[10],beta*par[11],par[12],par[13],par[14],par[15]};
+ double S = crystalBallLowHigh (x, S_par) ; //SM signal with width rescaled for c',BRnew
 
- double w = (alpha*S + sqrt(alpha)*I + sqrt(zeta)*I126) / S;
+ double I = (num - beta*S- sqrt(1-beta)*I126)/sqrt(beta); //I of the heavy-Higgs
 
+ double w = (alpha*S + sqrt(alpha)*I + sqrt(zeta)*I126) / den; //weight
 
   if (w<0)   return 0;
   else       return w;
