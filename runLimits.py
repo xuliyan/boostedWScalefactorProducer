@@ -961,11 +961,11 @@ def makeLikelihoodScanPlot(SIGCH,cprime,brnew):
 ##############################################
 ### Make the BSM Limit plot vs mass and c' ###
 ##############################################    
-def makeBSMLimitPlotMass(SIGCH):
+def makeBSMLimitPlotMass(SIGCH,brnew):
 
     print "module ===> makeBSMLimits_vsMass";
     curcolors = [1,2,210,4,6,12,7];
-    brnew = 00; nPoints = len(mass);
+    nPoints = len(mass);
 
     massCS  = [];
     if SIGCH == "" or SIGCH == "_2jet":
@@ -991,8 +991,10 @@ def makeBSMLimitPlotMass(SIGCH):
         
     massBRWW = [5.58E-01,5.77E-01,5.94E-01,6.09E-01,6.21E-01];
 
-    gridMax    = -999;
-    gridMaxSig = -999;
+    gridMaxExp    = -999;
+    gridMaxSigExp = -999;
+    gridMaxObs    = -999;
+    gridMaxSigObs = -999;
 
     tGraphs_exp = [];
     tGraphs_obs = [];
@@ -1002,12 +1004,14 @@ def makeBSMLimitPlotMass(SIGCH):
     
     for j in range(len(cprime)):
 
+        if (cprime[j]*0.1) > (1-brnew*0.1): continue ;
+            
         xbins           = array('f', []); ybins_exp       = array('f', []);
         ybins_obs       = array('f', []); ybins_csXbr_exp = array('f', []);
         ybins_csXbr_obs = array('f', []); ybins_csXbr_th  = array('f', []);
 
         for i in range(len(mass)):
-         if (cprime[j]*0.1)<=(1-brnew*0.1):
+
             curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime[j],brnew,mass[i]);
 
             curAsymLimits = getAsymLimits(curFile);
@@ -1018,12 +1022,19 @@ def makeBSMLimitPlotMass(SIGCH):
             ybins_csXbr_obs.append(curAsymLimits[0]*massCS[i]*cprime[j]*0.1*(1-brnew*0.1)*massBRWW[i] );
             ybins_csXbr_th.append(1.*massCS[i]*cprime[j]*0.1*(1-brnew*0.1)*massBRWW[i] );
 
-            if gridMax < curAsymLimits[3]:
-                gridMax = curAsymLimits[3];
+            if gridMaxExp < curAsymLimits[3]:
+                gridMaxExp = curAsymLimits[3];
+
+            if gridMaxObs < curAsymLimits[0]:
+                gridMaxObs = curAsymLimits[0];
 
             cscur = ( curAsymLimits[3]*massCS[i]*cprime[j]*0.1*(1-brnew*0.1)*massBRWW[i] );
-            if gridMaxSig < cscur:
-                gridMaxSig = cscur;
+
+            if gridMaxSigExp  < ( curAsymLimits[3]*massCS[i]*cprime[j]*0.1*(1-brnew*0.1)*massBRWW[i] ):
+                gridMaxSigExp = ( curAsymLimits[3]*massCS[i]*cprime[j]*0.1*(1-brnew*0.1)*massBRWW[i] );
+
+            if gridMaxSigObs  < ( curAsymLimits[0]*massCS[i]*cprime[j]*0.1*(1-brnew*0.1)*massBRWW[i] ):
+                gridMaxSigObs = ( curAsymLimits[0]*massCS[i]*cprime[j]*0.1*(1-brnew*0.1)*massBRWW[i] );
 
         curGraph_exp = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_exp);
         curGraph_obs = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_obs);
@@ -1059,7 +1070,7 @@ def makeBSMLimitPlotMass(SIGCH):
     setStyle();
 
     can_BSM = ROOT.TCanvas("can_BSM","can_BSM",630,600);
-    hrl_BSM = can_BSM.DrawFrame(599,0.0,1001,gridMax*1.5);
+    hrl_BSM = can_BSM.DrawFrame(599,0.0,1001,max(gridMaxExp,gridMaxObs)*1.3);
 
     hrl_BSM.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{SM}");
     hrl_BSM.GetYaxis().SetTitleOffset(1.35);
@@ -1081,7 +1092,7 @@ def makeBSMLimitPlotMass(SIGCH):
     leg2.SetTextSize(0.028);
     leg2.SetNColumns(2);
 
-    for k in range(len(cprime)):
+    for k in range(len(tGraphs_exp)):
         tGraphs_exp[k].SetLineStyle(1);
         tGraphs_exp[k].SetLineColor(curcolors[k]);
         tGraphs_exp[k].SetMarkerColor(curcolors[k]);
@@ -1089,9 +1100,13 @@ def makeBSMLimitPlotMass(SIGCH):
         tGraphs_obs[k].SetMarkerColor(curcolors[k]);
         tGraphs_exp[k].SetLineWidth(2);
         tGraphs_obs[k].SetLineWidth(2);
-        tGraphs_exp[k].Draw("PL");
-        if not options.blindObservedLine: tGraphs_obs[k].Draw("PL");
-
+        if not options.blindObservedLine:
+            tGraphs_exp[k].SetLineStyle(7);
+            tGraphs_exp[k].Draw("PL");            
+            tGraphs_obs[k].Draw("PL");
+        else:
+            tGraphs_exp[k].Draw("PL");            
+            
         tmplabel = "exp., C'^{ 2} = %1.1f"%(float((cprime[k])/10.));
         leg2.AddEntry(tGraphs_exp[k],tmplabel,"L");
         tmplabel = "obs., C'^{ 2} = %1.1f"%(float((cprime[k])/10.));
@@ -1127,11 +1142,11 @@ def makeBSMLimitPlotMass(SIGCH):
 
     leg2.Draw();
     banner2.Draw();
-    can_BSM.SaveAs("limitFigs/BSMLim%s_%s.png"%(SIGCH,options.channel));
-    can_BSM.SaveAs("limitFigs/BSMLim%s_%s.pdf"%(SIGCH,options.channel));
+    can_BSM.SaveAs("limitFigs/BSMLim%s_%s_vsMass_brNew_%s.png"%(SIGCH,options.channel,brnew));
+    can_BSM.SaveAs("limitFigs/BSMLim%s_%s_vsMass_brNew_%s.pdf"%(SIGCH,options.channel,brnew));
 
     can_BSMsig = ROOT.TCanvas("can_BSMsig","can_BSMsig",630,600);
-    hrl_BSMsig = can_BSMsig.DrawFrame(599,0.001,1001,gridMaxSig*15);
+    hrl_BSMsig = can_BSMsig.DrawFrame(599,0.001,1001,max(gridMaxSigExp,gridMaxSigObs)*4);
 
     hrl_BSMsig.GetYaxis().SetTitle("#sigma #times BR_{WW}");
     hrl_BSMsig.GetYaxis().SetTitleOffset(1.35);
@@ -1159,7 +1174,7 @@ def makeBSMLimitPlotMass(SIGCH):
     can_BSMsig.Update();
     ROOT.gPad.SetLogy();
     
-    for k in range(len(cprime)):
+    for k in range(len(tGraphs_csXbr_exp)):
         tGraphs_csXbr_exp[k].SetLineStyle(1);
         tGraphs_csXbr_exp[k].SetLineColor(curcolors[k]);
         tGraphs_csXbr_obs[k].SetLineColor(curcolors[k]);
@@ -1168,23 +1183,28 @@ def makeBSMLimitPlotMass(SIGCH):
         tGraphs_csXbr_exp[k].SetLineWidth(2);
         tGraphs_csXbr_obs[k].SetLineWidth(2);
         tGraphs_csXbr_exp[k].Draw("PL");
-        if not options.blindObservedLine : tGraphs_csXbr_obs[k].Draw("PL");
+        if not options.blindObservedLine :        
+            tGraphs_csXbr_exp[k].SetLineStyle(7);
+            tGraphs_csXbr_exp[k].Draw("PL");
+            tGraphs_csXbr_obs[k].Draw("PL");
+        else:
+            tGraphs_csXbr_exp[k].Draw("PL");
+            
         tGraphs_csXbr_th[k].Draw("PL");
 
         tmplabel = "exp., C'^{ 2} = %1.1f    "%( float((cprime[k])/10.) )
         leg2.AddEntry(tGraphs_csXbr_exp[k],tmplabel,"L")
-        tmplabel = "obs., C'^{ 2} = %1.1f    "%( float((cprime[k])/10.) )
-        if not options.blindObservedLine: leg2.AddEntry(tGraphs_csXbr_obs[k],tmplabel,"L");
-        tmplabel = "th., C'^{ 2} = %1.1f"%( float((cprime[k])/10.) )
-        leg2.AddEntry(tGraphs_csXbr_th[k],tmplabel,"L");
+        if not options.blindObservedLine:
+         tmplabel = "th., C'^{ 2} = %1.1f"%( float((cprime[k])/10.) )
+         leg2.AddEntry(tGraphs_csXbr_th[k],tmplabel,"L");
 
     leg2.Draw();
     banner.Draw();
     label_sqrt.Draw();
     banner2.Draw();
     
-    can_BSMsig.SaveAs("limitFigs/BSMLim%s_%s_Sigma.png"%(SIGCH,options.channel));
-    can_BSMsig.SaveAs("limitFigs/BSMLim%s_%s_Sigma.pdf"%(SIGCH,options.channel));
+    can_BSMsig.SaveAs("limitFigs/BSMLim%s_%s_vsMass_brNew_%s_Sigma.png"%(SIGCH,options.channel,brnew));
+    can_BSMsig.SaveAs("limitFigs/BSMLim%s_%s_vsMass_brNew_%s_Sigma.pdf"%(SIGCH,options.channel,brnew));
 
 
 ###############################################
@@ -1196,10 +1216,9 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
     print "module ===> makeBSMLimits_vsBRnew";
 
     curcolors = [1,2,210,4,6,12,7];
-    BRnew_x = [0,0.1,0.2,0.3,0.4,0.5];
+    BRnew_x   = [0,0.1,0.2,0.3,0.4,0.5];
     massindex = {600:0,700:1,800:2,900:3,1000:4}
-    nPoints = len(BRnew);
-    massXS  = [];
+    massXS    = [];
 
     if SIGCH == "" or SIGCH == "_2jet":
 	massXS.append((0.5230+0.09688));
@@ -1223,8 +1242,10 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
         print "problem!"
     massBRWW = [5.58E-01,5.77E-01,5.94E-01,6.09E-01,6.21E-01];
 
-    gridMax = -999;
-    gridMaxSig = -999;
+    gridMaxExp = -999;
+    gridMaxSigExp = -999;
+    gridMaxObs = -999;
+    gridMaxSigObs = -999;
 
     tGraphs_exp = [];
     tGraphs_obs = [];
@@ -1234,15 +1255,18 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
 
     for j in range(len(cprime)):
 
+        if cprime[j]*0.1 == 1.0 : continue ; 
+
         xbins           = array('f', []);
         ybins_exp       = array('f', []);
         ybins_obs       = array('f', []);
         ybins_csXbr_exp = array('f', []);
         ybins_csXbr_obs = array('f', []);
         ybins_csXbr_th  = array('f', []);
-
+        nPoints = 0 ;
         for i in range(len(BRnew)):
-         if (cprime[j]*0.1)<=(1-BRnew[i]*0.1):
+            if (cprime[j]*0.1) > (1-BRnew[i]*0.1): continue ;
+            nPoints = nPoints+1 ;
             curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass,options.channel,SIGCH,cprime[j],BRnew[i],mass);
             curAsymLimits = getAsymLimits(curFile);
             xbins.append(BRnew_x[i]);
@@ -1252,9 +1276,14 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
             ybins_csXbr_obs.append( curAsymLimits[0]*massXS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]] );
             ybins_csXbr_th.append( 1.*massXS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]] );
 
-            if gridMax < curAsymLimits[3]: gridMax = curAsymLimits[3];
+            if gridMaxExp < curAsymLimits[3]: gridMaxExp = curAsymLimits[3];
+            if gridMaxObs < curAsymLimits[0]: gridMaxObs = curAsymLimits[0];
             cscur = ( curAsymLimits[3]*massXS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]] );
-            if gridMaxSig < cscur: gridMaxSig = cscur;
+            if gridMaxSigExp < cscur: gridMaxSigExp = cscur;
+            cscurObs = ( curAsymLimits[0]*massXS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]] );
+            if gridMaxSigObs < cscurObs: gridMaxSigObs = cscurObs;
+
+        if not xbins or not ybins_exp or not ybins_obs : continue ;
 
         curGraph_exp = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_exp);
         curGraph_obs = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_obs);
@@ -1296,8 +1325,9 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
         tGraphs_csXbr_th.append(curGraph_csXbr_th);
 
     setStyle();
+
     can_BSM = ROOT.TCanvas("can_BSM_BR","can_BSM",630,600);
-    hrl_BSM = can_BSM.DrawFrame(0.0,0.0,0.5,gridMax*1.5);
+    hrl_BSM = can_BSM.DrawFrame(0.0,0.0,0.5,max(gridMaxExp,gridMaxObs)*1.5);
 
     hrl_BSM.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{SM}");
     hrl_BSM.GetYaxis().SetTitleOffset(1.35);
@@ -1319,7 +1349,7 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
     leg2.SetTextSize(0.028);
     leg2.SetNColumns(2);
 
-    for k in range(len(cprime)): 
+    for k in range(len(tGraphs_exp)): 
         tGraphs_exp[k].SetLineStyle(1);
         tGraphs_exp[k].SetLineColor(curcolors[k]);
         tGraphs_exp[k].SetMarkerColor(curcolors[k]);
@@ -1327,11 +1357,18 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
         tGraphs_obs[k].SetMarkerColor(curcolors[k]);
         tGraphs_exp[k].SetLineWidth(2);
         tGraphs_obs[k].SetLineWidth(2);
-        tGraphs_exp[k].Draw("PL");
-        if not options.blindObservedLine: tGraphs_obs[k].Draw("PL");
-
+        if not options.blindObservedLine:
+            tGraphs_exp[k].SetLineStyle(7);
+            tGraphs_exp[k].Draw("PL");
+            tGraphs_obs[k].Draw("PL");
+        else:
+            tGraphs_exp[k].Draw("PL");
+            
         tmplabel = "exp., C'^{ 2} = %1.1f    "%( float((cprime[k])/10.) )
         leg2.AddEntry(tGraphs_exp[k],tmplabel,"L")
+        if not options.blindObservedLine:
+         tmplabel = "obs., C'^{ 2} = %1.1f    "%( float((cprime[k])/10.) )
+         leg2.AddEntry(tGraphs_obs[k],tmplabel,"L")
 
 
     can_BSM.Update();
@@ -1369,7 +1406,7 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
     can_BSM.SaveAs("limitFigs/BSMLim%s_Mu_vsBRnew_%i.pdf"%(SIGCH,mass));
 
     can_BSMsig = ROOT.TCanvas("can_BSM_Sig","can_BSM",630,600);
-    hrl_BSMSig = can_BSMsig.DrawFrame(0.,0.0,0.5,gridMaxSig*1.5);
+    hrl_BSMSig = can_BSMsig.DrawFrame(0.,0.0,0.5,max(gridMaxSigExp,gridMaxSigObs)*1.5);
 
     hrl_BSMSig.GetYaxis().SetTitle("#sigma #times BR_{WW}");
     hrl_BSMSig.GetYaxis().SetTitleOffset(1.35);
@@ -1391,7 +1428,7 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
     leg2.SetTextSize(0.028);
     leg2.SetNColumns(2);
 
-    for k in range(len(cprime)):
+    for k in range(len(tGraphs_csXbr_exp)):
         tGraphs_csXbr_exp[k].SetLineStyle(1);
         tGraphs_csXbr_exp[k].SetLineColor(curcolors[k]);
         tGraphs_csXbr_obs[k].SetLineColor(curcolors[k]);
@@ -1401,11 +1438,17 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
         tGraphs_csXbr_obs[k].SetLineWidth(2);
         tGraphs_csXbr_exp[k].SetMarkerColor(curcolors[k]);
         tGraphs_csXbr_exp[k].Draw("PL");
-        if not options.blindObservedLine: tGraphs_csXbr_obs[k].Draw("PL");
+        if not options.blindObservedLine:
+            tGraphs_csXbr_exp[k].SetLineStyle(7);
+            tGraphs_csXbr_exp[k].Draw("PL");
+            tGraphs_csXbr_obs[k].Draw("PL");
 
         tmplabel = "exp., C'^{ 2} = %1.1f"%( float((cprime[k])/10.) );
         leg2.AddEntry(tGraphs_csXbr_exp[k],tmplabel,"L")
-        tmplabel = "obs., C'^{ 2} = %1.1f"%( float((cprime[k])/10.) );
+
+        if not options.blindObservedLine:
+         tmplabel = "obs., C'^{ 2} = %1.1f"%( float((cprime[k])/10.) );
+         leg2.AddEntry(tGraphs_csXbr_obs[k],tmplabel,"L")
 
     leg2.Draw();
     banner.Draw();
@@ -2020,7 +2063,7 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew, contourListBrNewExp =0, counturListBr
     banner3.SetTextFont(42);
     banner3.SetBorderSize(0);
 
-    counturLevel = [3.];
+    counturLevel = [4.];
 #    if brNew*0.1 == 0.2:
 #     counturLevel[0] = 4.;
 #    elif brNew*0.1 == 0.3:
@@ -2866,7 +2909,12 @@ if __name__ == '__main__':
               makeSMPValuePlot(SIGCH,07,03);
 
       if options.makeBSMLimitPlotMass == 1:
-          makeBSMLimitPlotMass(SIGCH);
+          makeBSMLimitPlotMass(SIGCH,00);
+          makeBSMLimitPlotMass(SIGCH,01);
+          makeBSMLimitPlotMass(SIGCH,02);
+          makeBSMLimitPlotMass(SIGCH,03);
+          makeBSMLimitPlotMass(SIGCH,04);
+          makeBSMLimitPlotMass(SIGCH,05);
                  
       if options.makeBSMLimitPlotBRnew == 1:
           
