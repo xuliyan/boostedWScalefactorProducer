@@ -5,7 +5,7 @@ RooExtendPdf* MakeExtendedModel(RooWorkspace* workspace, const std::string & lab
 
       std::cout<<" "<<std::endl;
       std::cout<<"#########################################"<<std::endl;
-      std::cout<<"## Make model : "<<label<<" "<<model<<"##"<<std::endl;
+      std::cout<<"## Make model : "<<label<<" "<<model<<" "<<area_init_value<<" ##"<<std::endl;
       std::cout<<"#########################################"<<std::endl;
       std::cout<<" "<<std::endl;
 
