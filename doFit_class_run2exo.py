@@ -338,19 +338,19 @@ class doFit_wj_and_wlvj:
          self.file_rlt_txt                   = self.rlt_DIR+"other_hwwlvj_%s_%s%s_%02d_%02d.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
          self.file_rlt_root                  = self.rlt_DIR+"hwwlvj_%s_%s%s_%02d_%02d_workspace.root"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
          self.file_datacard_unbin_RSGravitonvbfH    = self.rlt_DIR+"hwwlvj_%s_%s%s_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
-         self.file_datacard_unbin_RSGraviton        = self.rlt_DIR+"hwwlvj_%s_%s%s_RSGraviton_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
+         self.file_datacard_unbin_RSGraviton        = self.rlt_DIR+"hwwlvj_%s_%s%s_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
          self.file_datacard_unbin_vbfH       = self.rlt_DIR+"hwwlvj_%s_%s%s_vbfH_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
          self.file_datacard_counting_RSGravitonvbfH = self.rlt_DIR+"hwwlvj_%s_%s%s_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
-         self.file_datacard_counting_RSGraviton     = self.rlt_DIR+"hwwlvj_%s_%s%s_RSGraviton_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
+         self.file_datacard_counting_RSGraviton     = self.rlt_DIR+"hwwlvj_%s_%s%s_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
          self.file_datacard_counting_vbfH    = self.rlt_DIR+"hwwlvj_%s_%s%s_vbfH_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
         else:
          self.file_rlt_txt                   = self.rlt_DIR+"other_hwwlvj_%s_%s_%02d_%02d.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
          self.file_rlt_root                  = self.rlt_DIR+"hwwlvj_%s_%s_%02d_%02d_workspace.root"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
          self.file_datacard_unbin_RSGravitonvbfH    = self.rlt_DIR+"hwwlvj_%s_%s_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
-         self.file_datacard_unbin_RSGraviton        = self.rlt_DIR+"hwwlvj_%s_%s_RSGraviton_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
+         self.file_datacard_unbin_RSGraviton        = self.rlt_DIR+"hwwlvj_%s_%s_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
          self.file_datacard_unbin_vbfH       = self.rlt_DIR+"hwwlvj_%s_%s_vbfH_%02d_%02d_unbin.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
          self.file_datacard_counting_RSGravitonvbfH = self.rlt_DIR+"hwwlvj_%s_%s_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
-         self.file_datacard_counting_RSGraviton     = self.rlt_DIR+"hwwlvj_%s_%s_RSGraviton_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
+         self.file_datacard_counting_RSGraviton     = self.rlt_DIR+"hwwlvj_%s_%s_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
          self.file_datacard_counting_vbfH    = self.rlt_DIR+"hwwlvj_%s_%s_vbfH_%02d_%02d_counting.txt"%(self.higgs_sample,self.channel,options.cprime,options.BRnew)
             
         self.file_out = open(self.file_rlt_txt,"w");
