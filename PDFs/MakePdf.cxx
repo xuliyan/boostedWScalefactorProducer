@@ -1309,6 +1309,22 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
            rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2100,1500,2500);
            rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 630,550 ,900);
          }
+         else if (TString(label).Contains("1000") and TString(label).Contains("RSGraviton") and not TString(label).Contains("M1000_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),1000, 900,1100);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 50,20 ,120);
+         }
+         else if (TString(label).Contains("2000") and TString(label).Contains("RSGraviton") and not TString(label).Contains("M2000_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),2000,1900,2100);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),100,75,210);
+         }
+         else if (TString(label).Contains("3000") and TString(label).Contains("RSGraviton") and not TString(label).Contains("M3000_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),3000,2900,3100);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),150,100,250);
+         }
+         else if (TString(label).Contains("4000") and TString(label).Contains("RSGraviton") and not TString(label).Contains("M4000_W") ){
+           rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),4000,3800,4200);
+           rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),200,100,300);
+         }
          else{
                rrv_mean_CB  = new  RooRealVar(("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),("rrv_mean_CB"+label+"_"+channel+spectrum).c_str(),700,550,2500);
                rrv_sigma_CB = new  RooRealVar(("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(),("rrv_sigma_CB"+label+"_"+channel+spectrum).c_str(), 50,20 ,120);
