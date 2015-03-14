@@ -93,15 +93,15 @@ parser.add_option('--plotLikelihoodScan',    action="store", type="int",    dest
 ######### Get Some Global Variables #########
 #############################################
 
-mass = [1000]
-ccmlo = [800]
-ccmhi = [1200]
-mjlo = [40]
-mjhi = [130]
-mlo = [550]
-mhi = [1500]
-shape = ["Exp"]
-shapeAlt = ["Pow"]
+mass = [1000,2000,3000,4000]
+ccmlo = [800,800,800,800]
+ccmhi = [4800,4800,4800,4800]
+mjlo = [40,40,40,40]
+mjhi = [130,130,130,130]
+mlo = [700,700,700,700]
+mhi = [5000,5000,5000,5000]
+shape = ["Exp","Exp","Exp","Exp"]
+shapeAlt = ["Pow","Pow","Pow","Pow"]
 
 ################## options turnOn Analysis
 '''
