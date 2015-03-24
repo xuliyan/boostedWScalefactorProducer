@@ -229,17 +229,17 @@ TLatex* banner4Plot(const std::string & channel, const float & lumi, const int &
  std::cout<<"############### draw the banner ########################"<<std::endl;
  TString bannerName;
  if(channel=="mu" and not forPaper) 
-  bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu #nu",lumi);
+  bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow #mu #nu",lumi);
  else if(channel=="mu" and forPaper == 1)
-   bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow #mu#nu ",lumi); 
+   bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow #mu#nu ",lumi); 
  else if(channel=="el" and not forPaper) 
-  bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow e #nu",lumi);
+  bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow e #nu",lumi);
  else if(channel=="el" and forPaper == 1) 
-   bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow e#nu ",lumi); 
+   bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow e#nu ",lumi); 
  else if(channel=="em" and not forPaper)  
-  bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow l #nu",lumi);
+  bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow l #nu",lumi);
  else if(channel=="em" and forPaper == 1) 
-   bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 8 TeV, W#rightarrow l#nu ",lumi); 
+   bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow l#nu ",lumi); 
  
  TLatex* banner = NULL ;
  
@@ -775,9 +775,9 @@ void setTDRStyle(){
 
 float GetLumi(const std::string & channel){
  
-  if(channel=="el") return 19.3;
-  else if(channel=="mu") return 19.3;
-  else if(channel=="em") return 19.3;
+  if(channel=="el") return 1;
+  else if(channel=="mu") return 1;
+  else if(channel=="em") return 1;
 
   return -1 ;
 }
