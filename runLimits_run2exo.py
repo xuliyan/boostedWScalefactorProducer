@@ -103,6 +103,17 @@ mhi = [5000,5000,5000,5000]
 shape = ["Exp","Exp","Exp","Exp"]
 shapeAlt = ["Pow","Pow","Pow","Pow"]
 
+'''
+mass = [1000]#,2000,3000,4000]
+ccmlo = [800]#,800,800,800]
+ccmhi = [4800]#,4800,4800,4800]
+mjlo = [40]#,40,40,40]
+mjhi = [130]#,130,130,130]
+mlo = [700]#,700,700,700]
+mhi = [1500]#,5000,5000,5000]
+shape = ["Exp"]#,"Exp","Exp","Exp"]
+shapeAlt = ["Pow"]#,"Pow","Pow","Pow"]
+'''
 ################## options turnOn Analysis
 '''
 if options.turnOnAnalysis :
