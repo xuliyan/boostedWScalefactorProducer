@@ -90,9 +90,12 @@ class doFit_wj_and_wlvj:
             self.mj_shape["WJets1"]  = "ErfExp";
             self.mj_shape["WJets01"] = "User1";
         else: 
-            self.mj_shape["WJets0"]  = "User1";
-            self.mj_shape["WJets1"]  = "User1";
-            self.mj_shape["WJets01"] = "ErfExp";
+            self.mj_shape["WJets0"]  = "ErfExp";
+            self.mj_shape["WJets1"]  = "ErfExp";
+            self.mj_shape["WJets01"] = "User1";
+#            self.mj_shape["WJets0"]  = "User1";
+#            self.mj_shape["WJets1"]  = "User1";
+#            self.mj_shape["WJets01"] = "ErfExp";
 
         self.mlvj_shape = ROOT.std.map(ROOT.std.string,ROOT.std.string) () ;
         self.mlvj_shape["TTbar"]   = fit_model;
@@ -375,18 +378,18 @@ class doFit_wj_and_wlvj:
         self.color_palet["Other_Backgrounds"] = 1;
                                                                         
         
-        self.Lumi = 19297;
-        if self.channel=="el":
-            self.Lumi = 19166;
+        self.Lumi = 1000;
+#        if self.channel=="el":
+#            self.Lumi = 19166;
 
 	#met cut:el 70; mu: 50
-        self.pfMET_cut = 50;
-        self.lpt_cut   = 30;
+        self.pfMET_cut = 40;
+        self.lpt_cut   = 50;
         self.vpt_cut   = 200;
         self.bcut      = 0.679;
         if self.channel=="el":
-            self.pfMET_cut = 50; 
-            self.lpt_cut   = 35;        
+            self.pfMET_cut = 80; 
+            self.lpt_cut   = 90;        
         #deltaPhi_METj cut
         self.deltaPhi_METj_cut = 2.0;
         self.top_veto_had = 200 ;
@@ -1108,7 +1111,7 @@ class doFit_wj_and_wlvj:
 
           else:
               
-           if ungroomed_jet_pt > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"nBTagJet_medium") < 1 and mass_lvj >= rrv_mass_lvj.getMin() and mass_lvj <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1 and njet < 2:
+           if ungroomed_jet_pt > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"nBTagJet_medium") < 1 and mass_lvj >= rrv_mass_lvj.getMin() and mass_lvj <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1:# and njet < 2:
                
             isPassingCut = 1 ;
 
@@ -1132,8 +1135,10 @@ class doFit_wj_and_wlvj:
 
           if isPassingCut !=0 or isPassingCut_jes_up!=0 or isPassingCut_jes_dn!=0 or isPassingCut_jer!=0 or isPassingCut_jer_up!=0 or isPassingCut_jer_dn!=0 :
 
-             
-             tmp_event_weight = getattr(treeIn,"totalEventWeight");
+             #need to change the following lines
+#             tmp_event_weight = getattr(treeIn,"totalEventWeight");
+#             tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight");
+             tmp_event_weight = getattr(treeIn,"wSampleWeight")*self.Lumi;
              tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight");
 
              '''
@@ -1287,9 +1292,11 @@ class doFit_wj_and_wlvj:
                      raw_input("HOUSTON WE'VE GOT A PROBLEM")                     
              '''   
 
-             # for multi-sample, like STop and VV. There are two sample, and two wSampleWeight_value.Use the least wSampleWeight as scale.
+#             print "#########  #########";
+             #for multi-sample, like STop and VV. There are two sample, and two wSampleWeight_value.Use the least wSampleWeight as scale.
              tmp_event_weight4fit = tmp_event_weight4fit*treeIn.wSampleWeight/tmp_scale_to_lumi;
 
+             '''
              if TString(label).Contains("vbfH"):
                  
                  tmp_event_weight4fitUp = tmp_event_weight4fitUp*treeIn.wSampleWeight/tmp_scale_to_lumi;
@@ -1302,7 +1309,7 @@ class doFit_wj_and_wlvj:
                  tmp_event_weightDn = tmp_event_weightDn/self.higgs_xs_scale;
                  tmp_event_weight4fitDn = tmp_event_weight4fitDn/self.higgs_xs_scale; 
 
-             if TString(label).Contains("ggH"):
+             if TString(label).Contains("RSGraviton"):
 
                  tmp_event_weight4fitUp = tmp_event_weight4fitUp*treeIn.wSampleWeight/tmp_scale_to_lumi;
                  tmp_event_weight4fitDn = tmp_event_weight4fitDn*treeIn.wSampleWeight/tmp_scale_to_lumi;
@@ -1321,33 +1328,34 @@ class doFit_wj_and_wlvj:
                  tmp_event_weight4fitUp=tmp_event_weight4fitUp*tmp_bsmWeightUp;
                  tmp_event_weightDn = tmp_event_weightDn*tmp_bsmWeightDn;
                  tmp_event_weight4fitDn =tmp_event_weight4fitDn*tmp_bsmWeightDn;
-
+             '''
+#             print "######### #########";
 
              if not label=="_data":
                      if TString(label).Contains("_TTbar") or TString(label).Contains("_STop") :
                          tmp_event_weight     = tmp_event_weight*self.rrv_wtagger_eff_reweight_forT.getVal();
                          tmp_event_weight4fit = tmp_event_weight4fit*self.rrv_wtagger_eff_reweight_forT.getVal();
-                     elif TString(label).Contains("_ggH") or TString(label).Contains("_vbfH") or TString(label).Contains("_VV") or TString(label).Contains("_WW_EWK") :
+                     elif TString(label).Contains("_RSGraviton") or TString(label).Contains("_vbfH") or TString(label).Contains("_VV") or TString(label).Contains("_WW_EWK") :
                          tmp_event_weight     = tmp_event_weight*self.rrv_wtagger_eff_reweight_forV.getVal();
                          tmp_event_weight4fit = tmp_event_weight4fit*self.rrv_wtagger_eff_reweight_forV.getVal();
 
-                     if TString(label).Contains("vbfH") or TString(label).Contains("_ggH"):    
-                         tmp_event_weightUp     = tmp_event_weightUp*self.rrv_wtagger_eff_reweight_forV.getVal();
-                         tmp_event_weight4fitUp = tmp_event_weight4fitUp*self.rrv_wtagger_eff_reweight_forV.getVal();
-                         tmp_event_weightDn     = tmp_event_weightDn*self.rrv_wtagger_eff_reweight_forV.getVal();
-                         tmp_event_weight4fitDn = tmp_event_weight4fitDn*self.rrv_wtagger_eff_reweight_forV.getVal();
+#                     if TString(label).Contains("vbfH") or TString(label).Contains("_RSGraviton"):    
+#                         tmp_event_weightUp     = tmp_event_weightUp*self.rrv_wtagger_eff_reweight_forV.getVal();
+#                         tmp_event_weight4fitUp = tmp_event_weight4fitUp*self.rrv_wtagger_eff_reweight_forV.getVal();
+#                         tmp_event_weightDn     = tmp_event_weightDn*self.rrv_wtagger_eff_reweight_forV.getVal();
+#                         tmp_event_weight4fitDn = tmp_event_weight4fitDn*self.rrv_wtagger_eff_reweight_forV.getVal();
 
-             if TString(label).Contains("ggH") or TString(label).Contains("vbfH"):     
-              tmp_event_weightUp        = tmp_event_weightUp* getattr(treeIn,"btag_weight"); ## add the btag weight 
-              tmp_event_weight4fitUp    = tmp_event_weight4fitUp* getattr(treeIn,"btag_weight"); ## add the btag weight
-              tmp_event_weightDn        = tmp_event_weightDn* getattr(treeIn,"btag_weight"); ## add the btag weight 
-              tmp_event_weight4fitDn    = tmp_event_weight4fitDn* getattr(treeIn,"btag_weight"); ## add the btag
-              tmp_event_weight          = tmp_event_weight* getattr(treeIn,"btag_weight"); ## add the btag weight 
-              tmp_event_weight4fit      = tmp_event_weight4fit* getattr(treeIn,"btag_weight"); ## add the btag weight
+#             if TString(label).Contains("RSGraviton") or TString(label).Contains("vbfH"):     
+#              tmp_event_weightUp        = tmp_event_weightUp* getattr(treeIn,"btag_weight"); ## add the btag weight 
+#              tmp_event_weight4fitUp    = tmp_event_weight4fitUp* getattr(treeIn,"btag_weight"); ## add the btag weight
+#              tmp_event_weightDn        = tmp_event_weightDn* getattr(treeIn,"btag_weight"); ## add the btag weight 
+#              tmp_event_weight4fitDn    = tmp_event_weight4fitDn* getattr(treeIn,"btag_weight"); ## add the btag
+#              tmp_event_weight          = tmp_event_weight* getattr(treeIn,"btag_weight"); ## add the btag weight 
+#              tmp_event_weight4fit      = tmp_event_weight4fit* getattr(treeIn,"btag_weight"); ## add the btag weight
 
  
 
-             if TString(label).Contains("ggH") or TString(label).Contains("vbfH"):
+             if TString(label).Contains("RSGraviton") or TString(label).Contains("vbfH"):
               rrv_mass_gen_WW.setVal(mass_WW_gen);
               rdataset4fit_m_WW_gen.add( RooArgSet( rrv_mass_gen_WW ), tmp_event_weight4fit );
                                                 
@@ -1365,23 +1373,23 @@ class doFit_wj_and_wlvj:
              if tmp_jet_mass >= self.mj_signal_min and tmp_jet_mass < self.mj_signal_max and isPassingCut == 1:
                  rdataset_signal_region_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
                  rdataset4fit_signal_region_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fit );
-                 if TString(label).Contains("vbfH") or TString(label).Contains("ggH") :
-                     rdataset_signal_region_mlvj_int_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weightUp );
-                     rdataset4fit_signal_region_mlvj_int_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fitUp );
-                     rdataset_signal_region_mlvj_int_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weightDn );
-                     rdataset4fit_signal_region_mlvj_int_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fitDn ); 
+#                 if TString(label).Contains("vbfH") or TString(label).Contains("RSGraviton") :
+#                     rdataset_signal_region_mlvj_int_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weightUp );
+#                     rdataset4fit_signal_region_mlvj_int_up.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fitUp );
+#                     rdataset_signal_region_mlvj_int_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weightDn );
+#                     rdataset4fit_signal_region_mlvj_int_dn.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight4fitDn ); 
                  data_category.setLabel("signal_region");
                  combData.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight);
                  combData4fit.add(RooArgSet(rrv_mass_lvj,data_category),tmp_event_weight4fit);
                  hnum_2region.Fill(1,tmp_event_weight);
-                 if TString(label).Contains("vbfH") or TString(label).Contains("ggH"):
-                       hnum_2region_int_up.Fill(1,tmp_event_weightUp);
-                       hnum_2region_int_dn.Fill(1,tmp_event_weightDn);                 
+#                 if TString(label).Contains("vbfH") or TString(label).Contains("RSGraviton"):
+#                       hnum_2region_int_up.Fill(1,tmp_event_weightUp);
+#                       hnum_2region_int_dn.Fill(1,tmp_event_weightDn);                 
                  if mass_lvj >=self.mlvj_signal_min and mass_lvj <self.mlvj_signal_max: 
                    hnum_2region.Fill(0,tmp_event_weight);
-                   if TString(label).Contains("vbfH") or TString(label).Contains("ggH"):
-                       hnum_2region_int_up.Fill(0,tmp_event_weightUp);
-                       hnum_2region_int_dn.Fill(0,tmp_event_weightDn);
+#                   if TString(label).Contains("vbfH") or TString(label).Contains("RSGraviton"):
+#                       hnum_2region_int_up.Fill(0,tmp_event_weightUp);
+#                       hnum_2region_int_dn.Fill(0,tmp_event_weightDn);
 
              if tmp_jet_mass >= self.mj_sideband_hi_min and tmp_jet_mass < self.mj_sideband_hi_max and isPassingCut == 1:
                  rdataset_sb_hi_mlvj.add( RooArgSet( rrv_mass_lvj ), tmp_event_weight );
@@ -1392,23 +1400,23 @@ class doFit_wj_and_wlvj:
               rdataset4fit_mj.add( RooArgSet( rrv_mass_j ), tmp_event_weight4fit );
               if tmp_jet_mass >=self.mj_sideband_lo_min and tmp_jet_mass <self.mj_sideband_lo_max: 
                  hnum_4region.Fill(-1,tmp_event_weight );
-                 if TString(label).Contains("vbfH") or TString(label).Contains("ggH"):
-                     hnum_4region_int_up.Fill(-1,tmp_event_weightUp );
-                     hnum_4region_int_dn.Fill(-1,tmp_event_weightDn );                 
+#                 if TString(label).Contains("vbfH") or TString(label).Contains("RSGraviton"):
+#                     hnum_4region_int_up.Fill(-1,tmp_event_weightUp );
+#                     hnum_4region_int_dn.Fill(-1,tmp_event_weightDn );                 
               if tmp_jet_mass >=self.mj_signal_min and tmp_jet_mass <self.mj_signal_max : 
                  hnum_4region.Fill(0,tmp_event_weight);
-                 if TString(label).Contains("vbfH") or TString(label).Contains("ggH"):
-                     hnum_4region_int_up.Fill(0,tmp_event_weightUp );
-                     hnum_4region_int_dn.Fill(0,tmp_event_weightDn );                 
+#                 if TString(label).Contains("vbfH") or TString(label).Contains("RSGraviton"):
+#                     hnum_4region_int_up.Fill(0,tmp_event_weightUp );
+#                     hnum_4region_int_dn.Fill(0,tmp_event_weightDn );                 
               if tmp_jet_mass >=self.mj_sideband_hi_min and tmp_jet_mass <self.mj_sideband_hi_max: 
                  hnum_4region.Fill(1,tmp_event_weight);
-                 if TString(label).Contains("vbfH") and TString(label).Contains("ggH"):
-                     hnum_4region_int_up.Fill(1,tmp_event_weightUp );
-                     hnum_4region_int_dn.Fill(1,tmp_event_weightDn );                 
+#                 if TString(label).Contains("vbfH") and TString(label).Contains("RSGraviton"):
+#                     hnum_4region_int_up.Fill(1,tmp_event_weightUp );
+#                     hnum_4region_int_dn.Fill(1,tmp_event_weightDn );                 
               hnum_4region.Fill(2,tmp_event_weight);
-              if TString(label).Contains("vbfH") and TString(label).Contains("ggH"):
-                     hnum_4region_int_up.Fill(2,tmp_event_weightUp );
-                     hnum_4region_int_dn.Fill(2,tmp_event_weightDn );                 
+#              if TString(label).Contains("vbfH") and TString(label).Contains("RSGraviton"):
+#                     hnum_4region_int_up.Fill(2,tmp_event_weightUp );
+#                     hnum_4region_int_dn.Fill(2,tmp_event_weightDn );                 
 
              ## JES UP
              if label != "_WJets01" and label != "_WJets1" and label !="_data" and not options.skipJetSystematics:
