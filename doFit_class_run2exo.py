@@ -793,7 +793,7 @@ class doFit_wj_and_wlvj:
 
 
     ##### Method used to cycle on the events and for the dataset to be fitted
-    def get_mj_and_mlvj_dataset(self,in_file_name, label, jet_mass="jet_mass_pr"):# to get the shape of m_lvj
+    def get_mj_and_mlvj_dataset(self,in_file_name, label, jet_mass="jet_mass_so"):# to get the shape of m_lvj
 
         # read in tree
         fileIn_name = TString(self.file_Directory+in_file_name);
@@ -1111,7 +1111,7 @@ class doFit_wj_and_wlvj:
 
           else:
               
-           if ungroomed_jet_pt > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"nBTagJet_medium") < 1 and mass_lvj >= rrv_mass_lvj.getMin() and mass_lvj <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1:# and njet < 2:
+           if ungroomed_jet_pt > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"nBTagJet_medium") < 1 and mass_lvj >= rrv_mass_lvj.getMin() and mass_lvj <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1:# and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep:# and njet < 2:
                
             isPassingCut = 1 ;
 
@@ -2910,6 +2910,15 @@ self.channel));
         if self.higgs_sample=="RSGraviton1000":
             model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("RSGraviton#times%s, m_{H}=1TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["RSGraviton"]), RooFit.LineStyle(2), RooFit.VLines());
 #            model_pdf_vbfH.plotOn(mplot,RooFit.Normalization(scale_number_vbfH*signal_scale),RooFit.Name("qqH#times%s, m_{H}=1TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["vbfH"]), RooFit.LineStyle( 9), RooFit.VLines());
+
+        if self.higgs_sample=="RSGraviton2000":
+            model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("RSGraviton#times%s, m_{H}=1TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["RSGraviton"]), RooFit.LineStyle(2), RooFit.VLines());
+
+        if self.higgs_sample=="RSGraviton3000":
+            model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("RSGraviton#times%s, m_{H}=1TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["RSGraviton"]), RooFit.LineStyle(2), RooFit.VLines());
+
+        if self.higgs_sample=="RSGraviton4000":
+            model_pdf_ggH.plotOn(mplot,RooFit.Normalization(scale_number_ggH*signal_scale),RooFit.Name("RSGraviton#times%s, m_{H}=1TeV"%(signal_scale)),RooFit.DrawOption("L"), RooFit.LineColor(self.color_palet["RSGraviton"]), RooFit.LineStyle(2), RooFit.VLines());
 
         GetDataPoissonInterval(data_obs,rrv_x,mplot,self.narrow_factor);
         model_Total_background_MC.plotOn(mplot,RooFit.Normalization(scale_number_Total_background_MC),RooFit.Invisible(),RooFit.Name("model_mc"));
