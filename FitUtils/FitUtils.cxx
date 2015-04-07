@@ -642,7 +642,13 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
 
   //## draw the plot for the default WJets Shape
   RooPlot* mplot = rrv_mass_j->frame(RooFit::Title("rrv_mass_j"), RooFit::Bins(int(rrv_mass_j->getBins())));
-  rdataset_data_mj->plotOn(mplot,RooFit::Name("data_invisible"), RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::Poisson), RooFit::XErrorSize(0),RooFit::Invisible());
+
+  //DRAW DATA
+  if (pseudodata==1)
+    GetDataPoissonInterval(rdataset_data_mj,rrv_mass_j,mplot);
+  else
+    rdataset_data_mj->plotOn(mplot,RooFit::Name("data_invisible"), RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0),RooFit::Invisible());
+
   //## plot solid style
   if (ttbarcontrolregion){
     // plot solid style 
@@ -915,7 +921,6 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
 
      Name.Form("model%s_%s_mj,model_STop%s%s_%s_mj,model_TTbar%s%s_%s_mj,model_VV%s%s_%s_mj",(label+model).c_str(),channel.c_str(),mass_scale.c_str(),mj_shape["STop"].c_str(),channel.c_str(),mass_scale.c_str(),mj_shape["TTbar"].c_str(),channel.c_str(),mass_scale.c_str(),mj_shape["VV"].c_str(),channel.c_str());
      model_data->plotOn( mplot,RooFit::Name("_invisible"), RooFit::Components(Name.Data()), RooFit::LineColor(kBlack), RooFit::LineWidth(2),RooFit::NormRange("sb_lo,sb_hi"), RooFit::VLines());
-
 
      // dash line
      Name.Form("model%s_%s_mj",(label+model).c_str(),channel.c_str());
