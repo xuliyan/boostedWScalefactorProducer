@@ -793,7 +793,7 @@ class doFit_wj_and_wlvj:
 
 
     ##### Method used to cycle on the events and for the dataset to be fitted
-    def get_mj_and_mlvj_dataset(self,in_file_name, label, jet_mass="jet_mass_so"):# to get the shape of m_lvj
+    def get_mj_and_mlvj_dataset(self,in_file_name, label, jet_mass="jet_mass_pr"):# to get the shape of m_lvj
 
         # read in tree
         fileIn_name = TString(self.file_Directory+in_file_name);
