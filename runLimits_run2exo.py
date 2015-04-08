@@ -94,23 +94,27 @@ parser.add_option('--plotLikelihoodScan',    action="store", type="int",    dest
 #############################################
 
 mass = [1000,2000,3000,4000]
-ccmlo = [800,800,800,800]
-ccmhi = [4800,4800,4800,4800]
+ccmlo = [700,700,700,700]
+ccmhi = [1500,2500,3500,4500]
 mjlo = [40,40,40,40]
 mjhi = [130,130,130,130]
+#mjlo = [35,35,35,35]
+#mjhi = [110,110,110,110]
 mlo = [700,700,700,700]
-mhi = [5000,5000,5000,5000]
-shape = ["Exp","Exp","Exp","Exp"]
-shapeAlt = ["Pow","Pow","Pow","Pow"]
+mhi = [1500,2500,3500,4500]
+shape = ["ExpN","ExpN","ExpN","ExpN"]
+shapeAlt = ["ExpTail","ExpTail","ExpTail","ExpTail"]
+#shape = ["Exp","Exp","Exp","Exp"]
+#shapeAlt = ["Pow","Pow","Pow","Pow"]
 
 '''
 mass = [1000]#,2000,3000,4000]
-ccmlo = [800]#,800,800,800]
+ccmlo = [700]#,800,800,800]
 ccmhi = [4800]#,4800,4800,4800]
-mjlo = [40]#,40,40,40]
-mjhi = [130]#,130,130,130]
+mjlo = [35]#,40,40,40]
+mjhi = [110]#,130,130,130]
 mlo = [700]#,700,700,700]
-mhi = [1500]#,5000,5000,5000]
+mhi = [5000]#,5000,5000,5000]
 shape = ["Exp"]#,"Exp","Exp","Exp"]
 shapeAlt = ["Pow"]#,"Pow","Pow","Pow"]
 '''
@@ -310,9 +314,9 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
     # create a dummy bash/csh
     outScript = open(fn+".sh","w");
 
-    file1 = "hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass,SIGCH,cprime,BRnew);
-    file2 = "hwwlvj_ggH%03d_mu%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
-    file3 = "hwwlvj_ggH%03d_el%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
+    file1 = "hwwlvj_RSGraviton%03d_em%s_%02d_%02d_unbin.txt"%(mass,SIGCH,cprime,BRnew);
+    file2 = "hwwlvj_RSGraviton%03d_mu%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
+    file3 = "hwwlvj_RSGraviton%03d_el%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
 
     if not options.lxbatchCern and not options.herculesMilano :   
      outScript.write('#!/bin/bash');
@@ -357,10 +361,10 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
      outScript.write("\n"+'cd -');
      outScript.write("\n"+'ls');    
     
-     file1 = "hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt"%(mass,options.channel,SIGCH,cprime,BRnew);
-     file2 = "hwwlvj_ggH%03d_mu%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
-     file3 = "hwwlvj_ggH%03d_el%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
-     file4 = "hwwlvj_ggH%03d_em%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
+     file1 = "hwwlvj_RSGraviton%03d_%s%s_%02d_%02d_unbin.txt"%(mass,options.channel,SIGCH,cprime,BRnew);
+     file2 = "hwwlvj_RSGraviton%03d_mu%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
+     file3 = "hwwlvj_RSGraviton%03d_el%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
+     file4 = "hwwlvj_RSGraviton%03d_em%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
 
      outScript.write("\n"+'cp '+currentDir+'/'+file1+' ./');
      outScript.write("\n"+'cp '+currentDir+'/'+file2+' ./');
@@ -387,10 +391,10 @@ def submitBatchJobCombine( command, fn, mass, cprime, BRnew ):
      outScript.write("\n"+'cd -');
      outScript.write("\n"+'ls');    
     
-     file1 = "hwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.txt"%(mass,options.channel,SIGCH,cprime,BRnew);
-     file2 = "hwwlvj_ggH%03d_mu%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
-     file3 = "hwwlvj_ggH%03d_el%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
-     file4 = "hwwlvj_ggH%03d_em%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
+     file1 = "hwwlvj_RSGraviton%03d_%s%s_%02d_%02d_unbin.txt"%(mass,options.channel,SIGCH,cprime,BRnew);
+     file2 = "hwwlvj_RSGraviton%03d_mu%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
+     file3 = "hwwlvj_RSGraviton%03d_el%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
+     file4 = "hwwlvj_RSGraviton%03d_em%s_%02d_%02d_workspace.root"%(mass,SIGCH,cprime,BRnew);
 
      outScript.write("\n"+'cp '+currentDir+'/'+file1+' ./');
      outScript.write("\n"+'cp '+currentDir+'/'+file2+' ./');
@@ -523,7 +527,8 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
     setStyle();
      
     for i in range(len(mass)):
-	curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+	curFile = "higgsCombinehwwlvj_RSGraviton%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+        print curFile
 	curAsymLimits = getAsymLimits(curFile);
         xbins.append( mass[i] );
 	xbins_env.append( mass[i] );
@@ -533,7 +538,7 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
 	ybins_1s.append( curAsymLimits[2] );
 
     for i in range( len(mass)-1, -1, -1 ):
-	curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+	curFile = "higgsCombinehwwlvj_RSGraviton%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
 	curAsymLimits = getAsymLimits(curFile);
         xbins_env.append( mass[i] );
         ybins_2s.append( curAsymLimits[5] );
@@ -570,27 +575,28 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
     curGraph_2s.SetLineWidth(3);
                                
 
-    oneLine = ROOT.TF1("oneLine","1",599,1001);
+    oneLine = ROOT.TF1("oneLine","1",999,4001);
     oneLine.SetLineColor(ROOT.kRed);
     oneLine.SetLineWidth(3);
 
     setStyle();
     
     can_SM = ROOT.TCanvas("can_SM","can_SM",600,650);
-    hrl_SM = can_SM.DrawFrame(599,0.0,1001,ROOT.TMath.MaxElement(curGraph_2s.GetN(),curGraph_2s.GetY())*1.2);
+    hrl_SM = can_SM.DrawFrame(999,0.01,4001,ROOT.TMath.MaxElement(curGraph_2s.GetN(),curGraph_2s.GetY())*1.2);
 
     hrl_SM.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{SM}");
     hrl_SM.GetYaxis().SetTitleOffset(1.35);
     hrl_SM.GetYaxis().SetTitleSize(0.045);
     hrl_SM.GetYaxis().SetTitleFont(42);
 
-    hrl_SM.GetXaxis().SetTitle("M_{H} (GeV)");
+    hrl_SM.GetXaxis().SetTitle("M_{X} (GeV)");
     hrl_SM.GetXaxis().SetTitleSize(0.045);
     hrl_SM.GetXaxis().SetTitleFont(42);
 
-    hrl_SM.GetYaxis().SetNdivisions(505);
+#    hrl_SM.GetYaxis().SetNdivisions(505);
     can_SM.SetGridx(1);
     can_SM.SetGridy(1);
+    ROOT.gPad.SetLogy();
                    
     curGraph_2s.Draw("F");
     curGraph_1s.Draw("Fsame");
@@ -632,7 +638,7 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
     label_sqrt.SetTextSize(0.038);
     label_sqrt.SetTextFont(62);
     label_sqrt.SetTextAlign(31); # align right                                                                                                                                         
-    label_sqrt.AddText("L = 19.3 fb^{-1} at #sqrt{s} = 8 TeV");
+    label_sqrt.AddText("L = 1 fb^{-1} at #sqrt{s} = 13 TeV");
     label_sqrt.Draw();
 
     os.system("mkdir -p %s/limitFigs/"%(os.getcwd()));
@@ -657,13 +663,13 @@ def makeSMPValuePlot(SIGCH,cprime = 10,brnew = 00):
     setStyle();
 
     for i in range(len(mass)):
-	curFile_obs = "higgsCombinehwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
-	curFile_exp = "higgsCombinehwwlvj_pval_exp_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+	curFile_obs = "higgsCombinehwwlvj_pval_obs_RSGraviton%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+	curFile_exp = "higgsCombinehwwlvj_pval_exp_RSGraviton%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
         xbins_obs.append(mass[i]); 
         xbins_exp.append(mass[i]); 
-        print "higgsCombinehwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+        print "higgsCombinehwwlvj_pval_obs_RSGraviton%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
         ybins_obs.append(getPValueFromCard(curFile_obs,1));
-        print "higgsCombinehwwlvj_pval_exp_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]); 
+        print "higgsCombinehwwlvj_pval_exp_RSGraviton%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]); 
         ybins_exp.append(getPValueFromCard(curFile_exp,0));
 
     gr_obs = ROOT.TGraphAsymmErrors(nPoints,xbins_obs,ybins_obs);
@@ -758,7 +764,7 @@ def makeSignalStrenghtPlot(SIGCH,cprime = 10,brnew = 00):
         
     for i in range(len(mass)):
 
-     curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.MaxLikelihoodFit.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+     curFile = "higgsCombinehwwlvj_RSGraviton%03d_%s%s_%02d_%02d_unbin.MaxLikelihoodFit.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
  
      f = ROOT.TFile(curFile);
      t = f.Get("limit");
@@ -798,7 +804,7 @@ def makeSignalStrenghtPlot(SIGCH,cprime = 10,brnew = 00):
      else:        ybins_mu_ratio.append(mu/mu_err_up);
 
      if options.plotPValue == 1:
-	curFile_obs = "higgsCombinehwwlvj_pval_obs_ggH%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+	curFile_obs = "higgsCombinehwwlvj_pval_obs_RSGraviton%03d_%s%s_%02d_%02d_unbin.ProfileLikelihood.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
         xbins_obs.append(mass[i]); 
         ybins_obs.append(getPValueFromCard(curFile_obs,1));
 
@@ -935,7 +941,7 @@ def makeLikelihoodScanPlot(SIGCH,cprime,brnew):
     
     for i in range(len(mass)):
 
-	curFile = "higgsCombinehwwlvj_LikelihoodScan_ggH%03d_%s%s_%02d_%02d_unbin.MultiDimFit.mH%02d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+	curFile = "higgsCombinehwwlvj_LikelihoodScan_RSGraviton%03d_%s%s_%02d_%02d_unbin.MultiDimFit.mH%02d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
         f = ROOT.TFile(curFile);
         t = f.Get("limit");
         
@@ -990,7 +996,7 @@ def makeBSMLimitPlotMass(SIGCH,brnew):
         massCS.append((0.1097+0.04365));
         massCS.append((0.0571+0.03164));
         massCS.append((0.0320+0.02399));
-    elif SIGCH == "_ggH":
+    elif SIGCH == "_RSGraviton":
         massCS.append((0.5230));
         massCS.append((0.2290));
         massCS.append((0.1097));
@@ -1028,7 +1034,7 @@ def makeBSMLimitPlotMass(SIGCH,brnew):
 
         for i in range(len(mass)):
 
-            curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime[j],brnew,mass[i]);
+            curFile = "higgsCombinehwwlvj_RSGraviton%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime[j],brnew,mass[i]);
 
             curAsymLimits = getAsymLimits(curFile);
             xbins.append( mass[i] );
@@ -1242,7 +1248,7 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
         massXS.append((0.1095+0.04365));
         massXS.append((0.05684+0.03164));
         massXS.append((0.03163+0.02399));
-    elif SIGCH == "_ggH":
+    elif SIGCH == "_RSGraviton":
         massXS.append((0.5230));
         massXS.append((0.2288));
         massXS.append((0.1095));
@@ -1283,7 +1289,7 @@ def makeBSMLimitPlotBRnew(SIGCH,mass):
         for i in range(len(BRnew)):
             if (cprime[j]*0.1) > (1-BRnew[i]*0.1): continue ;
             nPoints = nPoints+1 ;
-            curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass,options.channel,SIGCH,cprime[j],BRnew[i],mass);
+            curFile = "higgsCombinehwwlvj_RSGraviton%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass,options.channel,SIGCH,cprime[j],BRnew[i],mass);
             curAsymLimits = getAsymLimits(curFile);
             xbins.append(BRnew_x[i]);
             ybins_exp.append( curAsymLimits[3] );
@@ -1499,7 +1505,7 @@ def makeBSMLimitPlot2D( SIGCH, mass, contourListMassExp=0, contourListMassObs=0)
         mass_XS.append((0.1095+0.04365));
         mass_XS.append((0.05684+0.03164));
         mass_XS.append((0.03163+0.02399));
-    elif SIGCH == "_ggH":
+    elif SIGCH == "_RSGraviton":
         mass_XS.append((0.5230));
         mass_XS.append((0.2288));
         mass_XS.append((0.1095));
@@ -1528,7 +1534,7 @@ def makeBSMLimitPlot2D( SIGCH, mass, contourListMassExp=0, contourListMassObs=0)
          binX = h2d_exp.GetXaxis().FindBin(cprime[j]*0.1);
          binY = h2d_exp.GetYaxis().FindBin(BRnew[i]*0.1);
                 
-         curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass,options.channel,SIGCH,cprime[j],BRnew[i],mass); 
+         curFile = "higgsCombinehwwlvj_RSGraviton%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass,options.channel,SIGCH,cprime[j],BRnew[i],mass); 
          curAsymLimits = getAsymLimits(curFile);
          h2d_exp.SetBinContent(binX+1,binY+1,curAsymLimits[3]);
          h2d_csXbr_exp.SetBinContent(binX+1,binY+1,curAsymLimits[3]*mass_XS[massindex[mass]]*cprime[j]*0.1*(1-BRnew[i]*0.1)*massBRWW[massindex[mass]]);
@@ -1876,7 +1882,7 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew, contourListBrNewExp =0, counturListBr
         mass_XS.append((0.1095+0.04365));
         mass_XS.append((0.05684+0.03164));
         mass_XS.append((0.03163+0.02399));
-    elif SIGCH == "_ggH":
+    elif SIGCH == "_RSGraviton":
         mass_XS.append((0.5230));
         mass_XS.append((0.2288));
         mass_XS.append((0.1095));
@@ -1904,7 +1910,7 @@ def makeBSMLimitPlot2DBRnew( SIGCH, brNew, contourListBrNewExp =0, counturListBr
             binX = h2d_exp.GetXaxis().FindBin(mass[j]);
             binY = h2d_exp.GetYaxis().FindBin(cprime[i]*0.1);
                            
-            curFile = "higgsCombinehwwlvj_ggH%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[j],options.channel,SIGCH,cprime[i],brNew,mass[j]);
+            curFile = "higgsCombinehwwlvj_RSGraviton%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[j],options.channel,SIGCH,cprime[i],brNew,mass[j]);
             curAsymLimits = getAsymLimits(curFile);
             h2d_exp.SetBinContent(binX+1,binY+1,curAsymLimits[3]);
             h2d_obs.SetBinContent(binX+1,binY+1,curAsymLimits[0]);
@@ -2591,7 +2597,7 @@ if __name__ == '__main__':
                 for k in range(brLo,brHi):
 
                     print "--------------------------------------------------";
-                    print "analyzing card: hwwlvj_ggH%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k]);
+                    print "analyzing card: hwwlvj_RSGraviton%03d_em%s_%02d_%02d_unbin.txt"%(mass[i],SIGCH,cprime[j],BRnew[k]);
                     print "--------------------------------------------------";                
 
                     ###############################################
@@ -2857,6 +2863,7 @@ if __name__ == '__main__':
 
       if options.makeSMLimitPlot == 1:
           makeSMLimitPlot(SIGCH,10,00);
+          '''
           makeSMLimitPlot(SIGCH,01,00);
           makeSMLimitPlot(SIGCH,01,01);
           makeSMLimitPlot(SIGCH,01,02);
@@ -2885,7 +2892,7 @@ if __name__ == '__main__':
           makeSMLimitPlot(SIGCH,07,01);
           makeSMLimitPlot(SIGCH,07,02);
           makeSMLimitPlot(SIGCH,07,03);
-
+          '''
 
           if options.plotPValue == 1:
               makeSMPValuePlot(SIGCH,10,00);
