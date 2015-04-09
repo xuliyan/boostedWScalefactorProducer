@@ -110,13 +110,13 @@ shapeAlt = ["ExpTail","ExpTail","ExpTail","ExpTail"]
 '''
 mass = [1000]#,2000,3000,4000]
 ccmlo = [700]#,800,800,800]
-ccmhi = [4800]#,4800,4800,4800]
-mjlo = [35]#,40,40,40]
-mjhi = [110]#,130,130,130]
+ccmhi = [1500]#,4800,4800,4800]
+mjlo = [40]#,40,40,40]
+mjhi = [130]#,130,130,130]
 mlo = [700]#,700,700,700]
-mhi = [5000]#,5000,5000,5000]
-shape = ["Exp"]#,"Exp","Exp","Exp"]
-shapeAlt = ["Pow"]#,"Pow","Pow","Pow"]
+mhi = [1500]#,5000,5000,5000]
+shape = ["ExpN"]#,"Exp","Exp","Exp"]
+shapeAlt = ["ExpTail"]#,"Pow","Pow","Pow"]
 '''
 ################## options turnOn Analysis
 '''
@@ -584,7 +584,7 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
     can_SM = ROOT.TCanvas("can_SM","can_SM",600,650);
     hrl_SM = can_SM.DrawFrame(999,0.01,4001,ROOT.TMath.MaxElement(curGraph_2s.GetN(),curGraph_2s.GetY())*1.2);
 
-    hrl_SM.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{SM}");
+    hrl_SM.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{X}");
     hrl_SM.GetYaxis().SetTitleOffset(1.35);
     hrl_SM.GetYaxis().SetTitleSize(0.045);
     hrl_SM.GetYaxis().SetTitleFont(42);
