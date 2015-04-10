@@ -1138,7 +1138,11 @@ class doFit_wj_and_wlvj:
              #need to change the following lines
 #             tmp_event_weight = getattr(treeIn,"totalEventWeight");
 #             tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight");
-             tmp_event_weight = getattr(treeIn,"wSampleWeight")*self.Lumi;
+             
+             if options.pseudodata==1: 
+                 tmp_event_weight = getattr(treeIn,"wSampleWeight")*self.Lumi;
+             else:    
+                 tmp_event_weight = getattr(treeIn,"wSampleWeight");
              tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight");
 
              '''
