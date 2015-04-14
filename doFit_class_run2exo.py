@@ -188,8 +188,8 @@ class doFit_wj_and_wlvj:
         ## different code operation mode -> just normal analysis
 	if options.closuretest == 0:
             self.mj_sideband_lo_min = in_mj_min;
-            self.mj_sideband_lo_max = 65;
-            self.mj_signal_min = 65;
+            self.mj_sideband_lo_max = 60;
+            self.mj_signal_min = 60;
             self.mj_signal_max = 105;
             self.mj_sideband_hi_min = 105;
             self.mj_sideband_hi_max = in_mj_max;
