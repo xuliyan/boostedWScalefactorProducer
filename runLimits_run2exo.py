@@ -43,6 +43,7 @@ parser.add_option('--herculesMilano', action='store_true', dest='herculesMilano'
 
 ##### other basci options for all the methods 
 parser.add_option('--datacardDIR', action="store", type="string", dest="datacardDIR", default="")
+parser.add_option('--category',    action="store", type="string", dest="category",    default="HP")
 parser.add_option('--channel',     action="store", type="string", dest="channel",     default="em")
 parser.add_option('--queque',      action="store", type="string", dest="queque",      default="")
 parser.add_option('--pseudodata',  action="store", type="int",    dest="pseudodata",  default=0)
@@ -2583,7 +2584,7 @@ if __name__ == '__main__':
                     
                     time.sleep(0.3);
                     
-                    command = "python doFit_class_run2exo.py %s RSGraviton%03d %02d %02d %02d %02d %02d %02d %s %s -b -s --cprime %01d --BRnew %01d --inPath %s/ --jetBin %s --channel %s --pseudodata %d --closuretest %d --skipJetSystematics %d --interferenceModel %s -f %s"%(CHAN, mass[i], ccmlo[i], ccmhi[i], mjlo[i], mjhi[i], mlo[i], mhi[i], shape[i], shapeAlt[i], cprime[j], BRnew[k], os.getcwd(), options.jetBin, options.channel,options.pseudodata,options.closuretest,options.skipJetSystematics,options.interferenceModel,options.treeFolder);
+                    command = "python doFit_class_run2exo.py %s RSGraviton%03d %02d %02d %02d %02d %02d %02d %s %s -b -s --cprime %01d --BRnew %01d --inPath %s/ --jetBin %s --channel %s --pseudodata %d --closuretest %d --skipJetSystematics %d --interferenceModel %s -f %s --category %s"%(CHAN, mass[i], ccmlo[i], ccmhi[i], mjlo[i], mjhi[i], mlo[i], mhi[i], shape[i], shapeAlt[i], cprime[j], BRnew[k], os.getcwd(), options.jetBin, options.channel,options.pseudodata,options.closuretest,options.skipJetSystematics,options.interferenceModel,options.treeFolder,options.category);
                     print command ;
 
                     if options.batchMode :
