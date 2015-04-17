@@ -86,6 +86,7 @@ parser.add_option('--makeBSMLimitPlotBRnew', action="store", type="int",    dest
 parser.add_option('--makeBSMLimitPlot2D',    action="store", type="int",    dest="makeBSMLimitPlot2D",     default=0)
 parser.add_option('--blindObservedLine',     action="store", type="int",    dest="blindObservedLine",      default=1)
 parser.add_option('--plotPValue',            action="store", type="int",    dest="plotPValue",             default=0)
+parser.add_option('--plotxsec',              action="store", type="int",    dest="plotxsec",             default=0)
 parser.add_option('--plotSignalStrenght',    action="store", type="int",    dest="plotSignalStrenght",     default=0)
 parser.add_option('--plotLikelihoodScan',    action="store", type="int",    dest="plotLikelihoodScan",     default=0)
 
@@ -97,13 +98,15 @@ parser.add_option('--plotLikelihoodScan',    action="store", type="int",    dest
 
 mass = [1000,2000,3000,4000]
 ccmlo = [700,700,700,700]
-ccmhi = [1500,2500,3500,4500]
+#ccmhi = [1500,2500,3500,4500]
+ccmhi = [5000,5000,5000,5000]
 mjlo = [40,40,40,40]
 mjhi = [130,130,130,130]
 #mjlo = [35,35,35,35]
 #mjhi = [110,110,110,110]
 mlo = [700,700,700,700]
-mhi = [1500,2500,3500,4500]
+#mhi = [1500,2500,3500,4500]
+mhi = [4500,4500,4500,4500]
 shape = ["ExpN","ExpN","ExpN","ExpN"]
 shapeAlt = ["ExpTail","ExpTail","ExpTail","ExpTail"]
 #shape = ["Exp","Exp","Exp","Exp"]
@@ -521,6 +524,7 @@ def getPValueFromCard(file,observed):
 def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
 
     nPoints = len(mass);
+    xsec = [2.37, 0.04797, 0.00292, 0.0002739];
     
     xbins     = array('f', []); xbins_env = array('f', []);
     ybins_exp = array('f', []); ybins_obs = array('f', []);
@@ -534,17 +538,17 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
 	curAsymLimits = getAsymLimits(curFile);
         xbins.append( mass[i] );
 	xbins_env.append( mass[i] );
-	ybins_exp.append( curAsymLimits[3] );
+        ybins_exp.append( curAsymLimits[3] );
         ybins_obs.append( curAsymLimits[0] );
         ybins_2s.append( curAsymLimits[1] );
-	ybins_1s.append( curAsymLimits[2] );
-
+        ybins_1s.append( curAsymLimits[2] );
+        
     for i in range( len(mass)-1, -1, -1 ):
 	curFile = "higgsCombinehwwlvj_RSGraviton%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
 	curAsymLimits = getAsymLimits(curFile);
         xbins_env.append( mass[i] );
         ybins_2s.append( curAsymLimits[5] );
-	ybins_1s.append( curAsymLimits[4] );
+        ybins_1s.append( curAsymLimits[4] );
                                                                     
     
     curGraph_exp = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_exp);
@@ -576,22 +580,21 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
     curGraph_2s.SetLineStyle(ROOT.kDashed);
     curGraph_2s.SetLineWidth(3);
                                
-
     oneLine = ROOT.TF1("oneLine","1",999,4001);
     oneLine.SetLineColor(ROOT.kRed);
     oneLine.SetLineWidth(3);
 
     setStyle();
     
-    can_SM = ROOT.TCanvas("can_SM","can_SM",600,650);
-    hrl_SM = can_SM.DrawFrame(999,0.1,4001,ROOT.TMath.MaxElement(curGraph_2s.GetN(),curGraph_2s.GetY())*1.2);
+    can_SM = ROOT.TCanvas("can_SM","can_SM",600,650); 
 
-    hrl_SM.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{X}");
+    hrl_SM = can_SM.DrawFrame(999,0.01,4001,1000);#ROOT.TMath.MaxElement(curGraph_2s.GetN(),curGraph_2s.GetY())*1.2);
+    hrl_SM.GetYaxis().SetTitle("#mu = #sigma_{95%} / #sigma_{theory}");
     hrl_SM.GetYaxis().SetTitleOffset(1.35);
     hrl_SM.GetYaxis().SetTitleSize(0.045);
     hrl_SM.GetYaxis().SetTitleFont(42);
 
-    hrl_SM.GetXaxis().SetTitle("M_{X} (GeV)");
+    hrl_SM.GetXaxis().SetTitle("M_{G} (GeV)");
     hrl_SM.GetXaxis().SetTitleSize(0.045);
     hrl_SM.GetXaxis().SetTitleFont(42);
 
@@ -604,6 +607,7 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
     curGraph_1s.Draw("Fsame");
     if not options.blindObservedLine : curGraph_obs.Draw("PCsame");
     curGraph_exp.Draw("Csame");
+    oneLine.Draw("same");
 
     leg2 = ROOT.TLegend(0.3,0.72,0.75,0.9);
     leg2.SetFillColor(0);
@@ -626,7 +630,7 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
 
     banner = TPaveText( 0.145, 0.953, 0.56, 0.975, "brNDC");
     banner.SetFillColor(ROOT.kWhite);
-    banner.SetTextSize(0.038);
+    banner.SetTextSize(0.03);
     banner.SetTextAlign(11);
     banner.SetTextFont(62);
     banner.SetBorderSize(0);
@@ -637,16 +641,164 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
     label_sqrt = TPaveText(0.5,0.953,0.96,0.975, "brNDC");
     label_sqrt.SetFillColor(ROOT.kWhite);
     label_sqrt.SetBorderSize(0);
-    label_sqrt.SetTextSize(0.038);
+    label_sqrt.SetTextSize(0.03);
     label_sqrt.SetTextFont(62);
     label_sqrt.SetTextAlign(31); # align right                                                                                                                                         
-    label_sqrt.AddText("L = 1 fb^{-1} at #sqrt{s} = 13 TeV");
+    label_sqrt.AddText("W #rightarrow l#nu, L = 1 fb^{-1} at #sqrt{s} = 13 TeV");
     label_sqrt.Draw();
 
     os.system("mkdir -p %s/limitFigs/"%(os.getcwd()));
     
     can_SM.SaveAs("limitFigs/SMLim_%s_%02d_%02d.png"%(options.channel,cprime,brnew));
     can_SM.SaveAs("limitFigs/SMLim_%s_%02d_%02d.pdf"%(options.channel,cprime,brnew));
+
+#############################
+#### Make limit in xsec #####
+#############################
+def makeSMXsecPlot(SIGCH,cprime = 10, brnew = 00):
+
+    nPoints = len(mass);
+    xsec = [2.37, 0.04797, 0.00292, 0.0002739];
+    
+    xbins     = array('f', []); xbins_env = array('f', []);
+    ybins_exp = array('f', []); ybins_obs = array('f', []);
+    ybins_1s  = array('f', []); ybins_2s  = array('f', []);
+    ybins_xsec= array('f', []);
+
+    setStyle();
+     
+    for i in range(len(mass)):
+	curFile = "higgsCombinehwwlvj_RSGraviton%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+        print curFile
+	curAsymLimits = getAsymLimits(curFile);
+        xbins.append( mass[i] );
+	xbins_env.append( mass[i] );
+        ybins_exp.append( curAsymLimits[3]*xsec[i] );
+        ybins_obs.append( curAsymLimits[0]*xsec[i] );
+        ybins_2s.append( curAsymLimits[1]*xsec[i] );
+        ybins_1s.append( curAsymLimits[2]*xsec[i] );
+        ybins_xsec.append(xsec[i]);
+
+    for i in range( len(mass)-1, -1, -1 ):
+	curFile = "higgsCombinehwwlvj_RSGraviton%03d_%s%s_%02d_%02d_unbin.Asymptotic.mH%03d.root"%(mass[i],options.channel,SIGCH,cprime,brnew,mass[i]);
+	curAsymLimits = getAsymLimits(curFile);
+        xbins_env.append( mass[i] );
+        ybins_2s.append( curAsymLimits[5]*xsec[i] );
+        ybins_1s.append( curAsymLimits[4]*xsec[i] );
+                                                                    
+    
+    curGraph_exp = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_exp);
+    curGraph_obs = ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_obs);
+    curGraph_1s  = ROOT.TGraphAsymmErrors(nPoints*2,xbins_env,ybins_1s);
+    curGraph_2s  = ROOT.TGraphAsymmErrors(nPoints*2,xbins_env,ybins_2s);
+    curGraph_xsec= ROOT.TGraphAsymmErrors(nPoints,xbins,ybins_xsec);
+
+
+    curGraph_obs.SetMarkerStyle(20);
+    curGraph_obs.SetLineWidth(3);
+    curGraph_obs.SetLineStyle(1);
+    curGraph_obs.SetMarkerSize(1.6);
+    curGraph_exp.SetMarkerSize(1.3);
+    curGraph_exp.SetMarkerColor(ROOT.kBlack);
+
+    curGraph_exp.SetLineStyle(2);
+    curGraph_exp.SetLineWidth(3);
+    curGraph_exp.SetMarkerSize(2);
+    curGraph_exp.SetMarkerStyle(24);
+    curGraph_exp.SetMarkerColor(ROOT.kBlack);
+
+    curGraph_1s.SetFillColor(ROOT.kGreen);
+    curGraph_1s.SetFillStyle(1001);
+    curGraph_1s.SetLineStyle(ROOT.kDashed);
+    curGraph_1s.SetLineWidth(3);
+
+    curGraph_2s.SetFillColor(ROOT.kYellow);
+    curGraph_2s.SetFillStyle(1001);
+    curGraph_2s.SetLineStyle(ROOT.kDashed);
+    curGraph_2s.SetLineWidth(3);
+
+#    curGraph_obs.SetMarkerStyle(20);
+    curGraph_xsec.SetLineWidth(3);
+    curGraph_xsec.SetLineStyle(1);
+#    curGraph_xsec.SetMarkerSize(1.6);
+    curGraph_xsec.SetLineColor(ROOT.kRed);
+                               
+    oneG = ROOT.TGraph(4);
+    for i in range(len(xsec)):
+        oneG.SetPoint(i, mass[i], xsec[i]);
+    oneLine = ROOT.TSpline3("oneLine",oneG);    
+    oneLine.SetLineColor(ROOT.kRed);
+    oneLine.SetLineWidth(3);
+
+    setStyle();
+    
+    can_SM = ROOT.TCanvas("can_SM","can_SM",600,650); 
+
+    hrl_SM = can_SM.DrawFrame(999,0.001,4001,100);#ROOT.TMath.MaxElement(curGraph_2s.GetN(),curGraph_2s.GetY())*1.2);
+    hrl_SM.GetYaxis().SetTitle("#sigma_{95%} x BR(G_{RS} #rightarrow WW)(pb)");
+    hrl_SM.GetYaxis().SetTitleOffset(1.35);
+    hrl_SM.GetYaxis().SetTitleSize(0.045);
+    hrl_SM.GetYaxis().SetTitleFont(42);
+
+    hrl_SM.GetXaxis().SetTitle("M_{G} (GeV)");
+    hrl_SM.GetXaxis().SetTitleSize(0.045);
+    hrl_SM.GetXaxis().SetTitleFont(42);
+
+#    hrl_SM.GetYaxis().SetNdivisions(505);
+    can_SM.SetGridx(1);
+    can_SM.SetGridy(1);
+    ROOT.gPad.SetLogy();
+                   
+    curGraph_2s.Draw("F");
+    curGraph_1s.Draw("Fsame");
+    if not options.blindObservedLine : curGraph_obs.Draw("PCsame");
+    curGraph_exp.Draw("Csame");
+    curGraph_xsec.Draw("Csame");
+#    oneLine.Draw("same");
+
+    leg2 = ROOT.TLegend(0.3,0.72,0.75,0.9);
+    leg2.SetFillColor(0);
+    leg2.SetShadowColor(0);
+    leg2.SetTextFont(42);
+    leg2.SetTextSize(0.028);
+
+    leg2.AddEntry(curGraph_exp,"Asympt. CL_{S} Expected","L")
+    leg2.AddEntry(curGraph_1s, "Asympt. CL_{S} Expected #pm 1#sigma","LF")
+    leg2.AddEntry(curGraph_2s, "Asympt. CL_{S} Expected #pm 2#sigma","LF")
+    leg2.AddEntry(curGraph_xsec, "#sigma_{theory}","L")
+                                       
+    if not options.blindObservedLine:     leg2.AddEntry(curGraph_obs,"Asympt. CL_{S} Observed","LP")
+
+    can_SM.Update();
+    can_SM.RedrawAxis();
+    can_SM.RedrawAxis("g");
+    can_SM.Update();
+
+    leg2.Draw();
+
+    banner = TPaveText( 0.145, 0.953, 0.56, 0.975, "brNDC");
+    banner.SetFillColor(ROOT.kWhite);
+    banner.SetTextSize(0.03);
+    banner.SetTextAlign(11);
+    banner.SetTextFont(62);
+    banner.SetBorderSize(0);
+    leftText = "CMS Preliminary";
+    banner.AddText(leftText);
+    banner.Draw();
+
+    label_sqrt = TPaveText(0.5,0.953,0.96,0.975, "brNDC");
+    label_sqrt.SetFillColor(ROOT.kWhite);
+    label_sqrt.SetBorderSize(0);
+    label_sqrt.SetTextSize(0.03);
+    label_sqrt.SetTextFont(62);
+    label_sqrt.SetTextAlign(31); # align right                                                                                                                                         
+    label_sqrt.AddText("W #rightarrow l#nu, L = 1 fb^{-1} at #sqrt{s} = 13 TeV");
+    label_sqrt.Draw();
+
+    os.system("mkdir -p %s/limitFigs/"%(os.getcwd()));
+    
+    can_SM.SaveAs("limitFigs/SMXsec_%s_%02d_%02d.png"%(options.channel,cprime,brnew));
+    can_SM.SaveAs("limitFigs/SMXsec_%s_%02d_%02d.pdf"%(options.channel,cprime,brnew));
 
 ##############################
 #### Make SM PValue Plots ####  
@@ -692,7 +844,7 @@ def makeSMPValuePlot(SIGCH,cprime = 10,brnew = 00):
     fourSLine = ROOT.TF1("fourSLine","3.16712418331199785e-05",mass[0],mass[len(mass)-1]);
     fourSLine.SetLineColor(ROOT.kRed); fourSLine.SetLineWidth(2); fourSLine.SetLineStyle(2);
     
-    banner = TLatex(0.32,0.955,("CMS Preliminary, 1 fb^{-1} at #sqrt{s}=13TeV"));
+    banner = TLatex(0.32,0.955,("CMS Preliminary, 1 fb^{-1} at #sqrt{s}=13 TeV"));
     banner.SetNDC(); banner.SetTextSize(0.035);
 
     ban1s = TLatex(950,1.58655253931457074e-01,("1 #sigma"));
@@ -704,7 +856,7 @@ def makeSMPValuePlot(SIGCH,cprime = 10,brnew = 00):
     ban4s = TLatex(950,3.16712418331199785e-05,("4 #sigma"));
     ban4s.SetTextSize(0.028); ban4s.SetTextColor(1)
 
-    leg2 = ROOT.TLegend(0.25,0.2,0.7,0.35);
+    leg2 = ROOT.TLegend(0.5,0.2,0.9,0.35);
     leg2.SetFillStyle(0);
     leg2.SetBorderSize(1);
     leg2.SetTextFont(42);
@@ -2930,6 +3082,7 @@ if __name__ == '__main__':
 
       if options.makeSMLimitPlot == 1:
           makeSMLimitPlot(SIGCH,10,00);
+          makeSMXsecPlot(SIGCH,10,00);
           '''
           makeSMLimitPlot(SIGCH,01,00);
           makeSMLimitPlot(SIGCH,01,01);
