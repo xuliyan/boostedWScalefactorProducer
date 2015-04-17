@@ -265,6 +265,7 @@ class doFit_wj_and_wlvj:
         self.PS_model= options.psmodel
  
         ## event categorization as a function of the purity and the applied selection
+        self.category = options.category;
         self.wtagger_label = options.category;
 
         if self.wtagger_label=="HP" :
@@ -382,8 +383,8 @@ class doFit_wj_and_wlvj:
 
 
         #result files: The event number, parameters and error write into a txt file. The dataset and pdfs write into a root file
-        if not os.path.isdir("cards_%s_%s"%(self.channel,self.mlvj_shape["WJets0"])): os.system("mkdir cards_%s_%s"%(self.channel,self.mlvj_shape["WJets0"]));
-        self.rlt_DIR = "cards_%s_%s/"%(self.channel,self.mlvj_shape["WJets0"]);
+        if not os.path.isdir("cards_%s_%s_%s"%(self.channel,self.mlvj_shape["WJets0"],self.category)): os.system("mkdir cards_%s_%s_%s"%(self.channel,self.mlvj_shape["WJets0"],self.category));
+        self.rlt_DIR = "cards_%s_%s_%s/"%(self.channel,self.mlvj_shape["WJets0"],self.category);
 
         if options.jetBin == "_2jet" : 
          self.file_rlt_txt                   = self.rlt_DIR+"other_hwwlvj_%s_%s%s_%02d_%02d.txt"%(self.higgs_sample,self.channel,options.jetBin,options.cprime,options.BRnew)
