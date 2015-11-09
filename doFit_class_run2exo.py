@@ -138,7 +138,7 @@ class doFit_wj_and_wlvj:
          if self.MODEL_4_mlvj == "ErfPowExp_v1" or self.MODEL_4_mlvj == "ErfPow2_v1" or self.MODEL_4_mlvj == "ErfExp_v1":
             self.BinWidth_mlvj = 35.;
          else:
-            self.BinWidth_mlvj = 50.;
+            self.BinWidth_mlvj = 100.;
         else:
          if self.MODEL_4_mlvj == "ErfPowExp_v1" or self.MODEL_4_mlvj == "ErfPow2_v1" or self.MODEL_4_mlvj == "ErfExp_v1":
             self.BinWidth_mlvj = 10.;
@@ -188,10 +188,10 @@ class doFit_wj_and_wlvj:
         ## different code operation mode -> just normal analysis
 	if options.closuretest == 0:
             self.mj_sideband_lo_min = in_mj_min;
-            self.mj_sideband_lo_max = 60;
-            self.mj_signal_min = 60;
+            self.mj_sideband_lo_max = 65;
+            self.mj_signal_min = 65;
             self.mj_signal_max = 105;
-            self.mj_sideband_hi_min = 105;
+            self.mj_sideband_hi_min = 130;
             self.mj_sideband_hi_max = in_mj_max;
         if options.closuretest == 1: ##closure test A1->A2
             self.mj_sideband_lo_min = in_mj_min;
@@ -227,7 +227,7 @@ class doFit_wj_and_wlvj:
         if options.pseudodata == 1:
             self.file_data = ("WWTree_pseudodata.root");
         else:
-            self.file_data  = ("WWTree_data.root");
+            self.file_data  = ("WWTree_data_silver.root");
 
         self.file_ggH   = ("WWTree_%s.root"%(self.higgs_sample));
 #        self.file_vbfH  = ("WWTree_%s.root"%(self.vbfhiggs_sample));
@@ -270,11 +270,11 @@ class doFit_wj_and_wlvj:
 
         if self.wtagger_label=="HP" :
             if self.channel=="el":
-                self.wtagger_cut=0.5 ; self.wtagger_cut_min=0. ;
+                self.wtagger_cut=0.6 ; self.wtagger_cut_min=0. ;
             if self.channel=="mu":
-                self.wtagger_cut=0.5 ; self.wtagger_cut_min=0. ;
+                self.wtagger_cut=0.6 ; self.wtagger_cut_min=0. ;
             if self.channel=="em":
-                self.wtagger_cut=0.5 ; self.wtagger_cut_min=0. ;
+                self.wtagger_cut=0.6 ; self.wtagger_cut_min=0. ;
         if self.wtagger_label=="LP":
             self.wtagger_cut=0.75 ;
             self.wtagger_cut_min=0.5 ;
@@ -295,10 +295,10 @@ class doFit_wj_and_wlvj:
            self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.93);
            self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
           elif options.pseudodata == 0 and not options.jetBin == "_2jet":
-           self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.96);
-           self.rrv_wtagger_eff_reweight_forT.setError(0.06*self.rrv_wtagger_eff_reweight_forT.getVal());
-           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.93);
-           self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
+           self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.891);
+           self.rrv_wtagger_eff_reweight_forT.setError(0.046*self.rrv_wtagger_eff_reweight_forT.getVal());
+           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",1.021);
+           self.rrv_wtagger_eff_reweight_forV.setError(0.054*self.rrv_wtagger_eff_reweight_forV.getVal());
                                                                                                                           
         if self.channel=="el" and self.wtagger_label=="HP":
           if options.pseudodata == 1:
@@ -312,10 +312,10 @@ class doFit_wj_and_wlvj:
            self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.93);
            self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
           elif options.pseudodata == 0 and not  options.jetBin == "_2jet":
-           self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.89);
-           self.rrv_wtagger_eff_reweight_forT.setError(0.06*self.rrv_wtagger_eff_reweight_forT.getVal());
-           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.87);
-           self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
+           self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.837);
+           self.rrv_wtagger_eff_reweight_forT.setError(0.081*self.rrv_wtagger_eff_reweight_forT.getVal());
+           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",1.043);
+           self.rrv_wtagger_eff_reweight_forV.setError(0.098*self.rrv_wtagger_eff_reweight_forV.getVal());
                                                   
         if self.channel=="em" and self.wtagger_label=="HP":
           if options.pseudodata == 1:
@@ -343,10 +343,10 @@ class doFit_wj_and_wlvj:
            self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.93);
            self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
           elif options.pseudodata == 0 and not options.jetBin == "_2jet":
-           self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.96);
-           self.rrv_wtagger_eff_reweight_forT.setError(0.06*self.rrv_wtagger_eff_reweight_forT.getVal());
-           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.93);
-           self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
+           self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.767);
+           self.rrv_wtagger_eff_reweight_forT.setError(0.128*self.rrv_wtagger_eff_reweight_forT.getVal());
+           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.879);
+           self.rrv_wtagger_eff_reweight_forV.setError(0.130*self.rrv_wtagger_eff_reweight_forV.getVal());
                                                                                                                           
         if self.channel=="el" and self.wtagger_label=="LP":
           if options.pseudodata == 1:
@@ -360,10 +360,10 @@ class doFit_wj_and_wlvj:
            self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.93);
            self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
           elif options.pseudodata == 0 and not  options.jetBin == "_2jet":
-           self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.89);
-           self.rrv_wtagger_eff_reweight_forT.setError(0.06*self.rrv_wtagger_eff_reweight_forT.getVal());
-           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.87);
-           self.rrv_wtagger_eff_reweight_forV.setError(0.097*self.rrv_wtagger_eff_reweight_forV.getVal());
+           self.rrv_wtagger_eff_reweight_forT = RooRealVar("rrv_wtagger_eff_reweight_forT","rrv_wtagger_eff_reweight_forT",0.603);
+           self.rrv_wtagger_eff_reweight_forT.setError(0.248*self.rrv_wtagger_eff_reweight_forT.getVal());
+           self.rrv_wtagger_eff_reweight_forV = RooRealVar("rrv_wtagger_eff_reweight_forV","rrv_wtagger_eff_reweight_forV",0.751);
+           self.rrv_wtagger_eff_reweight_forV.setError(0.219*self.rrv_wtagger_eff_reweight_forV.getVal());
                                                   
         if self.channel=="em" and self.wtagger_label=="LP":
           if options.pseudodata == 1:
@@ -427,18 +427,20 @@ class doFit_wj_and_wlvj:
         self.color_palet["Other_Backgrounds"] = 1;
                                                                         
         
-        self.Lumi = 1000;
+#        self.Lumi = 1550;
+        self.Lumi = 1889;
+#        self.Lumi = 1263;
 #        if self.channel=="el":
 #            self.Lumi = 19166;
 
 	#met cut:el 70; mu: 50
         self.pfMET_cut = 40;
-        self.lpt_cut   = 50;
+        self.lpt_cut   = 53;
         self.vpt_cut   = 200;
-        self.bcut      = 0.679;
+        self.bcut      = 0.890;
         if self.channel=="el":
             self.pfMET_cut = 80; 
-            self.lpt_cut   = 90;        
+            self.lpt_cut   = 120;        
         #deltaPhi_METj cut
         self.deltaPhi_METj_cut = 2.0;
         self.top_veto_had = 200 ;
@@ -1050,7 +1052,8 @@ class doFit_wj_and_wlvj:
           njet         = getattr(treeIn,"njets");
           ungroomed_jet_pt = getattr(treeIn,"ungroomed_jet_pt");
           pfMET    = getattr(treeIn,"pfMET");
-          mass_lvj = getattr(treeIn,"mass_lvj_type2");
+#          mass_lvj = getattr(treeIn,"mass_lvj_type2");
+          mass_lvj = getattr(treeIn,"mass_lvj_type0");
 
           if label != "_WJets01" and label != "_WJets1" and label !="_data" and not options.skipJetSystematics:
 
@@ -1190,9 +1193,14 @@ class doFit_wj_and_wlvj:
              
              if options.pseudodata==1: 
                  tmp_event_weight = getattr(treeIn,"wSampleWeight")*self.Lumi;
+                 tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight")*getattr(treeIn,"genWeight");
              else:    
-                 tmp_event_weight = getattr(treeIn,"wSampleWeight");
-             tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight");
+                 if not TString(label).Contains("data"):
+                     tmp_event_weight = getattr(treeIn,"wSampleWeight")*self.Lumi*getattr(treeIn,"eff_and_pu_Weight")*getattr(treeIn,"genWeight");
+                     tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight")*getattr(treeIn,"genWeight");
+                 else:
+                     tmp_event_weight = 1.;
+                     tmp_event_weight4fit = 1.;
 
              '''
              tmp_interference_weight_H600 = getattr(treeIn,"interference_Weight_H600");

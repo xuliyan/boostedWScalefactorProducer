@@ -84,7 +84,7 @@ parser.add_option('--makeSMLimitPlot',       action="store", type="int",    dest
 parser.add_option('--makeBSMLimitPlotMass',  action="store", type="int",    dest="makeBSMLimitPlotMass",   default=0)
 parser.add_option('--makeBSMLimitPlotBRnew', action="store", type="int",    dest="makeBSMLimitPlotBRnew",  default=0)
 parser.add_option('--makeBSMLimitPlot2D',    action="store", type="int",    dest="makeBSMLimitPlot2D",     default=0)
-parser.add_option('--blindObservedLine',     action="store", type="int",    dest="blindObservedLine",      default=1)
+parser.add_option('--blindObservedLine',     action="store", type="int",    dest="blindObservedLine",      default=0)
 parser.add_option('--plotPValue',            action="store", type="int",    dest="plotPValue",             default=0)
 parser.add_option('--plotxsec',              action="store", type="int",    dest="plotxsec",             default=0)
 parser.add_option('--plotSignalStrenght',    action="store", type="int",    dest="plotSignalStrenght",     default=0)
@@ -97,16 +97,17 @@ parser.add_option('--plotLikelihoodScan',    action="store", type="int",    dest
 #############################################
 
 mass = [1000,2000,3000,4000]
+#mass = [2000]
 ccmlo = [700,700,700,700]
 #ccmhi = [1500,2500,3500,4500]
 ccmhi = [5000,5000,5000,5000]
 mjlo = [40,40,40,40]
-mjhi = [130,130,130,130]
+mjhi = [150,150,150,150]
 #mjlo = [35,35,35,35]
 #mjhi = [110,110,110,110]
 mlo = [700,700,700,700]
 #mhi = [1500,2500,3500,4500]
-mhi = [4500,4500,4500,4500]
+mhi = [4000,4000,4000,4000]
 shape = ["ExpN","ExpN","ExpN","ExpN"]
 shapeAlt = ["ExpTail","ExpTail","ExpTail","ExpTail"]
 #shape = ["Exp","Exp","Exp","Exp"]
@@ -281,7 +282,7 @@ def submitBatchJob( command, fn ):
   if options.queque != "":
    os.system("bsub -q "+options.queque+" -cwd "+currentDir+" "+fn+".sh");
   else:
-   os.system("bsub -q 8nh -cwd "+currentDir+" "+fn+".sh");
+   os.system("bsub -q cmscaf1nd -cwd "+currentDir+" "+fn+".sh");
       
  elif not options.lxbatchCern and options.herculesMilano:
 
@@ -605,7 +606,8 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
                    
     curGraph_2s.Draw("F");
     curGraph_1s.Draw("Fsame");
-    if not options.blindObservedLine : curGraph_obs.Draw("PCsame");
+#    if not options.blindObservedLine : curGraph_obs.Draw("PCsame");
+    curGraph_obs.Draw("PCsame");
     curGraph_exp.Draw("Csame");
     oneLine.Draw("same");
 
@@ -619,7 +621,8 @@ def makeSMLimitPlot(SIGCH,cprime = 10, brnew = 00):
     leg2.AddEntry(curGraph_1s, "Asympt. CL_{S} Expected #pm 1#sigma","LF")
     leg2.AddEntry(curGraph_2s, "Asympt. CL_{S} Expected #pm 2#sigma","LF")
                                        
-    if not options.blindObservedLine:     leg2.AddEntry(curGraph_obs,"Asympt. CL_{S} Observed","LP")
+#    if not options.blindObservedLine:     leg2.AddEntry(curGraph_obs,"Asympt. CL_{S} Observed","LP")
+    leg2.AddEntry(curGraph_obs,"Asympt. CL_{S} Observed","LP")
 
     can_SM.Update();
     can_SM.RedrawAxis();

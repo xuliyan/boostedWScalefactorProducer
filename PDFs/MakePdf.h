@@ -141,8 +141,10 @@ struct SystematicUncertaintyHiggs_01jetBin{
                                   const double sigma_signal_uncertainty_jet_res_vbfH_900  = 0.099;
                                   const double sigma_signal_uncertainty_jet_res_vbfH_1000 = 0.056;
 
-                                  const double mean_mj_shift = 1.4 ;
-                                  const double sigma_mj_smear = 1.16 ;
+                                  const double mean_mj_shift = 0.1 ;
+                                  const double sigma_mj_smear = 1.30 ;
+  //                                  const double mean_mj_shift = 1.4 ;
+  //                                  const double sigma_mj_smear = 1.16 ;
 };       
 
 
