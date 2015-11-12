@@ -2294,7 +2294,8 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
             RooRealVar* rrv_c_ErfExp    = new RooRealVar(("rrv_c_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_c_ErfExp"+label+"_"+channel+spectrum).c_str(),-0.05,-0.2,0.);
             RooRealVar* rrv_width_ErfExp= new RooRealVar(("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(),30.,10,200.);
            
-            RooRealVar* rrv_mean1_gaus   = new RooRealVar(("rrv_mean1_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_mean1_gaus"+label+"_"+channel+spectrum).c_str(),84,78,88);
+	    //            RooRealVar* rrv_mean1_gaus   = new RooRealVar(("rrv_mean1_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_mean1_gaus"+label+"_"+channel+spectrum).c_str(),84,78,88);
+            RooRealVar* rrv_mean1_gaus   = new RooRealVar(("rrv_mean1_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_mean1_gaus"+label+"_"+channel+spectrum).c_str(),85,78,95);
             RooRealVar* rrv_sigma1_gaus  = new RooRealVar(("rrv_sigma1_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_sigma1_gaus"+label+"_"+channel+spectrum).c_str(),7,4,10);
 
             RooErfExpPdf* erfExp        = new RooErfExpPdf(("erfExp"+label+"_"+channel+spectrum).c_str(),("erfExp"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_c_ErfExp,*rrv_mean1_gaus,*rrv_width_ErfExp);
@@ -2408,9 +2409,10 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
         if(model == "2_2Gaus"){
 
 	    std::cout<< "########### 2Gaus +2Gaus for mj fit  ############"<<std::endl;
-	    //            double mean1_tmp      = 8.3141e+01; 
-            double mean1_tmp      = 80; 
-            double sigma1_tmp     = 7.5145e+00; 
+	    //            double mean1_tmp      = 8.3141e+01;  
+	    //            double mean1_tmp      = 80; 
+            double mean1_tmp      = 85; 
+	    double sigma1_tmp     = 7.5145e+00; 
             double scalesigma_tmp = 3.6819e+00; double scalesigma_tmp_err = 2.11e-01;
             double frac_tmp       = 6.7125e-01; double frac_tmp_err       = 2.09e-02;
 
@@ -2420,7 +2422,7 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
             RooRealVar* rrv_sigma1_gaus = new RooRealVar(("rrv_sigma1_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_sigma1_gaus"+label+"_"+channel+spectrum).c_str(),sigma1_tmp, sigma1_tmp-4,sigma1_tmp+4 );
             RooGaussian* gaus1 = new RooGaussian(("gaus1"+label+"_"+channel+spectrum).c_str(),("gaus1"+label+"_"+channel+spectrum).c_str(), *rrv_x,*rrv_mean1_gaus,*rrv_sigma1_gaus);
 
-            RooRealVar* rrv_deltamean_gaus     = new RooRealVar(("rrv_deltamean_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_deltamean_gaus"+label+"_"+channel+spectrum).c_str(),0.,-8,10);
+            RooRealVar* rrv_deltamean_gaus     = new RooRealVar(("rrv_deltamean_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_deltamean_gaus"+label+"_"+channel+spectrum).c_str(),0.,-8,15);
             RooFormulaVar* rrv_mean2_gaus      = new RooFormulaVar(("rrv_mean2_gaus"+label+"_"+channel+spectrum).c_str(),"@0+@1",RooArgList(*rrv_mean1_gaus, *rrv_deltamean_gaus));
             RooRealVar* rrv_scalesigma_gaus    = new RooRealVar(("rrv_scalesigma_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_scalesigma_gaus"+label+"_"+channel+spectrum).c_str(),scalesigma_tmp, scalesigma_tmp-scalesigma_tmp_err*4, scalesigma_tmp+scalesigma_tmp_err*4);
             RooFormulaVar* rrv_sigma2_gaus     =  new RooFormulaVar(("rrv_sigma2_gaus"+label+"_"+channel+spectrum).c_str(),"@0*@1", RooArgList(*rrv_sigma1_gaus,*rrv_scalesigma_gaus));
@@ -2447,7 +2449,8 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
 
 	  std::cout<< "########### 2Gaus + Erf*Exp for mj fit  ############"<<std::endl;
 	  //          double mean1_tmp      = 8.3141e+01; 
-          double mean1_tmp      = 80; 
+	  //          double mean1_tmp      = 80; 
+          double mean1_tmp      = 85; 
           double deltamean_tmp  = 6.9129e+00; 
           double sigma1_tmp     = 7.5145e+00; 
           double scalesigma_tmp = 3.6819e+00;           
