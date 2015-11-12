@@ -180,10 +180,12 @@ void draw_error_band_extendPdf( RooAbsData *rdata,  RooAbsPdf* rpdf, RooFitResul
 
  ap->SetLineWidth(2);
  ap->SetLineColor(kcolor);
+ ap->SetMarkerSize(0.);
  am->SetLineWidth(2);
  am->SetLineColor(kcolor);
- errorband->SetFillColor(kBlack);
- errorband->SetFillStyle(3013);
+ am->SetMarkerSize(0.);
+ // errorband->SetFillColor(kBlack);
+ // errorband->SetFillStyle(3013);
 
  if( TString(opt).Contains("F") ) mplot->addObject(errorband,"E3"); 
  else if( TString(opt).Contains("L") ){ mplot->addObject(am); mplot->addObject(ap); }
