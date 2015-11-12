@@ -191,7 +191,7 @@ class doFit_wj_and_wlvj:
             self.mj_sideband_lo_max = 65;
             self.mj_signal_min = 65;
             self.mj_signal_max = 105;
-            self.mj_sideband_hi_min = 130;
+            self.mj_sideband_hi_min = 135;
             self.mj_sideband_hi_max = in_mj_max;
         if options.closuretest == 1: ##closure test A1->A2
             self.mj_sideband_lo_min = in_mj_min;
@@ -203,9 +203,9 @@ class doFit_wj_and_wlvj:
         if options.closuretest == 2: #closure test A->B
             self.mj_sideband_lo_min = in_mj_min;
             self.mj_sideband_lo_max = 65;
-            self.mj_signal_min = 100;
-            self.mj_signal_max = 115;
-            self.mj_sideband_hi_min = 115;
+            self.mj_signal_min = 135;
+            self.mj_signal_max = 145;
+            self.mj_sideband_hi_min = 145;
             self.mj_sideband_hi_max = in_mj_max;
 
         ## zone definition in the jet mass
