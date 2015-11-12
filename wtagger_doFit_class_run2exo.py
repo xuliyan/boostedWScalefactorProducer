@@ -224,11 +224,11 @@ class doFit_wj_and_wlvj:
 
                                                        
         ## Some basic cut vaule
-        self.vpt_cut      = 100; ## hadronic and leptonic W cut
+        self.vpt_cut      = 200; ## hadronic and leptonic W cut
         self.mass_lvj_max = 5000.; ## invariant mass of 3 body max
         self.mass_lvj_min = 0.; ## invariant mass of 3 body min
-        self.pfMET_cut    = 50; ## missing transverse energy
-        self.lpt_cut      = 50; ## lepton pT
+        self.pfMET_cut    = 40; ## missing transverse energy
+        self.lpt_cut      = 53; ## lepton pT
         self.deltaPhi_METj_cut = 2.0;
 
         ## binning in the W jet pT for differential SF study in bins of pT
@@ -237,13 +237,13 @@ class doFit_wj_and_wlvj:
          self.ca8_ungroomed_pt_min = int(options.pTbin[0]);
          self.ca8_ungroomed_pt_max = int(options.pTbin[1]);
         else:
-         self.ca8_ungroomed_pt_min = 100;
+         self.ca8_ungroomed_pt_min = 200;
          self.ca8_ungroomed_pt_max = 5000;
 
         
         ## tighter cut for the electron channel
-#        if self.channel == "el" or self.channel == "em":
-        if self.channel == "em":
+        if self.channel == "el" or self.channel == "em":
+#        if self.channel == "em":
             self.pfMET_cut = 80; self.lpt_cut = 90;
 
         ## out txt file with info about fit and event couting
