@@ -646,8 +646,9 @@ void fit_WJetsNormalization_in_Mj_signal_region(RooWorkspace* workspace,  std::m
   //DRAW DATA
   if (pseudodata==1)
     GetDataPoissonInterval(rdataset_data_mj,rrv_mass_j,mplot);
-  else
+  else {
     rdataset_data_mj->plotOn(mplot,RooFit::Name("data_invisible"), RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0),RooFit::Invisible());
+  }
 
   //## plot solid style
   if (ttbarcontrolregion){
