@@ -43,7 +43,7 @@ parser.add_option('--pTbin', action="callback",callback=foo_callback,type="strin
 parser.add_option('--shift', action="store", type="int",dest="shift",default=0)
 parser.add_option('--smear', action="store", type="int",dest="smear",default=0)
 
-parser.add_option('--tau2tau1cutHP', action="store", type="float",dest="tau2tau1cutHP",default=0.6)
+parser.add_option('--tau2tau1cutHP', action="store", type="float",dest="tau2tau1cutHP",default=0.60)
 parser.add_option('--tau2tau1cutLP', action="store", type="float",dest="tau2tau1cutLP",default=0.75)
 
 (options, args) = parser.parse_args()
@@ -77,7 +77,7 @@ gInterpreter.GenerateDictionary("std::vector<std::string>", "vector;string")
 class doFit_wj_and_wlvj:
 
     ## contructor taking channel, signal name, range in mj, label and a workspace
-    def __init__(self, in_channel,in_signal_sample, in_mj_min=40, in_mj_max=150, label="", input_workspace=None):
+    def __init__(self, in_channel,in_signal_sample, in_mj_min=40, in_mj_max=130, label="", input_workspace=None):
 
         print " ";
         print "#####################################################";
@@ -95,9 +95,10 @@ class doFit_wj_and_wlvj:
         self.mj_shape = ROOT.std.map(ROOT.std.string,ROOT.std.string)();
         self.mj_shape["TTbar"]   = "2Gaus_ErfExp";
 
-        if self.channel == "mu":
+        if self.channel == "em": #"mu"
             self.mj_shape["STop"]             = "ErfExpGaus_sp";
-            self.mj_shape["STop_fail"]        = "Exp";
+            self.mj_shape["STop_fail"]         = "ExpGaus";
+#            self.mj_shape["STop_fail"]        = "Exp";
             self.mj_shape["STop_extremefail"] = "Exp";
             self.mj_shape["VV"]               = "ErfExpGaus_sp";
             self.mj_shape["VV_fail"]          = "ExpGaus";
@@ -163,7 +164,7 @@ class doFit_wj_and_wlvj:
         rrv_mass_j.setRange("sb_lo",self.mj_sideband_lo_min,self.mj_sideband_lo_max);
         rrv_mass_j.setRange("signal_region",self.mj_signal_min,self.mj_signal_max);
         rrv_mass_j.setRange("sb_hi",self.mj_sideband_hi_min,self.mj_sideband_hi_max);
-        rrv_mass_j.setRange("controlsample_fitting_range",40,150);
+        rrv_mass_j.setRange("controlsample_fitting_range",40,130);
 
         ## directory where are the trees to be run
         self.file_Directory = "/afs/cern.ch/user/l/lbrianza/work/public/WWTree_24nov_jecV6/WWTree_%s/"%(self.channel);
@@ -392,12 +393,16 @@ class doFit_wj_and_wlvj:
                 
             discriminantCut = 0;
             wtagger = getattr(treeIn,"jet_tau2tau1");
-            
+
+            deltaR = getattr(treeIn,"deltaR_AK8_closestBtagJet");
+            deltaRcutMax = 2.0;
+            deltaRcutMin = 0.8;
+
             if wtagger < options.tau2tau1cutHP:
                 discriminantCut = 2;
             elif wtagger > options.tau2tau1cutHP and wtagger < options.tau2tau1cutLP:
                 discriminantCut = 1;
-            elif wtagger > options.tau2tau1cutLP :
+            elif wtagger > options.tau2tau1cutLP:
                 discriminantCut = 0;
 
             tmp_jet_mass = 0. ;    
@@ -431,7 +436,7 @@ class doFit_wj_and_wlvj:
        
 
             ### Cut for the HP category
-            if discriminantCut ==2 and getattr(treeIn,"mass_lvj_type0") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0") > self.mass_lvj_min and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ungroomed_jet_pt") > 100 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ungroomed_jet_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ungroomed_jet_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"nBTagJet_medium") > 0:
+            if discriminantCut ==2 and getattr(treeIn,"mass_lvj_type0") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0") > self.mass_lvj_min and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ungroomed_jet_pt") > 100 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ungroomed_jet_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ungroomed_jet_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"nBTagJet_medium") > 0 and deltaR<deltaRcutMax and deltaR>deltaRcutMin:
 
 
                 if TString(label).Contains("herwig") and not TString(label).Contains("data") :
@@ -458,7 +463,7 @@ class doFit_wj_and_wlvj:
                 combData_p_f.add(RooArgSet(rrv_mass_j,category_p_f),tmp_event_weight);
 
             ### Cut for the Total category
-            if getattr(treeIn,"mass_lvj_type0") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0") > self.mass_lvj_min and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ungroomed_jet_pt") > 100 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ungroomed_jet_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ungroomed_jet_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"nBTagJet_medium") > 0:
+            if getattr(treeIn,"mass_lvj_type0") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0") > self.mass_lvj_min and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ungroomed_jet_pt") > 100 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ungroomed_jet_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ungroomed_jet_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"nBTagJet_medium") > 0  and deltaR<deltaRcutMax and deltaR>deltaRcutMin:
 
                 if TString(label).Contains("herwig") and not TString(label).Contains("data") :
                    tmp_event_weight = tmp_event_weight*treeIn.event_weight;
@@ -473,7 +478,7 @@ class doFit_wj_and_wlvj:
                 rdataset4fit_beforetau2tau1cut_mj.add(RooArgSet(rrv_mass_j),tmp_event_weight4fit);
 
             ### 1-HP category
-            if (discriminantCut==1 or discriminantCut==0) and getattr(treeIn,"mass_lvj_type0") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0") > self.mass_lvj_min and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ungroomed_jet_pt") > 100 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ungroomed_jet_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ungroomed_jet_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"nBTagJet_medium") > 0:
+            if (discriminantCut==1 or discriminantCut==0) and getattr(treeIn,"mass_lvj_type0") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0") > self.mass_lvj_min and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ungroomed_jet_pt") > 100 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ungroomed_jet_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ungroomed_jet_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"nBTagJet_medium") > 0  and deltaR<deltaRcutMax and deltaR>deltaRcutMin:
 
                 if TString(label).Contains("herwig") and not TString(label).Contains("data") :
                    tmp_event_weight = tmp_event_weight*treeIn.event_weight;
@@ -489,7 +494,7 @@ class doFit_wj_and_wlvj:
 
             ### extreme fail category
 #            if discriminantCut==1 and getattr(treeIn,"mass_lvj_type0") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0") > self.mass_lvj_min and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ungroomed_jet_pt") > 100 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ungroomed_jet_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ungroomed_jet_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"nBTagJet_medium") > 0: #to be changed with the one below!!!!
-            if discriminantCut==0 and getattr(treeIn,"mass_lvj_type0") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0") > self.mass_lvj_min and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ungroomed_jet_pt") > 100 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ungroomed_jet_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ungroomed_jet_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"nBTagJet_medium") > 0: 
+            if discriminantCut==0 and getattr(treeIn,"mass_lvj_type0") < self.mass_lvj_max and getattr(treeIn,"mass_lvj_type0") > self.mass_lvj_min and getattr(treeIn,"v_pt") > self.vpt_cut and getattr(treeIn,"l_pt") >= self.lpt_cut and getattr(treeIn,"pfMET") > self.pfMET_cut and getattr(treeIn,"ungroomed_jet_pt") > 100 and tmp_jet_mass>rrv_mass_j.getMin() and tmp_jet_mass<rrv_mass_j.getMax() and getattr(treeIn,"ungroomed_jet_pt") > self.ca8_ungroomed_pt_min and getattr(treeIn,"ungroomed_jet_pt") < self.ca8_ungroomed_pt_max and getattr(treeIn,"nBTagJet_medium") > 0  and deltaR<deltaRcutMax and deltaR>deltaRcutMin: 
            
                 if TString(label).Contains("herwig") and not TString(label).Contains("data") :
                    tmp_event_weight = tmp_event_weight*treeIn.event_weight;
@@ -503,15 +508,19 @@ class doFit_wj_and_wlvj:
 
 
         rrv_number_pass.setVal(rdataset_mj.sumEntries()); #LUCA
+        rrv_number_pass.setError(TMath.Sqrt(rdataset_mj.sumEntries())); #LUCA
         rrv_number_pass.Print();
 
         rrv_number_before.setVal(rdataset_beforetau2tau1cut_mj.sumEntries()); #LUCA
+        rrv_number_before.setError(TMath.Sqrt(rdataset_beforetau2tau1cut_mj.sumEntries())); #LUCA
         rrv_number_before.Print();
 
         rrv_number_fail.setVal(rdataset_failtau2tau1cut_mj.sumEntries()); #LUCA
+        rrv_number_fail.setError(TMath.Sqrt(rdataset_failtau2tau1cut_mj.sumEntries())); #LUCA
         rrv_number_fail.Print();
      
         rrv_number_extremefail.setVal(rdataset_extremefailtau2tau1cut_mj.sumEntries()); #LUCA
+        rrv_number_extremefail.setError(TMath.Sqrt(rdataset_extremefailtau2tau1cut_mj.sumEntries())); #LUCA
         rrv_number_extremefail.Print();
 #        raw_input("CIAO");
 
@@ -703,9 +712,9 @@ class doFit_wj_and_wlvj_simultaneous:
 
         self.workspace4fit_ = RooWorkspace("workspace4fit"+label+"_","workspace4fit"+label+"_"); ## create the workspace
 
-#        self.boostedW_fitter_el = doFit_wj_and_wlvj("el","ggH600",40,150,label, self.workspace4fit_); ## single object analysis for electrons
-#        self.boostedW_fitter_mu = doFit_wj_and_wlvj("mu","ggH600",40,150,label, self.workspace4fit_); ## single object analysis for muons
-        self.boostedW_fitter_em = doFit_wj_and_wlvj("em","ggH600",40,150,label, self.workspace4fit_); ## single object analysis for muons
+#        self.boostedW_fitter_el = doFit_wj_and_wlvj("el","ggH600",40,130,label, self.workspace4fit_); ## single object analysis for electrons
+#        self.boostedW_fitter_mu = doFit_wj_and_wlvj("mu","ggH600",40,130,label, self.workspace4fit_); ## single object analysis for muons
+        self.boostedW_fitter_em = doFit_wj_and_wlvj("em","ggH600",40,130,label, self.workspace4fit_); ## single object analysis for muons
 
 #        self.boostedW_fitter_el.fit_TTbar_controlsample(isherwig); ## run the electron analysis
 #        self.boostedW_fitter_mu.fit_TTbar_controlsample(isherwig); ## run the muon analysis
@@ -834,7 +843,7 @@ class doFit_wj_and_wlvj_simultaneous:
         rrv_number_ttbar_data_extremefailtau2tau1cut_em_mj = self.workspace4fit_.var("rrv_number_ttbar_data"+label+"_extremefailtau2tau1cut_em_mj");
         rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_em_mj.Print();
         rrv_number_ttbar_data_extremefailtau2tau1cut_em_mj.Print();
-
+        
         rrv_number_ttbar_TotalMC_failtau2tau1cut_em_mj = self.workspace4fit_.var("rrv_number_ttbar_TotalMC"+label+"_failtau2tau1cut_em_mj");
         rrv_number_ttbar_data_failtau2tau1cut_em_mj = self.workspace4fit_.var("rrv_number_ttbar_data"+label+"_failtau2tau1cut_em_mj");
         rrv_number_ttbar_TotalMC_failtau2tau1cut_em_mj.Print();
@@ -849,7 +858,10 @@ class doFit_wj_and_wlvj_simultaneous:
         rrv_number_ttbar_data_passtau2tau1cut_em_mj = self.workspace4fit_.var("rrv_number_ttbar_data"+label+"_passtau2tau1cut_em_mj");
         rrv_number_ttbar_TotalMC_passtau2tau1cut_em_mj.Print();
         rrv_number_ttbar_data_passtau2tau1cut_em_mj.Print();
+        
 
+#        rrv_number_total_ttbar_TotalMC_em = self.workspace4fit_.var("rrv_number_total_ttbar_TotalMC"+label+"_em_mj");
+#        rrv_number_total_ttbar_data_em = self.workspace4fit_.var("rrv_number_total_ttbar_data"+label+"_em_mj");
 
         rrv_number_total_ttbar_TotalMC_em = self.workspace4fit_.var("rrv_number_ttbar_TotalMC"+label+"_beforetau2tau1cut_em_mj");
         rrv_number_total_ttbar_data_em = self.workspace4fit_.var("rrv_number_ttbar_data"+label+"_beforetau2tau1cut_em_mj");
@@ -866,12 +878,14 @@ class doFit_wj_and_wlvj_simultaneous:
 
         self.boostedW_fitter_em.file_out_ttbar_control.write("\nel TotalMC number of extremefail %s: %0.6f"%(label, rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_em_mj.getVal()));
         self.boostedW_fitter_em.file_out_ttbar_control.write("\nel data number of extremefail %s: %0.6f"%(label, rrv_number_ttbar_data_extremefailtau2tau1cut_em_mj.getVal()));
+        
         self.boostedW_fitter_em.file_out_ttbar_control.write("\nel TotalMC number of fail %s: %0.6f"%(label, rrv_number_ttbar_TotalMC_failtau2tau1cut_em_mj.getVal()));
         self.boostedW_fitter_em.file_out_ttbar_control.write("\nel data number of fail %s: %0.6f"%(label, rrv_number_ttbar_data_failtau2tau1cut_em_mj.getVal()));
         self.boostedW_fitter_em.file_out_ttbar_control.write("\nel TotalMC number of before %s: %0.6f"%(label, rrv_number_ttbar_TotalMC_beforetau2tau1cut_em_mj.getVal()));
         self.boostedW_fitter_em.file_out_ttbar_control.write("\nel data number of before %s: %0.6f"%(label, rrv_number_ttbar_data_beforetau2tau1cut_em_mj.getVal()));
         self.boostedW_fitter_em.file_out_ttbar_control.write("\nel TotalMC number of pass %s: %0.6f"%(label, rrv_number_ttbar_TotalMC_passtau2tau1cut_em_mj.getVal()));
         self.boostedW_fitter_em.file_out_ttbar_control.write("\nel data number of pass %s: %0.6f"%(label, rrv_number_ttbar_data_passtau2tau1cut_em_mj.getVal()));
+        
         self.boostedW_fitter_em.file_out_ttbar_control.write("\nel TotalMC number of total %s: %0.6f"%(label, rrv_number_total_ttbar_TotalMC_em.getVal()));
         self.boostedW_fitter_em.file_out_ttbar_control.write("\nel data number of total %s: %0.6f"%(label, rrv_number_total_ttbar_data_em.getVal()));
 
@@ -921,19 +935,19 @@ def control_sample(channel="mu",isherwig=0, ttbarMC=0):
     print "control sample "+channel;
     if isherwig == 0:
         ## create the object and do the single for pythia
-        boostedW_fitter = doFit_wj_and_wlvj(channel,"ggH600",40,150);
+        boostedW_fitter = doFit_wj_and_wlvj(channel,"ggH600",40,130);
         boostedW_fitter.fit_TTbar_controlsample(isherwig);
 
     elif isherwig == 1:
         ## create the object and do the single for herwig
-        boostedW_fitter_herwig = doFit_wj_and_wlvj(channel,"ggH600",40,150,"_herwig");
+        boostedW_fitter_herwig = doFit_wj_and_wlvj(channel,"ggH600",40,130,"_herwig");
         boostedW_fitter_herwig.fit_TTbar_controlsample(isherwig);
 
     elif isherwig == 2:
         ## do Pythia and herwig analysis at the same time
-        boostedW_fitter = doFit_wj_and_wlvj(channel,"ggH600",40,150);
+        boostedW_fitter = doFit_wj_and_wlvj(channel,"ggH600",40,130);
         boostedW_fitter.fit_TTbar_controlsample(0);
-        boostedW_fitter_herwig = doFit_wj_and_wlvj(channel,"ggH600",40,150,"_herwig");
+        boostedW_fitter_herwig = doFit_wj_and_wlvj(channel,"ggH600",40,130,"_herwig");
         boostedW_fitter_herwig.fit_TTbar_controlsample(1);
                                                              
 ### function to call simultaneous channel fits

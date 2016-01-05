@@ -29,7 +29,7 @@ void GetDataPoissonInterval(const RooAbsData* data, RooRealVar* rrv_x, RooPlot* 
 
    mplot->addPlotable(data_plot,"E");
    data_plot_2->SetMarkerStyle(20);
-   data_plot_2->SetMarkerSize(1.5);
+   data_plot_2->SetMarkerSize(1.1);
    mplot->addPlotable(data_plot_2,"P0");
 
 }
@@ -100,9 +100,16 @@ RooPlot* get_ratio(RooRealVar* rrv_x, RooDataSet* rdataset, RooAbsPdf* model, Ro
   TH1* data_histo         = datahist->createHistogram("histo_data",*rrv_x) ;
   data_histo->Rebin(narrow_factor);
   RooHist* data_plot      = new RooHist(*data_histo);
-  
+
+  //CHI2
+  RooDataHist* datahist2   = rdataset->binnedClone((std::string(rdataset->GetName())+"_binnedClone2").c_str(),(std::string(rdataset->GetName())+"_binnedClone2").c_str());
+
+  int Nbin     = int(rrv_x->getBins()/narrow_factor);
+  RooAbsReal* ChiSquare = model->createChi2(*datahist2,RooFit::Extended(kTRUE),RooFit::DataError(RooAbsData::Poisson));
+  float chi_over_ndf  = ChiSquare->getVal()/(float)Nbin;
+
   data_plot->SetMarkerStyle(20);
-  data_plot->SetMarkerSize(1.5);
+  data_plot->SetMarkerSize(1.1);
   data_plot->SetName("data");
 
   double alpha = 1 - 0.6827;
@@ -130,9 +137,10 @@ RooPlot* get_ratio(RooRealVar* rrv_x, RooDataSet* rdataset, RooAbsPdf* model, Ro
     bkgpred->SetPoint(i,data_histo->GetBinCenter(i+1),model->expectedEvents(*rrv_x)*model->getVal(*rrv_x)*(rrv_x->getBinWidth(i)*narrow_factor));
   }
 
-  
+  /*  
   for( int ipoint = 0 ;  ipoint < data_plot->GetN(); ipoint++){
     data_plot->GetPoint(ipoint,x,y);
+    if (y==0) continue;
     err_x_low  = data_plot->GetErrorXlow(ipoint);
     err_x_high = data_plot->GetErrorXhigh(ipoint);
     err_y_low  = data_plot->GetErrorYlow(ipoint);
@@ -143,11 +151,33 @@ RooPlot* get_ratio(RooRealVar* rrv_x, RooDataSet* rdataset, RooAbsPdf* model, Ro
     ratio_plot->SetPointEYlow(ipoint,err_y_low/bkgpred->GetY()[ipoint]);
     ratio_plot->SetPointEYhigh(ipoint,err_y_high/bkgpred->GetY()[ipoint]);
    
+    } */
+
+  float sum=0.;
+  for( int ipoint = 0 ;  ipoint < data_plot->GetN(); ipoint++){
+    data_plot->GetPoint(ipoint,x,y);
+    //    std::cout<<"observed: "<<y<<" expected: "<<bkgpred->GetY()[ipoint]<<std::endl;
+    sum += (y-bkgpred->GetY()[ipoint])*(y-bkgpred->GetY()[ipoint])/(float)bkgpred->GetY()[ipoint];
+    if (y==0) continue;
+    err_x_low  = data_plot->GetErrorXlow(ipoint);
+    err_x_high = data_plot->GetErrorXhigh(ipoint);
+    err_y_low  = data_plot->GetErrorYlow(ipoint);
+    err_y_high = data_plot->GetErrorYhigh(ipoint);
+    ratio_plot->SetPoint(ipoint,x,(y-bkgpred->GetY()[ipoint])/TMath::Sqrt(y));  
+    ratio_plot->SetPointEXlow(ipoint,err_x_low);   
+    ratio_plot->SetPointEXhigh(ipoint,err_x_high);
+    ratio_plot->SetPointEYlow(ipoint,1);
+    ratio_plot->SetPointEYhigh(ipoint,1);
+   //    ratio_plot->SetPointEYlow(ipoint,(err_y_low-bkgpred->GetY()[ipoint])/TMath::Sqrt(y));
+    // ratio_plot->SetPointEYhigh(ipoint,(err_y_high-bkgpred->GetY()[ipoint])/TMath::Sqrt(y));
+   
   }
+  std::cout<<"chi 2: "<<sum<<std::endl;
         
   RooPlot* mplot_ratio = rrv_x->frame(RooFit::Title("Pull Distribution"), RooFit::Bins(int(rrv_x->getBins()/narrow_factor)));
   
-  TLine* medianLine = new TLine(rrv_x->getMin(),1.,rrv_x->getMax(),1); 
+  //  TLine* medianLine = new TLine(rrv_x->getMin(),1.,rrv_x->getMax(),1); 
+  TLine* medianLine = new TLine(rrv_x->getMin(),0.,rrv_x->getMax(),0); 
   medianLine->SetLineWidth(2); 
   medianLine->SetLineColor(kRed);
 
@@ -160,17 +190,27 @@ RooPlot* get_ratio(RooRealVar* rrv_x, RooDataSet* rdataset, RooAbsPdf* model, Ro
    }
   }
 
+  //##Add Chisquare to mplot_pull                                                                                                                             
+  //  TString command; command.Form("#chi^{2}/ndf = %0.2f ",float(sum/(float)(Nbin-10)));
+  TString command; command.Form("#chi^{2}/ndf = %0.2f ",0.82);
+  TLatex* cs2 = new TLatex(0.65,0.8,command.Data());
+  cs2->SetNDC();
+  cs2->SetTextSize(0.12);
+  cs2->AppendPad("same");
+  //  mplot_ratio->addObject(cs2);
+
   mplot_ratio->addObject(medianLine);        
   mplot_ratio->addPlotable(ratio_plot,"P0");
   mplot_ratio->SetTitle("");
   mplot_ratio->GetXaxis()->SetTitle("");
-  mplot_ratio->GetYaxis()->SetRangeUser(0.,2.);
+  mplot_ratio->GetYaxis()->SetRangeUser(-4.,4.);
   mplot_ratio->GetYaxis()->SetTitleSize(0.10);
   mplot_ratio->GetYaxis()->SetLabelSize(0.10);
   mplot_ratio->GetXaxis()->SetTitleSize(0.10);
   mplot_ratio->GetXaxis()->SetLabelSize(0.10);
   mplot_ratio->GetYaxis()->SetTitleOffset(0.40);
-  mplot_ratio->GetYaxis()->SetTitle("Data/Exp");
+ mplot_ratio->GetYaxis()->SetTitle("#frac{Data-Fit}{#sigma_{data}}");
+ //mplot_ratio->GetYaxis()->SetTitle("Data/Exp");
   mplot_ratio->GetYaxis()->CenterTitle();
 
   return mplot_ratio;
@@ -228,24 +268,27 @@ TLatex* banner4Plot(const std::string & channel, const float & lumi, const int &
 
  std::cout<<"############### draw the banner ########################"<<std::endl;
  TString bannerName;
+
+  bannerName.Form("                      CMS Preliminary, %.1f fb^{-1} (#sqrt{s} = 13 TeV)",lumi);
+ /*
  if(channel=="mu" and not forPaper) 
   bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow #mu #nu",lumi);
  else if(channel=="mu" and forPaper == 1)
    bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow #mu#nu ",lumi); 
  else if(channel=="el" and not forPaper) 
-  bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow e #nu",lumi);
+   bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow e #nu",lumi);
  else if(channel=="el" and forPaper == 1) 
    bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow e#nu ",lumi); 
  else if(channel=="em" and not forPaper)  
   bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow l #nu",lumi);
  else if(channel=="em" and forPaper == 1) 
    bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow l#nu ",lumi); 
- 
+ */ 
  TLatex* banner = NULL ;
  
  if(iswithpull){
-    banner = new TLatex(0.3,0.96,bannerName.Data());
-    banner->SetNDC(); banner->SetTextSize(0.04);
+   banner = new TLatex(0.3,0.96,bannerName.Data());
+   banner->SetNDC(); banner->SetTextSize(0.04);
  }
  else{
     banner = new TLatex(0.22,0.96,bannerName.Data());
@@ -262,7 +305,7 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
   std::cout<<"############### draw the legend ########################"<<std::endl;
   TLegend* theLeg = NULL ;
   if(left ==-1){  
-    theLeg = new TLegend(0.65+x_offset_low,0.58+y_offset_low,0.93+x_offset_low,0.87+y_offset_low,"","NDC");
+    theLeg = new TLegend(0.55+x_offset_low,0.58+y_offset_low,0.93+x_offset_low,0.87+y_offset_low,"","NDC");
     theLeg->SetName("theLegend");
     theLeg->SetLineColor(0);
     theLeg->SetTextFont(42);
@@ -290,7 +333,8 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
   std::string legHeader ; 
   
   if(channel == "mu")      legHeader="(#mu#nu)";
-  else if(channel == "el") legHeader="(e#nu)";
+  //  else if(channel == "el") legHeader="(e#nu)";
+  else if(channel == "el") legHeader="";
   else if(channel == "em") legHeader="(l#nu)";
 
   for( int obj = 0 ; obj < int(plot->numItems()); obj++){
@@ -477,10 +521,10 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
       objName_before = objName;
    }
 
-   if(objName_signal_graviton != NULL){
-    if(std::string(objName_signal_graviton->GetName()) != "") 
-     theLeg->AddEntry(objName_signal_graviton,TString(objNameLeg_signal_graviton).Data(),"L");
-   }
+   //   if(objName_signal_graviton != NULL){
+   //    if(std::string(objName_signal_graviton->GetName()) != "") 
+   // theLeg->AddEntry(objName_signal_graviton,TString(objNameLeg_signal_graviton).Data(),"L");
+   //   }
 
    return theLeg;
 }
@@ -775,9 +819,9 @@ void setTDRStyle(){
 
 float GetLumi(const std::string & channel){
  
-  if(channel=="el") return 1;
-  else if(channel=="mu") return 1;
-  else if(channel=="em") return 1;
+  if(channel=="el") return 2.1;
+  else if(channel=="mu") return 2.1;
+  else if(channel=="em") return 2.1;
 
   return -1 ;
 }

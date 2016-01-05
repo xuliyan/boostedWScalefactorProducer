@@ -127,7 +127,7 @@ class doFit_wj_and_wlvj:
         self.mj_shape["mc_extremefail"]       = "Exp_ttbar_extremefailtau2tau1cut";
         self.mj_shape["mc_bkg_extremefail"]   = "Exp_bkg_extremefailtau2tau1cut";
 
-        self.Lumi=1263;
+        self.Lumi=2100;
 
         ### Set the mj binning for plots
         self.BinWidth_mj = 5.;
@@ -166,10 +166,10 @@ class doFit_wj_and_wlvj:
         rrv_mass_j.setRange("controlsample_fitting_range",40,150);
 
         ## directory where are the trees to be run
-        self.file_Directory = "/afs/cern.ch/user/l/lbrianza/work/public/WWTree_3nov/WWTree_%s/"%(self.channel);
+        self.file_Directory = "/afs/cern.ch/user/l/lbrianza/work/public/WWTree_24nov_jecV6/WWTree_%s/"%(self.channel);
 
         ## taking the root file for data and mc
-        self.file_data = ("WWTree_data.root");
+        self.file_data = ("WWTree_data_golden_2p1.root");
 
         self.signal_sample = in_signal_sample;
         self.file_signal   = ("WWTree_%s.root"%(self.signal_sample));
@@ -244,7 +244,7 @@ class doFit_wj_and_wlvj:
         ## tighter cut for the electron channel
         if self.channel == "el" or self.channel == "em":
 #        if self.channel == "em":
-            self.pfMET_cut = 80; self.lpt_cut = 90;
+            self.pfMET_cut = 80; self.lpt_cut = 120;
 
         ## out txt file with info about fit and event couting
         self.file_ttbar_control_txt = "ttbar_control_%s_%s_wtaggercut%s.txt"%(self.signal_sample,self.channel,self.wtagger_label);
@@ -401,10 +401,10 @@ class doFit_wj_and_wlvj:
                  tmp_jet_mass = getattr(treeIn, jet_mass);
 
 #            tmp_event_weight     = getattr(treeIn,"totalEventWeight");
-            tmp_event_weight = getattr(treeIn,"wSampleWeight")*self.Lumi#*getattr(treeIn,"genWeight")*getattr(treeIn,"eff_and_pu_Weight")
-            tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight")#*getattr(treeIn,"genWeight");
-            if TString(label).Contains("TTbar"):
-                tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight")#*getattr(treeIn,"genWeight");
+            tmp_event_weight = getattr(treeIn,"wSampleWeight")*self.Lumi*getattr(treeIn,"genWeight")*getattr(treeIn,"eff_and_pu_Weight")
+            tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight")*getattr(treeIn,"genWeight");
+#            if TString(label).Contains("TTbar"):
+#                tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight")#*getattr(treeIn,"genWeight");
 
 #            tmp_event_weight4fit = tmp_event_weight4fit*getattr(treeIn,"wSampleWeight")/tmp_scale_to_lumi
 

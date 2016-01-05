@@ -2090,18 +2090,45 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
       if(model == "ExpN"){
             
 	std::cout<< "########### ExpN funtion for W+jets mlvj ############"<<std::endl;
-        RooRealVar* rrv_c_ExpN = new RooRealVar(("rrv_c_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_c_ExpN"+label+"_"+channel+spectrum).c_str(),-3e-3,-1e-1,-1e-5);
-        RooRealVar* rrv_n_ExpN = NULL ;
-        if(ismc==1){
+	//	RooRealVar* rrv_c_ExpN = new RooRealVar(("rrv_c_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_c_ExpN"+label+"_"+channel+spectrum).c_str(),-3e-3,-1e-1,-1e-5);
+	RooRealVar* rrv_c_ExpN;
+	RooRealVar* rrv_n_ExpN = NULL ;
+
+	//	if (label == "_VV")
+	//rrv_c_ExpN = new RooRealVar(("rrv_c_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_c_ExpN"+label+"_"+channel+spectrum).c_str(),-3e-3,-1e-1,-1e-5);
+	//	else
+	//	rrv_c_ExpN = new RooRealVar(("rrv_c_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_c_ExpN"+label+"_"+channel+spectrum).c_str(),-3e-3,-2e-1,-1e-1);
+	/*	if (label == "_VV") {
+	  rrv_c_ExpN = new RooRealVar(("rrv_c_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_c_ExpN"+label+"_"+channel+spectrum).c_str(),-2.5e-3,-3e-3,-1e-3);
+	  rrv_n_ExpN = new RooRealVar(("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),  1000, 100., 10000);
+	}
+
+	else {
+	  rrv_c_ExpN = new RooRealVar(("rrv_c_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_c_ExpN"+label+"_"+channel+spectrum).c_str(),-1.5e-3,-2e-3,-1e-3);
+	  rrv_n_ExpN = new RooRealVar(("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),  1000, 100., 10000);
+	  } */
+
+        rrv_c_ExpN = new RooRealVar(("rrv_c_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_c_ExpN"+label+"_"+channel+spectrum).c_str(),-1.5e-3,-1e-1,-1e-5);
+    
+	//rrv_n_ExpN = RooRealVar("rrv_n_ExpN"+label+"_"+channel+spectrum,"rrv_n_ExpN"+label+"_"+self.channel, 0, -10000, 10000);
+	rrv_n_ExpN = new RooRealVar(("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),  0, -10000, 10000);
+	//	if (label == "_VV")
+	// rrv_n_ExpN = new RooRealVar(("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),  1500, 800., 10000);
+	//else
+	//  rrv_n_ExpN = new RooRealVar(("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),  3000, 2000., 10000);
+
+	/*	
+	if(ismc==1){
 	  rrv_n_ExpN = new RooRealVar(("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(), 1e3, -1e2, 1e4);
 	}
 	else {
 	  if( channel+spectrum == "el" )
 	    rrv_n_ExpN = new RooRealVar(("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(), 1e3, -1e2, 1e4);
 	  else     
-	    rrv_n_ExpN = new RooRealVar(("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(), 5e2, 0, 1e3);
-	}
-            
+	    rrv_n_ExpN = new RooRealVar(("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(), 1e3, -1e2, 1e4);
+	  //	    rrv_n_ExpN = new RooRealVar(("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(),("rrv_n_ExpN"+label+"_"+channel+spectrum).c_str(), 5e2, 0, 1e3);
+	  } */
+	
         RooExpNPdf* model_pdf = new RooExpNPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_c_ExpN,*rrv_n_ExpN);
         
         return model_pdf ;
@@ -2173,13 +2200,23 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
             
             return model_pdf ;
       }
-      
+      /*      
       // Erf times for mj spectrum
       if ( model == "ErfExp" ){
    	    std::cout<< "########### Erf*Exp for mj fit  ############"<<std::endl;
             RooRealVar* rrv_c_ErfExp      = new RooRealVar(("rrv_c_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_c_ErfExp"+label+"_"+channel+spectrum).c_str(),-0.05,-0.1,-1e-4);
             RooRealVar* rrv_offset_ErfExp = new RooRealVar(("rrv_offset_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_offset_ErfExp"+label+"_"+channel+spectrum).c_str(),60.,30.,120);
             RooRealVar* rrv_width_ErfExp  = new RooRealVar(("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(),30.,10, 60.);
+            RooErfExpPdf* model_pdf       = new RooErfExpPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_c_ErfExp,*rrv_offset_ErfExp,*rrv_width_ErfExp);
+            
+           return model_pdf ;
+	   } */
+      // Erf times for mj spectrum
+      if ( model == "ErfExp" ){
+   	    std::cout<< "########### Erf*Exp for mj fit  ############"<<std::endl;
+            RooRealVar* rrv_c_ErfExp      = new RooRealVar(("rrv_c_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_c_ErfExp"+label+"_"+channel+spectrum).c_str(),-0.035,-0.05,-0.01);
+            RooRealVar* rrv_offset_ErfExp = new RooRealVar(("rrv_offset_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_offset_ErfExp"+label+"_"+channel+spectrum).c_str(),115.,110.,120);
+            RooRealVar* rrv_width_ErfExp  = new RooRealVar(("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(),50.,40, 60.);
             RooErfExpPdf* model_pdf       = new RooErfExpPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_c_ErfExp,*rrv_offset_ErfExp,*rrv_width_ErfExp);
             
            return model_pdf ;

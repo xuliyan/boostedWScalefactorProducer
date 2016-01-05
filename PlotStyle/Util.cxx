@@ -493,7 +493,8 @@ void draw_error_band_shape_Decor( std::string pdf_name, std::string xaxis_name, 
  errorband->SetFillColor(kcolor);
  errorband->SetName(Form("%s %g#sigma",uncertainty_title.c_str(),sigma));
 
- if( TString(opt).Contains("F") ){ mplot->addObject(errorband,"E3"); }
+ mplot->addObject(errorband,"E3");
+ // if( TString(opt).Contains("F") ){ mplot->addObject(errorband,"E3"); }
  if( TString(opt).Contains("L") ){ mplot->addObject(am); mplot->addObject(ap); }
 
  for(Int_t ipara=0;ipara<paras->getSize();ipara++)
