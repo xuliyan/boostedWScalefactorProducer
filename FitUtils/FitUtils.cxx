@@ -1834,8 +1834,8 @@ void get_WJets_mlvj_correction_sb_lo_to_signal_region(RooWorkspace* workspace,co
     //### Total plot shape in sb_lo, sr and alpha
     //    model_pdf_sb_lo_WJets->plotOn(mplot,RooFit::Name("Sideband"),RooFit::LineStyle(10));
     //model_pdf_signal_region_WJets->plotOn(mplot, RooFit::LineColor(kRed) ,RooFit::LineStyle(8), RooFit::Name("Signal Region"));
-    model_pdf_sb_lo_WJets->plotOn(mplot,RooFit::Name("Region A"),RooFit::LineStyle(10));
-    model_pdf_signal_region_WJets->plotOn(mplot, RooFit::LineColor(kRed) ,RooFit::LineStyle(8), RooFit::Name("Region B"));
+    model_pdf_sb_lo_WJets->plotOn(mplot,RooFit::Name("Sideband"),RooFit::LineStyle(10));
+    model_pdf_signal_region_WJets->plotOn(mplot, RooFit::LineColor(kRed) ,RooFit::LineStyle(8), RooFit::Name("Signal Region"));
     correct_factor_pdf_deco->plotOn(mplot, RooFit::LineColor(kBlack),RooFit::Name("#alpha") );
 
     if(workspace->pdf(("correct_factor_pdf_Deco_WJets1_sim_"+mlvj_model+"_"+channel+"_"+wtagger+mass_spectrum).c_str()))

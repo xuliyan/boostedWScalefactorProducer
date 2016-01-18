@@ -2448,18 +2448,18 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
 	    std::cout<< "########### 2Gaus +2Gaus for mj fit  ############"<<std::endl;
 	    //            double mean1_tmp      = 8.3141e+01;  
 	    //            double mean1_tmp      = 80; 
-            double mean1_tmp      = 85; 
-	    double sigma1_tmp     = 7.5145e+00; 
+            double mean1_tmp      = 90; 
+	    double sigma1_tmp     = 5.5145e+00; 
             double scalesigma_tmp = 3.6819e+00; double scalesigma_tmp_err = 2.11e-01;
             double frac_tmp       = 6.7125e-01; double frac_tmp_err       = 2.09e-02;
 
             RooRealVar* rrv_shift = new RooRealVar(("rrv_shift"+label+"_"+channel+spectrum).c_str(),("rrv_shift"+label+"_"+channel+spectrum).c_str(),10.8026);
 
-            RooRealVar* rrv_mean1_gaus = new RooRealVar(("rrv_mean1_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_mean1_gaus"+label+"_"+channel+spectrum).c_str(),mean1_tmp, mean1_tmp-4, mean1_tmp+4);
-            RooRealVar* rrv_sigma1_gaus = new RooRealVar(("rrv_sigma1_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_sigma1_gaus"+label+"_"+channel+spectrum).c_str(),sigma1_tmp, sigma1_tmp-4,sigma1_tmp+4 );
+            RooRealVar* rrv_mean1_gaus = new RooRealVar(("rrv_mean1_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_mean1_gaus"+label+"_"+channel+spectrum).c_str(),mean1_tmp, mean1_tmp-8, mean1_tmp+8);
+            RooRealVar* rrv_sigma1_gaus = new RooRealVar(("rrv_sigma1_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_sigma1_gaus"+label+"_"+channel+spectrum).c_str(),sigma1_tmp, sigma1_tmp-8,sigma1_tmp+8 );
             RooGaussian* gaus1 = new RooGaussian(("gaus1"+label+"_"+channel+spectrum).c_str(),("gaus1"+label+"_"+channel+spectrum).c_str(), *rrv_x,*rrv_mean1_gaus,*rrv_sigma1_gaus);
 
-            RooRealVar* rrv_deltamean_gaus     = new RooRealVar(("rrv_deltamean_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_deltamean_gaus"+label+"_"+channel+spectrum).c_str(),0.,-8,15);
+            RooRealVar* rrv_deltamean_gaus     = new RooRealVar(("rrv_deltamean_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_deltamean_gaus"+label+"_"+channel+spectrum).c_str(),0.,-1800,15);
             RooFormulaVar* rrv_mean2_gaus      = new RooFormulaVar(("rrv_mean2_gaus"+label+"_"+channel+spectrum).c_str(),"@0+@1",RooArgList(*rrv_mean1_gaus, *rrv_deltamean_gaus));
             RooRealVar* rrv_scalesigma_gaus    = new RooRealVar(("rrv_scalesigma_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_scalesigma_gaus"+label+"_"+channel+spectrum).c_str(),scalesigma_tmp, scalesigma_tmp-scalesigma_tmp_err*4, scalesigma_tmp+scalesigma_tmp_err*4);
             RooFormulaVar* rrv_sigma2_gaus     =  new RooFormulaVar(("rrv_sigma2_gaus"+label+"_"+channel+spectrum).c_str(),"@0*@1", RooArgList(*rrv_sigma1_gaus,*rrv_scalesigma_gaus));

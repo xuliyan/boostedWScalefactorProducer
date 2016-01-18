@@ -99,7 +99,8 @@ class doFit_wj_and_wlvj:
 
         self.mlvj_shape = ROOT.std.map(ROOT.std.string,ROOT.std.string) () ;
         self.mlvj_shape["TTbar"]   = "Exp" #fit_model;
-        self.mlvj_shape["VV"]      = fit_model;
+        self.mlvj_shape["VV"]      = "ExpN";
+#        self.mlvj_shape["VV"]      = fit_model;
         self.mlvj_shape["WW_EWK"]  = fit_model;
         self.mlvj_shape["STop"]    = "Exp" #fit_model;
         self.mlvj_shape["WJets0"]  = fit_model;
@@ -436,7 +437,7 @@ class doFit_wj_and_wlvj:
 	#met cut:el 70; mu: 50
         self.pfMET_cut = 40;
         self.lpt_cut   = 30;
-        self.vpt_cut   = 180;
+        self.vpt_cut   = 200;
 #        self.pfMET_cut = 40;
 #        self.lpt_cut   = 53;
         self.bcut      = 0.890;
@@ -1174,7 +1175,7 @@ class doFit_wj_and_wlvj:
 
           else:
               
-           if ungroomed_jet_pt > 180. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"nBTagJet_medium") < 1 and mass_lvj >= rrv_mass_lvj.getMin() and mass_lvj <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1:# and njet >=2 and tmp_vbf_dEta > self.dEta_cut and tmp_vbf_Mjj > self.Mjj_cut:# and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep:# and njet < 2:
+           if ungroomed_jet_pt > 200. and discriminantCut and tmp_jet_mass >= rrv_mass_j.getMin() and tmp_jet_mass<=rrv_mass_j.getMax() and getattr(treeIn,"nBTagJet_medium") < 1 and mass_lvj >= rrv_mass_lvj.getMin() and mass_lvj <=rrv_mass_lvj.getMax() and getattr(treeIn,"v_pt") > self.vpt_cut and pfMET > self.pfMET_cut and getattr(treeIn,"l_pt") > self.lpt_cut and getattr(treeIn,"issignal")==1:# and njet >=2 and tmp_vbf_dEta > self.dEta_cut and tmp_vbf_Mjj > self.Mjj_cut:# and getattr(treeIn,"mass_ungroomedjet_closerjet") > self.top_veto_had and getattr(treeIn,"mass_leptonic_closerjet") > self.top_veto_lep:# and njet < 2:
                
             isPassingCut = 1 ;
 
@@ -1203,12 +1204,12 @@ class doFit_wj_and_wlvj:
 #             tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight");
              
              if options.pseudodata==1: 
-                 tmp_event_weight = getattr(treeIn,"wSampleWeight")*self.Lumi;
-                 tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight")*getattr(treeIn,"genWeight");
+                 tmp_event_weight = getattr(treeIn,"wSampleWeight")*self.Lumi*getattr(treeIn,"eff_and_pu_Weight")*getattr(treeIn,"genWeight");
+                 tmp_event_weight4fit = getattr(treeIn,"wSampleWeight")*self.Lumi*getattr(treeIn,"eff_and_pu_Weight")*getattr(treeIn,"genWeight");
              else:    
                  if not TString(label).Contains("data"):
                      tmp_event_weight = getattr(treeIn,"wSampleWeight")*self.Lumi*getattr(treeIn,"eff_and_pu_Weight")*getattr(treeIn,"genWeight");
-                     tmp_event_weight4fit = getattr(treeIn,"eff_and_pu_Weight")*getattr(treeIn,"genWeight");
+                     tmp_event_weight4fit = getattr(treeIn,"wSampleWeight")*self.Lumi*getattr(treeIn,"eff_and_pu_Weight")*getattr(treeIn,"genWeight");
                  else:
                      tmp_event_weight = 1.;
                      tmp_event_weight4fit = 1.;
