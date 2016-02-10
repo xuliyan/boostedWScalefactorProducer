@@ -105,7 +105,7 @@ RooPlot* get_ratio(RooRealVar* rrv_x, RooDataSet* rdataset, RooAbsPdf* model, Ro
   RooDataHist* datahist2   = rdataset->binnedClone((std::string(rdataset->GetName())+"_binnedClone2").c_str(),(std::string(rdataset->GetName())+"_binnedClone2").c_str());
 
   int Nbin     = int(rrv_x->getBins()/narrow_factor);
-  RooAbsReal* ChiSquare = model->createChi2(*datahist2,RooFit::Extended(kTRUE),RooFit::DataError(RooAbsData::Poisson));
+  RooAbsReal* ChiSquare = model->createChi2(*datahist2,RooFit::Extended(kTRUE),RooFit::DataError(RooAbsData::SumW2));
   float chi_over_ndf  = ChiSquare->getVal()/(float)Nbin;
 
   data_plot->SetMarkerStyle(20);

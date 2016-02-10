@@ -3,11 +3,13 @@ import ROOT, sys
 
 
 parser = OptionParser()
+parser.add_option('-b', action='store_true', dest='noX', default=False, help='no X11 windows')
 parser.add_option('-c', '--channel',action="store",type="string",dest="channel",default="mu")
 parser.add_option('-s','--simultaneous', action='store_true', dest='fitwtaggersim', default=False, help='Fit W-tagger adding mu+ele channels')
 parser.add_option('--category', action="store",type="string",dest="category",default="HP")
-parser.add_option('--tau2tau1cutHP', action="store", type="float",dest="tau2tau1cutHP",default=0.60)
-parser.add_option('--tau2tau1cutLP', action="store", type="float",dest="tau2tau1cutLP",default=0.75)
+parser.add_option('--HP', action="store", type="float",dest="tau2tau1cutHP",default=0.60)
+parser.add_option('--LP', action="store", type="float",dest="tau2tau1cutLP",default=0.75)
+parser.add_option('--csvMax', action="store",type="float",dest="csvMax",default=100)
 
 (options, args) = parser.parse_args()
 
@@ -23,7 +25,10 @@ from ROOT import RooWorkspace, RooAbsPdf, setTDRStyle, ScaleFactorTTbarControlSa
 from ROOT import *
 
 gInterpreter.GenerateDictionary("std::map<std::string,std::string>", "map;string;string")
-gInterpreter.GenerateDictionary("std::vector<std::string>", "vector;string")
+# gInterpreter.GenerateDictionary("std::vector<std::string>", "vector;string")
+
+if options.noX:
+  gROOT.SetBatch(True)
 
 ### Fit e+mu together
 def control_sample_simultaneous():
@@ -31,7 +36,7 @@ def control_sample_simultaneous():
     print "control_sample_simultaneous"
     boostedW_fitter_sim = doFit_wj_and_wlvj_simultaneous()
 
-def control_sample(channel="mu"):
+def control_sample(channel="em"):
 
     print "control_sample"
     
@@ -40,32 +45,34 @@ class doFit_wj_and_wlvj_simultaneous:
     def __init__(self):
       
       self.workspace4fit_ = RooWorkspace("workspace4fit_","workspace4fit_")           # create workspace
-      
-      self.boostedW_fitter_em = doFit_wj_and_wlvj("em", 40, 130, self.workspace4fit_) # Define all shapes to be used for Mj, define regions (SB,signal) and input files.
-                                                              
+      self.boostedW_fitter_em = doFit_wj_and_wlvj("em", 40, 130, self.workspace4fit_) # Define all shapes to be used for Mj, define regions (SB,signal) and input files. 
       self.boostedW_fitter_em.fit_TTbar_controlsample()                               # Loop over intrees to create datasets om Mj and fit the single MCs.
+      self.workspace4fit_.data("rdataset_data_em_mj").Print() 
+      self.workspace4fit_.data("rdataset_data_failtau2tau1cut_em_mj").Print()
+      self.workspace4fit_.data("rdataset_TotalMC_em_mj").Print()
+      self.workspace4fit_.data("rdataset_TotalMC_failtau2tau1cut_em_mj").Print()
+      
  
-      self.workspace4fit_.data("rdataset_data_em_mj").Print() # Then I PRINT the contents of my workspace
-
       #Defining categories
       sample_type = RooCategory("sample_type","sample_type")
       sample_type.defineType("em_pass")
       sample_type.defineType("em_fail")
 
       rrv_weight = RooRealVar("rrv_weight","rrv_weight",0. ,10000000.)
-
+ 
       #Importing datasets
       rdataset_data_em_mj      = self.workspace4fit_.data("rdataset_data_em_mj")
       rdataset_data_em_mj_fail = self.workspace4fit_.data("rdataset_data_failtau2tau1cut_em_mj")
-
+ 
       rrv_mass_j   = self.workspace4fit_.var("rrv_mass_j")
 
       #Combined dataset
       combData_data = RooDataSet("combData_data","combData_data",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight),RooFit.Index(sample_type),RooFit.Import("em_pass",rdataset_data_em_mj),RooFit.Import("em_fail",rdataset_data_em_mj_fail) )
-      combData_data.Print()
+
 
       rdataset_TotalMC_em_mj      = self.workspace4fit_.data("rdataset_TotalMC_em_mj")
       rdataset_TotalMC_em_mj_fail = self.workspace4fit_.data("rdataset_TotalMC_failtau2tau1cut_em_mj")
+      
 
       combData_TotalMC = RooDataSet("combData_TotalMC","combData_TotalMC",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight),RooFit.Index(sample_type),RooFit.Import("em_pass",rdataset_TotalMC_em_mj),RooFit.Import("em_fail",rdataset_TotalMC_em_mj_fail) )
       combData_TotalMC.Print()
@@ -73,18 +80,18 @@ class doFit_wj_and_wlvj_simultaneous:
       # Import pdf from single fits and define the simultaneous total pdf
       model_data_em      = self.workspace4fit_.pdf("model_data_em")
       model_data_fail_em = self.workspace4fit_.pdf("model_data_failtau2tau1cut_em")
-
+ 
       simPdf_data = RooSimultaneous("simPdf_data_em","simPdf_data_em",sample_type)
       simPdf_data.addPdf(model_data_em,"em_pass")
       simPdf_data.addPdf(model_data_fail_em,"em_fail")
 
-      label = ""
-
+ 
       constrainslist_data_em = ROOT.std.vector(ROOT.std.string)()
       for i in range(self.boostedW_fitter_em.constrainslist_data.size()):
           constrainslist_data_em.push_back(self.boostedW_fitter_em.constrainslist_data.at(i))
+          print self.boostedW_fitter_em.constrainslist_data.at(i)
 
-      pdfconstrainslist_data_em = RooArgSet("pdfconstrainslist_data_em"+label)
+      pdfconstrainslist_data_em = RooArgSet("pdfconstrainslist_data_em")
       for i in range(constrainslist_data_em.size()):
           self.workspace4fit_.pdf(constrainslist_data_em.at(i)).Print()
           pdfconstrainslist_data_em.add(self.workspace4fit_.pdf(constrainslist_data_em.at(i)) )
@@ -94,10 +101,10 @@ class doFit_wj_and_wlvj_simultaneous:
       rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
 
       # fit TotalMC --> define the simultaneous total pdf
-      model_TotalMC_em      = self.workspace4fit_.pdf("model_TotalMC"+label+"_em")
-      model_TotalMC_fail_em = self.workspace4fit_.pdf("model_TotalMC"+label+"_failtau2tau1cut_em")
+      model_TotalMC_em      = self.workspace4fit_.pdf("model_TotalMC_em")
+      model_TotalMC_fail_em = self.workspace4fit_.pdf("model_TotalMC_failtau2tau1cut_em")
 
-      simPdf_TotalMC = RooSimultaneous("simPdf_TotalMC_em"+label,"simPdf_TotalMC_em"+label,sample_type)
+      simPdf_TotalMC = RooSimultaneous("simPdf_TotalMC_em","simPdf_TotalMC_em",sample_type)
       simPdf_TotalMC.addPdf(model_TotalMC_em,"em_pass")
       simPdf_TotalMC.addPdf(model_TotalMC_fail_em,"em_fail")
 
@@ -111,147 +118,56 @@ class doFit_wj_and_wlvj_simultaneous:
           pdfconstrainslist_TotalMC_em.add(self.workspace4fit_.pdf(constrainslist_TotalMC_em[i]) )
       pdfconstrainslist_TotalMC_em.Print()
 
-      rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))
-      rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))
+      rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em),RooFit.SumW2Error(kTRUE))
+      rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em),RooFit.SumW2Error(kTRUE))
 
-      ## draw the plots
-      DrawScaleFactorTTbarControlSample(self.workspace4fit_,self.boostedW_fitter_em.color_palet,label,"em",self.boostedW_fitter_em.wtagger_label,self.boostedW_fitter_em.AK8_pt_min,self.boostedW_fitter_em.AK8_pt_max)
+      # draw the plots
+      DrawScaleFactorTTbarControlSample(self.workspace4fit_,self.boostedW_fitter_em.color_palet,"","em",self.boostedW_fitter_em.wtagger_label,self.boostedW_fitter_em.AK8_pt_min,self.boostedW_fitter_em.AK8_pt_max)
 
-      rfresult_TotalMC.Print()
-      rfresult_data.Print()
+      print ""
 
       ### Efficiency in data and MC
-      rrv_eff_MC_em   = self.workspace4fit_.var("eff_ttbar_TotalMC"+label+"_em_mj")
-      rrv_mean_MC_em  = self.workspace4fit_.var("rrv_mean1_gaus_ttbar_TotalMC"+label+"_em_mj")
-      rrv_sigma_MC_em = self.workspace4fit_.var("rrv_sigma1_gaus_ttbar_TotalMC"+label+"_em_mj")
+      rrv_eff_MC_em   = self.workspace4fit_.var("eff_ttbar_TotalMC_em_mj")
+      rrv_mean_MC_em  = self.workspace4fit_.var("rrv_mean1_gaus_ttbar_TotalMC_em_mj")
+      rrv_sigma_MC_em = self.workspace4fit_.var("rrv_sigma1_gaus_ttbar_TotalMC_em_mj")
 
-      rrv_eff_data_em   = self.workspace4fit_.var("eff_ttbar_data"+label+"_em_mj")
-      rrv_mean_data_em  = self.workspace4fit_.var("rrv_mean1_gaus_ttbar_data"+label+"_em_mj")
-      rrv_sigma_data_em = self.workspace4fit_.var("rrv_sigma1_gaus_ttbar_data"+label+"_em_mj")
+      rrv_eff_data_em   = self.workspace4fit_.var("eff_ttbar_data_em_mj")
+      rrv_mean_data_em  = self.workspace4fit_.var("rrv_mean1_gaus_ttbar_data_em_mj")
+      rrv_sigma_data_em = self.workspace4fit_.var("rrv_sigma1_gaus_ttbar_data_em_mj")
 
-      # rrv_eff_MC_em.Print()
- #      rrv_eff_MC_em.Print()
- #      rrv_eff_data_em.Print()
- #      rrv_eff_data_em.Print()
- #      rrv_mean_MC_em.Print()
- #      rrv_mean_data_em.Print()
- #      rrv_sigma_MC_em.Print()
- #      rrv_sigma_data_em.Print()
+      rrv_eff_MC_em.Print()
+      rrv_eff_MC_em.Print()
+      rrv_eff_data_em.Print()
+      rrv_eff_data_em.Print()
+      rrv_mean_MC_em.Print()
+      rrv_mean_data_em.Print()
+      rrv_sigma_MC_em.Print()
+      rrv_sigma_data_em.Print()
 
       ## GET HP SCALEFACTOR AND UNCERTIANTIES
-      pure_wtagger_sf_em            = rrv_eff_data_em.getVal()/rrv_eff_MC_em.getVal()
-      
-      pure_wtagger_mean_shift_em    = rrv_mean_data_em.getVal()-rrv_mean_MC_em.getVal()
-      pure_wtagger_sigma_enlarge_em = rrv_sigma_data_em.getVal()/rrv_sigma_MC_em.getVal()
+      pure_wtagger_sf_em             = rrv_eff_data_em.getVal()/rrv_eff_MC_em.getVal()
+      pure_wtagger_sf_em_err         = pure_wtagger_sf_em * ( (rrv_eff_data_em.getError()/rrv_eff_data_em.getVal() )**2 + (rrv_eff_MC_em.getError()/rrv_eff_MC_em.getVal())**2 )**0.5
 
-      pure_wtagger_sf_em_err = ( (rrv_eff_data_em.getError()/rrv_eff_data_em.getVal() )**2 + (rrv_eff_MC_em.getError()/rrv_eff_MC_em.getVal())**2 )**0.5* pure_wtagger_sf_em
-
+      pure_wtagger_mean_shift_em     = rrv_mean_data_em.getVal()-rrv_mean_MC_em.getVal()
       pure_wtagger_mean_shift_err_em = (rrv_mean_data_em.getError()**2 + rrv_mean_MC_em.getError()**2)**0.5
 
+      pure_wtagger_sigma_enlarge_em     = rrv_sigma_data_em.getVal()/rrv_sigma_MC_em.getVal()
       pure_wtagger_sigma_enlarge_err_em = ((rrv_sigma_data_em.getError()/rrv_sigma_data_em.getVal())**2 + (rrv_sigma_MC_em.getError()/rrv_sigma_MC_em.getVal())**2 )**0.5* pure_wtagger_sigma_enlarge_em
-      
-      mean_sf_error  = (rrv_mean_data_em.getVal()/rrv_mean_MC_em.getVal())   * ( (rrv_mean_data_em.getError()/rrv_mean_data_em.getVal())**2   +  (rrv_mean_MC_em.getError() /rrv_mean_MC_em.getVal())**2   )**0.5
-      sigma_sf_error = (rrv_sigma_data_em.getVal()/rrv_sigma_MC_em.getVal()) * ( (rrv_sigma_data_em.getError()/rrv_sigma_data_em.getVal())**2 +  (rrv_sigma_MC_em.getError()/rrv_sigma_MC_em.getVal())**2 )**0.5
-      eff_sf_error  = (rrv_eff_data_em.getVal()/rrv_eff_MC_em.getVal())      * ( (rrv_eff_data_em.getError()/rrv_eff_data_em.getVal())**2     +  (rrv_eff_MC_em.getError()  /rrv_eff_MC_em.getVal())**2     )**0.5
 
-      print "                                     HP                                    "
-      print "---------------------------------------------------------------------------"
-      print ""
-      print "Pure W-tagging SF of em %s         : %0.3f +/- %0.3f"%(label,pure_wtagger_sf_em, pure_wtagger_sf_em_err)
-      print ""
-      print "Pure W-tagging mean shift em %s    : %0.3f +/- %0.3f"%(label,pure_wtagger_mean_shift_em, pure_wtagger_mean_shift_err_em)
-      print "Pure W-tagging sigma enlarge em %s : %0.3f +/- %0.3f"%(label,pure_wtagger_sigma_enlarge_em, pure_wtagger_sigma_enlarge_err_em)
-      print ""
-      print "Parameter                 Data                          Simulation                          Data/Simulation"
-      print " < m >              %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(rrv_mean_data_em.getVal(),rrv_mean_data_em.getError(),rrv_mean_MC_em.getVal(),rrv_mean_MC_em.getError()    , rrv_mean_data_em.getVal()/rrv_mean_MC_em.getVal()  ,  mean_sf_error)
-      print " #sigma             %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(rrv_sigma_data_em.getVal(),rrv_sigma_data_em.getError(),rrv_sigma_MC_em.getVal(),rrv_sigma_MC_em.getError(), rrv_sigma_data_em.getVal()/rrv_sigma_MC_em.getVal(),  sigma_sf_error)
-      print ""
-      print ""
-      print "HP W-tag eff+SF     %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(rrv_eff_data_em.getVal(),rrv_eff_data_em.getError(),rrv_eff_MC_em.getVal(),rrv_eff_MC_em.getError()        , rrv_eff_data_em.getVal()/rrv_eff_MC_em.getVal()    ,  eff_sf_error)
-      print ""
-      print "---------------------------------------------------------------------------"
-      
-      self.boostedW_fitter_em.file_out_ttbar_control.write( "\nPure W-tagger SF of em %s     : %0.3f +/- %0.3f"%(label,pure_wtagger_sf_em, pure_wtagger_sf_em_err))
-      self.boostedW_fitter_em.file_out_ttbar_control.write( "\nPure W-tagger mean shift em %s    : %0.3f +/- %0.3f"%(label,pure_wtagger_mean_shift_em, pure_wtagger_mean_shift_err_em))
-      self.boostedW_fitter_em.file_out_ttbar_control.write( "\nPure W-tagger sigma enlarge em %s : %0.3f +/- %0.3f"%(label,pure_wtagger_sigma_enlarge_em, pure_wtagger_sigma_enlarge_err_em))
-
-
-      ## GET EXTREME FAIL NUMBERS IN ORDER TO COMPUTE LP SF:   
-      rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_em_mj = self.workspace4fit_.var("rrv_number_ttbar_TotalMC"+label+"_extremefailtau2tau1cut_em_mj")
-      rrv_number_ttbar_data_extremefailtau2tau1cut_em_mj    = self.workspace4fit_.var("rrv_number_ttbar_data"+label+"_extremefailtau2tau1cut_em_mj")
- 
-      # rrv_number_ttbar_TotalMC_failtau2tau1cut_em_mj = self.workspace4fit_.var("rrv_number_ttbar_TotalMC"+label+"_failtau2tau1cut_em_mj")
-      # rrv_number_ttbar_data_failtau2tau1cut_em_mj    = self.workspace4fit_.var("rrv_number_ttbar_data"+label+"_failtau2tau1cut_em_mj")
-      # rrv_number_ttbar_TotalMC_beforetau2tau1cut_em_mj = self.workspace4fit_.var("rrv_number_ttbar_TotalMC"+label+"_beforetau2tau1cut_em_mj")
-      # rrv_number_ttbar_data_beforetau2tau1cut_em_mj    = self.workspace4fit_.var("rrv_number_ttbar_data"+label+"_beforetau2tau1cut_em_mj")
-      # rrv_number_ttbar_TotalMC_passtau2tau1cut_em_mj = self.workspace4fit_.var("rrv_number_ttbar_TotalMC"+label+"_passtau2tau1cut_em_mj")
-      # rrv_number_ttbar_data_passtau2tau1cut_em_mj    = self.workspace4fit_.var("rrv_number_ttbar_data"+label+"_passtau2tau1cut_em_mj")
-
-      # rrv_number_total_ttbar_TotalMC_em = self.workspace4fit_.var("rrv_number_total_ttbar_TotalMC"+label+"_em_mj")
-      # rrv_number_total_ttbar_data_em    = self.workspace4fit_.var("rrv_number_total_ttbar_data"+label+"_em_mj")
-      rrv_number_total_ttbar_TotalMC_em = self.workspace4fit_.var("rrv_number_ttbar_TotalMC"+label+"_beforetau2tau1cut_em_mj")
-      rrv_number_total_ttbar_data_em    = self.workspace4fit_.var("rrv_number_ttbar_data"+label+"_beforetau2tau1cut_em_mj")
-      
-      
-      
-      
-      
-      # rrv_number_total_ttbar_TotalMC_el = self.workspace4fit_.var("rrv_number_total_ttbar_TotalMC"+label+"_el");
-      # rrv_number_total_ttbar_data_el = self.workspace4fit_.var("rrv_number_total_ttbar_data"+label+"_el");
-      # print "el TotalMC Eff of extremefail %s: %0.6f"%(label, rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_el_mj.getVal() / rrv_number_total_ttbar_TotalMC_el.getVal());
-      # print "el data Eff of extremefail %s: %0.6f"%(label, rrv_number_ttbar_data_extremefailtau2tau1cut_el_mj.getVal() / rrv_number_total_ttbar_data_el.getVal());
-      #
-      # tmp_eff_MC_el_extremefail = rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_el_mj.getVal() / rrv_number_total_ttbar_TotalMC_el.getVal();
-      # tmp_eff_data_el_extremefail= rrv_number_ttbar_data_extremefailtau2tau1cut_el_mj.getVal() / rrv_number_total_ttbar_data_el.getVal();
-      #
-      # tmp_eff_MC_el_extremefail_error =tmp_eff_MC_el_extremefail* TMath.Sqrt( (rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_el_mj.getError()/rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_el_mj.getVal() )**2+ (rrv_number_total_ttbar_TotalMC_el.getError()/rrv_number_total_ttbar_TotalMC_el.getVal() )**2 );
-      # tmp_eff_data_el_extremefail_error =tmp_eff_data_el_extremefail* TMath.Sqrt( (rrv_number_ttbar_data_extremefailtau2tau1cut_el_mj.getError()/rrv_number_ttbar_data_extremefailtau2tau1cut_el_mj.getVal() )**2+ (rrv_number_total_ttbar_data_el.getError()/rrv_number_total_ttbar_data_el.getVal() )**2 );
-      #
-      #
-      # tmp_eff_MC_el_LP =1. - rrv_eff_MC_el.getVal() - tmp_eff_MC_el_extremefail;
-      # tmp_eff_data_el_LP =1. - rrv_eff_data_el.getVal() - tmp_eff_data_el_extremefail;
-      # tmp_eff_MC_el_LP_err = TMath.Sqrt( rrv_eff_MC_el.getError()**2 + tmp_eff_MC_el_extremefail_error**2 );
-      # tmp_eff_data_el_LP_err = TMath.Sqrt( rrv_eff_data_el.getError()**2 + tmp_eff_data_el_extremefail_error**2 );
-      #
-      # tmpq_eff_MC_el_LP =1. - rrv_eff_MC_el.getVal() ;
-      # tmpq_eff_data_el_LP =1. - rrv_eff_data_el.getVal() ;
-      #
-      # tmpq_eff_MC_el_LP_err = TMath.Sqrt( rrv_eff_MC_el.getError()**2);# + tmpq_eff_MC_el_extremefail_error**2 );
-      # tmpq_eff_data_el_LP_err = TMath.Sqrt( rrv_eff_data_el.getError()**2);# + tmpq_eff_data_el_extremefail_error**2 );
-      # print "LP Eff of el data %s: %0.3f +/- %0.3f"%(label,tmp_eff_data_el_LP, tmp_eff_data_el_LP_err);
-      # print "LP Eff of el MC %s: %0.3f +/- %0.3f"%(label,tmp_eff_MC_el_LP, tmp_eff_MC_el_LP_err);
-      #
-      # pure_wtagger_sf_el_LP = tmp_eff_data_el_LP / tmp_eff_MC_el_LP;
-      #  pure_wtagger_sf_el_LP_err = pure_wtagger_sf_el_LP*TMath.Sqrt( (tmp_eff_data_el_LP_err/tmp_eff_data_el_LP)**2 + (tmp_eff_MC_el_LP_err/tmp_eff_MC_el_LP)**2 );
-      #
-      #  pureq_wtagger_sf_el_LP = tmpq_eff_data_el_LP / tmpq_eff_MC_el_LP;
-      #  pureq_wtagger_sf_el_LP_err = pureq_wtagger_sf_el_LP*TMath.Sqrt( (tmpq_eff_data_el_LP_err/tmpq_eff_data_el_LP)**2 + (tmpq_eff_MC_el_LP_err/tmpq_eff_MC_el_LP)**2 );
+      mean_sf_error  = (rrv_mean_data_em.getVal()/rrv_mean_MC_em.getVal())   * ( (rrv_mean_data_em.getError()/rrv_mean_data_em.getVal())**2   +  (rrv_mean_MC_em.getError() /rrv_mean_MC_em.getVal())**2    )**0.5
+      sigma_sf_error = (rrv_sigma_data_em.getVal()/rrv_sigma_MC_em.getVal()) * ( (rrv_sigma_data_em.getError()/rrv_sigma_data_em.getVal())**2 +  (rrv_sigma_MC_em.getError()/rrv_sigma_MC_em.getVal())**2   )**0.5
+      eff_sf_error   = (rrv_eff_data_em.getVal()/rrv_eff_MC_em.getVal())     * ( (rrv_eff_data_em.getError()/rrv_eff_data_em.getVal())**2     +  (rrv_eff_MC_em.getError()  /rrv_eff_MC_em.getVal())**2     )**0.5
 
 
 
 
+      ## GET EXTREME FAIL NUMBERS IN ORDER TO COMPUTE LP SF:
 
+      rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_em_mj = self.workspace4fit_.var("rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_em_mj")
+      rrv_number_ttbar_data_extremefailtau2tau1cut_em_mj    = self.workspace4fit_.var("rrv_number_ttbar_data_extremefailtau2tau1cut_em_mj")
 
-
-      # print ""
-      # print "em TotalMC Eff of extremefail %s: %0.6f"%(label, rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_em_mj.getVal() / rrv_number_total_ttbar_TotalMC_em.getVal())
-      # print "em data Eff of extremefail %s   : %0.6f"%(label, rrv_number_ttbar_data_extremefailtau2tau1cut_em_mj.getVal()    / rrv_number_total_ttbar_data_em.getVal())
-      # print ""
-      # self.boostedW_fitter_em.file_out_ttbar_control.write("\nel TotalMC Eff of extremefail %s: %0.6f"%(label, rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_em_mj.getVal() / rrv_number_total_ttbar_TotalMC_em.getVal()))
-      # self.boostedW_fitter_em.file_out_ttbar_control.write("\nel data Eff of extremefail %s: %0.6f"%(label, rrv_number_ttbar_data_extremefailtau2tau1cut_em_mj.getVal() / rrv_number_total_ttbar_data_em.getVal()))
-      #
-      # self.boostedW_fitter_em.file_out_ttbar_control.write("\nel TotalMC number of extremefail %s: %0.6f"%(label, rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_em_mj.getVal()))
-      # self.boostedW_fitter_em.file_out_ttbar_control.write("\nel data number of extremefail %s: %0.6f"%(label, rrv_number_ttbar_data_extremefailtau2tau1cut_em_mj.getVal()))
-      #
-      # self.boostedW_fitter_em.file_out_ttbar_control.write("\nel TotalMC number of fail %s: %0.6f"%(label, rrv_number_ttbar_TotalMC_failtau2tau1cut_em_mj.getVal()))
-      # self.boostedW_fitter_em.file_out_ttbar_control.write("\nel data number of fail %s: %0.6f"%(label, rrv_number_ttbar_data_failtau2tau1cut_em_mj.getVal()))
-      # self.boostedW_fitter_em.file_out_ttbar_control.write("\nel TotalMC number of before %s: %0.6f"%(label, rrv_number_ttbar_TotalMC_beforetau2tau1cut_em_mj.getVal()))
-      # self.boostedW_fitter_em.file_out_ttbar_control.write("\nel data number of before %s: %0.6f"%(label, rrv_number_ttbar_data_beforetau2tau1cut_em_mj.getVal()))
-      # self.boostedW_fitter_em.file_out_ttbar_control.write("\nel TotalMC number of pass %s: %0.6f"%(label, rrv_number_ttbar_TotalMC_passtau2tau1cut_em_mj.getVal()))
-      # self.boostedW_fitter_em.file_out_ttbar_control.write("\nel data number of pass %s: %0.6f"%(label, rrv_number_ttbar_data_passtau2tau1cut_em_mj.getVal()))
-      #
-      # self.boostedW_fitter_em.file_out_ttbar_control.write("\nel TotalMC number of total %s: %0.6f"%(label, rrv_number_total_ttbar_TotalMC_em.getVal()))
-      # self.boostedW_fitter_em.file_out_ttbar_control.write("\nel data number of total %s: %0.6f"%(label, rrv_number_total_ttbar_data_em.getVal()))
+      rrv_number_total_ttbar_TotalMC_em = self.workspace4fit_.var("rrv_number_ttbar_TotalMC_beforetau2tau1cut_em_mj")
+      rrv_number_total_ttbar_data_em    = self.workspace4fit_.var("rrv_number_ttbar_data_beforetau2tau1cut_em_mj")
 
       eff_MC_em_extremefail   = rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_em_mj.getVal() / rrv_number_total_ttbar_TotalMC_em.getVal()
       eff_data_em_extremefail = rrv_number_ttbar_data_extremefailtau2tau1cut_em_mj.getVal()    / rrv_number_total_ttbar_data_em.getVal()
@@ -262,16 +178,62 @@ class doFit_wj_and_wlvj_simultaneous:
       eff_SF_extremefail       = eff_data_em_extremefail/eff_MC_em_extremefail
       eff_SF_extremefail_error = eff_SF_extremefail * ( (eff_data_em_extremefail_error/eff_data_em_extremefail)**2 + (eff_MC_em_extremefail_error/eff_MC_em_extremefail)**2 )**0.5
       
-      # print ""
-      # print ""
-      # print ""
-      # print "eff_MC_em_extremefail_error   %s: %f"%(label,eff_MC_em_extremefail_error)
-      # print "eff_data_em_extremefail_error %s: %f"%(label,eff_data_em_extremefail_error)
-      # print ""
-      # print ""
-      # print ""
       
       
+      print "---------------------------------------------------------------------------"
+      print "                        EXTREME FAIL NUMBERS                               "
+      print "---------------------------------------------------------------------------"
+      print "---------------------------------------------------------------------------"
+      print "Extreme fail, MC       = " , rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_em_mj.Print()
+      print "Extreme fail, DATA     = " , rrv_number_ttbar_data_extremefailtau2tau1cut_em_mj.Print()
+      print "---------------------------------------------------------------------------"
+      print "TOTAL, MC              = " , rrv_number_total_ttbar_TotalMC_em.Print()
+      print "TOTAL, DATA            = " , rrv_number_total_ttbar_data_em.Print()
+      print "---------------------------------------------------------------------------"
+      print "Extreme fail eff, MC   = " , rrv_number_ttbar_TotalMC_extremefailtau2tau1cut_em_mj.getVal()/rrv_number_total_ttbar_TotalMC_em.getVal()
+      print "Extreme fail eff, DATA = " , rrv_number_ttbar_data_extremefailtau2tau1cut_em_mj.getVal()/rrv_number_total_ttbar_data_em.getVal()
+      print "---------------------------------------------------------------------------"
+     
+      ## GET LP SCALEFACTOR AND UNCERTIANTIES
+
+      # w/ extreme fail
+      eff_MC_em_LP   = 1.-rrv_eff_MC_em.getVal()   - eff_MC_em_extremefail
+      eff_data_em_LP = 1.-rrv_eff_data_em.getVal() - eff_data_em_extremefail
+
+      eff_MC_em_LP_err   = TMath.Sqrt( rrv_eff_MC_em.getError()  **2 + eff_MC_em_extremefail_error**2 )
+      eff_data_em_LP_err = TMath.Sqrt( rrv_eff_data_em.getError()**2 + eff_data_em_extremefail_error**2 )
+
+      pure_wtagger_sf_em_LP     = eff_data_em_LP / eff_MC_em_LP
+      pure_wtagger_sf_em_LP_err = pure_wtagger_sf_em_LP * ( (eff_data_em_LP_err/eff_data_em_LP)**2 + (eff_MC_em_LP_err/eff_MC_em_LP)**2 )**0.5
+
+      # w/o extreme fail
+      tmpq_eff_MC_em_LP   = 1. - rrv_eff_MC_em.getVal()
+      tmpq_eff_data_em_LP = 1. - rrv_eff_data_em.getVal()
+
+      tmpq_eff_MC_em_LP_err   = TMath.Sqrt( rrv_eff_MC_em.getError()  **2)
+      tmpq_eff_data_em_LP_err = TMath.Sqrt( rrv_eff_data_em.getError()**2)
+
+      pureq_wtagger_sf_em_LP = tmpq_eff_data_em_LP / tmpq_eff_MC_em_LP
+      pureq_wtagger_sf_em_LP_err = pureq_wtagger_sf_em_LP*TMath.Sqrt( (tmpq_eff_data_em_LP_err/tmpq_eff_data_em_LP)**2 + (tmpq_eff_MC_em_LP_err/tmpq_eff_MC_em_LP)**2 )
+
+
+      print "---------------------------------------------------------------------------"
+      print "                                     HP                                    "
+      print "---------------------------------------------------------------------------"
+      print ""
+      print "Pure W-tagging SF            : %0.3f +/- %0.3f" %(pure_wtagger_sf_em, pure_wtagger_sf_em_err)
+      print ""
+      print "Pure W-tagging mean shift    : %0.3f +/- %0.3f" %(pure_wtagger_mean_shift_em, pure_wtagger_mean_shift_err_em)
+      print "Pure W-tagging sigma enlarge : %0.3f +/- %0.3f" %(pure_wtagger_sigma_enlarge_em, pure_wtagger_sigma_enlarge_err_em)
+      print ""
+      print "Parameter                 Data                          Simulation                          Data/Simulation"
+      print " < m >              %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(rrv_mean_data_em.getVal(),rrv_mean_data_em.getError(),rrv_mean_MC_em.getVal(),rrv_mean_MC_em.getError()    , rrv_mean_data_em.getVal()/rrv_mean_MC_em.getVal()  ,  mean_sf_error)
+      print " #sigma             %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(rrv_sigma_data_em.getVal(),rrv_sigma_data_em.getError(),rrv_sigma_MC_em.getVal(),rrv_sigma_MC_em.getError(), rrv_sigma_data_em.getVal()/rrv_sigma_MC_em.getVal(),  sigma_sf_error)
+      print ""
+      print ""
+      print "HP W-tag eff+SF     %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(rrv_eff_data_em.getVal(),rrv_eff_data_em.getError(),rrv_eff_MC_em.getVal(),rrv_eff_MC_em.getError()        , rrv_eff_data_em.getVal()/rrv_eff_MC_em.getVal()    ,  eff_sf_error)
+      print ""
+      print "---------------------------------------------------------------------------"
       print "                                EXTREME FAIL                               "
       print "---------------------------------------------------------------------------"
       print ""
@@ -279,60 +241,6 @@ class doFit_wj_and_wlvj_simultaneous:
       print "Extreme fail eff+SF     %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(eff_data_em_extremefail,eff_data_em_extremefail_error,eff_MC_em_extremefail,eff_MC_em_extremefail_error, eff_SF_extremefail, eff_SF_extremefail_error)
       print ""
       print "---------------------------------------------------------------------------"
-      
-      
-
-      self.boostedW_fitter_em.file_out_ttbar_control.write("\neff_MC_em_extremefail_error %s: %f"%(label,eff_MC_em_extremefail_error))
-      self.boostedW_fitter_em.file_out_ttbar_control.write("\neff_data_em_extremefail_error %s: %f"%(label,eff_data_em_extremefail_error))
-
-      self.boostedW_fitter_em.file_out_ttbar_control.write("\nTotalMC Eff of pass %s: %0.6f"%(label, rrv_eff_MC_em.getVal()))
-      self.boostedW_fitter_em.file_out_ttbar_control.write("\ndata Eff of pass %s: %0.6f"%(label, rrv_eff_data_em.getVal()))
-
-      self.boostedW_fitter_em.file_out_ttbar_control.write("\nerr TotalMC Eff of pass %s: %0.6f"%(label, rrv_eff_MC_em.getError()))
-      self.boostedW_fitter_em.file_out_ttbar_control.write("\nerr data Eff of pass %s: %0.6f"%(label, rrv_eff_data_em.getError()))
-
-
-      ## GET LP SCALEFACTOR AND UNCERTIANTIES
-      eff_MC_em_LP   = 1.-rrv_eff_MC_em.getVal()   - eff_MC_em_extremefail
-      eff_data_em_LP = 1.-rrv_eff_data_em.getVal() - eff_data_em_extremefail
-
-      eff_MC_em_LP_err   = TMath.Sqrt( rrv_eff_MC_em.getError()  **2 + eff_MC_em_extremefail_error**2 )
-      eff_data_em_LP_err = TMath.Sqrt( rrv_eff_data_em.getError()**2 + eff_data_em_extremefail_error**2 )
-      
-      
-      
-      tmpq_eff_MC_em_LP   = 1. - rrv_eff_MC_em.getVal()
-      tmpq_eff_data_em_LP = 1. - rrv_eff_data_em.getVal()
-
-      tmpq_eff_MC_em_LP_err   = TMath.Sqrt( rrv_eff_MC_em.getError()  **2)
-      tmpq_eff_data_em_LP_err = TMath.Sqrt( rrv_eff_data_em.getError()**2)
-      
-      pureq_wtagger_sf_em_LP = tmpq_eff_data_em_LP / tmpq_eff_MC_em_LP
-      pureq_wtagger_sf_em_LP_err = pureq_wtagger_sf_em_LP*TMath.Sqrt( (tmpq_eff_data_em_LP_err/tmpq_eff_data_em_LP)**2 + (tmpq_eff_MC_em_LP_err/tmpq_eff_MC_em_LP)**2 )
-            
-      # print ""
-      # print ""
-      # print ""
-      # print "LP Eff of em data %s: %0.3f +/- %0.3f"%(label,eff_data_em_LP, eff_data_em_LP_err)
-      # print "LP Eff of em MC %s: %0.3f +/- %0.3f"%(label,eff_MC_em_LP, eff_MC_em_LP_err)
-      # print ""
-      # print ""
-      # print ""
-
-      self.boostedW_fitter_em.file_out_ttbar_control.write("\nLP Eff of em data %s: %f +/- %f"%(label,eff_data_em_LP, eff_data_em_LP_err))
-      self.boostedW_fitter_em.file_out_ttbar_control.write("\nLP Eff of em MC %s: %f +/- %f"  %(label,eff_MC_em_LP, eff_MC_em_LP_err))
-
-      pure_wtagger_sf_em_LP     = eff_data_em_LP / eff_MC_em_LP
-      pure_wtagger_sf_em_LP_err = pure_wtagger_sf_em_LP * ( (eff_data_em_LP_err/eff_data_em_LP)**2 + (eff_MC_em_LP_err/eff_MC_em_LP)**2 )**0.5
-
-      print ""
-      print ""
-      print ""
-      print "Pure W-tagger LP SF of em %s: %0.3f +/- %0.3f"%(label,pure_wtagger_sf_em_LP, pure_wtagger_sf_em_LP_err)
-      print ""
-      print ""
-      print ""
-      
       print "                                    LP                                     "
       print "---------------------------------------------------------------------------"
       print ""
@@ -341,10 +249,37 @@ class doFit_wj_and_wlvj_simultaneous:
       print "LP W-tag eff+SF (wo/ext fail)         %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(tmpq_eff_data_em_LP,tmpq_eff_data_em_LP_err,tmpq_eff_MC_em_LP,tmpq_eff_MC_em_LP_err,pureq_wtagger_sf_em_LP,pureq_wtagger_sf_em_LP_err)
       print ""
       print "---------------------------------------------------------------------------"
-      
-      
 
-      self.boostedW_fitter_em.file_out_ttbar_control.write("\nPure W-tagger LP SF of em %s: %f +/- %f"%(label,pure_wtagger_sf_em_LP, pure_wtagger_sf_em_LP_err))
+
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n                                     HP                                    ")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n---------------------------------------------------------------------------")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\nPure W-tagging SF of          : %0.3f +/- %0.3f" %(pure_wtagger_sf_em, pure_wtagger_sf_em_err))
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\nPure W-tagging mean shift     : %0.3f +/- %0.3f" %(pure_wtagger_mean_shift_em, pure_wtagger_mean_shift_err_em))
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\nPure W-tagging sigma enlarge  : %0.3f +/- %0.3f" %(pure_wtagger_sigma_enlarge_em, pure_wtagger_sigma_enlarge_err_em))
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\nParameter                 Data                          Simulation                          Data/Simulation")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n < m >              %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(rrv_mean_data_em.getVal(),rrv_mean_data_em.getError(),rrv_mean_MC_em.getVal(),rrv_mean_MC_em.getError()    , rrv_mean_data_em.getVal()/rrv_mean_MC_em.getVal()  ,  mean_sf_error))
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n #sigma             %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(rrv_sigma_data_em.getVal(),rrv_sigma_data_em.getError(),rrv_sigma_MC_em.getVal(),rrv_sigma_MC_em.getError(), rrv_sigma_data_em.getVal()/rrv_sigma_MC_em.getVal(),  sigma_sf_error))
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\nHP W-tag eff+SF     %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(rrv_eff_data_em.getVal(),rrv_eff_data_em.getError(),rrv_eff_MC_em.getVal(),rrv_eff_MC_em.getError(), rrv_eff_data_em.getVal()/rrv_eff_MC_em.getVal(),  eff_sf_error))
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n---------------------------------------------------------------------------")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n                                EXTREME FAIL                               ")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n---------------------------------------------------------------------------")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\nParameter                     Data                          Simulation                          Data/Simulation")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\nExtreme fail eff+SF     %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(eff_data_em_extremefail,eff_data_em_extremefail_error,eff_MC_em_extremefail,eff_MC_em_extremefail_error, eff_SF_extremefail, eff_SF_extremefail_error))
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n---------------------------------------------------------------------------")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n                                    LP                                     ")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n---------------------------------------------------------------------------")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\nParameter                                   Data                          Simulation                          Data/Simulation")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\nLP W-tag eff+SF ( w/ext fail)         %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(eff_data_em_LP,eff_data_em_LP_err,eff_MC_em_LP,eff_MC_em_LP_err,pure_wtagger_sf_em_LP,pure_wtagger_sf_em_LP_err))
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\nLP W-tag eff+SF (wo/ext fail)         %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(tmpq_eff_data_em_LP,tmpq_eff_data_em_LP_err,tmpq_eff_MC_em_LP,tmpq_eff_MC_em_LP_err,pureq_wtagger_sf_em_LP,pureq_wtagger_sf_em_LP_err))
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n")
+      self.boostedW_fitter_em.file_out_ttbar_control.write("\n---------------------------------------------------------------------------")
 
 class doFit_wj_and_wlvj:
 
@@ -361,64 +296,67 @@ class doFit_wj_and_wlvj:
 
       ### shapes to be used in mj                                                                                                                                          
       self.mj_shape = ROOT.std.map(ROOT.std.string,ROOT.std.string)()
-      self.mj_shape["TTbar"]  = "2Gaus_ErfExp"
+      # self.mj_shape["TTbar"]  = "2Gaus_ErfExp"
       
       if (options.tau2tau1cutHP==0.60):
-        self.mj_shape["STop"]               = "ExpGaus"
-        self.mj_shape["STop_fail"]          = "ExpGaus"
-        self.mj_shape["STop_extremefail"]   = "Exp"
-        self.mj_shape["VV"]                 = "ExpGaus"
-        self.mj_shape["VV_fail"]            = "ExpGaus"
-        self.mj_shape["VV_extremefail"]     = "Exp"
+        print "Using Tau21 leptonic HP cut of" ,options.tau2tau1cutHP 
+        self.mj_shape["STop"]                 = "ExpGaus"
+        self.mj_shape["STop_fail"]            = "ExpGaus"
+       #self.mj_shape["STop_extremefail"]     = "Exp"
+        self.mj_shape["VV"]                   = "ExpGaus"
+        self.mj_shape["VV_fail"]              = "ExpGaus"
+        # self.mj_shape["VV_extremefail"]       = "Exp"
         self.mj_shape["WJets0"]               = "ErfExp"
         self.mj_shape["WJets0_fail"]          = "Exp"
-        self.mj_shape["WJets0_extremefail"]   = "Exp"
+        # self.mj_shape["WJets0_extremefail"]   = "Exp"
+        
+        self.mj_shape["bkg_mc_fail"]          = "ErfExp_ttbar_failtau2tau1cut"
+        self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut"
+        self.mj_shape["signal_data_fail"]     = "GausChebychev_ttbar_failtau2tau1cut"
 
       elif (options.tau2tau1cutHP==0.45):
-        if self.channel == "mu":
-          self.mj_shape["STop"]               = "ErfExpGaus_sp" # Qun: ErfExpGaus_sp for MU and "ExpGaus" for EM/ELE
+        if self.channel == "em":
+          self.mj_shape["STop"]             = "ErfExpGaus_sp"
         else:
-          self.mj_shape["STop"]               = "ExpGaus"       # Qun: "ExpGaus" for EM/ELE
-        self.mj_shape["STop_fail"]          = "ExpGaus"       # Qun: "ExpGaus" for EM/ELE
-        self.mj_shape["STop_extremefail"]   = "Exp"           # Qun: "Exp"
-        self.mj_shape["VV"]                 = "Gaus"          # Qun: "ExpGaus"
-        self.mj_shape["VV_fail"]            = "Exp"           # Qun: "ExpGaus"
-        self.mj_shape["VV_extremefail"]     = "Exp"           # Qun: "Exp"
-        self.mj_shape["WJets0"]               = "ExpGaus"        # Qun: "ExpGaus"
-        self.mj_shape["WJets0_fail"]          = "Exp"           # Qun: "ExpGaus"
-        self.mj_shape["WJets0_extremefail"]   = "Exp"           # Qun: "Exp"
+          self.mj_shape["STop"]             = "ExpGaus"       
+        self.mj_shape["STop_fail"]          = "ExpGaus"    
+        # self.mj_shape["STop_extremefail"]   = "Exp"
+        self.mj_shape["VV"]                 = "ExpGaus"
+        self.mj_shape["VV_fail"]            = "ExpGaus" 
+        # self.mj_shape["VV_extremefail"]     = "Exp"
+        self.mj_shape["WJets0"]             = "ExpGaus" 
+        self.mj_shape["WJets0_fail"]        = "Exp" 
+        # self.mj_shape["WJets0_extremefail"] = "Exp"
+        
+        self.mj_shape["bkg_mc_fail"]          = "ErfExp_ttbar_failtau2tau1cut"
+        self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut" #GausChebychev_ttbar_failtau2tau1cut I think is correct! Not ErfExp_ttbar_failtau2tau1cut as in Quns
+        self.mj_shape["signal_data_fail"]     = "GausChebychev_ttbar_failtau2tau1cut"
+        
+        
       else:
         print "NO CHANNEL IS DEFINED!!! ABORT!!"
         sys.exit(0)
-        
-      self.mj_shape["bkg_data"]         = "ErfExp_ttbar"
-      self.mj_shape["bkg_data_fail"]    = "ErfExp_ttbar_failtau2tau1cut"
-      self.mj_shape["signal_data"]      = "2Gaus_ttbar" 
-      self.mj_shape["signal_data_fail"] = "GausChebychev_ttbar_failtau2tau1cut"
-      self.mj_shape["bkg_mc"]           = "ErfExp_ttbar"
-      self.mj_shape["bkg_mc_fail"]      = "ErfExp_ttbar_failtau2tau1cut"
-      self.mj_shape["signal_mc"]        = "2Gaus_ttbar" 
-      self.mj_shape["signal_mc_fail"]   = "GausChebychev_ttbar_failtau2tau1cut"
-      self.mj_shape["data_extremefail"]     = "Exp_ttbar_extremefailtau2tau1cut"
-      self.mj_shape["data_bkg_extremefail"] = "Exp_bkg_extremefailtau2tau1cut"
-      self.mj_shape["mc_extremefail"]       = "Exp_ttbar_extremefailtau2tau1cut"
-      self.mj_shape["mc_bkg_extremefail"]   = "Exp_bkg_extremefailtau2tau1cut"
+         
+      self.mj_shape["bkg_data"]             = "ErfExp_ttbar" 
+      self.mj_shape["bkg_data_fail"]        = "ErfExp_ttbar_failtau2tau1cut"    
+      self.mj_shape["signal_data"]          = "2Gaus_ttbar" 
+      self.mj_shape["bkg_mc"]               = "ErfExp_ttbar" 
+      self.mj_shape["signal_mc"]            = "2Gaus_ttbar"
+      
+      # self.mj_shape["data_extremefail"]     = "Exp_ttbar_extremefailtau2tau1cut"
+      # self.mj_shape["data_bkg_extremefail"] = "Exp_bkg_extremefailtau2tau1cut"
+      # self.mj_shape["mc_extremefail"]       = "Exp_ttbar_extremefailtau2tau1cut"
+      # self.mj_shape["mc_bkg_extremefail"]   = "Exp_bkg_extremefailtau2tau1cut"
         
 
       self.Lumi=2100
-
-      # Mj binning (for plotting)
       self.BinWidth_mj = 5.
-      
-      # Higgs-Combination-Tools generates binned sample, need bin width narrower than 5 as above.
       self.narrow_factor = 1.
 
-      # Set range
       self.BinWidth_mj = self.BinWidth_mj/self.narrow_factor
       nbins_mj         = int( (in_mj_max - in_mj_min) / self.BinWidth_mj )
       in_mj_max        = in_mj_min+nbins_mj*self.BinWidth_mj
 
-      # Declare RooRealVar
       rrv_mass_j = RooRealVar("rrv_mass_j","pruned jet mass",(in_mj_min+in_mj_max)/2.,in_mj_min,in_mj_max,"GeV")
       rrv_mass_j.setBins(nbins_mj)
  
@@ -434,7 +372,7 @@ class doFit_wj_and_wlvj:
       self.mj_sideband_lo_max = 65
       self.mj_signal_min      = 65
       self.mj_signal_max      = 105
-      self.mj_sideband_hi_min = 135
+      self.mj_sideband_hi_min = 105
       self.mj_sideband_hi_max = in_mj_max
  
       # Setting ranges...
@@ -465,7 +403,12 @@ class doFit_wj_and_wlvj:
 
       if self.wtagger_label == "nocut":
           self.wtagger_cut = 10000
-          
+      
+      if (options.tau2tau1cutHP==0.60):
+        self.wtagger_label = self.wtagger_label + "leptonic"
+      elif (options.tau2tau1cutHP==0.45):  
+        self.wtagger_label = self.wtagger_label + "hadronic"
+       
       self.color_palet = ROOT.std.map(ROOT.std.string, int) ()
       self.color_palet["data"]              = 1
       self.color_palet["WJets"]             = 2
@@ -485,9 +428,9 @@ class doFit_wj_and_wlvj:
       self.mass_lvj_min = 0.    # invariant mass of 3 body min
       self.pfMET_cut    = 40.    # missing transverse energy
       self.lpt_cut      = 53.    # lepton pT
-      self.AK8_pt_min = 200
-      self.AK8_pt_max = 5000  
-      if self.channel == "el":
+      self.AK8_pt_min   = 200
+      self.AK8_pt_max   = 5000  
+      if self.channel  == "el":
         self.pfMET_cut = 80
         self.lpt_cut = 120
         
@@ -499,32 +442,37 @@ class doFit_wj_and_wlvj:
       setTDRStyle()
 
     def fit_TTbar_controlsample(self):
-  
-      print "Fit ttbar control sample"
+
       rrv_mass_j = self.workspace4fit_.var("rrv_mass_j")
       
       ### Build single-t fit pass and fail distributions
+      print ""
+      print ""
       print "##################################################"
       print "############### Single Top DataSet ###############"
       print "##################################################"
+      print ""
+      print ""
     
       self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_STop_mc,"_STop")
 
-      fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STop",self.mj_shape["STop"],self.channel,self.wtagger_label,1) #Start value and range of parameters defined in PDFs/MakePDF.cxx
-      fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STop_failtau2tau1cut",self.mj_shape["STop_fail"],self.channel,self.wtagger_label,1)
-      fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STop_extremefailtau2tau1cut",self.mj_shape["STop_extremefail"],self.channel,self.wtagger_label,1)
- 
+      fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STop"                        ,self.mj_shape["STop"],self.channel,self.wtagger_label,1) #Start value and range of parameters defined in PDFs/MakePDF.cxx
+      fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STop_failtau2tau1cut"        ,self.mj_shape["STop_fail"],self.channel,self.wtagger_label,1)
+      # fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STop_extremefailtau2tau1cut" ,self.mj_shape["STop_extremefail"],self.channel,self.wtagger_label,1)
+
 
       ### Build WJet fit pass and fail distributions
       print "###########################################"
       print "############### WJets Pythia ##############"
       print "###########################################"
+      print ""
+      print ""
 
       self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_WJets0_mc,"_WJets0")
 
       fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0",self.mj_shape["WJets0"],self.channel,self.wtagger_label,1)
       fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0_failtau2tau1cut",self.mj_shape["WJets0_fail"],self.channel,self.wtagger_label,1)
-      fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0_extremefailtau2tau1cut",self.mj_shape["WJets0_extremefail"],self.channel,self.wtagger_label,1)
+      # fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0_extremefailtau2tau1cut",self.mj_shape["WJets0_extremefail"],self.channel,self.wtagger_label,1)
 
 
 
@@ -532,42 +480,57 @@ class doFit_wj_and_wlvj:
       print "#########################################"
       print "############### VV Pythia ###############"
       print "#########################################"
+      print ""
+      print ""
 
       self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_VV_mc,"_VV")
 
       fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV",self.mj_shape["VV"],self.channel,self.wtagger_label,1)
       fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV_failtau2tau1cut",self.mj_shape["VV_fail"],self.channel,self.wtagger_label,1)
-      fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV_extremefailtau2tau1cut",self.mj_shape["VV_extremefail"],self.channel,self.wtagger_label,1)
+      # fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV_extremefailtau2tau1cut",self.mj_shape["VV_extremefail"],self.channel,self.wtagger_label,1)
 
 
       print "#########################################"
       print "############# TTbar Powheg ##############"
       print "#########################################"
+      print ""
+      print ""
       self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_TTbar_mc,"_TTbar")
 
       print "################################################"
       print "############## Pseudo Data Powheg ##############"
       print "################################################"
+      print ""
+      print ""
       self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_pseudodata,"_TotalMC")
 
       print "#################################"
       print "############# Data ##############"
       print "#################################"
+      print ""
+      print ""
       self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_data,"_data")
- 
 
-      self.fit_mj_TTbar_controlsample(self.file_data);
+
+      # self.print_yields()
 
       self.constrainslist_data = ROOT.std.vector(ROOT.std.string)()
       self.constrainslist_mc   = ROOT.std.vector(ROOT.std.string)()
-  
+
       ScaleFactorTTbarControlSampleFit(self.workspace4fit_,self.mj_shape,self.color_palet,self.constrainslist_data,self.constrainslist_mc,"",self.channel,self.wtagger_label,self.AK8_pt_min,self.AK8_pt_max)
+      
+      rrv_scale_number                      = self.workspace4fit_.var("rrv_scale_number_TTbar_STop_VV_WJets").getVal()
+      rrv_scale_number_fail                 = self.workspace4fit_.var("rrv_scale_number_TTbar_STop_VV_WJets_fail").getVal()
+      
+      print " Pass MC / all data = %.3f" %(rrv_scale_number)
+      print " Fail MC / all data = %.3f" %(rrv_scale_number_fail)
+      
+      
 
 
-    def fit_mj_TTbar_controlsample(self,in_file_name):
+    def print_yields(self):
 
-        ##### Print number of events passing cut and before cut + the efficiency for the W-tagging -> dataset yields in the signal region
-        
+        # Print dataset yields in the signal region
         print ""
         print ""
         print ""
@@ -580,56 +543,53 @@ class doFit_wj_and_wlvj:
         print ""
         print ""
 
-        number_dataset_signal_region_data_mj        = self.workspace4fit_.var("rrv_number_dataset_signal_region_data_"+self.channel+"_mj").getVal()
-        number_dataset_signal_region_error2_data_mj = self.workspace4fit_.var("rrv_number_dataset_signal_region_error2_data_"+self.channel+"_mj").getVal()
-        print ""
-        print "Nr. data events in signal_region: %s +/- sqrt(%s)"%(number_dataset_signal_region_data_mj, number_dataset_signal_region_error2_data_mj)
-        print ""
-
-        self.file_out_ttbar_control.write("%s channel SF: \n"%(self.channel));
-        self.file_out_ttbar_control.write("Nr. events in signal_region: %s +/- sqrt(%s)\n"%(number_dataset_signal_region_data_mj, number_dataset_signal_region_error2_data_mj))
-
-        number_dataset_signal_region_TotalMC_mj        = self.workspace4fit_.var("rrv_number_dataset_signal_region_TotalMC_"+self.channel+"_mj").getVal()
-        number_dataset_signal_region_error2_TotalMC_mj = self.workspace4fit_.var("rrv_number_dataset_signal_region_error2_TotalMC_"+self.channel+"_mj").getVal()
-        print ""
-        print "Nr. MC events in signal_region: %s +/- sqrt(%s) "%(number_dataset_signal_region_TotalMC_mj, number_dataset_signal_region_error2_TotalMC_mj)
-        print ""
-
-        self.file_out_ttbar_control.write("Nr.  TotalMC in signal_region: %s +/- sqrt(%s) \n"%(number_dataset_signal_region_TotalMC_mj, number_dataset_signal_region_error2_TotalMC_mj))
-
-
-        number_dataset_signal_region_before_cut_data_mj        = self.workspace4fit_.var("rrv_number_dataset_signal_region_before_cut_data_"+self.channel+"_mj").getVal()
-        number_dataset_signal_region_before_cut_error2_data_mj = self.workspace4fit_.var("rrv_number_dataset_signal_region_before_cut_error2_data_"+self.channel+"_mj").getVal()
-        print ""
-        print "Nr dataevents in signalregion before cut on tau21: %s +/- sqrt(%s)"%(number_dataset_signal_region_before_cut_data_mj, number_dataset_signal_region_before_cut_error2_data_mj)
-        print ""
-        self.file_out_ttbar_control.write("event number of data in signal_region before_cut: %s +/- sqrt(%s)\n"%(number_dataset_signal_region_before_cut_data_mj, number_dataset_signal_region_before_cut_error2_data_mj))
-
+        number_dataset_signal_region_data_mj                      = self.workspace4fit_.var("rrv_number_dataset_signal_region_data_"+self.channel+"_mj").getVal()
+        number_dataset_signal_region_error2_data_mj               = self.workspace4fit_.var("rrv_number_dataset_signal_region_error2_data_"+self.channel+"_mj").getVal()
+        
+        number_dataset_signal_region_TotalMC_mj                   = self.workspace4fit_.var("rrv_number_dataset_signal_region_TotalMC_"+self.channel+"_mj").getVal()
+        number_dataset_signal_region_error2_TotalMC_mj            = self.workspace4fit_.var("rrv_number_dataset_signal_region_error2_TotalMC_"+self.channel+"_mj").getVal()
+        
+        number_dataset_signal_region_before_cut_data_mj           = self.workspace4fit_.var("rrv_number_dataset_signal_region_before_cut_data_"+self.channel+"_mj").getVal()
+        number_dataset_signal_region_before_cut_error2_data_mj    = self.workspace4fit_.var("rrv_number_dataset_signal_region_before_cut_error2_data_"+self.channel+"_mj").getVal()
+        
         number_dataset_signal_region_before_cut_TotalMC_mj        = self.workspace4fit_.var("rrv_number_dataset_signal_region_before_cut_TotalMC_"+self.channel+"_mj").getVal()
         number_dataset_signal_region_before_cut_error2_TotalMC_mj = self.workspace4fit_.var("rrv_number_dataset_signal_region_before_cut_error2_TotalMC_"+self.channel+"_mj").getVal()
-        print ""
-        print "Nr MC events in signal_region before cut on tau21: %s +/- sqrt(%s) "%(number_dataset_signal_region_before_cut_TotalMC_mj, number_dataset_signal_region_before_cut_error2_TotalMC_mj)
-        print ""
-        self.file_out_ttbar_control.write("event number of TotalMC in signal_region before_cut: %s +/- sqrt(%s) \n"%(number_dataset_signal_region_before_cut_TotalMC_mj, number_dataset_signal_region_before_cut_error2_TotalMC_mj))
-                                                             
-        # wtagger_eff reweight: only reweight the efficiency difference between MC and data
-        wtagger_eff_MC   = number_dataset_signal_region_TotalMC_mj/number_dataset_signal_region_before_cut_TotalMC_mj
-        wtagger_eff_data = number_dataset_signal_region_data_mj/number_dataset_signal_region_before_cut_data_mj
-
-        wtagger_eff_reweight     = wtagger_eff_data/wtagger_eff_MC
-        wtagger_eff_reweight_err = wtagger_eff_reweight*TMath.Sqrt(number_dataset_signal_region_error2_data_mj/number_dataset_signal_region_data_mj/number_dataset_signal_region_data_mj + number_dataset_signal_region_error2_TotalMC_mj/number_dataset_signal_region_TotalMC_mj/number_dataset_signal_region_TotalMC_mj +number_dataset_signal_region_before_cut_error2_data_mj/number_dataset_signal_region_before_cut_data_mj/number_dataset_signal_region_data_mj + number_dataset_signal_region_before_cut_error2_TotalMC_mj/number_dataset_signal_region_before_cut_TotalMC_mj/number_dataset_signal_region_before_cut_TotalMC_mj)
         
-        print "W-tagging efficiency for the %s channel:"%(self.channel)
-        print "W-tagging eff. MC       = %s "%(wtagger_eff_MC)
-        print "W-tagging eff. data     = %s "%(wtagger_eff_data)
-        print "EFF. DATA/EFF. MC       = %s +/- %s"%(wtagger_eff_reweight, wtagger_eff_reweight_err)
+        wtagger_eff_MC                                            = number_dataset_signal_region_TotalMC_mj/number_dataset_signal_region_before_cut_TotalMC_mj
+        wtagger_eff_data                                          = number_dataset_signal_region_data_mj/number_dataset_signal_region_before_cut_data_mj
 
-        self.file_out_ttbar_control.write("wtagger_eff_MC       = %s       \n"%(wtagger_eff_MC ))
-        self.file_out_ttbar_control.write("wtagger_eff_data     = %s       \n"%(wtagger_eff_data ))
-        self.file_out_ttbar_control.write("wtagger_eff_reweight = %s +/- %s\n"%(wtagger_eff_reweight, wtagger_eff_reweight_err))
+        wtagger_eff_reweight                                      = wtagger_eff_data/wtagger_eff_MC
+        wtagger_eff_reweight_err                                  = wtagger_eff_reweight*TMath.Sqrt(number_dataset_signal_region_error2_data_mj/number_dataset_signal_region_data_mj/number_dataset_signal_region_data_mj + number_dataset_signal_region_error2_TotalMC_mj/number_dataset_signal_region_TotalMC_mj/number_dataset_signal_region_TotalMC_mj +number_dataset_signal_region_before_cut_error2_data_mj/number_dataset_signal_region_before_cut_data_mj/number_dataset_signal_region_data_mj + number_dataset_signal_region_before_cut_error2_TotalMC_mj/number_dataset_signal_region_before_cut_TotalMC_mj/number_dataset_signal_region_before_cut_TotalMC_mj)
+        
+        print ""
+        print "Nr. data events in signal_region                  : %s +/- sqrt(%s)"%(number_dataset_signal_region_data_mj, number_dataset_signal_region_error2_data_mj**.5)
+        print ""
+        print "Nr. MC events in signal_region                    : %s +/- sqrt(%s)"%(number_dataset_signal_region_TotalMC_mj, number_dataset_signal_region_error2_TotalMC_mj)
+        print ""
+        print "Nr. dataevents in signalregion before cut on tau21: %s +/- sqrt(%s)"%(number_dataset_signal_region_before_cut_data_mj, number_dataset_signal_region_before_cut_error2_data_mj)
+        print ""
+        print "Nr. MC events in signalregion before cut on tau21 : %s +/- sqrt(%s) "%(number_dataset_signal_region_before_cut_TotalMC_mj, number_dataset_signal_region_before_cut_error2_TotalMC_mj)
+        print ""
+        print ""
+        print ""                                                     
+        print "W-tagging efficiency (pre-fit):"
+        print "W-tagging eff. MC       = %.3f "%(wtagger_eff_MC)
+        print "W-tagging eff. data     = %.3f "%(wtagger_eff_data)
+        print "W-tagging SF            = %.3f +/- %.3f"%(wtagger_eff_reweight, wtagger_eff_reweight_err)
+        print ""
+        print ""
+        
+        self.file_out_ttbar_control.write("%s channel SF: \n"%(self.channel))
+        self.file_out_ttbar_control.write("Nr. events in signal_region                        : %s +/- sqrt(%s)\n"%(number_dataset_signal_region_data_mj, number_dataset_signal_region_error2_data_mj))
+        self.file_out_ttbar_control.write("Nr. TotalMC in signal_region                       : %s +/- sqrt(%s) \n"%(number_dataset_signal_region_TotalMC_mj, number_dataset_signal_region_error2_TotalMC_mj))
+        self.file_out_ttbar_control.write("event number of data in signalregion before_cut    : %s +/- sqrt(%s)\n"%(number_dataset_signal_region_before_cut_data_mj, number_dataset_signal_region_before_cut_error2_data_mj))
+        self.file_out_ttbar_control.write("event number of TotalMC in signal_region before_cut: %s +/- sqrt(%s) \n"%(number_dataset_signal_region_before_cut_TotalMC_mj, number_dataset_signal_region_before_cut_error2_TotalMC_mj))
+        self.file_out_ttbar_control.write("wtagger_eff_MC         = %s       \n"%(wtagger_eff_MC ))
+        self.file_out_ttbar_control.write("wtagger_eff_data       = %s       \n"%(wtagger_eff_data ))
+        self.file_out_ttbar_control.write("wtagger_eff_reweight   = %s +/- %s\n"%(wtagger_eff_reweight, wtagger_eff_reweight_err))
             
     # Loop over trees
-    def get_mj_and_mlvj_dataset_TTbar_controlsample(self,in_file_name, label, jet_mass="Mjpruned"): 
+    def get_mj_and_mlvj_dataset_TTbar_controlsample(self,in_file_name, label, jet_mass="Whadr_pruned"): 
     
       fileIn_name = TString(self.file_Directory+in_file_name)
       fileIn      = TFile(fileIn_name.Data())
@@ -658,6 +618,11 @@ class doFit_wj_and_wlvj:
       rdataset4fit_extremefailtau2tau1cut_mj = RooDataSet("rdataset4fit"+label+"_extremefailtau2tau1cut_"+self.channel+"_mj","rdataset4fit" +label+"_extremefailtau2tau1cut_"+self.channel+"_mj",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight) )
       rrv_number_extremefail = RooRealVar("rrv_number_ttbar"+label+"_extremefailtau2tau1cut_em_mj","rrv_number_ttbar"+label+"_extremefailtau2tau1cut_em_mj",0.,10000000.) #LUCA
       
+      # category_cut = RooCategory("category_cut"+"_"+self.channel,"category_cut"+"_"+self.channel) #---->Think this can be removed!!!!
+ #      category_cut.defineType("cut",1)
+ #      category_cut.defineType("beforecut",2)
+ #      combData4cut = RooDataSet("combData4cut"+"_"+self.channel,"combData4cut"+"_"+self.channel,RooArgSet(rrv_mass_j, category_cut, rrv_weight),RooFit.WeightVar(rrv_weight) )
+      
       
       # Define categories
       if self.workspace4fit_.cat("category_p_f"+"_"+self.channel):
@@ -680,15 +645,19 @@ class doFit_wj_and_wlvj:
 
       hnum_2region                    = TH1D("hnum_2region"       +label+"_"+self.channel,"hnum_2region"        +label+"_"+self.channel,2,-0.5,1.5);# m_lvj 0: signal_region; 1: total --> There is only 1 and that is SIGNAL REGION?!
       hnum_2region_error2             = TH1D("hnum_2region_error2"+label+"_"+self.channel,"hnum_2region_error2" +label+"_"+self.channel,2,-0.5,1.5);# m_lvj 0: signal_region; 1: total
-      
+  
       #-------------------------------------------------------------------------------------------
       # Loop over tree entries
       for i in range(treeIn.GetEntries()):
           if i % 5000 == 0: print "iEntry: ",i
           treeIn.GetEntry(i)
-              
+          
+          #b-tag veto!
+          if getattr(treeIn,"Whadr_csv") > options.csvMax:
+            continue
+                
           discriminantCut = 0
-          wtagger = getattr(treeIn,"tau21")
+          wtagger = getattr(treeIn,"Whadr_tau21")
 
           if wtagger <= options.tau2tau1cutHP: # HP
               discriminantCut = 2
@@ -704,26 +673,25 @@ class doFit_wj_and_wlvj:
 
           if not TString(label).Contains("data"):
             tmp_event_weight     = getattr(treeIn,"weight")*self.Lumi 
-            # tmp_event_weight4fit = getattr(treeIn,"genweight")*getattr(treeIn,"puweight")*getattr(treeIn,"hltweight") #Missing b-tag weight and Vtg weight!
-            # tmp_event_weight4fit = tmp_event_weight4fit*getattr(treeIn,"lumiweight")*self.Lumi/tmp_scale_to_lumi      #this is essentially the same as tmp_event_weight/tmp_scale_to_lumi?
-            tmp_event_weight4fit = tmp_event_weight*self.Lumi/tmp_scale_to_lumi
+            tmp_event_weight4fit = getattr(treeIn,"genweight")*getattr(treeIn,"puweight")*getattr(treeIn,"hltweight") #Missing b-tag weight and Vtg weight!
+            tmp_event_weight4fit = tmp_event_weight4fit*treeIn.lumiweight*self.Lumi /tmp_scale_to_lumi
+            # tmp_event_weight4fit = tmp_event_weight/tmp_scale_to_lumi
           else:
             tmp_event_weight = 1.
             tmp_event_weight4fit = 1.
 
           #  HP category
-          if discriminantCut == 2  and (rrv_mass_j.getMin() < tmp_jet_mass < rrv_mass_j.getMax()):   
-          
+          if discriminantCut == 2  and tmp_jet_mass > rrv_mass_j.getMin() and tmp_jet_mass < rrv_mass_j.getMax():   
              rrv_mass_j.setVal(tmp_jet_mass)
              
              rdataset_mj    .add(RooArgSet(rrv_mass_j), tmp_event_weight)
              rdataset4fit_mj.add(RooArgSet(rrv_mass_j), tmp_event_weight4fit)
-  
+
              if tmp_jet_mass >= self.mj_sideband_lo_min and tmp_jet_mass < self.mj_sideband_lo_max:
                  hnum_4region.Fill(-1,tmp_event_weight )
+                 
              if tmp_jet_mass >= self.mj_signal_min and tmp_jet_mass < self.mj_signal_max:
-                 hnum_2region.Fill(1,tmp_event_weight)
-             if tmp_jet_mass >= self.mj_signal_min and tmp_jet_mass < self.mj_signal_max :
+                 # hnum_2region.Fill(1,tmp_event_weight)
                  hnum_4region.Fill(0,tmp_event_weight)
                  hnum_4region_error2.Fill(0,tmp_event_weight*tmp_event_weight)
              if tmp_jet_mass >= self.mj_sideband_hi_min and tmp_jet_mass < self.mj_sideband_hi_max:
@@ -731,6 +699,8 @@ class doFit_wj_and_wlvj:
 
              hnum_4region.Fill(2,tmp_event_weight) 
              
+             # category_cut.setLabel("cut");
+ #             combData4cut.add(RooArgSet(rrv_mass_j,category_cut),tmp_event_weight4fit)
              category_p_f.setLabel("pass")
              combData_p_f.add(RooArgSet(rrv_mass_j,category_p_f),tmp_event_weight)
           
@@ -762,36 +732,29 @@ class doFit_wj_and_wlvj:
 
             rdataset_extremefailtau2tau1cut_mj     .add(RooArgSet(rrv_mass_j), tmp_event_weight)
             rdataset4fit_extremefailtau2tau1cut_mj .add(RooArgSet(rrv_mass_j), tmp_event_weight4fit )
-      
-
 
       
+      rrv_scale_to_lumi                        = RooRealVar("rrv_scale_to_lumi"+label+"_"                       +self.channel,"rrv_scale_to_lumi"+label+"_"                       +self.channel,tmp_scale_to_lumi)
+      rrv_scale_to_lumi_failtau2tau1cut        = RooRealVar("rrv_scale_to_lumi"+label+"_failtau2tau1cut_"       +self.channel,"rrv_scale_to_lumi"+label+"_failtau2tau1cut_"       +self.channel,tmp_scale_to_lumi)
+      rrv_scale_to_lumi_extremefailtau2tau1cut = RooRealVar("rrv_scale_to_lumi"+label+"_extremefailtau2tau1cut_"+self.channel,"rrv_scale_to_lumi"+label+"_extremefailtau2tau1cut_"+self.channel,tmp_scale_to_lumi)
       
-      rrv_scale_to_lumi                        = RooRealVar("rrv_scale_to_lumi"+label+"_"                       +self.channel,"rrv_scale_to_lumi"+label+"_"                       +self.channel,rdataset_mj.sumEntries()/rdataset4fit_mj.sumEntries()) 
-      rrv_scale_to_lumi_failtau2tau1cut        = RooRealVar("rrv_scale_to_lumi"+label+"_failtau2tau1cut_"       +self.channel,"rrv_scale_to_lumi"+label+"_failtau2tau1cut_"       +self.channel,rdataset_failtau2tau1cut_mj.sumEntries()/rdataset4fit_failtau2tau1cut_mj.sumEntries())
-      rrv_scale_to_lumi_extremefailtau2tau1cut = RooRealVar("rrv_scale_to_lumi"+label+"_extremefailtau2tau1cut_"+self.channel,"rrv_scale_to_lumi"+label+"_extremefailtau2tau1cut_"+self.channel,rdataset_extremefailtau2tau1cut_mj.sumEntries()/rdataset4fit_extremefailtau2tau1cut_mj.sumEntries()) 
+      getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi)
+      getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_failtau2tau1cut)
+      getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_extremefailtau2tau1cut)
         
       rrv_number_pass.setVal(rdataset_mj.sumEntries())
       rrv_number_pass.setError(TMath.Sqrt(rdataset_mj.sumEntries()))
       # rrv_number_pass.Print()
-
       rrv_number_before.setVal(rdataset_beforetau2tau1cut_mj.sumEntries()) 
       rrv_number_before.setError(TMath.Sqrt(rdataset_beforetau2tau1cut_mj.sumEntries())) 
       # rrv_number_before.Print()
-
       rrv_number_fail.setVal(rdataset_failtau2tau1cut_mj.sumEntries())
       rrv_number_fail.setError(TMath.Sqrt(rdataset_failtau2tau1cut_mj.sumEntries()))
       # rrv_number_fail.Print()
-   
       rrv_number_extremefail.setVal(rdataset_extremefailtau2tau1cut_mj.sumEntries())
       rrv_number_extremefail.setError(TMath.Sqrt(rdataset_extremefailtau2tau1cut_mj.sumEntries()))
       # rrv_number_extremefail.Print()
-      
-      
-
-      getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi)
-      getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_failtau2tau1cut)
-      getattr(self.workspace4fit_,"import")(rrv_scale_to_lumi_extremefailtau2tau1cut)
+ 
       getattr(self.workspace4fit_,"import")(rrv_number_pass)
       getattr(self.workspace4fit_,"import")(rrv_number_before)
       getattr(self.workspace4fit_,"import")(rrv_number_fail)
@@ -824,28 +787,28 @@ class doFit_wj_and_wlvj:
       getattr(self.workspace4fit_,"import")(rdataset_extremefailtau2tau1cut_mj)
       getattr(self.workspace4fit_,"import")(rdataset4fit_extremefailtau2tau1cut_mj)
 
-      # rdataset_mj.Print()
-      # rdataset4fit_mj.Print()
-      # rdataset_failtau2tau1cut_mj.Print()
-      # rdataset4fit_failtau2tau1cut_mj.Print()
-      # rdataset_extremefailtau2tau1cut_mj.Print()
-      # rdataset4fit_extremefailtau2tau1cut_mj.Print()
-      # rrv_number_dataset_sb_lo_mj.Print()
-      # rrv_number_dataset_signal_region_mj.Print()
-      # rrv_number_dataset_signal_region_error2_mj.Print()
-      # rrv_number_dataset_signal_region_before_cut_mj.Print()
-      # rrv_number_dataset_signal_region_before_cut_error2_mj.Print()
-      # rrv_number_dataset_sb_hi_mj.Print()
-      #
-      # rdataset_mj.Print()
-      # rdataset_beforetau2tau1cut_mj.Print()
-      # rdataset_failtau2tau1cut_mj.Print()
-      # rdataset_extremefailtau2tau1cut_mj.Print()
-      # rrv_number_dataset_signal_region_mj.Print()
-      # rrv_number_dataset_signal_region_error2_mj.Print()
-      # rrv_number_dataset_signal_region_before_cut_mj.Print()
-      # rrv_number_dataset_signal_region_before_cut_error2_mj.Print()
-      # combData_p_f.Print("v")
+      rdataset_mj.Print()
+      rdataset4fit_mj.Print()
+      rdataset_failtau2tau1cut_mj.Print()
+      rdataset4fit_failtau2tau1cut_mj.Print()
+      rdataset_extremefailtau2tau1cut_mj.Print()
+      rdataset4fit_extremefailtau2tau1cut_mj.Print()
+      rrv_number_dataset_sb_lo_mj.Print()
+      rrv_number_dataset_signal_region_mj.Print()
+      rrv_number_dataset_signal_region_error2_mj.Print()
+      rrv_number_dataset_signal_region_before_cut_mj.Print()
+      rrv_number_dataset_signal_region_before_cut_error2_mj.Print()
+      rrv_number_dataset_sb_hi_mj.Print()
+
+      rdataset_mj.Print()
+      rdataset_beforetau2tau1cut_mj.Print()
+      rdataset_failtau2tau1cut_mj.Print()
+      rdataset_extremefailtau2tau1cut_mj.Print()
+      rrv_number_dataset_signal_region_mj.Print()
+      rrv_number_dataset_signal_region_error2_mj.Print()
+      rrv_number_dataset_signal_region_before_cut_mj.Print()
+      rrv_number_dataset_signal_region_before_cut_error2_mj.Print()
+      combData_p_f.Print("v")
 
     def make_Pdf(self, label, in_model_name, mass_spectrum="_mj", ConstraintsList=[]):
 
