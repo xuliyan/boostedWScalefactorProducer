@@ -302,51 +302,56 @@ class doFit_wj_and_wlvj:
         print "Using Tau21 leptonic HP cut of" ,options.tau2tau1cutHP 
         self.mj_shape["STop"]                 = "ExpGaus"
         self.mj_shape["STop_fail"]            = "ExpGaus"
-       #self.mj_shape["STop_extremefail"]     = "Exp"
+        self.mj_shape["STop_extremefail"]     = "Exp"
         self.mj_shape["VV"]                   = "ExpGaus"
         self.mj_shape["VV_fail"]              = "ExpGaus"
-        # self.mj_shape["VV_extremefail"]       = "Exp"
+        self.mj_shape["VV_extremefail"]       = "Exp"
         self.mj_shape["WJets0"]               = "ErfExp"
         self.mj_shape["WJets0_fail"]          = "Exp"
-        # self.mj_shape["WJets0_extremefail"]   = "Exp"
+        self.mj_shape["WJets0_extremefail"]   = "Exp"
         
         self.mj_shape["bkg_mc_fail"]          = "ErfExp_ttbar_failtau2tau1cut"
-        self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut"
-        self.mj_shape["signal_data_fail"]     = "GausChebychev_ttbar_failtau2tau1cut"
-
-      elif (options.tau2tau1cutHP==0.45):
+        self.mj_shape["bkg_data_fail"]        = "ErfExp_ttbar_failtau2tau1cut"    
+        
+        self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut"        
+        self.mj_shape["signal_data_fail"]     = "GausExp_ttbar_failtau2tau1cut"
+        
+      elif (options.tau2tau1cutHP==0.45 or options.tau2tau1cutHP==0.55 ):
         if self.channel == "em":
           self.mj_shape["STop"]             = "ErfExpGaus_sp"
         else:
           self.mj_shape["STop"]             = "ExpGaus"       
         self.mj_shape["STop_fail"]          = "ExpGaus"    
-        # self.mj_shape["STop_extremefail"]   = "Exp"
+        self.mj_shape["STop_extremefail"]   = "Exp"
         self.mj_shape["VV"]                 = "ExpGaus"
         self.mj_shape["VV_fail"]            = "ExpGaus" 
-        # self.mj_shape["VV_extremefail"]     = "Exp"
+        self.mj_shape["VV_extremefail"]     = "Exp"
         self.mj_shape["WJets0"]             = "ExpGaus" 
         self.mj_shape["WJets0_fail"]        = "Exp" 
-        # self.mj_shape["WJets0_extremefail"] = "Exp"
+        self.mj_shape["WJets0_extremefail"] = "Exp"
         
         self.mj_shape["bkg_mc_fail"]          = "ErfExp_ttbar_failtau2tau1cut"
-        self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut" #GausChebychev_ttbar_failtau2tau1cut I think is correct! Not ErfExp_ttbar_failtau2tau1cut as in Quns
-        self.mj_shape["signal_data_fail"]     = "GausChebychev_ttbar_failtau2tau1cut"
+        self.mj_shape["bkg_data_fail"]        = "ErfExp_ttbar_failtau2tau1cut"    
         
+        self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut"
+        self.mj_shape["signal_data_fail"]     = "GausChebychev_ttbar_failtau2tau1cut"
+        # if options.tau2tau1cutHP==0.55:       self.mj_shape["signal_data_fail"]     = "GausExp_ttbar_failtau2tau1cut"
         
       else:
         print "NO CHANNEL IS DEFINED!!! ABORT!!"
         sys.exit(0)
          
       self.mj_shape["bkg_data"]             = "ErfExp_ttbar" 
-      self.mj_shape["bkg_data_fail"]        = "ErfExp_ttbar_failtau2tau1cut"    
-      self.mj_shape["signal_data"]          = "2Gaus_ttbar" 
       self.mj_shape["bkg_mc"]               = "ErfExp_ttbar" 
+      
+      self.mj_shape["signal_data"]          = "2Gaus_ttbar"
       self.mj_shape["signal_mc"]            = "2Gaus_ttbar"
       
-      # self.mj_shape["data_extremefail"]     = "Exp_ttbar_extremefailtau2tau1cut"
-      # self.mj_shape["data_bkg_extremefail"] = "Exp_bkg_extremefailtau2tau1cut"
-      # self.mj_shape["mc_extremefail"]       = "Exp_ttbar_extremefailtau2tau1cut"
-      # self.mj_shape["mc_bkg_extremefail"]   = "Exp_bkg_extremefailtau2tau1cut"
+      self.mj_shape["data_extremefail"]     = "Exp_ttbar_extremefailtau2tau1cut"
+      self.mj_shape["mc_extremefail"]       = "Exp_ttbar_extremefailtau2tau1cut"
+      
+      self.mj_shape["data_bkg_extremefail"] = "Exp_bkg_extremefailtau2tau1cut"
+      self.mj_shape["mc_bkg_extremefail"]   = "Exp_bkg_extremefailtau2tau1cut"
         
 
       self.Lumi=2100
@@ -408,6 +413,8 @@ class doFit_wj_and_wlvj:
         self.wtagger_label = self.wtagger_label + "leptonic"
       elif (options.tau2tau1cutHP==0.45):  
         self.wtagger_label = self.wtagger_label + "hadronic"
+      elif (options.tau2tau1cutHP==0.55):  
+        self.wtagger_label = self.wtagger_label + "hadronic0v55"  
        
       self.color_palet = ROOT.std.map(ROOT.std.string, int) ()
       self.color_palet["data"]              = 1
