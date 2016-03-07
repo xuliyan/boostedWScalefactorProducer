@@ -40,13 +40,7 @@
 // #include "../PDFs/PdfDiagonalizer.h"
 
 
-void fit_mj_single_MC(RooWorkspace*, const std::string & = "", const std::string & = "", const std::string & = "",const std::string & = "em", const std::string & = "HP", const int & = 0);
-
-void fit_mlvj_model_single_MC(RooWorkspace*, const std::string & ="", const std::string & = " ", const std::string & = "_signal_region", const std::string & = "", const std::string & = "em", const std::string & = "HP",const int & = 1, const int & = 0, const std::string & = "", const std::string & = "");
-
-void get_mj_normalization_insignalregion(RooWorkspace*, const std::string & = "", const std::string & = "", const std::string & = "");
-
-void get_mlvj_normalization_insignalregion(RooWorkspace* ,const std::string & = "", const std::string & = "", const std::string & = "", const std::string & = "", const int & = 0);
+void fit_mj_single_MC(RooWorkspace*, const std::string & = "", const std::string & = "", const std::string & = "",const std::string & = "em", const std::string & = "HP");
 
 void ScaleFactorTTbarControlSampleFit(RooWorkspace*, std::map<std::string,std::string >, std::map<std::string,int>, std::vector<std::string>* = NULL, std::vector<std::string>* = NULL, const std::string & ="", const std::string & ="mu", const std::string & wtagger ="HP", const double & = 200, const double & = 2000);
 

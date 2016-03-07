@@ -172,7 +172,7 @@ RooPlot* get_ratio(RooRealVar* rrv_x, RooDataSet* rdataset, RooAbsPdf* model, Ro
     // ratio_plot->SetPointEYhigh(ipoint,(err_y_high-bkgpred->GetY()[ipoint])/TMath::Sqrt(y));
    
   }
-  std::cout<<"chi 2: "<<sum<<std::endl;
+  // std::cout<<"chi 2: "<<sum<<std::endl;
         
   RooPlot* mplot_ratio = rrv_x->frame(RooFit::Title("Pull Distribution"), RooFit::Bins(int(rrv_x->getBins()/narrow_factor)));
   
@@ -270,20 +270,7 @@ TLatex* banner4Plot(const std::string & channel, const float & lumi, const int &
  TString bannerName;
 
   bannerName.Form("                      CMS Preliminary, %.1f fb^{-1} (#sqrt{s} = 13 TeV)",lumi);
- /*
- if(channel=="mu" and not forPaper) 
-  bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow #mu #nu",lumi);
- else if(channel=="mu" and forPaper == 1)
-   bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow #mu#nu ",lumi); 
- else if(channel=="el" and not forPaper) 
-   bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow e #nu",lumi);
- else if(channel=="el" and forPaper == 1) 
-   bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow e#nu ",lumi); 
- else if(channel=="em" and not forPaper)  
-  bannerName.Form("CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow l #nu",lumi);
- else if(channel=="em" and forPaper == 1) 
-   bannerName.Form("CMS                       L = %.1f fb^{-1} at #sqrt{s} = 13 TeV, W#rightarrow l#nu ",lumi); 
- */ 
+
  TLatex* banner = NULL ;
  
  if(iswithpull){
@@ -328,8 +315,7 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
 
   int entryCnt = 0;
   std::string objName_before = "";
-  TObject* objName_signal_graviton = NULL;
-  std::string objNameLeg_signal_graviton = "";
+
   std::string legHeader ; 
   
   if(channel == "mu")      legHeader="(#mu#nu)";
@@ -369,12 +355,12 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
   
   entryCnt = 0;
   objName_before = "";
-  objName_signal_graviton = NULL;
-  objNameLeg_signal_graviton = "";
+
   
   for( int obj = 0 ; obj < int(plot->numItems()) ; obj++ ){
     std::string objName = plot->nameOf(obj);
     if( objName == "errorband" ) objName = "Uncertainty";
+    if( objName == "Fit error" ) objName = "Fit unc.";
     if(not ( ( (plot->getInvisible(objName.c_str())) and (not TString(objName).Contains("Uncertainty")) ) or TString(objName).Contains("invisible") or TString(objName).Contains("TLine") or objName == objName_before or TString(objName).Contains("error") or TString(objName).Contains("rdataset"))){
        TObject* theObj = plot->getObject(obj);
        std::string objTitle = objName;
@@ -388,7 +374,7 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
          objName_before = objName;
          continue ;
        }
-       else if(TString(objName) == "WJets"){
+       else if(TString(objName).Contains("WJets")){
         theLeg->AddEntry(theObj, "W+jets","F");
         objName_before = objName;
        }
@@ -401,8 +387,6 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
         
    entryCnt = 0;
    objName_before = "";
-   objName_signal_graviton = NULL;
-   objNameLeg_signal_graviton = "";
 
    
    for( int obj = 0 ; obj < int(plot->numItems()) ; obj++){
@@ -424,110 +408,20 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
 	 }
          else{
                if(TString(objName) == "STop") theLeg->AddEntry(theObj, "Single Top","F");
-               else if(TString(objName) == "TTbar") theLeg->AddEntry(theObj, "t#bar{t}","F");
-               else if(TString(objName) == "VV")    theLeg->AddEntry(theObj, "WW/WZ","F");
-               else if(TString(objName) == "data") { objName_before = objName; entryCnt = entryCnt+1; continue;}
-               else if(TString(objName) == "WJets"){ objName_before = objName; entryCnt = entryCnt+1; continue;}
-               else if(TString(objName).Contains("vbfH")) 
-                 theLeg->AddEntry(theObj,(TString(objName).ReplaceAll("vbfH","qqH")).Data() ,"L");
+               else if(TString(objName).Contains("TTbar")) theLeg->AddEntry(theObj, "t#bar{t}","F");
+               else if(TString(objName).Contains("VV"))    theLeg->AddEntry(theObj, "WW/WZ/ZZ","F");
+               else if(TString(objName).Contains("data")) { objName_before = objName; entryCnt = entryCnt+1; continue;}
+               else if(TString(objName).Contains("WJets")){ objName_before = objName; entryCnt = entryCnt+1; continue;}
                else if(TString(objName).Contains("Uncertainty"))
                  theLeg->AddEntry(theObj,objTitle.c_str(),drawoption.c_str());
-               else if(TString(objName).Contains("Bulk")){
-                if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M600") or TString(objName).Contains("BulkG_WW_lvjj_c0p2_M600")){
-                 objName_signal_graviton = theObj ;
-                 objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.6 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M700") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M700")){
-                   objName_signal_graviton = theObj ;
-                   objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.7 TeV #tilde{k}=0.5 (#times100)";
-                 }
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M800") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M800")){
-                   objName_signal_graviton = theObj ;
-                   objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.8 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M900") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M900")){
-                    objName_signal_graviton = theObj ;
-                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=0.9 TeV #tilde{k}=0.5 (#times100)";
-                  }   
-                  if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1000") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1000")){
-                    objName_signal_graviton = theObj ;
-                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=1 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1100") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1100")){
-                    objName_signal_graviton = theObj ;
-                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.1 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1200") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1200")){
-                    objName_signal_graviton = theObj ;
-                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.2 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1300") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1300")){
-                    objName_signal_graviton = theObj ;
-                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.3 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1400") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1400")){
-                    objName_signal_graviton = theObj ;
-                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.4 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1500") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1500")){
-                    objName_signal_graviton = theObj ;
-                    objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.5 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1600") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1600")){
-                   objName_signal_graviton = theObj ;
-                   objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.6 TeV #tilde{k}=0.5 (#times100)";
-                 }
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1700") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1700")){
-                   objName_signal_graviton = theObj ;
-                   objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.7 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1800") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1800")){
-                   objName_signal_graviton = theObj ;
-                   objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.8 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M1900") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M1900")){
-                   objName_signal_graviton = theObj ;
-                   objNameLeg_signal_graviton = "Bulk G* M_{G*}=1.9 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2000") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2000")){
-                   objName_signal_graviton = theObj ;
-                   objNameLeg_signal_graviton = "Bulk G* M_{G*}=2 TeV #tilde{k}=0.5 (#times100)";
-                 }   
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2100") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2100")){
-                   objName_signal_graviton = theObj ;
-                   objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.1 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2200") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2200")){
-                   objName_signal_graviton = theObj ;
-                   objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.2 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2300") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2300")){
-                   objName_signal_graviton = theObj ;
-                   objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.3 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2400") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2400")){
-                   objName_signal_graviton = theObj ;
-                   objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.4 TeV #tilde{k}=0.5 (#times100)";
-                 }    
-                 if(TString(objName).Contains("BulkG_WW_inclusive_c0p2_M2500") or  TString(objName).Contains("BulkG_WW_lvjj_c0p2_M2500")){
-                   objName_signal_graviton = theObj ;
-                   objNameLeg_signal_graviton = "Bulk G* M_{G*}=2.5 TeV #tilde{k}=0.5 (#times100)";
-	  	 }
-	       }
                else theLeg->AddEntry(theObj,objTitle.c_str(),drawoption.c_str());
 	 }
          entryCnt = entryCnt+1;
       }
       objName_before = objName;
    }
-
-   //   if(objName_signal_graviton != NULL){
-   //    if(std::string(objName_signal_graviton->GetName()) != "") 
-   // theLeg->AddEntry(objName_signal_graviton,TString(objNameLeg_signal_graviton).Data(),"L");
-   //   }
-
    return theLeg;
-}
+ }
 
 void draw_canvas(RooPlot* in_obj, const std::string & in_directory, const TString & in_file_name, const std::string & channel, const float & lumi, const int & in_range, const int & logy, const int & frompull){
 
@@ -563,15 +457,12 @@ void draw_canvas(RooPlot* in_obj, const std::string & in_directory, const TStrin
   system(std::string("mkdir -p "+Directory).c_str());
 
   TString rlt_file(Directory.Data()+in_file_name);
-  if(rlt_file.EndsWith(".root")) rlt_file.ReplaceAll(".root","_rlt_without_pull_and_paramters.png");
+  if(rlt_file.EndsWith(".root")) rlt_file.ReplaceAll(".root","_rlt_without_pull_and_paramters.pdf");
   else{
          rlt_file.ReplaceAll(".root","");
-         rlt_file = rlt_file.Append(".png");
+         rlt_file = rlt_file.Append(".pdf");
   }
   
-  cMassFit.SaveAs(rlt_file.Data());
-
-  rlt_file.ReplaceAll(".png",".pdf");
   cMassFit.SaveAs(rlt_file.Data());
 
   rlt_file.ReplaceAll(".pdf",".root");
@@ -584,8 +475,6 @@ void draw_canvas(RooPlot* in_obj, const std::string & in_directory, const TStrin
       rlt_file.ReplaceAll(".root","_log.root");
       cMassFit.SaveAs(rlt_file.Data());
       rlt_file.ReplaceAll(".root",".pdf");
-      cMassFit.SaveAs(rlt_file.Data());
-      rlt_file.ReplaceAll(".pdf",".png");
       cMassFit.SaveAs(rlt_file.Data());
   }
 
@@ -672,18 +561,16 @@ void draw_canvas_with_pull(RooPlot* mplot, RooPlot* mplot_pull, RooArgList* para
   TString rlt_file;  rlt_file.Form("%s%s",Directory.Data(),in_file_name.c_str());
   if(rlt_file.EndsWith(".root")){
     TString(in_model_name).ReplaceAll(".root","");
-    rlt_file.ReplaceAll(".root","_"+in_model_name+"_with_pull.png");
+    rlt_file.ReplaceAll(".root","_"+in_model_name+"_with_pull.pdf");
   }   
   else{    
     TString(in_model_name).ReplaceAll(".root","");
     rlt_file.ReplaceAll(".root","");
-    rlt_file = rlt_file.Append("_"+in_model_name+"_with_pull.png");
+    rlt_file = rlt_file.Append("_"+in_model_name+"_with_pull.pdf");
   }
   
   pad2->Update();
   cMassFit.Update();
-  cMassFit.SaveAs(rlt_file.Data());
-  rlt_file.ReplaceAll(".png",".pdf");
   cMassFit.SaveAs(rlt_file.Data());
   rlt_file.ReplaceAll(".pdf",".root");
   cMassFit.SaveAs(rlt_file.Data());
@@ -703,8 +590,6 @@ void draw_canvas_with_pull(RooPlot* mplot, RooPlot* mplot_pull, RooArgList* para
      rlt_file.ReplaceAll(".root","_log.root");
      cMassFit.SaveAs(rlt_file.Data());
      rlt_file.ReplaceAll(".root",".pdf");
-     cMassFit.SaveAs(rlt_file.Data());
-     rlt_file.ReplaceAll(".pdf",".png");
      cMassFit.SaveAs(rlt_file.Data());
   }
  
