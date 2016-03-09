@@ -356,12 +356,11 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
   // FOR 0v45 ONLY!!!!!
   if(TString(wtagger_label.c_str()).Contains("0v45") or TString(wtagger_label.c_str()).Contains("0v55")){
     
-    // sum of two exponential 
+     // sum of two exponential 
     if(model == "Exp"){
       std::cout<< "######### Exp = levelled exp funtion for W+jets mlvj ############" <<std::endl;
       RooRealVar* rrv_c_Exp = new RooRealVar(("rrv_c_Exp"+label+"_"+channel+spectrum).c_str(),("rrv_c_Exp"+label+"_"+channel+spectrum).c_str(),-0.030, -0.2, 0.05);
-      RooExponential* model_pdf = new RooExponential(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_c_Exp);
-            
+      RooExponential* model_pdf = new RooExponential(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_c_Exp);       
       return model_pdf ;
     }
 
@@ -382,15 +381,13 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
         rrv_width_ErfExp  = new RooRealVar(("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(),37.,0.,80.);
       }
       
-      RooErfExpPdf* model_pdf       = new RooErfExpPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_c_ErfExp,*rrv_offset_ErfExp,*rrv_width_ErfExp);
-            
+      RooErfExpPdf* model_pdf       = new RooErfExpPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_c_ErfExp,*rrv_offset_ErfExp,*rrv_width_ErfExp);          
       return model_pdf ;
     }     
 
     // Exp+Gaus or mj spectrum
     if ( model == "ExpGaus"){
-    
-    
+      
       RooRealVar* rrv_c_Exp       = new RooRealVar(("rrv_c_Exp"+label+"_"+channel+spectrum).c_str(),("rrv_c_Exp"+label+"_"+channel+spectrum).c_str(),-0.05,-0.5,0.5);
       RooRealVar* rrv_mean1_gaus  = new RooRealVar(("rrv_mean1_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_mean1_gaus"+label+"_"+channel+spectrum).c_str(),84,70,90);
       RooRealVar* rrv_sigma1_gaus = new RooRealVar(("rrv_sigma1_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_sigma1_gaus"+label+"_"+channel+spectrum).c_str(),7,4,40);
@@ -447,17 +444,34 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
        double sigma1_tmp = 7.3633e+00;     
       double scalesigma_tmp = 3.794e+00;  
       double frac_tmp = 6.24209e-01; double frac_tmp_err = 8.42986e-02;
+      
+      float rangeMean = 5. ;
+      float rangeWidth = 2. ;
+      
       if( TString(label).Contains("realW") ) {
         deltamean_tmp = 7.794e+00; 
         scalesigma_tmp = 3.00394e+00;
         sigma1_tmp = 8.3633e+00;   
        }
+       if( TString(wtagger_label.c_str()).Contains("0v55") ) {
+         deltamean_tmp = 7.794e+00; 
+         scalesigma_tmp = 3.00394e+00;
+         sigma1_tmp = 8.3633e+00; 
+         rangeWidth = 20. ;
+       }
+        
+        if( TString(label).Contains("data") ) {
+          mean1_tmp = 84.;   
+          deltamean_tmp = 7.794e+00; 
+          sigma1_tmp = 8.3633e+00;
+          rangeWidth = 10.;
+          
+          scalesigma_tmp = 3.00394e+00;
+        }
+        if( TString(label).Contains("TotalMC") ) {
+          frac_tmp = 6.24209e-01;  frac_tmp_err = 8.42986e-02;
+        }
     
-    
-      float rangeMean = 5. ;
-      float rangeWidth = 2. ;
-
-       
       RooRealVar* rrv_mean1_gaus  = NULL;
       RooRealVar* rrv_sigma1_gaus = NULL;
 
@@ -498,6 +512,7 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
       RooGaussian*   gaus2 = new RooGaussian(("gaus2"+label+"_"+channel+spectrum).c_str(),("gaus2"+label+"_"+channel+spectrum).c_str(), *rrv_x,*rrv_mean2_gaus,*rrv_sigma2_gaus);
 
       RooRealVar* rrv_frac = new RooRealVar(("rrv_frac"+label+"_"+channel+spectrum).c_str(),("rrv_frac"+label+"_"+channel+spectrum).c_str(),frac_tmp,frac_tmp-frac_tmp_err*4, frac_tmp+frac_tmp_err*4);
+      if( TString(label).Contains("data") ) rrv_frac = new RooRealVar(("rrv_frac"+label+"_"+channel+spectrum).c_str(),("rrv_frac"+label+"_"+channel+spectrum).c_str(),frac_tmp,frac_tmp-frac_tmp_err*4, frac_tmp+frac_tmp_err*4);
       RooAddPdf* model_pdf = new RooAddPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),RooArgList(*gaus1,*gaus2),RooArgList(*rrv_frac),1);
             
       return model_pdf ;
@@ -552,12 +567,12 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
       double offset_tmp = 8.27928e+01;  double offset_tmp_err = 3.20278e+00;
       double width_tmp = 2.94111e+01;   double width_tmp_err = 8.81193e-01;
       
-      if(  TString(wtagger_label.c_str()).Contains("herwig")  ){
-        
-        c0_tmp         = -2.9893e-02 ;  c0_tmp_err     = 6.83e-03;
-        offset_tmp     = 7.9350e+01 ;  offset_tmp_err = 9.35e+00;
-        width_tmp      = 3.3083e+01 ;  width_tmp_err  = 2.97e+00;
-      }
+      // if(  TString(wtagger_label.c_str()).Contains("herwig")  ){
+      //
+      //   c0_tmp         = -2.9893e-02 ;  c0_tmp_err     = 6.83e-03;
+      //   offset_tmp     = 7.9350e+01 ;  offset_tmp_err = 9.35e+00;
+      //   width_tmp      = 3.3083e+01 ;  width_tmp_err  = 2.97e+00;
+      // }
                                                         
       RooRealVar* rrv_c_ErfExp      = new RooRealVar(("rrv_c_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_c_ErfExp"+label+"_"+channel+spectrum).c_str(),c0_tmp,c0_tmp-4e-2,c0_tmp+4e-2);
       RooRealVar* rrv_offset_ErfExp = new RooRealVar(("rrv_offset_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_offset_ErfExp"+label+"_"+channel+spectrum).c_str(),offset_tmp,offset_tmp-offset_tmp_err*4,offset_tmp+offset_tmp_err*4);
@@ -596,11 +611,21 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
         rrv_width_ErfExp = new RooRealVar(("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(), width_tmp,width_tmp-width_tmp_err*5, width_tmp+width_tmp_err*5);
         rrv_offset_ErfExp = new RooRealVar(("rrv_offset_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_offset_ErfExp"+label+"_"+channel+spectrum).c_str(),offset_tmp);
       }
+      
+      if( TString(label).Contains("data")) {
+        offset_tmp = 7.294e+01;
+        rrv_width_ErfExp = new RooRealVar(("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(), width_tmp);//,width_tmp-width_tmp_err*5, width_tmp+width_tmp_err*5);
+        rrv_offset_ErfExp = new RooRealVar(("rrv_offset_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_offset_ErfExp"+label+"_"+channel+spectrum).c_str(),offset_tmp);// offset_tmp-offset_tmp_err*20,offset_tmp+offset_tmp_err*20);
+      }
+      
+      
       if( TString(wtagger_label.c_str()).Contains("0v55") && TString(label).Contains("data")) {
         offset_tmp = 7.294e+01;
         rrv_width_ErfExp = new RooRealVar(("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(), width_tmp,width_tmp-width_tmp_err*5, width_tmp+width_tmp_err*5);
         rrv_offset_ErfExp = new RooRealVar(("rrv_offset_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_offset_ErfExp"+label+"_"+channel+spectrum).c_str(),offset_tmp, offset_tmp-offset_tmp_err*20,offset_tmp+offset_tmp_err*20);
       }
+      
+      
     
       model_pdf = new RooErfExpPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_c_ErfExp,*rrv_offset_ErfExp,*rrv_width_ErfExp);
       RooGaussian* gaus1 = addConstraint(rrv_c_ErfExp,rrv_c_ErfExp->getVal(),c0_tmp_err,constraint);
@@ -723,7 +748,7 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
       double width_tmp  = 7.1891e+01 ;
 
 
-      RooRealVar* rrv_c_ErfExp = new RooRealVar(("rrv_c_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_c_ErfExp"+label+"_"+channel+spectrum).c_str(),c0_tmp,c0_tmp-4e-2, c0_tmp+4e-2);
+      RooRealVar* rrv_c_ErfExp = new RooRealVar(("rrv_c_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_c_ErfExp"+label+"_"+channel+spectrum).c_str(),c0_tmp,-2.5,0.0);//,c0_tmp-6e-1, c0_tmp+6e-1);
       RooRealVar* rrv_offset_ErfExp = new RooRealVar(("rrv_offset_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_offset_ErfExp"+label+"_"+channel+spectrum).c_str(),offset_tmp);
       RooRealVar* rrv_width_ErfExp = new RooRealVar(("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(),("rrv_width_ErfExp"+label+"_"+channel+spectrum).c_str(), width_tmp);
       RooErfExpPdf* model_pdf = new RooErfExpPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_c_ErfExp,*rrv_offset_ErfExp,*rrv_width_ErfExp);
@@ -826,10 +851,15 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
     if( TString(label).Contains("data")    ) gaus = workspace->pdf(("gaus1_ttbar_data_"   +channel+spectrum).c_str());
     if( TString(label).Contains("TotalMC") ) gaus = workspace->pdf(("gaus1_ttbar_TotalMC_"+channel+spectrum).c_str());
 
-    RooRealVar* rrv_c_Exp = new RooRealVar( ("rrv_c_ExpGaus"+label+"_"+channel).c_str(), ("rrv_c_ExpGaus"+label+"_"+channel).c_str(),-0.05,-0.1,0.);
+    RooRealVar* rrv_c_Exp = new RooRealVar( ("rrv_c_ExpGaus"+label+"_"+channel).c_str(), ("rrv_c_ExpGaus"+label+"_"+channel).c_str(),-0.05,-0.6,0.);
+    
+    if( TString(label).Contains("data") ){
+       std::cout<<"IAMHEREWHEREISHOULD!!!!!"<<std::endl;
+      rrv_c_Exp = new RooRealVar( ("rrv_c_ExpGaus"+label+"_"+channel).c_str(), ("rrv_c_ExpGaus"+label+"_"+channel).c_str(),-0.001,-0.01,0.000);
+    }
 
     RooExponential* exp   = new RooExponential(("ExpGaus"+label+"_"+channel+spectrum).c_str(),("ExpGaus"+label+"_"+channel+spectrum).c_str(),*rrv_x,*rrv_c_Exp);
-
+    
     RooRealVar* rrv_high  = new RooRealVar(("rrv_high"+label+"_"+channel).c_str(), ("rrv_high"+label+"_"+channel).c_str(),0.5,0.,1.);
 
     RooAddPdf* model_pdf  = new RooAddPdf(("model_pdf"+label+"_"+channel+spectrum).c_str(),("model_pdf"+label+"_"+channel+spectrum).c_str(),RooArgList(*gaus,*exp),RooArgList(*rrv_high),1);
