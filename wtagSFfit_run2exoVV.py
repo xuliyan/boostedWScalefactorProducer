@@ -2,6 +2,7 @@ from optparse import OptionParser
 import ROOT, sys
 import ROOT as rt
 import time
+import math
 
 parser = OptionParser()
 parser.add_option('-b', action='store_true', dest='noX', default=False, help='no X11 windows')
@@ -13,6 +14,9 @@ parser.add_option('--csvMax', action="store",type="float",dest="csvMax",default=
 parser.add_option('--sample', action="store",type="string",dest="sample",default="")
 parser.add_option('--fitTT', action='store_true', dest='fitTT', default=False, help='Only do ttbar fits')
 parser.add_option('--lowMass', action='store_true', dest='doLowMass', default=False, help='Use low-mass samples')
+parser.add_option('--76X',dest="use76X", default=True, action="store_true", help="Use 76X samples")
+parser.add_option('--usePuppiSD',dest="usePuppiSD", default=False, action="store_true", help="Use PUPPI+softdrop")
+parser.add_option('--useDDT',dest="useDDT", default=False, action="store_true", help="Use DDT tagger")
 
 (options, args) = parser.parse_args()
 
@@ -38,7 +42,8 @@ if options.noX:
 ### Fit e+mu together
 def getSF():
 
-    print "getSF"
+    print "Getting W-tagging SF for cut " ,options.tau2tau1cutHP
+    if options.useDDT: options.usePuppiSD = True
     boostedW_fitter_sim = doFit_wj_and_wlvj_simultaneous()
 
 def control_sample(channel="em"):
@@ -52,22 +57,17 @@ class doFit_wj_and_wlvj_simultaneous:
       self.workspace4fit_ = RooWorkspace("workspace4fit_","workspace4fit_")                           # create workspace
       self.boostedW_fitter_em = doFit_wj_and_wlvj("em", options.sample, 40, 130, self.workspace4fit_) # Define all shapes to be used for Mj, define regions (SB,signal) and input files. 
       self.boostedW_fitter_em.get_datasets_fit_minor_bkg()                                            # Loop over intrees to create datasets om Mj and fit the single MCs.
+     
+      self.workspace4fit_.Print()
       onlyMCfits = False                                                                              # To be removed. Flag for when testing fits to minor backgrounds only (skip simoultaneous fit) 
-      # self.workspace4fit_.Print()
-      # model = self.workspace4fit_.pdf("model_pdf_VVErfExpGaus_sp_em_mj")
-      # model_obs = RooArgSet(model.getComponents())
-      # model_obs.Print("v")
-      # rrv_mass_j   = self.workspace4fit_.var("rrv_mass_j")
-      # frame = rrv_mass_j.frame()
-      # c1 =rt.TCanvas("c1","",800,800)
-      # model.plotOn(frame,rt.RooFit.LineColor(rt.kGreen))
-      # # model.plotOn(frame,rt.RooFit.Components("erfExp*,gaus*"),rt.RooFit.LineColor(rt.kRed+1))
-      # model.plotOn(frame,rt.RooFit.Components("erfExp_VVErfExpGaus_sp_em_mj"),rt.RooFit.LineColor(rt.kBlue+1))
-      # # model.plotOn(frame,rt.RooFit.Components("gaus_VVErfExpGaus_sp_em_mj"),rt.RooFit.LineColor(rt.kMagenta+1))
-      # frame.Draw()
-      # time.sleep(200)
 
       if not options.fitTT and not onlyMCfits:
+        
+        postfix=""
+        if options.usePuppiSD: postfix = "_PuppiSD"
+        title = "Pruned jet mass (GeV)"
+        if options.usePuppiSD:  title = "PUPPI softdrop jet mass (GeV)"
+        
         self.workspace4fit_.data("rdataset_data_em_mj").Print() 
         self.workspace4fit_.data("rdataset_data_failtau2tau1cut_em_mj").Print()
         self.workspace4fit_.data("rdataset_TotalMC_em_mj").Print()
@@ -119,39 +119,42 @@ class doFit_wj_and_wlvj_simultaneous:
      
         # Perform simoultaneous fit to data
         rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_data_em),RooFit.Verbose(kFALSE))
-        rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_data_em),RooFit.Verbose(kFALSE))
+        # rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_data_em),RooFit.Verbose(kFALSE))
         
 
-        frame = rrv_mass_j.frame()  
+        frame = rrv_mass_j.frame()
         rdataset_data_em_mj_fail.plotOn(frame,rt.RooFit.DataError(rt.RooAbsData.Poisson),rt.RooFit.Name("rdataset_data_failtau2tau1cut_em_mj"))
-        model_data_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error"),RooFit.FillColor(kRed-7),RooFit.LineColor(kRed-7))
+        model_data_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error"),RooFit.FillColor(kRed-7),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
         model_data_fail_em.plotOn(frame,rt.RooFit.LineColor(rt.kRed+1),rt.RooFit.Name("model_data_failtau2tau1cut_em"))
-        chi2_fail_data = frame.chiSquare("model_data_failtau2tau1cut_em", "rdataset_data_failtau2tau1cut_em_mj",13)
-        
-        model_data_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Gauss1"),RooFit.Components("gaus1*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_data_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Gauss2"),RooFit.Components("gaus2*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_data_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error ErfExp"),RooFit.Components("*ErfExp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_data_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Cheb"),RooFit.Components("cheb*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_data_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Exp*"),RooFit.Components("Exp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_data_fail_em.plotOn(frame,RooFit.Name( "Gaussian 1" ),RooFit.Components("gaus1*"),RooFit.LineStyle(kDashed),RooFit.LineColor(kRed+3))
-        model_data_fail_em.plotOn(frame,RooFit.Name( "Gaussian 2" ),RooFit.Components("gaus2*"),RooFit.LineStyle(kSolid),RooFit.LineColor(kRed+3))
-        model_data_fail_em.plotOn(frame,RooFit.Name( "ErfExp comp." ),RooFit.Components("*ErfExp*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3))
-        model_data_fail_em.plotOn(frame,RooFit.Name( "Chebychev" ),RooFit.Components("cheb*"),RooFit.LineStyle(kSolid),RooFit.LineColor(kRed+3))
-        model_data_fail_em.plotOn(frame,RooFit.Name( "Exp comp." ),RooFit.Components("Exp*"),RooFit.LineStyle(9),RooFit.LineColor(kRed+3))
+        chi2_fail_data = frame.chiSquare("model_data_failtau2tau1cut_em", "rdataset_data_failtau2tau1cut_em_mj")
+
+        model_data_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Gauss1"),RooFit.Components("gaus1*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Gauss2"),RooFit.Components("gaus2*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error ErfExp"),RooFit.Components("*ErfExp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error erfExp"),RooFit.Components("*erfExp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Cheb"),RooFit.Components("cheb*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Exp*"),RooFit.Components("Exp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error exp*"),RooFit.Components("exp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_fail_em.plotOn(frame,RooFit.Name( "Gaussian 1" ),RooFit.Components("gaus1*"),RooFit.LineStyle(kDashed),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_fail_em.plotOn(frame,RooFit.Name( "Gaussian 2" ),RooFit.Components("gaus2*"),RooFit.LineStyle(kSolid),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_fail_em.plotOn(frame,RooFit.Name( "ErfExp comp." ),RooFit.Components("*ErfExp*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_fail_em.plotOn(frame,RooFit.Name( "erfExp comp." ),RooFit.Components("*erfExp*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_fail_em.plotOn(frame,RooFit.Name( "Chebychev" ),RooFit.Components("cheb*"),RooFit.LineStyle(kSolid),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_fail_em.plotOn(frame,RooFit.Name( "Exp comp." ),RooFit.Components("Exp*"),RooFit.LineStyle(9),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_fail_em.plotOn(frame,RooFit.Name( "exp comp." ),RooFit.Components("exp*"),RooFit.LineStyle(9),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
         rdataset_data_em_mj_fail.plotOn(frame,rt.RooFit.DataError(rt.RooAbsData.Poisson),rt.RooFit.Name("rdataset_data_failtau2tau1cut_em_mj"))
-        frame3 = rrv_mass_j.frame()
-       
-      
-      
+
+
+
         c1 =rt.TCanvas("c1","",800,800)
         frame.GetYaxis().SetTitleSize(0.05)
         frame.GetYaxis().SetTitleOffset(0.90)
         # frame.GetYaxis().SetLabelSize(0.09)
         frame.SetName("mjjFit")
         frame.GetYaxis().SetTitle("Events")
-        frame.GetXaxis().SetTitle("Pruned jet mass (GeV)")
+        frame.GetXaxis().SetTitle(title)
         frame.Draw()
-    
+
         legend = rt.TLegend(0.6010112,0.7183362,0.8202143,0.919833)
         legend.SetTextSize(0.032)
         legend.SetLineColor(0)
@@ -162,19 +165,23 @@ class doFit_wj_and_wlvj_simultaneous:
         legend.SetFillStyle(0)
         legend.SetMargin(0.35)
         legend.AddEntry(frame.findObject("rdataset_data_failtau2tau1cut_em_mj"),"CMS data","lpe")
-        legend.AddEntry(frame.findObject("model_data_failtau2tau1cut_em"),"Sim. fit","l")    
+        legend.AddEntry(frame.findObject("model_data_failtau2tau1cut_em"),"Sim. fit","l")
         if frame.findObject("Gaussian 1"):
-          legend.AddEntry(frame.findObject("Gaussian 1"),frame.findObject("Gaussian 1").GetName(),"l")    
+          legend.AddEntry(frame.findObject("Gaussian 1"),frame.findObject("Gaussian 1").GetName(),"l")
         if frame.findObject("Gaussian 2"):
-          legend.AddEntry(frame.findObject("Gaussian 2"),frame.findObject("Gaussian 2").GetName(),"l")  
+          legend.AddEntry(frame.findObject("Gaussian 2"),frame.findObject("Gaussian 2").GetName(),"l")
         if frame.findObject("ErfExp comp."):
-          legend.AddEntry(frame.findObject("ErfExp comp."),frame.findObject("ErfExp comp.").GetName(),"l")    
+          legend.AddEntry(frame.findObject("ErfExp comp."),frame.findObject("ErfExp comp.").GetName(),"l")
+        if frame.findObject("erfExp comp."):
+          legend.AddEntry(frame.findObject("erfExp comp."),frame.findObject("erfExp comp.").GetName(),"l")
         if frame.findObject("Chebychev"):
-          legend.AddEntry(frame.findObject("Chebychev"),frame.findObject("Chebychev").GetName(),"l")  
+          legend.AddEntry(frame.findObject("Chebychev"),frame.findObject("Chebychev").GetName(),"l")
         if frame.findObject("Exp comp."):
           legend.AddEntry(frame.findObject("Exp comp."),frame.findObject("Exp comp.").GetName(),"l")
+        if frame.findObject("exp comp."):
+          legend.AddEntry(frame.findObject("exp comp."),frame.findObject("exp comp.").GetName(),"l")
         legend.Draw("same")
-      
+
         addInfo = rt.TPaveText(0.2510112,0.2066292,0.4202143,0.3523546,"NDC")
         addInfo.AddText("#chi^{2}/nDOF = %.3f"%chi2_fail_data)
         addInfo.SetFillColor(0)
@@ -184,38 +191,44 @@ class doFit_wj_and_wlvj_simultaneous:
         addInfo.SetTextFont(42)
         addInfo.SetTextSize(0.040)
         addInfo.SetTextAlign(12)
-        addInfo.Draw()     
+        addInfo.Draw()
         c1.Update()
-        c1.SaveAs("plots/DATA-fail_em_HP%.2f%s.pdf"%(options.tau2tau1cutHP,options.sample))
-      
-      
+        c1.SaveAs("plots/DATA-fail_em_HP%.2f%s%s.pdf"%(options.tau2tau1cutHP,options.sample,postfix))
+
+
         frame2 = rrv_mass_j.frame()
         rdataset_data_em_mj.plotOn(frame2,rt.RooFit.DataError(rt.RooAbsData.Poisson),rt.RooFit.Name("rdataset_data_em_mj"))
-        model_data_em.plotOn(frame2,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error"),RooFit.FillColor(kRed-7),RooFit.LineColor(kRed-7))
+        model_data_em.plotOn(frame2,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error"),RooFit.FillColor(kRed-7),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
         model_data_em.plotOn(frame2,rt.RooFit.LineColor(rt.kRed+1),rt.RooFit.Name("model_data_em"))
-        chi2_pass_data = frame2.chiSquare("model_data_em", "rdataset_data_em_mj",13)
-        model_data_em.plotOn(frame2,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Gauss1"),RooFit.Components("gaus1*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_data_em.plotOn(frame2,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Gauss2"),RooFit.Components("gaus2*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_data_em.plotOn(frame2,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error ErfExp"),RooFit.Components("*ErfExp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_data_em.plotOn(frame2,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Cheb"),RooFit.Components("cheb*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_data_em.plotOn(frame2,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Exp*"),RooFit.Components("Exp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_data_em.plotOn(frame2,RooFit.Name( "Gaussian 1" ),RooFit.Components("gaus1*"),RooFit.LineStyle(kDashed),RooFit.LineColor(kRed+3))
-        model_data_em.plotOn(frame2,RooFit.Name( "Gaussian 2" ),RooFit.Components("gaus2*"),RooFit.LineStyle(kSolid),RooFit.LineColor(kRed+3))
-        model_data_em.plotOn(frame2,RooFit.Name( "ErfExp comp." ),RooFit.Components("*ErfExp*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3))
+        chi2_pass_data = frame2.chiSquare("model_data_em", "rdataset_data_em_mj")
+        model_data_em.plotOn(frame2,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Gauss1"),RooFit.Components("gaus1*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_em.plotOn(frame2,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Gauss2"),RooFit.Components("gaus2*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_em.plotOn(frame2,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error ErfExp"),RooFit.Components("*ErfExp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_em.plotOn(frame2,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error erfExp"),RooFit.Components("*erfExp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_em.plotOn(frame2,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Cheb"),RooFit.Components("cheb*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_em.plotOn(frame2,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error Exp*"),RooFit.Components("Exp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_em.plotOn(frame2,RooFit.VisualizeError(rfresult_data,1), RooFit.Name("Fit error exp*"),RooFit.Components("exp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_em.plotOn(frame2,RooFit.Name( "Gaussian 1" ),RooFit.Components("gaus1*"),RooFit.LineStyle(kDashed),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_em.plotOn(frame2,RooFit.Name( "Gaussian 2" ),RooFit.Components("gaus2*"),RooFit.LineStyle(kSolid),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_em.plotOn(frame2,RooFit.Name( "ErfExp comp." ),RooFit.Components("*ErfExp*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_em.plotOn(frame2,RooFit.Name( "erfExp comp." ),RooFit.Components("erfExp*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_em.plotOn(frame2,RooFit.Name( "Chebychev" ),RooFit.Components("cheb*"),RooFit.LineStyle(kSolid),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_em.plotOn(frame2,RooFit.Name( "Exp comp." ),RooFit.Components("Exp*"),RooFit.LineStyle(9),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_data_em.plotOn(frame2,RooFit.Name( "exp comp." ),RooFit.Components("exp_*"),RooFit.LineStyle(9),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
         rdataset_data_em_mj.plotOn(frame2,rt.RooFit.DataError(rt.RooAbsData.Poisson),rt.RooFit.Name("rdataset_data_em_mj"))
-       
-      
+
+
         c2 =rt.TCanvas("c2","",800,800)
         frame2.GetYaxis().SetTitleSize(0.05)
         frame2.GetYaxis().SetTitleOffset(0.90)
         # frame.GetYaxis().SetLabelSize(0.09)
         frame2.SetName("mjjFit")
         frame2.GetYaxis().SetTitle("Events")
-        frame2.GetXaxis().SetTitle("Pruned jet mass (GeV)")
+        frame2.GetXaxis().SetTitle(title)
         frame2.Draw()
-        
-        
-        
+
+
+
         legend = rt.TLegend(0.6010112,0.7183362,0.8202143,0.919833)
         legend.SetTextSize(0.032)
         legend.SetLineColor(0)
@@ -226,18 +239,20 @@ class doFit_wj_and_wlvj_simultaneous:
         legend.SetFillStyle(0)
         legend.SetMargin(0.35)
         legend.AddEntry(frame2.findObject("rdataset_data_em_mj"),"CMS data","lpe")
-        legend.AddEntry(frame2.findObject("model_data_em"),"Sim. fit","l")    
+        legend.AddEntry(frame2.findObject("model_data_em"),"Sim. fit","l")
         if frame2.findObject("Gaussian 1"):
-          legend.AddEntry(frame2.findObject("Gaussian 1"),frame2.findObject("Gaussian 1").GetName(),"l")    
+          legend.AddEntry(frame2.findObject("Gaussian 1"),frame2.findObject("Gaussian 1").GetName(),"l")
         if frame2.findObject("Gaussian 2"):
-          legend.AddEntry(frame2.findObject("Gaussian 2"),frame2.findObject("Gaussian 2").GetName(),"l")  
+          legend.AddEntry(frame2.findObject("Gaussian 2"),frame2.findObject("Gaussian 2").GetName(),"l")
         if frame2.findObject("ErfExp comp."):
-          legend.AddEntry(frame2.findObject("ErfExp comp."),frame2.findObject("ErfExp comp.").GetName(),"l")    
-
+          legend.AddEntry(frame2.findObject("ErfExp comp."),frame2.findObject("ErfExp comp.").GetName(),"l")
+        if frame2.findObject("erfExp comp."):
+          legend.AddEntry(frame2.findObject("erfExp comp."),frame2.findObject("erfExp comp.").GetName(),"l")
+        if frame2.findObject("Exp comp."):
+          legend.AddEntry(frame2.findObject("Exp comp."),frame2.findObject("Exp comp.").GetName(),"l")
+        if frame2.findObject("exp comp."):
+          legend.AddEntry(frame2.findObject("exp comp."),frame2.findObject("exp comp.").GetName(),"l")
         legend.Draw("same")
-        
-        
-        
         addInfo = rt.TPaveText(0.2510112,0.2066292,0.4202143,0.3523546,"NDC")
         addInfo.AddText("#chi^{2}/nDOF = %.3f"%chi2_pass_data)
         addInfo.SetFillColor(0)
@@ -247,19 +262,19 @@ class doFit_wj_and_wlvj_simultaneous:
         addInfo.SetTextFont(42)
         addInfo.SetTextSize(0.040)
         addInfo.SetTextAlign(12)
-        addInfo.Draw()  
+        addInfo.Draw()
         c2.Update()
-        c2.SaveAs("plots/DATA-pass_em_HP%.2f%s.pdf"%(options.tau2tau1cutHP,options.sample))
-      
-      
-      
+        c2.SaveAs("plots/DATA-pass_em_HP%.2f%s%s.pdf"%(options.tau2tau1cutHP,options.sample,postfix))
+
+
+
         print "FIT parameters (DATA) :"
         print ""
         print "CHI2 PASS = %.3f    CHI2 FAIL = %.3f" %(chi2_pass_data,chi2_fail_data)
         print ""
         print rfresult_data.Print()
         print ""
-        
+
   
  
 
@@ -275,7 +290,7 @@ class doFit_wj_and_wlvj_simultaneous:
         constrainslist_TotalMC_em = ROOT.std.vector(ROOT.std.string)()
         for i in range(self.boostedW_fitter_em.constrainslist_mc.size()):
             constrainslist_TotalMC_em.push_back(self.boostedW_fitter_em.constrainslist_mc.at(i))
-          
+
 
         pdfconstrainslist_TotalMC_em = RooArgSet("pdfconstrainslist_TotalMC_em")
         for i in range(constrainslist_TotalMC_em.size()):
@@ -284,38 +299,41 @@ class doFit_wj_and_wlvj_simultaneous:
 
         # Perform simoultaneous fit to MC
         rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em),RooFit.SumW2Error(kTRUE),RooFit.Verbose(kFALSE))
-        rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em),RooFit.SumW2Error(kTRUE),RooFit.Verbose(kFALSE))
-        
-        
-        frame = rrv_mass_j.frame()
-      
-        rdataset_TotalMC_em_mj_fail.plotOn(frame,rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.Name("rdataset_TotalMC_failtau2tau1cut_em_mj"))
-        model_TotalMC_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error"),RooFit.FillColor(kRed-7),RooFit.LineColor(kRed-7))
-        model_TotalMC_fail_em.plotOn(frame,rt.RooFit.LineColor(rt.kRed+1),rt.RooFit.Name("model_TotalMC_failtau2tau1cut_em"))
-        chi2_fail_mc = frame.chiSquare("model_TotalMC_failtau2tau1cut_em", "rdataset_TotalMC_failtau2tau1cut_em_mj",13)
-        model_TotalMC_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Gauss1"),RooFit.Components("gaus1*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_TotalMC_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Gauss2"),RooFit.Components("gaus2*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_TotalMC_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error ErfExp"),RooFit.Components("*ErfExp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_TotalMC_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Cheb"),RooFit.Components("cheb*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_TotalMC_fail_em.plotOn(frame,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Exp*"),RooFit.Components("Exp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_TotalMC_fail_em.plotOn(frame,RooFit.Name( "Gaussian 1" ),RooFit.Components("gaus1*"),RooFit.LineStyle(kDashed),RooFit.LineColor(kRed+3))
-        model_TotalMC_fail_em.plotOn(frame,RooFit.Name( "Gaussian 2" ),RooFit.Components("gaus2*"),RooFit.LineStyle(kSolid),RooFit.LineColor(kRed+3))
-        model_TotalMC_fail_em.plotOn(frame,RooFit.Name( "ErfExp comp." ),RooFit.Components("*ErfExp*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3))
-        model_TotalMC_fail_em.plotOn(frame,RooFit.Name( "Chebychev" ),RooFit.Components("cheb*"),RooFit.LineStyle(kSolid),RooFit.LineColor(kRed+3))
-        model_TotalMC_fail_em.plotOn(frame,RooFit.Name( "Exp comp." ),RooFit.Components("Exp*"),RooFit.LineStyle(9),RooFit.LineColor(kRed+3))
-        rdataset_TotalMC_em_mj_fail.plotOn(frame,rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.Name("rdataset_TotalMC_failtau2tau1cut_em_mj"))
+        # rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em),RooFit.SumW2Error(kTRUE),RooFit.Verbose(kFALSE))
+
+
         frame3 = rrv_mass_j.frame()
-        
-      
+
+        rdataset_TotalMC_em_mj_fail.plotOn(frame3,rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.Name("rdataset_TotalMC_failtau2tau1cut_em_mj"))
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error"),RooFit.FillColor(kRed-7),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_fail_em.plotOn(frame3,rt.RooFit.LineColor(rt.kRed+1),rt.RooFit.Name("model_TotalMC_failtau2tau1cut_em"))
+        chi2_fail_mc = frame3.chiSquare("model_TotalMC_failtau2tau1cut_em", "rdataset_TotalMC_failtau2tau1cut_em_mj")
+
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Gauss1"),RooFit.Components("gaus1*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Gauss2"),RooFit.Components("gaus2*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error ErfExp"),RooFit.Components("*ErfExp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error erfExp"),RooFit.Components("*erfExp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Cheb"),RooFit.Components("cheb*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Exp*"),RooFit.Components("Exp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error exp*"),RooFit.Components("exp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.Name( "Gaussian 1" ),RooFit.Components("gaus1*"),RooFit.LineStyle(kDashed),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.Name( "Gaussian 2" ),RooFit.Components("gaus2*"),RooFit.LineStyle(kSolid),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.Name( "ErfExp comp." ),RooFit.Components("*ErfExp*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.Name( "erfExp comp." ),RooFit.Components("erfExp*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.Name( "Chebychev" ),RooFit.Components("cheb*"),RooFit.LineStyle(kSolid),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.Name( "Exp comp." ),RooFit.Components("Exp*"),RooFit.LineStyle(9),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_fail_em.plotOn(frame3,RooFit.Name( "exp comp." ),RooFit.Components("exp_*"),RooFit.LineStyle(9),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        rdataset_TotalMC_em_mj_fail.plotOn(frame3,rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.Name("rdataset_TotalMC_failtau2tau1cut_em_mj"))
+
         c1 =rt.TCanvas("c1","",800,800)
-        frame.GetYaxis().SetTitleSize(0.05)
-        frame.GetYaxis().SetTitleOffset(0.90)
+        frame3.GetYaxis().SetTitleSize(0.05)
+        frame3.GetYaxis().SetTitleOffset(0.90)
         # frame.GetYaxis().SetLabelSize(0.09)
-        frame.SetName("mjjFit")
-        frame.GetYaxis().SetTitle("Events")
-        frame.GetXaxis().SetTitle("Pruned jet mass (GeV)")
-        frame.Draw()
-    
+        frame3.SetName("mjjFit")
+        frame3.GetYaxis().SetTitle("Events")
+        frame3.GetXaxis().SetTitle(title)
+        frame3.Draw()
+
         legend = rt.TLegend(0.6510112,0.7183362,0.8202143,0.919833)
         legend.SetTextSize(0.038)
         legend.SetLineColor(0)
@@ -325,20 +343,24 @@ class doFit_wj_and_wlvj_simultaneous:
         legend.SetFillColor(0)
         legend.SetFillStyle(0)
         legend.SetMargin(0.35)
-        legend.AddEntry(frame.findObject("rdataset_TotalMC_failtau2tau1cut_em_mj"),"Tot. MC","lpe")
-        legend.AddEntry(frame.findObject("model_TotalMC_failtau2tau1cut_em"),"Sim. fit","l")    
-        if frame.findObject("Gaussian 1"):
-          legend.AddEntry(frame.findObject("Gaussian 1"),frame.findObject("Gaussian 1").GetName(),"l")    
-        if frame.findObject("Gaussian 2"):
-          legend.AddEntry(frame.findObject("Gaussian 2"),frame.findObject("Gaussian 2").GetName(),"l")  
-        if frame.findObject("ErfExp comp."):
-          legend.AddEntry(frame.findObject("ErfExp comp."),frame.findObject("ErfExp comp.").GetName(),"l")    
-        if frame.findObject("Chebychev"):
-          legend.AddEntry(frame.findObject("Chebychev"),frame.findObject("Chebychev").GetName(),"l")  
-        if frame.findObject("Exp comp."):
-          legend.AddEntry(frame.findObject("Exp comp."),frame.findObject("Exp comp.").GetName(),"l")  
+        legend.AddEntry(frame3.findObject("rdataset_TotalMC_em_mj_fail"),"Tot. MC","lpe")
+        legend.AddEntry(frame3.findObject("model_TotalMC_fail_em"),"Sim. fit","l")
+        if frame3.findObject("Gaussian 1"):
+          legend.AddEntry(frame3.findObject("Gaussian 1"),frame3.findObject("Gaussian 1").GetName(),"l")
+        if frame3.findObject("Gaussian 2"):
+          legend.AddEntry(frame3.findObject("Gaussian 2"),frame3.findObject("Gaussian 2").GetName(),"l")
+        if frame3.findObject("ErfExp comp."):
+          legend.AddEntry(frame3.findObject("ErfExp comp."),frame3.findObject("ErfExp comp.").GetName(),"l")
+        if frame3.findObject("erfExp comp."):
+          legend.AddEntry(frame3.findObject("erfExp comp."),frame3.findObject("erfExp comp.").GetName(),"l")
+        if frame3.findObject("Chebychev"):
+          legend.AddEntry(frame3.findObject("Chebychev"),frame3.findObject("Chebychev").GetName(),"l")
+        if frame3.findObject("Exp comp."):
+          legend.AddEntry(frame3.findObject("Exp comp."),frame3.findObject("Exp comp.").GetName(),"l")
+        if frame3.findObject("exp comp."):
+          legend.AddEntry(frame3.findObject("exp comp."),frame3.findObject("exp comp.").GetName(),"l")
         legend.Draw("same")
-      
+
         addInfo = rt.TPaveText(0.2510112,0.2066292,0.4202143,0.3523546,"NDC")
         addInfo.AddText("#chi^{2}/nDOF = %.3f"%chi2_fail_mc)
         addInfo.SetFillColor(0)
@@ -348,37 +370,43 @@ class doFit_wj_and_wlvj_simultaneous:
         addInfo.SetTextFont(42)
         addInfo.SetTextSize(0.040)
         addInfo.SetTextAlign(12)
-        addInfo.Draw()     
+        addInfo.Draw()
         c1.Update()
-        c1.SaveAs("plots/MC-fail_em_HP%.2f%s.pdf"%(options.tau2tau1cutHP,options.sample))
-      
-      
-        frame2 = rrv_mass_j.frame()
-        rdataset_TotalMC_em_mj.plotOn(frame2,rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.Name("rdataset_TotalMC_em_mj"))
-        model_TotalMC_em.plotOn(frame2,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error"),RooFit.FillColor(kRed-7),RooFit.LineColor(kRed-7))
-        model_TotalMC_em.plotOn(frame2,rt.RooFit.LineColor(rt.kRed+1),rt.RooFit.Name("model_TotalMC_em"))
-        chi2_pass_mc = frame2.chiSquare("model_TotalMC_em", "rdataset_TotalMC_em_mj",13)
-        model_TotalMC_em.plotOn(frame2,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Gauss1"),RooFit.Components("gaus1*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_TotalMC_em.plotOn(frame2,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Gauss2"),RooFit.Components("gaus2*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_TotalMC_em.plotOn(frame2,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error ErfExp"),RooFit.Components("*ErfExp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_TotalMC_em.plotOn(frame2,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Cheb"),RooFit.Components("cheb*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_TotalMC_em.plotOn(frame2,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Exp*"),RooFit.Components("Exp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7))
-        model_TotalMC_em.plotOn(frame2,RooFit.Name( "Gaussian 1" ),RooFit.Components("gaus1*")  ,RooFit.LineStyle(kDashed),RooFit.LineColor(kRed+3))
-        model_TotalMC_em.plotOn(frame2,RooFit.Name( "Gaussian 2" ),RooFit.Components("gaus2*")  ,RooFit.LineStyle(kSolid),RooFit.LineColor(kRed+3))
-        model_TotalMC_em.plotOn(frame2,RooFit.Name( "ErfExp comp."     ),RooFit.Components("*ErfExp*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3))
-        rdataset_TotalMC_em_mj.plotOn(frame2,rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.Name("rdataset_TotalMC_em_mj"))
-        
-      
+        c1.SaveAs("plots/MC-fail_em_HP%.2f%s%s.pdf"%(options.tau2tau1cutHP,options.sample,postfix))
+
+
+        frame4 = rrv_mass_j.frame()
+        rdataset_TotalMC_em_mj.plotOn(frame4,rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.Name("rdataset_TotalMC_em_mj"))
+        model_TotalMC_em.plotOn(frame4,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error"),RooFit.FillColor(kRed-7),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_em.plotOn(frame4,rt.RooFit.LineColor(rt.kRed+1),rt.RooFit.Name("model_TotalMC_em"))
+        chi2_pass_mc = frame4.chiSquare("model_TotalMC_em", "rdataset_TotalMC_em_mj")
+        model_TotalMC_em.plotOn(frame4,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Gauss1"),RooFit.Components("gaus1*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_em.plotOn(frame4,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Gauss2"),RooFit.Components("gaus2*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_em.plotOn(frame4,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error ErfExp"),RooFit.Components("*ErfExp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_em.plotOn(frame4,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error erfExp"),RooFit.Components("*erfExp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_em.plotOn(frame4,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Cheb"),RooFit.Components("cheb*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_em.plotOn(frame4,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error Exp*"),RooFit.Components("Exp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_em.plotOn(frame4,RooFit.VisualizeError(rfresult_TotalMC,1), RooFit.Name("Fit error exp*"),RooFit.Components("exp*"),RooFit.FillColor(kRed-9),RooFit.LineColor(kRed-7),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_em.plotOn(frame4,RooFit.Name( "Gaussian 1" ),RooFit.Components("gaus1*")  ,RooFit.LineStyle(kDashed),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_em.plotOn(frame4,RooFit.Name( "Gaussian 2" ),RooFit.Components("gaus2*")  ,RooFit.LineStyle(kSolid),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_em.plotOn(frame4,RooFit.Name( "ErfExp comp."     ),RooFit.Components("*ErfExp*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_em.plotOn(frame4,RooFit.Name( "erfExp comp."     ),RooFit.Components("*erfExp*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_em.plotOn(frame4,RooFit.Name( "Cheb. comp."     ),RooFit.Components("cheb*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_em.plotOn(frame4,RooFit.Name( "Exp. comp."     ),RooFit.Components("Exp*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        model_TotalMC_em.plotOn(frame4,RooFit.Name( "exp. comp."     ),RooFit.Components("exp*"),RooFit.LineStyle(kDashDotted),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
+        rdataset_TotalMC_em_mj.plotOn(frame4,rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.Name("rdataset_TotalMC_em_mj"))
+
+
         c2 =rt.TCanvas("c2","",800,800)
-        frame2.GetYaxis().SetTitleSize(0.05)
-        frame2.GetYaxis().SetTitleOffset(0.90)
+        frame4.GetYaxis().SetTitleSize(0.05)
+        frame4.GetYaxis().SetTitleOffset(0.90)
         # frame.GetYaxis().SetLabelSize(0.09)
-        frame2.SetName("mjjFit")
-        frame2.GetYaxis().SetTitle("Events")
-        frame2.GetXaxis().SetTitle("Pruned jet mass (GeV)")
-        frame2.Draw()
-        
-        
+        frame4.SetName("mjjFit")
+        frame4.GetYaxis().SetTitle("Events")
+        frame4.GetXaxis().SetTitle(title)
+        frame4.Draw()
+
+
         legend = rt.TLegend(0.6510112,0.7183362,0.8202143,0.919833)
         legend.SetTextSize(0.038)
         legend.SetLineColor(0)
@@ -388,17 +416,23 @@ class doFit_wj_and_wlvj_simultaneous:
         legend.SetFillColor(0)
         legend.SetFillStyle(0)
         legend.SetMargin(0.35)
-        legend.AddEntry(frame2.findObject("rdataset_TotalMC_em_mj"),"Tot. MC","lpe")
-        legend.AddEntry(frame2.findObject("model_TotalMC_em"),"Sim. fit","l")    
-        if frame2.findObject("Gaussian 1"):
-          legend.AddEntry(frame2.findObject("Gaussian 1"),frame2.findObject("Gaussian 1").GetName(),"l")    
-        if frame2.findObject("Gaussian 2"):
-          legend.AddEntry(frame2.findObject("Gaussian 2"),frame2.findObject("Gaussian 2").GetName(),"l")  
-        if frame2.findObject("ErfExp comp."):
-          legend.AddEntry(frame2.findObject("ErfExp comp."),frame2.findObject("ErfExp comp.").GetName(),"l")    
+        legend.AddEntry(frame4.findObject("rdataset_TotalMC_em_mj"),"Tot. MC","lpe")
+        legend.AddEntry(frame4.findObject("model_TotalMC_em"),"Sim. fit","l")
+        if frame4.findObject("Gaussian 1"):
+          legend.AddEntry(frame4.findObject("Gaussian 1"),frame4.findObject("Gaussian 1").GetName(),"l")
+        if frame4.findObject("Gaussian 2"):
+          legend.AddEntry(frame4.findObject("Gaussian 2"),frame4.findObject("Gaussian 2").GetName(),"l")
+        if frame4.findObject("ErfExp comp."):
+          legend.AddEntry(frame4.findObject("ErfExp comp."),frame4.findObject("ErfExp comp.").GetName(),"l")
+        if frame4.findObject("erfExp comp."):
+          legend.AddEntry(frame4.findObject("erfExp comp."),frame4.findObject("erfExp comp.").GetName(),"l")
+        if frame4.findObject("Exp comp."):
+          legend.AddEntry(frame4.findObject("Exp comp."),frame4.findObject("Exp comp.").GetName(),"l")
+        if frame4.findObject("exp comp."):
+          legend.AddEntry(frame4.findObject("exp comp."),frame4.findObject("exp comp.").GetName(),"l")
         legend.Draw("same")
-        
-        
+
+
         addInfo = rt.TPaveText(0.2510112,0.2066292,0.4202143,0.3523546,"NDC")
         addInfo.AddText("#chi^{2}/nDOF = %.3f"%chi2_pass_mc)
         addInfo.SetFillColor(0)
@@ -408,10 +442,10 @@ class doFit_wj_and_wlvj_simultaneous:
         addInfo.SetTextFont(42)
         addInfo.SetTextSize(0.040)
         addInfo.SetTextAlign(12)
-        addInfo.Draw()  
+        addInfo.Draw()
         c2.Update()
-        c2.SaveAs("plots/MC-pass_em_HP%.2f%s.pdf"%(options.tau2tau1cutHP,options.sample))
-        
+        c2.SaveAs("plots/MC-pass_em_HP%.2f%s%s.pdf"%(options.tau2tau1cutHP,options.sample,postfix))
+
         print "FIT Par. (MC) :"
         print ""
         print "CHI2 PASS= " ,chi2_pass_mc
@@ -423,7 +457,7 @@ class doFit_wj_and_wlvj_simultaneous:
 
         # draw the plots
         DrawScaleFactorTTbarControlSample(self.workspace4fit_,self.boostedW_fitter_em.color_palet,"","em",self.boostedW_fitter_em.wtagger_label,self.boostedW_fitter_em.AK8_pt_min,self.boostedW_fitter_em.AK8_pt_max)
-      
+
 
         ### Efficiency in data and MC
         rrv_eff_MC_em   = self.workspace4fit_.var("eff_ttbar_TotalMC_em_mj")
@@ -433,7 +467,7 @@ class doFit_wj_and_wlvj_simultaneous:
         rrv_eff_data_em   = self.workspace4fit_.var("eff_ttbar_data_em_mj")
         rrv_mean_data_em  = self.workspace4fit_.var("rrv_mean1_gaus_ttbar_data_em_mj")
         rrv_sigma_data_em = self.workspace4fit_.var("rrv_sigma1_gaus_ttbar_data_em_mj")
-      
+
 
         ## GET HP SCALEFACTOR AND UNCERTIANTIES
         pure_wtagger_sf_em             = rrv_eff_data_em.getVal()/rrv_eff_MC_em.getVal()
@@ -468,7 +502,7 @@ class doFit_wj_and_wlvj_simultaneous:
 
         eff_SF_extremefail       = eff_data_em_extremefail/eff_MC_em_extremefail
         eff_SF_extremefail_error = eff_SF_extremefail * ( (eff_data_em_extremefail_error/eff_data_em_extremefail)**2 + (eff_MC_em_extremefail_error/eff_MC_em_extremefail)**2 )**0.5
-      
+
 
         # w/ extreme fail
         eff_MC_em_LP   = 1.-rrv_eff_MC_em.getVal()   - eff_MC_em_extremefail
@@ -566,8 +600,9 @@ class doFit_wj_and_wlvj:
       self.mj_shape = ROOT.std.map(ROOT.std.string,ROOT.std.string)()
       self.mj_shape["TTbar"]            = "2Gaus_ttbar"
       self.mj_shape["TTbar_fail"]       = "ErfExp_ttbar_failtau2tau1cut"
+      
       self.mj_shape["TTbar_realW"]      = "2Gaus_ttbar"
-      self.mj_shape["TTbar_realW_fail"] = "GausChebychev_ttbar_failtau2tau1cut"
+      self.mj_shape["TTbar_realW_fail"] = "2Gaus_ttbar"
       self.mj_shape["TTbar_fakeW"]      = "ErfExp_ttbar"
       self.mj_shape["TTbar_fakeW_fail"] = "ErfExp_ttbar_failtau2tau1cut"
       
@@ -590,10 +625,7 @@ class doFit_wj_and_wlvj:
         self.mj_shape["signal_data_fail"]     = "GausExp_ttbar_failtau2tau1cut"
         
       elif (options.tau2tau1cutHP==0.45 or options.tau2tau1cutHP==0.55):
-        if self.channel == "em":
-          self.mj_shape["STop"]             = "ErfExpGaus_sp"
-        else:
-          self.mj_shape["STop"]             = "ExpGaus"       
+        self.mj_shape["STop"]             = "ErfExpGaus_sp"       
         self.mj_shape["STop_fail"]          = "ExpGaus"    
         self.mj_shape["STop_extremefail"]   = "Exp"
         self.mj_shape["VV"]                 = "ExpGaus"
@@ -608,8 +640,14 @@ class doFit_wj_and_wlvj:
         self.mj_shape["bkg_mc_fail"]          = "ErfExp_ttbar_failtau2tau1cut"
         self.mj_shape["bkg_data_fail"]        = "ErfExp_ttbar_failtau2tau1cut"    
         
-        self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut"
-        self.mj_shape["signal_data_fail"]     = "GausChebychev_ttbar_failtau2tau1cut"
+        # self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut"
+        # self.mj_shape["signal_data_fail"]     = "GausChebychev_ttbar_failtau2tau1cut"
+        
+        self.mj_shape["signal_mc_fail"]       = "2Gaus_ttbar"
+        self.mj_shape["signal_data_fail"]     = "2Gaus_ttbar"
+        # if options.usePuppiSD:
+ #          self.mj_shape["signal_mc_fail"]       = "2Gaus_ttbar"
+ #          self.mj_shape["signal_data_fail"]     = "2Gaus_ttbar"
         # if options.tau2tau1cutHP==0.55:
         #   self.mj_shape["VV_fail"]              = "ErfExp"
 
@@ -631,15 +669,18 @@ class doFit_wj_and_wlvj:
       self.mj_shape["mc_bkg_extremefail"]   = "Exp_bkg_extremefailtau2tau1cut"
         
 
-      self.Lumi=2100
+      self.Lumi=2300
       self.BinWidth_mj = 5.
       self.narrow_factor = 1.
 
       self.BinWidth_mj = self.BinWidth_mj/self.narrow_factor
       nbins_mj         = int( (in_mj_max - in_mj_min) / self.BinWidth_mj )
       in_mj_max        = in_mj_min+nbins_mj*self.BinWidth_mj
+      
+      jetMass = "pruned jet mass"
+      if options.usePuppiSD: jetMass = "PUPPI softdrop jet mass"
 
-      rrv_mass_j = RooRealVar("rrv_mass_j","pruned jet mass",(in_mj_min+in_mj_max)/2.,in_mj_min,in_mj_max,"GeV")
+      rrv_mass_j = RooRealVar("rrv_mass_j", jetMass ,(in_mj_min+in_mj_max)/2.,in_mj_min,in_mj_max,"GeV")
       rrv_mass_j.setBins(nbins_mj)
  
       # Create workspace and import variable
@@ -662,18 +703,39 @@ class doFit_wj_and_wlvj:
       rrv_mass_j.setRange("signal_region",self.mj_signal_min,self.mj_signal_max)   # 65-105 GeV
       rrv_mass_j.setRange("sb_hi",self.mj_sideband_hi_min,self.mj_sideband_hi_max) # 105-135 GeV
       rrv_mass_j.setRange("controlsample_fitting_range",40,130) # ---> what is this????
-
+      
+      
+      postfix = ""
+      if options.use76X: 
+        postfix ="_76X"
       # Tree directory and input files
       self.file_Directory         = "/shome/thaarres/EXOVVAnalysisRunII/AnalysisOutput/Wtag/WWTree_%s/"%(self.channel)
       if options.doLowMass: 
         self.file_Directory       = "/shome/thaarres/EXOVVAnalysisRunII/AnalysisOutput/Wtag/lowMass/WWTree_%s/"%(self.channel)
-      self.file_data              = ("ExoDiBosonAnalysis.WWTree_data.root")
-      self.file_pseudodata        = ("ExoDiBosonAnalysis.WWTree_pseudodata%s.root")%in_sample       
-      self.file_WJets0_mc         = ("ExoDiBosonAnalysis.WWTree_WJets.root")
-      self.file_VV_mc             = ("ExoDiBosonAnalysis.WWTree_VV.root")            
-      self.file_TTbar_mc          = ("ExoDiBosonAnalysis.WWTree_TTbar%s.root")%in_sample        
-      self.file_STop_mc           = ("ExoDiBosonAnalysis.WWTree_STop.root")          
+      self.file_data              = ("ExoDiBosonAnalysis.WWTree_data%s.root") %postfix
+      self.file_pseudodata        = ("ExoDiBosonAnalysis.WWTree_pseudodata%s%s.root")%(in_sample,postfix)       
+      self.file_WJets0_mc         = ("ExoDiBosonAnalysis.WWTree_WJets%s.root") %postfix
+      self.file_VV_mc             = ("ExoDiBosonAnalysis.WWTree_VV%s.root") %postfix          
+      self.file_TTbar_mc          = ("ExoDiBosonAnalysis.WWTree_TTbar%s%s.root")%(in_sample,postfix)      
+      if options.use76X: 
+        self.file_TTbar_mc        = ("ExoDiBosonAnalysis.WWTree_TTbar_powheg_76X.root")
+        if in_sample.find("herwig")!=-1: self.file_TTbar_mc        = ("ExoDiBosonAnalysis.WWTree_TTbar_herwig_76X.root")
+      self.file_STop_mc           = ("ExoDiBosonAnalysis.WWTree_STop%s.root") %postfix          
       
+      
+      if options.usePuppiSD:
+        self.file_Directory         = "/shome/thaarres/EXOVVAnalysisRunII/AnalysisOutput/Wtag/WWTree_%s/"%(self.channel)
+        self.file_data              = ("ExoDiBosonAnalysis.WWTree_data_76X_PUPPISD.root")
+        self.file_pseudodata        = ("ExoDiBosonAnalysis.WWTree_pseudodata_76X_PUPPISD.root")     
+        self.file_WJets0_mc         = ("ExoDiBosonAnalysis.WWTree_WJets_76X_PUPPISD.root")
+        self.file_VV_mc             = ("ExoDiBosonAnalysis.WWTree_VV_76X_PUPPISD.root")        
+        self.file_TTbar_mc          = ("ExoDiBosonAnalysis.WWTree_TTbar_powheg_76X_PUPPISD.root")
+        self.file_STop_mc           = ("ExoDiBosonAnalysis.WWTree_STop_76X_PUPPISD.root")
+        
+        
+        
+        
+        
       # Define Tau21 WP
       self.wtagger_label = options.category;
 
@@ -688,12 +750,20 @@ class doFit_wj_and_wlvj:
       if self.wtagger_label == "nocut":
           self.wtagger_cut = 10000
       
+      if options.usePuppiSD: 
+        postfix = postfix + "_PuppiSD"
+      if options.useDDT: 
+        postfix = postfix + "_DDT"
+        print postfix
+        print postfix
+        print postfix
+        print postfix
       if (options.tau2tau1cutHP==0.60):
-        self.wtagger_label = self.wtagger_label + "0v60_%s"%in_sample
+        self.wtagger_label = self.wtagger_label + "0v60%s%s"%(in_sample,postfix) 
       elif (options.tau2tau1cutHP==0.45):  
-        self.wtagger_label = self.wtagger_label + "0v45_%s"%in_sample
+        self.wtagger_label = self.wtagger_label + "0v45%s%s"%(in_sample,postfix) 
       elif (options.tau2tau1cutHP==0.55):  
-        self.wtagger_label = self.wtagger_label + "0v55_%s"%in_sample  
+        self.wtagger_label = self.wtagger_label + "0v55%s%s"%(in_sample,postfix)  
        
       self.color_palet = ROOT.std.map(ROOT.std.string, int) ()
       self.color_palet["data"]              = 1
@@ -738,18 +808,18 @@ class doFit_wj_and_wlvj:
 
       
       if options.fitTT:
-        self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_TTbar_mc,"_TTbar_realW")
-        self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_TTbar_mc,"_TTbar_fakeW")
+        self.get_mj_dataset(self.file_TTbar_mc,"_TTbar_realW")
+        self.get_mj_dataset(self.file_TTbar_mc,"_TTbar_fakeW")
 
         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbar_realW",self.mj_shape["TTbar_realW"],self.channel,self.wtagger_label)
         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbar_realW_failtau2tau1cut",self.mj_shape["TTbar_realW_fail"],self.channel,self.wtagger_label)
         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbar_fakeW",self.mj_shape["TTbar_fakeW"],self.channel,self.wtagger_label)
         fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbar_fakeW_failtau2tau1cut",self.mj_shape["TTbar_fakeW_fail"],self.channel,self.wtagger_label)
       else:
-        self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_TTbar_mc,"_TTbar")
+        self.get_mj_dataset(self.file_TTbar_mc,"_TTbar")
 
-        #
-        ## Build single-t fit pass and fail distributions
+
+        # Build single-t fit pass and fail distributions
         print ""
         print ""
         print "##################################################"
@@ -758,7 +828,7 @@ class doFit_wj_and_wlvj:
         print ""
         print ""
 
-        self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_STop_mc,"_STop")
+        self.get_mj_dataset(self.file_STop_mc,"_STop")
 
         fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STop"                        ,self.mj_shape["STop"],self.channel,self.wtagger_label) #Start value and range of parameters defined in PDFs/MakePDF.cxx
         fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STop_failtau2tau1cut"        ,self.mj_shape["STop_fail"],self.channel,self.wtagger_label)
@@ -773,7 +843,7 @@ class doFit_wj_and_wlvj:
         print ""
         print ""
 
-        self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_WJets0_mc,"_WJets0")
+        self.get_mj_dataset(self.file_WJets0_mc,"_WJets0")
 
         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0",self.mj_shape["WJets0"],self.channel,self.wtagger_label)
         fit_mj_single_MC(self.workspace4fit_,self.file_WJets0_mc,"_WJets0_failtau2tau1cut",self.mj_shape["WJets0_fail"],self.channel,self.wtagger_label)
@@ -788,7 +858,7 @@ class doFit_wj_and_wlvj:
         print ""
         print ""
 
-        self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_VV_mc,"_VV")
+        self.get_mj_dataset(self.file_VV_mc,"_VV")
 
         fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV",self.mj_shape["VV"],self.channel,self.wtagger_label)
         fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV_failtau2tau1cut",self.mj_shape["VV_fail"],self.channel,self.wtagger_label)
@@ -799,14 +869,14 @@ class doFit_wj_and_wlvj:
         print "################################################"
         print ""
         print ""
-        self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_pseudodata,"_TotalMC")
+        self.get_mj_dataset(self.file_pseudodata,"_TotalMC")
 
         print "#################################"
         print "############# Data ##############"
         print "#################################"
         print ""
         print ""
-        self.get_mj_and_mlvj_dataset_TTbar_controlsample(self.file_data,"_data")
+        self.get_mj_dataset(self.file_data,"_data")
 
 
         # self.print_yields()
@@ -886,9 +956,16 @@ class doFit_wj_and_wlvj:
         self.file_out_ttbar_control.write("wtagger_eff_reweight   = %s +/- %s\n"%(wtagger_eff_reweight, wtagger_eff_reweight_err))
             
     # Loop over trees
-    def get_mj_and_mlvj_dataset_TTbar_controlsample(self,in_file_name, label, jet_mass="Whadr_pruned"): 
+    def get_mj_dataset(self,in_file_name, label, jet_mass="Whadr_pruned"): 
+      
+      if options.usePuppiSD: jet_mass="Whadr_puppi_softdrop"
+      
+      print "Using mass variable " ,jet_mass
     
       fileIn_name = TString(self.file_Directory+in_file_name)
+      
+      print "Using file " ,fileIn_name
+      
       fileIn      = TFile(fileIn_name.Data())
       treeIn      = fileIn.Get("tree")
       
@@ -962,6 +1039,12 @@ class doFit_wj_and_wlvj:
                 
           discriminantCut = 0
           wtagger = getattr(treeIn,"Whadr_tau21")
+          if options.useDDT:
+            wtagger = getattr(treeIn,"Whadr_puppi_tau2")/getattr(treeIn,"Whadr_puppi_tau1")+ (0.063 * math.log( (pow( getattr(treeIn,"Whadr_puppi_softdrop"),2))/getattr(treeIn,"Whadr_puppi_pt") ))
+          # print "Puppi tau21 " ,getattr(treeIn,"Whadr_puppi_tau2")/getattr(treeIn,"Whadr_puppi_tau1")
+          # print "Puppi softdrop " ,getattr(treeIn,"Whadr_puppi_softdrop")
+          # print "Puppi pt " ,getattr(treeIn,"Whadr_puppi_pt")
+          # print "Puppi ddt " ,wtagger
 
           if wtagger <= options.tau2tau1cutHP: # HP
               discriminantCut = 2

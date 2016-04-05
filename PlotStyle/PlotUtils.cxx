@@ -333,7 +333,7 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
     TObject*  theObj = plot->getObject(obj);
     std::string objTitle = objName;
     std::string drawoption= plot->getDrawOptions(objName.c_str()).Data();
-    if(drawoption == "P") drawoption = "PE";
+    if(drawoption == "P") drawoption = "pe";
     if(TString(objName).Contains("Uncertainty") or TString(objName).Contains("sigma")){ 
      objName_before = objName; 
      continue ;
@@ -365,7 +365,9 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
        TObject* theObj = plot->getObject(obj);
        std::string objTitle = objName;
        std::string drawoption = plot->getDrawOptions(objName.c_str()).Data();
-       if(drawoption == "P") drawoption = "PE";
+       const char *label = drawoption.c_str();
+       if((label != NULL) && (label[0] == '\0')) label = "pe";
+       if(drawoption == "P") drawoption = "pe";
        if(TString(objName).Contains("Uncertainty") or TString(objName).Contains("sigma")){
         objName_before = objName;
         continue ;
@@ -375,7 +377,7 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
          continue ;
        }
        else if(TString(objName).Contains("WJets")){
-        theLeg->AddEntry(theObj, "W+jets","F");
+        theLeg->AddEntry(theObj, "W+jets",label);
         objName_before = objName;
        }
        else{
@@ -399,17 +401,21 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
          TObject* theObj = plot->getObject(obj);
          std::string objTitle = objName;
          std::string drawoption = plot->getDrawOptions(objName.c_str()).Data();
-         if(drawoption == "P") drawoption = "PE";
+         const char *label = drawoption.c_str();
+         if(drawoption == "P") drawoption = "pe";
+         if((label != NULL) && (label[0] == '\0')) label = "pe";
          if(TString(objName).Contains("Uncertainty") or TString(objName).Contains("sigma"))
-             theLeg->AddEntry(theObj, objName.c_str(),"F");
+             theLeg->AddEntry(theObj, objName.c_str(),label);
          else if(TString(objName).Contains("Graph")){
               if(not (objName_before == "Graph" or objName_before == "Uncertainty"))
-               theLeg->AddEntry(theObj, "Uncertainty","F");
+               theLeg->AddEntry(theObj, "Uncertainty",label);
 	 }
          else{
-               if(TString(objName) == "STop") theLeg->AddEntry(theObj, "Single Top","F");
-               else if(TString(objName).Contains("TTbar")) theLeg->AddEntry(theObj, "t#bar{t}","F");
-               else if(TString(objName).Contains("VV"))    theLeg->AddEntry(theObj, "WW/WZ/ZZ","F");
+               if(TString(objName) == "STop") theLeg->AddEntry(theObj, "Single Top",label);
+               else if(TString(objName).Contains("TTbar")) theLeg->AddEntry(theObj, "t#bar{t}",label);
+               else if(TString(objName).Contains("TTbar_real")) theLeg->AddEntry(theObj, "t#bar{t}","pe");
+               else if(TString(objName).Contains("TTbar_fake")) theLeg->AddEntry(theObj, "t#bar{t}","pe");
+               else if(TString(objName).Contains("VV"))    theLeg->AddEntry(theObj, "WW/WZ/ZZ",label);
                else if(TString(objName).Contains("data")) { objName_before = objName; entryCnt = entryCnt+1; continue;}
                else if(TString(objName).Contains("WJets")){ objName_before = objName; entryCnt = entryCnt+1; continue;}
                else if(TString(objName).Contains("Uncertainty"))
@@ -704,9 +710,9 @@ void setTDRStyle(){
 
 float GetLumi(const std::string & channel){
  
-  if(channel=="el") return 2.1;
-  else if(channel=="mu") return 2.1;
-  else if(channel=="em") return 2.1;
+  if(channel=="el") return 2.3;
+  else if(channel=="mu") return 2.3;
+  else if(channel=="em") return 2.3;
 
   return -1 ;
 }
