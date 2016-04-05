@@ -9,11 +9,11 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
 
   // make the extended model  
   std::vector<std::string>* constraint_list = new std::vector<std::string>(); 
-  RooExtendPdf* model_pdf = MakeExtendedModel(workspace,label+model,model,"_mj",channel,wtagger_label,constraint_list);
+  RooExtendPdf* model_pdf = MakeExtendedModel(workspace,label,model,"_mj",channel,wtagger_label,constraint_list);
 
   RooFitResult* rfresult = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2"),RooFit::Verbose(kFALSE));
   rfresult               = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2"),RooFit::Verbose(kFALSE));
-  rfresult               = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2"),RooFit::Verbose(kFALSE));
+  rfresult               = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2"));
   
   std::cout<<""<<std::endl;
   std::cout<<""<<std::endl;
@@ -50,11 +50,17 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
   //## draw the function
   model_pdf->plotOn(mplot,RooFit::VisualizeError(*rfresult,1), RooFit::Name("Fit error"),RooFit::FillColor(kRed-7),RooFit::LineColor(kRed-7)); // remove RooFit.VLines() in order to get right pull in the 1st bin
   model_pdf->plotOn(mplot,RooFit::Name( (model).c_str() ),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+1)); // remove RooFit.VLines() in order to get right pull in the 1st bin
+  model_pdf->plotOn(mplot,RooFit::Components("gaus1*"),RooFit::VisualizeError(*rfresult,1), RooFit::Name("Fit error"),RooFit::FillColor(kRed-7),RooFit::LineColor(kRed-7));
+  model_pdf->plotOn(mplot,RooFit::Components("gaus2*"),RooFit::VisualizeError(*rfresult,1), RooFit::Name("Fit error"),RooFit::FillColor(kRed-7),RooFit::LineColor(kRed-7));
+  model_pdf->plotOn(mplot,RooFit::Components("gaus*"),RooFit::VisualizeError(*rfresult,1), RooFit::Name("Fit error"),RooFit::FillColor(kRed-7),RooFit::LineColor(kRed-7));
+  model_pdf->plotOn(mplot,RooFit::Components("erfExp*"),RooFit::VisualizeError(*rfresult,1), RooFit::Name("Fit error"),RooFit::FillColor(kRed-7),RooFit::LineColor(kRed-7));
+  model_pdf->plotOn(mplot,RooFit::Components("exp*"),RooFit::VisualizeError(*rfresult,1), RooFit::Name("Fit error"),RooFit::FillColor(kRed-7),RooFit::LineColor(kRed-7));
+  model_pdf->plotOn(mplot,RooFit::Components("cheb*"),RooFit::VisualizeError(*rfresult,1), RooFit::Name("Fit error"),RooFit::FillColor(kRed-7),RooFit::LineColor(kRed-7));
   model_pdf->plotOn(mplot,RooFit::Name( "Gaussian comp. 1" ),RooFit::Components("gaus1*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+3));
-  model_pdf->plotOn(mplot,RooFit::Name( "Gaussian comp. 2" ),RooFit::Components("gaus2*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+3));
+  model_pdf->plotOn(mplot,RooFit::Name( "Gaussian comp. 2" ),RooFit::Components("gaus2*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+4));
   model_pdf->plotOn(mplot,RooFit::Name( "Gaussian comp." ),RooFit::Components("gaus*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+3));
   model_pdf->plotOn(mplot,RooFit::Name( "ErfExp comp." ),RooFit::Components("erfExp*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+3));
-  model_pdf->plotOn(mplot,RooFit::Name( "Exp. comp." ),RooFit::Components("exp*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+3));
+  model_pdf->plotOn(mplot,RooFit::Name( "Exp. comp." ),RooFit::Components("exp*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+2));
   model_pdf->plotOn(mplot,RooFit::Name( "Chebychev comp." ),RooFit::Components("cheb*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+3));
 
   //## re-draw the dataset
@@ -97,8 +103,9 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
   command.Form("plots/plots_%s_%s_MCfits/",channel.c_str(),wtagger_label.c_str());
   draw_canvas_with_pull(mplot,mplot_pull,new RooArgList(*parameters_list),std::string(command.Data()),label+fileName,model,channel,0,0,GetLumi());
   
-  workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setVal(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getVal()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
-  workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+model+"_"+channel+"_mj").c_str())->getError()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
+  workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->setVal(workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->getVal()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
+  workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->getError()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
+
 }
 
 // method to do fail and pass fit for the scale factor evaluation                                                                                                                      
