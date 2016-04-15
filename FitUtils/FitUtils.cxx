@@ -71,6 +71,7 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
   //## Get the pull
   RooPlot* mplot_pull = get_ratio(rrv_mass_j,rdataset_mj,model_pdf,rfresult,0,1);
   mplot->GetYaxis()->SetRangeUser(0,mplot->GetMaximum()*1.2);
+  mplot->GetYaxis()->SetTitle(" MC events / 5 GeV");
 
   //## CALCULATE CHI2
   RooDataHist* datahist = rdataset_mj->binnedClone((std::string(rdataset_mj->GetName())+"_binnedClone").c_str(),(std::string(rdataset_mj->GetName())+"_binnedClone").c_str());
