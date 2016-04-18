@@ -53,3 +53,10 @@ It takes as input .root files containing a TTree with a branch for the mass dist
     --fitTT : Only do fits to truth matched tt MC
     --sample : pass different TT MC eg --sample "_herwig"
 ```
+In class "initialiseFits" in wtagSFfit_run2exoVV.py, define the fir functions you wish to use for each fit category in the map "mj_shape"
+```
+    self.mj_shape["bkg_mc_fail"]          = "ErfExp_ttbar_failtau2tau1cut"
+    self.mj_shape["bkg_data_fail"]        = "ErfExp_ttbar_failtau2tau1cut" 
+
+```
+These fit functions are defined in the script "PDF/MakePdf.cxx". An appropriate starting value and range need to be set for all parameters. When no range is defined, the parameter is set to constant.
