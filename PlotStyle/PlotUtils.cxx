@@ -114,15 +114,15 @@ RooPlot* get_ratio(RooRealVar* rrv_x, RooDataSet* rdataset, RooAbsPdf* model, Ro
 
   double alpha = 1 - 0.6827;
   for( int iPoint = 0 ; iPoint < data_plot->GetN(); iPoint++){
-   double N = data_plot->GetY()[iPoint];
-   double L , U ;
-   if(N==0) L = 0;
-   else L = (ROOT::Math::gamma_quantile(alpha/2,N,1.));
-   U =  ROOT::Math::gamma_quantile_c(alpha/2,N+1,1);
-   data_plot->SetPointEYlow(iPoint,N-L);
-   data_plot->SetPointEYhigh(iPoint,U-N);
-   data_plot->SetPointEXlow(iPoint,0);
-   data_plot->SetPointEXhigh(iPoint,0);
+   // double N = data_plot->GetY()[iPoint];
+   // double L , U ;
+   // if(N==0) L = 0;
+   // else L = (ROOT::Math::gamma_quantile(alpha/2,N,1.));
+   // U =  ROOT::Math::gamma_quantile_c(alpha/2,N+1,1);
+   // data_plot->SetPointEYlow(iPoint,N-L);
+   // data_plot->SetPointEYhigh(iPoint,U-N);
+   // data_plot->SetPointEXlow(iPoint,0);
+   // data_plot->SetPointEXhigh(iPoint,0);
   }
 
   RooHist* ratio_plot  = new RooHist();
@@ -412,16 +412,18 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
 	 }
          else{
                if(TString(objName) == "STop") theLeg->AddEntry(theObj, "Single Top",label);
+               else if(TString(objName).Contains("_TTbar_realW_failtau2tau1cut")) theLeg->AddEntry(theObj, "t#bar{t} (W-jet)","ple");
+               else if(TString(objName).Contains("_TTbar_realW")) theLeg->AddEntry(theObj, "t#bar{t} (W-jet)","ple");
+               else if(TString(objName).Contains("_TTbar_fakeW_failtau2tau1cut")) theLeg->AddEntry(theObj, "t#bar{t} (non-W)","ple");
+               else if(TString(objName).Contains("_TTbar_fakeW")) theLeg->AddEntry(theObj, "t#bar{t} (non-W)","ple");
                else if(TString(objName).Contains("TTbar")) theLeg->AddEntry(theObj, "t#bar{t}",label);
-               else if(TString(objName).Contains("TTbar_real")) theLeg->AddEntry(theObj, "t#bar{t}","pe");
-               else if(TString(objName).Contains("TTbar_fake")) theLeg->AddEntry(theObj, "t#bar{t}","pe");
                else if(TString(objName).Contains("VV"))    theLeg->AddEntry(theObj, "WW/WZ/ZZ",label);
                else if(TString(objName).Contains("data")) { objName_before = objName; entryCnt = entryCnt+1; continue;}
                else if(TString(objName).Contains("WJets")){ objName_before = objName; entryCnt = entryCnt+1; continue;}
                else if(TString(objName).Contains("Uncertainty"))
                  theLeg->AddEntry(theObj,objTitle.c_str(),drawoption.c_str());
                else theLeg->AddEntry(theObj,objTitle.c_str(),drawoption.c_str());
-	 }
+             }
          entryCnt = entryCnt+1;
       }
       objName_before = objName;
