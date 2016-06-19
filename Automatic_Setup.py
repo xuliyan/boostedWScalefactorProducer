@@ -48,11 +48,11 @@ if __name__ == "__main__":
   ROOT.gROOT.ProcessLine(".L MakePdf.cxx+");
   ROOT.gSystem.Load("MakePdf_cxx.so");
 
-  # os.chdir(inPath+"/BiasStudy");
-  #
-  # if options.vclean : os.system("rm BiasUtils_cxx.so");
-  # ROOT.gROOT.ProcessLine(".L BiasUtils.cxx+");
-  # ROOT.gSystem.Load("BiasUtils_cxx.so");
+  os.chdir(inPath+"/BiasStudy");
+
+  if options.vclean : os.system("rm BiasUtils_cxx.so");
+  ROOT.gROOT.ProcessLine(".L BiasUtils.cxx+");
+  ROOT.gSystem.Load("BiasUtils_cxx.so");
   
   os.chdir(inPath+"/FitUtils");
 
