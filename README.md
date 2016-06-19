@@ -5,8 +5,8 @@
 ## installation instructions
 ```
 export SCRAM_ARCH=slc6_amd64_gcc491
-cmsrel CMSSW_7_1_5_patch2
-cd CMSSW_7_1_5_patch2/src
+cmsrel CMSSW_7_1_5
+cd CMSSW_7_1_5/src
 cmsenv
 
 ```
@@ -31,25 +31,28 @@ cd boostedWScalefactorProducer
 
 ```
 python Automatic_Setup.py
-python wtagSFfit_run2exoVV.py -b
+python wtagSFfits.py -b
 ```
 
 The basic script to be run is 
 
 ```
-python wtagSFfit_run2exoVV.py
+python wtagSFfits.py
 ```
-It takes as input .root files containing a TTree with a branch for the mass distribution you want to calculate a scalefactor for. This branch can contain events after full selection is applied, or new selections can be implemented on the fly in wtagSFfit_run2exoVV.py. In addition to a data and the separate background MC files, you need one file called "*pseudodata* wchich contains all MC added together (with their appropriate weights).
+It takes as input .root files containing a TTree with a branch for the mass distribution you want to calculate a scalefactor for. This branch can contain events after full selection is applied, or new selections can be implemented on the fly in wtagSFfits.py. In addition to a data and the separate background MC files, you need one file called "*pseudodata* wchich contains all MC added together (with their appropriate weights, using ROOT hadd).
 
    
    General Options:
 ```
     -b : To run without X11 windows
     -c : channel you are using(electron,muon or electron+muon added together)
-    -s : to do simoultaneous fit (true when running em channel"
-    --category  : HP or LP. Obsolete, HP and LP returned together
     --HP : HP working point
     --LP : LP working point
     --fitTT : Only do fits to truth matched tt MC
-    --sample : pass different TT MC eg --sample "_herwig"
+    --fitMC : Only do fits to MC (test fit functions)
+    --sample : name of TT MC eg --sample "herwig"
+    --doUnbinned : to do unbinned simultaneous fit
+    --76X : Use files with postfix "_76X" (change to postfix of your choice if running on several different samples)
+    --useDDT : Uses DDT tagger instead of pruning+softdrop (ops! Requires softdrop variables)
+    --usePuppiSD : Uses PUPPI + softdrop and PUPPI n-subjettiness
 ```
