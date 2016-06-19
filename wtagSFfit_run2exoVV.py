@@ -14,7 +14,7 @@ parser.add_option('--LP', action="store", type="float",dest="tau2tau1cutLP",defa
 parser.add_option('--sample', action="store",type="string",dest="sample",default="powheg")
 parser.add_option('--fitTT', action='store_true', dest='fitTT', default=False, help='Only do ttbar fits')
 parser.add_option('--fitMC', action='store_true', dest='fitMC', default=False, help='Only do MC fits')
-parser.add_option('--doBinned',dest="doBinnedFit", default=False, action="store_true", help="Do binned fit") ## Change default to true for now! More consistent and stable, SumW2 is buggy not used
+parser.add_option('--doUnbinned',dest="doUnbinnedFit", default=False, action="store_true", help="Do unbinned fit")
 parser.add_option('--76X',dest="use76X", default=False, action="store_true", help="Use 76X samples")
 parser.add_option('--useDDT',dest="useDDT", default=False, action="store_true", help="Use DDT tagger")
 parser.add_option('--usePuppiSD',dest="usePuppiSD", default=False, action="store_true", help="Use PUPPI+softdrop")
@@ -281,11 +281,8 @@ class doWtagFits:
         print "Printing workspace:"
         self.workspace4fit_.Print()
         
-        
-        
         print "#############"
-        self.boostedW_fitter_em.get_sim_fit_components()   
-        
+        self.boostedW_fitter_em.get_sim_fit_components()     
 
         #Defining categories
         sample_type = RooCategory("sample_type","sample_type")
@@ -296,14 +293,13 @@ class doWtagFits:
         rrv_mass_j = self.workspace4fit_.var("rrv_mass_j")
         rrv_weight = RooRealVar("rrv_weight","rrv_weight",0. ,10000000.)
         
-
         #-------------IMPORT DATA-------------
         #Importing datasets
         rdataset_data_em_mj      = self.workspace4fit_.data("rdataset_data_em_mj")
         rdataset_data_em_mj_fail = self.workspace4fit_.data("rdataset_data_failtau2tau1cut_em_mj")
 
         #For binned fit (shorter computing time, more presise when no SumW2Error is used!)
-        if options.doBinnedFit:
+        if not options.doUnbinnedFit:
 
           #Converting to RooDataHist
           rdatahist_data_em_mj      = RooDataHist(rdataset_data_em_mj.binnedClone())
@@ -330,7 +326,7 @@ class doWtagFits:
         rdataset_TotalMC_em_mj      = self.workspace4fit_.data("rdataset_TotalMC_em_mj")
         rdataset_TotalMC_em_mj_fail = self.workspace4fit_.data("rdataset_TotalMC_failtau2tau1cut_em_mj")
 
-        if options.doBinnedFit:
+        if not options.doUnbinnedFit:
           #Converting to RooDataHist
           rdatahist_TotalMC_em_mj      = RooDataHist(rdataset_TotalMC_em_mj.binnedClone())
           rdatahist_TotalMC_em_mj_fail = RooDataHist(rdataset_TotalMC_em_mj_fail.binnedClone())
@@ -360,7 +356,7 @@ class doWtagFits:
         simPdf_data.addPdf(model_data_em,"em_pass")
         simPdf_data.addPdf(model_data_fail_em,"em_fail")
 
-        #Import Gaussian constraints for fixed paramters to propagate error to likelihood
+        #Import Gaussian constraints to propagate error to likelihood
         constrainslist_data_em = ROOT.std.vector(ROOT.std.string)()
         for i in range(self.boostedW_fitter_em.constrainslist_data.size()):
             constrainslist_data_em.push_back(self.boostedW_fitter_em.constrainslist_data.at(i))
@@ -381,10 +377,7 @@ class doWtagFits:
         #Print final data fit results
         print "FIT parameters (DATA) :"; print ""
         print "CHI2 PASS = %.3f    CHI2 FAIL = %.3f" %(chi2PassData,chi2FailData)
-        print ""
-        print rfresult_data.Print()
-        print ""
-
+        print ""; print rfresult_data.Print(); print ""
 
         #-------------Define and perform fit to MC-------------
 
@@ -403,18 +396,16 @@ class doWtagFits:
         for i in range(constrainslist_TotalMC_em.size()):
           pdfconstrainslist_TotalMC_em.add(self.workspace4fit_.pdf(constrainslist_TotalMC_em[i]) )
 
-
         # Perform simoultaneous fit to MC
         rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))--> Removing due to unexected behaviour. See https://root.cern.ch/phpBB3/viewtopic.php?t=16917, https://root.cern.ch/phpBB3/viewtopic.php?t=16917
-        rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))
-        
+        rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))        
         
         chi2FailMC = drawFrameGetChi2(rrv_mass_j,rfresult_TotalMC,rdataset_TotalMC_em_mj_fail,model_TotalMC_fail_em)
         chi2PassMC = drawFrameGetChi2(rrv_mass_j,rfresult_TotalMC,rdataset_TotalMC_em_mj,model_TotalMC_em)
         
         #Print final MC fit results
         print "FIT Par. (MC) :"; print ""
-        print "CHI2 PASS= " ,chi2PassMC ; print "CHI2 FAIL= " ,chi2FailMC
+        print "CHI2 PASS = %.3f    CHI2 FAIL = %.3f" %(chi2PassMC,chi2FailMC)
         print ""; print rfresult_TotalMC.Print(); print ""
         
         # draw the final fit results
@@ -422,35 +413,34 @@ class doWtagFits:
        
         # Get W-tagging scalefactor and efficiencies
         GetWtagScalefactors(self.workspace4fit_,self.boostedW_fitter_em)
-
+        
+        # Delete workspace
         del self.workspace4fit_
 
 class initialiseFits:
 
-    ## COnstructor: Input is channel (mu,ele,em), range in mj and a workspace
+    # Constructor: Input is channel (mu,ele,em), range in mj and a workspace
     def __init__(self, in_channel, in_sample, in_mj_min=40, in_mj_max=130, input_workspace=None):
       
       RooAbsPdf.defaultIntegratorConfig().setEpsRel(1e-9)
       RooAbsPdf.defaultIntegratorConfig().setEpsAbs(1e-9)
       
-      ### set the channel type
+      # Set channel 
       self.channel = in_channel
       
       print "CHANNEL = %s" %in_channel
       print "Using Tau21 HP cut of " ,options.tau2tau1cutHP 
 
-      ### Fit shapes to be used (defined in PDFs/MakePdf.cxx)                                                                                                                                         
+      # Map of shapes to be used for the various fits (defined in PDFs/MakePdf.cxx)                                                                                                                                         
       self.mj_shape = ROOT.std.map(ROOT.std.string,ROOT.std.string)()
       
-      # Fit functions to matched tt MC
-      self.mj_shape["TTbar_realW"]      = "GausErfExp_ttbar"
-      # self.mj_shape["TTbar_realW"]      = "2Gaus_ttbar"
-      self.mj_shape["TTbar_realW_fail"] = "GausErfExp_ttbar_failtau2tau1cut"
-      # self.mj_shape["TTbar_realW_fail"] = "GausChebychev_ttbar_failtau2tau1cut"
+      # Fit functions for matched tt MC
+      self.mj_shape["TTbar_realW"]      = "GausErfExp_ttbar" #before "2Gaus_ttbar"
+      self.mj_shape["TTbar_realW_fail"] = "GausErfExp_ttbar_failtau2tau1cut" #before "GausChebychev_ttbar_failtau2tau1cut"
       self.mj_shape["TTbar_fakeW"]      = "ErfExp_ttbar"
       self.mj_shape["TTbar_fakeW_fail"] = "ErfExp_ttbar_failtau2tau1cut"
       
-      # Fit functions to minor backgrounds
+      # Fit functions for minor backgrounds
       self.mj_shape["VV"]                 = "ExpGaus"
       self.mj_shape["VV_fail"]            = "ExpGaus"
       self.mj_shape["WJets0"]             = "ErfExp"
@@ -458,8 +448,7 @@ class initialiseFits:
       self.mj_shape["STop"]               = "ErfExpGaus_sp"       
       self.mj_shape["STop_fail"]          = "ExpGaus"  
           
-      if (options.tau2tau1cutHP==0.60):
-        self.mj_shape["VV"]                 = "ErfExpGaus_sp"
+      if (options.tau2tau1cutHP==0.60): self.mj_shape["VV"]                 = "ErfExpGaus_sp"
         
       if (options.useDDT):
         self.mj_shape["VV"]                 = "ExpGaus"
@@ -481,23 +470,19 @@ class initialiseFits:
       self.mj_shape["signal_mc"]            = "GausErfExp_ttbar"
       
       if (options.useDDT): 
-        self.mj_shape["signal_data"]          = "GausErfExp_ttbar"
-        self.mj_shape["signal_mc"]            = "GausErfExp_ttbar"
-        self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut" #Before GausChebychev_ttbar_failtau2tau1cut
+        self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut" 
         self.mj_shape["signal_data_fail"]     = "GausChebychev_ttbar_failtau2tau1cut"
       
-      # #TESTS FOR FIXED PARAMETERS!
+      # #TESTS USING OLD METHOD, EG ADDING TWO ADDITIONAL FIT FUNCTIONS
       # self.mj_shape["signal_data"]          = "2Gaus_ttbar"
       # self.mj_shape["signal_mc"]            = "2Gaus_ttbar"
-      # self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut" #Before GausChebychev_ttbar_failtau2tau1cut
+      # self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut"
       # self.mj_shape["signal_data_fail"]     = "GausChebychev_ttbar_failtau2tau1cut"
-
-        
+      
       #Set lumi  
       self.Lumi=2198. #74
       if options.use76X: self.Lumi=2300. #76
-      
-      
+          
       self.BinWidth_mj = 5.
       self.narrow_factor = 1.
 
@@ -558,8 +543,7 @@ class initialiseFits:
       if options.usePuppiSD: 
         postfix = postfix + "_PuppiSD"
       if options.useDDT: 
-        postfix = postfix + "_PuppiSD_DDT"
-        
+        postfix = postfix + "_PuppiSD_DDT"    
       
       # Define label used for plots and choosing fit paramters in PDFs/MakePdf.cxx  
       wp = "%.2f" %options.tau2tau1cutHP
@@ -588,11 +572,10 @@ class initialiseFits:
       self.AK8_pt_max   = 5000  
       if self.channel  == "el":
         self.pfMET_cut = 80
-        self.lpt_cut = 120
-        
+        self.lpt_cut = 120      
       
       # Out .txt file with final SF numbers
-      self.file_ttbar_control_txt = "WtaggingSF_%s%.2f%s.txt"%(self.channel,options.tau2tau1cutHP,options.sample)
+      self.file_ttbar_control_txt = "WtaggingSF.txt"
       self.file_out_ttbar_control = open(self.file_ttbar_control_txt,"w")
                                                                                                                                                              
       setTDRStyle()
@@ -669,7 +652,7 @@ class initialiseFits:
         
       #Construct pass/fail models (fix minor backgrounds, create sim. fit total PDFS)
       ScaleFactorTTbarControlSampleFit(self.workspace4fit_,self.mj_shape,self.color_palet,self.constrainslist_data,self.constrainslist_mc,"",self.channel,self.wtagger_label,self.AK8_pt_min,self.AK8_pt_max)
-      
+     
       #Get data/MC scalefactors
       rrv_scale_number                      = self.workspace4fit_.var("rrv_scale_number_TTbar_STop_VV_WJets").getVal()
       rrv_scale_number_fail                 = self.workspace4fit_.var("rrv_scale_number_TTbar_STop_VV_WJets_fail").getVal()
@@ -984,7 +967,6 @@ class initialiseFits:
       rrv_number_dataset_signal_region_before_cut_error2_mj.Print()
       combData_p_f.Print("v")
       
-
 ### Start  main
 if __name__ == '__main__':
     channel = options.channel ## ele, mu or ele+mu combined
