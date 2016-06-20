@@ -18,8 +18,9 @@ parser.add_option('--vclean', help='clean all the so files', type=int, default=0
 
 (options, args) = parser.parse_args()
 
-
 if __name__ == "__main__":
+  
+  # os.environ['ROOFITSYS'] = "ROOTSYS" # export ROOFITSYS=$ROOTSYS
 
   ROOT.gSystem.AddIncludePath("-I$ROOFITSYS/include");
 

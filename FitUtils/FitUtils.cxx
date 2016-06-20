@@ -2,146 +2,111 @@
 
 void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, const std::string & label, const std::string & model,const std::string & channel,const std::string & wtagger_label){
 
-  std::cout<<" Fit mj single MC sample"<<fileName<<" "<<label<<"  "<<model<<std::endl;
-  //import variable and dataset
-  RooRealVar* rrv_mass_j  = workspace->var("rrv_mass_j");
-  RooDataSet* rdataset_mj = (RooDataSet*) workspace->data(("rdataset4fit"+label+"_"+channel+"_mj").c_str());
+	std::cout<<" Fit mj single MC sample"<<fileName<<" "<<label<<"  "<<model<<std::endl;
+	//import variable and dataset
+	RooRealVar* rrv_mass_j  = workspace->var("rrv_mass_j");
+	RooDataSet* rdataset_mj = (RooDataSet*) workspace->data(("rdataset4fit"+label+"_"+channel+"_mj").c_str());
 
-  // make the extended model  
-  std::vector<std::string>* constraint_list = new std::vector<std::string>(); 
-  RooExtendPdf* model_pdf = MakeExtendedModel(workspace,label,model,"_mj",channel,wtagger_label,constraint_list);
+	// make the extended model  
+	std::vector<std::string>* constraint_list = new std::vector<std::string>(); 
+	RooExtendPdf* model_pdf = MakeExtendedModel(workspace,label,model,"_mj",channel,wtagger_label,constraint_list);
 
-  RooFitResult* rfresult = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2"),RooFit::Verbose(kFALSE));
-  rfresult               = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2"),RooFit::Verbose(kFALSE));
-  rfresult               = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2"));
+	RooFitResult* rfresult = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2"),RooFit::Verbose(kFALSE));
+	rfresult               = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2"),RooFit::Verbose(kFALSE));
+	rfresult               = model_pdf->fitTo(*rdataset_mj,RooFit::Save(1),RooFit::SumW2Error(kTRUE),RooFit::Extended(kTRUE), RooFit::Minimizer("Minuit2"));
   
 
-  std::cout<<""<<std::endl;std::cout<<""<<std::endl;
-  std::cout<<"PRINTING FIT RESULT!!!!!!!"<<std::endl;
-  rfresult->Print();
-  std::cout<<""<<std::endl;std::cout<<""<<std::endl;
+	std::cout<<""<<std::endl;std::cout<<""<<std::endl;
+	std::cout<<"PRINTING FIT RESULT!!!!!!!"<<std::endl;
+	rfresult->Print();
+	std::cout<<""<<std::endl;std::cout<<""<<std::endl;
 
 
-  //##### apply the correction of the mean and sigma from the ttbar control sample to the STop, TTbar and VV
-  RooArgSet* parameters_list = model_pdf->getParameters(*rdataset_mj);
-  TIter par = parameters_list->createIterator();
-  par.Reset();
+	//##### apply the correction of the mean and sigma from the ttbar control sample to the STop, TTbar and VV
+	RooArgSet* parameters_list = model_pdf->getParameters(*rdataset_mj);
+	TIter par = parameters_list->createIterator();
+	par.Reset();
+
+	// par=parameters_list.createIterator();
+	// par.Reset();
+	// param=par.Next()
+	// while (param):
+	//      if (TString(label).Contains("VV") or TString(label).Contains("STop") or TString(label).Contains("TTbar")) and (not (options.fitwtaggersim or options.fitwtagger)):
+	//          #param.Print();
+	//          if TString(param.GetName()).Contains("rrv_mean1_gaus"):
+	//              param.setRange(param.getMin()+self.mean_shift, param.getMax()+self.mean_shift);
+	//              param.setVal(param.getVal()+self.mean_shift);
+	//              #param.Print(); raw_input("mean"+label);
+	//          if TString(param.GetName()).Contains("rrv_deltamean_gaus"):
+	//              param.setRange(param.getMin()-self.mean_shift, param.getMax()-self.mean_shift);
+	//              param.setVal(param.getVal()-self.mean_shift);
+	//              #param.Print(); raw_input("mean"+label);
+	//          if TString(param.GetName()).Contains("rrv_sigma1_gaus"):
+	//              param.setVal(param.getVal()*self.sigma_scale);
+	//              param.setRange(param.getMin()*self.sigma_scale, param.getMax()*self.sigma_scale);
+	//              #param.Print(); raw_input("sigma"+label);
+	//          if TString(param.GetName()).Contains("rrv_scalesigma_gaus"):
+	//              param.setRange(param.getMin()/self.sigma_scale, param.getMax()/self.sigma_scale);
+	//              param.setVal(param.getVal()/self.sigma_scale);
+	//              #param.Print(); raw_input("sigma"+label);
+	//      param=par.Next()
   
-  workspace->import(*model_pdf);
-  workspace->import(*rfresult);
   
-  std::cout<<" Plot name = " << (label+" fitted by "+model).c_str() << std::endl;
-
-
-  // Plot the result
-  RooPlot* mplot = rrv_mass_j->frame(RooFit::Title((label+" fitted by "+model).c_str()), RooFit::Bins(int(rrv_mass_j->getBins())));
-  mplot->GetYaxis()->SetRangeUser(0,mplot->GetMaximum()*1.2);
-  rdataset_mj->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0),RooFit::Invisible());
+	workspace->import(*model_pdf);
+	workspace->import(*rfresult);
   
+	std::cout<<" Plot name = " << (label+" fitted by "+model).c_str() << std::endl;
 
-  // ## draw the error band for an extend pdf
-  draw_error_band_extendPdf(rdataset_mj,model_pdf,rfresult,mplot,2,"L");
-  model_pdf->plotOn(mplot,RooFit::Name( "Gaussian comp. 1" ),RooFit::Components("gaus1*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+3));
-  model_pdf->plotOn(mplot,RooFit::Name( "Gaussian comp. 2" ),RooFit::Components("gaus2*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+4));
-  model_pdf->plotOn(mplot,RooFit::Name( "ErfExp comp." ),RooFit::Components("erfExp*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+3));
-  model_pdf->plotOn(mplot,RooFit::Name( "Exp. comp." ),RooFit::Components("exp*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+2));
-  model_pdf->plotOn(mplot,RooFit::Name( "Chebychev comp." ),RooFit::Components("cheb*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+3));
-  model_pdf->plotOn(mplot,RooFit::Name((model).c_str() )); // remove RooFit.VLines() in order to get right pull in the 1st bin
-
-  //## draw the function
-  // model_pdf->plotOn(mplot,RooFit::VisualizeError(*rfresult,1), RooFit::Name("Fit error"),RooFit::FillColor(kRed-7),RooFit::LineColor(kRed-7)); // remove RooFit.VLines() in order to get right pull in the 1st bin
-  // model_pdf->plotOn(mplot,RooFit::Name( (model).c_str() ),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+1)); // remove RooFit.VLines() in order to get right pull in the 1st bin
-  // model_pdf->plotOn(mplot,RooFit::Components("gaus1*"),RooFit::VisualizeError(*rfresult,1), RooFit::Name("Fit error"),RooFit::FillColor(kRed-7),RooFit::LineColor(kRed-7));
-  // model_pdf->plotOn(mplot,RooFit::Components("gaus2*"),RooFit::VisualizeError(*rfresult,1), RooFit::Name("Fit error"),RooFit::FillColor(kRed-7),RooFit::LineColor(kRed-7));
-  // model_pdf->plotOn(mplot,RooFit::Components("erfExp*"),RooFit::VisualizeError(*rfresult,1), RooFit::Name("Fit error"),RooFit::FillColor(kRed-7),RooFit::LineColor(kRed-7));
-  // model_pdf->plotOn(mplot,RooFit::Components("exp*"),RooFit::VisualizeError(*rfresult,1), RooFit::Name("Fit error"),RooFit::FillColor(kRed-7),RooFit::LineColor(kRed-7));
-  // model_pdf->plotOn(mplot,RooFit::Components("cheb*"),RooFit::VisualizeError(*rfresult,1), RooFit::Name("Fit error"),RooFit::FillColor(kRed-7),RooFit::LineColor(kRed-7));
+	// Plot the result
+	RooPlot* mplot = rrv_mass_j->frame(RooFit::Title((label+" fitted by "+model).c_str()), RooFit::Bins(int(rrv_mass_j->getBins())));
+	mplot->GetYaxis()->SetRangeUser(0,mplot->GetMaximum()*1.2);
+	rdataset_mj->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0),RooFit::Invisible());
   
 
-  //## re-draw the dataset
-  rdataset_mj->plotOn(mplot,RooFit::MarkerSize(1.),RooFit::Name( (label).c_str() ), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(1));
-  TLegend* leg1 = legend4Plot(mplot,1,-0.2,0.15,0.00,0.,0,channel);
-  mplot->addObject(leg1);
+	// ## draw the error band for an extend pdf
+	draw_error_band_extendPdf(rdataset_mj,model_pdf,rfresult,mplot,2,"L");
+	model_pdf->plotOn(mplot,RooFit::Name( "Gaussian comp. 1" ),RooFit::Components("gaus1*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+3));
+	model_pdf->plotOn(mplot,RooFit::Name( "Gaussian comp. 2" ),RooFit::Components("gaus2*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+4));
+	model_pdf->plotOn(mplot,RooFit::Name( "ErfExp comp." ),RooFit::Components("erfExp*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+3));
+	model_pdf->plotOn(mplot,RooFit::Name( "Exp. comp." ),RooFit::Components("exp*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+2));
+	model_pdf->plotOn(mplot,RooFit::Name( "Chebychev comp." ),RooFit::Components("cheb*"),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed+3));
+	model_pdf->plotOn(mplot,RooFit::Name((model).c_str() )); // remove RooFit.VLines() in order to get right pull in the 1st bin
 
-  //## Get the pull
-  RooPlot* mplot_pull = get_ratio(rrv_mass_j,rdataset_mj,model_pdf,rfresult,0,1);
-  mplot->GetYaxis()->SetRangeUser(0,mplot->GetMaximum()*1.2);
-  mplot->GetYaxis()->SetTitle(" MC events / 5 GeV");
+	//## re-draw the dataset
+	rdataset_mj->plotOn(mplot,RooFit::MarkerSize(1.),RooFit::Name( (label).c_str() ), RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(1));
+	TLegend* leg1 = legend4Plot(mplot,1,-0.2,0.15,0.00,0.,0,channel);
+	mplot->addObject(leg1);
 
-  // //## CALCULATE CHI2
-  // RooDataHist* datahist = rdataset_mj->binnedClone((std::string(rdataset_mj->GetName())+"_binnedClone").c_str(),(std::string(rdataset_mj->GetName())+"_binnedClone").c_str());
-  // int Nbin = int(rrv_mass_j->getBins());
-  // RooArgList rresult_param = rfresult->floatParsFinal();
-  // int nparameters =  rresult_param.getSize();
-  // RooAbsReal* ChiSquare = model_pdf->createChi2(*datahist,RooFit::Extended(kTRUE),RooFit::DataError(RooAbsData::SumW2));
-  // float chi_over_ndf= ChiSquare->getVal()/(Nbin - nparameters);
-  // std::cout<<"ChiSquare ==" << chi_over_ndf << std::endl;
-  // std::cout<<"ChiSquare ==" << chi_over_ndf << std::endl;
-  // std::cout<<"ChiSquare ==" << chi_over_ndf << std::endl;
-  // std::cout<<"ChiSquare ==" << chi_over_ndf << std::endl;
-  // std::cout<<"ChiSquare ==" << chi_over_ndf << std::endl;
-  // std::cout<<"ChiSquare ==" << chi_over_ndf << std::endl;
-  //
-  // //## Add Chisquare to mplot_pull
-  // TString Name ; Name.Form("#chi^{2}/ndf = %0.2f ",float(chi_over_ndf));
-  // TLatex* cs = new TLatex(0.75,0.8,Name.Data());
-  // cs->SetNDC();
-  // cs->SetTextSize(0.12);
-  // cs->AppendPad("same");
-  // mplot_pull->addObject(cs);
-  // TLegend* leg = legend4Plot(mplot_pull,1,-0.2,0.15,0.00,0.,0,channel);
-  // mplot_pull->addObject(leg);
-
+	//## Get the pull
+	RooPlot* mplot_pull = get_ratio(rrv_mass_j,rdataset_mj,model_pdf,rfresult,0,1);
+	mplot->GetYaxis()->SetRangeUser(0,mplot->GetMaximum()*1.2);
+	mplot->GetYaxis()->SetTitle(" MC events / 5 GeV");
   
-//
-// //## Plot the result
-//      RooPlot* mplot = rrv_mass_j->frame(RooFit::Title((label+" fitted by "+model).c_str()), RooFit::Bins(int(rrv_mass_j->getBins())));
-//      rdataset_mj->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2),RooFit::XErrorSize(0),RooFit::Invisible());
-//      std::cout<< "PRINTING MASS VARIABLE!!!: "<<std::endl;
-//      rdataset_mj->Print();
-//
-//      //## draw the error band for an extend pdf
-     // draw_error_band_extendPdf(rdataset_mj,model_pdf,rfresult,mplot,2,"L");
-//
-//      //## draw the function
-     // model_pdf->plotOn(mplot,RooFit::Name("model_mc")); // remove RooFit.VLines() in order to get right pull in the 1st bin
-//
-//      //## re-draw the dataset
-//      rdataset_mj->plotOn(mplot,RooFit::MarkerSize(1.5),RooFit::DataError(RooAbsData::SumW2), RooFit::XErrorSize(0),RooFit::Name("data"));
-//
-     //## Get the pull
-     // RooPlot* mplot_pull = get_ratio(rrv_mass_j,rdataset_mj,model_pdf,rfresult,0,1);
-     // mplot->GetYaxis()->SetRangeUser(0,mplot->GetMaximum()*1.2);
+	//## CALCULATE CHI2
+	RooDataHist* datahist = rdataset_mj->binnedClone((std::string(rdataset_mj->GetName())+"_binnedClone").c_str(),(std::string(rdataset_mj->GetName())+"_binnedClone").c_str());
+	int Nbin = int(rrv_mass_j->getBins());
+	RooArgList rresult_param = rfresult->floatParsFinal();
+	int nparameters =  rresult_param.getSize();
+	RooAbsReal* ChiSquare = model_pdf->createChi2(*datahist,RooFit::Extended(kTRUE),RooFit::DataError(RooAbsData::Poisson));
+	float chi_over_ndf= ChiSquare->getVal()/(Nbin - nparameters);
 
-     //## CALCULATE CHI2
-     RooDataHist* datahist = rdataset_mj->binnedClone((std::string(rdataset_mj->GetName())+"_binnedClone").c_str(),(std::string(rdataset_mj->GetName())+"_binnedClone").c_str());
-     int Nbin = int(rrv_mass_j->getBins());
-     RooArgList rresult_param = rfresult->floatParsFinal();
-     int nparameters =  rresult_param.getSize();
-     RooAbsReal* ChiSquare = model_pdf->createChi2(*datahist,RooFit::Extended(kTRUE),RooFit::DataError(RooAbsData::Poisson));
-     float chi_over_ndf= ChiSquare->getVal()/(Nbin - nparameters);
+	//## Add Chisquare to mplot_pull
+	TString Name ; Name.Form("#chi^{2}/ndf = %0.2f ",float(chi_over_ndf));
+	TLatex* cs = new TLatex(0.75,0.8,Name.Data());
+	cs->SetNDC();
+	cs->SetTextSize(0.12);
+	cs->AppendPad("same");
+	mplot_pull->addObject(cs);
+   
+	TString command; 
+	command.Form("mkdir -p plots/plots_%s_%s_MCfits/",channel.c_str(),wtagger_label.c_str());
+	system(command.Data());
 
-     //## Add Chisquare to mplot_pull
-     TString Name ; Name.Form("#chi^{2}/ndf = %0.2f ",float(chi_over_ndf));
-     TLatex* cs = new TLatex(0.75,0.8,Name.Data());
-     cs->SetNDC();
-     cs->SetTextSize(0.12);
-     cs->AppendPad("same");
-     mplot_pull->addObject(cs);
-     
-     
-     
-     
-  TString command; 
-  command.Form("mkdir -p plots/plots_%s_%s_MCfits/",channel.c_str(),wtagger_label.c_str());
-  system(command.Data());
-
-  command.Form("plots/plots_%s_%s_MCfits/",channel.c_str(),wtagger_label.c_str());
-  draw_canvas_with_pull(mplot,mplot_pull,new RooArgList(*parameters_list),std::string(command.Data()),label+fileName,model,channel,0,0,GetLumi());
+	command.Form("plots/plots_%s_%s_MCfits/",channel.c_str(),wtagger_label.c_str());
+	draw_canvas_with_pull(mplot,mplot_pull,new RooArgList(*parameters_list),std::string(command.Data()),label+fileName,model,channel,0,0,GetLumi());
   
-  workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->setVal(workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->getVal()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
-  workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->getError()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
-
+	workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->setVal(workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->getVal()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
+	workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->setError(workspace->var(("rrv_number"+label+"_"+channel+"_mj").c_str())->getError()*workspace->var(("rrv_scale_to_lumi"+label+"_"+channel).c_str())->getVal());
 }
 
 // method to do fail and pass fit for the scale factor evaluation                                                                                                                      

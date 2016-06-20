@@ -137,8 +137,6 @@ def doFitsToMatchedTT():
     
     print "Finished fitting matched tt MC! Plots can be found in plots_*_MCfits. Printing workspace:"
     workspace4fit_.Print()
-    
-    
         
 def doFitsToMC():
     workspace4fit_ = RooWorkspace("workspace4fit_","workspace4fit_")
@@ -278,10 +276,8 @@ class doWtagFits:
         self.boostedW_fitter_em = initialiseFits("em", options.sample, 40, 130, self.workspace4fit_)    # Define all shapes to be used for Mj, define regions (SB,signal) and input files. 
         self.boostedW_fitter_em.get_datasets_fit_minor_bkg()                                            # Loop over intrees to create datasets om Mj and fit the single MCs.
        
-        print "Printing workspace:"
-        self.workspace4fit_.Print()
+        print "Printing workspace:"; self.workspace4fit_.Print(); print ""
         
-        print "#############"
         self.boostedW_fitter_em.get_sim_fit_components()     
 
         #Defining categories
@@ -300,7 +296,6 @@ class doWtagFits:
 
         #For binned fit (shorter computing time, more presise when no SumW2Error is used!)
         if not options.doUnbinnedFit:
-
           #Converting to RooDataHist
           rdatahist_data_em_mj      = RooDataHist(rdataset_data_em_mj.binnedClone())
           rdatahist_data_em_mj_fail = RooDataHist(rdataset_data_em_mj_fail.binnedClone())
@@ -347,7 +342,6 @@ class doWtagFits:
          combData_TotalMC = RooDataSet("combData_TotalMC","combData_TotalMC",RooArgSet(rrv_mass_j,rrv_weight),RooFit.WeightVar(rrv_weight),RooFit.Index(sample_type),RooFit.Import("em_pass",rdataset_TotalMC_em_mj),RooFit.Import("em_fail",rdataset_TotalMC_em_mj_fail) )
 
         #-------------Define and perform fit to data-------------
-
         #Import pdf from single fits and define the simultaneous total pdf
         model_data_em      = self.workspace4fit_.pdf("model_data_em")
         model_data_fail_em = self.workspace4fit_.pdf("model_data_failtau2tau1cut_em")
@@ -367,8 +361,12 @@ class doWtagFits:
           pdfconstrainslist_data_em.Print()
 
         # Perform simoultaneous fit to data
-        rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))#, RooFit.SumW2Error(kTRUE))
-        rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))#, RooFit.SumW2Error(kTRUE))
+        if not options.doUnbinnedFit:
+          rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))#, RooFit.SumW2Error(kTRUE))
+          rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))#, RooFit.SumW2Error(kTRUE))
+        else:
+          rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em), RooFit.SumW2Error(kTRUE))
+          rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em), RooFit.SumW2Error(kTRUE))
 
         #Draw       
         chi2FailData = drawFrameGetChi2(rrv_mass_j,rfresult_data,rdataset_data_em_mj_fail,model_data_fail_em)
@@ -397,9 +395,14 @@ class doWtagFits:
           pdfconstrainslist_TotalMC_em.add(self.workspace4fit_.pdf(constrainslist_TotalMC_em[i]) )
 
         # Perform simoultaneous fit to MC
-        rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))--> Removing due to unexected behaviour. See https://root.cern.ch/phpBB3/viewtopic.php?t=16917, https://root.cern.ch/phpBB3/viewtopic.php?t=16917
-        rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))        
-        
+        if not options.doUnbinnedFit:
+          rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))--> Removing due to unexected behaviour. See https://root.cern.ch/phpBB3/viewtopic.php?t=16917, https://root.cern.ch/phpBB3/viewtopic.php?t=16917
+          rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))        
+        else:
+          rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em), RooFit.SumW2Error(kTRUE))
+          rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em), RooFit.SumW2Error(kTRUE))
+          
+          
         chi2FailMC = drawFrameGetChi2(rrv_mass_j,rfresult_TotalMC,rdataset_TotalMC_em_mj_fail,model_TotalMC_fail_em)
         chi2PassMC = drawFrameGetChi2(rrv_mass_j,rfresult_TotalMC,rdataset_TotalMC_em_mj,model_TotalMC_em)
         
