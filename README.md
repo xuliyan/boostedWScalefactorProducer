@@ -4,10 +4,10 @@
 
 ## installation instructions
 ```
-export SCRAM_ARCH=slc6_amd64_gcc491
-cmsrel CMSSW_7_1_5
-cd CMSSW_7_1_5/src
-cmsenv
+Source ROOT version 5.34/36 independently (currently no CMSSW version with ROOT 5.34.X with X>18 available), e.g at PSI:
+```
+source /swshare/ROOT/root_v5.34.32_precompiled/root/bin/thisroot/.sh
+```
 
 ```
 
@@ -22,9 +22,9 @@ git remote add originalRemote git@github.com:thaarres/boostedWScalefactorProduce
 git fetch originalRemote
 git checkout -b DevelopmentBranch thaarres/DevelopmentBranch
 cd $CMSSW_BASE/src
-scram b distclean
-scram b -j8
 cd boostedWScalefactorProducer
+export ROOFITSYS=$ROOTSYS
+python Automatic_Setup.py
 ```
 
 ### running
