@@ -3,14 +3,10 @@
 #########################################
 
 ## installation instructions
-```
 Source ROOT version 5.34/36 independently (currently no CMSSW version with ROOT 5.34.X with X>18 available), e.g at PSI:
 ```
 source /swshare/ROOT/root_v5.34.32_precompiled/root/bin/thisroot/.sh
 ```
-
-```
-
 ### getting the code
 
 ```
