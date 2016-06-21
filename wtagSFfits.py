@@ -1,6 +1,7 @@
 from optparse import OptionParser
 import ROOT
 import sys
+import os
 import time
 import math
 import CMS_lumi, tdrstyle
@@ -14,7 +15,7 @@ parser.add_option('--LP', action="store", type="float",dest="tau2tau1cutLP",defa
 parser.add_option('--sample', action="store",type="string",dest="sample",default="powheg")
 parser.add_option('--fitTT', action='store_true', dest='fitTT', default=False, help='Only do ttbar fits')
 parser.add_option('--fitMC', action='store_true', dest='fitMC', default=False, help='Only do MC fits')
-parser.add_option('--doUnbinned',dest="doUnbinnedFit", default=False, action="store_true", help="Do unbinned fit")
+parser.add_option('--doBinned',dest="doBinnedFit", default=False, action="store_true", help="Do binned fit")
 parser.add_option('--76X',dest="use76X", default=False, action="store_true", help="Use 76X samples")
 parser.add_option('--useDDT',dest="useDDT", default=False, action="store_true", help="Use DDT tagger")
 parser.add_option('--usePuppiSD',dest="usePuppiSD", default=False, action="store_true", help="Use PUPPI+softdrop")
@@ -120,7 +121,9 @@ def drawFrameGetChi2(variable,fitResult,dataset,pdfModel):
     
 def getSF():
     print "Getting W-tagging SF for cut " ,options.tau2tau1cutHP
-    if options.useDDT: options.usePuppiSD = True
+    if options.useDDT: 
+      options.usePuppiSD = True
+      options.use76X = True
     boostedW_fitter_sim = doWtagFits()
 
 def doFitsToMatchedTT():
@@ -295,7 +298,7 @@ class doWtagFits:
         rdataset_data_em_mj_fail = self.workspace4fit_.data("rdataset_data_failtau2tau1cut_em_mj")
 
         #For binned fit (shorter computing time, more presise when no SumW2Error is used!)
-        if not options.doUnbinnedFit:
+        if options.doBinnedFit:
           #Converting to RooDataHist
           rdatahist_data_em_mj      = RooDataHist(rdataset_data_em_mj.binnedClone())
           rdatahist_data_em_mj_fail = RooDataHist(rdataset_data_em_mj_fail.binnedClone())
@@ -321,7 +324,7 @@ class doWtagFits:
         rdataset_TotalMC_em_mj      = self.workspace4fit_.data("rdataset_TotalMC_em_mj")
         rdataset_TotalMC_em_mj_fail = self.workspace4fit_.data("rdataset_TotalMC_failtau2tau1cut_em_mj")
 
-        if not options.doUnbinnedFit:
+        if options.doBinnedFit:
           #Converting to RooDataHist
           rdatahist_TotalMC_em_mj      = RooDataHist(rdataset_TotalMC_em_mj.binnedClone())
           rdatahist_TotalMC_em_mj_fail = RooDataHist(rdataset_TotalMC_em_mj_fail.binnedClone())
@@ -361,7 +364,7 @@ class doWtagFits:
           pdfconstrainslist_data_em.Print()
 
         # Perform simoultaneous fit to data
-        if not options.doUnbinnedFit:
+        if options.doBinnedFit:
           rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))#, RooFit.SumW2Error(kTRUE))
           rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))#, RooFit.SumW2Error(kTRUE))
         else:
@@ -395,7 +398,7 @@ class doWtagFits:
           pdfconstrainslist_TotalMC_em.add(self.workspace4fit_.pdf(constrainslist_TotalMC_em[i]) )
 
         # Perform simoultaneous fit to MC
-        if not options.doUnbinnedFit:
+        if options.doBinnedFit:
           rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))--> Removing due to unexected behaviour. See https://root.cern.ch/phpBB3/viewtopic.php?t=16917, https://root.cern.ch/phpBB3/viewtopic.php?t=16917
           rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))        
         else:
@@ -524,9 +527,9 @@ class initialiseFits:
       # Directory and input files
       self.file_Directory         = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag/PRUNED/WWTree_%s/"%(self.channel)
     
-      # if options.usePuppiSD or options.useDDT:
-      #   self.file_Directory       = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag/PUPPISD/WWTree_%s/"%(self.channel)
-      #   options.use76X = True
+      if options.usePuppiSD :
+        self.file_Directory       = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag/PUPPISD/WWTree_%s/"%(self.channel)
+        options.use76X = True
 
       postfix = ""
       if options.use76X: postfix ="_76X"  
