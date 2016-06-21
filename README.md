@@ -47,7 +47,7 @@ It takes as input .root files containing a TTree with a branch for the mass dist
     --fitTT : Only do fits to truth matched tt MC
     --fitMC : Only do fits to MC (test fit functions)
     --sample : name of TT MC eg --sample "herwig"
-    --doUnbinned : to do unbinned simultaneous fit
+    --doBinned : to do binned simultaneous fit (default is unbinned)
     --76X : Use files with postfix "_76X" (change to postfix of your choice if running on several different samples)
     --useDDT : Uses DDT tagger instead of pruning+softdrop (ops! Requires softdrop variables)
     --usePuppiSD : Uses PUPPI + softdrop and PUPPI n-subjettiness
