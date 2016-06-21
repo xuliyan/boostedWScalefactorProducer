@@ -26,8 +26,8 @@ python Automatic_Setup.py --vclean 1
 ### running
 
 ```
-python Automatic_Setup.py
-python wtagSFfits.py -b
+python Automatic_Setup.py #To compile
+python wtagSFfits.py -b   #To run
 ```
 
 The basic script to be run is 
