@@ -20,7 +20,7 @@ git checkout -b DevelopmentBranch thaarres/DevelopmentBranch
 cd $CMSSW_BASE/src
 cd boostedWScalefactorProducer
 export ROOFITSYS=$ROOTSYS
-python Automatic_Setup.py
+python Automatic_Setup.py --vclean 1
 ```
 
 ### running
