@@ -31,7 +31,8 @@ ROOT.gSystem.Load(".//BiasStudy/BiasUtils_cxx.so")
 ROOT.gSystem.Load(".//FitUtils/FitUtils_cxx.so")
 
 tdrstyle.setTDRStyle()
-CMS_lumi.lumi_13TeV = "2.3 fb^{-1}"
+CMS_lumi.lumi_13TeV = "12.9 fb^{-1}"
+if options.use76X: CMS_lumi.lumi_13TeV = "2.3 fb^{-1}"
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Preliminary"
 CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
@@ -68,7 +69,7 @@ def getPavetext():
   addInfo.SetTextAlign(12)
   return addInfo
     
-def drawFrameGetChi2(variable,fitResult,dataset,pdfModel):
+def drawFrameGetChi2(variable,fitResult,dataset,pdfModel,isData):
     
     wpForPlotting ="%.2f"%options.tau2tau1cutHP
     wpForPlotting = wpForPlotting.replace(".","v")
@@ -80,7 +81,8 @@ def drawFrameGetChi2(variable,fitResult,dataset,pdfModel):
     
     
     frame = variable.frame()
-    dataset.plotOn(frame,RooFit.DataError(RooAbsData.Poisson),RooFit.Name(dataset.GetName ()))
+    if(isData): dataset.plotOn(frame,RooFit.DataError(RooAbsData.Poisson),RooFit.Name(dataset.GetName ()))
+    else: dataset.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.Name(dataset.GetName ()))
     pdfModel.plotOn(frame,RooFit.VisualizeError(fitResult,1), RooFit.Name("Fit error"),RooFit.FillColor(kGray),RooFit.LineColor(kGray)) #,RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
     pdfModel.plotOn(frame,RooFit.LineColor(kBlack),RooFit.Name(pdfModel.GetName())) #,RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
     chi2 = frame.chiSquare(pdfModel.GetName(), dataset.GetName ())
@@ -88,7 +90,8 @@ def drawFrameGetChi2(variable,fitResult,dataset,pdfModel):
     pdfModel.plotOn(frame,RooFit.Name( "ErfExp comp." ),RooFit.Components("model_bkg*"),RooFit.LineStyle(9),RooFit.LineColor(kBlue+2),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
     pdfModel.plotOn(frame,RooFit.Name( "Gaussian 1" ),RooFit.Components("gaus1*"),RooFit.LineStyle(kDashed),RooFit.LineColor(kRed+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
     pdfModel.plotOn(frame,RooFit.Name( "Chebyshev comp." ),RooFit.Components("cheb*"),RooFit.LineStyle(kDashed),RooFit.LineColor(kBlue+3),RooFit.Normalization(1.0,RooAbsReal.RelativeExpected))
-    dataset.plotOn(frame,RooFit.DataError(RooAbsData.Poisson),RooFit.Name(dataset.GetName ()))
+    if(isData): dataset.plotOn(frame,RooFit.DataError(RooAbsData.Poisson),RooFit.Name(dataset.GetName ()))
+    else: dataset.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.Name(dataset.GetName ()))
     c1 =TCanvas("data_fail","",800,800)
     frame.GetYaxis().SetTitleSize(0.05)
     frame.GetYaxis().SetTitleOffset(0.90)
@@ -98,7 +101,8 @@ def drawFrameGetChi2(variable,fitResult,dataset,pdfModel):
     frame.Draw()
     frame.SetMinimum(0.)
     legend = getLegend()
-    legend.AddEntry(frame.findObject(dataset.GetName ()),"CMS data","lpe")
+    if(isData): legend.AddEntry(frame.findObject(dataset.GetName ()),"CMS data","lpe")
+    else: legend.AddEntry(frame.findObject(dataset.GetName ()),"Total MC","lpe")
     legend.AddEntry(frame.findObject(pdfModel.GetName()),"Sim. fit","l")
     if frame.findObject("Gaussian 1"):
       legend.AddEntry(frame.findObject("Gaussian 1"),frame.findObject("Gaussian 1").GetName(),"l")
@@ -115,8 +119,8 @@ def drawFrameGetChi2(variable,fitResult,dataset,pdfModel):
     addInfo.Draw()
     c1.Update()
     cname = pdfModel.GetName()
-    c1.SaveAs("plots/%s.pdf"%(cname))
-    c1.SaveAs("plots/%s.root"%(cname))
+    c1.SaveAs("plots/%s_%s.pdf"%(cname,options.sample))
+    c1.SaveAs("plots/%s_%s.root"%(cname,options.sample))
     return chi2
     
 def getSF():
@@ -271,8 +275,6 @@ def GetWtagScalefactors(workspace,fitter):
     fitter.file_out_ttbar_control.write("\n")
     fitter.file_out_ttbar_control.write("\n-----------------------------------------------------------------------------------------------------------------------------")
      
-     
-     
 class doWtagFits:
     def __init__(self):
         self.workspace4fit_ = RooWorkspace("workspace4fit_","workspace4fit_")                           # create workspace
@@ -372,8 +374,9 @@ class doWtagFits:
           rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em), RooFit.SumW2Error(kTRUE))
 
         #Draw       
-        chi2FailData = drawFrameGetChi2(rrv_mass_j,rfresult_data,rdataset_data_em_mj_fail,model_data_fail_em)
-        chi2PassData = drawFrameGetChi2(rrv_mass_j,rfresult_data,rdataset_data_em_mj,model_data_em)
+        isData = True
+        chi2FailData = drawFrameGetChi2(rrv_mass_j,rfresult_data,rdataset_data_em_mj_fail,model_data_fail_em,isData)
+        chi2PassData = drawFrameGetChi2(rrv_mass_j,rfresult_data,rdataset_data_em_mj,model_data_em,isData)
 
         #Print final data fit results
         print "FIT parameters (DATA) :"; print ""
@@ -405,9 +408,9 @@ class doWtagFits:
           rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em), RooFit.SumW2Error(kTRUE))
           rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em), RooFit.SumW2Error(kTRUE))
           
-          
-        chi2FailMC = drawFrameGetChi2(rrv_mass_j,rfresult_TotalMC,rdataset_TotalMC_em_mj_fail,model_TotalMC_fail_em)
-        chi2PassMC = drawFrameGetChi2(rrv_mass_j,rfresult_TotalMC,rdataset_TotalMC_em_mj,model_TotalMC_em)
+        isData = False  
+        chi2FailMC = drawFrameGetChi2(rrv_mass_j,rfresult_TotalMC,rdataset_TotalMC_em_mj_fail,model_TotalMC_fail_em,isData)
+        chi2PassMC = drawFrameGetChi2(rrv_mass_j,rfresult_TotalMC,rdataset_TotalMC_em_mj,model_TotalMC_em,isData)
         
         #Print final MC fit results
         print "FIT Par. (MC) :"; print ""
@@ -415,10 +418,23 @@ class doWtagFits:
         print ""; print rfresult_TotalMC.Print(); print ""
         
         # draw the final fit results
-        DrawScaleFactorTTbarControlSample(self.workspace4fit_,self.boostedW_fitter_em.color_palet,"","em",self.boostedW_fitter_em.wtagger_label,self.boostedW_fitter_em.AK8_pt_min,self.boostedW_fitter_em.AK8_pt_max)
+        DrawScaleFactorTTbarControlSample(self.workspace4fit_,self.boostedW_fitter_em.color_palet,"","em",self.boostedW_fitter_em.wtagger_label,self.boostedW_fitter_em.AK8_pt_min,self.boostedW_fitter_em.AK8_pt_max,options.sample)
        
         # Get W-tagging scalefactor and efficiencies
         GetWtagScalefactors(self.workspace4fit_,self.boostedW_fitter_em)
+        
+        # wpForPlotting ="%.2f"%options.tau2tau1cutHP
+        # wpForPlotting = wpForPlotting.replace(".","v")
+        # pf=""
+        # if options.usePuppiSD: pf = "_PuppiSD"
+        # if options.useDDT: pf = "_PuppiSD_DDT"
+        # postfix = "%s_%s" %(pf,wpForPlotting)
+        # cmd =   "mv plots plots%s" %postfix
+        # print cmd
+        # os.system(cmd)
+        # cmd =   "mv WtaggingSF.txt plots%s" %postfix
+        # print cmd
+        # os.system(cmd)
         
         # Delete workspace
         del self.workspace4fit_
@@ -444,8 +460,10 @@ class initialiseFits:
       self.mj_shape["TTbar_realW"]      = "GausErfExp_ttbar" #before "2Gaus_ttbar"
       self.mj_shape["TTbar_realW_fail"] = "GausErfExp_ttbar_failtau2tau1cut" #before "GausChebychev_ttbar_failtau2tau1cut"
       self.mj_shape["TTbar_fakeW"]      = "ErfExp_ttbar"
-      self.mj_shape["TTbar_fakeW_fail"] = "ErfExp_ttbar_failtau2tau1cut"
-      
+      self.mj_shape["TTbar_fakeW_fail"] = "ErfExp_ttbar_failtau2tau1cut"      
+      if (options.useDDT): 
+        self.mj_shape["TTbar_realW_fail"]       = "GausChebychev_ttbar_failtau2tau1cut"  
+        
       # Fit functions for minor backgrounds
       self.mj_shape["VV"]                 = "ExpGaus"
       self.mj_shape["VV_fail"]            = "ExpGaus"
@@ -453,8 +471,14 @@ class initialiseFits:
       self.mj_shape["WJets0_fail"]        = "ErfExp"
       self.mj_shape["STop"]               = "ErfExpGaus_sp"       
       self.mj_shape["STop_fail"]          = "ExpGaus"  
+      
+      if (options.usePuppiSD): 
+        self.mj_shape["STop_fail"]          = "ErfExpGaus_sp"  
           
-      if (options.tau2tau1cutHP==0.60): self.mj_shape["VV"]                 = "ErfExpGaus_sp"
+      if (options.tau2tau1cutHP==0.60): 
+        self.mj_shape["VV_fail"]     = "Exp"
+        self.mj_shape["VV"]          = "Exp"
+        self.mj_shape["WJets0_fail"] = "Exp" 
         
       if (options.useDDT):
         self.mj_shape["VV"]                 = "ExpGaus"
@@ -479,14 +503,15 @@ class initialiseFits:
         self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut" 
         self.mj_shape["signal_data_fail"]     = "GausChebychev_ttbar_failtau2tau1cut"
       
-      # #TESTS USING OLD METHOD, EG ADDING TWO ADDITIONAL FIT FUNCTIONS
-      # self.mj_shape["signal_data"]          = "2Gaus_ttbar"
-      # self.mj_shape["signal_mc"]            = "2Gaus_ttbar"
-      # self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut"
-      # self.mj_shape["signal_data_fail"]     = "GausChebychev_ttbar_failtau2tau1cut"
+      # # #TESTS USING OLD METHOD, EG ADDING TWO ADDITIONAL FIT FUNCTIONS
+#       self.mj_shape["signal_data"]          = "2Gaus_ttbar"
+#       self.mj_shape["signal_mc"]            = "2Gaus_ttbar"
+#       self.mj_shape["signal_mc_fail"]       = "GausChebychev_ttbar_failtau2tau1cut"
+#       self.mj_shape["signal_data_fail"]     = "GausChebychev_ttbar_failtau2tau1cut"
       
       #Set lumi  
-      self.Lumi=2198. #74
+      self.Lumi=12900
+      # self.Lumi=2198. #74
       if options.use76X: self.Lumi=2300. #76
           
       self.BinWidth_mj = 5.
@@ -496,7 +521,7 @@ class initialiseFits:
       nbins_mj         = int( (in_mj_max - in_mj_min) / self.BinWidth_mj )
       in_mj_max        = in_mj_min+nbins_mj*self.BinWidth_mj
       
-      jetMass = "pruned jet mass"
+      jetMass = "Pruned jet mass"
       if options.usePuppiSD: jetMass = "PUPPI softdrop jet mass"
 
       rrv_mass_j = RooRealVar("rrv_mass_j", jetMass ,(in_mj_min+in_mj_max)/2.,in_mj_min,in_mj_max,"GeV")
@@ -525,11 +550,13 @@ class initialiseFits:
         
 
       # Directory and input files
+      # self.file_Directory         = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag_80X/WWTree_%s/"%(self.channel) #For 80X!!!!
       self.file_Directory         = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag/PRUNED/WWTree_%s/"%(self.channel)
     
       if options.usePuppiSD :
-        self.file_Directory       = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag/PUPPISD/WWTree_%s/"%(self.channel)
-        options.use76X = True
+        self.file_Directory       = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag_80X/WWTree_%s/"%(self.channel)
+        if options.use76X:
+           self.file_Directory       = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag/PUPPISD_newcorr/WWTree_%s/"%(self.channel)
 
       postfix = ""
       if options.use76X: postfix ="_76X"  
@@ -539,8 +566,8 @@ class initialiseFits:
       self.file_VV_mc             = ("ExoDiBosonAnalysis.WWTree_VV%s.root") %postfix      
       self.file_STop_mc           = ("ExoDiBosonAnalysis.WWTree_STop%s.root") %postfix           
       self.file_TTbar_mc          = ("ExoDiBosonAnalysis.WWTree_TTbar_%s%s.root")%(in_sample,postfix)
-      self.file_pseudodata        = ("ExoDiBosonAnalysis.WWTree_pseudodata_%s%s.root")%(in_sample,postfix)      #Important! ROOT tree containing all backgrounds added together (tt+singleT+VV+Wjets). Used for fit to total MC    
-             
+      self.file_pseudodata        = ("ExoDiBosonAnalysis.WWTree_pseudodata_%s%s.root")%(in_sample,postfix)      #Important! ROOT tree containing all backgrounds added together (tt+singleT+VV+Wjets). Used for fit to total MC
+      self.file_pseudodata        = ("pseudodata_weighted.root")
       # Define Tau21 WP
       self.wtagger_label = "HP"
       self.wtagger_cut = options.tau2tau1cutHP
@@ -564,6 +591,8 @@ class initialiseFits:
       self.color_palet["VV"]                = 4
       self.color_palet["STop"]              = 7
       self.color_palet["TTbar"]             = 210
+      self.color_palet["TTbar_realW"]       = 210
+      self.color_palet["TTbar_fakeW"]       = 419
       self.color_palet["Signal"]            = 1
       self.color_palet["Uncertainty"]       = 1
       self.color_palet["Other_Backgrounds"] = 1    
@@ -624,14 +653,16 @@ class initialiseFits:
 
         if options.fitMC:
             return
-        
-        # Get dataset for ttbar    
+
+        # Get dataset for ttbar
         print "#########################################"
         print "################ TTbar %s################"%options.sample
         print "#########################################"
         print ""
 
-        self.get_mj_dataset(self.file_TTbar_mc,"_TTbar")    
+        self.get_mj_dataset(self.file_TTbar_mc,"_TTbar")
+        self.get_mj_dataset(self.file_TTbar_mc,"_TTbar_realW")
+        self.get_mj_dataset(self.file_TTbar_mc,"_TTbar_fakeW")
 
         # Get dataset used for fit to total MC
         print "################################################"
@@ -800,16 +831,16 @@ class initialiseFits:
           if i % 5000 == 0: print "iEntry: ",i
           treeIn.GetEntry(i)
           
-          if TString(label).Contains("realW") and not getattr(treeIn,"Whadr_isW_def1"): 
+          if TString(label).Contains("realW") and not getattr(treeIn,"Whadr_isW_def1"): #Is a real W, meaning both daughters of W is withing jet cone!!
             continue
           if TString(label).Contains("fakeW") and     getattr(treeIn,"Whadr_isW_def1"): 
             continue
           
           wtagger = getattr(treeIn,"Whadr_tau21")
           if options.usePuppiSD:
-            wtagger = getattr(treeIn,"Whadr_puppi_tau2")/getattr(treeIn,"Whadr_puppi_tau1")
+            wtagger = getattr(treeIn,"Whadr_puppi_tau2tau1")
           if options.useDDT:
-            wtagger = getattr(treeIn,"Whadr_puppi_tau2")/getattr(treeIn,"Whadr_puppi_tau1")+ (0.063 * TMath.log( (pow( getattr(treeIn,"Whadr_puppi_softdrop"),2))/getattr(treeIn,"Whadr_puppi_pt") ))        
+            wtagger = getattr(treeIn,"Whadr_puppi_tau2tau1")+ (0.063 * TMath.log( (pow( getattr(treeIn,"Whadr_puppi_softdrop"),2))/getattr(treeIn,"Whadr_puppi_pt") ))        
             
           discriminantCut = 0
           if wtagger <= options.tau2tau1cutHP: # HP
@@ -820,21 +851,22 @@ class initialiseFits:
               discriminantCut = 0
 
           tmp_jet_mass = getattr(treeIn, jet_mass);
+          treeWeight = treeIn.GetWeight()
           
           if i==0: 
             tmp_scale_to_lumi = treeIn.lumiweight*self.Lumi ## weigth for xs and lumi
-            
+          
           if not TString(label).Contains("data"):
-            tmp_event_weight     = getattr(treeIn,"weight")*self.Lumi
-            tmp_event_weight4fit = getattr(treeIn,"genweight")*getattr(treeIn,"puweight")*getattr(treeIn,"hltweight") #Missing b-tag weight and Vtg weight! ##FROM JEN!
-            tmp_event_weight4fit = tmp_event_weight4fit*treeIn.lumiweight*self.Lumi /tmp_scale_to_lumi      ##FROM JEN!
-         
-         
-            # tmp_event_weight4fit = getattr(treeIn,"weight")*self.Lumi/tmp_scale_to_lumi ##FROM QUN
-            
-            # tmp_event_weight = getattr(treeIn,"weight")*self.Lumi  ##LUCA
-            # tmp_event_weight4fit = getattr(treeIn,"genweight")*getattr(treeIn,"puweight")*getattr(treeIn,"hltweight")  ##LUCA
-            # tmp_event_weight4fit = tmp_event_weight/tmp_scale_to_lumi
+            if options.usePuppiSD: # With pT weight (Use with PUPPI+SD with new corrections!!)
+               tmp_event_weight     = getattr(treeIn,"weight")*self.Lumi*treeWeight*getattr(treeIn,"ptweight")
+               tmp_event_weight4fit = treeWeight*getattr(treeIn,"genweight")*getattr(treeIn,"puweight")*getattr(treeIn,"hltweight")*getattr(treeIn,"ptweight") #Missing b-tag weight and Vtg weight! ##FROM JEN!
+               tmp_event_weight4fit = tmp_event_weight4fit*treeIn.lumiweight*self.Lumi /tmp_scale_to_lumi      ##FROM JEN!
+
+            if TString(label).Contains("Total") or not options.usePuppiSD:   # Without pT weight (use for 76X pruning!!!) and pseudodata PUPPI+SD new corr!!!!
+              tmp_event_weight     = getattr(treeIn,"weight")*self.Lumi*treeWeight
+              tmp_event_weight4fit = treeWeight*getattr(treeIn,"genweight")*getattr(treeIn,"puweight")*getattr(treeIn,"hltweight") #Missing b-tag weight and Vtg weight! ##FROM JEN!
+              tmp_event_weight4fit = tmp_event_weight4fit*treeIn.lumiweight*self.Lumi /tmp_scale_to_lumi      ##FROM JEN!
+
           else:
             tmp_event_weight = 1.
             tmp_event_weight4fit = 1.

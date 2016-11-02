@@ -34,8 +34,6 @@ void GetDataPoissonInterval(const RooAbsData* data, RooRealVar* rrv_x, RooPlot* 
 
 }
 
-
-
 // in order to get the pull
 RooPlot* get_pull(RooRealVar* rrv_x, RooPlot* mplot_orig, RooDataSet* rdataset, RooAbsPdf* model, RooFitResult* rfresult, const std::string & dataname, const std::string & modelname, const int & makeBand, const int & narrow_factor, std::vector<TObject*>* addtoPlot){
 
@@ -89,7 +87,6 @@ RooPlot* get_pull(RooRealVar* rrv_x, RooPlot* mplot_orig, RooDataSet* rdataset, 
   return mplot_pull;
 
 }
-
 
 // in order to get the pull
 RooPlot* get_ratio(RooRealVar* rrv_x, RooDataSet* rdataset, RooAbsPdf* model, RooFitResult* rfresult, const int & makeBand, const int & narrow_factor,std::vector<TObject*>* addtoPlot){
@@ -217,7 +214,6 @@ RooPlot* get_ratio(RooRealVar* rrv_x, RooDataSet* rdataset, RooAbsPdf* model, Ro
 
 }
 
-
 RooPlot* get_pull_ws(RooRealVar* rrv_x, RooPlot* mplot_orig, TGraphAsymmErrors* plot_graph, const std::string & dataname, const std::string & modelname, const int & narrow_factor){
 
  std::cout<<"############### draw the ratio plot ########################"<<std::endl;
@@ -322,6 +318,7 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
   //  else if(channel == "el") legHeader="(e#nu)";
   else if(channel == "el") legHeader="";
   else if(channel == "em") legHeader="(l#nu)";
+  legHeader="";
 
   for( int obj = 0 ; obj < int(plot->numItems()); obj++){
           
@@ -343,7 +340,9 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
      continue ;
     }
     else if(TString(objName) == "data"){
-     theLeg->AddEntry(theObj,std::string("CMS Data "+legHeader).c_str(),"PE");  
+    // else if(TString(objName).Contains("data")){
+     // theLeg->AddEntry(theObj,std::string("CMS Data "+legHeader).c_str(),"PE");
+      theLeg->AddEntry(theObj,"CMS Data ","PEL");  
      objName_before = objName;
     }
     else{
@@ -416,6 +415,8 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
                else if(TString(objName).Contains("_TTbar_realW")) theLeg->AddEntry(theObj, "t#bar{t} (W-jet)","ple");
                else if(TString(objName).Contains("_TTbar_fakeW_failtau2tau1cut")) theLeg->AddEntry(theObj, "t#bar{t} (non-W)","ple");
                else if(TString(objName).Contains("_TTbar_fakeW")) theLeg->AddEntry(theObj, "t#bar{t} (non-W)","ple");
+               else if(TString(objName).Contains("TTbar_realW")) theLeg->AddEntry(theObj, "t#bar{t} (merged)","f");
+               else if(TString(objName).Contains("TTbar_fakeW")) theLeg->AddEntry(theObj, "t#bar{t} (unmerged)","f");
                else if(TString(objName).Contains("TTbar")) theLeg->AddEntry(theObj, "t#bar{t}",label);
                else if(TString(objName).Contains("VV"))    theLeg->AddEntry(theObj, "WW/WZ/ZZ",label);
                else if(TString(objName).Contains("data")) { objName_before = objName; entryCnt = entryCnt+1; continue;}
@@ -434,7 +435,31 @@ TLegend* legend4Plot(RooPlot* plot, const int & left, const double & x_offset_lo
 void draw_canvas(RooPlot* in_obj, const std::string & in_directory, const TString & in_file_name, const std::string & channel, const float & lumi, const int & in_range, const int & logy, const int & frompull){
 
   std::cout<<"############### draw the canvas without pull ########################"<<std::endl;
-  TCanvas cMassFit ("cMassFit","cMassFit", 600,600);
+  
+  int W = 800;
+  int H = 800;
+  int H_ref = 800; 
+  int W_ref = 800; 
+
+  // references for T, B, L, R
+  float T = 0.08*H_ref;
+  float B = 0.12*H_ref; 
+  float L = 0.12*W_ref;
+  float R = 0.04*W_ref;
+
+  TCanvas* cMassFit = new TCanvas("cMassFit","cMassFit",50,50,W,H);
+  cMassFit->SetFillColor(0);
+  cMassFit->SetBorderMode(0);
+  cMassFit->SetFrameFillStyle(0);
+  cMassFit->SetFrameBorderMode(0);
+  cMassFit->SetLeftMargin( L/W );
+  cMassFit->SetRightMargin( R/W );
+  cMassFit->SetTopMargin( T/H );
+  cMassFit->SetBottomMargin( B/H );
+  cMassFit->SetTickx(0);
+  cMassFit->SetTicky(0);
+  
+  setTDRStyle();
 
   if(frompull and logy)
      in_obj->GetYaxis()->SetRangeUser(1e-2,in_obj->GetMaximum()/100);
@@ -454,11 +479,23 @@ void draw_canvas(RooPlot* in_obj, const std::string & in_directory, const TStrin
   in_obj->GetXaxis()->SetLabelSize(0.04);
 
   in_obj->GetYaxis()->SetTitleSize(0.045);
-  in_obj->GetYaxis()->SetTitleOffset(1.40);
+  in_obj->GetYaxis()->SetTitleOffset(1.35);
   in_obj->GetYaxis()->SetLabelSize(0.04);
 
-  TLatex* banner = banner4Plot(channel,lumi,0);
-  banner->Draw();
+ //  TLatex* banner = banner4Plot(channel,lumi,0);
+ //  banner->Draw();
+  
+  int iPeriod = 4;
+  int iPos=11;
+  writeExtraText = true;
+  extraText  = "Preliminary";
+  lumi_13TeV  = "2.3 fb^{-1}";
+  lumi_sqrtS = "13 TeV";
+  CMS_lumi( cMassFit, iPeriod, iPos );
+  cMassFit->Update();
+  cMassFit->RedrawAxis();
+  
+  
         
   TString Directory(in_directory);
   if(not Directory.EndsWith("/")) Directory = Directory.Append("/");
@@ -471,19 +508,19 @@ void draw_canvas(RooPlot* in_obj, const std::string & in_directory, const TStrin
          rlt_file = rlt_file.Append(".pdf");
   }
   
-  cMassFit.SaveAs(rlt_file.Data());
+  cMassFit->SaveAs(rlt_file.Data());
 
   rlt_file.ReplaceAll(".pdf",".root");
-  cMassFit.SaveAs(rlt_file.Data());
+  cMassFit->SaveAs(rlt_file.Data());
 
   if(logy){
       in_obj->GetYaxis()->SetRangeUser(1e-2,in_obj->GetMaximum()*100);
-      cMassFit.SetLogy() ;
-      cMassFit.Update();
+      cMassFit->SetLogy() ;
+      cMassFit->Update();
       rlt_file.ReplaceAll(".root","_log.root");
-      cMassFit.SaveAs(rlt_file.Data());
+      cMassFit->SaveAs(rlt_file.Data());
       rlt_file.ReplaceAll(".root",".pdf");
-      cMassFit.SaveAs(rlt_file.Data());
+      cMassFit->SaveAs(rlt_file.Data());
   }
 
 }
@@ -607,107 +644,251 @@ void draw_canvas_with_pull(RooPlot* mplot, RooPlot* mplot_pull, RooArgList* para
 
 // set tdr style function
 void setTDRStyle(){
+  
+  TStyle *gStyle = new TStyle("gStyle","Style for P-TDR");
 
- 
- //For the canvas:
- gStyle->SetCanvasBorderMode(0);
- gStyle->SetCanvasColor(kWhite);
- gStyle->SetCanvasDefH(600); 
- gStyle->SetCanvasDefW(600); 
- gStyle->SetCanvasDefX(0); 
- gStyle->SetCanvasDefY(0);
-      
- //For the Pad:
- gStyle->SetPadBorderMode(0);
- gStyle->SetPadColor(kWhite);
- gStyle->SetPadGridX(kFALSE);
- gStyle->SetPadGridY(kFALSE);
- gStyle->SetGridColor(0);
- gStyle->SetGridStyle(3);
- gStyle->SetGridWidth(1);
-      
- //For the frame:
- gStyle->SetFrameBorderMode(0);
- gStyle->SetFrameBorderSize(1);
- gStyle->SetFrameFillColor(0);
- gStyle->SetFrameFillStyle(0);
- gStyle->SetFrameLineColor(1);
- gStyle->SetFrameLineStyle(1);
- gStyle->SetFrameLineWidth(1);
-      
- //For the histo:
- gStyle->SetHistLineColor(1);
- gStyle->SetHistLineStyle(0);
- gStyle->SetHistLineWidth(1);
- gStyle->SetEndErrorSize(2);
- gStyle->SetErrorX(0.);
- gStyle->SetMarkerStyle(20);
-      
- //For the fit/function:
- gStyle->SetOptFit(1);
- gStyle->SetFitFormat("5.4g");
- gStyle->SetFuncColor(2);
- gStyle->SetFuncStyle(1);
- gStyle->SetFuncWidth(1);
-      
- //For the date:
- gStyle->SetOptDate(0);
-      
- //For the statistics box:
- gStyle->SetOptFile(0);
- gStyle->SetOptStat(0);
- gStyle->SetStatColor(kWhite);
- gStyle->SetStatFont(42);
- gStyle->SetStatFontSize(0.025);
- gStyle->SetStatTextColor(1);
- gStyle->SetStatFormat("6.4g");
- gStyle->SetStatBorderSize(1);
- gStyle->SetStatH(0.1);
- gStyle->SetStatW(0.15);
-      
-  //Margins:
+// For the canvas:
+  gStyle->SetCanvasBorderMode(0);
+  gStyle->SetCanvasColor(kWhite);
+  gStyle->SetCanvasDefH(600); //Height of canvas
+  gStyle->SetCanvasDefW(600); //Width of canvas
+  gStyle->SetCanvasDefX(0);   //POsition on screen
+  gStyle->SetCanvasDefY(0);
+
+// For the Pad:
+  gStyle->SetPadBorderMode(0);
+  // gStyle->SetPadBorderSize(Width_t size = 1);
+  gStyle->SetPadColor(kWhite);
+  gStyle->SetPadGridX(false);
+  gStyle->SetPadGridY(false);
+  gStyle->SetGridColor(0);
+  gStyle->SetGridStyle(3);
+  gStyle->SetGridWidth(1);
+
+// For the frame:
+  gStyle->SetFrameBorderMode(0);
+  gStyle->SetFrameBorderSize(1);
+  gStyle->SetFrameFillColor(0);
+  gStyle->SetFrameFillStyle(0);
+  gStyle->SetFrameLineColor(1);
+  gStyle->SetFrameLineStyle(1);
+  gStyle->SetFrameLineWidth(1);
+  
+// For the histo:
+  // gStyle->SetHistFillColor(1);
+  // gStyle->SetHistFillStyle(0);
+  gStyle->SetHistLineColor(1);
+  gStyle->SetHistLineStyle(0);
+  gStyle->SetHistLineWidth(1);
+  // gStyle->SetLegoInnerR(Float_t rad = 0.5);
+  // gStyle->SetNumberContours(Int_t number = 20);
+
+  gStyle->SetEndErrorSize(2);
+  // gStyle->SetErrorMarker(20);
+  //gStyle->SetErrorX(0.);
+  
+  gStyle->SetMarkerStyle(20);
+  
+//For the fit/function:
+  gStyle->SetOptFit(1);
+  gStyle->SetFitFormat("5.4g");
+  gStyle->SetFuncColor(2);
+  gStyle->SetFuncStyle(1);
+  gStyle->SetFuncWidth(1);
+
+//For the date:
+  gStyle->SetOptDate(0);
+  // gStyle->SetDateX(Float_t x = 0.01);
+  // gStyle->SetDateY(Float_t y = 0.01);
+
+// For the statistics box:
+  gStyle->SetOptFile(0);
+  gStyle->SetOptStat(0); // To display the mean and RMS:   SetOptStat("mr");
+  gStyle->SetStatColor(kWhite);
+  gStyle->SetStatFont(42);
+  gStyle->SetStatFontSize(0.025);
+  gStyle->SetStatTextColor(1);
+  gStyle->SetStatFormat("6.4g");
+  gStyle->SetStatBorderSize(1);
+  gStyle->SetStatH(0.1);
+  gStyle->SetStatW(0.15);
+  // gStyle->SetStatStyle(Style_t style = 1001);
+  // gStyle->SetStatX(Float_t x = 0);
+  // gStyle->SetStatY(Float_t y = 0);
+
+// Margins:
   gStyle->SetPadTopMargin(0.05);
   gStyle->SetPadBottomMargin(0.13);
-  gStyle->SetPadLeftMargin(0.18);
-  gStyle->SetPadRightMargin(0.06);
-      
-  //For the Global title:
+  gStyle->SetPadLeftMargin(0.16);
+  gStyle->SetPadRightMargin(0.02);
+
+// For the Global title:
+
   gStyle->SetOptTitle(0);
   gStyle->SetTitleFont(42);
   gStyle->SetTitleColor(1);
   gStyle->SetTitleTextColor(1);
   gStyle->SetTitleFillColor(10);
   gStyle->SetTitleFontSize(0.05);
-      
-  //For the axis titles:
+  // gStyle->SetTitleH(0); // Set the height of the title box
+  // gStyle->SetTitleW(0); // Set the width of the title box
+  // gStyle->SetTitleX(0); // Set the position of the title box
+  // gStyle->SetTitleY(0.985); // Set the position of the title box
+  // gStyle->SetTitleStyle(Style_t style = 1001);
+  // gStyle->SetTitleBorderSize(2);
+
+// For the axis titles:
+
   gStyle->SetTitleColor(1, "XYZ");
   gStyle->SetTitleFont(42, "XYZ");
-  gStyle->SetTitleSize(0.03, "XYZ");
+  gStyle->SetTitleSize(0.06, "XYZ");
+  // gStyle->SetTitleXSize(Float_t size = 0.02); // Another way to set the size?
+  // gStyle->SetTitleYSize(Float_t size = 0.02);
   gStyle->SetTitleXOffset(0.9);
-  gStyle->SetTitleYOffset(1.5);
-      
-  //For the axis labels:
+  gStyle->SetTitleYOffset(1.25);
+  // gStyle->SetTitleOffset(1.1, "Y"); // Another way to set the Offset
+
+// For the axis labels:
+
   gStyle->SetLabelColor(1, "XYZ");
   gStyle->SetLabelFont(42, "XYZ");
   gStyle->SetLabelOffset(0.007, "XYZ");
-  gStyle->SetLabelSize(0.03, "XYZ");
-      
-  //For the axis:
+  gStyle->SetLabelSize(0.05, "XYZ");
+
+// For the axis:
+
   gStyle->SetAxisColor(1, "XYZ");
   gStyle->SetStripDecimals(kTRUE);
   gStyle->SetTickLength(0.03, "XYZ");
   gStyle->SetNdivisions(510, "XYZ");
-  gStyle->SetPadTickX(1); 
+  gStyle->SetPadTickX(1);  // To get tick marks on the opposite side of the frame
   gStyle->SetPadTickY(1);
-      
-  //Change for log plots:
+
+// Change for log plots:
   gStyle->SetOptLogx(0);
   gStyle->SetOptLogy(0);
   gStyle->SetOptLogz(0);
-      
-  //Postscript options:
+
+// Postscript options:
   gStyle->SetPaperSize(20.,20.);
+  // gStyle->SetLineScalePS(Float_t scale = 3);
+  // gStyle->SetLineStyleString(Int_t i, const char* text);
+  // gStyle->SetHeaderPS(const char* header);
+  // gStyle->SetTitlePS(const char* pstitle);
+
+  // gStyle->SetBarOffset(Float_t baroff = 0.5);
+  // gStyle->SetBarWidth(Float_t barwidth = 0.5);
+  // gStyle->SetPaintTextFormat(const char* format = "g");
+  // gStyle->SetPalette(Int_t ncolors = 0, Int_t* colors = 0);
+  // gStyle->SetTimeOffset(Double_t toffset);
+  // gStyle->SetHistMinimumZero(kTRUE);
+
+  gStyle->SetHatchesLineWidth(5);
+  gStyle->SetHatchesSpacing(0.05);
   gStyle->cd();
+  
+  
+
+  // OLD!!!!!
+ // //For the canvas:
+ // gStyle->SetCanvasBorderMode(0);
+ // gStyle->SetCanvasColor(kWhite);
+ // gStyle->SetCanvasDefH(600);
+ // gStyle->SetCanvasDefW(600);
+ // gStyle->SetCanvasDefX(0);
+ // gStyle->SetCanvasDefY(0);
+ //
+ // //For the Pad:
+ // gStyle->SetPadBorderMode(0);
+ // gStyle->SetPadColor(kWhite);
+ // gStyle->SetPadGridX(kFALSE);
+ // gStyle->SetPadGridY(kFALSE);
+ // gStyle->SetGridColor(0);
+ // gStyle->SetGridStyle(3);
+ // gStyle->SetGridWidth(1);
+ //
+ // //For the frame:
+ // gStyle->SetFrameBorderMode(0);
+ // gStyle->SetFrameBorderSize(1);
+ // gStyle->SetFrameFillColor(0);
+ // gStyle->SetFrameFillStyle(0);
+ // gStyle->SetFrameLineColor(1);
+ // gStyle->SetFrameLineStyle(1);
+ // gStyle->SetFrameLineWidth(1);
+ //
+ // //For the histo:
+ // gStyle->SetHistLineColor(1);
+ // gStyle->SetHistLineStyle(0);
+ // gStyle->SetHistLineWidth(1);
+ // gStyle->SetEndErrorSize(2);
+ // gStyle->SetErrorX(0.);
+ // gStyle->SetMarkerStyle(20);
+ //
+ // //For the fit/function:
+ // gStyle->SetOptFit(1);
+ // gStyle->SetFitFormat("5.4g");
+ // gStyle->SetFuncColor(2);
+ // gStyle->SetFuncStyle(1);
+ // gStyle->SetFuncWidth(1);
+ //
+ // //For the date:
+ // gStyle->SetOptDate(0);
+ //
+ // //For the statistics box:
+ // gStyle->SetOptFile(0);
+ // gStyle->SetOptStat(0);
+ // gStyle->SetStatColor(kWhite);
+ // gStyle->SetStatFont(42);
+ // gStyle->SetStatFontSize(0.025);
+ // gStyle->SetStatTextColor(1);
+ // gStyle->SetStatFormat("6.4g");
+ // gStyle->SetStatBorderSize(1);
+ // gStyle->SetStatH(0.1);
+ // gStyle->SetStatW(0.15);
+ //
+ //  //Margins:
+ //  gStyle->SetPadTopMargin(0.05);
+ //  gStyle->SetPadBottomMargin(0.13);
+ //  gStyle->SetPadLeftMargin(0.18);
+ //  gStyle->SetPadRightMargin(0.06);
+ //
+ //  //For the Global title:
+ //  gStyle->SetOptTitle(0);
+ //  gStyle->SetTitleFont(42);
+ //  gStyle->SetTitleColor(1);
+ //  gStyle->SetTitleTextColor(1);
+ //  gStyle->SetTitleFillColor(10);
+ //  gStyle->SetTitleFontSize(0.05);
+ //
+ //  //For the axis titles:
+ //  gStyle->SetTitleColor(1, "XYZ");
+ //  gStyle->SetTitleFont(42, "XYZ");
+ //  gStyle->SetTitleSize(0.03, "XYZ");
+ //  gStyle->SetTitleXOffset(0.9);
+ //  gStyle->SetTitleYOffset(1.5);
+ //
+ //  //For the axis labels:
+ //  gStyle->SetLabelColor(1, "XYZ");
+ //  gStyle->SetLabelFont(42, "XYZ");
+ //  gStyle->SetLabelOffset(0.007, "XYZ");
+ //  gStyle->SetLabelSize(0.03, "XYZ");
+ //
+ //  //For the axis:
+ //  gStyle->SetAxisColor(1, "XYZ");
+ //  gStyle->SetStripDecimals(kTRUE);
+ //  gStyle->SetTickLength(0.03, "XYZ");
+ //  gStyle->SetNdivisions(510, "XYZ");
+ //  gStyle->SetPadTickX(1);
+ //  gStyle->SetPadTickY(1);
+ //
+ //  //Change for log plots:
+ //  gStyle->SetOptLogx(0);
+ //  gStyle->SetOptLogy(0);
+ //  gStyle->SetOptLogz(0);
+ //
+ //  //Postscript options:
+ //  gStyle->SetPaperSize(20.,20.);
+ //  gStyle->cd();
 }
 
 float GetLumi(const std::string & channel){

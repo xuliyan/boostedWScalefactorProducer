@@ -13,6 +13,7 @@
 #include "TH2F.h"
 #include "TLegend.h"
 #include "TStyle.h"
+#include "TROOT.h"
 
 #include "RooPlot.h"
 #include "RooHist.h"
@@ -26,6 +27,9 @@
 #include "RooPlot.h"
 
 #include "Util.h"
+
+#include "CMS_lumi.C"
+
 
 void GetDataPoissonInterval(const RooAbsData*, RooRealVar*, RooPlot*, const int & = 1); 
 
