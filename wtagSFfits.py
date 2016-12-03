@@ -469,6 +469,8 @@ class initialiseFits:
       self.mj_shape["VV_fail"]            = "ExpGaus"
       self.mj_shape["WJets0"]             = "ErfExp"
       self.mj_shape["WJets0_fail"]        = "ErfExp"
+      self.mj_shape["QCD"]                = "ErfExp"
+      self.mj_shape["QCD_fail"]           = "ErfExp"
       self.mj_shape["STop"]               = "ErfExpGaus_sp"       
       self.mj_shape["STop_fail"]          = "ExpGaus"  
       
@@ -550,13 +552,13 @@ class initialiseFits:
         
 
       # Directory and input files
-      # self.file_Directory         = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag_80X/WWTree_%s/"%(self.channel) #For 80X!!!!
-      self.file_Directory         = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag/PRUNED/WWTree_%s/"%(self.channel)
+      self.file_Directory         = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag_80X/WWTree_%s/"%(self.channel) #For 80X!!!!
+      # self.file_Directory         = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag/PRUNED/WWTree_%s/"%(self.channel)
     
-      if options.usePuppiSD :
-        self.file_Directory       = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag_80X/WWTree_%s/"%(self.channel)
-        if options.use76X:
-           self.file_Directory       = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag/PUPPISD_newcorr/WWTree_%s/"%(self.channel)
+      # if options.usePuppiSD :
+#         self.file_Directory       = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag_80X/WWTree_%s/"%(self.channel)
+#         if options.use76X:
+#            self.file_Directory       = "$HOME/EXOVVAnalysisRunII/AnalysisOutput/Wtag/PUPPISD_newcorr/WWTree_%s/"%(self.channel)
 
       postfix = ""
       if options.use76X: postfix ="_76X"  
@@ -564,10 +566,11 @@ class initialiseFits:
       self.file_data              = ("ExoDiBosonAnalysis.WWTree_data%s.root") %postfix        
       self.file_WJets0_mc         = ("ExoDiBosonAnalysis.WWTree_WJets%s.root") %postfix
       self.file_VV_mc             = ("ExoDiBosonAnalysis.WWTree_VV%s.root") %postfix      
+      self.file_QCD_mc            = ("ExoDiBosonAnalysis.WWTree_QCD%s.root") %postfix      
       self.file_STop_mc           = ("ExoDiBosonAnalysis.WWTree_STop%s.root") %postfix           
       self.file_TTbar_mc          = ("ExoDiBosonAnalysis.WWTree_TTbar_%s%s.root")%(in_sample,postfix)
-      self.file_pseudodata        = ("ExoDiBosonAnalysis.WWTree_pseudodata_%s%s.root")%(in_sample,postfix)      #Important! ROOT tree containing all backgrounds added together (tt+singleT+VV+Wjets). Used for fit to total MC
-      self.file_pseudodata        = ("pseudodata_weighted.root")
+      self.file_pseudodata        = ("pseudodata_weighted_%s%s.root")%(in_sample,postfix)      #Important! ROOT tree containing all backgrounds added together (tt+singleT+VV+Wjets). Used for fit to total MC
+      # self.file_pseudodata        = ("pseudodata_weighted.root")
       # Define Tau21 WP
       self.wtagger_label = "HP"
       self.wtagger_cut = options.tau2tau1cutHP
@@ -589,6 +592,7 @@ class initialiseFits:
       self.color_palet["data"]              = 1
       self.color_palet["WJets"]             = 2
       self.color_palet["VV"]                = 4
+      self.color_palet["QCD"]               = 5
       self.color_palet["STop"]              = 7
       self.color_palet["TTbar"]             = 210
       self.color_palet["TTbar_realW"]       = 210
@@ -650,6 +654,19 @@ class initialiseFits:
         self.get_mj_dataset(self.file_VV_mc,"_VV")
         fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV",self.mj_shape["VV"],self.channel,self.wtagger_label)
         fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV_failtau2tau1cut",self.mj_shape["VV_fail"],self.channel,self.wtagger_label)
+        
+        
+        # # Build QCD fit pass and fail distributions
+   #      print "#########################################"
+   #      print "################## QCD ##################"
+   #      print "#########################################"
+   #      print ""
+   #      print ""
+   #
+   #      self.get_mj_dataset(self.file_VV_mc,"_QCD")
+   #      fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_QCD",self.mj_shape["QCD"],self.channel,self.wtagger_label)
+   #      fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_QCD_failtau2tau1cut",self.mj_shape["QCD_fail"],self.channel,self.wtagger_label)
+        
 
         if options.fitMC:
             return
@@ -707,6 +724,7 @@ class initialiseFits:
         self.workspace4fit_.var("rrv_number_dataset_signal_region_data_"    +self.channel+"_mj").Print()
         self.workspace4fit_.var("rrv_number_dataset_signal_region_VV_"      +self.channel+"_mj").Print()
         self.workspace4fit_.var("rrv_number_dataset_signal_region_WJets0_"  +self.channel+"_mj").Print()
+        self.workspace4fit_.var("rrv_number_dataset_signal_region_QCD_"     +self.channel+"_mj").Print()
         self.workspace4fit_.var("rrv_number_dataset_signal_region_STop_"    +self.channel+"_mj").Print()
         self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbar_"   +self.channel+"_mj").Print()
         print ""
@@ -853,21 +871,23 @@ class initialiseFits:
           tmp_jet_mass = getattr(treeIn, jet_mass);
           treeWeight = treeIn.GetWeight()
           
-          if i==0: 
-            tmp_scale_to_lumi = treeIn.lumiweight*self.Lumi ## weigth for xs and lumi
+          # if i==0:
+            
           
           if not TString(label).Contains("data"):
-            if options.usePuppiSD: # With pT weight (Use with PUPPI+SD with new corrections!!)
-               tmp_event_weight     = getattr(treeIn,"weight")*self.Lumi*treeWeight*getattr(treeIn,"ptweight")
-               tmp_event_weight4fit = treeWeight*getattr(treeIn,"genweight")*getattr(treeIn,"puweight")*getattr(treeIn,"hltweight")*getattr(treeIn,"ptweight") #Missing b-tag weight and Vtg weight! ##FROM JEN!
-               tmp_event_weight4fit = tmp_event_weight4fit*treeIn.lumiweight*self.Lumi /tmp_scale_to_lumi      ##FROM JEN!
-
-            if TString(label).Contains("Total") or not options.usePuppiSD:   # Without pT weight (use for 76X pruning!!!) and pseudodata PUPPI+SD new corr!!!!
+            # if options.usePuppiSD: # With pT weight (Use with PUPPI+SD with new corrections!!)
+            #    tmp_event_weight     = getattr(treeIn,"weight")*self.Lumi*treeWeight*getattr(treeIn,"ptweight")
+            #    tmp_event_weight4fit = treeWeight*getattr(treeIn,"genweight")*getattr(treeIn,"puweight")*getattr(treeIn,"hltweight")*getattr(treeIn,"ptweight") #Missing b-tag weight and Vtg weight! ##FROM JEN!
+            #    tmp_event_weight4fit = tmp_event_weight4fit*treeIn.lumiweight*self.Lumi /tmp_scale_to_lumi      ##FROM JEN!
+# 
+            # if TString(label).Contains("Total") or not options.usePuppiSD:   # Without pT weight (use for 76X pruning!!!) and pseudodata PUPPI+SD new corr!!!!
+              tmp_scale_to_lumi = treeIn.lumiweight*self.Lumi ## weigth for xs and lumi
               tmp_event_weight     = getattr(treeIn,"weight")*self.Lumi*treeWeight
               tmp_event_weight4fit = treeWeight*getattr(treeIn,"genweight")*getattr(treeIn,"puweight")*getattr(treeIn,"hltweight") #Missing b-tag weight and Vtg weight! ##FROM JEN!
               tmp_event_weight4fit = tmp_event_weight4fit*treeIn.lumiweight*self.Lumi /tmp_scale_to_lumi      ##FROM JEN!
 
           else:
+            tmp_scale_to_lumi = 1.
             tmp_event_weight = 1.
             tmp_event_weight4fit = 1.
 

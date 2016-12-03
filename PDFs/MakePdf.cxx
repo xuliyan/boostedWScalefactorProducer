@@ -528,7 +528,6 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
         sigma1_tmp = 8.4035e+00;
         rangeMean = 5. ;
         rangeWidth = 5. ;
-        frac_tmp = 1.; //6.9510e-01 in 76X
         c0_tmp     = -2.1046e-02  ;
         offset_tmp =  8.0122e+01 ;
         width_tmp  =  2.9595e+01 ;
@@ -713,10 +712,10 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
 
     if( model == "GausErfExp_ttbar_failtau2tau1cut"){
 
-      double c0_tmp = -3.0626e-02    ;      double c0_tmp_err = 1.46e-02;
-      double offset_tmp = 5.1636e+01 ;      double offset_tmp_err = 4.92e+01;
-      double width_tmp = 3.6186e+01  ;      double width_tmp_err = 4.69e+00;
-      double frac_tmp =1.;
+      double c0_tmp     = -3.0626e-02 ;      double c0_tmp_err = 1.46e-02;
+      double offset_tmp = 5.1636e+01  ;      double offset_tmp_err = 4.92e+01;
+      double width_tmp  = 3.6186e+01  ;      double width_tmp_err = 4.69e+00;
+      double frac_tmp   = 1.          ;
       double mean1_tmp  = 8.7486e+01;
       double sigma1_tmp = 8.7456e+00;
       
@@ -729,12 +728,12 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
       }
       if( TString(wtagger_label.c_str()).Contains("PuppiSD") ){
         
-        c0_tmp = -7.8382e-02    ;    
-        offset_tmp = 1.6304e+02 ;     
-        width_tmp = 4.5316e+01  ;    
-        // frac_tmp = 3.8406e-01; //3.8406e-01
-        mean1_tmp = 8.7857e+01;
-        sigma1_tmp = 8.4035e+00;
+        c0_tmp      = -5.5604e-02;
+        offset_tmp  = 1.9915e+02 ;
+        width_tmp   = 6.4888e+01 ;
+        // frac_tmp = 4.5680e-01 ;
+        mean1_tmp   = 8.0056e+01 ;
+        sigma1_tmp  = 9.4160e+00 ;
           
         if(TString(wtagger_label.c_str()).Contains("0v56")){
           mean1_tmp = 8.4429e+01 ;
@@ -742,7 +741,7 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
           c0_tmp     = -4.5251e-02 ;
           offset_tmp =  1.7294e+02 ;
           width_tmp  =  6.7105e+01  ;
-          frac_tmp = 2.5562e-01 ;
+          // frac_tmp = 2.5562e-01 ;
         }
       }
       if(TString(wtagger_label.c_str()).Contains("DDT")){
@@ -778,7 +777,6 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
       RooAbsPdf* gaus = NULL ;
       if( TString(label).Contains("data"   ) ) gaus = workspace->pdf(("gaus1_ttbar_data_"+channel+spectrum).c_str());
       if( TString(label).Contains("TotalMC") ) gaus = workspace->pdf(("gaus1_ttbar_TotalMC_"+channel+spectrum).c_str());
-      if( TString(label).Contains("realW")   ) gaus = workspace->pdf(("gaus1_TTbar_realW_"+channel+spectrum).c_str());
       
       // RooRealVar* rrv_mean1_gaus = new RooRealVar(("rrv_mean1_gaus"+label+"_"+channel+spectrum).c_str(),("rrv_mean1_gaus"+label+"_"+channel+spectrum).c_str(),mean1_tmp, 75., 90.);
       //     // if( TString(label).Contains("data"   ) ) rrv_mean1_gaus = workspace->var( ("rrv_mean1_gaus_ttbar_data_"+channel+spectrum).c_str() );
@@ -890,10 +888,10 @@ RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, co
           width_tmp = 2.5680e+01  ;
         }
       }
-      if( TString(wtagger_label.c_str()).Contains("PuppiSD") ){
-        c0_tmp = -3.4172e-02    ;       c0_tmp_err = 1.46e-02;
-        offset_tmp = 7.0670e+01 ;       offset_tmp_err = 4.92e+01;
-        width_tmp = 4.4438e+01  ;       width_tmp_err = 4.69e+00;
+      if( TString(wtagger_label.c_str()).Contains("PuppiSD") ){     
+        c0_tmp = -3.5160e-02    ;       c0_tmp_err = 1.46e-02;
+        offset_tmp = 6.0935e+01 ;       offset_tmp_err = 4.92e+01;
+        width_tmp = 3.9583e+01  ;       width_tmp_err = 4.69e+00;
       }
       
       if(TString(wtagger_label.c_str()).Contains("DDT")){

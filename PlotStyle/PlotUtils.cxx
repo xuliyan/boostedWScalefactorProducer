@@ -489,7 +489,7 @@ void draw_canvas(RooPlot* in_obj, const std::string & in_directory, const TStrin
   int iPos=11;
   writeExtraText = true;
   extraText  = "Preliminary";
-  lumi_13TeV  = "2.3 fb^{-1}";
+  lumi_13TeV  = "12.9 fb^{-1}";
   lumi_sqrtS = "13 TeV";
   CMS_lumi( cMassFit, iPeriod, iPos );
   cMassFit->Update();
@@ -893,9 +893,9 @@ void setTDRStyle(){
 
 float GetLumi(const std::string & channel){
  
-  if(channel=="el") return 2.3;
-  else if(channel=="mu") return 2.3;
-  else if(channel=="em") return 2.3;
+  if(channel=="el") return 12.9;
+  else if(channel=="mu") return 12.9;
+  else if(channel=="em") return 12.9;
 
   return -1 ;
 }
