@@ -20,14 +20,14 @@ git checkout -b DevelopmentBranch thaarres/DevelopmentBranch
 cd $CMSSW_BASE/src
 cd boostedWScalefactorProducer
 export ROOFITSYS=$ROOTSYS
-python Automatic_Setup.py
+python Automatic_Setup.py --vclean 1
 ```
 
 ### running
 
 ```
-python Automatic_Setup.py
-python wtagSFfits.py -b
+python Automatic_Setup.py #To compile
+python wtagSFfits.py -b   #To run
 ```
 
 The basic script to be run is 
@@ -47,7 +47,7 @@ It takes as input .root files containing a TTree with a branch for the mass dist
     --fitTT : Only do fits to truth matched tt MC
     --fitMC : Only do fits to MC (test fit functions)
     --sample : name of TT MC eg --sample "herwig"
-    --doUnbinned : to do unbinned simultaneous fit
+    --doBinned : to do binned simultaneous fit (default is unbinned)
     --76X : Use files with postfix "_76X" (change to postfix of your choice if running on several different samples)
     --useDDT : Uses DDT tagger instead of pruning+softdrop (ops! Requires softdrop variables)
     --usePuppiSD : Uses PUPPI + softdrop and PUPPI n-subjettiness
