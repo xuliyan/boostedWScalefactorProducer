@@ -1,0 +1,52 @@
+# Variable definition file for jets
+#
+# expected format:
+# detail_level  C++_type  name  [default]
+#
+# Do not add variables here which are defined in Particle.h.
+#
+
+Basic	int*	pdgId
+Basic	floatingnumber*	charge
+Basic	floatingnumber*	d0
+
+ID	int*	TauType
+
+
+AdvancedID	floatingnumber*	decayModeFindingNewDMs
+AdvancedID	floatingnumber*	decayModeFinding
+AdvancedID	floatingnumber*	byLooseCombinedIsolationDeltaBetaCorr3Hits
+AdvancedID	floatingnumber*	byMediumCombinedIsolationDeltaBetaCorr3Hits
+AdvancedID	floatingnumber*	byTightCombinedIsolationDeltaBetaCorr3Hits
+AdvancedID	floatingnumber*	byCombinedIsolationDeltaBetaCorrRaw3Hits
+AdvancedID	floatingnumber*	chargedIsoPtSum
+AdvancedID	floatingnumber*	neutralIsoPtSum
+AdvancedID	floatingnumber*	puCorrPtSum
+AdvancedID	floatingnumber*	byIsolationMVA3oldDMwLTraw
+AdvancedID	floatingnumber*	byVLooseIsolationMVA3oldDMwLT
+AdvancedID	floatingnumber*	byLooseIsolationMVA3oldDMwLT
+AdvancedID	floatingnumber*	byMediumIsolationMVA3oldDMwLT
+AdvancedID	floatingnumber*	byTightIsolationMVA3oldDMwLT
+AdvancedID	floatingnumber*	byVTightIsolationMVA3oldDMwLT
+AdvancedID	floatingnumber*	byIsolationMVA3newDMwLTraw
+AdvancedID	floatingnumber*	byVLooseIsolationMVA3newDMwLT
+AdvancedID	floatingnumber*	byLooseIsolationMVA3newDMwLT
+AdvancedID	floatingnumber*	byMediumIsolationMVA3newDMwLT
+AdvancedID	floatingnumber*	byTightIsolationMVA3newDMwLT
+AdvancedID	floatingnumber*	byVTightIsolationMVA3newDMwLT
+AdvancedID	floatingnumber*	againstElectronMVA5raw
+AdvancedID	floatingnumber*	againstElectronMVA5category
+AdvancedID	floatingnumber*	againstElectronVLooseMVA5
+AdvancedID	floatingnumber*	againstElectronLooseMVA5
+AdvancedID	floatingnumber*	againstElectronMediumMVA5
+AdvancedID	floatingnumber*	againstElectronTightMVA5
+AdvancedID	floatingnumber*	againstElectronVTightMVA5
+AdvancedID	floatingnumber*	againstMuonLoose3
+AdvancedID	floatingnumber*	againstMuonTight3
+AdvancedID	floatingnumber*	byPileupWeightedIsolationRaw3Hits
+AdvancedID	floatingnumber*	byLoosePileupWeightedIsolation3Hits
+AdvancedID	floatingnumber*	byMediumPileupWeightedIsolation3Hits
+AdvancedID	floatingnumber*	byTightPileupWeightedIsolation3Hits
+AdvancedID	floatingnumber*	byPhotonPtSumOutsideSignalCone
+AdvancedID	floatingnumber*	footprintCorrection
+

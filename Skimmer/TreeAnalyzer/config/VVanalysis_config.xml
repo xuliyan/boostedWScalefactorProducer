@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd">
+<JobConfiguration JobName="VVanalysisJob" OutputLevel="INFO">
+
+	<Library Name="libSFramePlugIns" />
+	<Library Name="libNtupleVariables"/>
+	<!-- <Library Name="libGoodRunsLists" /> -->
+	<Library Name="libPileupReweightingTool" />
+	<Library Name="libBTaggingTools" />
+	<Library Name="libTreeAnalyzer"/>
+	
+	
+	<Cycle Name="VVanalysis" OutputDirectory="./" PostFix="M1000" TargetLumi="1.0">
+		<InputData Lumi="0.0" NEventsMax="-1" Type="WprimeWZ" Version="v1">
+			<In FileName="flatTuple_1.root" Lumi="1.0" />
+			<In FileName="flatTuple_2.root" Lumi="1.0" />
+			<In FileName="flatTuple_3.root" Lumi="1.0" />
+			<InputTree Name="ntuplizer/tree" />
+			<OutputTree Name="outtree" />
+		</InputData>
+		<UserConfig>
+			<Item Name="RecoTreeName" Value="tree"/>
+		</UserConfig>
+	</Cycle>
+</JobConfiguration>

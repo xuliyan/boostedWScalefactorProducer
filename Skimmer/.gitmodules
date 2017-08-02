@@ -1,0 +1,12 @@
+[submodule "NtupleVariables"]
+	path = NtupleVariables
+	url = git@github.com:thaarres/NtupleVariables.git
+[submodule "PileupReweightingTool"]
+	path = PileupReweightingTool
+	url = git@github.com:thaarres/PileupReweightingTool.git
+[submodule "BTaggingTools"]
+	path = BTaggingTools
+	url = git@github.com:thaarres/BTaggingTools.git
+[submodule "GoodRunsLists"]
+	path = GoodRunsLists
+	url = git@github.com:thaarres/GoodRunsLists.git
