@@ -11,15 +11,18 @@
 	
 	
 	<Cycle Name="VVanalysis" OutputDirectory="./" PostFix="M1000" TargetLumi="1.0">
-		<InputData Lumi="0.0" NEventsMax="-1" Type="WprimeWZ" Version="v1">
-			<In FileName="flatTuple_1.root" Lumi="1.0" />
-			<In FileName="flatTuple_2.root" Lumi="1.0" />
-			<In FileName="flatTuple_3.root" Lumi="1.0" />
+		<InputData Lumi="0.0" NEventsMax="-1" NEventsSkip="0" Type="WprimeWZ" Version="v1">
+			<!--<In FileName="/storage/b/psi_data/jobtmp_BulkGravToWW_narrow_M-2000_13TeV-madgraph_RunIISummer16MiniAODv2_PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/BulkGravToWW_narrow_M-2000_13TeV-madgraph_RunIISummer16MiniAODv2_PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1-1/flatTuple.root" Lumi="1.0" />-->
+                        
+                        <In FileName="/storage/b/psi_data/Summer16/QstarToQW_M-2000_TuneCUETP8M2T4_13TeV-pythia8/QstarToQW_M-2000_TuneCUETP8M2T4_13TeV-pythia820170203_signal/170203_131525/0000/flatTuple_1.root" Lumi="1.0" />
+			<!--<In FileName="flatTuple_2.root" Lumi="1.0" />
+			<In FileName="flatTuple_3.root" Lumi="1.0" />-->
 			<InputTree Name="ntuplizer/tree" />
 			<OutputTree Name="outtree" />
 		</InputData>
 		<UserConfig>
 			<Item Name="RecoTreeName" Value="tree"/>
+                        <Item Name="PUPPIJEC" Value="weights/puppiCorr.root" /> 
 		</UserConfig>
 	</Cycle>
 </JobConfiguration>
