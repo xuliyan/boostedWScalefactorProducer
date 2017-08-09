@@ -13,7 +13,7 @@ source /swshare/ROOT/root_v5.34.32_precompiled/root/bin/thisroot/.sh
 export GITUSER=`git config user.github`
 echo "Your github username has been set to \"$GITUSER\""
 git clone git@github.com:${GITUSER}/WTopScalefactorProducer.git
-cd boostedWScalefactorProducer
+cd WTopScalefactorProducer
 git remote add originalRemote git@github.com:thaarres/WTopScalefactorProducer.git
 git fetch originalRemote
 git checkout -b DevelopmentBranch thaarres/master
