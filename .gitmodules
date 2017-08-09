@@ -1,0 +1,4 @@
+[submodule "SFrameAnalysis"]
+	path = SFrameAnalysis
+	url = https://github.com/thaarres/SFrameAnalysis.git
+	branch = VTopScalefactor
