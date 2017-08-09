@@ -1,6 +1,6 @@
-# SFrameAnalysis (thanks C.Lange)
+# Skimmer
 
-Repository using submodules for ntuple-based analysis (at PSI T3).
+Skimmer running on UZH ntuples to create input for W/top scalefactor code
 
 ## Getting started
 
