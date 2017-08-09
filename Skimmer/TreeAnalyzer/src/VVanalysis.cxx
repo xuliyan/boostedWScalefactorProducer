@@ -1,9 +1,11 @@
 
 // Local include(s):
 #include "../include/VVanalysis.h"
+#include "../include/VVAnalysisTools.h"
 
 // External include(s):
 // #include "../GoodRunsLists/include/TGoodRunsListReader.h"
+
 
 #include <TMath.h>
 #include "TGraph.h"
@@ -40,6 +42,7 @@ VVanalysis::VVanalysis()
    DeclareProperty( "GenParticleName" ,         m_genParticleName         = "genParticle"   );
    
    DeclareProperty( "RecoTreeName"    ,         m_recoTreeName            = "physics" );
+   DeclareProperty( "PUPPIJEC"        ,         m_PUPPIJEC                = "weights/puppiCorr.root" );
    // DeclareProperty( "JSONName"        ,         m_jsonName                = std::string (std::getenv("SFRAME_DIR")) + "/../GoodRunsLists/JSON/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_Silver_v2.txt" );
    DeclareProperty( "IsData"          ,         m_isData                  = false );
 }
@@ -82,12 +85,19 @@ void VVanalysis::BeginInputFile( const SInputData& ) throw( SError ) { //For eac
   
   m_logger << INFO << "Connecting input variables" << SLogger::endmsg;
   if (m_isData) {
-    
+    m_jetAK4.ConnectVariables(       m_recoTreeName.c_str(), Ntuple::JetBasic|Ntuple::JetAnalysis|Ntuple::JetTruth, (m_jetAK4Name + "_").c_str() );
+    m_electron.ConnectVariables(     m_recoTreeName.c_str(), Ntuple::ElectronBasic|Ntuple::ElectronID, (m_electronName + "_").c_str() );
+    m_muon.ConnectVariables(         m_recoTreeName.c_str(), Ntuple::MuonBasic|Ntuple::MuonID|Ntuple::MuonIsolation, (m_muonName + "_").c_str() );
+    m_missingEt.ConnectVariables(    m_recoTreeName.c_str(), Ntuple::MissingEtBasic, (m_missingEtName + "_").c_str() );
     m_jetAK8Puppi .ConnectVariables(  m_recoTreeName.c_str(), Ntuple::JetSubstructure, (m_jetAK8PuppiName + "_").c_str() );
     m_jetAK8      .ConnectVariables(  m_recoTreeName.c_str(), Ntuple::JetBasic|Ntuple::JetAnalysis|Ntuple::JetSubstructure|Ntuple::JetSoftdropSubjets, (m_jetAK8Name + "_").c_str() );
     m_eventInfo   .ConnectVariables(  m_recoTreeName.c_str(), Ntuple::EventInfoBasic|Ntuple::EventInfoTrigger|Ntuple::EventInfoMETFilters, "" );
   }
   else {
+    m_jetAK4.ConnectVariables(       m_recoTreeName.c_str(), Ntuple::JetBasic|Ntuple::JetAnalysis|Ntuple::JetTruth, (m_jetAK4Name + "_").c_str() );
+    m_electron.ConnectVariables(     m_recoTreeName.c_str(), Ntuple::ElectronBasic|Ntuple::ElectronID, (m_electronName + "_").c_str() );
+    m_muon.ConnectVariables(         m_recoTreeName.c_str(), Ntuple::MuonBasic|Ntuple::MuonID|Ntuple::MuonIsolation, (m_muonName + "_").c_str() );
+    m_missingEt.ConnectVariables(    m_recoTreeName.c_str(), Ntuple::MissingEtBasic, (m_missingEtName + "_").c_str() );
     m_jetAK8Puppi .ConnectVariables(  m_recoTreeName.c_str(), Ntuple::JetSubstructure, (m_jetAK8PuppiName + "_").c_str() );
     m_jetAK8      .ConnectVariables(  m_recoTreeName.c_str(), Ntuple::JetBasic|Ntuple::JetAnalysis|Ntuple::JetSubstructure|Ntuple::JetTruth|Ntuple::JetSoftdropSubjets|Ntuple::JetSoftdropSubjetsTruth, (m_jetAK8Name + "_").c_str() );
     m_eventInfo   .ConnectVariables(  m_recoTreeName.c_str(), Ntuple::EventInfoBasic|Ntuple::EventInfoTrigger|Ntuple::EventInfoMETFilters|Ntuple::EventInfoTruth, "" );
@@ -102,15 +112,52 @@ void VVanalysis::BeginInputFile( const SInputData& ) throw( SError ) { //For eac
   
   m_logger << INFO << "Connecting input variables completed" << SLogger::endmsg;
   
+  m_logger << INFO << "Initializing inputs for puppi softdop mass corrections" << SLogger::endmsg; 
+  TFile* file = TFile::Open( m_PUPPIJEC.c_str(),"READ");
+  if(file->IsZombie()) throw SError(SError::StopExecution);
+  m_puppisd_corr.push_back( dynamic_cast<TF1*>(file->Get("puppiJECcorr_gen")));
+  m_puppisd_corr.push_back( dynamic_cast<TF1*>(file->Get("puppiJECcorr_reco_0eta1v3")));
+  m_puppisd_corr.push_back( dynamic_cast<TF1*>(file->Get("puppiJECcorr_reco_1v3eta2v5")));
   
-   return;
+  return;
 
 }
 
 
 void VVanalysis::BeginInputData( const SInputData& ) throw( SError ) { //called once before processing each of the input data types. If you need to initialise output objects (histograms, etc.) before the event-by-event execution, you should do that here. Also the declaration of the output variables has to be done here.
   
-  // Declare output variables:
+  // VARIABLES TO BE IMPLEMENTED FOR V-TAG CODE!!!
+  //DeclareVariable( puweight_     , "puweight"   );
+  //DeclareVariable( lumiweight_   , "lumiweight" );
+  //DeclareVariable( genweight_    , "genweight"  );
+  //DeclareVariable( btagweight_ 	 , "btagweight" );
+  //DeclareVariable( ptweight_ 	   , "ptweight"   );
+  //DeclareVariable( weight	   	   , "weight"	    );
+  //DeclareVariable( jet_csv            , "Whadr_csv"    );
+  //DeclareVariable( jet_pt             , "Whadr_pt"     );
+  //DeclareVariable( jet_eta            , "Whadr_eta"    );
+  //DeclareVariable( jet_phi            , "Whadr_phi"    );
+  //DeclareVariable( realW              , "Whadr_isW"    );
+  //DeclareVariable( jet_puppi_softdrop , "Whadr_puppi_softdrop"   );
+  //DeclareVariable( jet_puppi_tau1     , "Whadr_puppi_tau1"       );
+  //DeclareVariable( jet_puppi_tau2     , "Whadr_puppi_tau2"       );
+  //DeclareVariable( jet_puppi_tau3     , "Whadr_puppi_tau3"       );
+ 
+  //DeclareVariable( l_pt               , "lept_pt"      );
+  //DeclareVariable( l_eta              , "lept_eta"     );
+  //DeclareVariable( l_phi              , "lept_phi"     );
+  //DeclareVariable( l_iso              , "lept_iso"     );
+  //DeclareVariable( Wlept_pt           , "Wlept_pt"     ); 
+  //DeclareVariable( WMass              , "Wlept_mass"   );
+  //DeclareVariable( pfMET              , "pfMET"        ); 
+  //DeclareVariable( pfMETPhi           , "pfMETPhi"     );
+  //DeclareVariable( nak4jets           , "nak4jets"     );
+  
+  
+  
+  
+  
+  
   DeclareVariable( m_o_mjj                        , "mjj");
   DeclareVariable( m_o_genmjj                     , "genmjj");
   DeclareVariable( m_o_mpuppisoftdrop_jet1        , "jet1_softDrop_mass");
@@ -135,7 +182,8 @@ void VVanalysis::BeginInputData( const SInputData& ) throw( SError ) { //called 
   DeclareVariable( HLTHT650_MJJ900DEtaJJ1p5       , "HLTHT650_MJJ900DEtaJJ1p5");
   DeclareVariable( HLTHT800                       , "HLTHT800");
   DeclareVariable( nLeptonOverlap                 , "nLeptonOverlap");
-  DeclareVariable( jj_mergedVTruth                , "jj_mergedVTruth");
+  DeclareVariable( jj_mergedVTruth_jet1           , "jj_mergedVTruth_jet1");
+  DeclareVariable( jj_mergedVTruth_jet2           , "jj_mergedVTruth_jet2");
 
   // // Declare the output histograms:
   // Book( TH1F( "Mjj_hist"     , "Mjj", 100, 0.0, 3000. ) );
@@ -191,6 +239,87 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   
   ++m_allEvents;
   ( *m_test )[ 0 ]++;
+  
+  
+  // W-top scalefactor pseudocode/old code to be rewritten
+  // setWeight();
+  // if( !applyJSON() ) throw SError( SError::SkipEvent );
+  // if( !passedTrigger() ) throw SError( SError::SkipEvent );
+  // if( !passedFilters( infile ) ) throw SError( SError::SkipEvent );
+  // if( passedTTbarSelections( infile) ){ <--- SEE METHOD BELOW!!!
+    
+   //GEN MATCHING
+    // int isW_def1 = 0;
+    // int isW_def2 = 0;
+    //
+    // if( runOnMC_ ){
+    //   TLorentzVector genP;
+    //   std::vector<TLorentzVector> daus;
+    //   TLorentzVector hadW;
+    //
+    //   for( unsigned int p = 0; p < (data_.genParticle_pdgId)->size(); ++p ){
+    //     bool isHad = false;
+    //     if( (*data_.genParticle_pt).at(p) < 0.1) continue;
+    //     if( fabs((*data_.genParticle_pdgId).at(p)) > 9) continue;
+    //     for( unsigned int d = 0; d < (*data_.genParticle_mother)[p].size(); ++d ) {
+    //       if( fabs((*data_.genParticle_mother)[p][d]) != 24 ) continue;
+    //       isHad = true;
+    //     }
+    //     if (!isHad) continue;
+    //     genP.SetPtEtaPhiE( (*data_.genParticle_pt).at(p), (*data_.genParticle_eta).at(p), (*data_.genParticle_phi).at(p), (*data_.genParticle_e).at(p) );
+    //     daus.push_back(genP);
+    //   }
+    //   if( daus.size() > 1){
+    //
+    //     for( unsigned int p = 0; p < (data_.genParticle_pdgId)->size(); ++p ){
+    //       bool isHad = false;
+    //       if( (*data_.genParticle_pt).at(p) < 0.1) continue;
+    //       if( fabs((*data_.genParticle_pdgId).at(p)) != 24) continue;
+    //       // if( not infile.Contains( "herwig" ) && (*data_.genParticle_status).at(p) != 4 && (*data_.genParticle_status).at(p) != 22 && (*data_.genParticle_status).at(p) != 23) continue;
+    //       // if( infile.Contains( "herwig" ) && (*data_.genParticle_status).at(p) != 11 ) continue;
+    //       if ((*data_.genParticle_dau)[p].size() < 2) continue;
+    //       for( unsigned int d = 0; d < (*data_.genParticle_dau)[p].size(); ++d ) {
+    //         if( fabs((*data_.genParticle_dau)[p][d]) > 9) continue;
+    //         isHad = true;
+    //       }
+    //       if (isHad){
+    //         hadW.SetPtEtaPhiE( (*data_.genParticle_pt).at(p), (*data_.genParticle_eta).at(p), (*data_.genParticle_phi).at(p), (*data_.genParticle_e).at(p) );
+    //       }
+    //     }
+    //
+    //     int isMatch = 0;
+    //     for( unsigned int p = 0; p < daus.size(); ++p ){
+    //       float dR = daus.at(p).DeltaR(Vcand.at(0).p4);
+    //       if (dR < 0.8 ) isMatch +=1;
+    //     }
+    //     if (isMatch > 1) isW_def1 = 1;
+    //     if( (Vcand.at(0).p4).DeltaR(hadW) < 0.4  && daus.at(0).DeltaR(daus.at(1)) < 0.8 ) isW_def2 = 1;
+    //   }
+    // }
+    //
+    // realW_def1 = isW_def1;
+    // realW_def2 = isW_def2;
+    // weight = weight_;
+    // jet_csv = Vcand.at(0).csv;
+    // jet_pt = Vcand.at(0).p4.Pt();
+    // jet_eta = Vcand.at(0).p4.Eta();
+    // jet_phi = Vcand.at(0).p4.Phi();
+    // l_pt  = leptonCand_[0].p4.Pt();
+    // l_eta = leptonCand_[0].p4.Eta();
+    // l_phi = leptonCand_[0].p4.Phi();
+    // l_iso = leptonCand_[0].iso;
+    // Wlept_pt = WCand_[0].p4.Pt();
+    // pfMET = METCand_[0].p4.Pt();
+    // pfMETPhi = METCand_[0].p4.Phi();
+    // nak4jets = AK4jetCand_.size();
+    // jet_puppi_softdrop = Vcand.at(0).puppi_softdropMass;
+    // jet_puppi_tau1 = Vcand.at(0).puppi_tau1;
+    // jet_puppi_tau2 = Vcand.at(0).puppi_tau2;
+    // jet_puppi_tau3 = Vcand.at(0).puppi_tau3;
+
+    
+    
+  
    
    
    if( m_jetAK8.N < 2 ) throw SError( SError::SkipEvent );
@@ -198,6 +327,7 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   //-------------Select two fat jets-------------//
   std::vector<UZH::Jet> goodFatJets;
   std::vector<UZH::Jet> goodGenJets;
+  std::vector<UZH::GenParticle> GenQuarks = FindGeneratedQuarks(m_genParticle, m_isData);
 
   for ( int i = 0; i < (m_jetAK8.N); ++i ) {
    
@@ -213,7 +343,7 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
       float dR = myjet.DeltaR(mypuppijet);
       if ( dR > dRmin ) continue;
       dRmin = dR;
-      myjet.puppi_softdropmass= mypuppijet.softdrop_massCorr();
+      myjet.puppi_softdropmass= ApplyPuppiSoftdropMassCorrections(mypuppijet,m_puppisd_corr,m_isData);//mypuppijet.softdrop_massCorr();
       myjet.puppi_tau1        = mypuppijet.tau1();
       myjet.puppi_tau2        = mypuppijet.tau2();
     }
@@ -239,15 +369,7 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   if( goodFatJets.size() < 2 ) throw SError( SError::SkipEvent );
   ++m_passedLoose;
   ( *m_test )[ 1 ]++;
-  
-  // std::cout<<""<< std::endl;
-  // std::cout<<"0) Gen Msd   = " << goodGenJets[0].softdropmass()                     <<"   1) Gen Msd   = " << goodGenJets[1].softdropmass() << std::endl;
-  // std::cout<<"0) Reco Msd  = " << goodFatJets[0].puppi_softdropmass                 <<"   1) Reco Msd  = " << goodFatJets[1].puppi_softdropmass << std::endl;
-  // std::cout<<"0) dR        = " << goodGenJets[0].tlv().DeltaR(goodFatJets[0].tlv()) <<" 1) dR         = " << goodGenJets[1].tlv().DeltaR(goodFatJets[1].tlv()) << std::endl;
-  // std::cout<<"----------------------------------"<< std::endl;
-  // std::cout<<"Gen Mjj   = " << (goodGenJets[0].tlv() + goodGenJets[1].tlv()).M() <<"    Reco Mjj   = " << (goodFatJets[0].tlv() + goodFatJets[1].tlv()).M() << std::endl;
-  // std::cout<<""<< std::endl;
-  // std::cout<<""<< std::endl;
+
      
    //-------------Make sure we have a PUPPI match-------------// 
   if( goodFatJets[0].puppi_softdropmass == -99 || goodFatJets[1].puppi_softdropmass == -99
@@ -306,10 +428,12 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   }
   
   // nLeptonOverlap                  =           ;
-  // jj_mergedVTruth                 =           ;
+  jj_mergedVTruth_jet1                =  isMergedVJet(goodFatJets[0].tlv(),GenQuarks) ;
+  jj_mergedVTruth_jet2                =  isMergedVJet(goodFatJets[1].tlv(),GenQuarks) ;
   //
 
-
+   
+  
   // }
   // TString StatusString = "Before_Cuts_";
   // FillValidationHists( GENERAL, StatusString );
@@ -320,6 +444,8 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   return;
 
 }
+
+ 
 
 void VVanalysis::FillValidationHists( ValHistsType ht, const TString& status ) {  
 
@@ -394,8 +520,307 @@ void VVanalysis::clearBranches() {
   HLTHT650_MJJ900DEtaJJ1p5      = -99;
   HLTHT800                      = -99;
   nLeptonOverlap                = -99;
-  jj_mergedVTruth               = -99;
+  jj_mergedVTruth_jet1          = -99;
+  jj_mergedVTruth_jet2          = -99;
 
 }
 
+// bool ExoDiBosonAnalysis::passedTTbarSelections( TString infile ){
+//
+//   bool foundLept    = false;
+//   bool passVeto     = false;
+//   bool foundMET     = false;
+//   bool foundW       = false;
+//   bool foundAK8     = false;
+//   bool passAK8LepDR = false;
+//   bool passAK8PrunedMass = false;
+//   bool found1b      = false;
+//
+//   foundAMu  = 0;
+//   foundAEle = 0;
+//
+//   // Find lepton (muon/electron depending on channel)
+//   if( findLeptonCandidate() ) foundLept = true;
+//   if( !foundLept ) return false;
+//   nPassedFoundLept_++;
+//
+//   Hist( "leptonPT"    )->Fill( leptonCand_.at(0).p4.Pt()  , weight_ );
+//   Hist( "leptonPhi"   )->Fill( leptonCand_.at(0).p4.Phi(), weight_ );
+//   Hist( "leptonEta"   )->Fill( leptonCand_.at(0).p4.Eta(), weight_ );
+//
+//
+//   // Veto additional loose leptons (both muons/electrons )
+//   if ( (foundAMu+foundAEle) > 0) return false;
+//   else
+//     passVeto = true;
+//
+//   nPassedVetoLep_++;
+//
+//   // Find MET
+//   if( findMETCandidate() ) {
+//     Hist( "MET"         )->Fill(  METCand_.at(0).sumEt, weight_ );
+//      if( METCand_[0].p4.Pt() > METCut_ ) foundMET = true;
+//    }
+//   if( !foundMET ) return false;
+//   nPassedFoundMET_++;
+//
+//   // reconstruct W
+//   if( foundLept && foundMET && findWCandidate() ){
+//     Hist( "Wcand_pt")->Fill(  WCand_[0].p4.Pt() );
+//      if( WCand_[0].p4.Pt() > 200.0 ) foundW = true;
+//   }
+//
+//   if( !foundW ) return false;
+//   nPassedFoundW_++;
+//   // Find AK8 W-jet candidate
+//   if(findJetCandidates( infile )){
+//     foundAK8 = true;
+//     // if( leptonCand_[0].p4.DeltaR(Vcand.at(0).p4) > 1.0 ) passAK8LepDR = true;
+//     if( Vcand.at(0).p4.Pt() >= JetPtCutTight_  ) passAK8LepDR = true;
+//     float groomedMass = Vcand.at(0).prunedMass;
+//     if(usePuppiSD_) groomedMass = Vcand.at(0).puppi_softdropMass;
+//     if( groomedMass >= mWLow_ && groomedMass <= mZHigh_ ) passAK8PrunedMass = true;
+//   }
+//
+//   if( !foundAK8 ) return false;
+//   nPassedFoundJet_++;
+//
+//   if( !passAK8LepDR ) return false;
+//   nPassedLepJetDR_++;
+//
+//   if( !passAK8PrunedMass ) return false;
+//   nPassedJetPrunedMass_++;
+//
+//
+//   // Find b-tagged AK4 jet
+//   findAK4Jets();
+//   bool najetCut = false;
+//   int najet = 0;
+//   for( unsigned int j = 0; j < abs(AK4jetCand_.size()); j++ ){
+//      if( AK4jetCand_[j].csv > 0.800 ) najet++;
+//   }
+//
+//   if( najet  > 0 ) found1b = true;
+//   if( !found1b ) return false;
+//   nPassed1bTag_++;
+//
+//   if(foundLept && passVeto && foundMET && foundW && foundAK8 && passAK8LepDR && passAK8PrunedMass && found1b) return true;
+//
+//   else
+//     return false;
+// }
+//
+// bool ExoDiBosonAnalysis::findLeptonCandidate( void ){
+//
+//   if( Channel_.find("el") != std::string::npos ) return findElectronCandidate();
+//   else if( Channel_.find("mu") != std::string::npos ) return findMuonCandidate();
+//   else return false;
+//
+// }
+//
+// //==============================================================================================
+// bool ExoDiBosonAnalysis::findMuonCandidate( void ){
+//
+//   foundAEle = 0;
+//   foundAMu = 0;
+//
+//   TLorentzVector TLV;
+//   bool foundLept = false;
+//   double ptMu = -999;
+//   int muIndex = 999;
+//   double scale = 0.;
+//   double newpt = 0.;
+//   double scale_ = 0.;
+//   for( int l = 0; l < data_.mu_N; ++l ){
+//     // if( !isLowMass && (*data_.mu_isHighPtMuon)[l] != 1 ) continue;
+//     // if(  isLowMass && (*data_.mu_isTightMuon)[l] != 1 ) continue;
+//     if( (*data_.mu_isTightMuon)[l] != 1 ) continue;
+//     //if( (*data_.mu_isPFMuon)[l] != 1 ) continue;
+//     scale = getMuonScale((*data_.mu_pt)[l]);
+//     newpt = (*data_.mu_pt)[l]+scale;
+//     if( (*data_.mu_trackIso)[l]/newpt >= 0.1 ) continue;
+//     if( newpt <= leptPtCut_ ) continue;
+//     if( fabs((*data_.mu_eta)[l]) >= leptEtaCut_ ) continue;
+//     if( fabs((*data_.mu_eta)[l]) > 1.2 && newpt > 500 ) continue;
+//     foundLept = true;
+//     if( newpt > ptMu ){
+//       ptMu = newpt;
+//       TLV.SetPtEtaPhiE( newpt, (*data_.mu_eta)[l], (*data_.mu_phi)[l], (*data_.mu_e)[l]+scale );
+//       muIndex = l;
+//       scale_ = scale;
+//     }
+//   }
+//
+//    if( foundLept ){
+//      LeptonCandidate muCand(TLV);
+//      muCand.iso = (*data_.mu_trackIso)[muIndex]/ptMu;
+//      // muCand.scale = scale_;
+//  //     muCand.isGlobalMuon = (*data_.mu_isGlobalMuon)[muIndex];
+//  //     muCand.globalHits = (*data_.mu_globalHits)[muIndex];
+//  //     muCand.matchedStations = (*data_.mu_matchedStations)[muIndex];
+//  //     muCand.bestTrack_ptErrRel = (*data_.mu_bestTrack_ptErr)[muIndex]/(*data_.mu_bestTrack_pt)[muIndex];
+//  //     muCand.d0 = (*data_.mu_d0)[muIndex];
+//  //     //muCand.dz = (*data_.mu_dz)[muIndex];
+//  //     muCand.pixelHits = (*data_.mu_pixelHits)[muIndex];
+//  //     muCand.trackerHits = (*data_.mu_trackerHits)[muIndex];
+//      leptonCand_.push_back( muCand );
+//    }
+//
+//    scale = 0.;
+//    for( int l = 0; l < data_.mu_N; ++l ){
+//       if( muIndex == 999 || l == muIndex ) continue;
+//       // if( !isLowMass && (*data_.mu_isHighPtMuon)[l] != 1 ) continue;
+//       // if(  isLowMass && (*data_.mu_isLooseMuon)[l] != 1 ) continue;
+//       if( (*data_.mu_isLooseMuon)[l] != 1 ) continue;
+//       scale = getMuonScale((*data_.mu_pt)[l]);
+//       newpt = (*data_.mu_pt)[l]+scale;
+//       if( (*data_.mu_trackIso)[l]/newpt >= 0.1 ) continue;
+//       if( newpt <= AleptPtCut_ ) continue;
+//       if( fabs((*data_.mu_eta)[l]) >= AleptEtaCut_ ) continue;
+//       foundAMu++;
+//    }
+//
+//    for( int l = 0; l < data_.el_N; ++l ){
+//       // if( !isLowMass && (*data_.el_isHEEP)[l] != 1 ) continue;
+//       // if( isLowMass && (*data_.el_isVetoElectron)[l] != 1 ) continue;
+//       if( (*data_.el_isVetoElectron)[l] != 1 ) continue;
+//       if( (*data_.el_pt)[l] <= 30. ) continue;
+//       if( fabs((*data_.el_eta)[l]) >= 1.4442 && fabs((*data_.el_eta)[l]) <= 1.566 ) continue;
+//       if( fabs((*data_.el_eta)[l]) >= 2.5 ) continue;
+//       foundAEle++;
+//    }
+//
+//    return foundLept;
+//
+//    //if( (foundAMu+foundAEle)<1 && foundLept ) return true;
+//    //else return false;
+//
+// }
+// //==============================================================================================
+// bool ExoDiBosonAnalysis::findElectronCandidate( void ){
+//
+//    foundAMu = 0;
+//    foundAEle = 0;
+//
+//    TLorentzVector TLV;
+//    bool foundEle = false;
+//    double ptEle = -999;
+//    int eleIndex = 999;
+//    for( int l = 0; l < data_.el_N; ++l ){
+//       if( (*data_.el_pt)[l] <= leptPtCut_ ) continue;
+//       if( fabs((*data_.el_eta)[l]) >= 1.4442 && fabs((*data_.el_eta)[l]) <= 1.566 ) continue;
+//       if( fabs((*data_.el_eta)[l]) >= leptEtaCut_ ) continue;
+//       if( (*data_.el_isHEEP)[l] != 1 ) continue;
+//       // if(  isLowMass && (*data_.el_isTightElectron)[l] != 1 ) continue;
+//
+//       foundEle = true;
+//       if( (*data_.el_pt)[l] > ptEle ){
+//          ptEle = (*data_.el_pt)[l];
+//          TLV.SetPtEtaPhiE( (*data_.el_pt)[l], (*data_.el_eta)[l], (*data_.el_phi)[l], (*data_.el_e)[l] );
+//          eleIndex = l;
+//       }
+//    }
+//
+//    if( foundEle )
+//     leptonCand_.push_back( LeptonCandidate( TLV ) );
+//
+//    for( int l = 0; l < data_.el_N; ++l ){
+//       if( eleIndex == 999 || l == eleIndex ) continue;
+//       // if( !isLowMass && (*data_.el_isHEEP)[l] != 1 ) continue;
+//       if( (*data_.el_isVetoElectron)[l] != 1 ) continue;
+//       if( (*data_.el_pt)[l] <= 30. ) continue;
+//       if( fabs((*data_.el_eta)[l]) >= 1.4442 && fabs((*data_.el_eta)[l]) <= 1.566 ) continue;
+//       if( fabs((*data_.el_eta)[l]) >= 2.5 ) continue;
+//       foundAEle++;
+//    }
+//    for( int l = 0; l < data_.mu_N; ++l ){
+//      // if( !isLowMass && (*data_.mu_isHighPtMuon)[l] != 1 ) continue;
+//      if(  (*data_.mu_isLooseMuon)[l] != 1 ) continue;
+//       if( (*data_.mu_trackIso)[l]/(*data_.mu_pt)[l] >= 0.1 ) continue;
+//       if( (*data_.mu_pt)[l] <= 20. ) continue;
+//       if( fabs((*data_.mu_eta)[l]) >= 2.4 ) continue;
+//       foundAMu++;
+//    }
+//    return foundEle;
+//  }
+//
+// //==============================================================================================
+// void ExoDiBosonAnalysis::findAK4Jets( void ){
+//   TLorentzVector jet;
+//   for( int j = 0; j < data_.njetsAK4; ++j ){
+//      jet.SetPtEtaPhiE( (*data_.jetAK4_pt)[j], (*data_.jetAK4_eta)[j], (*data_.jetAK4_phi)[j], (*data_.jetAK4_e)[j] );
+//      if( jet.DeltaR(Vcand[0].p4) < 0.8 ) continue;
+//      if( (*data_.jetAK4_IDLoose)[j] != 1 ) continue;
+//      if( (*data_.jetAK4_pt)[j] <= JetPtCutLoose_ ) continue;
+//      if( fabs((*data_.jetAK4_eta)[j]) >= JetEtaCut_ ) continue;
+//      if( jet.DeltaR(leptonCand_[0].p4) < 0.3 ) continue;
+//      JetCandidate Ajet(jet);
+//      Ajet.csv = (*data_.jetAK4_csv)[j];
+//      // Ajet.flavor = 0;
+//      // if( runOnMC_ ) Ajet.flavor = abs((*data_.jetAK4_flavor)[j]);
+//      AK4jetCand_.push_back(Ajet);
+//   }
+// }
+//
+// //==============================================================================================
+// bool ExoDiBosonAnalysis::findMETCandidate( void ){
+//
+//   TLorentzVector TLV;
+//   bool foundMET = false;
+//   if( (*data_.MET_et)[0] > 0. ){
+//
+//      TLV.SetPtEtaPhiE( (*data_.MET_et)[0], 0., (*data_.MET_phi)[0], 0. );
+//
+//      METCandidate metC(TLV);
+//      metC.sumEt = (*data_.MET_sumEt)[0];
+//      METCand_.push_back( METCandidate( TLV ) );
+//      foundMET = true;
+//
+//   }
+//
+//   return foundMET;
+//
+// }
+//
+// //==============================================================================================
+// bool ExoDiBosonAnalysis::findWCandidate( void ){
+//
+//   TLorentzVector TLV;
+//   bool foundW = false;
+//   if( (METCand_[0].p4+leptonCand_[0].p4).Pt() > 0. ){
+//      foundW = true;
+//      TLV = METCand_[0].p4+leptonCand_[0].p4;
+//      WCand_.push_back( TLV );
+//   }
+//
+//   return foundW;
+// }
+// //==============================================================================================
+// bool ExoDiBosonAnalysis::findHadronicWCandidate( void ){
+//
+//   TLorentzVector TLV,TLV1, TLV2;
+//   bool foundW = false;
+//   Double_t deltaWmassMin = 999.;
+//
+//   for(int i=0; i < abs(AK4jetCand_.size()); i++ ){
+//     if (AK4jetCand_.at(i).p4.Pt() == Leptonicb_.at(0).p4.Pt() || AK4jetCand_.at(i).p4.Pt() <= 0. ) continue;
+//     for(int j=0; j != i && j < abs(AK4jetCand_.size()); j++ ){
+//       Double_t deltaWmass = fabs(pdgMw - ((AK4jetCand_.at(i).p4+ AK4jetCand_.at(j).p4).M()));
+//       if( deltaWmass < deltaWmassMin ){
+//         deltaWmassMin = deltaWmass;
+//         foundW = true;
+//         TLV = AK4jetCand_.at(i).p4+AK4jetCand_.at(j).p4;
+//         TLV1 = AK4jetCand_.at(i).p4;
+//         TLV2 = AK4jetCand_.at(j).p4;
+//       }
+//     }
+//   }
+//   HadronicJ_.push_back( TLV1 );
+//   HadronicJ_.push_back( TLV2 );
+//   Hist( "DeltaRJJ")->Fill ( HadronicJ_.at(1).p4.DeltaR(HadronicJ_.at(0).p4) , weight_  );
+//
+//   WCand_.push_back( TLV );
+//   return foundW;
+//
+// }
 

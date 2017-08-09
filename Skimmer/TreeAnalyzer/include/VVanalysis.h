@@ -14,6 +14,7 @@
 
 // ROOT include(s):
 #include <TBits.h>
+#include <TFile.h>
 
 // External include(s):
 #include "../NtupleVariables/include/JetNtupleObject.h"
@@ -77,7 +78,7 @@ public:
 
    /// Function called for every event
    virtual void ExecuteEvent( const SInputData&, Double_t ) throw( SError );
-
+   
 private:
    
   // Input variable objects:
@@ -133,7 +134,8 @@ private:
   float     HLTHT650_MJJ900DEtaJJ1p5      ; 
   float     HLTHT800                      ;                                        
   int       nLeptonOverlap                ; 
-  int       jj_mergedVTruth               ; 
+  int       jj_mergedVTruth_jet1          ; 
+  int       jj_mergedVTruth_jet2          ; 
   float     b_weight                      ;
   float     b_weightGen                   ;
   float     b_weightPU                    ;
@@ -147,7 +149,10 @@ private:
   std::string m_genjetAK8Name;
   std::string m_jetAK8PuppiName;
   std::string m_genParticleName;
+  std::string m_PUPPIJEC;
   
+  std::vector<TF1*> m_puppisd_corr      ;
+
   
   
   // Names of the input/output trees:
