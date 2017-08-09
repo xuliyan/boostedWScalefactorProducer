@@ -16,7 +16,7 @@ git clone git@github.com:${GITUSER}/WTopScalefactorProducer.git
 cd WTopScalefactorProducer
 git remote add originalRemote git@github.com:thaarres/WTopScalefactorProducer.git
 git fetch originalRemote
-git checkout -b DevelopmentBranch thaarres/master
+git checkout -b DevelopmentBranch originalRemote/master
 cd $CMSSW_BASE/src
 cd boostedWScalefactorProducer
 export ROOFITSYS=$ROOTSYS
