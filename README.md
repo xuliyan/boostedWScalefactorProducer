@@ -17,15 +17,16 @@ cd WTopScalefactorProducer
 git remote add originalRemote git@github.com:thaarres/WTopScalefactorProducer.git
 git fetch originalRemote
 git checkout -b DevelopmentBranch originalRemote/master
-cd $CMSSW_BASE/src
+git submodule init
+git submodule update
+```
+
+### running scalefactor code
+
+```
 cd boostedWScalefactorProducer
 export ROOFITSYS=$ROOTSYS
 python Automatic_Setup.py --vclean 1
-```
-
-### running
-
-```
 python Automatic_Setup.py #To compile
 python wtagSFfits.py -b   #To run
 ```
