@@ -17,8 +17,6 @@ cd WTopScalefactorProducer
 git remote add originalRemote git@github.com:thaarres/WTopScalefactorProducer.git
 git fetch originalRemote
 git checkout -b DevelopmentBranch originalRemote/master
-git submodule init
-git submodule update
 ```
 
 ### running scalefactor code
