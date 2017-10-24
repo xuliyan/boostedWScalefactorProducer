@@ -10,7 +10,7 @@ from ROOT import *
 parser = OptionParser()
 parser.add_option('-b', action='store_true', dest='noX', default=False, help='no X11 windows')
 parser.add_option('-c', '--channel',action="store",type="string",dest="channel",default="em")
-parser.add_option('--HP', action="store", type="float",dest="tau2tau1cutHP",default=0.45)
+parser.add_option('--HP', action="store", type="float",dest="tau2tau1cutHP",default=0.40)
 parser.add_option('--LP', action="store", type="float",dest="tau2tau1cutLP",default=0.75)
 parser.add_option('--sample', action="store",type="string",dest="sample",default="powheg")
 parser.add_option('--fitTT', action='store_true', dest='fitTT', default=False, help='Only do ttbar fits')
@@ -548,7 +548,7 @@ class initialiseFits:
       self.file_QCD_mc            = "QCD.root"  
       self.file_STop_mc           = "ST.root"       
       self.file_TTbar_mc          = "TT.root"
-      self.file_pseudodata        = "pseudodata.root"    #Important! ROOT tree containing all backgrounds added together (tt+singleT+VV+Wjets). Used for fit to total MC
+      self.file_pseudodata        = "pseudodata_weighted.root"    #Important! ROOT tree containing all backgrounds added together (tt+singleT+VV+Wjets). Used for fit to total MC
 	  
 
       # Define Tau21 WP
@@ -814,6 +814,9 @@ class initialiseFits:
       for i in range(treeIn.GetEntries()):
           if i % 5000 == 0: print "iEntry: ",i
           treeIn.GetEntry(i)
+		  
+          # if (math.fabs(treeIn.dr_ak8Lep)<1.5708 or math.fabs(treeIn.dphi_ak8Et)<2.or math.fabs(treeIn.dphi_ak8Wlep)<2. or treeIn.Wlep_pt<200): continue
+          if (treeIn.Wlep_pt<200): continue
           
           if TString(label).Contains("realW") and not getattr(treeIn,"mergedVTruth"): #Is a real W, meaning both daughters of W is withing jet cone!!
             continue

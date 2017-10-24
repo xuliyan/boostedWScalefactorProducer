@@ -104,19 +104,20 @@ void fit_mj_single_MC(RooWorkspace* workspace, const std::string & fileName, con
 void ScaleFactorTTbarControlSampleFit(RooWorkspace* workspace, std::map<std::string,std::string > mj_shape, std::map<std::string,int> color_palet, std::vector<std::string>* constraintlist_data, std::vector<std::string>* constraintlist_MC, const std::string & channel, const std::string & wtagger){
   
   float data     = workspace->data(("rdataset_data_beforetau2tau1cut_"  +channel+"_mj").c_str())->sumEntries();
-  // float tt       = workspace->data(("rdataset_TTbar_beforetau2tau1cut_" +channel+"_mj").c_str())->sumEntries();
-  float tt       = workspace->data(("rdataset_TTbar_realW_"+channel+"_mj").c_str())->sumEntries();
-  tt            +=  workspace->data(("rdataset_TTbar_fakeW_"+channel+"_mj").c_str())->sumEntries();
+  float tt       = workspace->data(("rdataset_TTbar_beforetau2tau1cut_" +channel+"_mj").c_str())->sumEntries();
+  // float tt       = workspace->data(("rdataset_TTbar_realW_"+channel+"_mj").c_str())->sumEntries();
+  // tt            +=  workspace->data(("rdataset_TTbar_fakeW_"+channel+"_mj").c_str())->sumEntries();
   float minorBKG = workspace->data(("rdataset_WJets0_beforetau2tau1cut_"+channel+"_mj").c_str())->sumEntries();
   minorBKG      += workspace->data(("rdataset_VV_beforetau2tau1cut_"    +channel+"_mj").c_str())->sumEntries();
   minorBKG      += workspace->data(("rdataset_STop_beforetau2tau1cut_"  +channel+"_mj").c_str())->sumEntries();
 
-  float ttSF = (data-minorBKG)/tt;
+  float ttScalefactor = (data-minorBKG)/tt;
+  // float ttScalefactor = 0.71;
   
-  RooRealVar* scalefactor = new RooRealVar("tt_scalefactor","tt_scalefactor",ttSF);
+  RooRealVar* scalefactor = new RooRealVar("tt_scalefactor","tt_scalefactor",ttScalefactor);
   workspace->import(*scalefactor);
   
-  std::cout<<"Calculated tt scalefactor from yield. Using SF = " << ttSF << std::endl;
+  std::cout<<"Calculated tt scalefactor from yield. Using SF = " << ttScalefactor << std::endl;
 
   std::string label = "";
   RooRealVar* rrv_mass_j = workspace->var("rrv_mass_j");
@@ -146,13 +147,13 @@ void ScaleFactorTTbarControlSampleFit(RooWorkspace* workspace, std::map<std::str
    RooAbsPdf* model_histpdf_TTbar_unmerged = workspace->pdf((std::string(rdataset_TTbar_mj_unmerged->GetName())+"_histpdf").c_str());
    
 
-  RooRealVar* number_TTbar = new RooRealVar(("rrv_number_TTbar"+label+"_"+channel).c_str(),("rrv_number_TTbar"+label+"_"+channel).c_str(),rdataset_TTbar_mj->sumEntries()*ttSF);
+  RooRealVar* number_TTbar = new RooRealVar(("rrv_number_TTbar"+label+"_"+channel).c_str(),("rrv_number_TTbar"+label+"_"+channel).c_str(),rdataset_TTbar_mj->sumEntries()*ttScalefactor);
   RooRealVar* number_STop  = new RooRealVar(("rrv_number_STop"+label+"_"+channel).c_str(),("rrv_number_STop"+label+"_"+channel).c_str(),rdataset_STop_mj->sumEntries());
   RooRealVar* number_VV    = new RooRealVar(("rrv_number_VV"+label+"_"+channel).c_str(),("rrv_number_VV"+label+"_"+channel).c_str(),rdataset_VV_mj->sumEntries());
   RooRealVar* number_WJets = new RooRealVar(("rrv_number_WJets"+label+"_"+channel).c_str(),("rrv_number_WJets"+label+"_"+channel).c_str(),rdataset_WJets_mj->sumEntries());
 
-  RooRealVar* number_TTbar_merged   = new RooRealVar(("rrv_number_TTbar_realW"+label+"_"+channel).c_str(),("rrv_number_TTbar_realW"+label+"_"+channel).c_str(),rdataset_TTbar_mj_merged->sumEntries()*ttSF);
-  RooRealVar* number_TTbar_unmerged = new RooRealVar(("rrv_number_TTbar_fakeW"+label+"_"+channel).c_str(),("rrv_number_TTbar_fakeW"+label+"_"+channel).c_str(),rdataset_TTbar_mj_unmerged->sumEntries()*ttSF);
+  RooRealVar* number_TTbar_merged   = new RooRealVar(("rrv_number_TTbar_realW"+label+"_"+channel).c_str(),("rrv_number_TTbar_realW"+label+"_"+channel).c_str(),rdataset_TTbar_mj_merged->sumEntries()*ttScalefactor);
+  RooRealVar* number_TTbar_unmerged = new RooRealVar(("rrv_number_TTbar_fakeW"+label+"_"+channel).c_str(),("rrv_number_TTbar_fakeW"+label+"_"+channel).c_str(),rdataset_TTbar_mj_unmerged->sumEntries()*ttScalefactor);
   RooAddPdf* model_TTbar_STop_VV_WJets = new RooAddPdf(("model_TTbar_STop_VV_WJets"+label+"_"+channel).c_str(),("model_TTbar_STop_VV_WJets"+label+"_"+channel).c_str(),RooArgList(*model_histpdf_TTbar_merged,*model_histpdf_TTbar_unmerged,*model_histpdf_STop,*model_histpdf_VV,*model_histpdf_WJets),RooArgList(*number_TTbar_merged,*number_TTbar_unmerged,*number_STop,*number_VV,*number_WJets));
   
   workspace->import(*model_TTbar_STop_VV_WJets);
@@ -180,20 +181,20 @@ void ScaleFactorTTbarControlSampleFit(RooWorkspace* workspace, std::map<std::str
    RooAbsPdf* model_histpdf_TTbar_fail_merged   = workspace->pdf((std::string(rdataset_TTbar_mj_fail_merged->GetName())+"_histpdf").c_str());
    RooAbsPdf* model_histpdf_TTbar_fail_unmerged = workspace->pdf((std::string(rdataset_TTbar_mj_fail_unmerged->GetName())+"_histpdf").c_str());
 
-  RooRealVar* number_TTbar_fail  = new RooRealVar(("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TTbar_mj_fail->sumEntries()*ttSF);
+  RooRealVar* number_TTbar_fail  = new RooRealVar(("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),("rrv_number_TTbar_fail"+label+"_"+channel).c_str(),rdataset_TTbar_mj_fail->sumEntries()*ttScalefactor);
   RooRealVar* number_STop_fail   = new RooRealVar(("rrv_number_STop_fail"+label +"_"+channel).c_str(),("rrv_number_STop_fail"+label+"_"+channel).c_str(),rdataset_STop_mj_fail->sumEntries());
   RooRealVar* number_VV_fail     = new RooRealVar(("rrv_number_VV_fail"+label   +"_"+channel).c_str(),("rrv_number_VV_fail"+label+"_"+channel).c_str(),rdataset_VV_mj_fail->sumEntries());
   RooRealVar* number_WJets_fail  = new RooRealVar(("rrv_number_WJets_fail"+label+"_"+channel).c_str(),("rrv_number_WJets_fail"+label+"_"+channel).c_str(),rdataset_WJets_mj_fail->sumEntries());
 
-  RooRealVar* number_TTbar_fail_merged    = new RooRealVar(("rrv_number_TTbar_fail_realW"+label+"_"+channel).c_str(),("rrv_number_TTbar_fail_realW"+label+"_"+channel).c_str(),rdataset_TTbar_mj_fail_merged->sumEntries()*ttSF);
-  RooRealVar* number_TTbar_fail_unmerged  = new RooRealVar(("rrv_number_TTbar_fail_fakeW"+label+"_"+channel).c_str(),("rrv_number_TTbar_fail_fakeW"+label+"_"+channel).c_str(),rdataset_TTbar_mj_fail_unmerged->sumEntries()*ttSF);
+  RooRealVar* number_TTbar_fail_merged    = new RooRealVar(("rrv_number_TTbar_fail_realW"+label+"_"+channel).c_str(),("rrv_number_TTbar_fail_realW"+label+"_"+channel).c_str(),rdataset_TTbar_mj_fail_merged->sumEntries()*ttScalefactor);
+  RooRealVar* number_TTbar_fail_unmerged  = new RooRealVar(("rrv_number_TTbar_fail_fakeW"+label+"_"+channel).c_str(),("rrv_number_TTbar_fail_fakeW"+label+"_"+channel).c_str(),rdataset_TTbar_mj_fail_unmerged->sumEntries()*ttScalefactor);
   
   RooAddPdf* model_TTbar_STop_VV_WJets_fail = new RooAddPdf(("model_TTbar_STop_VV_WJets_fail"+label+"_"+channel).c_str(),("model_TTbar_STop_VV_WJets_fail"+label+"_"+channel).c_str(),RooArgList(*model_histpdf_TTbar_fail_merged,*model_histpdf_TTbar_fail_unmerged,*model_histpdf_STop_fail,*model_histpdf_VV_fail,*model_histpdf_WJets_fail), RooArgList(*number_TTbar_fail_merged,*number_TTbar_fail_unmerged,*number_STop_fail,*number_VV_fail,*number_WJets_fail));
   workspace->import(*model_TTbar_STop_VV_WJets_fail);
   
   
-  double scale_number_TTbar_STop_VV_WJets      = (rdataset_TTbar_mj_merged->sumEntries()*ttSF+rdataset_TTbar_mj_unmerged->sumEntries()*ttSF+rdataset_STop_mj->sumEntries()+rdataset_VV_mj->sumEntries()+rdataset_WJets_mj->sumEntries())/(rdataset_data_mj->sumEntries()+rdataset_data_mj_fail->sumEntries());
-  double scale_number_TTbar_STop_VV_WJets_fail = (rdataset_TTbar_mj_fail_merged->sumEntries()*ttSF+rdataset_TTbar_mj_fail_unmerged->sumEntries()*ttSF+rdataset_STop_mj_fail->sumEntries()+rdataset_VV_mj_fail->sumEntries()+rdataset_WJets_mj_fail->sumEntries())/( rdataset_data_mj->sumEntries()+rdataset_data_mj_fail->sumEntries());
+  double scale_number_TTbar_STop_VV_WJets      = (rdataset_TTbar_mj_merged->sumEntries()*ttScalefactor+rdataset_TTbar_mj_unmerged->sumEntries()*ttScalefactor+rdataset_STop_mj->sumEntries()+rdataset_VV_mj->sumEntries()+rdataset_WJets_mj->sumEntries())/(rdataset_data_mj->sumEntries()+rdataset_data_mj_fail->sumEntries());
+  double scale_number_TTbar_STop_VV_WJets_fail = (rdataset_TTbar_mj_fail_merged->sumEntries()*ttScalefactor+rdataset_TTbar_mj_fail_unmerged->sumEntries()*ttScalefactor+rdataset_STop_mj_fail->sumEntries()+rdataset_VV_mj_fail->sumEntries()+rdataset_WJets_mj_fail->sumEntries())/( rdataset_data_mj->sumEntries()+rdataset_data_mj_fail->sumEntries());
 
   RooRealVar* rrv_scale_number_TTbar_STop_VV_WJets      = new RooRealVar(("rrv_scale_number_TTbar_STop_VV_WJets"+label).c_str(),("rrv_scale_number_TTbar_STop_VV_WJets"+label).c_str(),scale_number_TTbar_STop_VV_WJets);
   RooRealVar* rrv_scale_number_TTbar_STop_VV_WJets_fail = new RooRealVar(("rrv_scale_number_TTbar_STop_VV_WJets_fail"+label).c_str(),("rrv_scale_number_TTbar_STop_VV_WJets_fail"+label).c_str(),scale_number_TTbar_STop_VV_WJets_fail);
@@ -240,8 +241,8 @@ void ScaleFactorTTbarControlSampleFit(RooWorkspace* workspace, std::map<std::str
 void DrawScaleFactorTTbarControlSample(RooWorkspace* workspace, std::map<std::string,int> color_palet, const std::string & label, const std::string & channel, const std::string & wtagger,const double & ca8_ungroomed_pt_min, const double & ca8_ungroomed_pt_max, const std::string & sample){
   
   
- float ttSF = workspace->var("tt_scalefactor")->getValV();
-
+ // float ttSF = workspace->var("tt_scalefactor")->getValV();
+float ttSF =1;
   std::cout<< "Using tt scalefactor of " << ttSF << std::endl;
 
   RooRealVar* rrv_mass_j = workspace->var("rrv_mass_j");
