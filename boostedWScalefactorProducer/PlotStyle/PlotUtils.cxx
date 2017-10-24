@@ -489,7 +489,7 @@ void draw_canvas(RooPlot* in_obj, const std::string & in_directory, const TStrin
   int iPos=11;
   writeExtraText = true;
   extraText  = "Preliminary";
-  lumi_13TeV  = "12.9 fb^{-1}";
+  lumi_13TeV  = "35.9 fb^{-1}";
   lumi_sqrtS = "13 TeV";
   CMS_lumi( cMassFit, iPeriod, iPos );
   cMassFit->Update();
@@ -506,6 +506,8 @@ void draw_canvas(RooPlot* in_obj, const std::string & in_directory, const TStrin
   else{
          rlt_file.ReplaceAll(".root","");
          rlt_file = rlt_file.Append(".pdf");
+         rlt_file.ReplaceAll(".pdf","");
+         rlt_file = rlt_file.Append(".png");
   }
   
   cMassFit->SaveAs(rlt_file.Data());
@@ -520,6 +522,8 @@ void draw_canvas(RooPlot* in_obj, const std::string & in_directory, const TStrin
       rlt_file.ReplaceAll(".root","_log.root");
       cMassFit->SaveAs(rlt_file.Data());
       rlt_file.ReplaceAll(".root",".pdf");
+      cMassFit->SaveAs(rlt_file.Data());
+      rlt_file.ReplaceAll(".pdf",".png");
       cMassFit->SaveAs(rlt_file.Data());
   }
 
@@ -618,6 +622,8 @@ void draw_canvas_with_pull(RooPlot* mplot, RooPlot* mplot_pull, RooArgList* para
   cMassFit.Update();
   cMassFit.SaveAs(rlt_file.Data());
   rlt_file.ReplaceAll(".pdf",".root");
+  cMassFit.SaveAs(rlt_file.Data());
+  rlt_file.ReplaceAll(".root",".png");
   cMassFit.SaveAs(rlt_file.Data());
   TString string_file_name (in_file_name);
   if(string_file_name.EndsWith(".root"))
@@ -893,9 +899,9 @@ void setTDRStyle(){
 
 float GetLumi(const std::string & channel){
  
-  if(channel=="el") return 12.9;
-  else if(channel=="mu") return 12.9;
-  else if(channel=="em") return 12.9;
+  if(channel=="el") return 35.9;
+  else if(channel=="mu") return 35.9;
+  else if(channel=="em") return 35.9;
 
   return -1 ;
 }

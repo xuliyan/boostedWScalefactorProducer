@@ -14,7 +14,7 @@ from subprocess import Popen
 from ROOT import gROOT, gStyle, gSystem, TLatex
 
 parser = OptionParser()
-parser.add_option('--vclean', help='clean all the so files', type=int, default=0.)
+parser.add_option('--clean', action='store_true', dest='vclean', default=False, help='Clean all the .so files')
 
 (options, args) = parser.parse_args()
 
@@ -48,6 +48,12 @@ if __name__ == "__main__":
 
   ROOT.gROOT.ProcessLine(".L MakePdf.cxx+");
   ROOT.gSystem.Load("MakePdf_cxx.so");
+  
+  os.chdir(inPath+"/BiasStudy");
+
+  if options.vclean : os.system("rm BiasUtils_cxx.so");
+  ROOT.gROOT.ProcessLine(".L BiasUtils.cxx+");
+  ROOT.gSystem.Load("BiasUtils_cxx.so");
   
   os.chdir(inPath+"/FitUtils");
 

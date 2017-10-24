@@ -3,52 +3,36 @@
 ////////////////////////////////////////////
 RooExtendPdf* MakeExtendedModel(RooWorkspace* workspace, const std::string & label, const std::string & model, const std::string & spectrum, const std::string & channel, const std::string & wtagger_label, std::vector<std::string>* constraint, const int & ismc_wjet, const int & area_init_value){
 
-  std::cout<<" "<<std::endl;
-  std::cout<<""<<std::endl;
-  std::cout<<"## Make model : "<<label<<" "<<model<<" "<<area_init_value<<" ##"<<std::endl;
-  std::cout<<""<<std::endl;
-  std::cout<<" "<<std::endl;
-
   RooRealVar* rrv_number = new  RooRealVar(("rrv_number"+label+"_"+channel+spectrum).c_str(),("rrv_number"+label+"_"+channel+spectrum).c_str(),500.,0.,1e5);
-  // call the make RooAbsPdf method
   RooAbsPdf* model_pdf = NULL ;
   model_pdf = MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label,channel,constraint,ismc_wjet);
-  // std::cout<< "######## Model Pdf ########"<<std::endl;
-  // model_pdf->Print();
-      
-  // create the extended pdf
+ 
+  // create  extended pdf
   RooExtendPdf* model_extended = new RooExtendPdf(("model"+label+"_"+channel+spectrum).c_str(),("model"+label+"_"+channel+spectrum).c_str(),*model_pdf, *rrv_number);
-  std::cout<< "######## Model Extended Pdf ########"<<std::endl;
-  // model_extended->Print();
-  // return the total extended pdf
+  
   return model_extended;
 }
 
-/////////////////////////////
-
+////////////////////////////////////////////
 
 RooGaussian* addConstraint(RooRealVar* rrv_x, double x_mean, double x_sigma, std::vector<std::string>* ConstraintsList){
 
-  //########### Gaussian contraint of a parameter of a pdf
+  // Gaussian contraint on a pdf parameter
   std::cout<<"########### Add to Constraint List some parameters  ############"<<std::endl;
   RooRealVar* rrv_x_mean  = new RooRealVar((std::string(rrv_x->GetName())+"_mean").c_str() ,(std::string(rrv_x->GetName())+"_mean").c_str() ,x_mean);
   RooRealVar* rrv_x_sigma = new RooRealVar((std::string(rrv_x->GetName())+"_sigma").c_str(),(std::string(rrv_x->GetName())+"_sigma").c_str(),x_sigma);
   RooGaussian* constrainpdf_x = new RooGaussian(("constrainpdf_"+std::string(rrv_x->GetName())).c_str(),("constrainpdf_"+std::string(rrv_x->GetName())).c_str(),*rrv_x,*rrv_x_mean, *rrv_x_sigma);
-  //import in the workspace and save the name of constraint pdf
+  //import into workspace and save name of constraint pdf
   ConstraintsList->push_back(constrainpdf_x->GetName());
   return constrainpdf_x ;
 }
 
-//////////////////
-
-// ---------------------------------------------                                                                                                                                    
+////////////////////////////////////////////
+                                                                                                                              
 RooAbsPdf* MakeModelTTbarControlSample(RooWorkspace* workspace ,const std::string & label, const std::string & modelName, const std::string & spectrum, const std::string & channel, const std::string & wtagger, const std::string & information, std::vector<std::string>* constraint){
 
-  std::cout<<" "<<std::endl;
-  std::cout<<"Defining number of real W-jets(rrv_number_total), W-tagging efficiency (eff_ttbar) and total yield after scaling with efficiency (rrv_number)"<<std::endl;
-  std::cout<<" Making model for (label, modelName, information) : "<<label<<" "<<modelName<<" "<<information<<" "<<std::endl;
-  std::cout<<""<<std::endl;
-  std::cout<<" "<<std::endl;
+  std::cout<<" "<<std::endl; std::cout<<"Defining number of real W-jets(rrv_number_total), W-tagging efficiency (eff_ttbar) and total yield after scaling with efficiency (rrv_number)"<<std::endl;
+  std::cout<<" Making model for (label, modelName, information) : "<<label<<" "<<modelName<<" "<<information<<" "<<std::endl; std::cout<<""<<std::endl;
 
   RooRealVar* rrv_number_total = NULL , *eff_ttbar = NULL ; 
   RooFormulaVar *rrv_number = NULL ;
@@ -59,7 +43,6 @@ RooAbsPdf* MakeModelTTbarControlSample(RooWorkspace* workspace ,const std::strin
     eff_ttbar        = new RooRealVar(("eff_ttbar_data"+information+"_"+channel+spectrum).c_str(),("eff_ttbar_data"+information+"_"+channel+spectrum).c_str(),0.7,0.0,0.99);
     rrv_number       = new RooFormulaVar(("rrv_number"+label+"_"+channel+spectrum+spectrum).c_str(), "@0*@1", RooArgList(*rrv_number_total,*eff_ttbar));
   }
-
   else if(TString(label).Contains("_ttbar_data") and TString(label).Contains("failtau2tau1cut")){
     rrv_number_total = workspace->var(("rrv_number_total_ttbar_data"+information+"_"+channel+spectrum).c_str());
     eff_ttbar        = workspace->var(("eff_ttbar_data"+information+"_"+channel+spectrum).c_str());
@@ -76,57 +59,34 @@ RooAbsPdf* MakeModelTTbarControlSample(RooWorkspace* workspace ,const std::strin
     eff_ttbar        = workspace->var(("eff_ttbar_TotalMC"+information+"_"+channel+spectrum).c_str());
     rrv_number       = new RooFormulaVar(("rrv_number"+label+"_"+channel+spectrum+spectrum).c_str(), "(1-@0)*@1", RooArgList(*eff_ttbar,*rrv_number_total)) ;
   }
-
-
   RooAbsPdf* model_pdf = MakeGeneralPdf(workspace,label,modelName,spectrum,wtagger,channel,constraint,false);
-
   RooExtendPdf* model = new RooExtendPdf(("model"+label+"_"+channel+spectrum).c_str(),("model"+label+"_"+channel+spectrum).c_str(),*model_pdf,*rrv_number);
 
   workspace->import(*model);
   workspace->pdf(("model"+label+"_"+channel+spectrum).c_str())->Print();
   return workspace->pdf(("model"+label+"_"+channel+spectrum).c_str());
-
 }
 
+////////////////////////////////////////////
 
-//## change a dataset to a histpdf roofit object
 void change_dataset_to_histpdf(RooWorkspace* workspace,RooRealVar* x,RooDataSet* dataset){
  
-  std::cout<<"######## change the dataset into a histpdf  ########"<<std::endl;
   RooDataHist* datahist = dataset->binnedClone((std::string(dataset->GetName())+"_binnedClone").c_str(),(std::string(dataset->GetName())+"_binnedClone").c_str());
   RooHistPdf* histpdf = new RooHistPdf((std::string(dataset->GetName())+"_histpdf").c_str(),(std::string(dataset->GetName())+"_histpdf").c_str(),RooArgSet(*x),*datahist);
   workspace->import(*histpdf);
 }
   
-// change from a dataset to a histogramm of Roofit
-TH1F* change_dataset_to_histogram(RooRealVar* x, RooDataSet* dataset, const std::string & label, const int & BinWidth){
-
-  std::cout<<"######## change the dataset into a histogramm for mj distribution ########"<<std::endl;
-  RooDataHist* datahist = dataset->binnedClone((std::string(dataset->GetName())+"_binnedClone").c_str(),(std::string(dataset->GetName())+"_binnedClone").c_str());
-  int nbin = int( (x->getMax()-x->getMin())/BinWidth);
-  TString Name ;
-  if(label ==""){
-    Name.Form("histo_%s",dataset->GetName());
-    return (TH1F*) datahist->createHistogram(Name.Data(),*x,RooFit::Binning(nbin,x->getMin(),x->getMax()));
-  }
-  else{
-    Name.Form("histo_%s",label.c_str());
-    return (TH1F*) datahist->createHistogram(Name.Data(),*x,RooFit::Binning(nbin,x->getMin(),x->getMax()));
-  }
-
-}
-
-////////////////////////////////////
+////////////////////////////////////////////
 
 RooAbsPdf* get_mj_Model (RooWorkspace* workspace, const std::string & label, const std::string & channel){
   std::cout<<"model"+label+"_"+channel+"_mj"<<std::endl;
   return workspace->pdf(("model"+label+"_"+channel+"_mj").c_str());
-
 }
+
+////////////////////////////////////////////
 
 RooAbsPdf* get_General_mj_Model(RooWorkspace* workspace, const std::string & label, const std::string & model, const std::string & channel, const int & fix){
 
-  std::cout<<" Fixing and return a general mj model "<<std::endl;
   TString name ;
 
   if(TString(workspace->GetName()).Contains("4bias")) name.Form("rdataset4bias%s_%s_mj",label.c_str(),channel.c_str());
@@ -158,189 +118,11 @@ RooAbsPdf* get_General_mj_Model(RooWorkspace* workspace, const std::string & lab
       param = dynamic_cast<RooRealVar*>(par.Next());
     }
   }
-
   return model_General;
 }
 
-RooAbsPdf* get_TTbar_mj_Model  (RooWorkspace* workspace, const std::string & label, const std::string & model, const std::string & channel, const int & fix){
+////////////////////////////////////////////
 
-  std::cout<<"########### Fixing TTbar mj model ############"<<std::endl;
-  return get_General_mj_Model(workspace,label,model,channel,fix);
-}
-
-RooAbsPdf* get_STop_mj_Model  (RooWorkspace* workspace, const std::string & label, const std::string & model, const std::string & channel, const int & fix){
-
-  std::cout<<"########### Fixing STop mj model ############"<<std::endl;
-  return get_General_mj_Model(workspace,label,model,channel,fix);
-}
-
-RooAbsPdf* get_VV_mj_Model  (RooWorkspace* workspace, const std::string & label, const std::string & model, const std::string & channel, const int & fix){
-
-  std::cout<<"########### Fixing VV mj model ############"<<std::endl;
-  return get_General_mj_Model(workspace,label,model,channel,fix);
-}
- 
-
-RooAbsPdf* get_WJets_mj_Model  (RooWorkspace* workspace, const std::string & label, const std::string & model, const std::string & channel, const int & fix, const std::string & jetBin){
-
-  std::cout<<"########### Fixing WJets mj model ############"<<std::endl;
-  if(jetBin == "_2jet") return get_General_mj_Model(workspace,label,model,channel,fix);
-  else{
-    
-    TString name ;
-    if(TString(workspace->GetName()).Contains("4bias")) name.Form("rdataset4bias%s_%s_mj",label.c_str(),channel.c_str());
-    else if (TString(workspace->GetName()).Contains("4fit")) name.Form("rdataset%s_%s_mj",label.c_str(),channel.c_str());
-    else name.Form("rdataset%s_%s_mj",label.c_str(),channel.c_str());
-
-    RooDataSet* rdataset_WJets_mj = (RooDataSet*) workspace->data(name.Data());
-    // rdataset_WJets_mj->Print();
-    RooAbsPdf* model_WJets = get_mj_Model(workspace,label+model,channel);
-    // model_WJets->Print();
-    RooArgSet* parameters_WJets = model_WJets->getParameters(*rdataset_WJets_mj);
-    TIter par = parameters_WJets->createIterator(); par.Reset();
-    RooRealVar* param = dynamic_cast<RooRealVar*>(par.Next());
-    while (param){
-      TString paraName; paraName = Form("%s",param->GetName());
-      if (paraName.Contains("rrv_width_ErfExp_WJets") or paraName.Contains("rrv_offset_ErfExp_WJets") or paraName.Contains("rrv_p1_User1_WJets")){
-        param->setConstant(kTRUE);
-      }
-      param =  dynamic_cast<RooRealVar*>(par.Next());
-    }
-    return model_WJets ;
-  }       
-   
-}
-
-/////////////////////////////////////////
-
-RooAbsPdf* get_mlvj_Model (RooWorkspace* workspace,const std::string & label,const std::string & region,const std::string & model, const std::string & channel){
-  //#### get a generic mlvj model from the workspace
-  return workspace->pdf(("model"+label+region+model+"_"+channel+"_mlvj").c_str());
-}
-
-//#### get a general mlvj model and fiz the paramters --> for extended pdf
-RooAbsPdf* get_General_mlvj_Model        (RooWorkspace* workspace,const std::string & label,const std::string & region,const std::string & model, const std::string & channel, const int & fix){
-  std::cout<<"Fixing and return a general mlvj model "<<std::endl;
-  TString Name ; 
-  if(TString(workspace->GetName()).Contains("4bias")) Name.Form("rdataset4bias%s%s_%s_mlvj",label.c_str(),region.c_str(),channel.c_str());
-  else if(TString(workspace->GetName()).Contains("4fit")) Name.Form("rdataset%s%s_%s_mlvj",label.c_str(),region.c_str(),channel.c_str());
-
-  RooAbsData* rdataset_General_mlvj = workspace->data(Name.Data());
-  RooAbsPdf* model_General = get_mlvj_Model(workspace,label,region,model,channel);
-  // rdataset_General_mlvj->Print();
-  //   model_General->Print();
-  RooArgSet* parameters_General = model_General->getParameters(*rdataset_General_mlvj);
-  TIter par = parameters_General->createIterator(); par.Reset();
-  RooRealVar* param = dynamic_cast<RooRealVar*>(par.Next());
-  if(fix == 1){
-    while(param){
-      param->setConstant(kTRUE);
-      param->Print();
-      param = dynamic_cast<RooRealVar*>(par.Next());
-    }
-  }
-  return model_General;
-}
-
-//###### get TTbar model mlvj in a region
-RooAbsPdf* get_TTbar_mlvj_Model (RooWorkspace* workspace, const std::string & label, const std::string & region, const std::string & model, const std::string & channel, const int & fix){
-
-  std::cout<<"########### Fixing TTbar mlvj model ############"<<std::endl;
-  return get_General_mlvj_Model(workspace,label,region,model,channel,fix);
-}
-
-//###### get STop model mlvj in a region
-RooAbsPdf* get_STop_mlvj_Model (RooWorkspace* workspace, const std::string & label, const std::string & region, const std::string & model, const std::string & channel, const int & fix){
-
-  std::cout<<"########### Fixing STop mlvj model ############"<<std::endl;
-  return get_General_mlvj_Model(workspace,label,region,model,channel,fix);
-}
-
-//###### get VV model mlvj in a region
-RooAbsPdf* get_VV_mlvj_Model (RooWorkspace* workspace, const std::string & label,const std::string & region, const std::string & model, const std::string & channel, const int & fix){
-
-  std::cout<<"########### Fixing VV mlvj model ############"<<std::endl;
-  return get_General_mlvj_Model(workspace,label,region,model,channel,fix);
-}
- 
-//###### get Wjets
-RooAbsPdf* get_WJets_mlvj_Model  (RooWorkspace* workspace, const std::string & label,const std::string & region,const std::string & model, const std::string & channel, const int & fix){
-
-  std::cout<<"########### Fixing WJets mlvj model ############"<<std::endl;
-  return get_General_mlvj_Model(workspace,label,region,model,channel,fix);
-}
-
-/////////////////////////////////////////////////
-// fix a given model taking the label, and the region --> for extended pdf --> all the parameter of the pdf + normalization
-void fix_Model(RooWorkspace* workspace, const std::string & label, const std::string & region, const std::string & spectrum, const std::string & model,const std::string & channel, const std::string & additional_info, const int & notExtended){
-  
-  RooAbsData* rdataset = NULL ;
-  RooAbsPdf* model_pdf = NULL ;             
-  std::cout<<"########### Fixing an Extended Pdf for mlvj ############"<<std::endl;
-  if(spectrum == "_mj"){  
-    TString Name ; Name.Form("rdataset%s%s_%s%s",label.c_str(),region.c_str(),channel.c_str(),spectrum.c_str()); 
-    std::cout<<"DataSet Name "<<Name<<std::endl;
-    rdataset = workspace->data(Name.Data());
-    std::string label2 ; 
-    if(notExtended == 1)
-      label2 = std::string("_pdf")+label;
-    else label2 = label;
-    model_pdf = get_mj_Model(workspace,label2+model+additional_info,channel);        
-  }
-  else{  
-    TString Name ; Name.Form("rdataset%s%s_%s%s",label.c_str(),region.c_str(),channel.c_str(),spectrum.c_str());
-    std::cout<<"DataSet Name "<<Name<<std::endl;
-    rdataset = workspace->data(Name.Data());
-    std::string label2 ; 
-    if(notExtended == 1)
-      label2 = std::string("_pdf")+label;
-    else label2 = label;
-    model_pdf = get_mlvj_Model(workspace,label2.c_str(),region.c_str(),(model+additional_info).c_str(),channel.c_str());
-  }
-
-  // rdataset->Print();
-  // model_pdf->Print();
-  RooArgSet* parameters = model_pdf->getParameters(*rdataset);
-  TIter par = parameters->createIterator(); 
-  par.Reset();
-  RooRealVar* param = dynamic_cast<RooRealVar*>(par.Next());
-  while (param){
-    param->setConstant(kTRUE);
-    param->Print();       
-    param = dynamic_cast<RooRealVar*>(par.Next());
-  }
-  return ;
-}
-
-////////////////////////////////////////////////
-void fix_Pdf(RooAbsPdf* model_pdf, RooArgSet* argset_notparameter){
-
-  std::cout<<"########### Fixing a RooAbsPdf for mlvj or mj  ############"<<std::endl;     
-  RooArgSet* parameters = model_pdf->getParameters(*argset_notparameter);
-  TIter par = parameters->createIterator(); par.Reset();
-  RooRealVar* param = dynamic_cast<RooRealVar*>(par.Next());
-  while (param){
-    param->setConstant(kTRUE);
-    param->Print();
-    param = dynamic_cast<RooRealVar*>(par.Next());
-  }
-}
-
-////// print the parameters of a given pdf --> only non constant ones
-void ShowParam_Pdf(RooAbsPdf* model_pdf, RooArgSet* argset_notparameter){
- 
-  std::cout<<"########### Show Parameters of a input model  ############"<<std::endl;        
-  model_pdf->Print();
-  RooArgSet* parameters = model_pdf->getParameters(*argset_notparameter);
-  TIter par = parameters->createIterator(); par.Reset();
-  RooRealVar* param = dynamic_cast<RooRealVar*>(par.Next());
-  while (param){
-    if(not param->isConstant()) param->Print();        
-    param = dynamic_cast<RooRealVar*>(par.Next());
-  }
-}
-
-///////////////////////////////////////////////
 RooAbsPdf* MakeGeneralPdf(RooWorkspace* workspace, const std::string & label, const std::string & model, const std::string & spectrum, const std::string & wtagger_label, const std::string & channel, std::vector<std::string>* constraint, const int & ismc){
   
   std::cout<< "Making general PDF for wtagger_label = "<<wtagger_label.c_str() << " model = "<< model.c_str() << " label = "<< label.c_str()<< " ismc = "<< ismc << " channel = "<< channel.c_str()<< std::endl;
