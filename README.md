@@ -24,7 +24,7 @@ git checkout -b DevelopmentBranch originalRemote/master
 ```
 cd boostedWScalefactorProducer
 export ROOFITSYS=$ROOTSYS
-python Automatic_Setup.py --vclean 1
+python Automatic_Setup.py --clean
 python Automatic_Setup.py #To compile
 python wtagSFfits.py -b   #To run
 ```
