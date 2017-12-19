@@ -3,10 +3,17 @@
 #########################################
 
 ## installation instructions
-Source ROOT version 5.34/36 independently (currently no CMSSW version with ROOT 5.34.X with X>18 available), e.g at PSI:
+Setup CMSSW and get nanoAOD packages
 ```
-source /swshare/ROOT/root_v5.34.32_precompiled/root/bin/thisroot/.sh
+cmsrel CMSSW_9_4_1
+cd CMSSW_9_4_1/src
+cmsenv
+git cms-merge-topic cms-nanoAOD:master
+git checkout -b nanoAOD cms-nanoAOD/master
+git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
+scram build
 ```
+
 ### getting the code
 
 ```
@@ -16,15 +23,18 @@ git clone git@github.com:${GITUSER}/WTopScalefactorProducer.git
 cd WTopScalefactorProducer
 git remote add originalRemote git@github.com:thaarres/WTopScalefactorProducer.git
 git fetch originalRemote
-git checkout -b DevelopmentBranch originalRemote/master
+git checkout -b nanoAOD originalRemote/nanoOAD
+```
+### Producing samples
+
+```
+python process_nanoAOD.py
 ```
 
 ### running scalefactor code
 
 ```
 cd boostedWScalefactorProducer
-export ROOFITSYS=$ROOTSYS
-python Automatic_Setup.py --vclean 1
 python Automatic_Setup.py #To compile
 python wtagSFfits.py -b   #To run
 ```
