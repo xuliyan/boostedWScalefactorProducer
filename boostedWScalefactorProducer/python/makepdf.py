@@ -1,0 +1,153 @@
+import ROOT
+from ROOT import RooHistPdf,RooRealVar,RooExponential,RooGaussian,RooExtendPdf,RooAddPdf,RooArgList
+ROOT.gSystem.Load("PDFs/HWWLVJRooPdfs_cxx.so")
+
+def change_dataset_to_histpdf(workspace,x,dataset):
+  datahist = dataset.binnedClone(dataset.GetName()+"_binnedClone",dataset.GetName()+"_binnedClone")
+  histpdf = RooHistPdf(dataset.GetName()+"_histpdf",dataset.GetName()+"_histpdf",x,datahist)
+  getattr(workspace,'import')(histpdf)
+
+def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constraint,ismc=1):
+	
+	rrv_x = workspace.var("rrv_mass_j")
+	
+	if model == "ErfExp":
+		rrv_c_ErfExp      = RooRealVar("rrv_c_ErfExp"+label+"_"+channel+spectrum,"rrv_c_ErfExp"+label+"_"+channel+spectrum,-0.026)#,-0.05, 0.05)
+  		rrv_offset_ErfExp = RooRealVar("rrv_offset_ErfExp"+label+"_"+channel+spectrum,"rrv_offset_ErfExp"+label+"_"+channel+spectrum,41.,0.,100)
+  		rrv_width_ErfExp  = RooRealVar("rrv_width_ErfExp"+label+"_"+channel+spectrum,"rrv_width_ErfExp"+label+"_"+channel+spectrum,30.,1.,100.)
+  		model_pdf         = ROOT.RooErfExpPdf("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum,rrv_x,rrv_c_ErfExp,rrv_offset_ErfExp,rrv_width_ErfExp)
+
+	if model == "ExpGaus":
+		
+		if label.find("_STop_failtau2tau1cut")!=-1:
+			rrv_c_Exp       = RooRealVar("rrv_c_Exp"+label+"_"+channel+spectrum,"rrv_c_Exp"+label+"_"+channel+spectrum,-0.03,-0.5,0.5)
+			rrv_mean1_gaus  = RooRealVar("rrv_mean1_gaus"+label+"_"+channel+spectrum,"rrv_mean1_gaus"+label+"_"+channel+spectrum,84,60,120) #Too narrow limits here often lead to error!! eg max 80
+			rrv_sigma1_gaus = RooRealVar("rrv_sigma1_gaus"+label+"_"+channel+spectrum,"rrv_sigma1_gaus"+label+"_"+channel+spectrum,7,4,60)
+		
+		
+		elif label.find("fail")!=-1:
+			rrv_c_Exp       = RooRealVar("rrv_c_Exp"+label+"_"+channel+spectrum,"rrv_c_Exp"+label+"_"+channel+spectrum,-0.05,-0.5,0.5)
+			rrv_mean1_gaus  = RooRealVar("rrv_mean1_gaus"+label+"_"+channel+spectrum,"rrv_mean1_gaus"+label+"_"+channel+spectrum,80,70.,95.)
+			rrv_sigma1_gaus = RooRealVar("rrv_sigma1_gaus"+label+"_"+channel+spectrum,"rrv_sigma1_gaus"+label+"_"+channel+spectrum,7,6.,20.)
+			rrv_high        = RooRealVar("rrv_high"+label+"_"+channel+spectrum,"rrv_high"+label+"_"+channel+spectrum,0.,0.6,1.)
+        
+		else:
+			rrv_c_Exp       = RooRealVar("rrv_c_Exp"+label+"_"+channel+spectrum,"rrv_c_Exp"+label+"_"+channel+spectrum,-0.01,-1.,0.)
+			rrv_mean1_gaus  = RooRealVar("rrv_mean1_gaus"+label+"_"+channel+spectrum,"rrv_mean1_gaus"+label+"_"+channel+spectrum,84 ,75,89) 
+			rrv_sigma1_gaus = RooRealVar("rrv_sigma1_gaus"+label+"_"+channel+spectrum,"rrv_sigma1_gaus"+label+"_"+channel+spectrum,11,4,15)
+			rrv_high        = RooRealVar("rrv_high"+label+"_"+channel+spectrum,"rrv_high"+label+"_"+channel+spectrum,0.7,0.,1.)
+		  
+		exp		= RooExponential("exp"+label+"_"+channel+spectrum,"exp"+label+"_"+channel+spectrum,rrv_x,rrv_c_Exp)
+		gaus		= RooGaussian("gaus"+label+"_"+channel+spectrum,"gaus"+label+"_"+channel+spectrum, rrv_x,rrv_mean1_gaus,rrv_sigma1_gaus)
+		model_pdf	= RooAddPdf("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum,RooArgList(exp,gaus),RooArgList(rrv_high))
+     
+	if model.find("ErfExp_ttbar")!=-1:
+		
+		if model.find("failtau2tau1cut")!=-1:
+			c0_tmp     = -3.5160e-02
+			offset_tmp = 6.0935e+01 
+			width_tmp  = 3.9583e+01 
+			c0_tmp_err = 1.46e-02 
+			offset_tmp_err = 4.92e+01 
+			width_tmp_err = 4.69e+00
+			
+			rrv_offset_ErfExp = RooRealVar("rrv_offset_ErfExp"+label+"_"+channel+spectrum ,"rrv_offset_ErfExp"+label+"_"+channel+spectrum ,offset_tmp)
+			rrv_width_ErfExp  = RooRealVar("rrv_width_ErfExp" +label+"_"+channel+spectrum ,"rrv_width_ErfExp" +label+"_"+channel+spectrum ,width_tmp )
+			
+		else:	
+			c0_tmp         =  -2.1046e-02      
+			offset_tmp     =  80.1       
+			width_tmp      =  29.5  
+			c0_tmp_err     = 6.83e-03
+			offset_tmp_err = 9.3
+			width_tmp_err  = 2.9
+			
+			rrv_offset_ErfExp = RooRealVar("rrv_offset_ErfExp"+label+"_"+channel+spectrum ,"rrv_offset_ErfExp"+label+"_"+channel+spectrum ,offset_tmp, offset_tmp-offset_tmp_err*4,offset_tmp+offset_tmp_err*4)
+			rrv_width_ErfExp  = RooRealVar("rrv_width_ErfExp" +label+"_"+channel+spectrum ,"rrv_width_ErfExp" +label+"_"+channel+spectrum ,width_tmp , width_tmp-10, width_tmp+10)
+ 			 
+		rrv_c_ErfExp  = RooRealVar("rrv_c_ErfExp"  +label+"_"+channel+spectrum ,"rrv_c_ErfExp"     +label+"_"+channel+spectrum ,c0_tmp    , c0_tmp-4e-2, c0_tmp+4e-2 )
+		model_pdf     = rt.RooErfExpPdf("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum ,rrv_x,rrv_c_ErfExp,rrv_offset_ErfExp,rrv_width_ErfExp)
+		gaus1         = addConstraint(rrv_c_ErfExp,rrv_c_ErfExp.getVal(),c0_tmp_err,constraint)
+		getattr(workspace,'import')(gaus1)
+      
+		if model.find("failtau2tau1cut")==-1:
+			gaus2 = addConstraint(rrv_offset_ErfExp,rrv_offset_ErfExp.getVal(),offset_tmp_err,constraint)
+			gaus3 = addConstraint(rrv_width_ErfExp,rrv_width_ErfExp.getVal(),width_tmp_err,constraint)
+			getattr(workspace,'import')(gaus2)
+			getattr(workspace,'import')(gaus3)
+	
+	if model.find("GausErfExp_ttbar")!=-1:
+		
+		if model.find("failtau2tau1cut"):
+			
+			c0_tmp      = -0.05
+			offset_tmp  = 199. 
+			width_tmp   = 64.8 
+			frac_tmp    = 0.15 
+			mean1_tmp   = 80.0 
+			sigma1_tmp  = 9.41
+			
+			gaus = RooAbsPdf()
+			if label.find("data")!=-1: gaus = workspace.pdf("gaus1_ttbar_data_"+channel+spectrum)
+			else:					   gaus = workspace.pdf("gaus1_ttbar_TotalMC_"+channel+spectrum)
+      
+		else:
+			mean1_tmp  = 80.8
+			sigma1_tmp =  8.4
+			rangeMean  =  5. 
+			rangeWidth =  5. 
+			c0_tmp     = -2.1
+			offset_tmp =  8.0
+			width_tmp  =  2.9
+			offset_tmp_err = 20
+			
+			rrv_mean1_gaus  = RooRealVar("rrv_mean1_gaus"+label+"_"+channel+spectrum ,"rrv_mean1_gaus"+label+"_"+channel+spectrum ,mean1_tmp, mean1_tmp-rangeMean, mean1_tmp+rangeMean)
+			rrv_sigma1_gaus = RooRealVar("rrv_sigma1_gaus"+label+"_"+channel+spectrum ,"rrv_sigma1_gaus"+label+"_"+channel+spectrum ,sigma1_tmp, sigma1_tmp-rangeWidth,sigma1_tmp+rangeWidth )
+			gaus1 = RooGaussian("gaus1"+label+"_"+channel+spectrum ,"gaus1"+label+"_"+channel+spectrum ,rrv_x,rrv_mean1_gaus,rrv_sigma1_gaus)
+			
+		rrv_c_ErfExp      = RooRealVar("rrv_c_ErfExp"     +label+"_"+channel+spectrum ,"rrv_c_ErfExp"     +label+"_"+channel+spectrum ,c0_tmp,c0_tmp-4e-2, c0_tmp+4e-2 )
+		rrv_offset_ErfExp = RooRealVar("rrv_offset_ErfExp"+label+"_"+channel+spectrum ,"rrv_offset_ErfExp"+label+"_"+channel+spectrum ,offset_tmp,offset_tmp-offset_tmp_err*4,offset_tmp+offset_tmp_err*4)
+		rrv_width_ErfExp  = RooRealVar("rrv_width_ErfExp" +label+"_"+channel+spectrum ,"rrv_width_ErfExp" +label+"_"+channel+spectrum ,width_tmp, width_tmp-10, width_tmp+10)
+		
+		rrv_frac = RooRealVar("rrv_frac"+label+"_"+channel+spectrum ,"rrv_frac"+label+"_"+channel+spectrum ,frac_tmp)
+
+		rrv_c_ErfExp.setConstant(rt.kTRUE)
+		rrv_offset_ErfExp.setConstant(rt.kTRUE)
+		rrv_width_ErfExp.setConstant(rt.kTRUE)
+		
+		erfExp    = rt.RooErfExpPdf("erfExp"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum,rrv_x,rrv_c_ErfExp,rrv_offset_ErfExp,rrv_width_ErfExp)
+		model_pdf = RooAddPdf("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum,RooArgList(gaus1,erfExp),RooArgList(rrv_frac,1))
+
+	if model == "Exp" :
+		rrv_c_Exp = RooRealVar("rrv_c_Exp"+label+"_"+channel+spectrum,"rrv_c_Exp"+label+"_"+channel+spectrum,-0.030, -2., 0.05)
+		model_pdf = RooExponential("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum,rrv_x,rrv_c_Exp)
+		
+    
+	if model == "Gaus":
+		rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus" +label+"_"+channel+spectrum ,"rrv_mean1_gaus" +label+"_"+channel+spectrum,80,40,100)
+		rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus"+label+"_"+channel+spectrum ,"rrv_sigma1_gaus"+label+"_"+channel+spectrum,7,0.,15)  
+		model_pdf        = RooGaussian("gaus"+label+"_"+channel+spectrum,"gaus"+label+"_"+channel+spectrum, rrv_x,rrv_mean1_gaus,rrv_sigma1_gaus)
+    
+	if model == "ErfExpGaus_sp":
+		
+		rrv_c_ErfExp     = RooRealVar("rrv_c_ErfExp"+label+"_"    +channel+spectrum,"rrv_c_ErfExp"    +label+"_"+channel+spectrum,-0.04,-0.2,0.)
+		rrv_width_ErfExp = RooRealVar("rrv_width_ErfExp"+label+"_"+channel+spectrum,"rrv_width_ErfExp"+label+"_"+channel+spectrum,30.,10,300.)
+		rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"+label+"_"  +channel+spectrum,"rrv_mean1_gaus"  +label+"_"+channel+spectrum,80,40,100)
+		rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus"+label+"_" +channel+spectrum,"rrv_sigma1_gaus" +label+"_"+channel+spectrum,7,0.,40)
+		erfExp           = ROOT.RooErfExpPdf("erfExp"+label+"_"+channel+spectrum,"erfExp"+label+"_"+channel+spectrum,rrv_x,rrv_c_ErfExp,rrv_mean1_gaus,rrv_width_ErfExp)
+		gaus             = RooGaussian ("gaus"+label+"_"+channel+spectrum  ,"gaus"+label+"_"+channel+spectrum  , rrv_x,rrv_mean1_gaus,rrv_sigma1_gaus)
+		rrv_high   = RooRealVar("rrv_high"+label+"_"+channel+spectrum,"rrv_high"+label+"_"+channel+spectrum,0.5,0.,1.)
+		model_pdf  = RooAddPdf("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum,erfExp,gaus,rrv_high)
+	
+	
+	getattr(workspace,'import')(model_pdf)
+	  
+def MakeExtendedModel(workspace, label, model,spectrum, channel, wtagger_label,constraint):
+	
+	print "Making extended model"
+	rrv_number = RooRealVar("rrv_number"+label+"_"+channel+spectrum,"rrv_number"+label+"_"+channel+spectrum,500.,0.,1e5)
+	MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label,channel,constraint)
+	model_pdf = workspace.pdf("model_pdf"+label+"_"+channel+spectrum)
+	model_extended = RooExtendPdf("model"+label+"_"+channel+spectrum,"model"+label+"_"+channel+spectrum,model_pdf, rrv_number)
+	getattr(workspace,'import')(model_extended)
+	return model_extended    	
