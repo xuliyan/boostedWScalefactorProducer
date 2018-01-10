@@ -1,6 +1,8 @@
 import os,sys
 import ROOT as rt
 
+from python.makepdf import MakeExtendedModel,change_dataset_to_histpdf,fixParameters,makeTTbarModel
+ 
 def getPavetext():
   addInfo = rt.TPaveText(0.73010112,0.2566292,0.8202143,0.5523546,"NDC")
   addInfo.SetFillColor(0)
@@ -48,9 +50,8 @@ def fit_mj_single_MC(workspace,fileName,label, model,channel, wtagger_label):
 	rdataset_mj = workspace.data("rdataset4fit"+label+"_"+channel+"_mj")
 
 	constraint_list = []
-	from python.makepdf import MakeExtendedModel
-	MakeExtendedModel(workspace,label,model,"_mj",channel,wtagger_label,constraint_list)
-	model_pdf = workspace.pdf("model"+label+"_"+channel+"_mj")
+	
+	model_pdf = MakeExtendedModel(workspace,label,model,"_mj",channel,wtagger_label,constraint_list)
 	
 	rfresult = model_pdf.fitTo(rdataset_mj,rt.RooFit.Save(1),rt.RooFit.SumW2Error(rt.kTRUE),rt.RooFit.Extended(rt.kTRUE), rt.RooFit.Minimizer("Minuit2"),rt.RooFit.Verbose(rt.kFALSE))
 	rfresult = model_pdf.fitTo(rdataset_mj,rt.RooFit.Save(1),rt.RooFit.SumW2Error(rt.kTRUE),rt.RooFit.Extended(rt.kTRUE), rt.RooFit.Minimizer("Minuit2"),rt.RooFit.Verbose(rt.kFALSE))
@@ -95,7 +96,7 @@ def fit_mj_single_MC(workspace,fileName,label, model,channel, wtagger_label):
 	try: os.stat("plots/MCfits/") 
 	except: os.makedirs("plots/MCfits/")
 
-	# TODO # draw_canvas_with_pull(mplot,mplot_pull,RooArgList(*parameters_list),"plots/MCfits/",label+fileName,model,channel,0,0,GetLumi())
+	# TODO # draw_canvas_with_pull(mplot,mplot_pull,rt.RooArgList(*parameters_list),"plots/MCfits/",label+fileName,model,channel,0,0,GetLumi())
   
 	workspace.var("rrv_number"+label+"_"+channel+"_mj").setVal(workspace.var("rrv_number"+label+"_"+channel+"_mj").getVal()*workspace.var("rrv_scale_to_lumi"+label+"_"+channel).getVal())
 	workspace.var("rrv_number"+label+"_"+channel+"_mj").setError(workspace.var("rrv_number"+label+"_"+channel+"_mj").getError()*workspace.var("rrv_scale_to_lumi"+label+"_"+channel).getVal())
@@ -104,62 +105,52 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
   
   data      = workspace.data(("rdataset_data_beforetau2tau1cut_"  +channel+"_mj")).sumEntries()
   tt        = workspace.data(("rdataset_TTbar_beforetau2tau1cut_" +channel+"_mj")).sumEntries()
-  # #// tt       = workspace.data(("rdataset_TTbar_realW_"+channel+"_mj")).sumEntries()
- #  #// tt            +=  workspace.data(("rdataset_TTbar_fakeW_"+channel+"_mj")).sumEntries()
-  minorBKG  = workspace.data(("rdataset_WJets0_beforetau2tau1cut_"+channel+"_mj")).sumEntries()
+  minorBKG  = workspace.data(("rdataset_WJets_beforetau2tau1cut_"+channel+"_mj")).sumEntries()
   minorBKG += workspace.data(("rdataset_VV_beforetau2tau1cut_"    +channel+"_mj")).sumEntries()
   minorBKG += workspace.data(("rdataset_STop_beforetau2tau1cut_"  +channel+"_mj")).sumEntries()
-
   ttScalefactor = (data-minorBKG)/tt
-  
-  scalefactor = RooRealVar("tt_scalefactor","tt_scalefactor",ttScalefactor)
+  scalefactor = rt.RooRealVar("tt_scalefactor","tt_scalefactor",ttScalefactor)
   getattr(workspace,'import')(scalefactor)
 
   label = ""
-  rrv_mass_j = workspace.var("rrv_mass_j")
-  rdataset_data_mj  =  workspace.data(("rdataset_data"+ label+"_"+channel+"_mj"))
-  rdataset_TTbar_mj =  workspace.data(("rdataset_TTbar"+ label+"_"+channel+"_mj"))
-  rdataset_STop_mj  =  workspace.data(("rdataset_STop"+  label+"_"+channel+"_mj"))
-  rdataset_VV_mj    =  workspace.data(("rdataset_VV"+    label+"_"+channel+"_mj"))
-  rdataset_WJets_mj =  workspace.data(("rdataset_WJets0"+label+"_"+channel+"_mj"))
- 
+  rrv_mass_j                 = workspace.var("rrv_mass_j")
+  rdataset_data_mj           = workspace.data(("rdataset_data"+ label+"_"+channel+"_mj"))
+  rdataset_TTbar_mj          = workspace.data(("rdataset_TTbar"+ label+"_"+channel+"_mj"))
+  rdataset_STop_mj           = workspace.data(("rdataset_STop"+  label+"_"+channel+"_mj"))
+  rdataset_VV_mj             = workspace.data(("rdataset_VV"+    label+"_"+channel+"_mj"))
+  rdataset_WJets_mj          = workspace.data(("rdataset_WJets"+label+"_"+channel+"_mj"))
   rdataset_TTbar_mj_merged   =  workspace.data(("rdataset_TTbar_realW"+ label+"_"+channel+"_mj"))
   rdataset_TTbar_mj_unmerged =  workspace.data(("rdataset_TTbar_fakeW"+ label+"_"+channel+"_mj"))
   
-  from python.makepdf import change_dataset_to_histpdf
   change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_TTbar_mj)
   change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_STop_mj)
   change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_VV_mj)
   change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_WJets_mj)
-
   change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_TTbar_mj_merged)
   change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_TTbar_mj_unmerged)
   
-  model_histpdf_TTbar = workspace.pdf(((rdataset_TTbar_mj.GetName())+"_histpdf"))
-  model_histpdf_STop  = workspace.pdf(((rdataset_STop_mj.GetName())+"_histpdf"))
-  model_histpdf_VV    = workspace.pdf(((rdataset_VV_mj.GetName())+"_histpdf"))
-  model_histpdf_WJets = workspace.pdf(((rdataset_WJets_mj.GetName())+"_histpdf"))
-
+  model_histpdf_TTbar          = workspace.pdf(((rdataset_TTbar_mj.GetName())+"_histpdf"))
+  model_histpdf_STop           = workspace.pdf(((rdataset_STop_mj.GetName())+"_histpdf"))
+  model_histpdf_VV             = workspace.pdf(((rdataset_VV_mj.GetName())+"_histpdf"))
+  model_histpdf_WJets          = workspace.pdf(((rdataset_WJets_mj.GetName())+"_histpdf"))
   model_histpdf_TTbar_merged   = workspace.pdf(((rdataset_TTbar_mj_merged.GetName())+"_histpdf"))
   model_histpdf_TTbar_unmerged = workspace.pdf(((rdataset_TTbar_mj_unmerged.GetName())+"_histpdf"))
-   
 
-  number_TTbar = RooRealVar(("rrv_number_TTbar"+label+"_"+channel),("rrv_number_TTbar"+label+"_"+channel),rdataset_TTbar_mj.sumEntries()*ttScalefactor)
-  number_STop  = RooRealVar(("rrv_number_STop"+label+"_"+channel),("rrv_number_STop"+label+"_"+channel),rdataset_STop_mj.sumEntries())
-  number_VV    = RooRealVar(("rrv_number_VV"+label+"_"+channel),("rrv_number_VV"+label+"_"+channel),rdataset_VV_mj.sumEntries())
-  number_WJets = RooRealVar(("rrv_number_WJets"+label+"_"+channel),("rrv_number_WJets"+label+"_"+channel),rdataset_WJets_mj.sumEntries())
-
-  number_TTbar_merged   = RooRealVar(("rrv_number_TTbar_realW"+label+"_"+channel),("rrv_number_TTbar_realW"+label+"_"+channel),rdataset_TTbar_mj_merged.sumEntries()*ttScalefactor)
-  number_TTbar_unmerged = RooRealVar(("rrv_number_TTbar_fakeW"+label+"_"+channel),("rrv_number_TTbar_fakeW"+label+"_"+channel),rdataset_TTbar_mj_unmerged.sumEntries()*ttScalefactor)
-  model_TTbar_STop_VV_WJets = RooAddPdf(("model_TTbar_STop_VV_WJets"+label+"_"+channel),("model_TTbar_STop_VV_WJets"+label+"_"+channel),RooArgList(model_histpdf_TTbar_merged,model_histpdf_TTbar_unmerged,model_histpdf_STop,model_histpdf_VV,model_histpdf_WJets),RooArgList(number_TTbar_merged,number_TTbar_unmerged,number_STop,number_VV,number_WJets))
+  number_TTbar                 = rt.RooRealVar(("rrv_number_TTbar"+label+"_"+channel),("rrv_number_TTbar"+label+"_"+channel),rdataset_TTbar_mj.sumEntries()*ttScalefactor)
+  number_STop                  = rt.RooRealVar(("rrv_number_STop"+label+"_"+channel),("rrv_number_STop"+label+"_"+channel),rdataset_STop_mj.sumEntries())
+  number_VV                    = rt.RooRealVar(("rrv_number_VV"+label+"_"+channel),("rrv_number_VV"+label+"_"+channel),rdataset_VV_mj.sumEntries())
+  number_WJets                 = rt.RooRealVar(("rrv_number_WJets"+label+"_"+channel),("rrv_number_WJets"+label+"_"+channel),rdataset_WJets_mj.sumEntries())                            
+  number_TTbar_merged          = rt.RooRealVar(("rrv_number_TTbar_realW"+label+"_"+channel),("rrv_number_TTbar_realW"+label+"_"+channel),rdataset_TTbar_mj_merged.sumEntries()*ttScalefactor)
+  number_TTbar_unmerged        = rt.RooRealVar(("rrv_number_TTbar_fakeW"+label+"_"+channel),("rrv_number_TTbar_fakeW"+label+"_"+channel),rdataset_TTbar_mj_unmerged.sumEntries()*ttScalefactor)
   
+  model_TTbar_STop_VV_WJets    = rt.RooAddPdf(("model_TTbar_STop_VV_WJets"+label+"_"+channel),("model_TTbar_STop_VV_WJets"+label+"_"+channel),rt.RooArgList(model_histpdf_TTbar_merged,model_histpdf_TTbar_unmerged,model_histpdf_STop,model_histpdf_VV,model_histpdf_WJets),rt.RooArgList(number_TTbar_merged,number_TTbar_unmerged,number_STop,number_VV,number_WJets))
   getattr(workspace,'import')(model_TTbar_STop_VV_WJets)
 
-  rdataset_data_mj_fail  =  workspace.data(("rdataset_data"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
-  rdataset_TTbar_mj_fail =  workspace.data(("rdataset_TTbar"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
-  rdataset_STop_mj_fail  =  workspace.data(("rdataset_STop"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
-  rdataset_VV_mj_fail    =  workspace.data(("rdataset_VV"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
-  rdataset_WJets_mj_fail =  workspace.data(("rdataset_WJets0"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
+  rdataset_data_mj_fail           =  workspace.data(("rdataset_data"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
+  rdataset_TTbar_mj_fail          =  workspace.data(("rdataset_TTbar"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
+  rdataset_STop_mj_fail           =  workspace.data(("rdataset_STop"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
+  rdataset_VV_mj_fail             =  workspace.data(("rdataset_VV"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
+  rdataset_WJets_mj_fail          =  workspace.data(("rdataset_WJets"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
   rdataset_TTbar_mj_fail_merged   =  workspace.data(("rdataset_TTbar_realW"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
   rdataset_TTbar_mj_fail_unmerged =  workspace.data(("rdataset_TTbar_fakeW"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
 
@@ -170,63 +161,61 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
   change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_TTbar_mj_fail_merged)
   change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_TTbar_mj_fail_unmerged)
 
-  model_histpdf_TTbar_fail = workspace.pdf(((rdataset_TTbar_mj_fail.GetName())+"_histpdf"))
-  model_histpdf_STop_fail  = workspace.pdf(((rdataset_STop_mj_fail.GetName())+"_histpdf"))
-  model_histpdf_VV_fail    = workspace.pdf(((rdataset_VV_mj_fail.GetName())+"_histpdf"))
-  model_histpdf_WJets_fail = workspace.pdf(((rdataset_WJets_mj_fail.GetName())+"_histpdf"))
-
+  model_histpdf_TTbar_fail          = workspace.pdf(((rdataset_TTbar_mj_fail.GetName())+"_histpdf"))
+  model_histpdf_STop_fail           = workspace.pdf(((rdataset_STop_mj_fail.GetName())+"_histpdf"))
+  model_histpdf_VV_fail             = workspace.pdf(((rdataset_VV_mj_fail.GetName())+"_histpdf"))
+  model_histpdf_WJets_fail          = workspace.pdf(((rdataset_WJets_mj_fail.GetName())+"_histpdf"))
   model_histpdf_TTbar_fail_merged   = workspace.pdf(((rdataset_TTbar_mj_fail_merged.GetName())+"_histpdf"))
   model_histpdf_TTbar_fail_unmerged = workspace.pdf(((rdataset_TTbar_mj_fail_unmerged.GetName())+"_histpdf"))
 
-  number_TTbar_fail  = RooRealVar(("rrv_number_TTbar_fail"+label+"_"+channel),("rrv_number_TTbar_fail"+label+"_"+channel),rdataset_TTbar_mj_fail.sumEntries()*ttScalefactor)
-  number_STop_fail   = RooRealVar(("rrv_number_STop_fail"+label +"_"+channel),("rrv_number_STop_fail"+label+"_"+channel),rdataset_STop_mj_fail.sumEntries())
-  number_VV_fail     = RooRealVar(("rrv_number_VV_fail"+label   +"_"+channel),("rrv_number_VV_fail"+label+"_"+channel),rdataset_VV_mj_fail.sumEntries())
-  number_WJets_fail  = RooRealVar(("rrv_number_WJets_fail"+label+"_"+channel),("rrv_number_WJets_fail"+label+"_"+channel),rdataset_WJets_mj_fail.sumEntries())
+  number_TTbar_fail  = rt.RooRealVar(("rrv_number_TTbar_fail"+label+"_"+channel),("rrv_number_TTbar_fail"+label+"_"+channel),rdataset_TTbar_mj_fail.sumEntries()*ttScalefactor)
+  number_STop_fail   = rt.RooRealVar(("rrv_number_STop_fail"+label +"_"+channel),("rrv_number_STop_fail"+label+"_"+channel),rdataset_STop_mj_fail.sumEntries())
+  number_VV_fail     = rt.RooRealVar(("rrv_number_VV_fail"+label   +"_"+channel),("rrv_number_VV_fail"+label+"_"+channel),rdataset_VV_mj_fail.sumEntries())
+  number_WJets_fail  = rt.RooRealVar(("rrv_number_WJets_fail"+label+"_"+channel),("rrv_number_WJets_fail"+label+"_"+channel),rdataset_WJets_mj_fail.sumEntries())
 
-  number_TTbar_fail_merged    = RooRealVar(("rrv_number_TTbar_fail_realW"+label+"_"+channel),("rrv_number_TTbar_fail_realW"+label+"_"+channel),rdataset_TTbar_mj_fail_merged.sumEntries()*ttScalefactor)
-  number_TTbar_fail_unmerged  = RooRealVar(("rrv_number_TTbar_fail_fakeW"+label+"_"+channel),("rrv_number_TTbar_fail_fakeW"+label+"_"+channel),rdataset_TTbar_mj_fail_unmerged.sumEntries()*ttScalefactor)
+  number_TTbar_fail_merged    = rt.RooRealVar(("rrv_number_TTbar_fail_realW"+label+"_"+channel),("rrv_number_TTbar_fail_realW"+label+"_"+channel),rdataset_TTbar_mj_fail_merged.sumEntries()*ttScalefactor)
+  number_TTbar_fail_unmerged  = rt.RooRealVar(("rrv_number_TTbar_fail_fakeW"+label+"_"+channel),("rrv_number_TTbar_fail_fakeW"+label+"_"+channel),rdataset_TTbar_mj_fail_unmerged.sumEntries()*ttScalefactor)
   
-  model_TTbar_STop_VV_WJets_fail = RooAddPdf(("model_TTbar_STop_VV_WJets_fail"+label+"_"+channel),("model_TTbar_STop_VV_WJets_fail"+label+"_"+channel),RooArgList(model_histpdf_TTbar_fail_merged,model_histpdf_TTbar_fail_unmerged,model_histpdf_STop_fail,model_histpdf_VV_fail,model_histpdf_WJets_fail), RooArgList(number_TTbar_fail_merged,number_TTbar_fail_unmerged,number_STop_fail,number_VV_fail,number_WJets_fail))
+  model_TTbar_STop_VV_WJets_fail = rt.RooAddPdf(("model_TTbar_STop_VV_WJets_fail"+label+"_"+channel),("model_TTbar_STop_VV_WJets_fail"+label+"_"+channel),rt.RooArgList(model_histpdf_TTbar_fail_merged,model_histpdf_TTbar_fail_unmerged,model_histpdf_STop_fail,model_histpdf_VV_fail,model_histpdf_WJets_fail), rt.RooArgList(number_TTbar_fail_merged,number_TTbar_fail_unmerged,number_STop_fail,number_VV_fail,number_WJets_fail))
   getattr(workspace,'import')(model_TTbar_STop_VV_WJets_fail)
   
   
   scale_number_TTbar_STop_VV_WJets      = (rdataset_TTbar_mj_merged.sumEntries()*ttScalefactor+rdataset_TTbar_mj_unmerged.sumEntries()*ttScalefactor+rdataset_STop_mj.sumEntries()+rdataset_VV_mj.sumEntries()+rdataset_WJets_mj.sumEntries())/(rdataset_data_mj.sumEntries()+rdataset_data_mj_fail.sumEntries())
   scale_number_TTbar_STop_VV_WJets_fail = (rdataset_TTbar_mj_fail_merged.sumEntries()*ttScalefactor+rdataset_TTbar_mj_fail_unmerged.sumEntries()*ttScalefactor+rdataset_STop_mj_fail.sumEntries()+rdataset_VV_mj_fail.sumEntries()+rdataset_WJets_mj_fail.sumEntries())/( rdataset_data_mj.sumEntries()+rdataset_data_mj_fail.sumEntries())
-
-  rrv_scale_number_TTbar_STop_VV_WJets      = RooRealVar(("rrv_scale_number_TTbar_STop_VV_WJets"+label),("rrv_scale_number_TTbar_STop_VV_WJets"+label),scale_number_TTbar_STop_VV_WJets)
-  rrv_scale_number_TTbar_STop_VV_WJets_fail = RooRealVar(("rrv_scale_number_TTbar_STop_VV_WJets_fail"+label),("rrv_scale_number_TTbar_STop_VV_WJets_fail"+label),scale_number_TTbar_STop_VV_WJets_fail)
+  rrv_scale_number_TTbar_STop_VV_WJets      = rt.RooRealVar(("rrv_scale_number_TTbar_STop_VV_WJets"+label),("rrv_scale_number_TTbar_STop_VV_WJets"+label),scale_number_TTbar_STop_VV_WJets)
+  rrv_scale_number_TTbar_STop_VV_WJets_fail = rt.RooRealVar(("rrv_scale_number_TTbar_STop_VV_WJets_fail"+label),("rrv_scale_number_TTbar_STop_VV_WJets_fail"+label),scale_number_TTbar_STop_VV_WJets_fail)
   getattr(workspace,'import')(rrv_scale_number_TTbar_STop_VV_WJets)
   getattr(workspace,'import')(rrv_scale_number_TTbar_STop_VV_WJets_fail)
+  
+  #Fix all shape parameters and normalization                                                                  
+  model_STop       = fixParameters(workspace,"_STop"+label                    ,channel)
+  model_VV         = fixParameters(workspace,"_VV"+label                      ,channel)
+  model_WJets      = fixParameters(workspace,"_WJets"+label                   ,channel)
+  model_STop_fail  = fixParameters(workspace,"_STop"+label+"_failtau2tau1cut" ,channel)
+  model_VV_fail    = fixParameters(workspace,"_VV"+label+"_failtau2tau1cut"   ,channel)
+  model_WJets_fail = fixParameters(workspace,"_WJets"+label+"_failtau2tau1cut",channel)
 
-
-  #/// Fix all shape parameters and normalization                                                                                                         
-  model_STop       = get_General_mj_Model(workspace,"_STop"+label                      ,mj_shape["STop"]       ,channel)
-  model_VV         = get_General_mj_Model(workspace,"_VV"+label                        ,mj_shape["VV"]         ,channel)
-  model_WJets      = get_General_mj_Model(workspace,"_WJets0"+label                    ,mj_shape["WJets0"]     ,channel)
-  model_STop_fail  = get_General_mj_Model(workspace,"_STop"+label+"_failtau2tau1cut"   ,mj_shape["STop_fail"]  ,channel)
-  model_VV_fail    = get_General_mj_Model(workspace,"_VV"+label+"_failtau2tau1cut"     ,mj_shape["VV_fail"]    ,channel)
-  model_WJets_fail = get_General_mj_Model(workspace,"_WJets0"+label+"_failtau2tau1cut" ,mj_shape["WJets0_fail"],channel)
-
-
-  model_bkg_data         = MakeExtendedModel(workspace,"_bkg_data"+label,mj_shape["bkg_data"],"_mj",channel,wtagger,constraintlist_data)
-  model_bkg_data_fail    = MakeExtendedModel(workspace,"_bkg_data"+label+"_failtau2tau1cut",mj_shape["bkg_data_fail"],"_mj",channel,wtagger,constraintlist_data)                                                      
-  model_ttbar_data       = MakeModelTTbarControlSample(workspace,"_ttbar_data"+label,mj_shape["signal_data"],"_mj",channel,wtagger,label,constraintlist_data)    
-  model_ttbar_data_fail  = MakeModelTTbarControlSample(workspace,"_ttbar_data"+label+"_failtau2tau1cut",mj_shape["signal_data_fail"],"_mj",channel,wtagger,label,constraintlist_data)
-
-
-  model_data_fail = RooAddPdf(("model_data"+label+"_"+"failtau2tau1cut"+"_"+channel),("model_data+"+label+"_"+"failtau2tau1cut"+"_"+channel),RooArgList(model_ttbar_data_fail,model_bkg_data_fail,model_STop_fail,model_VV_fail,model_WJets_fail))
-  model_data      = RooAddPdf(("model_data"+label+"_"+channel),("model_data"+label+"_"+channel), RooArgList(model_ttbar_data,model_bkg_data,model_STop,model_VV,model_WJets))
-
+  model_bkg_data         =  MakeExtendedModel(workspace,"_bkg_data"  +label                    ,mj_shape["bkg_data"],"_mj",channel,wtagger,constraintlist_data)                 
+  model_bkg_data_fail    =  MakeExtendedModel(workspace,"_bkg_data"  +label+"_failtau2tau1cut" ,mj_shape["bkg_data_fail"],"_mj",channel,wtagger,constraintlist_data)     
+  
+  model_ttbar_data       =  makeTTbarModel   (workspace,"_ttbar_data"+label                    ,mj_shape["signal_data"]     ,channel,wtagger,constraintlist_data)   
+  model_ttbar_data_fail  =  makeTTbarModel   (workspace,"_ttbar_data"+label+"_failtau2tau1cut" ,mj_shape["signal_data_fail"],channel,wtagger,constraintlist_data)
+ 
+  model_data_fail = rt.RooAddPdf("model_data"+label+"_failtau2tau1cut_"+channel,"model_data"+label+"_failtau2tau1cut_"+channel, rt.RooArgList(model_ttbar_data_fail,model_bkg_data_fail,model_STop_fail,model_VV_fail,model_WJets_fail) )
+  model_data      = rt.RooAddPdf("model_data"+label+"_"+channel,"model_data"+label+"_"+channel  , rt.RooArgList(model_ttbar_data ,model_bkg_data ,model_STop ,model_VV ,model_WJets ) )
+  
+ 
+  print "Importing models: "
   getattr(workspace,'import')(model_data)
   getattr(workspace,'import')(model_data_fail)
 
   
   model_bkg_TotalMC        = MakeExtendedModel(workspace,"_bkg_TotalMC"+label,mj_shape["bkg_mc"],"_mj",channel,wtagger,constraintlist_MC)
   model_bkg_TotalMC_fail   = MakeExtendedModel(workspace,"_bkg_TotalMC"+label+"_failtau2tau1cut",mj_shape["bkg_mc_fail"],"_mj",channel,wtagger,constraintlist_MC)
-  model_ttbar_TotalMC      = MakeModelTTbarControlSample(workspace,"_ttbar_TotalMC"+label,mj_shape["signal_mc"],"_mj",channel,wtagger,label,constraintlist_MC ) 
-  model_ttbar_TotalMC_fail = MakeModelTTbarControlSample(workspace,"_ttbar_TotalMC"+label+"_failtau2tau1cut",mj_shape["signal_mc_fail"],"_mj",channel,wtagger,label,constraintlist_MC)                                                                                                                      
-  model_TotalMC_fail       = RooAddPdf(("model_TotalMC"+label+"_"+"failtau2tau1cut"+"_"+channel),("model_TotalMC"+label+"_"+"failtau2tau1cut"+"_"+channel),RooArgList(model_ttbar_TotalMC_fail,model_bkg_TotalMC_fail,model_STop_fail,model_VV_fail,model_WJets_fail))
-  model_TotalMC            = RooAddPdf(("model_TotalMC"+label+"_"+channel),("model_TotalMC"+label+"_"+channel),RooArgList(model_ttbar_TotalMC,model_bkg_TotalMC,model_STop,model_VV,model_WJets))
+  model_ttbar_TotalMC      = makeTTbarModel(workspace,"_ttbar_TotalMC"+label,mj_shape["signal_mc"],channel,wtagger,constraintlist_MC ) 
+  model_ttbar_TotalMC_fail = makeTTbarModel(workspace,"_ttbar_TotalMC"+label+"_failtau2tau1cut",mj_shape["signal_mc_fail"],channel,wtagger,constraintlist_MC)                                                                                                                      
+  model_TotalMC_fail       = rt.RooAddPdf(("model_TotalMC"+label+"_"+"failtau2tau1cut"+"_"+channel),("model_TotalMC"+label+"_"+"failtau2tau1cut"+"_"+channel),rt.RooArgList(model_ttbar_TotalMC_fail,model_bkg_TotalMC_fail,model_STop_fail,model_VV_fail,model_WJets_fail))
+  model_TotalMC            = rt.RooAddPdf(("model_TotalMC"+label+"_"+channel),("model_TotalMC"+label+"_"+channel),rt.RooArgList(model_ttbar_TotalMC,model_bkg_TotalMC,model_STop,model_VV,model_WJets))
  
   getattr(workspace,'import')(model_TotalMC_fail)
   getattr(workspace,'import')(model_TotalMC)
@@ -243,7 +232,7 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
 #
 #   model_histpdf_STop                = workspace.pdf(("rdataset_STop"+label+"_"+channel+"_mj_histpdf"))
 #   model_histpdf_VV                  = workspace.pdf(("rdataset_VV"+label+"_"+channel+"_mj_histpdf"))
-#   model_histpdf_WJets               = workspace.pdf(("rdataset_WJets0"+label+"_"+channel+"_mj_histpdf"))
+#   model_histpdf_WJets               = workspace.pdf(("rdataset_WJets"+label+"_"+channel+"_mj_histpdf"))
 #   model_histpdf_TTbar_merged        = workspace.pdf(("rdataset_TTbar_realW"+label+"_"+channel+"_mj_histpdf"))
 #   model_histpdf_TTbar_unmerged      = workspace.pdf(("rdataset_TTbar_fakeW"+label+"_"+channel+"_mj_histpdf"))
 #   model_TTbar_STop_VV_WJets         = workspace.pdf(("model_TTbar_STop_VV_WJets"+label+"_"+channel))
@@ -251,7 +240,7 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
 #
 #   model_histpdf_STop_fail           = workspace.pdf(("rdataset_STop"+label+"_"+"failtau2tau1cut_"+channel+"_mj_histpdf"))
 #   model_histpdf_VV_fail             = workspace.pdf(("rdataset_VV"+label+"_"+"failtau2tau1cut_"+channel+"_mj_histpdf"))
-#   model_histpdf_WJets_fail          = workspace.pdf(("rdataset_WJets0"+label+"_"+"failtau2tau1cut_"+channel+"_mj_histpdf"))
+#   model_histpdf_WJets_fail          = workspace.pdf(("rdataset_WJets"+label+"_"+"failtau2tau1cut_"+channel+"_mj_histpdf"))
 #   model_histpdf_TTbar_merged_fail   = workspace.pdf(("rdataset_TTbar_realW"+label+"_"+"failtau2tau1cut_"+channel+"_mj_histpdf"))
 #   model_histpdf_TTbar_unmerged_fail = workspace.pdf(("rdataset_TTbar_fakeW"+label+"_"+"failtau2tau1cut_"+channel+"_mj_histpdf"))
 #   model_TTbar_STop_VV_WJets_fail    = workspace.pdf(("model_TTbar_STop_VV_WJets_fail"+label+"_"+channel))
@@ -332,7 +321,7 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
 #   #// plot mc fit function
 #   cut.Form("category_p_f%s_%s==category_p_f%s_%s.pass",label,channel,label,channel)
 #   simPdf_TotalMC.plotOn(xframe_data,rt.RooFit.Name("MC fit"),rt.RooFit.Slice(*category_p_f,"pass"), rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.LineStyle(kSolid), rt.RooFit.LineColor(rt.kRed))
-#   cut.Form("model_bkg_TotalMC_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WJets0_%s_mj",channel,channel,channel,channel)
+#   cut.Form("model_bkg_TotalMC_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WJets_%s_mj",channel,channel,channel,channel)
 #   simPdf_TotalMC.plotOn(xframe_data,rt.RooFit.Name("mc fit bkg_invisible"),rt.RooFit.Slice(*category_p_f,"pass"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.Components(cut.Data()), rt.RooFit.LineColor(rt.kRed), rt.RooFit.LineStyle(rt.kDashed))
 #
 #   #// plot data fit function
@@ -340,7 +329,7 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
 #   combData_p_f_data.plotOn(xframe_data,rt.RooFit.Name("data_invisible"),rt.RooFit.Cut(cut.Data()),rt.RooFit.MarkerSize(1.5),rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.XErrorSize(0))
 #
 #   simPdf_data.plotOn(xframe_data,rt.RooFit.Name("Data fit"),rt.RooFit.Slice(*category_p_f,"pass"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.LineStyle(kSolid), rt.RooFit.LineColor(kBlue))
-#   cut.Form("model_bkg_data_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WJets0_%s_mj",channel,channel,channel,channel)
+#   cut.Form("model_bkg_data_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WJets_%s_mj",channel,channel,channel,channel)
 #   simPdf_data.plotOn(xframe_data,rt.RooFit.Name("dat fit bkg_invisible"),rt.RooFit.Slice(*category_p_f,"pass"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.Components(cut.Data()), rt.RooFit.LineStyle(rt.kDashed), rt.RooFit.LineColor(kBlue))
 #
 #   cut.Form("category_p_f%s_%s==category_p_f%s_%s.fail",label,channel,label,channel)
@@ -382,7 +371,7 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
 #   cut.Form("category_p_f%s_%s==category_p_f%s_%s.fail",label,channel,label,channel)
 #   combData_p_f_data.plotOn(xframe_data_fail,rt.RooFit.Name("data_invisible"),rt.RooFit.Cut(cut.Data()),rt.RooFit.MarkerSize(1.5),rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.XErrorSize(0))
 #   simPdf_TotalMC.plotOn(xframe_data_fail,rt.RooFit.Name("MC fit")    ,rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.LineStyle(kSolid), rt.RooFit.LineColor(rt.kRed))
-#   cut.Form("model_bkg_TotalMC_failtau2tau1cut_%s_mj,model_STop_failtau2tau1cut_%s_mj,model_VV_failtau2tau1cut_%s_mj,model_WJets0_failtau2tau1cut_%s_mj",channel,channel,channel,channel)
+#   cut.Form("model_bkg_TotalMC_failtau2tau1cut_%s_mj,model_STop_failtau2tau1cut_%s_mj,model_VV_failtau2tau1cut_%s_mj,model_WJets_failtau2tau1cut_%s_mj",channel,channel,channel,channel)
 #   simPdf_TotalMC.plotOn(xframe_data_fail,rt.RooFit.Name("MC fit bkg"),rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.Components(cut.Data()), rt.RooFit.LineColor(rt.kRed), rt.RooFit.LineStyle(rt.kDashed))
 #
 #   #//fail plots . plot data fit
@@ -391,7 +380,7 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
 #
 #   simPdf_data.plotOn(xframe_data_fail,rt.RooFit.Name("Data fit"),rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"),rt.RooFit.LineStyle(kSolid), rt.RooFit.LineColor(kBlue))
 #   simPdf_data.plotOn(xframe_data_fail,rt.RooFit.Name("data_fit_invisible"),rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"))
-#   cut.Form("model_bkg_data_failtau2tau1cut_%s_mj,model_STop_failtau2tau1cut_%s_mj,model_VV_failtau2tau1cut_%s_mj,model_WJets0_failtau2tau1cut_%s_mj",channel,channel,channel,channel)
+#   cut.Form("model_bkg_data_failtau2tau1cut_%s_mj,model_STop_failtau2tau1cut_%s_mj,model_VV_failtau2tau1cut_%s_mj,model_WJets_failtau2tau1cut_%s_mj",channel,channel,channel,channel)
 #   simPdf_data.plotOn(xframe_data_fail,rt.RooFit.Name("data fit bkg"),rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.Components(cut.Data()),rt.RooFit.LineStyle(rt.kDashed), rt.RooFit.LineColor(kBlue))
 #
 #   #// #//signal window
