@@ -3,7 +3,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection, Object 
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
-from modules.xsec import getXsec
+from python.xsec import getXsec
 
 class selectionProducer(Module):
     def __init__(self, jetSelection):
@@ -23,6 +23,7 @@ class selectionProducer(Module):
 		self.out.branch("FatJet_softDrop_mass",  "F")
 		self.out.branch("FatJet_tau21",  "F")
 		self.out.branch("FatJet_tau21_ddt",  "F")
+		self.out.branch("FatJet_tau21_ddt_retune",  "F")
 		self.out.branch("W_type",  "F")
 		self.out.branch("W_pt",  "F")
 		self.out.branch("MET",  "F")
@@ -58,17 +59,20 @@ class selectionProducer(Module):
         				continue	
         	
         
+		# Fat jet selection
         wFatJets =  [x for x in fatjets if x.pt>200 and abs(x.eta)<2.5]
         if len(wFatJets) < 1 : return False
         wFatJets.sort(key=lambda x:x.pt,reverse=True)
         
+		# Medium b-tag
         passedjets = [x for x in jets if x.jetId>0 and x.pt>35 and abs(x.eta)<2.5 and x.btagCMVA> 0.89]
         if len(passedjets) < 1 : return False
         
         Vtype = -1
         
-        wElectrons = [x for x in electrons if x.mvaSpring16GP_WP90 and x.pt > 115 ]      
-        wMuons = [x for x in muons if x.pt > 55 and x.highPtId >= 1 ]
+		#lepton selection
+        wElectrons = [x for x in electrons if x.cutBased_HEEP and x.pt > 35 ]	 #loose pt cut for veto 
+        wMuons = [x for x in muons if x.pt > 20 and x.highPtId >= 1 ]   			 #loose pt cut for veto
         wMuons.sort(key=lambda x:x.pt,reverse=True)
         wElectrons.sort(key=lambda x:x.pt,reverse=True)
         
@@ -77,10 +81,12 @@ class selectionProducer(Module):
         vLeptons = [] # decay products of V
         if len(wElectrons) + len(wMuons) == 1:
             if len(wMuons) == 1:
+                if wMuons[0].pt < 53: return False
                 Vtype = 0
                 vLeptons = [wMuons[0]]
                 if triggerMu == 0: return False
             if len(wElectrons) == 1:
+                if wElectrons[0].pt < 115: return False
                 Vtype=1
                 vLeptons = [wElectrons[0]]
                 if triggerEl == 0: return False
@@ -105,7 +111,7 @@ class selectionProducer(Module):
         
         met_4v  = ROOT.TLorentzVector()
         met_4v.SetPtEtaPhiE(met.sumEt, 0., met.phi, met.sumEt)
-        
+        if met.sumEt < 40: return False
         ## add branches for some basic V kinematics
         V = ROOT.TLorentzVector()
         for vLepton in vLeptons:
@@ -123,6 +129,7 @@ class selectionProducer(Module):
         self.out.fillBranch("FatJet_softDrop_mass",  wFatJets[0].msoftdrop)
         self.out.fillBranch("FatJet_tau21", wFatJets[0].tau2/wFatJets[0].tau1)
         self.out.fillBranch("FatJet_tau21_ddt", wFatJets[0].tau2/wFatJets[0].tau1+0.063*ROOT.TMath.Log(wFatJets[0].msoftdrop**2/wFatJets[0].pt))
+        self.out.fillBranch("FatJet_tau21_ddt_retune", wFatJets[0].tau2/wFatJets[0].tau1+0.082*ROOT.TMath.Log(wFatJets[0].msoftdrop**2/wFatJets[0].pt))
         
         return True
         
