@@ -3,7 +3,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection, Object 
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
-from python.xsec import getXsec
+from xsec import getXsec
 
 class selectionProducer(Module):
     def __init__(self, jetSelection):

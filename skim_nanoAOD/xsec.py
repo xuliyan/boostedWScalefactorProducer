@@ -23,7 +23,7 @@ def getXsec(sample):
   elif sample.find( "QCD_Pt-15to7000" ) !=-1 or sample.find( "QCD_Pt_15to7000" ) !=-1: return  2.022100000e+09*60.5387252324;
   elif sample.find( "TT_TuneCUETP8M2T4"                    ) !=-1 : return  831.76      ;
   elif sample.find( "TT_TuneEE5C_13TeV-powheg-herwigpp"    ) !=-1 : return  831.76      ;
-  elif sample.find( "TT_							  "    ) !=-1 : return  831.76      ; #for testing
+  elif sample.find( "TT_"    							   ) !=-1 : return  831.76      ; #for testing
   elif sample.find("WJetsToLNu_HT-100To200"                ) !=-1 : return 1347*1.21    ;
   elif sample.find("WJetsToLNu_HT-200To400"                ) !=-1 : return 360*1.21     ;
   elif sample.find("WJetsToLNu_HT-400To600"                ) !=-1 : return 48.9*1.21    ;
