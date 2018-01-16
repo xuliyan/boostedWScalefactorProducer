@@ -15,36 +15,35 @@ scram build
 ```
 
 ### getting the code
-
+First fork your own version of the repository at https://github.com/BoostedScalefactors/WTopScalefactorProducer
 ```
 export GITUSER=`git config user.github`
 echo "Your github username has been set to \"$GITUSER\""
-git clone git@github.com:${GITUSER}/WTopScalefactorProducer.git
+git clone -b nanoOAD git@github.com:${GITUSER}/WTopScalefactorProducer.git
 cd WTopScalefactorProducer
-git remote add originalRemote git@github.com:thaarres/WTopScalefactorProducer.git
-git fetch originalRemote
-git checkout -b nanoAOD originalRemote/nanoOAD
+git remote add originalRemote git@github.com:BoostedScalefactors/WTopScalefactorProducer.git
 ```
 ### Producing samples
 
+See README in subdirectory skim_nanoAOD/
 ```
+cd skim_nanoAOD/
 python process_nanoAOD.py
 ```
 
 ### running scalefactor code
 
 ```
-cd boostedWScalefactorProducer
 python Automatic_Setup.py #To compile
-python wtagSFfits.py -b   #To run
+python runSF.py -b   #To run
 ```
 
 The basic script to be run is 
 
 ```
-python wtagSFfits.py
+python runSF.py
 ```
-It takes as input .root files containing a TTree with a branch for the mass distribution you want to calculate a scalefactor for. This branch can contain events after full selection is applied, or new selections can be implemented on the fly in wtagSFfits.py. In addition to a data and the separate background MC files, you need one file called "*pseudodata* wchich contains all MC added together (with their appropriate weights, using ROOT hadd).
+It takes as input .root files containing a TTree with a branch for the mass distribution you want to calculate a scale factor for. This branch can contain events after full selection is applied, or new selections can be implemented on the fly in wtagSFfits.py. In addition to a data and the separate background MC files, you need one file called "*pseudodata* which contains all MC added together (with their appropriate weights, using ROOT hadd).
 
    
    General Options:
