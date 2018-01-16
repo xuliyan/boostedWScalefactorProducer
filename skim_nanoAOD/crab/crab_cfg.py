@@ -42,7 +42,7 @@ config.Data.unitsPerJob = 1
 # config.Data.totalUnits = 2000
 # config.Data.inputDBS='phys03'
 config.Data.outLFNDirBase = '/store/user/thaarres/NanoTEST/'
-config.Data.publication = FALSE
+config.Data.publication = False
 config.Data.outputDatasetTag = 'NanoTestPost'
 config.section_("Site")
 # since there is no data discovery and no data location lookup in CRAB

@@ -8,7 +8,7 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(),
 )
 process.source.fileNames = [
 	# '../../NanoAOD/test/lzma.root' ##you can change only this line
-	'file:/TT_sal.root'
+	'file:TT_sal.root'
 ]
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 process.output = cms.OutputModule("PoolOutputModule", fileName = cms.untracked.string('tree.root'))
