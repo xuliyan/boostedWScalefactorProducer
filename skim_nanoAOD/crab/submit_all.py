@@ -15,7 +15,7 @@ def getOptions() :
     usage = ('usage: python submit_all.py -c CONFIG -d DIR -f DATASETS_FILE')
 
     parser = OptionParser(usage=usage)    
-    parser.add_option("-c", "--config", dest="cfg", default="test94X_NANO.py",
+    parser.add_option("-c", "--config", dest="cfg", default="crab_script.py",
         help=("The crab script you want to submit "),
         metavar="CONFIG")
     parser.add_option("-d", "--dir", dest="dir", default="NANO",
@@ -58,16 +58,17 @@ def main():
 
     config.section_("JobType")
     config.JobType.pluginName = 'Analysis'
-    config.JobType.psetName = options.cfg
+    #config.JobType.psetName = options.cfg
     
     config.section_("Data")
     config.Data.inputDataset = None
     config.Data.splitting = ''
     #config.Data.unitsPerJob = 1
     config.Data.ignoreLocality = False
-    config.Data.publication = True    
-    config.Data.publishDBS = 'phys03'
-    
+    #config.Data.publication = True
+        
+    #config.Data.publishDBS = 'phys03'
+   
     config.section_("Site")
     config.Site.storageSite = options.storageSite
 
@@ -78,12 +79,23 @@ def main():
         try:
             crabCommand('submit', config = config)
         except HTTPException, hte:
-            print 'Cannot execute commend'
+            print 'Cannot execute command'
             print hte.headers
 
     #############################################################################################
     ## From now on that's what users should modify: this is the a-la-CRAB2 configuration part. ##
     #############################################################################################
+
+
+    #Taken from example here                                                       
+    #https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_submit_fails_with_Block_con                                                                    
+
+    # this will use CRAB client API                                                
+    from CRABAPI.RawCommand import crabCommand
+
+    # talk to DBS to get list of files in this dataset                             
+    from dbs.apis.dbsClient import DbsApi
+    dbs = DbsApi('https://cmsweb.cern.ch/dbs/prod/phys03/DBSReader')
 
     datasetsFile = open( options.datasets )
     jobsLines = datasetsFile.readlines()
@@ -104,8 +116,29 @@ def main():
         if len(requestname) > 100: requestname = ''.join((requestname[:100-len(requestname)]).split('_')[:-1])
         print 'requestname = ', requestname
         config.General.requestName = requestname
-        config.Data.inputDataset = job
-        config.Data.outputDatasetTag = requestname 
+        config.Data.outputDatasetTag = requestname
+        if datatier == 'USER':
+
+          config.JobType.psetName = 'PSet.py'
+          print options.cfg[0:-2]+'sh'
+          config.JobType.scriptExe = options.cfg[0:-2]+'sh'
+          config.JobType.inputFiles = [options.cfg ,'haddnano.py'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
+          config.JobType.sendPythonFolder  = True
+          fileDictList = dbs.listFiles(dataset=job) 
+          print ("dataset %s has %d files" % (job, len(fileDictList)))
+          # DBS client returns a list of dictionaries, but we want a list of Logical File Names                   
+          lfnList = [ dic['logical_file_name'] for dic in fileDictList ]
+          # following 3 lines are the trick to skip DBS data lookup in CRAB Server                                               
+          config.Data.userInputFiles = lfnList
+          config.Data.splitting = 'FileBased'
+          config.Data.unitsPerJob = 1          
+          config.Data.publication =  False
+          config.Site.whitelist = [options.storageSite]          
+        if 'MINIAOD' in datatier :
+          onfig.JobType.psetName = options.cfg
+          config.Data.inputDataset = job
+          config.Data.publication = True                                                                          
+          config.Data.publishDBS = 'phys03'  
         if datatier == 'MINIAODSIM': 
           config.Data.splitting = 'FileBased'
           config.Data.unitsPerJob = 1

@@ -16,5 +16,5 @@ Change input sample and SE in crab_cfg.py. Selections and module in crab_script.
 cd crab/
 voms-proxy-init -voms cms --valid 200:00
 source /cvmfs/cms.cern.ch/crab3/crab.sh
-crab submit -c crab_cfg.py
+python submit_all.py -f listOfDatasets.txt
 ```
