@@ -4,8 +4,10 @@ import sys
 import os
 import time
 import math
-import CMS_lumi, tdrstyle
-tdrstyle.setTDRStyle()
+from python.tdrstyle import *
+setTDRStyle()
+from python.CMS_lumi import *
+
 from ROOT import *
 
 parser = OptionParser()
