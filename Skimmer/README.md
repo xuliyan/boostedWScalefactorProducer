@@ -1,34 +1,40 @@
-
-### installation instructions ###
-Setup CMSSW and get nanoAOD packages
-```
-cmsrel CMSSW_9_4_1
-cd CMSSW_9_4_1/src
-cmsenv
-git cms-merge-topic cms-nanoAOD:master
-git checkout -b nanoAOD cms-nanoAOD/master
-git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
-scram build
-```
-
-
-
-### How to skim nanoAOD samples ###
+### How to run the W-tagging scalefactor code ###
 #########################################
 
-The selections are given in selectionModule.py. Additional cuts and input file is defined in process_nanoAOD.py
+## Installation instructions
+Setup CMSSW and get nanoAOD packages
 ```
-### Producing samples locally
+cmsrel CMSSW_9_4_2
+cd CMSSW_9_4_2/src
+git cms-init
+git remote add cms-nanoAOD https://github.com/cms-nanoAOD/cmssw.git
+git fetch cms-nanoAOD
+git checkout -b nanoAOD remotes/cms-nanoAOD/master
+git cms-addpkg PhysicsTools/NanoAOD
+scram b -j 10
+```
 
+### getting the code
+First fork your own version of the repository at https://github.com/BoostedScalefactors/WTopScalefactorProducer
 ```
+export GITUSER=`git config user.github`
+echo "Your github username has been set to \"$GITUSER\""
+git clone -b nanoOAD git@github.com:${GITUSER}/WTopScalefactorProducer.git
+cd WTopScalefactorProducer
+git remote add originalRemote git@github.com:BoostedScalefactors/WTopScalefactorProducer.git
+```
+
+
+
+### Producing samples
+
+First you need to produce your input files by skimming nanoAOD samples. For this, see README in subdirectory Skimmer/.
+The syntax is: python process_nanoAOD.py <infile> <outdir> <outtreename>
+```
+cd Skimmer/
 python process_nanoAOD.py
 ```
 
-### running with crab
-Change input sample and SE in crab_cfg.py. Selections and module in crab_script.py
-```
-cd crab/
-voms-proxy-init -voms cms --valid 200:00
-source /cvmfs/cms.cern.ch/crab3/crab.sh
-python submit_all.py -f listOfDatasets.txt
-```
+### running scalefactor code
+
+The fitting code is located in Fitter/. For scalefactors from merged W AK8 jet, see README in Fitter/partiallyMerged. For scalefactors from merged top AK8 jet, see README in Fitter/fullyMerged
