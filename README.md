@@ -15,10 +15,6 @@ ln -s $CMSSW_BASE/src/PhysicsTools/NanoAODTools/scripts/haddnano.py .
 scram build
 
 cd PhysicsTools/NanoAODTools/
-(JUST ONCE:)
-bash standalone/env_standalone.sh build
-(EVERY TIME:)
-source standalone/env_standalone.sh
 
 git remote add sal https://github.com/rappoccio/nanoAOD-tools.git
 git fetch sal
@@ -48,6 +44,15 @@ See README in subdirectory skim_nanoAOD/
 ```
 cd skim_nanoAOD/
 python process_nanoAOD.py
+```
+
+### Working locally (without CMSSW, just python2.7 and ROOT)
+```
+cd PhysicsTools/NanoAODTools/
+(JUST ONCE:)
+bash standalone/env_standalone.sh build
+(EVERY TIME:)
+source standalone/env_standalone.sh
 ```
 
 ### running scalefactor code
