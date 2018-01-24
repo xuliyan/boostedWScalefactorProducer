@@ -20,13 +20,10 @@ scram build
 ```
 
 ### getting the code
-First fork your own version of the repository at https://github.com/BoostedScalefactors/WTopScalefactorProducer
+
 ```
-export GITUSER=`git config user.github`
-echo "Your github username has been set to \"$GITUSER\""
-git clone -b nanoOAD git@github.com:${GITUSER}/WTopScalefactorProducer.git
+git clone -b nanoAOD git@github.com:BoostedScalefactors/WTopScalefactorProducer.git
 cd WTopScalefactorProducer
-git remote add originalRemote git@github.com:BoostedScalefactors/WTopScalefactorProducer.git
 ```
 ### Producing samples
 
