@@ -10,13 +10,21 @@ cd CMSSW_9_4_2/src
 cmsenv
 
 git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
+ln -s $CMSSW_BASE/src/PhysicsTools/NanoAODTools/scripts/haddnano.py .
+
+scram build
+
 cd PhysicsTools/NanoAODTools/
+(JUST ONCE:)
+bash standalone/env_standalone.sh build
+(EVERY TIME:)
+source standalone/env_standalone.sh
+
 git remote add sal https://github.com/rappoccio/nanoAOD-tools.git
 git fetch sal
 git checkout -b TTbarResHad remotes/sal/TTbarResHad
 
 
-scram build
 ```
 
 ### getting the code
