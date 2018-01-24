@@ -24,6 +24,15 @@ scram build
 ```
 git clone -b nanoAOD git@github.com:BoostedScalefactors/WTopScalefactorProducer.git
 cd WTopScalefactorProducer
+
+#For public version:
+#git clone https://github.com/${GITUSER}/WTopScalefactorProducer 
+#cd WTopScalefactorProducer
+#git remote add originalRemote https://github.com/BoostedScalefactors/WTopScalefactorProducer.git
+#git fetch originalRemote
+#git checkout -b nanoOAD originalRemote/nanoAOD
+#git fetch originalRemote
+
 ```
 ### Producing samples
 
