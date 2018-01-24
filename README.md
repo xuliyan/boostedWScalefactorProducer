@@ -8,16 +8,8 @@ Setup CMSSW and get nanoAOD packages
 cmsrel CMSSW_9_4_2
 cd CMSSW_9_4_2/src
 cmsenv
-
-# in order to get the latest developments
-git cms-merge-topic cms-nanoAOD:master
-# create a branch directly on the nanoAOD branch, skipping the unnecessary merge commit from cms-merge-topic
 git checkout -b nanoAOD cms-nanoAOD/master
-
-# get the support library
 git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
-
-# compile it
 scram build
 ```
 
