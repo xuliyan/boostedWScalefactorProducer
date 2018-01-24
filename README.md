@@ -8,8 +8,14 @@ Setup CMSSW and get nanoAOD packages
 cmsrel CMSSW_9_4_2
 cd CMSSW_9_4_2/src
 cmsenv
-git checkout -b nanoAOD cms-nanoAOD/master
+
 git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
+cd PhysicsTools/NanoAODTools/
+git remote add sal https://github.com/rappoccio/nanoAOD-tools.git
+git fetch sal
+git checkout -b TTbarResHad remotes/sal/TTbarResHad
+
+
 scram build
 ```
 
