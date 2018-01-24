@@ -1,8 +1,44 @@
 import os,sys
 import ROOT as rt
+rt.gROOT.SetBatch(True)
+from python.tdrstyle import *
+setTDRStyle()
+from python.CMS_lumi import *
 
 from python.makepdf import MakeExtendedModel,change_dataset_to_histpdf,fixParameters,makeTTbarModel
- 
+
+CMS_lumi.lumi_13TeV = "36.5 fb^{-1}(2017)"
+CMS_lumi.writeExtraText = 1
+CMS_lumi.extraText = "Preliminary"
+CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+iPos = 11
+if( iPos==0 ): CMS_lumi.relPosX = 0.12
+iPeriod = 4
+
+def getCanvas():
+	H_ref = 600
+	W_ref = 800
+	W = W_ref
+	H  = H_ref
+	T = 0.08*H_ref
+	B = 0.12*H_ref 
+	L = 0.12*W_ref
+	R = 0.04*W_ref
+	canvas = rt.TCanvas("c1","c1",50,50,W,H)
+	canvas.SetFillColor(0)
+	canvas.SetBorderMode(0)
+	canvas.SetFrameFillStyle(0)
+	canvas.SetFrameBorderMode(0)
+	canvas.SetLeftMargin( L/W )
+	canvas.SetRightMargin( R/W )
+	canvas.SetTopMargin( T/H )
+	canvas.SetBottomMargin( B/H )
+	canvas.SetTickx(0)
+	canvas.SetTicky(0)
+	rt.gStyle.SetOptStat(0)
+	rt.gStyle.SetOptTitle(0)
+	return canvas
+		 
 def getPavetext():
   addInfo = rt.TPaveText(0.73010112,0.2566292,0.8202143,0.5523546,"NDC")
   addInfo.SetFillColor(0)
@@ -17,33 +53,50 @@ def getPavetext():
 def getLegend(mplot,channel,x1=0.62,x2=0.7,y1=0.92,y2=0.9):
     theLeg = rt.TLegend(x1,x2,y1,y2,"","brNDC")
     for obj in range(0,int(mplot.numItems())):
-		
+		theObj = mplot.getObject(obj)
 		objName = mplot.nameOf(obj);
+		theLeg.AddEntry(theObj, objName,"L")
 		
-		if objName == "errorband":
-			 objName = "Uncertainty"
-		if not objName.find("Uncertainty")!=-1 or objName.find("invisible")!=-1 or objName.find("TLine")!=-1:
-		   theObj = mplot.getObject(obj)
-		   objTitle = objName
-		   drawoption = mplot.getDrawOptions(objName)
-		   label = drawoption
-		   if drawoption == "P": drawoption = "pe"
-		   if label: label = "pe";
-		if objName.find("Uncertainty")!=-1 or objName.find("sigma")!=-1: theLeg.AddEntry(theObj, objName,label)
-		elif objName.find("Graph")!=-1: theLeg.AddEntry(theObj, "Uncertainty",label)
-		else:
-			if     objName == "STop": theLeg.AddEntry(theObj, "Single Top",label);
-			elif objName.find("_TTbar_realW_failtau2tau1cut")!=-1: theLeg.AddEntry(theObj, "t#bar{t} (W-jet)","ple");
-			elif objName.find("_TTbar_realW")!=-1: theLeg.AddEntry(theObj, "t#bar{t} (W-jet)","ple");
-			elif objName.find("_TTbar_fakeW_failtau2tau1cut")!=-1: theLeg.AddEntry(theObj, "t#bar{t} (non-W)","ple");
-			elif objName.find("_TTbar_fakeW")!=-1: theLeg.AddEntry(theObj, "t#bar{t} (non-W)","ple");
-			elif objName.find("TTbar_realW")!=-1: theLeg.AddEntry(theObj, "t#bar{t} (merged)","f");
-			elif objName.find("TTbar_fakeW")!=-1: theLeg.AddEntry(theObj, "t#bar{t} (unmerged)","f");
-			elif objName.find("TTbar")!=-1: theLeg.AddEntry(theObj, "t#bar{t}",label);
-			elif objName.find("VV")!=-1:    theLeg.AddEntry(theObj, "WW/WZ/ZZ",label);
-			elif objName.find("data")!=-1:  theLeg.AddEntry(theObj, "data",label);
-			elif objName.find("WJets")!=-1: theLeg.AddEntry(theObj, "W+jets",label);
+			#
+		# if objName == "errorband":
+		# 	 objName = "Uncertainty"
+		# if not objName.find("Uncertainty")!=-1 or objName.find("invisible")!=-1 or objName.find("rt.TLine")!=-1:
+		#    theObj = mplot.getObject(obj)
+		#    objTitle = objName
+		#    drawoption = mplot.getDrawOptions(objName)
+		#    label = drawoption
+		#    if drawoption == "P": drawoption = "pe"
+		#    if label: label = "pe";
+		# if objName.find("Uncertainty")!=-1 or objName.find("sigma")!=-1: theLeg.AddEntry(theObj, objName,label)
+		# elif objName.find("Graph")!=-1: theLeg.AddEntry(theObj, "Uncertainty",label)
+		# else:
+		# 	if     objName == "STop": theLeg.AddEntry(theObj, "Single Top",label);
+		# 	elif objName.find("_TTbar_realW_failtau2tau1cut")!=-1: theLeg.AddEntry(theObj, "t#bar{t} (W-jet)","ple");
+		# 	elif objName.find("_TTbar_realW")!=-1: theLeg.AddEntry(theObj, "t#bar{t} (W-jet)","ple");
+		# 	elif objName.find("_TTbar_fakeW_failtau2tau1cut")!=-1: theLeg.AddEntry(theObj, "t#bar{t} (non-W)","ple");
+		# 	elif objName.find("_TTbar_fakeW")!=-1: theLeg.AddEntry(theObj, "t#bar{t} (non-W)","ple");
+		# 	elif objName.find("TTbar_realW")!=-1: theLeg.AddEntry(theObj, "t#bar{t} (merged)","f");
+		# 	elif objName.find("TTbar_fakeW")!=-1: theLeg.AddEntry(theObj, "t#bar{t} (unmerged)","f");
+		# 	elif objName.find("TTbar")!=-1: theLeg.AddEntry(theObj, "t#bar{t}",label);
+		# 	elif objName.find("VV")!=-1:    theLeg.AddEntry(theObj, "WW/WZ/ZZ",label);
+		# 	elif objName.find("data")!=-1:  theLeg.AddEntry(theObj, "data",label);
+		# 	elif objName.find("WJets")!=-1: theLeg.AddEntry(theObj, "W+jets",label);
+    return theLeg		
 	
+def doTTscalefactor(workspace,channel):
+
+    data      = workspace.data(("rdataset_data_"  +channel+"_mj")).sumEntries()
+    tt        = workspace.data(("rdataset_TTbar_" +channel+"_mj")).sumEntries()
+    minorBKG  = workspace.data(("rdataset_WJets_" +channel+"_mj")).sumEntries()
+    minorBKG += workspace.data(("rdataset_VV_"    +channel+"_mj")).sumEntries()
+    minorBKG += workspace.data(("rdataset_STop_"  +channel+"_mj")).sumEntries()
+    ttScalefactor = (data-minorBKG)/tt
+
+    scalefactor = rt.RooRealVar("tt_scalefactor","tt_scalefactor",ttScalefactor)
+    getattr(workspace,'import')(scalefactor)
+    return scalefactor.getVal()
+	
+
 def fit_mj_single_MC(workspace,fileName,label, model,channel, wtagger_label):
 
 	rrv_mass_j  = workspace.var("rrv_mass_j")
@@ -64,6 +117,7 @@ def fit_mj_single_MC(workspace,fileName,label, model,channel, wtagger_label):
 	mplot.GetYaxis().SetRangeUser(0,mplot.GetMaximum()*1.2)
 	rdataset_mj.plotOn(mplot,rt.RooFit.MarkerSize(1.5),rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.XErrorSize(0),rt.RooFit.Invisible())
   
+	model_pdf.plotOn(mplot,rt.RooFit.Name( "Gaussian comp."   ),rt.RooFit.Components("gaus*"),rt.RooFit.LineStyle(rt.kDashed),rt.RooFit.LineColor(rt.kRed+3))
 	model_pdf.plotOn(mplot,rt.RooFit.Name( "Gaussian comp. 1" ),rt.RooFit.Components("gaus1*"),rt.RooFit.LineStyle(rt.kDashed),rt.RooFit.LineColor(rt.kRed+3))
 	model_pdf.plotOn(mplot,rt.RooFit.Name( "Gaussian comp. 2" ),rt.RooFit.Components("gaus2*"),rt.RooFit.LineStyle(rt.kDashed),rt.RooFit.LineColor(rt.kRed+4))
 	model_pdf.plotOn(mplot,rt.RooFit.Name( "ErfExp comp." ),rt.RooFit.Components("erfExp*"),rt.RooFit.LineStyle(rt.kDashed),rt.RooFit.LineColor(rt.kRed+3))
@@ -92,9 +146,14 @@ def fit_mj_single_MC(workspace,fileName,label, model,channel, wtagger_label):
 	cs = getPavetext()
 	cs.AppendPad("same")
 	mplot.addObject(cs)
-   
 	try: os.stat("plots/MCfits/") 
 	except: os.makedirs("plots/MCfits/")
+	c1 = getCanvas()
+	mplot.Draw()
+	# leg1.Draw("same")
+	# from time import sleep
+	# sleep(100)
+	c1.SaveAs("plots/MCfits/"+label+".png")
 
 	# TODO # draw_canvas_with_pull(mplot,mplot_pull,rt.RooArgList(*parameters_list),"plots/MCfits/",label+fileName,model,channel,0,0,GetLumi())
   
@@ -119,8 +178,8 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
   rdataset_STop_mj           = workspace.data(("rdataset_STop"+  label+"_"+channel+"_mj"))
   rdataset_VV_mj             = workspace.data(("rdataset_VV"+    label+"_"+channel+"_mj"))
   rdataset_WJets_mj          = workspace.data(("rdataset_WJets"+label+"_"+channel+"_mj"))
-  rdataset_TTbar_mj_merged   =  workspace.data(("rdataset_TTbar_realW"+ label+"_"+channel+"_mj"))
-  rdataset_TTbar_mj_unmerged =  workspace.data(("rdataset_TTbar_fakeW"+ label+"_"+channel+"_mj"))
+  rdataset_TTbar_mj_merged   = workspace.data(("rdataset_TTbar_realW"+ label+"_"+channel+"_mj"))
+  rdataset_TTbar_mj_unmerged = workspace.data(("rdataset_TTbar_fakeW"+ label+"_"+channel+"_mj"))
   
   change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_TTbar_mj)
   change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_STop_mj)
@@ -220,6 +279,228 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
   getattr(workspace,'import')(model_TotalMC_fail)
   getattr(workspace,'import')(model_TotalMC)
 
+
+def DrawScaleFactorTTbarControlSample(workspace, color_palet, label, channel, wtagger, ca8_ungroomed_pt_min, ca8_ungroomed_pt_max, sample):
+
+
+        ttScalefactor = workspace.var("tt_scalefactor").getValV()
+        print "Using tt scalefactor of " , ttScalefactor 
+        
+        
+        #dataset after tau2tau1 cut
+        rrv_mass_j                 = workspace.var("rrv_mass_j")
+        rdataset_data_mj           = workspace.data(("rdataset_data"+ label+"_"+channel+"_mj"))
+        rdataset_TTbar_mj          = workspace.data(("rdataset_TTbar"+ label+"_"+channel+"_mj"))
+        rdataset_STop_mj           = workspace.data(("rdataset_STop"+  label+"_"+channel+"_mj"))
+        rdataset_VV_mj             = workspace.data(("rdataset_VV"+    label+"_"+channel+"_mj"))
+        rdataset_WJets_mj          = workspace.data(("rdataset_WJets"+label+"_"+channel+"_mj"))
+        rdataset_TTbar_mj_merged   =  workspace.data(("rdataset_TTbar_realW"+ label+"_"+channel+"_mj"))
+        rdataset_TTbar_mj_unmerged =  workspace.data(("rdataset_TTbar_fakeW"+ label+"_"+channel+"_mj"))
+        
+        change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_TTbar_mj)
+        change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_STop_mj)
+        change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_VV_mj)
+        change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_WJets_mj)
+        change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_TTbar_mj_merged)
+        change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_TTbar_mj_unmerged)
+        
+        model_histpdf_TTbar          = workspace.pdf(((rdataset_TTbar_mj.GetName())+"_histpdf"))
+        model_histpdf_STop           = workspace.pdf(((rdataset_STop_mj.GetName())+"_histpdf"))
+        model_histpdf_VV             = workspace.pdf(((rdataset_VV_mj.GetName())+"_histpdf"))
+        model_histpdf_WJets          = workspace.pdf(((rdataset_WJets_mj.GetName())+"_histpdf"))
+        model_histpdf_TTbar_merged   = workspace.pdf(((rdataset_TTbar_mj_merged.GetName())+"_histpdf"))
+        model_histpdf_TTbar_unmerged = workspace.pdf(((rdataset_TTbar_mj_unmerged.GetName())+"_histpdf"))
+        
+        number_TTbar                 = rt.RooRealVar(("rrv_number_TTbar"+label+"_"+channel),("rrv_number_TTbar"+label+"_"+channel),rdataset_TTbar_mj.sumEntries()*ttScalefactor)
+        number_STop                  = rt.RooRealVar(("rrv_number_STop"+label+"_"+channel),("rrv_number_STop"+label+"_"+channel),rdataset_STop_mj.sumEntries())
+        number_VV                    = rt.RooRealVar(("rrv_number_VV"+label+"_"+channel),("rrv_number_VV"+label+"_"+channel),rdataset_VV_mj.sumEntries())
+        number_WJets                 = rt.RooRealVar(("rrv_number_WJets"+label+"_"+channel),("rrv_number_WJets"+label+"_"+channel),rdataset_WJets_mj.sumEntries())                            
+        number_TTbar_merged          = rt.RooRealVar(("rrv_number_TTbar_realW"+label+"_"+channel),("rrv_number_TTbar_realW"+label+"_"+channel),rdataset_TTbar_mj_merged.sumEntries()*ttScalefactor)
+        number_TTbar_unmerged        = rt.RooRealVar(("rrv_number_TTbar_fakeW"+label+"_"+channel),("rrv_number_TTbar_fakeW"+label+"_"+channel),rdataset_TTbar_mj_unmerged.sumEntries()*ttScalefactor)
+        
+        
+        model_TTbar_STop_VV_WJets = workspace.pdf("model_TTbar_STop_VV_WJets"+label+"_"+channel)
+        
+        
+        #dataset fail tau2tau1 cut
+        rdataset_data_mj_fail           =  workspace.data(("rdataset_data"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
+        rdataset_TTbar_mj_fail          =  workspace.data(("rdataset_TTbar"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
+        rdataset_STop_mj_fail           =  workspace.data(("rdataset_STop"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
+        rdataset_VV_mj_fail             =  workspace.data(("rdataset_VV"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
+        rdataset_WJets_mj_fail          =  workspace.data(("rdataset_WJets"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
+        rdataset_TTbar_mj_fail_merged   =  workspace.data(("rdataset_TTbar_realW"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
+        rdataset_TTbar_mj_fail_unmerged =  workspace.data(("rdataset_TTbar_fakeW"+label+"_"+"failtau2tau1cut_"+channel+"_mj"))
+        
+        change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_TTbar_mj_fail)
+        change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_STop_mj_fail)
+        change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_VV_mj_fail)
+        change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_WJets_mj_fail)
+        change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_TTbar_mj_fail_merged)
+        change_dataset_to_histpdf(workspace,rrv_mass_j,rdataset_TTbar_mj_fail_unmerged)
+        
+        model_histpdf_TTbar_fail          = workspace.pdf(((rdataset_TTbar_mj_fail.GetName())+"_histpdf"))
+        model_histpdf_STop_fail           = workspace.pdf(((rdataset_STop_mj_fail.GetName())+"_histpdf"))
+        model_histpdf_VV_fail             = workspace.pdf(((rdataset_VV_mj_fail.GetName())+"_histpdf"))
+        model_histpdf_WJets_fail          = workspace.pdf(((rdataset_WJets_mj_fail.GetName())+"_histpdf"))
+        model_histpdf_TTbar_fail_merged   = workspace.pdf(((rdataset_TTbar_mj_fail_merged.GetName())+"_histpdf"))
+        model_histpdf_TTbar_fail_unmerged = workspace.pdf(((rdataset_TTbar_mj_fail_unmerged.GetName())+"_histpdf"))
+        
+        number_TTbar_fail  = rt.RooRealVar(("rrv_number_TTbar_fail"+label+"_"+channel),("rrv_number_TTbar_fail"+label+"_"+channel),rdataset_TTbar_mj_fail.sumEntries()*ttScalefactor)
+        number_STop_fail   = rt.RooRealVar(("rrv_number_STop_fail"+label +"_"+channel),("rrv_number_STop_fail"+label+"_"+channel),rdataset_STop_mj_fail.sumEntries())
+        number_VV_fail     = rt.RooRealVar(("rrv_number_VV_fail"+label   +"_"+channel),("rrv_number_VV_fail"+label+"_"+channel),rdataset_VV_mj_fail.sumEntries())
+        number_WJets_fail  = rt.RooRealVar(("rrv_number_WJets_fail"+label+"_"+channel),("rrv_number_WJets_fail"+label+"_"+channel),rdataset_WJets_mj_fail.sumEntries())
+        
+        number_TTbar_fail_merged    = rt.RooRealVar(("rrv_number_TTbar_fail_realW"+label+"_"+channel),("rrv_number_TTbar_fail_realW"+label+"_"+channel),rdataset_TTbar_mj_fail_merged.sumEntries()*ttScalefactor)
+        number_TTbar_fail_unmerged  = rt.RooRealVar(("rrv_number_TTbar_fail_fakeW"+label+"_"+channel),("rrv_number_TTbar_fail_fakeW"+label+"_"+channel),rdataset_TTbar_mj_fail_unmerged.sumEntries()*ttScalefactor)
+        
+        model_TTbar_STop_VV_WJets_fail = workspace.pdf("model_TTbar_STop_VV_WJets_fail"+label+"_"+channel);
+        
+        ## rescale factor for plots
+        scale_number_TTbar_STop_VV_WJets      = (rdataset_TTbar_mj_merged.sumEntries()*ttScalefactor+rdataset_TTbar_mj_unmerged.sumEntries()*ttScalefactor+rdataset_STop_mj.sumEntries()+rdataset_VV_mj.sumEntries()+rdataset_WJets_mj.sumEntries())/(rdataset_data_mj.sumEntries()+rdataset_data_mj_fail.sumEntries())
+        scale_number_TTbar_STop_VV_WJets_fail = (rdataset_TTbar_mj_fail_merged.sumEntries()*ttScalefactor+rdataset_TTbar_mj_fail_unmerged.sumEntries()*ttScalefactor+rdataset_STop_mj_fail.sumEntries()+rdataset_VV_mj_fail.sumEntries()+rdataset_WJets_mj_fail.sumEntries())/( rdataset_data_mj.sumEntries()+rdataset_data_mj_fail.sumEntries())
+        
+        
+        #Fix all shape parameters and normalization                                                                  
+        model_STop       = fixParameters(workspace,"_STop"+label                    ,channel)
+        model_VV         = fixParameters(workspace,"_VV"+label                      ,channel)
+        model_WJets      = fixParameters(workspace,"_WJets"+label                   ,channel)
+        model_STop_fail  = fixParameters(workspace,"_STop"+label+"_failtau2tau1cut" ,channel)
+        model_VV_fail    = fixParameters(workspace,"_VV"+label+"_failtau2tau1cut"   ,channel)
+        model_WJets_fail = fixParameters(workspace,"_WJets"+label+"_failtau2tau1cut",channel)
+        
+        model_data_fail = workspace.pdf("model_data"+label+"_"+"failtau2tau1cut"+"_"+channel)
+        model_data = workspace.pdf("model_data"+label+"_"+channel);
+        
+        category_p_f=workspace.cat("category_p_f"+label+"_"+channel);
+        
+        simPdf_data = rt.RooSimultaneous("simPdf_data"+label+"_"+channel,"simPdf_data"+label+"_"+channel,category_p_f);
+        simPdf_data.addPdf(model_data,"pass");
+        simPdf_data.addPdf(model_data_fail,"fail");
+        combData_p_f_data = workspace.data("combData_p_f_data"+label+"_"+channel);
+        
+        simPdf_data.Print();
+        combData_p_f_data.Print();
+        
+        model_TotalMC_fail = workspace.pdf("model_TotalMC"+label+"_"+"failtau2tau1cut"+"_"+channel);
+        model_TotalMC = workspace.pdf("model_TotalMC"+label+"_"+channel);
+        
+        simPdf_TotalMC = rt.RooSimultaneous("simPdf_TotalMC"+label+"_"+channel,"simPdf_TotalMC"+label+"_"+channel,category_p_f);
+        simPdf_TotalMC.addPdf(model_TotalMC,"pass");
+        simPdf_TotalMC.addPdf(model_TotalMC_fail,"fail");
+        combData_p_f_TotalMC = workspace.data("combData_p_f_TotalMC"+label+"_"+channel);
+        
+        
+        xframe_data=rrv_mass_j.frame( rt.RooFit.Bins(int(rrv_mass_j.getBins())));
+        xframe_data_fail=rrv_mass_j.frame( rt.RooFit.Bins(int(rrv_mass_j.getBins())));
+        
+        ## plot data and mc on the frame
+        combData_p_f_data.plotOn(xframe_data,rt.RooFit.Name("data invisi"), rt.RooFit.Cut("category_p_f%s_%s==category_p_f%s_%s::pass"%(label,channel,label,channel)), rt.RooFit.MarkerSize(1.5), rt.RooFit.DataError(rt.RooAbsData.SumW2), rt.RooFit.XErrorSize(0) );
+        combData_p_f_data.plotOn(xframe_data_fail,rt.RooFit.Name("data invisi"), rt.RooFit.Cut("category_p_f%s_%s==category_p_f%s_%s::fail"%(label,channel,label,channel)), rt.RooFit.MarkerSize(1.5), rt.RooFit.DataError(rt.RooAbsData.SumW2), rt.RooFit.XErrorSize(0) );
+        
+        #pass plot
+        model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("TTbar"),rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["TTbar"+label]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())    
+        model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("TTbar_realW"),rt.RooFit.Components("%s,%s,%s,%s,%s"%(model_histpdf_TTbar_merged.GetName(),model_histpdf_TTbar_unmerged.GetName(),model_histpdf_STop.GetName(), model_histpdf_VV.GetName(), model_histpdf_WJets.GetName())),rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["TTbar_realW"+label]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())    
+        model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("TTbar_fakeW"),rt.RooFit.Components("%s,%s,%s,%s"%(model_histpdf_TTbar_unmerged.GetName(),model_histpdf_STop.GetName(), model_histpdf_VV.GetName(), model_histpdf_WJets.GetName())),rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["TTbar_fakeW"+label]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())    
+        model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("STop"),rt.RooFit.Components("%s,%s,%s"%(model_histpdf_STop.GetName(), model_histpdf_VV.GetName(), model_histpdf_WJets.GetName())), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["STop"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())        
+        model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("VV"),rt.RooFit.Components("%s,%s"%(model_histpdf_VV.GetName(), model_histpdf_WJets.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["VV"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())
+        model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("WJets"),rt.RooFit.Components("%s"%(model_histpdf_WJets.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["WJets"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())
+        
+        #pass plots
+        model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("TTbar_line_invisible"), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())        
+        model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("TTbar_realW_line_invisible"), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())        
+        model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("TTbar_fakeW_line_invisible"), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())        
+        model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("STop_line_invisible"),rt.RooFit.Components("%s,%s,%s"%(model_histpdf_STop.GetName(), model_histpdf_VV.GetName(), model_histpdf_WJets.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())        
+        model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("VV_line_invisible"),rt.RooFit.Components("%s,%s"%(model_histpdf_VV.GetName(), model_histpdf_WJets.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())        
+        model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("WJets_line_invisible"),rt.RooFit.Components("%s"%(model_histpdf_WJets.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())
+        
+        #fail plot
+        model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("TTbar"), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["TTbar"+label]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())        
+        model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("TTbar_realW"),rt.RooFit.Components("%s,%s,%s,%s,%s"%(model_histpdf_TTbar_fail_merged.GetName(),model_histpdf_TTbar_fail_unmerged.GetName(),model_histpdf_STop_fail.GetName(), model_histpdf_VV_fail.GetName(), model_histpdf_WJets_fail.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["TTbar_realW"+label]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())        
+        model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("TTbar_fakeW"),rt.RooFit.Components("%s,%s,%s,%s"%(model_histpdf_TTbar_fail_unmerged.GetName(),model_histpdf_STop_fail.GetName(), model_histpdf_VV_fail.GetName(), model_histpdf_WJets_fail.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["TTbar_fakeW"+label]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())        
+        model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("STop"),rt.RooFit.Components("%s,%s,%s"%(model_histpdf_STop_fail.GetName(), model_histpdf_VV_fail.GetName(), model_histpdf_WJets_fail.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["STop"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())        
+        model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("VV"),rt.RooFit.Components("%s,%s"%(model_histpdf_VV_fail.GetName(), model_histpdf_WJets_fail.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["VV"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())        
+        model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("WJets"),rt.RooFit.Components("%s"%( model_histpdf_WJets_fail.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["WJets"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())
+        
+        #solid line
+        model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("TTbar_line_invisible"), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())      
+        model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("TTbar_realW_line_invisible"), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())      
+        model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("TTbar_fakeW_line_invisible"), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())        
+        model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("STop_line_invisible"),rt.RooFit.Components("%s,%s,%s"%(model_histpdf_STop_fail.GetName(), model_histpdf_VV_fail.GetName(), model_histpdf_WJets_fail.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())        
+        model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("VV_line_invisible"),rt.RooFit.Components("%s,%s"%(model_histpdf_VV_fail.GetName(), model_histpdf_WJets_fail.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())    
+        model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("WJets_line_invisible"),rt.RooFit.Components("%s"%( model_histpdf_WJets_fail.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())
+        
+        
+        combData_p_f_data.plotOn(xframe_data,rt.RooFit.Name("data"), rt.RooFit.Cut("category_p_f%s_%s==category_p_f%s_%s::pass"%(label,channel,label,channel)), rt.RooFit.MarkerSize(1.5), rt.RooFit.DataError(rt.RooAbsData.SumW2), rt.RooFit.XErrorSize(0) );
+        combData_p_f_data.plotOn(xframe_data_fail,rt.RooFit.Name("data"), rt.RooFit.Cut("category_p_f%s_%s==category_p_f%s_%s::fail"%(label,channel,label,channel)), rt.RooFit.MarkerSize(1.5), rt.RooFit.DataError(rt.RooAbsData.SumW2), rt.RooFit.XErrorSize(0) );
+        
+        ## plot mc fit
+        combData_p_f_TotalMC.plotOn(xframe_data,rt.RooFit.Name("TotalMC invisi"), rt.RooFit.Cut("category_p_f%s_%s==category_p_f%s_%s::pass"%(label,channel,label,channel)), rt.RooFit.MarkerColor(rt. kWhite), rt.RooFit.LineColor(rt. kWhite), rt.RooFit.Invisible() , rt.RooFit.MarkerSize(1.5), rt.RooFit.DataError(rt.RooAbsData.SumW2), rt.RooFit.XErrorSize(0) );   
+        simPdf_TotalMC.plotOn(xframe_data,rt.RooFit.Name("MC fit"),rt.RooFit.Slice(category_p_f,"pass"),rt.RooFit.ProjWData(rt.RooArgSet(category_p_f),combData_p_f_TotalMC),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.LineStyle(rt.kDashed))
+        
+        
+        ## plot data fit
+        combData_p_f_data.plotOn(xframe_data,rt.RooFit.Name("data invisi"), rt.RooFit.Cut("category_p_f%s_%s==category_p_f%s_%s::pass"%(label,channel,label,channel)), rt.RooFit.MarkerSize(1.5), rt.RooFit.DataError(rt.RooAbsData.SumW2), rt.RooFit.XErrorSize(0) );       
+        simPdf_data.plotOn(xframe_data,rt.RooFit.Name("data fit"),rt.RooFit.Slice(category_p_f,"pass"),rt.RooFit.ProjWData(rt.RooArgSet(category_p_f),combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"))
+        simPdf_data.plotOn(xframe_data,rt.RooFit.Name("data fit invisi"),rt.RooFit.Slice(category_p_f,"pass"),rt.RooFit.ProjWData(rt.RooArgSet(category_p_f),combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"))        
+        combData_p_f_TotalMC.plotOn(xframe_data_fail,rt.RooFit.Name("TotalMC invisi"), rt.RooFit.Cut("category_p_f%s_%s==category_p_f%s_%s::fail"%(label,channel,label,channel)), rt.RooFit.MarkerColor(rt. kWhite), rt.RooFit.LineColor(rt. kWhite), rt.RooFit.Invisible(), rt.RooFit.MarkerSize(1.5), rt.RooFit.DataError(rt.RooAbsData.SumW2), rt.RooFit.XErrorSize(0) );      
+        simPdf_TotalMC.plotOn(xframe_data_fail,rt.RooFit.Name("MC fit"),rt.RooFit.Slice(category_p_f,"fail"),rt.RooFit.ProjWData(rt.RooArgSet(category_p_f),combData_p_f_TotalMC),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.LineStyle(rt.kDashed))
+        combData_p_f_data.plotOn(xframe_data_fail,rt.RooFit.Name("data invisi"), rt.RooFit.Cut("category_p_f%s_%s==category_p_f%s_%s::fail"%(label,channel,label,channel)), rt.RooFit.MarkerSize(1.5), rt.RooFit.DataError(rt.RooAbsData.SumW2), rt.RooFit.XErrorSize(0) );
+        
+        simPdf_data.plotOn(xframe_data_fail,rt.RooFit.Name("data fit"),rt.RooFit.Slice(category_p_f,"fail"),rt.RooFit.ProjWData(rt.RooArgSet(category_p_f),combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"))
+        simPdf_data.plotOn(xframe_data_fail,rt.RooFit.Name("data fit invisi"),rt.RooFit.Slice(category_p_f,"fail"),rt.RooFit.ProjWData(rt.RooArgSet(category_p_f),combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"))
+        
+        # # #signal window
+#           lowerLine = rt.TLine(mj_signal_min,0.,mj_signal_min,xframe_data.GetMaximum()); lowerLine.SetLineWidth(2); lowerLine.SetLineColor(kGray+2); lowerLine.SetLineStyle(9);
+#           upperLine = rt.TLine(mj_signal_max,0.,mj_signal_max,xframe_data.GetMaximum()); upperLine.SetLineWidth(2); upperLine.SetLineColor(kGray+2); upperLine.SetLineStyle(9);
+#           xframe_data.addObject(lowerLine); xframe_data.addObject(upperLine);
+#           lowerLine = rt.TLine(mj_signal_min,0.,mj_signal_min,xframe_data_fail.GetMaximum()); lowerLine.SetLineWidth(2); lowerLine.SetLineColor(kGray+2); lowerLine.SetLineStyle(9);
+#           upperLine = rt.TLine(mj_signal_max,0.,mj_signal_max,xframe_data_fail.GetMaximum()); upperLine.SetLineWidth(2); upperLine.SetLineColor(kGray+2); upperLine.SetLineStyle(9);
+#           xframe_data_fail.addObject(lowerLine); xframe_data_fail.addObject(upperLine);
+        
+        # # #legend
+        #   leg_data=legend4Plot(xframe_data,0,1, 0.15)
+        #   xframe_data.addObject(leg_data)
+        #   leg_data_fail=legend4Plot(xframe_data_fail,0,1,0.18)
+        #   xframe_data_fail.addObject(leg_data_fail)
+        
+        #add mean and width
+        tmp_channel="em";
+        if workspace.var("rrv_mean1_gaus_ttbar_data"+label+"_"+"el"): tmp_channel="el";
+        if workspace.var("rrv_mean1_gaus_ttbar_data"+label+"_"+"mu"): tmp_channel="mu";
+        
+        rrv_mean_gaus_data =workspace.var("rrv_mean1_gaus_ttbar_data"+label+"_"+tmp_channel);
+        rrv_sigma_gaus_data =workspace.var("rrv_sigma1_gaus_ttbar_data"+label+"_"+tmp_channel);
+        rrv_mean_gaus_TotalMC =workspace.var("rrv_mean1_gaus_ttbar_TotalMC"+label+"_"+tmp_channel);
+        rrv_sigma_gaus_TotalMC=workspace.var("rrv_sigma1_gaus_ttbar_TotalMC"+label+"_"+tmp_channel);
+        
+        if rrv_mean_gaus_TotalMC:
+            tl_MC_mean =TLatex(0.25 ,0.62, ("Mean_{MC } = %3.1f #pm %2.1f")%(rrv_mean_gaus_TotalMC.getVal(), rrv_mean_gaus_TotalMC.getError()) );
+            tl_MC_sigma =TLatex(0.25 ,0.57, ("Sigma_{MC }= %2.1f #pm %2.1f")%(rrv_sigma_gaus_TotalMC.getVal(), rrv_sigma_gaus_TotalMC.getError()) );
+            tl_MC_mean.SetNDC(); tl_MC_sigma.SetNDC();
+            tl_MC_mean.SetTextSize(0.03)
+            tl_MC_sigma.SetTextSize(0.03)
+            # xframe_data.addObject(tl_MC_mean);
+            # xframe_data.addObject(tl_MC_sigma);
+        
+        if rrv_mean_gaus_data:
+            tl_data_mean =TLatex(0.25 ,0.52, ("Mean_{data} = %3.1f #pm %2.1f")%(rrv_mean_gaus_data.getVal(), rrv_mean_gaus_data.getError()) );
+            tl_data_sigma=TLatex(0.25 ,0.47, ("Sigma_{data}= %2.1f #pm %2.1f")%(rrv_sigma_gaus_data.getVal(), rrv_sigma_gaus_data.getError()) );
+            tl_data_mean.SetNDC(); tl_data_sigma.SetNDC();
+            tl_data_mean.SetTextSize(0.03)
+            tl_data_sigma.SetTextSize(0.03)
+            # xframe_data.addObject(tl_data_mean); xframe_data.addObject(tl_data_sigma);
+         
+        xframe_data.GetYaxis().SetRangeUser(1e-2,xframe_data.GetMaximum()*1.2);
+        xframe_data_fail.GetYaxis().SetRangeUser(1e-2,xframe_data_fail.GetMaximum()*1.2);
+        
+        c1 = getCanvas()
+        c1.cd()
+        xframe_data.Draw()
+        c1.SaveAs("plots/pass.png")
+        c1.cd()
+        xframe_data_fail.Draw()
+        c1.SaveAs("plots/fail.png")
+        
 # #///-------------------------------------------
 # def DrawScaleFactorTTbarControlSample(RooWorkspace* workspace, std.map<,int> color_palet, const  & label, const  & channel, const  & wtagger,const double & ca8_ungroomed_pt_min, const double & ca8_ungroomed_pt_max, const  & sample){
 #
@@ -288,7 +569,7 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
 #   combData_p_f_data.plotOn(xframe_data,rt.RooFit.Name("data_invisible"),rt.RooFit.Cut(cut.Data()),rt.RooFit.MarkerSize(1.5), rt.RooFit.DataError(rt.RooAbsData.SumW2), rt.RooFit.XErrorSize(0) )
 #
 #   #// Draw filled histograms
-#   model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("TTbar"), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["TTbar"+label]), rt.RooFit.LineColor(kBlack), rt.RooFit.VLines())
+#   model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("TTbar"), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["TTbar"+label]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())
 #   cut.Form("%s,%s,%s,%s,%s",model_histpdf_TTbar_merged.GetName(),model_histpdf_TTbar_unmerged.GetName(),model_histpdf_STop.GetName(),model_histpdf_VV.GetName(), model_histpdf_WJets.GetName())
 #   model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("TTbar_realW"),rt.RooFit.Components(cut.Data()),rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["TTbar_realW"+label]), rt.RooFit.LineColor(kBlack), rt.RooFit.VLines())
 #   cut.Form("%s,%s,%s,%s",model_histpdf_TTbar_unmerged.GetName(),model_histpdf_STop.GetName(),model_histpdf_VV.GetName(), model_histpdf_WJets.GetName())
@@ -320,17 +601,17 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
 #
 #   #// plot mc fit function
 #   cut.Form("category_p_f%s_%s==category_p_f%s_%s.pass",label,channel,label,channel)
-#   simPdf_TotalMC.plotOn(xframe_data,rt.RooFit.Name("MC fit"),rt.RooFit.Slice(*category_p_f,"pass"), rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.LineStyle(kSolid), rt.RooFit.LineColor(rt.kRed))
+#   simPdf_TotalMC.plotOn(xframe_data,rt.RooFit.Name("MC fit"),rt.RooFit.Slice(*category_p_f,"pass"), rt.RooFit.ProjWData(rt.RooArgSet(*category_p_f),*combData_p_f_TotalMC),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.LineStyle(kSolid), rt.RooFit.LineColor(rt.kRed))
 #   cut.Form("model_bkg_TotalMC_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WJets_%s_mj",channel,channel,channel,channel)
-#   simPdf_TotalMC.plotOn(xframe_data,rt.RooFit.Name("mc fit bkg_invisible"),rt.RooFit.Slice(*category_p_f,"pass"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.Components(cut.Data()), rt.RooFit.LineColor(rt.kRed), rt.RooFit.LineStyle(rt.kDashed))
+#   simPdf_TotalMC.plotOn(xframe_data,rt.RooFit.Name("mc fit bkg_invisible"),rt.RooFit.Slice(*category_p_f,"pass"),rt.RooFit.ProjWData(rt.RooArgSet(*category_p_f),*combData_p_f_TotalMC),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.Components(cut.Data()), rt.RooFit.LineColor(rt.kRed), rt.RooFit.LineStyle(rt.kDashed))
 #
 #   #// plot data fit function
 #   cut.Form("category_p_f%s_%s==category_p_f%s_%s.pass",label,channel,label,channel)
 #   combData_p_f_data.plotOn(xframe_data,rt.RooFit.Name("data_invisible"),rt.RooFit.Cut(cut.Data()),rt.RooFit.MarkerSize(1.5),rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.XErrorSize(0))
 #
-#   simPdf_data.plotOn(xframe_data,rt.RooFit.Name("Data fit"),rt.RooFit.Slice(*category_p_f,"pass"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.LineStyle(kSolid), rt.RooFit.LineColor(kBlue))
+#   simPdf_data.plotOn(xframe_data,rt.RooFit.Name("Data fit"),rt.RooFit.Slice(*category_p_f,"pass"),rt.RooFit.ProjWData(rt.RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.LineStyle(kSolid), rt.RooFit.LineColor(kBlue))
 #   cut.Form("model_bkg_data_%s_mj,model_STop_%s_mj,model_VV_%s_mj,model_WJets_%s_mj",channel,channel,channel,channel)
-#   simPdf_data.plotOn(xframe_data,rt.RooFit.Name("dat fit bkg_invisible"),rt.RooFit.Slice(*category_p_f,"pass"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.Components(cut.Data()), rt.RooFit.LineStyle(rt.kDashed), rt.RooFit.LineColor(kBlue))
+#   simPdf_data.plotOn(xframe_data,rt.RooFit.Name("dat fit bkg_invisible"),rt.RooFit.Slice(*category_p_f,"pass"),rt.RooFit.ProjWData(rt.RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.Components(cut.Data()), rt.RooFit.LineStyle(rt.kDashed), rt.RooFit.LineColor(kBlue))
 #
 #   cut.Form("category_p_f%s_%s==category_p_f%s_%s.fail",label,channel,label,channel)
 #   combData_p_f_data.plotOn(xframe_data_fail,rt.RooFit.Name("data_invisible"), rt.RooFit.Cut(cut.Data()), rt.RooFit.MarkerSize(1.5), rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.XErrorSize(0))
@@ -370,25 +651,25 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
 #
 #   cut.Form("category_p_f%s_%s==category_p_f%s_%s.fail",label,channel,label,channel)
 #   combData_p_f_data.plotOn(xframe_data_fail,rt.RooFit.Name("data_invisible"),rt.RooFit.Cut(cut.Data()),rt.RooFit.MarkerSize(1.5),rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.XErrorSize(0))
-#   simPdf_TotalMC.plotOn(xframe_data_fail,rt.RooFit.Name("MC fit")    ,rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.LineStyle(kSolid), rt.RooFit.LineColor(rt.kRed))
+#   simPdf_TotalMC.plotOn(xframe_data_fail,rt.RooFit.Name("MC fit")    ,rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(rt.RooArgSet(*category_p_f),*combData_p_f_TotalMC),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.LineStyle(kSolid), rt.RooFit.LineColor(rt.kRed))
 #   cut.Form("model_bkg_TotalMC_failtau2tau1cut_%s_mj,model_STop_failtau2tau1cut_%s_mj,model_VV_failtau2tau1cut_%s_mj,model_WJets_failtau2tau1cut_%s_mj",channel,channel,channel,channel)
-#   simPdf_TotalMC.plotOn(xframe_data_fail,rt.RooFit.Name("MC fit bkg"),rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_TotalMC),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.Components(cut.Data()), rt.RooFit.LineColor(rt.kRed), rt.RooFit.LineStyle(rt.kDashed))
+#   simPdf_TotalMC.plotOn(xframe_data_fail,rt.RooFit.Name("MC fit bkg"),rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(rt.RooArgSet(*category_p_f),*combData_p_f_TotalMC),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.Components(cut.Data()), rt.RooFit.LineColor(rt.kRed), rt.RooFit.LineStyle(rt.kDashed))
 #
 #   #//fail plots . plot data fit
 #   cut.Form("category_p_f%s_%s==category_p_f%s_%s.fail",label,channel,label,channel)
 #   combData_p_f_data.plotOn(xframe_data_fail,rt.RooFit.Name("data_invisible"),rt.RooFit.Cut(cut.Data()),rt.RooFit.MarkerSize(1.5),rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.XErrorSize(0))
 #
-#   simPdf_data.plotOn(xframe_data_fail,rt.RooFit.Name("Data fit"),rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"),rt.RooFit.LineStyle(kSolid), rt.RooFit.LineColor(kBlue))
-#   simPdf_data.plotOn(xframe_data_fail,rt.RooFit.Name("data_fit_invisible"),rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"))
+#   simPdf_data.plotOn(xframe_data_fail,rt.RooFit.Name("Data fit"),rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(rt.RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"),rt.RooFit.LineStyle(kSolid), rt.RooFit.LineColor(kBlue))
+#   simPdf_data.plotOn(xframe_data_fail,rt.RooFit.Name("data_fit_invisible"),rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(rt.RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"))
 #   cut.Form("model_bkg_data_failtau2tau1cut_%s_mj,model_STop_failtau2tau1cut_%s_mj,model_VV_failtau2tau1cut_%s_mj,model_WJets_failtau2tau1cut_%s_mj",channel,channel,channel,channel)
-#   simPdf_data.plotOn(xframe_data_fail,rt.RooFit.Name("data fit bkg"),rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.Components(cut.Data()),rt.RooFit.LineStyle(rt.kDashed), rt.RooFit.LineColor(kBlue))
+#   simPdf_data.plotOn(xframe_data_fail,rt.RooFit.Name("data fit bkg"),rt.RooFit.Slice(*category_p_f,"fail"),rt.RooFit.ProjWData(rt.RooArgSet(*category_p_f),*combData_p_f_data),rt.RooFit.NormRange("controlsample_fitting_range"), rt.RooFit.Components(cut.Data()),rt.RooFit.LineStyle(rt.kDashed), rt.RooFit.LineColor(kBlue))
 #
 #   #// #//signal window
-# #//   TLine* lowerLine = TLine(65,0.,65,xframe_data.GetMaximum()*0.7) lowerLine.SetLineWidth(2) lowerLine.SetLineColor(kBlack) lowerLine.SetLineStyle(9)
-# #//   TLine* upperLine = TLine(105,0.,105,xframe_data.GetMaximum()*0.7) upperLine.SetLineWidth(2) upperLine.SetLineColor(kBlack) upperLine.SetLineStyle(9)
+# #//   rt.TLine* lowerLine = rt.TLine(65,0.,65,xframe_data.GetMaximum()*0.7) lowerLine.SetLineWidth(2) lowerLine.SetLineColor(kBlack) lowerLine.SetLineStyle(9)
+# #//   rt.TLine* upperLine = rt.TLine(105,0.,105,xframe_data.GetMaximum()*0.7) upperLine.SetLineWidth(2) upperLine.SetLineColor(kBlack) upperLine.SetLineStyle(9)
 # #//   xframe_data.addObject(lowerLine) xframe_data.addObject(upperLine)
-# #//   lowerLine = TLine(65,0.,65,xframe_data_fail.GetMaximum()*0.7) lowerLine.SetLineWidth(2) lowerLine.SetLineColor(kBlack) lowerLine.SetLineStyle(9)
-# #//   upperLine = TLine(105,0.,105,xframe_data_fail.GetMaximum()*0.7) upperLine.SetLineWidth(2) upperLine.SetLineColor(kBlack) upperLine.SetLineStyle(9)
+# #//   lowerLine = rt.TLine(65,0.,65,xframe_data_fail.GetMaximum()*0.7) lowerLine.SetLineWidth(2) lowerLine.SetLineColor(kBlack) lowerLine.SetLineStyle(9)
+# #//   upperLine = rt.TLine(105,0.,105,xframe_data_fail.GetMaximum()*0.7) upperLine.SetLineWidth(2) upperLine.SetLineColor(kBlack) upperLine.SetLineStyle(9)
 # #//   xframe_data_fail.addObject(lowerLine) xframe_data_fail.addObject(upperLine)
 #
 #   #// TLegend* leg_data = legend4Plot(xframe_data,0,-0.2,0.07,0.04,0.,1,channel)
@@ -430,36 +711,13 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
 #   rrv_mean_gaus_TotalMC  = workspace.var(("rrv_mean1_gaus_ttbar_TotalMC"+label+"_"+tmp_channel))
 #   rrv_sigma_gaus_TotalMC = workspace.var(("rrv_sigma1_gaus_ttbar_TotalMC"+label+"_"+tmp_channel))
 #
-#   if(rrv_mean_gaus_TotalMC){
-#     TString latex  latex.Form("Mean_{MC } = %3.1f #pm %2.1f",rrv_mean_gaus_TotalMC.getVal(),rrv_mean_gaus_TotalMC.getError())
-#     TLatex* tl_MC_mean  = TLatex(0.25 ,0.62,latex.Data())
-#     latex.Form("Sigma_{MC }= %2.1f #pm %2.1f",rrv_sigma_gaus_TotalMC.getVal(),rrv_sigma_gaus_TotalMC.getError())
-#     TLatex* tl_MC_sigma = TLatex(0.25 ,0.57,latex.Data())
-#     tl_MC_mean.SetNDC() tl_MC_sigma.SetNDC()
-#     tl_MC_mean.SetTextSize(0.03)
-#     tl_MC_sigma.SetTextSize(0.03)
-#     #// xframe_data.addObject(tl_MC_mean)
-#     #// xframe_data.addObject(tl_MC_sigma)
 #
-#   }
-#   if(rrv_mean_gaus_data){
-#     TString latex  latex.Form("Mean_{data} = %3.1f #pm %2.1f",rrv_mean_gaus_data.getVal(),rrv_mean_gaus_data.getError())
-#     TLatex* tl_data_mean  = TLatex(0.25 ,0.62,latex.Data())
-#     latex.Form("Sigma_{data}= %2.1f #pm %2.1f",rrv_sigma_gaus_data.getVal(),rrv_sigma_gaus_data.getError())
-#     TLatex* tl_data_sigma = TLatex(0.25 ,0.57,latex.Data())
-#     tl_data_mean.SetNDC() tl_data_sigma.SetNDC()
-#     tl_data_mean.SetTextSize(0.03)
-#     tl_data_sigma.SetTextSize(0.03)
-#     #// xframe_data.addObject(tl_data_mean) xframe_data.addObject(tl_data_sigma)
-#   }
 #
 #   xframe_data.GetYaxis().SetRangeUser(1e-2,xframe_data.GetMaximum()*1.4)
 #   xframe_data_fail.GetYaxis().SetRangeUser(1e-2,xframe_data_fail.GetMaximum()*1.4)
 #
-#   TString nameDir  nameDir.Form("plots/TotalFit/",wtagger)
-#   TString namePlot namePlot.Form("TotalFit")
-#   draw_canvas(xframe_data,(nameDir),(namePlot),channel,GetLumi(),0,0,0)
-#   namePlot.Form("TotalFit_fail")
-#   draw_canvas(xframe_data_fail,(nameDir),(namePlot),channel,GetLumi(),0,0,0)
-#
-# }
+#   # TString nameDir  nameDir.Form("plots/TotalFit/",wtagger)
+#   # TString namePlot namePlot.Form("TotalFit")
+#   # draw_canvas(xframe_data,(nameDir),(namePlot),channel,GetLumi(),0,0,0)
+#   # namePlot.Form("TotalFit_fail")
+#   # draw_canvas(xframe_data_fail,(nameDir),(namePlot),channel,GetLumi(),0,0,0)

@@ -1,5 +1,4 @@
-# this is a comment
-drop * # start with all
+drop *
 keep HLT_Mu50
 keep FatJet_*
 keep Jet_*

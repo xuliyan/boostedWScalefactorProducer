@@ -138,12 +138,12 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
 	if model == "ErfExpGaus_sp":
 		
 		rrv_c_ErfExp     = RooRealVar("rrv_c_ErfExp"+label+"_"    +channel+spectrum,"rrv_c_ErfExp"    +label+"_"+channel+spectrum,-0.04,-0.2,0.)
-		rrv_width_ErfExp = RooRealVar("rrv_width_ErfExp"+label+"_"+channel+spectrum,"rrv_width_ErfExp"+label+"_"+channel+spectrum,30.,10,300.)
-		rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"+label+"_"  +channel+spectrum,"rrv_mean1_gaus"  +label+"_"+channel+spectrum,80,40,100)
-		rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus"+label+"_" +channel+spectrum,"rrv_sigma1_gaus" +label+"_"+channel+spectrum,7,0.,40)
+		rrv_width_ErfExp = RooRealVar("rrv_width_ErfExp"+label+"_"+channel+spectrum,"rrv_width_ErfExp"+label+"_"+channel+spectrum,30.,0.,300.)
+		rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"+label+"_"  +channel+spectrum,"rrv_mean1_gaus"  +label+"_"+channel+spectrum,80,60,100)
+		rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus"+label+"_" +channel+spectrum,"rrv_sigma1_gaus" +label+"_"+channel+spectrum,7,10.,40)
 		erfExp           = ROOT.RooErfExpPdf("erfExp"+label+"_"+channel+spectrum,"erfExp"+label+"_"+channel+spectrum,rrv_x,rrv_c_ErfExp,rrv_mean1_gaus,rrv_width_ErfExp)
 		gaus             = RooGaussian ("gaus"+label+"_"+channel+spectrum  ,"gaus"+label+"_"+channel+spectrum  , rrv_x,rrv_mean1_gaus,rrv_sigma1_gaus)
-		rrv_high   = RooRealVar("rrv_high"+label+"_"+channel+spectrum,"rrv_high"+label+"_"+channel+spectrum,0.5,0.,1.)
+		rrv_high   = RooRealVar("rrv_high"+label+"_"+channel+spectrum,"rrv_high"+label+"_"+channel+spectrum,0.3,0.0,0.8)
 		model_pdf  = RooAddPdf("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum,erfExp,gaus,rrv_high)
 
 	getattr(workspace,'import')(model_pdf)
@@ -165,6 +165,9 @@ def fixParameters(workspace,label,channel,fix=1):
 	name = "rdataset%s_%s_mj"%(label,channel)
 	rdataset_General_mj = workspace.data(name)
 	model_General = workspace.pdf("model"+label+"_"+channel+"_mj")
+	rdataset_General_mj.Print()
+	model_General.Print()
+	
 	parameters_General = model_General.getParameters(rdataset_General_mj)
 	par=parameters_General.createIterator()
 	par.Reset()
@@ -172,6 +175,7 @@ def fixParameters(workspace,label,channel,fix=1):
 	while (param):
 		param.setConstant(ROOT.kTRUE)
 		param=par.Next()
+	print "Failing for " ,"model"+label+"_"+channel+"_mj"
 	return workspace.pdf("model"+label+"_"+channel+"_mj")
 			
 def makeTTbarModel(workspace,label, model,channel, wtagger, constraint=[], spectrum="_mj"):

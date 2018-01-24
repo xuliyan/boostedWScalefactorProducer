@@ -8,7 +8,6 @@ from xsec import getXsec
 class selectionProducer(Module):
     def __init__(self, jetSelection):
         self.jetSel = jetSelection
-        pass
     def beginJob(self):
         pass
     def endJob(self):
@@ -36,29 +35,16 @@ class selectionProducer(Module):
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         pass
     def analyze(self, event):
-        """process event, return True (go to next module) or False (fail, go to next event)"""
+        isMC = event.run == 1
         electrons = Collection(event, "Electron")
         muons = Collection(event, "Muon")
-        gens = Collection(event, "GenPart")
         jets = list(Collection(event, "Jet"))
         fatjets = list(Collection(event, "FatJet"))
         met = Object(event, "MET")
         triggerMu = Object(event, "HLT_Mu50")
         triggerEl = Object(event, "HLT_Ele115_CaloIdVT_GsfTrkIdT")
-        
-        daus =  [x for x in gens if x.pt>1 and 0<abs(x.pdgId)<9]
-        moms =  [x for x in gens if x.pt>10 and abs(x.pdgId)==24]
-        
-        realVs = []
-        if len(moms)>0 and len(daus)>0:
-        	for dau in daus:
-        		for mom in moms:
-        			try:
-        				if mom == moms[dau.genPartIdxMother]: realVs.append(mom)	
-        			except:
-        				continue	
         	
-        
+			
 		# Fat jet selection
         wFatJets =  [x for x in fatjets if x.pt>200 and abs(x.eta)<2.5]
         if len(wFatJets) < 1 : return False
@@ -67,9 +53,7 @@ class selectionProducer(Module):
 		# Medium b-tag
         passedjets = [x for x in jets if x.jetId>0 and x.pt>35 and abs(x.eta)<2.5 and x.btagCMVA> 0.89]
         if len(passedjets) < 1 : return False
-        
-        Vtype = -1
-        
+
 		#lepton selection
         wElectrons = [x for x in electrons if x.cutBased_HEEP and x.pt > 35 ]	 #loose pt cut for veto 
         wMuons = [x for x in muons if x.pt > 20 and x.highPtId >= 1 ]   			 #loose pt cut for veto
@@ -77,7 +61,7 @@ class selectionProducer(Module):
         wElectrons.sort(key=lambda x:x.pt,reverse=True)
         
         # for j in filter(self.jetSel,fatjets):
-        
+        Vtype = -1
         vLeptons = [] # decay products of V
         if len(wElectrons) + len(wMuons) == 1:
             if len(wMuons) == 1:
@@ -100,13 +84,27 @@ class selectionProducer(Module):
         dR_jetlep = jet_4v.DeltaR(vLepton_4vec)
         
         if dR_jetlep < 1.0: return False
-        
+		
+		
         isW = 0
-        for V in realVs:
-        	gen_4v = ROOT.TLorentzVector()
-        	gen_4v.SetPtEtaPhiM(V.pt,V.eta,V.phi,80.)
-        	dR = jet_4v.DeltaR(gen_4v)
-        	if dR < 0.8: isW = 1
+        if isMC:
+			gens = Collection(event, "GenPart")
+			daus =  [x for x in gens if x.pt>1 and 0<abs(x.pdgId)<9]
+			moms =  [x for x in gens if x.pt>10 and abs(x.pdgId)==24]
+        
+			realVs = []
+			if len(moms)>0 and len(daus)>0:
+				for dau in daus:
+					for mom in moms:
+						try:
+							if mom == moms[dau.genPartIdxMother]: realVs.append(mom)	
+						except:
+							continue
+			for V in realVs:
+				gen_4v = ROOT.TLorentzVector()
+				gen_4v.SetPtEtaPhiM(V.pt,V.eta,V.phi,80.)
+				dR = jet_4v.DeltaR(gen_4v)
+				if dR < 0.8: isW = 1
         	
         
         met_4v  = ROOT.TLorentzVector()

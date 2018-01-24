@@ -104,7 +104,7 @@ def drawFrameGetChi2(variable,fitResult,dataset,pdfModel,isData):
     if frame.findObject("ErfExp comp."):
       legend.AddEntry(frame.findObject("ErfExp comp."),frame.findObject("ErfExp comp.").GetName(),"l")
     legend.Draw("same")
-    CMS_lumi.CMS_lumi(c1, iPeriod, iPos)
+    CMS_lumi(c1, iPeriod, iPos)
     addInfo = getPavetext()
     addInfo.AddText("#chi^{2}/nDOF = %.3f"%chi2)
     addInfo.Draw()
