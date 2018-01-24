@@ -9,7 +9,7 @@ from  selectionModule import *
 if len(sys.argv)>1:
 	 infile = sys.argv[1]
 else:
-	infile = "root://cms-xrd-global.cern.ch/store/user/thaarres/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/TTTuneCUETP8M2T413TeV-powheg-pythia8RunIISummer16MiniAODv2-PUMoriond1780XmcRun2asymptotic/180116_083632/0000/test80X_NANO_99.root"
+	infile = "root://cms-xrd-global.cern.ch//store/user/thaarres/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/TTTuneCUETP8M2T413TeV-powheg-pythia8RunIISummer16MiniAODv2-PUMoriond1780XmcRun2asymptotic/180116_083632/0000/test80X_NANO_99.root"
 if len(sys.argv)>2:
 	 outputDir = sys.argv[2]
 else:
