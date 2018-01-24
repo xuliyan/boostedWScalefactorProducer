@@ -1,6 +1,11 @@
 
-### How to run the W-tagging scalefactor code ###
+### W-tagging scalefactor producer ###
 #########################################
+
+Repository for fitting W-tagging scalefactors in a semi-leptonic ttbar enriched region. Contains code to skim nanoAOD samples using a semi-leptonic ttbar selection (WTopScalefactorProducer/Skimmer). This output is then used to fit data and MC and extract W-tagging scalefactors (WTopScalefactorProducer/Fitter) both from fitting the AK8 W-jet mass at low-pT (around 200 GeV) and fitting the top AK8 W-subjet mass (around 400 GeV). The calculated scalefactors are then statistically combined and fitted, yielding a parametrisation for the W-tagging pT-dependence.
+
+WTopScalefactorProducer/Skimmer : Start here. Produce samples.
+WTopScalefactorProducer/Fitter  : Based on output from above, run script mainBLABLA.sh to compute fully- and partially-merged W-tagging scalfactors as well as statistically combining the two
 
 ## installation instructions
 Setup CMSSW and get nanoAOD packages
@@ -42,17 +47,6 @@ cd ..
 
 ```
 
-
-
-### Producing samples
-
-First you need to produce your input files by skimming nanoAOD samples. For this, see README in subdirectory Skimmer/.
-The syntax is: python process_nanoAOD.py <infile> <outdir> <outtreename>. To submit with crab go to Skimmer/crab
-```
-cd Skimmer/
-python process_nanoAOD.py
-```
-
 ### Working locally (without CMSSW, just python2.7 and ROOT)
 ```
 cd PhysicsTools/NanoAODTools/
@@ -62,7 +56,18 @@ bash standalone/env_standalone.sh build
 source standalone/env_standalone.sh
 ```
 
+
+### Producing samples
+
+First you need to produce your input files by skimming nanoAOD samples. For this, see README in subdirectory Skimmer/.
+The syntax is: python process_nanoAOD.py <infile> <outdir> <outtreename>. To submit with crab go to Skimmer/crab
+
+```
+cd Skimmer/
+python process_nanoAOD.py
+```
+
 ### Running scalefactor code
 
-When you have skimmed your samples you can move to fitting the W-tagging scalefactor. The fitting code is located in Fitter/. For scalefactors from merged W AK8 jet, see README in Fitter/partiallyMerged. For scalefactors from merged top AK8 jet, see README in Fitter/fullyMerged
+When you have skimmed your samples you can move to fitting the W-tagging scalefactor. The fitting code is located in Fitter/, see README in that directory. For scalefactors from merged W AK8 jet, use Fitter/partiallyMerged. For scalefactors from merged top AK8 jet, use Fitter/fullyMerged
 
