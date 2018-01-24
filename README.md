@@ -10,7 +10,6 @@ cd CMSSW_9_4_2/src
 cmsenv
 
 git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
-ln -s $CMSSW_BASE/src/PhysicsTools/NanoAODTools/scripts/haddnano.py .
 
 scram build
 
@@ -42,7 +41,8 @@ cd WTopScalefactorProducer
 
 See README in subdirectory skim_nanoAOD/
 ```
-cd skim_nanoAOD/
+cd Skimmer/
+ln -s $CMSSW_BASE/src/PhysicsTools/NanoAODTools/scripts/haddnano.py .
 python process_nanoAOD.py
 ```
 
