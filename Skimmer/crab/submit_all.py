@@ -15,7 +15,7 @@ def getOptions() :
     usage = ('usage: python submit_all.py -c CONFIG -d DIR -f DATASETS_FILE')
 
     parser = OptionParser(usage=usage)    
-    parser.add_option("-c", "--config", dest="cfg", default="crab_script.py",
+    parser.add_option("-c", "--config", dest="cfg", default="test94X_NANO.py",
         help=("The crab script you want to submit "),
         metavar="CONFIG")
     parser.add_option("-d", "--dir", dest="dir", default="NANO",
@@ -24,7 +24,7 @@ def getOptions() :
     parser.add_option("-f", "--datasets", dest="datasets",
         help=("File listing datasets to run over"),
         metavar="FILE")
-    parser.add_option("-s", "--storageSite", dest="storageSite", default="T3_CH_PSI",
+    parser.add_option("-s", "--storageSite", dest="storageSite", default="T3_US_FNALLPC",
         help=("Site"),
         metavar="SITE")
     parser.add_option("-l", "--lumiMask", dest="lumiMask",
@@ -58,16 +58,16 @@ def main():
 
     config.section_("JobType")
     config.JobType.pluginName = 'Analysis'
-    #config.JobType.psetName = options.cfg
+    config.JobType.psetName = options.cfg
     
     config.section_("Data")
     config.Data.inputDataset = None
     config.Data.splitting = ''
     #config.Data.unitsPerJob = 1
-    config.Data.ignoreLocality = False
+    #config.Data.ignoreLocality = False
     #config.Data.publication = True
         
-    #config.Data.publishDBS = 'phys03'
+    config.Data.publishDBS = 'phys03'
    
     config.section_("Site")
     config.Site.storageSite = options.storageSite
@@ -85,17 +85,6 @@ def main():
     #############################################################################################
     ## From now on that's what users should modify: this is the a-la-CRAB2 configuration part. ##
     #############################################################################################
-
-
-    #Taken from example here                                                       
-    #https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_submit_fails_with_Block_con                                                                    
-
-    # this will use CRAB client API                                                
-    from CRABAPI.RawCommand import crabCommand
-
-    # talk to DBS to get list of files in this dataset                             
-    from dbs.apis.dbsClient import DbsApi
-    dbs = DbsApi('https://cmsweb.cern.ch/dbs/prod/phys03/DBSReader')
 
     datasetsFile = open( options.datasets )
     jobsLines = datasetsFile.readlines()
@@ -117,23 +106,24 @@ def main():
         print 'requestname = ', requestname
         config.General.requestName = requestname
         config.Data.outputDatasetTag = requestname
+        
+      
         if datatier == 'USER':
 
-          config.JobType.psetName = 'PSet.py'
-          print options.cfg[0:-2]+'sh'
-          config.JobType.scriptExe = options.cfg[0:-2]+'sh'
-          config.JobType.inputFiles = [options.cfg ,'haddnano.py'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
+          config.JobType.scriptExe = 'crab_script_SFs.sh' 
+          config.JobType.inputFiles = [options.cfg ,'crab_script_SFs.sh', 'crab_script_SFs.py' ,'../scripts/haddnano.py', 'Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
           config.JobType.sendPythonFolder  = True
-          fileDictList = dbs.listFiles(dataset=job) 
-          print ("dataset %s has %d files" % (job, len(fileDictList)))
-          # DBS client returns a list of dictionaries, but we want a list of Logical File Names                   
-          lfnList = [ dic['logical_file_name'] for dic in fileDictList ]
-          # following 3 lines are the trick to skip DBS data lookup in CRAB Server                                               
-          config.Data.userInputFiles = lfnList
+    
+          config.Data.inputDataset = job
+          config.Data.inputDBS = 'phys03'
           config.Data.splitting = 'FileBased'
           config.Data.unitsPerJob = 1          
-          config.Data.publication =  False
-          config.Site.whitelist = [options.storageSite]          
+          #config.Data.splitting = 'EventAwareLumiBased'# 'FileBased'                                                                                                          
+          #config.Data.unitsPerJob = 100 
+          #config.Data.totalUnits = 2000
+         
+          config.Data.publication =  True #False
+        
         if 'MINIAOD' in datatier :
           onfig.JobType.psetName = options.cfg
           config.Data.inputDataset = job
