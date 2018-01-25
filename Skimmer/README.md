@@ -51,6 +51,10 @@ The syntax is: python process_nanoAOD.py <infile> <outdir> <outtreename>. To sub
 cd Skimmer/
 python process_nanoAOD.py
 ```
+If you want to use CRAB3 to make your samples:
+```
+python submit_all.py -c Pset_nanoSkim.py -d DirectoryName -f listOfDatasets.txt
+```  
 
 ### Working locally (without CMSSW, just python2.7 and ROOT)
 ```
