@@ -55,7 +55,7 @@ class TTbar_SemiLep(Module):
         # HEEP + iso pt > 35 remove ecal crack region eta < 1.44, 1.56 < eta < 2.5
         #
 
-        self.minLepWPt = 200.
+        self.minLepWPt = 150.
 
         self.minJetPt = 200.
         self.maxJetEta = 2.5
@@ -247,13 +247,12 @@ class TTbar_SemiLep(Module):
             #        mindRObs = tempdR
             #        genbHad.SetPtEtaPhiM( bcand.p4().Perp(), bcand.p4().Eta() , bcand.p4().Phi() , bcand.p4().M()  )
 
-            ''' If METgen_eta info is missing we cannot use gen MET for leptonic W selection
             
             METgen_phi = event.GenMET_phi
-            METgen_eta = event.GenMET_eta 
+
             METgen = ROOT.TLorentzVector()
 
-            METgen.SetPtEtaPhiM(METgen_pt[0],METgen_eta[0],METgen_phi[0], 0.0  )
+            METgen.SetPtEtaPhiM(METgen_pt,0.0,METgen_phi, 0.0  )
             WLep = genleptons[0].p4() + METgen
             if WLep.Perp() < self.minLepWPt * 0.9 :
                 return False
@@ -263,7 +262,7 @@ class TTbar_SemiLep(Module):
                 print 'Gen W Leptonic:'
                 print self.printP4( WLep )
 
-            ''' 
+    
 
             ###### Get list of gen jets #######
             # List of gen jets:
@@ -272,14 +271,15 @@ class TTbar_SemiLep(Module):
                 print '-----'
                 print 'all genjets:'
                 self.printCollection( allgenjets )
-            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.8 and abs( x.p4().Eta()) < self.maxJetEta ] #and x.p4().DeltaPhi( WbosonLep ) > self.minDPhiWJet     ]
-            # List of gen subjets (no direct link from Genjet):
-            gensubjets = list(Collection(event, "SubGenJetAK8"))
-            # Dictionary to hold ungroomed-->groomed for gen
-            genjetsGroomed = {}
-            # Get the groomed gen jets
-            maxSubjetMass = 1.
+            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.8 and abs( x.p4().Eta()) < self.maxJetEta]
 
+            # List of gen subjets (no direct link from Genjet):
+            #gensubjets = list(Collection(event, "SubGenJetAK8"))
+            # Dictionary to hold ungroomed-->groomed for gen
+            #genjetsGroomed = {}
+            # Get the groomed gen jets
+            #maxSubjetMass = 1.
+            '''
             WHad = ROOT.TLorentzVector()
             
             for igen,gen in enumerate(genjets):
@@ -303,7 +303,7 @@ class TTbar_SemiLep(Module):
                     sdmassgen = genjetsGroomed[genjet].M() if genjet in genjetsGroomed else -1.0
                     print '         : %s %6.2f' % ( self.printP4(genjet), sdmassgen )            
             
-
+            ''' 
             
         ###### Get reco Top/W candidate #######
         # List of reco muons
@@ -354,7 +354,9 @@ class TTbar_SemiLep(Module):
 
         allrecoAK4jets = list(Collection(event, "Jet")) # are these AK4s ? 
         recojetsAK4 = [ x for x in allrecoAK4jets if x.p4().Perp() > self.minAK4Pt and abs(x.p4().Eta()) < self.maxJetEta]
-
+        if len(recojetsAK4) < 1:
+            return False
+        '''
         mindRObs = 5.0
         bHadreco = ROOT.TLorentzVector()
         for ibcand, bcand in enumerate(recojetsAK4 ) :
@@ -362,7 +364,7 @@ class TTbar_SemiLep(Module):
             if  tempdR < mindRObs :
                 mindRObs = tempdR
                 bHadreco.SetPtEtaPhiM( bcand.p4().Perp(), bcand.p4().Eta() , bcand.p4().Phi() , bcand.p4().M()  )
-
+        '''
 
 
         #Topcandreco =  WcandLep +  bHadreco
@@ -403,33 +405,33 @@ class TTbar_SemiLep(Module):
     
         # List of reco subjets:
         recosubjets = list(Collection(event,"SubJet"))
-        # Dictionary to hold reco--> gen matching
-        recoToGen = matchObjectCollection( recojets, genjets, dRmax=0.05 )
         # Dictionary to hold ungroomed-->groomed for reco
         recojetsGroomed = {}        
         # Get the groomed reco jets
         maxrecoSJmass = 1.
         WHadreco = ROOT.TLorentzVector()
         for ireco,reco in enumerate(recojets):
+            if reco.subJetIdx2 >= len(recosubjets) or reco.subJetIdx1 >= len(recosubjets) :
+                if self.verbose: print "Reco subjet indices not in Subjet list, Skipping"
+                continue
             if reco.subJetIdx1 >= 0 and reco.subJetIdx2 >= 0 :
                 recojetsGroomed[reco] = recosubjets[reco.subJetIdx1].p4() + recosubjets[reco.subJetIdx2].p4()
                 if recosubjets[reco.subJetIdx1].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() >  recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
                     WHadreco = recosubjets[reco.subJetIdx1].p4()
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
-
                         self.SJ0isW = 1
                 if recosubjets[reco.subJetIdx2].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() < recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
                     WHadreco = recosubjets[reco.subJetIdx2].p4()
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
                         self.SJ0isW = 0
-
-                for q in realqs:
-                    gen_4v = ROOT.TLorentzVector()
-                    gen_4v.SetPtEtaPhiM(q.pt,q.eta,q.phi,q.mass)
-                    dR = WHadreco.DeltaR(gen_4v)
-                    if dR < 0.6: self.matchedSJ = 1  
+                if isMC :
+                    for q in realqs:
+                        gen_4v = ROOT.TLorentzVector()
+                        gen_4v.SetPtEtaPhiM(q.pt,q.eta,q.phi,q.mass)
+                        dR = WHadreco.DeltaR(gen_4v)
+                        if dR < 0.6 and self.isttbar : self.matchedSJ = 1  
             elif reco.subJetIdx1 >= 0 :
                 recojetsGroomed[reco] = recosubjets[reco.subJetIdx1].p4()
                 maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
@@ -441,48 +443,13 @@ class TTbar_SemiLep(Module):
 
         if self.verbose:
             print '----'
-            print 'opposite-Z recojets:'
+            print ' recojets opposite the lepton  (Top/W candidates) :'
             for recojet in recojets:
                 sdmassreco = recojetsGroomed[recojet].M() if recojet in recojetsGroomed and recojetsGroomed[recojet] != None else -1.0
                 print '         : %s %6.2f' % ( self.printP4( recojet),  sdmassreco )            
-
-                
-        # Loop over the reco,gen pairs.
-        # Check if there are reco and gen SD jets
-
-        for reco,gen in recoToGen.iteritems():
-            recoSD = recojetsGroomed[reco]
-            if reco == None :
-                continue
-            #if recoSD != None :
-            #    # Fill the groomed det if available
-
-            # Now check ungroomed gen
-            genSDVal = None
-            if gen != None:
-                if self.isttbar :
-                    self.matchedSJ = 1
-
-                genSD = genjetsGroomed[gen]
-                if recoSD != None and genSD != None:
-                    genSDVal = genSD.M()
-                                        
-                    if self.verbose : 
-                        print ' reco: %s %8.4f, gen : %s %8.4f ' % (
-                            self.printP4(reco), recoSD.M(), 
-                            self.printP4(gen), genSD.M()
-                            )
-
-            elif  self.isttbar :
-                # Here we have a groomed det, but no groomed gen
-                if genSDVal == None and recoSD != None :
-
-                    self.matchedSJ = 0
-
-
-
-        self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)
-        self.out.fillBranch("genmatchedAK8",  self.isW)
+        if isMC :
+            self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)
+            self.out.fillBranch("genmatchedAK8",  self.isW)
         self.out.fillBranch("AK8Subjet0isMoreMassive", self.SJ0isW )
         
 
