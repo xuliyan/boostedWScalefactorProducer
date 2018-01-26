@@ -5,7 +5,8 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import *
 #this takes care of converting the input files from CRAB
 from PhysicsTools.NanoAODTools.postprocessing.framework.crabhelper import inputFiles,runsAndLumis
 
-from  TTbar_SemiLep import *
+
+from PhysicsTools.NanoAODTools.WTopScalefactorProducer.Skimmer.TTbar_SemiLep import *
 
 # NOTE : This file is configured to Process MC.
 # If you want to process Data then ADD "jsonInput='Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'"

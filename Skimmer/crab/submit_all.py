@@ -111,7 +111,7 @@ def main():
         if datatier == 'USER':
 
           config.JobType.scriptExe = 'crab_script_SFs.sh' 
-          config.JobType.inputFiles = [options.cfg ,'crab_script_SFs.sh', 'crab_script_SFs.py' ,'../scripts/haddnano.py', '../Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
+          config.JobType.inputFiles = [options.cfg ,'crab_script_SFs.sh', 'crab_script_SFs.py' ,'../../../scripts/haddnano.py', '../Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
           config.JobType.sendPythonFolder  = True
     
           config.Data.inputDataset = job
