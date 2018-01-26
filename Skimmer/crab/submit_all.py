@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 """
 This is a small script that submits a config over many datasets
@@ -64,14 +65,18 @@ def main():
     config.Data.inputDataset = None
     config.Data.splitting = ''
     #config.Data.unitsPerJob = 1
-    #config.Data.ignoreLocality = False
+    config.Data.ignoreLocality = True
+    # Note on ignoring locality :
+    # If running on Sal or Ashley's Nano datasets you can set this to False
+    # and comment out the whitelist below
+
     #config.Data.publication = True
         
     config.Data.publishDBS = 'phys03'
    
     config.section_("Site")
     config.Site.storageSite = options.storageSite
-
+    config.Site.whitelist = ['T2_CH_*']
     print 'Using config ' + options.cfg
     print 'Writing to directory ' + options.dir
     
@@ -111,7 +116,7 @@ def main():
         if datatier == 'USER':
 
           config.JobType.scriptExe = 'crab_script_SFs.sh' 
-          config.JobType.inputFiles = [options.cfg ,'crab_script_SFs.sh', 'crab_script_SFs.py' ,'../../../scripts/haddnano.py', '../Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
+          config.JobType.inputFiles = [options.cfg ,'crab_script_SFs.sh', 'crab_script_SFs.py' ,'../../../../scripts/haddnano.py', '../Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
           config.JobType.sendPythonFolder  = True
     
           config.Data.inputDataset = job
