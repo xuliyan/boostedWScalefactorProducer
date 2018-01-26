@@ -30,6 +30,7 @@ git checkout -b TTbarResHad remotes/sal/TTbarResHad
 ### getting the code
 
 ```
+cd python/
 git clone -b nanoAOD git@github.com:BoostedScalefactors/WTopScalefactorProducer.git
 cd WTopScalefactorProducer
 
