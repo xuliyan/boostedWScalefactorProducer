@@ -4,7 +4,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection,Object
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.tools import *
-from xsec import getXsec
+
 
 import random
 import array
@@ -115,17 +115,16 @@ class TTbar_SemiLep_fullyMerged(Module):
         # MET Pt > 40(mu) or 80(el) GeV
         #Leptonic W - lepton + MET has Pt > 150 GeV # did not apply this since we are missing MET eta
 
-        self.out.branch("xsec",  "F")
-        self.out.branch("genmatchedAK8Subjet",  "F")
-        self.out.branch("AK8Subjet0isMoreMassive",  "F")
-        self.out.branch("genmatchedAK8",  "F")
+       
+        
+        
+        self.out.branch("WHadreco_pt"   ,  "F")
+        self.out.branch("WHadreco_eta"  ,  "F")
+        self.out.branch("WHadreco_phi"  ,  "F")
+        self.out.branch("WHadreco_mass" ,  "F")
+        self.out.branch("WHadreco_tau21" ,  "F")
 
-        xsec = getXsec(inputFile.GetName())
-        print inputFile.GetName()
-        print xsec
-        self.out.fillBranch("xsec",xsec)
-
-
+        '''
         self.addObject( ROOT.TH1D('h_lep0pt',          'h_lep0pt',        40, 0, 200 ) )
         self.addObject( ROOT.TH1D('h_lep0eta',         'h_lep0eta',      48, -3, 3 ) )
         self.addObject( ROOT.TH1D('h_lep0phi',         'h_lep0phi',      100, -5, 5 ) )
@@ -144,8 +143,9 @@ class TTbar_SemiLep_fullyMerged(Module):
         self.addObject( ROOT.TH1D('h_WcandSubjeteta',         'h_WcandSubjeteta',      48, -3, 3 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjetphi',         'h_WcandSubjetphi',      100, -5, 5 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjetmass',        'h_WcandSubjetmass',      100, 50, 150 ) )
-
+        '''
         self.addObject( ROOT.TH1D('h_WcandSubjetpt_ptbin0',          'h_WcandSubjetpt_ptbin0',        100, 0, 500 ) )
+        '''   
         self.addObject( ROOT.TH1D('h_WcandSubjeteta_ptbin0',         'h_WcandSubjeteta_ptbin0',      48, -3, 3 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjetphi_ptbin0',         'h_WcandSubjetphi_ptbin0',      100, -5, 5 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjetmass_ptbin0',        'h_WcandSubjetmass_ptbin0',      100, 50, 150 ) )
@@ -196,10 +196,8 @@ class TTbar_SemiLep_fullyMerged(Module):
             self.addObject( ROOT.TH1D('h_unmatchedAK8Subjeteta',         'h_unmatchedAK8Subjeteta',      48, -3, 3 ) )
             self.addObject( ROOT.TH1D('h_unmatchedAK8Subjetphi',         'h_unmatchedAK8Subjetphi',      100, -5, 5 ) )
             self.addObject( ROOT.TH1D('h_unmatchedAK8Subjetmass',        'h_unmatchedAK8jetmass',      300, 0, 300 ) )
+        '''
 
-
-
-        pass
 
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         pass
@@ -236,6 +234,7 @@ class TTbar_SemiLep_fullyMerged(Module):
             ### a W decays to quarks (Type 1 - partially merged)
             ###    OR
             ### a Top decays to W + b (Type 2 - fully merged top quark)
+            '''
             gens = Collection(event, "GenPart")
             Wdaus =  [x for x in gens if x.pt>1 and 0<abs(x.pdgId)<9]
             Wmoms =  [x for x in gens if x.pt>10 and abs(x.pdgId)==24]
@@ -272,7 +271,7 @@ class TTbar_SemiLep_fullyMerged(Module):
                             except:
                                 continue  
 
-
+            '''
             ###### Get gen Top candidate #######
             genleptons = Collection(event, "GenDressedLepton")
 
@@ -441,18 +440,15 @@ class TTbar_SemiLep_fullyMerged(Module):
         mindRObs = 5.0
         bHadreco = ROOT.TLorentzVector()
         for ibcand, bcand in enumerate(recojetsAK4 ) :
-            tempdR = bcand.p4().DeltaR(genleptons[0].p4())
-            if  tempdR < mindRObs :
+            tempdR = bcand.p4().DeltaR(lepton)
+            ptrel = (bcand.p4() - lepton).Perp()
+            #print ptrel
+            if  tempdR < mindRObs and tempdR >  self.mindRlepAK4 and abs(ptrel) > self.minPtRel_lepAK4:
                 mindRObs = tempdR
-                bHadreco.SetPtEtaPhiM( bcand.p4().Perp(), bcand.p4().Eta() , bcand.p4().Phi() , bcand.p4().M()  )
-
-
-
-        #Topcandreco =  WcandLep +  bHadreco
-
-        #if self.verbose:
-        #    print '-----'
-        #    print ' reco Top Leptonic:', self.printP4( Topcandreco)
+                bHadreco.SetPtEtaPhiM( bcand.p4().Perp(), bcand.p4().Eta() , bcand.p4().Phi() , bcand.p4().M())  
+        if self.verbose and bHadreco.Perp() > self.minAK4Pt :
+            print '-----'
+            print ' reco b candidate AK4:', self.printP4( bHadreco )
         
         ###### Get list of reco jets #######
         # List of reco jets:
@@ -462,13 +458,6 @@ class TTbar_SemiLep_fullyMerged(Module):
             print 'all recojets:'
             self.printCollection( allrecojets )
 
-
-        self.minJetPt = 350.
-        self.maxJetEta = 2.4
-        self.minTopmass = 105.
-        self.maxTopmass = 250.
-        self.maxtau32Top = 0.7
-
         recojets = [ x for x in allrecojets if x.p4().Perp() > self.minJetPt and  abs(x.p4().Eta()) < self.maxJetEta  and x.p4().M() > self.minTopmass  and  x.p4().M() < self.maxTopmass]
         if len(recojets) < 1 : return False
         recojets.sort(key=lambda x:x.pt,reverse=True)
@@ -476,7 +465,9 @@ class TTbar_SemiLep_fullyMerged(Module):
         if recojets[0].tau2 > 0.0001 :
             Topcandtau32 = recojets[0].tau3 /recojets[0].tau2
         else :
-            
+            return False
+
+        if Topcandtau32 > self.maxtau32Top:
             return False
 
         jet_4v = ROOT.TLorentzVector()
@@ -490,13 +481,6 @@ class TTbar_SemiLep_fullyMerged(Module):
         if isMC == False:
             genjets = [None] * len(recojets)
 
-        else :
-                
-            for V in realVs:
-                gen_4v = ROOT.TLorentzVector()
-                gen_4v.SetPtEtaPhiM(V.pt,V.eta,V.phi,80.)
-                dR = jet_4v.DeltaR(gen_4v)
-                if dR < 0.8: self.isW = 1
     
         # List of reco subjets:
         recosubjets = list(Collection(event,"SubJet"))
@@ -507,6 +491,7 @@ class TTbar_SemiLep_fullyMerged(Module):
         # Get the groomed reco jets
         maxrecoSJmass = 1.
         WHadreco = ROOT.TLorentzVector()
+        WHadrecoTau21 = 5.
         for ireco,reco in enumerate(recojets):
             if reco.subJetIdx1 >= 0 and reco.subJetIdx2 >= 0 :
                 if reco.subJetIdx2 >= len(recosubjets): 
@@ -516,23 +501,24 @@ class TTbar_SemiLep_fullyMerged(Module):
                 if recosubjets[reco.subJetIdx1].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() >  recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
                     WHadreco = recosubjets[reco.subJetIdx1].p4()
+                    if recosubjets[reco.subJetIdx1].tau1 > 0.0001 :
+                        WHadrecoTau21 = recosubjets[reco.subJetIdx1].tau2 / recosubjets[reco.subJetIdx1].tau1
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
                         self.SJ0isW = 1
                 if recosubjets[reco.subJetIdx2].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() < recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
                     WHadreco = recosubjets[reco.subJetIdx2].p4()
+                    if recosubjets[reco.subJetIdx2].tau1 > 0.0001 :
+                        WHadrecoTau21 = recosubjets[reco.subJetIdx2].tau2 / recosubjets[reco.subJetIdx2].tau1
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
                         self.SJ0isW = 0
 
-                for q in realqs:
-                    gen_4v = ROOT.TLorentzVector()
-                    gen_4v.SetPtEtaPhiM(q.pt,q.eta,q.phi,q.mass)
-                    dR = WHadreco.DeltaR(gen_4v)
-                    if dR < 0.6 and self.isttbar : self.matchedSJ = 1  
             elif reco.subJetIdx1 >= 0 :
                 recojetsGroomed[reco] = recosubjets[reco.subJetIdx1].p4()
                 maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
                 WHadreco = recosubjets[reco.subJetIdx1].p4()     
+                if recosubjets[reco.subJetIdx1].tau1 > 0.0001 :
+                    WHadrecoTau21 = recosubjets[reco.subJetIdx1].tau2 / recosubjets[reco.subJetIdx1].tau1
 
             else :
                 recojetsGroomed[reco] = None
@@ -544,14 +530,19 @@ class TTbar_SemiLep_fullyMerged(Module):
             for recojet in recojets:
                 sdmassreco = recojetsGroomed[recojet].M() if recojet in recojetsGroomed and recojetsGroomed[recojet] != None else -1.0
                 print '         : %s %6.2f' % ( self.printP4( recojet),  sdmassreco )            
-
-        self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)
-        self.out.fillBranch("genmatchedAK8",  self.isW)
-        self.out.fillBranch("AK8Subjet0isMoreMassive", self.SJ0isW )
+        if self.SJ0isW >= 0 and WHadreco != None and WHadreco.Perp() > 200. :
+            self.out.fillBranch("WHadreco_pt", WHadreco.Perp())
+            self.out.fillBranch("WHadreco_eta", WHadreco.Eta())
+            self.out.fillBranch("WHadreco_phi", WHadreco.Phi())
+            self.out.fillBranch("WHadreco_mass", WHadreco.M())
+            self.out.fillBranch("WHadreco_tau21", WHadrecoTau21)
+        #self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)  
+        #self.out.fillBranch("AK8Subjet0isMoreMassive", self.SJ0isW )
         
-
+        if WHadreco.Perp() > 200. and WHadreco.Perp() < 300. :
+            self.h_WcandSubjetpt_ptbin0.Fill(WHadreco.Perp())
 
         return True
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
 
-ttbar_semilep = lambda : TTbar_SemiLep_fullyMerged() 
+ttbar_semilep = lambda : TTbar_SemiLep_fullyMerged( ) 
