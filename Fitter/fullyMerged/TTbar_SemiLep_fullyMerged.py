@@ -144,7 +144,7 @@ class TTbar_SemiLep_fullyMerged(Module):
         self.addObject( ROOT.TH1D('h_WcandSubjetphi',         'h_WcandSubjetphi',      100, -5, 5 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjetmass',        'h_WcandSubjetmass',      100, 50, 150 ) )
         '''
-        self.addObject( ROOT.TH1D('h_WcandSubjetpt_ptbin0',          'h_WcandSubjetpt_ptbin0',        100, 0, 500 ) )
+        #self.addObject( ROOT.TH1D('h_WcandSubjetpt_ptbin0',          'h_WcandSubjetpt_ptbin0',        100, 0, 500 ) )
         '''   
         self.addObject( ROOT.TH1D('h_WcandSubjeteta_ptbin0',         'h_WcandSubjeteta_ptbin0',      48, -3, 3 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjetphi_ptbin0',         'h_WcandSubjetphi_ptbin0',      100, -5, 5 ) )
@@ -226,7 +226,7 @@ class TTbar_SemiLep_fullyMerged(Module):
         isMC = event.run == 1
         if self.verbose:
             print '------------------------ ', event.event
-
+        '''
         if isMC:
 
             ### Look at generator level particles
@@ -234,7 +234,7 @@ class TTbar_SemiLep_fullyMerged(Module):
             ### a W decays to quarks (Type 1 - partially merged)
             ###    OR
             ### a Top decays to W + b (Type 2 - fully merged top quark)
-            '''
+           
             gens = Collection(event, "GenPart")
             Wdaus =  [x for x in gens if x.pt>1 and 0<abs(x.pdgId)<9]
             Wmoms =  [x for x in gens if x.pt>10 and abs(x.pdgId)==24]
@@ -271,7 +271,7 @@ class TTbar_SemiLep_fullyMerged(Module):
                             except:
                                 continue  
 
-            '''
+           
             ###### Get gen Top candidate #######
             genleptons = Collection(event, "GenDressedLepton")
 
@@ -361,7 +361,7 @@ class TTbar_SemiLep_fullyMerged(Module):
             #genjetsGroomed = {}
             # Get the groomed gen jets
             #maxSubjetMass = 1.
-            '''
+           
             WHad = ROOT.TLorentzVector()
             
             for igen,gen in enumerate(genjets):
@@ -385,8 +385,8 @@ class TTbar_SemiLep_fullyMerged(Module):
                     sdmassgen = genjetsGroomed[genjet].M() if genjet in genjetsGroomed else -1.0
                     print '         : %s %6.2f' % ( self.printP4(genjet), sdmassgen )            
             
-            ''' 
             
+        '''    
         ###### Get reco Top/W candidate #######
         # List of reco muons
         allmuons = Collection(event, "Muon")
@@ -436,7 +436,7 @@ class TTbar_SemiLep_fullyMerged(Module):
 
         allrecoAK4jets = list(Collection(event, "Jet")) # are these AK4s ? 
         recojetsAK4 = [ x for x in allrecoAK4jets if x.p4().Perp() > self.minAK4Pt and abs(x.p4().Eta()) < self.maxJetEta]
-
+        if len(recojetsAK4) < 1:  return False
         mindRObs = 5.0
         bHadreco = ROOT.TLorentzVector()
         for ibcand, bcand in enumerate(recojetsAK4 ) :
@@ -485,23 +485,48 @@ class TTbar_SemiLep_fullyMerged(Module):
         # List of reco subjets:
         recosubjets = list(Collection(event,"SubJet"))
         # Dictionary to hold reco--> gen matching
-        recoToGen = matchObjectCollection( recojets, genjets, dRmax=0.05 )
+        #recoToGen = matchObjectCollection( recojets, genjets, dRmax=0.05 )
         # Dictionary to hold ungroomed-->groomed for reco
         recojetsGroomed = {}        
         # Get the groomed reco jets
         maxrecoSJmass = 1.
         WHadreco = ROOT.TLorentzVector()
-        WHadrecoTau21 = 5.
+        WHadrecoTau21 = -1.
+        '''
+        In reco jet loop 
+1
+0
+<FatJet[0]>
+1
+0
+-1.0
+        '''
+ 
         for ireco,reco in enumerate(recojets):
+            print "In reco jet loop "
+            print len(recojets)
+            print ireco
+            print reco
+            print reco.subJetIdx2
+            print reco.subJetIdx1
+            print recosubjets[reco.subJetIdx1].tau2 
+            print recosubjets[reco.subJetIdx1].tau1
+            print "tau21 "
+            if recosubjets[reco.subJetIdx1].tau1 > 0.00001 : print recosubjets[reco.subJetIdx1].tau2/recosubjets[reco.subJetIdx1].tau1
+            if reco.subJetIdx2 >= len(recosubjets) or reco.subJetIdx1 >= len(recosubjets) :
+                if self.verbose: print "Reco subjet indices not in Subjet list, Skipping"
+                continue
             if reco.subJetIdx1 >= 0 and reco.subJetIdx2 >= 0 :
-                if reco.subJetIdx2 >= len(recosubjets): 
-                    if self.verbose: print "Reco subjet indices not in Subjet list, Skipping"    
-                    continue                
+              
                 recojetsGroomed[reco] = recosubjets[reco.subJetIdx1].p4() + recosubjets[reco.subJetIdx2].p4()
                 if recosubjets[reco.subJetIdx1].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() >  recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
                     WHadreco = recosubjets[reco.subJetIdx1].p4()
                     if recosubjets[reco.subJetIdx1].tau1 > 0.0001 :
+                        print tau2
+                        print recosubjets[reco.subJetIdx1].tau2 
+                        print tau1
+                        print recosubjets[reco.subJetIdx1].tau1
                         WHadrecoTau21 = recosubjets[reco.subJetIdx1].tau2 / recosubjets[reco.subJetIdx1].tau1
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
                         self.SJ0isW = 1
@@ -535,13 +560,13 @@ class TTbar_SemiLep_fullyMerged(Module):
             self.out.fillBranch("WHadreco_eta", WHadreco.Eta())
             self.out.fillBranch("WHadreco_phi", WHadreco.Phi())
             self.out.fillBranch("WHadreco_mass", WHadreco.M())
+            print " W subjet tau21  %2.2f "%(WHadrecoTau21)
             self.out.fillBranch("WHadreco_tau21", WHadrecoTau21)
         #self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)  
         #self.out.fillBranch("AK8Subjet0isMoreMassive", self.SJ0isW )
         
-        if WHadreco.Perp() > 200. and WHadreco.Perp() < 300. :
-            self.h_WcandSubjetpt_ptbin0.Fill(WHadreco.Perp())
-
+        #if WHadreco.Perp() > 200. and WHadreco.Perp() < 300. :  #self.WcandPtBins
+        #    self.h_WcandSubjetpt_ptbin0.Fill(WHadreco.Perp())
         return True
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
 
