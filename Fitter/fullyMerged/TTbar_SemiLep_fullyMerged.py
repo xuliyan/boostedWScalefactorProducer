@@ -72,6 +72,7 @@ class TTbar_SemiLep_fullyMerged(Module):
         self.minAK4Pt = 50.
 
         ### 2-D cut ###
+        ### dR OR PtRel ###
         self.mindRlepAK4 = 0.4
         self.minPtRel_lepAK4 = 30.
 
@@ -124,28 +125,28 @@ class TTbar_SemiLep_fullyMerged(Module):
         self.out.branch("WHadreco_mass" ,  "F")
         self.out.branch("WHadreco_tau21" ,  "F")
 
-        '''
+        
         self.addObject( ROOT.TH1D('h_lep0pt',          'h_lep0pt',        40, 0, 200 ) )
         self.addObject( ROOT.TH1D('h_lep0eta',         'h_lep0eta',      48, -3, 3 ) )
         self.addObject( ROOT.TH1D('h_lep0phi',         'h_lep0phi',      100, -5, 5 ) )
- 
+
         self.addObject( ROOT.TH1D('h_hadToppt',          'h_hadToppt',        100, 0, 500 ) )
         self.addObject( ROOT.TH1D('h_hadTopeta',         'h_hadTopeta',      48, -3, 3 ) )
         self.addObject( ROOT.TH1D('h_hadTopphi',         'h_hadTopphi',      100, -5, 5 ) )
         self.addObject( ROOT.TH1D('h_hadTopmass',        'h_hadTopmass',      60, 140, 200 ) )
-
+        '''
         self.addObject( ROOT.TH1D('h_lepToppt',          'h_lepToppt',        100, 0, 500 ) )
         self.addObject( ROOT.TH1D('h_lepTopeta',         'h_lepTopeta',      48, -3, 3 ) )
         self.addObject( ROOT.TH1D('h_lepTopphi',         'h_lepTopphi',      100, -5, 5 ) )
         self.addObject( ROOT.TH1D('h_lepTopmass',        'h_lepTopmass',      60, 140, 200 ) )
-
+        '''
         self.addObject( ROOT.TH1D('h_WcandSubjetpt',          'h_WcandSubjetpt',        100, 0, 500 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjeteta',         'h_WcandSubjeteta',      48, -3, 3 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjetphi',         'h_WcandSubjetphi',      100, -5, 5 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjetmass',        'h_WcandSubjetmass',      100, 50, 150 ) )
-        '''
-        #self.addObject( ROOT.TH1D('h_WcandSubjetpt_ptbin0',          'h_WcandSubjetpt_ptbin0',        100, 0, 500 ) )
-        '''   
+        
+        self.addObject( ROOT.TH1D('h_WcandSubjetpt_ptbin0',          'h_WcandSubjetpt_ptbin0',        100, 0, 500 ) )
+       
         self.addObject( ROOT.TH1D('h_WcandSubjeteta_ptbin0',         'h_WcandSubjeteta_ptbin0',      48, -3, 3 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjetphi_ptbin0',         'h_WcandSubjetphi_ptbin0',      100, -5, 5 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjetmass_ptbin0',        'h_WcandSubjetmass_ptbin0',      100, 50, 150 ) )
@@ -159,7 +160,14 @@ class TTbar_SemiLep_fullyMerged(Module):
         self.addObject( ROOT.TH1D('h_WcandSubjeteta_ptbin2',         'h_WcandSubjeteta_ptbin2',      48, -3, 3 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjetphi_ptbin2',         'h_WcandSubjetphi_ptbin2',      100, -5, 5 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjetmass_ptbin2',        'h_WcandSubjetmass_ptbin2',      100, 50, 150 ) )
+   
 
+        self.WcandSubjetpt = [self.h_WcandSubjetpt_ptbin0, self.h_WcandSubjetpt_ptbin1, self.h_WcandSubjetpt_ptbin2 ]
+        self.WcandSubjeteta = [self.h_WcandSubjeteta_ptbin0, self.h_WcandSubjeteta_ptbin1, self.h_WcandSubjeteta_ptbin2 ]
+        self.WcandSubjetphi = [self.h_WcandSubjetphi_ptbin0, self.h_WcandSubjetphi_ptbin1, self.h_WcandSubjetphi_ptbin2 ]
+        self.WcandSubjetmass = [self.h_WcandSubjetmass_ptbin0, self.h_WcandSubjetmass_ptbin1, self.h_WcandSubjetmass_ptbin2 ]
+
+        '''
         self.addObject( ROOT.TH1D('h_WcandSubjetpt_Tptbin0',          'h_WcandSubjetpt_Tptbin0',        100, 0, 500 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjeteta_Tptbin0',         'h_WcandSubjeteta_Tptbin0',      48, -3, 3 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjetphi_Tptbin0',         'h_WcandSubjetphi_Tptbin0',      100, -5, 5 ) )
@@ -175,16 +183,18 @@ class TTbar_SemiLep_fullyMerged(Module):
         self.addObject( ROOT.TH1D('h_WcandSubjetphi_Tptbin2',         'h_WcandSubjetphi_Tptbin2',      100, -5, 5 ) )
         self.addObject( ROOT.TH1D('h_WcandSubjetmass_Tptbin2',        'h_WcandSubjetmass_Tptbin2',      100, 50, 150 ) )
 
+        self.addObject( ROOT.TH1D('h_genjetpt',          'h_genjetpt',   100, 0, 500 ) )
+        self.addObject( ROOT.TH1D('h_genjeteta',         'h_genjeteta',      48, -3, 3 ) )
+        self.addObject( ROOT.TH1D('h_genjetphi',         'h_genjetphi',      100, -5, 5 ) )
+        self.addObject( ROOT.TH1D('h_genjetmass',        'h_genjetmass',      300, 0, 300 ) )
+        '''
+
         self.addObject( ROOT.TH1D('h_Wleppt',          'h_Wleppt',        100, 0, 500 ) )
         self.addObject( ROOT.TH1D('h_Wlepeta',         'h_Wlepeta',      48, -3, 3 ) )
         self.addObject( ROOT.TH1D('h_Wlepphi',         'h_Wlepphi',      100, -5, 5 ) )
         self.addObject( ROOT.TH1D('h_Wlepmass',        'h_Wlepmass',      100, 50, 150 ) )
 
 
-        self.addObject( ROOT.TH1D('h_genjetpt',          'h_genjetpt',   100, 0, 500 ) )
-        self.addObject( ROOT.TH1D('h_genjeteta',         'h_genjeteta',      48, -3, 3 ) )
-        self.addObject( ROOT.TH1D('h_genjetphi',         'h_genjetphi',      100, -5, 5 ) )
-        self.addObject( ROOT.TH1D('h_genjetmass',        'h_genjetmass',      300, 0, 300 ) )
 
         if self.isttbar :
             self.addObject( ROOT.TH1D('h_matchedAK8Subjetpt',          'h_matchedAK8Subjetpt',      100, 0, 500 ) )
@@ -196,7 +206,7 @@ class TTbar_SemiLep_fullyMerged(Module):
             self.addObject( ROOT.TH1D('h_unmatchedAK8Subjeteta',         'h_unmatchedAK8Subjeteta',      48, -3, 3 ) )
             self.addObject( ROOT.TH1D('h_unmatchedAK8Subjetphi',         'h_unmatchedAK8Subjetphi',      100, -5, 5 ) )
             self.addObject( ROOT.TH1D('h_unmatchedAK8Subjetmass',        'h_unmatchedAK8jetmass',      300, 0, 300 ) )
-        '''
+
 
 
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
@@ -226,167 +236,7 @@ class TTbar_SemiLep_fullyMerged(Module):
         isMC = event.run == 1
         if self.verbose:
             print '------------------------ ', event.event
-        '''
-        if isMC:
 
-            ### Look at generator level particles
-            ### find events where :
-            ### a W decays to quarks (Type 1 - partially merged)
-            ###    OR
-            ### a Top decays to W + b (Type 2 - fully merged top quark)
-           
-            gens = Collection(event, "GenPart")
-            Wdaus =  [x for x in gens if x.pt>1 and 0<abs(x.pdgId)<9]
-            Wmoms =  [x for x in gens if x.pt>10 and abs(x.pdgId)==24]
-
-            TWdaus =  [x for x in gens if x.pt>1 and  0<abs(x.pdgId)<4]
-            Tdaus =  [x for x in gens if x.pt>1 and (abs(x.pdgId)==5  or  abs(x.pdgId)==24 )]
-            Tmoms =  [x for x in gens if x.pt>10 and abs(x.pdgId)==6]
-                    
-            realVs = []
-
-            realTs = []
-            realWs = []
-            realqs = []
-            self.matchedJ = 0
-            self.matchedSJ = 0
-
-            if len(Wmoms)>0 and len(Wdaus)>0:
-                for dau in Wdaus:
-                    for mom in Wmoms:
-                        try:
-                            if mom == Wmoms[dau.genPartIdxMother]: realVs.append(mom)    
-                        except:
-                            continue    
-
-            if len(Tmoms)>0 and len(Tdaus)>0:
-                for gdau in TWdaus :
-                    for dau in Tdaus:
-                        for mom in Tmoms:
-                            try:
-                                if mom == Tmoms[dau.genPartIdxMother] and dau == Tdaus[gdau.genPartIdxMother]: 
-                                    realTs.append(mom)
-                                    realWs.append(dau)
-                                    realqs.append(gdau)    
-                            except:
-                                continue  
-
-           
-            ###### Get gen Top candidate #######
-            genleptons = Collection(event, "GenDressedLepton")
-
-            if len(genleptons) < 1 :
-                return False
-            if abs(genleptons[0].pdgId) != 13 and abs(genleptons[0].pdgId)!= 12 :
-                return False
-            ########################
-
-            ### Gen Selection
-            ########################
-
-            ### We want the AK4 nearest the lepton
-            ### This is the b candidate
-            ### check b disc in tagging script
-
-
-            genAK4s = Collection(event, "GenJet")    
-            genAK4jets = [ x for x in genAK4s if x.p4().Perp() > self.minAK4Pt * 0.8 and abs(x.p4().Eta()) < self.maxJetEta ]
-            
-
-            METgen_pt = event.GenMET_pt
-
-           
-            ### Gen Electron
-            ### Pick the high Pt (self.minElpt * 0.8), low eta, HEEPv7 Electrons    
-            if abs(genleptons[0].pdgId) == 12 :
-                if genleptons[0].p4().Perp() < self.minElpt * 0.8 :
-                    return False
-                if abs(genleptons[0].p4().Eta()) < 1.44 or (abs(genleptons[0].p4().Eta()) > 1.56 and  abs(genleptons[0].p4().Eta()) < 2.5  ) :
-                    return False 
-                if METgen_pt < self.minElMETPt :
-                    return False
-            ### Gen Muons  
-            ### Pick high pt, low eta muons       
-            if abs(genleptons[0].pdgId) == 13 :
-                if genleptons[0].p4().Perp() < self.minMupt * 0.8 :
-                    return False
-                if abs(genleptons[0].p4().Eta())  > self.maxMuEta :
-                    return False 
-                if METgen_pt < self.minMuMETPt :
-                    return False
-            if self.verbose :
-                print '----'
-                print 'Gen leptons:'
-                self.printCollection( genleptons )
-
-
-            # we want the ak4 closest to the lepton
-            #mindRObs = 5.0
-            #genbHad = ROOT.TLorentzVector()
-            #for ibcand, bcand in enumerate(genAK4jets) :
-            #    tempdR = bcand.p4().DeltaR(genleptons[0].p4())
-            #    if  tempdR < mindRObs :
-            #        mindRObs = tempdR
-            #        genbHad.SetPtEtaPhiM( bcand.p4().Perp(), bcand.p4().Eta() , bcand.p4().Phi() , bcand.p4().M()  )
-
-            
-            METgen_phi = event.GenMET_phi
-
-            METgen = ROOT.TLorentzVector()
-
-            METgen.SetPtEtaPhiM(METgen_pt,0.0,METgen_phi, 0.0  )
-            WLep = genleptons[0].p4() + METgen
-            if WLep.Perp() < self.minLepWPt * 0.9 :
-                return False
-
-            if self.verbose:
-                print '-----'
-                print 'Gen W Leptonic:'
-                print self.printP4( WLep )
-
-    
-
-            ###### Get list of gen jets #######
-            # List of gen jets:
-            allgenjets = list(Collection(event, "GenJetAK8"))
-            if self.verbose:
-                print '-----'
-                print 'all genjets:'
-                self.printCollection( allgenjets )
-            genjets = [ x for x in allgenjets if x.p4().Perp() > self.minJetPt * 0.8 and abs( x.p4().Eta()) < self.maxJetEta]
-
-            # List of gen subjets (no direct link from Genjet):
-            #gensubjets = list(Collection(event, "SubGenJetAK8"))
-            # Dictionary to hold ungroomed-->groomed for gen
-            #genjetsGroomed = {}
-            # Get the groomed gen jets
-            #maxSubjetMass = 1.
-           
-            WHad = ROOT.TLorentzVector()
-            
-            for igen,gen in enumerate(genjets):
-                hasBtagSJ = None
-                gensubjetsMatched = self.getSubjets( p4=gen.p4(),subjets=gensubjets, dRmax=0.8)
-                for isub,sub in enumerate(gensubjetsMatched) : 
-                    #if sub.btagCSVV2 > self.minBDisc :
-                    #    hasBtagSJ = True
-                    ### Note : will need to check for a b-tagged subjet in post selection
-                    if sub.M() > maxSubjetMass : # and hasBtagSJ :
-                        maxSubjetMass = sub.M() 
-                        WHad.SetPtEtaPhiM(sub.Perp(),sub.Eta(),sub.Phi(),sub.M())
-                        
-
-                genjetsGroomed[gen] = sum( gensubjetsMatched, ROOT.TLorentzVector() ) if len(gensubjetsMatched) > 0   else None
-                
-            if self.verbose:
-                print '----'
-                print 'opposite-LepW genjets:'
-                for genjet in genjets:
-                    sdmassgen = genjetsGroomed[genjet].M() if genjet in genjetsGroomed else -1.0
-                    print '         : %s %6.2f' % ( self.printP4(genjet), sdmassgen )            
-            
-            
-        '''    
         ###### Get reco Top/W candidate #######
         # List of reco muons
         allmuons = Collection(event, "Muon")
@@ -443,7 +293,7 @@ class TTbar_SemiLep_fullyMerged(Module):
             tempdR = bcand.p4().DeltaR(lepton)
             ptrel = (bcand.p4() - lepton).Perp()
             #print ptrel
-            if  tempdR < mindRObs and tempdR >  self.mindRlepAK4 and abs(ptrel) > self.minPtRel_lepAK4:
+            if  tempdR < mindRObs and (tempdR >  self.mindRlepAK4 or abs(ptrel) > self.minPtRel_lepAK4 ):
                 mindRObs = tempdR
                 bHadreco.SetPtEtaPhiM( bcand.p4().Perp(), bcand.p4().Eta() , bcand.p4().Phi() , bcand.p4().M())  
         if self.verbose and bHadreco.Perp() > self.minAK4Pt :
@@ -461,23 +311,9 @@ class TTbar_SemiLep_fullyMerged(Module):
         recojets = [ x for x in allrecojets if x.p4().Perp() > self.minJetPt and  abs(x.p4().Eta()) < self.maxJetEta  and x.p4().M() > self.minTopmass  and  x.p4().M() < self.maxTopmass]
         if len(recojets) < 1 : return False
         recojets.sort(key=lambda x:x.pt,reverse=True)
-        Topcandtau32 = 5.
-        if recojets[0].tau2 > 0.0001 :
-            Topcandtau32 = recojets[0].tau3 /recojets[0].tau2
-        else :
-            return False
 
-        if Topcandtau32 > self.maxtau32Top:
-            return False
 
-        jet_4v = ROOT.TLorentzVector()
-        jet_4v.SetPtEtaPhiM(recojets[0].pt,recojets[0].eta,recojets[0].phi,recojets[0].mass)
-        dR_jetlep = jet_4v.DeltaR(lepton )
         
-        if dR_jetlep < self.mindRLepJet : return False
-
-        self.isW = 0
-        self.SJ0isW = -1
         if isMC == False:
             genjets = [None] * len(recojets)
 
@@ -492,39 +328,54 @@ class TTbar_SemiLep_fullyMerged(Module):
         maxrecoSJmass = 1.
         WHadreco = ROOT.TLorentzVector()
         WHadrecoTau21 = -1.
+        TopHadreco = ROOT.TLorentzVector()
+        TopHadrecoTau32 = -1.
+        self.SJ0isW = -1
 
- 
+
+
         for ireco,reco in enumerate(recojets):
+            ## Check that this jet is top tagged
+            ## Top mass window was already required
+            ## Check Nsubjettiness
+            if reco.tau3 > 0.00001 :
+                TopHadrecoTau32 = reco.tau3/reco.tau2
+            if  TopHadrecoTau32 > self.maxtau32Top : continue
+            ## Check that leptons are well seperated from the Fat Jet
+            if reco.p4().DeltaR(lepton)  < self.mindRLepJet : continue
+
             if reco.subJetIdx2 >= len(recosubjets) or reco.subJetIdx1 >= len(recosubjets) :
                 if self.verbose: print "Reco subjet indices not in Subjet list, Skipping"
                 continue
             if reco.subJetIdx1 >= 0 and reco.subJetIdx2 >= 0 :
+              
                 recojetsGroomed[reco] = recosubjets[reco.subJetIdx1].p4() + recosubjets[reco.subJetIdx2].p4()
                 if recosubjets[reco.subJetIdx1].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() >  recosubjets[reco.subJetIdx2].p4().M() :
-                    maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
-                    WHadreco = recosubjets[reco.subJetIdx1].p4()
-                    if recosubjets[reco.subJetIdx1].tau1 > 0.0001 :
-                        WHadrecoTau21 = recosubjets[reco.subJetIdx1].tau2 / recosubjets[reco.subJetIdx1].tau1
+                    ### Check that one of the subjets is Btagged
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
-                        self.SJ0isW = 1
+                        if recosubjets[reco.subJetIdx1].tau1 > 0.0001 :
+                            WHadrecoTau21 = recosubjets[reco.subJetIdx1].tau2 / recosubjets[reco.subJetIdx1].tau1
+                            self.SJ0isW = 1
+                            WHadreco = recosubjets[reco.subJetIdx1].p4()
+                            TopHadreco = reco.p4()
+                            break
+
                 if recosubjets[reco.subJetIdx2].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() < recosubjets[reco.subJetIdx2].p4().M() :
-                    maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
-                    WHadreco = recosubjets[reco.subJetIdx2].p4()
-                    if recosubjets[reco.subJetIdx2].tau1 > 0.0001 :
-                        WHadrecoTau21 = recosubjets[reco.subJetIdx2].tau2 / recosubjets[reco.subJetIdx2].tau1
+                    ### Check that one of the subjets is Btagged
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
-                        self.SJ0isW = 0
-
-            elif reco.subJetIdx1 >= 0 :
-                recojetsGroomed[reco] = recosubjets[reco.subJetIdx1].p4()
-                maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
-                WHadreco = recosubjets[reco.subJetIdx1].p4()     
-                if recosubjets[reco.subJetIdx1].tau1 > 0.0001 :
-                    WHadrecoTau21 = recosubjets[reco.subJetIdx1].tau2 / recosubjets[reco.subJetIdx1].tau1
-
+                        if recosubjets[reco.subJetIdx2].tau1 > 0.0001 :
+                            WHadrecoTau21 = recosubjets[reco.subJetIdx2].tau2 / recosubjets[reco.subJetIdx2].tau1
+                            self.SJ0isW = 0
+                            WHadreco = recosubjets[reco.subJetIdx2].p4()
+                            TopHadreco = reco.p4()
+                            break
             else :
+                
                 recojetsGroomed[reco] = None
                 WHadreco = None
+                
+
+
 
         if self.verbose:
             print '----'
@@ -541,9 +392,51 @@ class TTbar_SemiLep_fullyMerged(Module):
             self.out.fillBranch("WHadreco_tau21", WHadrecoTau21)
         #self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)  
         #self.out.fillBranch("AK8Subjet0isMoreMassive", self.SJ0isW )
-        
-        #if WHadreco.Perp() > 200. and WHadreco.Perp() < 300. :  #self.WcandPtBins
-        #    self.h_WcandSubjetpt_ptbin0.Fill(WHadreco.Perp())
+        if WHadreco.Perp() > self.WcandPtBins[0][0] and event.genmatchedAK8Subjet >= 0 :
+            self.h_WcandSubjetpt.Fill(WHadreco.Perp())
+            self.h_WcandSubjeteta.Fill(WHadreco.Eta())
+            self.h_WcandSubjetphi.Fill(WHadreco.Phi())
+            self.h_WcandSubjetmass.Fill(WHadreco.M())
+
+            self.h_lep0pt.Fill(lepton.Perp())
+            self.h_lep0eta.Fill(lepton.Eta())
+            self.h_lep0phi.Fill(lepton.Phi())
+
+            self.h_Wleppt.Fill(WcandLep.Perp())
+            self.h_Wlepeta.Fill(WcandLep.Eta())
+            self.h_Wlepphi.Fill(WcandLep.Phi())
+            self.h_Wlepmass.Fill(WcandLep.M())
+
+            self.h_hadToppt.Fill(TopHadreco.Perp())
+            self.h_hadTopeta.Fill(TopHadreco.Eta())
+            self.h_hadTopphi.Fill(TopHadreco.Phi())
+            self.h_hadTopmass.Fill(TopHadreco.M())
+
+            if event.genmatchedAK8Subjet > 0 :
+                self.h_matchedAK8Subjetpt.Fill(WHadreco.Perp())
+                self.h_matchedAK8Subjeteta.Fill(WHadreco.Eta())
+                self.h_matchedAK8Subjetphi.Fill(WHadreco.Phi())
+                self.h_matchedAK8Subjetmass.Fill(WHadreco.M())
+            if event.genmatchedAK8Subjet ==0 :
+                self.h_unmatchedAK8Subjetpt.Fill(WHadreco.Perp())
+                self.h_unmatchedAK8Subjeteta.Fill(WHadreco.Eta())
+                self.h_unmatchedAK8Subjetphi.Fill(WHadreco.Phi())
+                self.h_unmatchedAK8Subjetmass.Fill(WHadreco.M())
+
+        for ib, binhist in enumerate(self.WcandPtBins) :
+
+            if WHadreco.Perp() > binhist[0] and WHadreco.Perp() < binhist[1] : 
+                self.WcandSubjetpt[ib].Fill(WHadreco.Perp())
+                self.WcandSubjeteta[ib].Fill(WHadreco.Eta())
+                self.WcandSubjetphi[ib].Fill(WHadreco.Phi())
+                self.WcandSubjetmass[ib].Fill(WHadreco.M())
+
+            else : 
+                self.WcandSubjetpt[ib].Fill(-1.)
+                self.WcandSubjeteta[ib].Fill(-1.)
+                self.WcandSubjetphi[ib].Fill(-1.)
+                self.WcandSubjetmass[ib].Fill(-1.)        
+
         return True
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
 
