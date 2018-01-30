@@ -4,7 +4,7 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 from importlib import import_module
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
-from  TTbar_SemiLep import *
+from PhysicsTools.NanoAODTools.WTopScalefactorProducer.Skimmer.TTbar_SemiLep import *
 if len(sys.argv)>1:
      infileis = sys.argv[1]
 else:
