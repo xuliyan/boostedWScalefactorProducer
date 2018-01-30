@@ -492,41 +492,18 @@ class TTbar_SemiLep_fullyMerged(Module):
         maxrecoSJmass = 1.
         WHadreco = ROOT.TLorentzVector()
         WHadrecoTau21 = -1.
-        '''
-        In reco jet loop 
-1
-0
-<FatJet[0]>
-1
-0
--1.0
-        '''
+
  
         for ireco,reco in enumerate(recojets):
-            print "In reco jet loop "
-            print len(recojets)
-            print ireco
-            print reco
-            print reco.subJetIdx2
-            print reco.subJetIdx1
-            print recosubjets[reco.subJetIdx1].tau2 
-            print recosubjets[reco.subJetIdx1].tau1
-            print "tau21 "
-            if recosubjets[reco.subJetIdx1].tau1 > 0.00001 : print recosubjets[reco.subJetIdx1].tau2/recosubjets[reco.subJetIdx1].tau1
             if reco.subJetIdx2 >= len(recosubjets) or reco.subJetIdx1 >= len(recosubjets) :
                 if self.verbose: print "Reco subjet indices not in Subjet list, Skipping"
                 continue
             if reco.subJetIdx1 >= 0 and reco.subJetIdx2 >= 0 :
-              
                 recojetsGroomed[reco] = recosubjets[reco.subJetIdx1].p4() + recosubjets[reco.subJetIdx2].p4()
                 if recosubjets[reco.subJetIdx1].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() >  recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
                     WHadreco = recosubjets[reco.subJetIdx1].p4()
                     if recosubjets[reco.subJetIdx1].tau1 > 0.0001 :
-                        print tau2
-                        print recosubjets[reco.subJetIdx1].tau2 
-                        print tau1
-                        print recosubjets[reco.subJetIdx1].tau1
                         WHadrecoTau21 = recosubjets[reco.subJetIdx1].tau2 / recosubjets[reco.subJetIdx1].tau1
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
                         self.SJ0isW = 1
