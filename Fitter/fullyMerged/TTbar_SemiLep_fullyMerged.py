@@ -27,7 +27,7 @@ class TTbar_SemiLep_fullyMerged(Module):
         self.TopcandPtBins = [[200,300], [300,400], [400,500],[500, -1]]
         # e.g. h_WcandSubjetpt_Tptbin0 is a 1D histogram for W candidate subjets (most massive SD subjet) within Top candidates of pt 200-300 GeV  
 
-        self.WcandPtBins = [[200,300], [300-500], [500, -1]]
+        self.WcandPtBins = [[200,300], [300,500], [500, float("inf") ] ]
         # e.g. h_WcandSubjetpt_ptbin0 1D histogram is for W candidate subjets (most massive SD subjet) with pt 200-300 GeV   
 
         self.minMupt = 53.
@@ -424,7 +424,8 @@ class TTbar_SemiLep_fullyMerged(Module):
                 self.h_unmatchedAK8Subjetmass.Fill(WHadreco.M())
 
         for ib, binhist in enumerate(self.WcandPtBins) :
-
+            print ib
+            print binhist
             if WHadreco.Perp() > binhist[0] and WHadreco.Perp() < binhist[1] : 
                 self.WcandSubjetpt[ib].Fill(WHadreco.Perp())
                 self.WcandSubjeteta[ib].Fill(WHadreco.Eta())
