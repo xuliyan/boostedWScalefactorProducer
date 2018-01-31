@@ -25,7 +25,7 @@ def getOptions() :
     parser.add_option("-f", "--datasets", dest="datasets",
         help=("File listing datasets to run over"),
         metavar="FILE")
-    parser.add_option("-s", "--storageSite", dest="storageSite", default="T3_US_FNALLPC",
+    parser.add_option("-s", "--storageSite", dest="storageSite", default="T3_CH_PSI",
         help=("Site"),
         metavar="SITE")
     parser.add_option("-l", "--lumiMask", dest="lumiMask",
@@ -76,7 +76,7 @@ def main():
    
     config.section_("Site")
     config.Site.storageSite = options.storageSite
-    config.Site.whitelist = ['T2_CH_*']
+    config.Site.whitelist = ['T2_CH_*','T3_US_FNALLPC']
     print 'Using config ' + options.cfg
     print 'Writing to directory ' + options.dir
     
@@ -106,7 +106,7 @@ def main():
         ptbin = job.split('/')[1]
         cond = job.split('/')[2]
         datatier = job.split('/')[3]
-        requestname = ptbin + '_' + cond
+        requestname = 'skim_'+ptbin + '_' + cond
         if len(requestname) > 100: requestname = ''.join((requestname[:100-len(requestname)]).split('_')[:-1])
         print 'requestname = ', requestname
         config.General.requestName = requestname
@@ -116,7 +116,7 @@ def main():
         if datatier == 'USER':
 
           config.JobType.scriptExe = 'crab_script_SFs.sh' 
-          config.JobType.inputFiles = [options.cfg ,'crab_script_SFs.sh', 'crab_script_SFs.py' ,'../../../../scripts/haddnano.py', '../Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
+          config.JobType.inputFiles = [options.cfg ,'crab_script_SFs.sh', 'crab_script_SFs.py' ,'../haddnano.py', 'Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON.txt'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
           config.JobType.sendPythonFolder  = True
     
           config.Data.inputDataset = job
