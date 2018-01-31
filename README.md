@@ -27,7 +27,7 @@ git checkout -b TTbarResHad remotes/sal/TTbarResHad
 
 ```
 
-### getting the code
+## getting the code
 
 ```
 cd python/
@@ -45,10 +45,11 @@ git fetch originalRemote
 cd Skimmer/
 ln -s $CMSSW_BASE/src/PhysicsTools/NanoAODTools/scripts/haddnano.py .
 cd ..
+scram b -j18
 
 ```
 
-### Working locally (without CMSSW, just python2.7 and ROOT)
+## Working locally (without CMSSW, just python2.7 and ROOT)
 ```
 cd PhysicsTools/NanoAODTools/
 (JUST ONCE:)
@@ -58,17 +59,12 @@ source standalone/env_standalone.sh
 ```
 
 
-### Producing samples
+## Step 1: Producing samples
 
 First you need to produce your input files by skimming nanoAOD samples. For this, see README in subdirectory Skimmer/.
-The syntax is: python process_nanoAOD.py <infile> <outdir> <outtreename>. To submit with crab go to Skimmer/crab
 
-```
-cd Skimmer/
-python process_nanoAOD.py
-```
 
-### Running scalefactor code
+## Step 2: Running scalefactor code
 
 When you have skimmed your samples you can move to fitting the W-tagging scalefactor. The fitting code is located in Fitter/, see README in that directory. For scalefactors from merged W AK8 jet, use Fitter/partiallyMerged. For scalefactors from merged top AK8 jet, use Fitter/fullyMerged
 
