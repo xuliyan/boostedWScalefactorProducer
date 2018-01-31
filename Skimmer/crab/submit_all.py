@@ -25,7 +25,7 @@ def getOptions() :
     parser.add_option("-f", "--datasets", dest="datasets",
         help=("File listing datasets to run over"),
         metavar="FILE")
-    parser.add_option("-s", "--storageSite", dest="storageSite", default="T3_CH_PSI",
+    parser.add_option("-s", "--storageSite", dest="storageSite", default="T3_US_FNALLPC",
         help=("Site"),
         metavar="SITE")
     parser.add_option("-l", "--lumiMask", dest="lumiMask",
@@ -76,7 +76,7 @@ def main():
    
     config.section_("Site")
     config.Site.storageSite = options.storageSite
-    config.Site.whitelist = ['T2_CH_*','T3_US_FNALLPC']
+    config.Site.whitelist = ['T2_CH_*']
     print 'Using config ' + options.cfg
     print 'Writing to directory ' + options.dir
     
@@ -116,7 +116,7 @@ def main():
         if datatier == 'USER':
 
           config.JobType.scriptExe = 'crab_script_SFs.sh' 
-          config.JobType.inputFiles = [options.cfg ,'crab_script_SFs.sh', 'crab_script_SFs.py' ,'../haddnano.py', 'Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON.txt'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
+          config.JobType.inputFiles = [options.cfg ,'crab_script_SFs.sh', 'crab_script_SFs.py' ,'../haddnano.py', '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PromptReco/Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON.txt'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
           config.JobType.sendPythonFolder  = True
     
           config.Data.inputDataset = job

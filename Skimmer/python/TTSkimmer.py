@@ -4,7 +4,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection,Object
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.tools import *
-from xsec import getXsec
+from WTopScalefactorProducer.Skimmer.xsec import getXsec
 
 import random
 import array
@@ -80,6 +80,7 @@ class TTbar_SemiLep(Module):
          self.out.branch("dphi_MetJet",  "F")
          self.out.branch("dphi_WJet"  ,  "F")
          self.out.branch("FatJet_softDrop_mass",  "F")
+         self.out.branch("FatJet_tau32",  "F")
          self.out.branch("FatJet_tau21",  "F")
          self.out.branch("FatJet_tau21_ddt",  "F")
          self.out.branch("FatJet_tau21_ddt_retune",  "F")
@@ -177,8 +178,10 @@ class TTbar_SemiLep(Module):
         triggerMu = Object(event, "HLT_Mu50")
         triggerEl = Object(event, "HLT_Ele115_CaloIdVT_GsfTrkIdT")
         
-        electrons = [x for x in allelectrons if x.cutBased_HEEP and x.pt > 35 ]	 #loose pt cut for veto 
-        muons     = [x for x in allmuons if x.pt > 20 and x.highPtId >= 1 ]   			 #loose pt cut for veto
+        
+        
+        electrons = [x for x in allelectrons if x.cutBased_HEEP and x.pt > 35  and ( abs(x.p4().Eta()) < 1.44 or (abs(x.p4().Eta()) > 1.56 and  abs(x.p4().Eta()) < 2.5 )) ]	 #loose pt cut for veto 
+        muons     = [x for x in allmuons if x.pt > 20 and x.highPtId >= 1 and abs(x.p4().Eta()) < self.maxMuEta] #loose pt cut for veto
         muons    .sort(key=lambda x:x.pt,reverse=True)
         electrons.sort(key=lambda x:x.pt,reverse=True)
         
@@ -187,13 +190,13 @@ class TTbar_SemiLep(Module):
         if len(electrons) + len(muons) == 1:
           if len(muons) == 1:
             if triggerMu == 0: return False
-            if muons[0].pt < 53: return False
+            if muons[0].pt < self.minMupt: return False
             self.Vlep_type = 0
             lepton = muons[0].p4()
            
           if len(electrons) == 1:
             if triggerEl == 0: return False
-            if electrons[0].pt < 115: return False
+            if electrons[0].pt < self.minElpt : return False
             self.Vlep_type=1
             lepton = electrons[0].p4()
             
@@ -292,11 +295,6 @@ class TTbar_SemiLep(Module):
                         gen_4v.SetPtEtaPhiM(q.pt,q.eta,q.phi,q.mass)
                         dR = WHadreco.DeltaR(gen_4v)
                         if dR < 0.6: self.matchedSJ = 1  
-            elif reco.subJetIdx1 >= 0 :
-                recoAK8Groomed[reco] = recosubjets[reco.subJetIdx1].p4()
-                maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
-                WHadreco = recosubjets[reco.subJetIdx1].p4()     
-
             else :
                 recoAK8Groomed[reco] = None
                 WHadreco = None
@@ -315,11 +313,18 @@ class TTbar_SemiLep(Module):
         self.out.fillBranch("W_pt", WcandLep.Perp() )
         self.out.fillBranch("MET", met.sumEt )
         self.out.fillBranch("FatJet_softDrop_mass",  recoAK8[0].msoftdrop)
-        self.out.fillBranch("FatJet_tau21", recoAK8[0].tau2/recoAK8[0].tau1)
-        self.out.fillBranch("FatJet_tau21_ddt", recoAK8[0].tau2/recoAK8[0].tau1+0.063*ROOT.TMath.Log(recoAK8[0].msoftdrop**2/recoAK8[0].pt))
-        self.out.fillBranch("FatJet_tau21_ddt_retune", recoAK8[0].tau2/recoAK8[0].tau1+0.082*ROOT.TMath.Log(recoAK8[0].msoftdrop**2/recoAK8[0].pt))
-        
-
+        if recoAK8[0].tau1 > 0.0: 
+          tau21 = recoAK8[0].tau2/recoAK8[0].tau1
+        else:
+          tau21 = -1.          
+        self.out.fillBranch("FatJet_tau21",tau21)
+        self.out.fillBranch("FatJet_tau21_ddt", tau21+0.063*ROOT.TMath.Log(recoAK8[0].msoftdrop**2/recoAK8[0].pt))
+        self.out.fillBranch("FatJet_tau21_ddt_retune", tau21+0.082*ROOT.TMath.Log(recoAK8[0].msoftdrop**2/recoAK8[0].pt))
+        if recoAK8[0].tau2 > 0.0: 
+          tau32 = recoAK8[0].tau3/recoAK8[0].tau2
+        else:
+          tau32 = -1.     
+        self.out.fillBranch("FatJet_tau32",tau32)
 
         return True
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
