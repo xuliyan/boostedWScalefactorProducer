@@ -70,7 +70,7 @@ def main():
     # If running on Sal or Ashley's Nano datasets you can set this to False
     # and comment out the whitelist below
 
-    #config.Data.publication = True
+    config.Data.publication = True
         
     config.Data.publishDBS = 'phys03'
    
