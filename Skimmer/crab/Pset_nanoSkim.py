@@ -5,7 +5,7 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(),
 
 )
 process.source.fileNames = [
-        '/store/user/srappocc/SingleMuon/SingleMuon_Run2016G-07Aug17-v1/180113_045720/0000/test_data_80X_NANO_10.root'
+       '/store/user/asparker/TTToSemiLeptonic_TuneCP5_PSweights_13TeV-powheg-pythia8/TTToSemiLeptonicTuneCP5PSweights13TeV-powheg-pythia8/180130_175206/0000/80XNanoV0-TTbar_SemiLep_1.root'
 
 ]
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))

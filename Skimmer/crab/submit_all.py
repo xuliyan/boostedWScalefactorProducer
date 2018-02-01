@@ -65,7 +65,7 @@ def main():
     config.Data.inputDataset = None
     config.Data.splitting = ''
     #config.Data.unitsPerJob = 1
-    config.Data.ignoreLocality = True
+    #config.Data.ignoreLocality = True
     # Note on ignoring locality :
     # If running on Sal or Ashley's Nano datasets you can set this to False
     # and comment out the whitelist below
@@ -76,7 +76,7 @@ def main():
    
     config.section_("Site")
     config.Site.storageSite = options.storageSite
-    config.Site.whitelist = ['T2_CH_*']
+    #config.Site.whitelist = ['T2_CH_*']
     print 'Using config ' + options.cfg
     print 'Writing to directory ' + options.dir
     
@@ -116,7 +116,7 @@ def main():
         if datatier == 'USER':
 
           config.JobType.scriptExe = 'crab_script_SFs.sh' 
-          config.JobType.inputFiles = [options.cfg ,'crab_script_SFs.sh', 'crab_script_SFs.py' ,'../haddnano.py', '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PromptReco/Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON.txt'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
+          config.JobType.inputFiles = [options.cfg ,'crab_script_SFs.sh', 'crab_script_SFs.py' ,'../haddnano.py', 'keep_and_drop.txt','/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PromptReco/Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON.txt'] #hadd nano will not be needed once nano tools are in cmssw                                                                                                                    
           config.JobType.sendPythonFolder  = True
     
           config.Data.inputDataset = job
