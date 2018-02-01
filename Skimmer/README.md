@@ -4,7 +4,10 @@
 ## Running locally
 First you need to produce your input files by skimming nanoAOD samples.
 
-For local tests, the syntax is: python process_nanoAOD.py <infile> <outdir> <outtreename>. 
+For local skimming tests, the syntax is (remember to change infile!):
+```
+ python crab/crab_script_SFs.py 
+```
 
 ## Running with crab
 To submit with crab go to directory Skimmer/crab and source crab3 if you have not already done so

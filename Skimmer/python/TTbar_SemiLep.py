@@ -111,10 +111,10 @@ class TTbar_SemiLep(Module):
         self.out.branch("AK8Subjet0isMoreMassive",  "F")
         self.out.branch("genmatchedAK8",  "F")
 
-        xsec = getXsec(inputFile.GetName())
+        self.xs = getXsec(inputFile.GetName())
         print inputFile.GetName()
-        print xsec
-        self.out.fillBranch("xsec",xsec)
+        print self.xs
+        
 
         pass
 
@@ -313,7 +313,8 @@ class TTbar_SemiLep(Module):
         muons = [ x for x in allmuons if x.tightId and x.pfRelIso03_all and x.p4().Perp() > self.minMupt and abs(x.p4().Eta())  < self.maxMuEta ]
         # Select reco muons:
         electrons = [ x for x in allelectrons if  x.cutBased_HEEP and x.p4().Perp() > self.minElpt  and (abs(x.p4().Eta()) < 1.44 or (abs(x.p4().Eta()) > 1.56 and  abs(x.p4().Eta()) < 2.5  ))]
-
+        
+        print "N leptons =?? " ,len(muons) + len(electrons)
         if ( len(muons) + len(electrons) ) < 1 :
             return False
 
@@ -451,6 +452,7 @@ class TTbar_SemiLep(Module):
             self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)
             self.out.fillBranch("genmatchedAK8",  self.isW)
         self.out.fillBranch("AK8Subjet0isMoreMassive", self.SJ0isW )
+        self.out.fillBranch("xsec",self.xs)
         
 
 

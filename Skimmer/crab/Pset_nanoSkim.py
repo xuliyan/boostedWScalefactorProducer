@@ -12,5 +12,5 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 
 process.options = cms.untracked.PSet()
 
-process.output = cms.OutputModule("PoolOutputModule", fileName = cms.untracked.string('80XNanoV0-TTbar_SemiLep.root'), fakeNameForCrab =cms.untracked.bool(True))
+process.output = cms.OutputModule("PoolOutputModule", fileName = cms.untracked.string('94XNanoV0-TTbar_SemiLep.root'), fakeNameForCrab =cms.untracked.bool(True))
 process.out = cms.EndPath(process.output)
