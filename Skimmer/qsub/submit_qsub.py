@@ -21,7 +21,7 @@ def getFileListDAS(dataset,instance="prod/phys03",run=-1):
 	return files 
    
 def createJobs(f, outfolder,name):
-    cmd = 'python process_nanoAOD.py root://cms-xrd-global.cern.ch/%s %s %s \n'%(f, outfolder,name)
+    cmd = 'python qsub_script_SFs_80X.py root://cms-xrd-global.cern.ch/%s %s %s \n'%(f, outfolder,name)
     print cmd
     jobs.write(cmd)
     return 1
@@ -49,8 +49,8 @@ if __name__ == "__main__":
 		if sys.argv[1].find("Wjets")!=-1:	patterns = ["/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/asparker-WJetsToLNuHT-100To200TuneCUETP8M113TeV-madgraphMLM-pythia8RunIISummer16MiniAODv2-PUMoriond17-4a4b356339e753e24c281c17941d0081/USER"	,"/WJetsToLNu_HT-1200To2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/asparker-WJetsToLNuHT-1200To2500TuneCUETP8M113TeV-madgraphMLM-pythia8RunIISummer16MiniAODv2-PUMoriond17-4a4b356339e753e24c281c17941d0081/USER","/WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/asparker-WJetsToLNuHT-200To400TuneCUETP8M113TeV-madgraphMLM-pythia8RunIISummer16MiniAODv2-PUMoriond17-4a4b356339e753e24c281c17941d0081/USER","/WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/asparker-WJetsToLNuHT-2500ToInfTuneCUETP8M113TeV-madgraphMLM-pythia8RunIISummer16MiniAODv2-PUMoriond17-4a4b356339e753e24c281c17941d0081/USER","/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/asparker-WJetsToLNuHT-400To600TuneCUETP8M113TeV-madgraphMLM-pythia8RunIISummer16MiniAODv2-PUMoriond17-4a4b356339e753e24c281c17941d0081/USER","/WJetsToLNu_HT-70To100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/asparker-WJetsToLNuHT-70To100TuneCUETP8M113TeV-madgraphMLM-pythia8RunIISummer16MiniAODv2-PUMoriond1780X-4a4b356339e753e24c281c17941d0081/USER","/WJetsToLNu_HT-600To800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/asparker-WJetsToLNuHT-600To800TuneCUETP8M113TeV-madgraphMLM-pythia8RunIISummer16MiniAODv2-PUMoriond17-4a4b356339e753e24c281c17941d0081/USER","/WJetsToLNu_HT-800To1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/asparker-WJetsToLNuHT-800To1200TuneCUETP8M113TeV-madgraphMLM-pythia8RunIISummer16MiniAODv2-PUMoriond17-4a4b356339e753e24c281c17941d0081/USER"]
 		if sys.argv[1].find("data")!=-1:	patterns = ["/SingleMuon/srappocc-SingleMuon_Run2016B-07Aug17_ver2-v1-b84139e74cafd5a0bfdaf4226ec7e7b4/USER","/SingleMuon/srappocc-SingleMuon_Run2016C-07Aug17-v1-b84139e74cafd5a0bfdaf4226ec7e7b4/USER","/SingleMuon/srappocc-SingleMuon_Run2016D-07Aug17-v1-b84139e74cafd5a0bfdaf4226ec7e7b4/USER","/SingleMuon/srappocc-SingleMuon_Run2016E-07Aug17-v1-b84139e74cafd5a0bfdaf4226ec7e7b4/USER","/SingleMuon/srappocc-SingleMuon_Run2016F-07Aug17-v1-b84139e74cafd5a0bfdaf4226ec7e7b4/USER","/SingleMuon/srappocc-SingleMuon_Run2016G-07Aug17-v1-b84139e74cafd5a0bfdaf4226ec7e7b4/USER","/SingleMuon/srappocc-SingleMuon_Run2016H-07Aug17-v1-b84139e74cafd5a0bfdaf4226ec7e7b4/USER"]			
 		
-    
-    print 'Location of input files', patterns
+		
+		print 'Location of input files', patterns
 	else:
 		print "No location given, give folder with files"
 		exit(0)
@@ -62,11 +62,7 @@ if __name__ == "__main__":
 		print "Using default output folder: ", outfolder
 
 
-	try: os.stat(outfolder)
-	except: os.mkdir(outfolder)
-
-	try: os.stat(outfolder+'/logs/')
-	except: os.mkdir(outfolder+'/logs/')
+	
 	for pattern in patterns:
 		files = getFileListDAS(pattern)
 		print "FILELIST = ", files
@@ -76,16 +72,22 @@ if __name__ == "__main__":
 		jobList = 'joblist%s.txt'%name
 		jobs = open(jobList, 'w')
 		nChunks = 0
+		outfolder = name
+		try: os.stat(outfolder)
+		except: os.mkdir(outfolder)
+		try: os.stat(outfolder+'/logs/')
+		except: os.mkdir(outfolder+'/logs/')
+		
 		for f in files:
 			createJobs(f,outfolder,name)
 			nChunks = nChunks+1
-
+		
 		jobs.close()
 		submit = raw_input("Do you also want to submit the jobs to the batch system? [y/n] ")
 		if submit == 'y' or submit=='Y':
 			submitJobs(jobList,nChunks, outfolder, batchSystem)
 		else:
 			print "Not submitting jobs"
-
-
-
+		
+		
+		

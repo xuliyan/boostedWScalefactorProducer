@@ -175,13 +175,13 @@ class TTbar_SemiLep(Module):
         # Find high-pT lepton, veto additional leptons, check trigger
         allmuons = Collection(event, "Muon")
         allelectrons = Collection(event, "Electron")
-        triggerMu = Object(event, "HLT_Mu50")
-        triggerEl = Object(event, "HLT_Ele115_CaloIdVT_GsfTrkIdT")
+        triggerMu = event.HLT_Mu50
+        # triggerEl = event.HLT_Ele115_CaloIdVT_GsfTrkIdT
         
         
         
-        electrons = [x for x in allelectrons if x.cutBased_HEEP and x.pt > 35  and ( abs(x.p4().Eta()) < 1.44 or (abs(x.p4().Eta()) > 1.56 and  abs(x.p4().Eta()) < 2.5 )) ]	 #loose pt cut for veto 
-        muons     = [x for x in allmuons if x.pt > 20 and x.highPtId >= 1 and abs(x.p4().Eta()) < self.maxMuEta] #loose pt cut for veto
+        electrons = [x for x in allelectrons if x.cutBased_HEEP and x.pt > 35 ]	 #loose pt cut for veto 
+        muons     = [x for x in allmuons if x.pt > 20 and x.highPtId == 2 and abs(x.p4().Eta()) < self.maxMuEta] #loose pt cut for veto
         muons    .sort(key=lambda x:x.pt,reverse=True)
         electrons.sort(key=lambda x:x.pt,reverse=True)
         
@@ -195,10 +195,11 @@ class TTbar_SemiLep(Module):
             lepton = muons[0].p4()
            
           if len(electrons) == 1:
-            if triggerEl == 0: return False
-            if electrons[0].pt < self.minElpt : return False
-            self.Vlep_type=1
-            lepton = electrons[0].p4()
+            return False
+            # if triggerEl == 0: return False
+            # if electrons[0].pt < self.minElpt : return False
+            # self.Vlep_type=1
+            # lepton = electrons[0].p4()
             
             
         else: return False
@@ -207,7 +208,7 @@ class TTbar_SemiLep(Module):
         passedMETFilters = False
         if event.Flag_BadChargedCandidateFilter and event.Flag_BadPFMuonFilter and event.Flag_EcalDeadCellTriggerPrimitiveFilter and event.Flag_HBHENoiseFilter and event.Flag_HBHENoiseIsoFilter and event.Flag_METFilters and event.Flag_ecalBadCalibFilter and event.Flag_globalTightHalo2016Filter and event.Flag_goodVertices:
           passedMETFilters = True
-        if not passedMETFilters: return False  
+        if not passedMETFilters: return False
             	
         
         # Apply MET cut    
@@ -219,12 +220,12 @@ class TTbar_SemiLep(Module):
         
         # Apply leptonic W cut
         WcandLep = lepton + MET
-        if WcandLep.Perp() < self.minLepWPt :
-            return False
+        # if WcandLep.Perp() < self.minLepWPt :
+        #     return False
         
         #Check for additional b-jet in the event, apply CSV later!
         Jets = list(Collection(event, "Jet")) 
-        recoAK4 = [ x for x in Jets if x.p4().Perp() > self.minAK4Pt and abs(x.p4().Eta()) < self.maxJetEta]
+        recoAK4 = [ x for x in Jets if x.p4().Perp() > self.minAK4Pt and abs(x.p4().Eta()) < self.maxJetEta and x.btagCSVV2 > self.minBDisc]
         if len(recoAK4) < 1:
             return False
     
