@@ -12,8 +12,12 @@ from PhysicsTools.NanoAODTools.WTopScalefactorProducer.Skimmer.TTSkimmer import 
 # to the PostProcessor arguement below
 
 # p=PostProcessor(".", inputFiles(),                                                                                          # --> to submit with crab, use this
+# p=PostProcessor(".", inputFiles(),
+#                  "nFatJet>0&&FatJet_msoftdrop>30&&FatJet_pt>200&&MET_sumEt>40&& ( (nElectron > 0 && HLT_Ele115_CaloIdVT_GsfTrkIdT) || (nMuon > 0 && HLT_Mu50))" ,"keep_and_drop.txt",
+#                   modules=[TTbar_SemiLep()],provenance=True,fwkJobReport=True
+#                   ,haddFileName=  '94XNanoV0-TTbar_SemiLep.root'  )
 p=PostProcessor(".", inputFiles(),
-                 "nFatJet>0&&FatJet_msoftdrop>30&&FatJet_pt>200&&MET_sumEt>40&& ( (nElectron > 0 && HLT_Ele115_CaloIdVT_GsfTrkIdT) || (nMuon > 0 && HLT_Mu50))" ,"keep_and_drop.txt",
+                 "nFatJet>0&&FatJet_msoftdrop>30&&FatJet_pt>200&&MET_sumEt>40&&nMuon>0&&HLT_Mu50" ,"keep_and_drop.txt",
                   modules=[TTbar_SemiLep()],provenance=True,fwkJobReport=True 
                   ,haddFileName=  '94XNanoV0-TTbar_SemiLep.root'  )
 
