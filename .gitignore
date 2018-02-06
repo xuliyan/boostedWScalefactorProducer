@@ -1,3 +1,7 @@
+*joblist*
+*.png
+*.root
+*.pyc
 *.pcm
 */*.d
 */*.so
