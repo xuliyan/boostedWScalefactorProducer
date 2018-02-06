@@ -30,6 +30,7 @@ def getXsec(sample):
   elif sample.find("WJetsToLNu_HT-600To800"                ) !=-1 : return 12.08*1.21   ;
   elif sample.find("WJetsToLNu_HT-800To1200"               ) !=-1 : return 5.26*1.21    ;
   elif sample.find("WJetsToLNu_HT-1200To2500"              ) !=-1 : return 1.33*1.21    ;
+  elif sample.find("WJetsToLNu_HT-70To100"                ) !=-1 : return 1270.*1.21    ;
   elif sample.find("WJetsToLNu_HT-2500ToInf"               ) !=-1 : return 0.03089*1.21 ;
   elif sample.find( "WJetsToLNu_TuneCUETP8M1"              ) !=-1 : return 50380.0*1.22 ;
   elif sample.find( "W1JetsToLNu_TuneCUETP8M1"             ) !=-1 : return 9644.5*1.22 ;

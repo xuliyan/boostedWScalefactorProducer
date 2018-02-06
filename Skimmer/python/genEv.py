@@ -15,6 +15,7 @@ def getGenEvents():
   genEvMap["WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root"] =                  253561.0     ;
   genEvMap["WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root"] =                   1963464.0    ;
   genEvMap["WJetsToLNu_HT-600To800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root"] =                   3779141.0    ;
+  genEvMap["WJetsToLNu_HT-70To100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root"] =                    1544513.0    ;
   genEvMap["WJetsToLNu_HT-800To1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root"] =                  1544513.0    ;
   genEvMap["TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root"] =                                          77229341.0   ;
   return genEvMap
