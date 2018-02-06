@@ -4,7 +4,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection,Object
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.tools import *
-from WTopScalefactorProducer.Skimmer.xsec import getXsec
+from PhysicsTools.NanoAODTools.WTopScalefactorProducer.Skimmer.xsec import getXsec
 
 import random
 import array
@@ -180,6 +180,7 @@ class TTbar_SemiLep(Module):
         
         
         
+
         electrons = [x for x in allelectrons if x.cutBased_HEEP and x.pt > 35 ]	 #loose pt cut for veto 
         muons     = [x for x in allmuons if x.pt > 20 and x.highPtId > 1 and abs(x.p4().Eta()) < self.maxMuEta] #loose pt cut for veto
         muons    .sort(key=lambda x:x.pt,reverse=True)
@@ -190,7 +191,7 @@ class TTbar_SemiLep(Module):
         if len(electrons) + len(muons) == 1:
           if len(muons) == 1:
             if triggerMu == 0: return False
-            if muons[0].pt < self.minMupt: return False
+            if muons[0].pt < self.minMupt : return False
             self.Vlep_type = 0
             lepton = muons[0].p4()
            
@@ -276,7 +277,7 @@ class TTbar_SemiLep(Module):
         recoAK8Groomed = {}        
         # Get the groomed reco jets
         maxrecoSJmass = 1.
-        WHadreco = ROOT.TLorentzVector()
+        WHadreco = None
         for ireco,reco in enumerate(recoAK8):
             if reco.subJetIdx2 >= len(recosubjets) or reco.subJetIdx1 >= len(recosubjets) :
                 if self.verbose: print "Reco subjet indices not in Subjet list, Skipping"
@@ -293,7 +294,8 @@ class TTbar_SemiLep(Module):
                     WHadreco = recosubjets[reco.subJetIdx2].p4()
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
                         self.SJ0isW = 0
-                if isMC :
+                if isMC and WHadreco != None and self.SJ0isW >= 0 :
+                      
                     for q in realqs:
                         gen_4v = ROOT.TLorentzVector()
                         gen_4v.SetPtEtaPhiM(q.pt,q.eta,q.phi,q.mass)
