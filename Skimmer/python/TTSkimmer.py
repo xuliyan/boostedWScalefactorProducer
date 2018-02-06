@@ -91,7 +91,7 @@ class TTbar_SemiLep(Module):
          self.out.branch("AK8Subjet0isMoreMassive",  "I")
          self.out.branch("genmatchedAK8",  "I")
          self.out.branch("crossection",  "F")
-         
+         self.out.branch("passedMETfilters",  "I")
          self.xs = getXsec(inputFile.GetName())
          print " Cross section for sample: " , inputFile.GetName()
          print self.xs
@@ -181,7 +181,7 @@ class TTbar_SemiLep(Module):
         
         
         electrons = [x for x in allelectrons if x.cutBased_HEEP and x.pt > 35 ]	 #loose pt cut for veto 
-        muons     = [x for x in allmuons if x.pt > 20 and x.highPtId == 2 and abs(x.p4().Eta()) < self.maxMuEta] #loose pt cut for veto
+        muons     = [x for x in allmuons if x.pt > 20 and x.highPtId > 1 and abs(x.p4().Eta()) < self.maxMuEta] #loose pt cut for veto
         muons    .sort(key=lambda x:x.pt,reverse=True)
         electrons.sort(key=lambda x:x.pt,reverse=True)
         
@@ -206,14 +206,17 @@ class TTbar_SemiLep(Module):
         
         # Add filters https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#Moriond_2018
         passedMETFilters = False
-        if event.Flag_BadChargedCandidateFilter and event.Flag_BadPFMuonFilter and event.Flag_EcalDeadCellTriggerPrimitiveFilter and event.Flag_HBHENoiseFilter and event.Flag_HBHENoiseIsoFilter and event.Flag_METFilters and event.Flag_ecalBadCalibFilter and event.Flag_globalTightHalo2016Filter and event.Flag_goodVertices:
-          passedMETFilters = True
-        if not passedMETFilters: return False
-            	
+        try:
+          if event.Flag_BadChargedCandidateFilter and event.Flag_BadPFMuonFilter and event.Flag_EcalDeadCellTriggerPrimitiveFilter and event.Flag_HBHENoiseFilter and event.Flag_HBHENoiseIsoFilter and event.Flag_METFilters and event.Flag_ecalBadCalibFilter and event.Flag_globalTightHalo2016Filter and event.Flag_goodVertices:
+            passedMETFilters = True
+        except:
+           passedMETFilters = False
+          # if not passedMETFilters: return False
+
         
         # Apply MET cut    
         met = Object(event, "MET")
-        if self.Vlep_type == 0 and met.sumEt < self.minMuMETPt     : return False
+        if self.Vlep_type == 0 and met.sumEt < self.minMuMETPt : return False
         if self.Vlep_type == 1 and met.sumEt < self.minElMETPt : return False
         MET  = ROOT.TLorentzVector()
         MET.SetPtEtaPhiE(met.sumEt, 0., met.phi, met.sumEt)
@@ -231,9 +234,9 @@ class TTbar_SemiLep(Module):
     
         # Find fat jet
         FatJets = list(Collection(event, "FatJet"))
-        recoAK8 = [ x for x in FatJets if x.p4().Perp() > self.minJetPt and  abs(x.p4().Eta()) < self.maxJetEta]
+        recoAK8 = [ x for x in FatJets if x.p4().Perp() > self.minJetPt and  abs(x.p4().Eta()) < self.maxJetEta and x.msoftdrop > 30]
         if len(recoAK8) < 1 : return False
-        recoAK8.sort(key=lambda x:x.pt,reverse=True)
+        recoAK8.sort(key=lambda x:x.msoftdrop,reverse=True)
 
         jetAK8_4v = ROOT.TLorentzVector()
         jetAK8_4v.SetPtEtaPhiM(recoAK8[0].pt,recoAK8[0].eta,recoAK8[0].phi,recoAK8[0].mass)
@@ -241,7 +244,7 @@ class TTbar_SemiLep(Module):
         
         # No lepton overlap
         dR_jetlep = jetAK8_4v.DeltaR(lepton )
-        if dR_jetlep < self.mindRLepJet : return False
+        if abs(dR_jetlep) < self.mindRLepJet : return False
         
         # Check if matched to genW and genW daughters
         #for partially merged:
@@ -281,12 +284,12 @@ class TTbar_SemiLep(Module):
             if reco.subJetIdx1 >= 0 and reco.subJetIdx2 >= 0 :
                 recoAK8Groomed[reco] = recosubjets[reco.subJetIdx1].p4() + recosubjets[reco.subJetIdx2].p4()
                 if recosubjets[reco.subJetIdx1].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() >  recosubjets[reco.subJetIdx2].p4().M() :
-                    maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
+                    maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M()
                     WHadreco = recosubjets[reco.subJetIdx1].p4()
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
                         self.SJ0isW = 1
                 if recosubjets[reco.subJetIdx2].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() < recosubjets[reco.subJetIdx2].p4().M() :
-                    maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M() 
+                    maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M()
                     WHadreco = recosubjets[reco.subJetIdx2].p4()
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
                         self.SJ0isW = 0
@@ -295,7 +298,7 @@ class TTbar_SemiLep(Module):
                         gen_4v = ROOT.TLorentzVector()
                         gen_4v.SetPtEtaPhiM(q.pt,q.eta,q.phi,q.mass)
                         dR = WHadreco.DeltaR(gen_4v)
-                        if dR < 0.6: self.matchedSJ = 1  
+                        if dR < 0.6: self.matchedSJ = 1
             else :
                 recoAK8Groomed[reco] = None
                 WHadreco = None
@@ -326,6 +329,7 @@ class TTbar_SemiLep(Module):
         else:
           tau32 = -1.     
         self.out.fillBranch("FatJet_tau32",tau32)
+        self.out.fillBranch("passedMETfilters",passedMETFilters)
 
         return True
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed

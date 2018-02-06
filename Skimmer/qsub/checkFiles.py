@@ -18,7 +18,7 @@ for file in filelist:
 	    cmd = 'rm %s' %file
 	    print 'Going to execute: ' , cmd
 	    print "Remember to resubmit %s , job number %s" %(pattern,file.split("_")[2])
-      # os.system(cmd)
+	    os.system(cmd)
 	else:
 		continue
 		print "FILE IS GOOD, KEEPING IT"	

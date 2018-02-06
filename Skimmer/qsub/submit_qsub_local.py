@@ -21,8 +21,7 @@ def getFileListDAS(dataset,instance="prod/phys03",run=-1):
 	return files 
    
 def createJobs(f, outfolder,name):
-    cmd = 'python qsub_script_SFs.py root://cms-xrd-global.cern.ch/%s %s %s \n'%(f.replace("/pnfs/psi.ch/cms/trivcat",""), outfolder,name)
-    if sys.argv[1].find("TT80X")!=-1: cmd = 'python qsub_script_SFs_80X.py root://cms-xrd-global.cern.ch/%s %s %s \n'%(f.replace("/pnfs/psi.ch/cms/trivcat",""), outfolder,name)
+    cmd = 'python qsub_script_SFs.py root://t3dcachedb.psi.ch:1094//%s %s %s \n'%(f, outfolder,name)
     print cmd
     jobs.write(cmd)
     return 1
@@ -68,8 +67,8 @@ if __name__ == "__main__":
   
   for pattern in patterns:
     print "Looking for file in " ,location+'/'+pattern+'/*/*/*/*.root'
-    # files = glob.glob(location+'/'+pattern+'*/*/*/*.root')
-    files = glob.glob(location+'/'+pattern+'/*/*/*/*.root')
+    if sys.argv[1].find("data")!=-1: files = glob.glob(location+'/'+pattern+'*/*/*/*.root')
+    else: files = glob.glob(location+'/'+pattern+'/*/*/*/*.root')
     print "FILELIST = ", files
     name = pattern
     if sys.argv[1].find("data")!=-1: name = pattern.split("/")[1].replace("/","")

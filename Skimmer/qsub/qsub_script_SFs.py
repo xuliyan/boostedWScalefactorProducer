@@ -27,11 +27,11 @@ else:
 #                     haddFileName=  name+'.root',jsonInput='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PromptReco/Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON.txt' )
 
 if infile.find("SingleMuon")==-1:
-  p=PostProcessor(outputDir, [infile],"nFatJet>0&&FatJet_msoftdrop>30&&FatJet_pt>200&&MET_sumEt>40&& nMuon > 0 && HLT_Mu50" ,"keep_and_drop.txt",
+  p=PostProcessor(outputDir, [infile],"nFatJet>0&&FatJet_msoftdrop>30&&FatJet_pt>200&&MET_sumEt>40&& nMuon>0 && HLT_Mu50" ,"keep_and_drop.txt",
                     modules=[TTbar_SemiLep()],provenance=False,fwkJobReport=False ,
                     haddFileName=  name+'.root' )
 else:
-  p=PostProcessor(outputDir, [infile],"nFatJet>0&&FatJet_msoftdrop>30&&FatJet_pt>200&&MET_sumEt>40&& nMuon > 0 && HLT_Mu50" ,"keep_and_drop.txt",
+  p=PostProcessor(outputDir, [infile],"nFatJet>0&&FatJet_msoftdrop>30&&FatJet_pt>200&&MET_sumEt>40&& nMuon>0 && HLT_Mu50" ,"keep_and_drop.txt",
                     modules=[TTbar_SemiLep()],provenance=False,fwkJobReport=False ,
                     haddFileName=  name+'.root',jsonInput='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PromptReco/Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON.txt' )  
                     

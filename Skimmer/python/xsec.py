@@ -20,7 +20,7 @@ def getXsec(sample):
   elif sample.find( "QCD_HT1000to1500"                     ) !=-1 : return 1207.;
   elif sample.find( "QCD_HT1500to2000"                     ) !=-1 : return 119.9;
   elif sample.find( "QCD_HT2000toInf"                      ) !=-1 : return 25.24;
-  elif sample.find( "QCD_Pt-15to7000" ) !=-1 or sample.find( "QCD_Pt_15to7000" ) !=-1: return  2.022100000e+09*60.5387252324;
+  elif sample.find( "QCD_Pt-15to7000" ) !=-1 or sample.find( "QCD_Pt_15to7000" ) !=-1: return  2.022100000e+09;
   elif sample.find( "TTbar_SemiLep"    							       ) !=-1 : return  831.76*0.4337*0.6760      ; 
   elif sample.find( "TTToSemiLeptonic"                     ) !=-1 : return  831.76*0.4337*0.6760;
   elif sample.find( "TT"                                   ) !=-1 : return  831.76      ;
