@@ -4,7 +4,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection,Object
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.tools import *
-from PhysicsTools.NanoAODTools.WTopScalefactorProducer.Skimmer.xsec import getXsec
+from WTopScalefactorProducer.Skimmer.xsec import getXsec
 
 import random
 import array
@@ -79,11 +79,15 @@ class TTbar_SemiLep(Module):
          self.out.branch("dphi_LepJet",  "F")
          self.out.branch("dphi_MetJet",  "F")
          self.out.branch("dphi_WJet"  ,  "F")
-         self.out.branch("FatJet_softDrop_mass",  "F")
-         self.out.branch("FatJet_tau32",  "F")
-         self.out.branch("FatJet_tau21",  "F")
-         self.out.branch("FatJet_tau21_ddt",  "F")
-         self.out.branch("FatJet_tau21_ddt_retune",  "F")
+         self.out.branch("SelectedJet_softDrop_mass",  "F")
+         self.out.branch("SelectedJet_tau32",  "F")
+         self.out.branch("SelectedJet_tau21",  "F")
+         self.out.branch("SelectedJet_tau21_ddt",  "F")
+         self.out.branch("SelectedJet_tau21_ddt_retune",  "F")      
+         self.out.branch("SelectedJet_pt",   "F")
+         self.out.branch("SelectedJet_eta",  "F")
+         self.out.branch("SelectedJet_mass", "F")
+         self.out.branch("SelectedLepton_pt",  "F")
          self.out.branch("Wlep_type",  "I")
          self.out.branch("W_pt",  "F")
          self.out.branch("MET",  "F")
@@ -182,7 +186,7 @@ class TTbar_SemiLep(Module):
         
 
         electrons = [x for x in allelectrons if x.cutBased_HEEP and x.pt > 35 ]	 #loose pt cut for veto 
-        muons     = [x for x in allmuons if x.pt > 20 and x.highPtId > 1 and abs(x.p4().Eta()) < self.maxMuEta] #loose pt cut for veto
+        muons     = [x for x in allmuons if x.pt > 20 and x.highPtId > 1 and abs(x.p4().Eta()) < self.maxMuEta and x.pfRelIso03_all < 0.1] #loose pt cut for veto
         muons    .sort(key=lambda x:x.pt,reverse=True)
         electrons.sort(key=lambda x:x.pt,reverse=True)
         
@@ -235,7 +239,7 @@ class TTbar_SemiLep(Module):
     
         # Find fat jet
         FatJets = list(Collection(event, "FatJet"))
-        recoAK8 = [ x for x in FatJets if x.p4().Perp() > self.minJetPt and  abs(x.p4().Eta()) < self.maxJetEta and x.msoftdrop > 30]
+        recoAK8 = [ x for x in FatJets if x.p4().Perp() > self.minJetPt and  abs(x.p4().Eta()) < self.maxJetEta and x.msoftdrop > 30. and x.tau1 > 0. and x.tau2 > 0.]
         if len(recoAK8) < 1 : return False
         recoAK8.sort(key=lambda x:x.msoftdrop,reverse=True)
 
@@ -318,19 +322,23 @@ class TTbar_SemiLep(Module):
         self.out.fillBranch("Wlep_type",self.Vlep_type)
         self.out.fillBranch("W_pt", WcandLep.Perp() )
         self.out.fillBranch("MET", met.sumEt )
-        self.out.fillBranch("FatJet_softDrop_mass",  recoAK8[0].msoftdrop)
+        self.out.fillBranch("SelectedJet_softDrop_mass",  recoAK8[0].msoftdrop)
+        self.out.fillBranch("SelectedJet_pt",   recoAK8[0].pt)
+        self.out.fillBranch("SelectedJet_eta",  recoAK8[0].eta)
+        self.out.fillBranch("SelectedJet_mass",  recoAK8[0].mass)
+        self.out.fillBranch("SelectedLepton_pt", lepton.Pt())
         if recoAK8[0].tau1 > 0.0: 
           tau21 = recoAK8[0].tau2/recoAK8[0].tau1
         else:
           tau21 = -1.          
-        self.out.fillBranch("FatJet_tau21",tau21)
-        self.out.fillBranch("FatJet_tau21_ddt", tau21+0.063*ROOT.TMath.Log(recoAK8[0].msoftdrop**2/recoAK8[0].pt))
-        self.out.fillBranch("FatJet_tau21_ddt_retune", tau21+0.082*ROOT.TMath.Log(recoAK8[0].msoftdrop**2/recoAK8[0].pt))
+        self.out.fillBranch("SelectedJet_tau21",tau21)
+        self.out.fillBranch("SelectedJet_tau21_ddt", tau21+0.063*ROOT.TMath.Log(recoAK8[0].msoftdrop**2/recoAK8[0].pt))
+        self.out.fillBranch("SelectedJet_tau21_ddt_retune", tau21+0.082*ROOT.TMath.Log(recoAK8[0].msoftdrop**2/recoAK8[0].pt))
         if recoAK8[0].tau2 > 0.0: 
           tau32 = recoAK8[0].tau3/recoAK8[0].tau2
         else:
           tau32 = -1.     
-        self.out.fillBranch("FatJet_tau32",tau32)
+        self.out.fillBranch("SelectedJet_tau32",tau32)
         self.out.fillBranch("passedMETfilters",passedMETFilters)
 
         return True
