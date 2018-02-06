@@ -4,7 +4,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection,Object
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.tools import *
-from PhysicsTools.NanoAODTools.WTopScalefactorProducer.Skimmer.xsec import getXsec
+from WTopScalefactorProducer.Skimmer.xsec import getXsec
 
 import random
 import array
