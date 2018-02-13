@@ -597,7 +597,7 @@ class initialiseFits:
         
 
       # Directory and input files
-      self.file_Directory         = "/mnt/t3nfs01/data01/shome/thaarres/2017/Treemaker/TreeAnalyzer/samples2017_v2/"
+      self.file_Directory         = "/scratch/thaarres/samples2017_v2/"
       postfix = ""
           
       self.file_data              = "SingleMuon.root"
