@@ -65,7 +65,7 @@ def printPlot(nameSelection , plotdir, title, CanvasName, XYrange, Ymax, histofA
             histofAlldata.GetXaxis().SetLabelSize(0.05)
             histofAlldata.GetXaxis().SetTitleSize(0.0475)
             histofAlldata.GetXaxis().SetTickLength(0.045)
-            histofAlldata.GetXaxis().SetTitleOffset(0.6)#(1.15)
+            histofAlldata.GetXaxis().SetTitleOffset(1.15)
             histofAlldata.GetXaxis().SetTitleFont(42)
             histofAlldata.GetXaxis().SetTitle(title)
 
@@ -96,10 +96,10 @@ def printPlot(nameSelection , plotdir, title, CanvasName, XYrange, Ymax, histofA
 
             histofAllMC.GetXaxis().SetNdivisions(506)
             histofAllMC.GetXaxis().SetLabelFont(42)
-            histofAllMC.GetXaxis().SetLabelSize(0.043)
-            histofAllMC.GetXaxis().SetTitleSize(0.045)
+            histofAllMC.GetXaxis().SetLabelSize(0.035)
+            histofAllMC.GetXaxis().SetTitleSize(0.037)
             histofAllMC.GetXaxis().SetTickLength(0.045)
-            histofAllMC.GetXaxis().SetTitleOffset(.92)
+            histofAllMC.GetXaxis().SetTitleOffset(1.01)
             histofAllMC.GetXaxis().SetTitleFont(42)
             histofAllMC.GetXaxis().SetTitle(title)
 
@@ -169,7 +169,7 @@ def printPlot(nameSelection , plotdir, title, CanvasName, XYrange, Ymax, histofA
             words.SetLineWidth(2)
             words.Draw()
 
-            words1 = ROOT.TLatex(0.43,0.86,"#font[52]{ Simulation Preliminary}")
+            words1 = ROOT.TLatex(0.475,0.86,"#font[52]{ Simulation Preliminary}")
             words1.SetNDC()
             words1.SetTextAlign(31)
             #words1.SetTextFont(42)
