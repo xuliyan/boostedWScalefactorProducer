@@ -4,10 +4,18 @@ from commands import getoutput
 import re
 import datetime
 import subprocess
+import itertools
 
 now = datetime.datetime.now()
 timestamp =  now.strftime("%Y_%m_%d")
 
+def split_seq(iterable, size):
+    it = iter(iterable)
+    item = list(itertools.islice(it, size))
+    while item:
+        yield item
+        item = list(itertools.islice(it, size))
+        
 def getFileListDAS(dataset,instance="prod/phys03",run=-1):
 	cmd='das_client --limit=0 --query="file dataset=%s instance=%s"'%(dataset,instance)
 	print "Executing ",cmd
@@ -20,11 +28,14 @@ def getFileListDAS(dataset,instance="prod/phys03",run=-1):
 	         
 	return files 
    
-def createJobs(f, outfolder,name):
-    cmd = 'python qsub_script_SFs.py root://cms-xrd-global.cern.ch/%s %s %s \n'%(f, outfolder,name)
-    print cmd
-    jobs.write(cmd)
-    return 1
+def createJobs(f, outfolder,name,nchunks):
+  infiles = []
+  for files in f:
+    infiles.append("root://cms-xrd-global.cern.ch/"+files)
+  cmd = 'python qsub_script_SFs.py %s %s %s %i \n'%(','.join(infiles), outfolder,name,nchunks)
+  print cmd
+  jobs.write(cmd)
+  return 1
 
 def submitJobs(jobList, nchunks, outfolder, batchSystem):
     print 'Reading joblist'
@@ -77,13 +88,15 @@ if __name__ == "__main__":
 		except: os.mkdir(outfolder)
 		try: os.stat(outfolder+'/logs/')
 		except: os.mkdir(outfolder+'/logs/')
-		
-		for f in files:
-			createJobs(f,outfolder,name)
+		filelists = list(split_seq(files,10))	
+		for f in filelists:
+			print "FILES = ",f
+			createJobs(f,outfolder,name,nChunks)
 			nChunks = nChunks+1
 		
 		jobs.close()
 		submit = raw_input("Do you also want to submit the jobs to the batch system? [y/n] ")
+		# submit = 'y'
 		if submit == 'y' or submit=='Y':
 			submitJobs(jobList,nChunks, outfolder, batchSystem)
 		else:

@@ -3,8 +3,5 @@ drop IsoTrack*
 drop Photon*
 drop TrigObj*
 drop SoftActivity*
-drop HLT_* 
 drop GenVisTau*
 drop Tau*
-keep HLT_Mu50*
-keep HLT_Ele115_*
