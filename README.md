@@ -24,6 +24,16 @@ git remote add sal https://github.com/rappoccio/nanoAOD-tools.git
 git fetch sal
 git checkout -b TTbarResHad remotes/sal/TTbarResHad
 
+cd ../..
+
+git clone https://github.com/cms-jet/NanoAODJMARTools.git PhysicsTools/NanoAODJMARTools
+
+cd PhysicsTools/NanoAODJMARTools/
+
+git remote add ash https://github.com/UBParker/NanoAODJMARTools.git
+git fetch ash
+git checkout -b amaster remotes/ash/amaster
+
 
 ```
 
