@@ -104,8 +104,8 @@ def fit_mj_single_MC(workspace,fileName,label, model,channel, wtagger_label):
 	
 	rfresult = model_pdf.fitTo(rdataset_mj,rt.RooFit.Save(1),rt.RooFit.SumW2Error(rt.kTRUE),rt.RooFit.Extended(rt.kTRUE), rt.RooFit.Minimizer("Minuit2"),rt.RooFit.Verbose(rt.kFALSE))
 	rfresult = model_pdf.fitTo(rdataset_mj,rt.RooFit.Save(1),rt.RooFit.SumW2Error(rt.kTRUE),rt.RooFit.Extended(rt.kTRUE), rt.RooFit.Minimizer("Minuit2"),rt.RooFit.Verbose(rt.kFALSE))
-	rfresult = model_pdf.fitTo(rdataset_mj,rt.RooFit.Save(1),rt.RooFit.SumW2Error(rt.kTRUE),rt.RooFit.Extended(rt.kTRUE), rt.RooFit.Minimizer("Minuit2"))
-
+	rfresult = model_pdf.fitTo(rdataset_mj,rt.RooFit.Save(1),rt.RooFit.SumW2Error(rt.kTRUE),rt.RooFit.Extended(rt.kTRUE), rt.RooFit.Minimizer("Minuit2"),rt.RooFit.Verbose(rt.kFALSE))
+	print "";rfresult.Print();print "";
 	getattr(workspace,'import')(rfresult)
 
 
@@ -335,7 +335,7 @@ def DrawScaleFactorTTbarControlSample(xtitle,workspace, color_palet, label, chan
         model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("STop")       ,rt.RooFit.Components("%s,%s,%s,%s"      %(model_histpdf_STop.GetName(), model_histpdf_VV.GetName(), model_histpdf_WJets.GetName(),model_histpdf_QCD.GetName())), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["STop"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())        
         model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("VV")         ,rt.RooFit.Components("%s,%s,%s"         %(model_histpdf_VV.GetName(), model_histpdf_WJets.GetName(),model_histpdf_QCD.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["VV"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())
         model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("WJets")      ,rt.RooFit.Components("%s,%s"            %(model_histpdf_WJets.GetName(),model_histpdf_QCD.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["WJets"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())
-        # model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("QCD")        ,rt.RooFit.Components("%s"               %(model_histpdf_QCD.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["QCD"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())
+        model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("QCD")        ,rt.RooFit.Components("%s"               %(model_histpdf_QCD.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["QCD"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())
         
         model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("TTline_invisible"), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())        
         model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("TTrealW_line_invisible"), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())
@@ -343,7 +343,7 @@ def DrawScaleFactorTTbarControlSample(xtitle,workspace, color_palet, label, chan
         model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("STline_invisible") ,rt.RooFit.Components("%s,%s,%s,%s"%(model_histpdf_STop.GetName(), model_histpdf_VV.GetName(), model_histpdf_WJets.GetName(),model_histpdf_QCD.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())
         model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("VVline_invisible") ,rt.RooFit.Components("%s,%s,%s"%(model_histpdf_VV.GetName(), model_histpdf_WJets.GetName(),model_histpdf_QCD.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())
         model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("WJ_line_invisible"),rt.RooFit.Components("%s,%s"%(model_histpdf_WJets.GetName(),model_histpdf_QCD.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())
-        # model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("QC_line_invisible"),rt.RooFit.Components("%s"%(model_histpdf_QCD.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())
+        model_TTbar_STop_VV_WJets.plotOn(xframe_data,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets),rt.RooFit.Name("QC_line_invisible"),rt.RooFit.Components("%s"%(model_histpdf_QCD.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())
         
         #redraw data
         combData_p_f_data.plotOn(xframe_data,rt.RooFit.Name("data"), rt.RooFit.Cut("sample_type==sample_type::em_pass"), rt.RooFit.MarkerSize(1.5), rt.RooFit.DataError(rt.RooAbsData.SumW2), rt.RooFit.XErrorSize(0) );
@@ -368,7 +368,7 @@ def DrawScaleFactorTTbarControlSample(xtitle,workspace, color_palet, label, chan
         model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("STop")       ,rt.RooFit.Components("%s,%s,%s,%s"%(model_histpdf_STop_fail.GetName(), model_histpdf_VV_fail.GetName(), model_histpdf_WJets_fail.GetName(),model_histpdf_QCD_fail.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["STop"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())        
         model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("VV")         ,rt.RooFit.Components("%s,%s,%s"%(model_histpdf_VV_fail.GetName(), model_histpdf_WJets_fail.GetName(),model_histpdf_QCD_fail.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["VV"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())        
         model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("WJets")      ,rt.RooFit.Components("%s,%s"%( model_histpdf_WJets_fail.GetName(),model_histpdf_QCD_fail.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["WJets"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())
-        # model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("QCD")        ,rt.RooFit.Components("%s"%( model_histpdf_QCD_fail.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["QCD"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())
+        model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("QCD")        ,rt.RooFit.Components("%s"%( model_histpdf_QCD_fail.GetName()) ), rt.RooFit.DrawOption("F"), rt.RooFit.FillColor(color_palet["QCD"]), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.VLines())
         
         #solid line
         model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("TT_line_invisible"), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())      
@@ -377,7 +377,7 @@ def DrawScaleFactorTTbarControlSample(xtitle,workspace, color_palet, label, chan
         model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("STline_invisible") ,rt.RooFit.Components("%s,%s,%s,%s"%(model_histpdf_STop_fail.GetName(), model_histpdf_VV_fail.GetName(), model_histpdf_WJets_fail.GetName(),model_histpdf_QCD_fail.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())
         model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("VVline_invisible") ,rt.RooFit.Components("%s,%s,%s"%(model_histpdf_VV_fail.GetName(), model_histpdf_WJets_fail.GetName(),model_histpdf_QCD_fail.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())
         model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("WJ_line_invisible"),rt.RooFit.Components("%s,%s"%( model_histpdf_WJets_fail.GetName(),model_histpdf_QCD_fail.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())
-        # model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("QC_line_invisible"),rt.RooFit.Components("%s"%( model_histpdf_QCD_fail.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())
+        model_TTbar_STop_VV_WJets_fail.plotOn(xframe_data_fail,rt.RooFit.Normalization(scale_number_TTbar_STop_VV_WJets_fail),rt.RooFit.Name("QC_line_invisible"),rt.RooFit.Components("%s"%( model_histpdf_QCD_fail.GetName()) ), rt.RooFit.LineColor(rt.kBlack), rt.RooFit.LineWidth(2), rt.RooFit.VLines())
         
         #redraw data
         combData_p_f_data.plotOn(xframe_data_fail,rt.RooFit.Name("data"), rt.RooFit.Cut("sample_type==sample_type::em_fail"), rt.RooFit.MarkerSize(1.5), rt.RooFit.DataError(rt.RooAbsData.SumW2), rt.RooFit.XErrorSize(0) );
@@ -428,7 +428,7 @@ def DrawScaleFactorTTbarControlSample(xtitle,workspace, color_palet, label, chan
         legend.AddEntry(xframe_data.findObject("WJets")      ,"W+jets"              ,"F");
         legend.AddEntry(xframe_data.findObject("TTbar_realW"),"t#bar{t} (merged)"   ,"F"); 
         legend.AddEntry(xframe_data.findObject("VV")         ,"WW/WZ/ZZ"            ,"F");
-        # legend.AddEntry(xframe_data.findObject("QCD")        ,"QCD"                 ,"F");
+        legend.AddEntry(xframe_data.findObject("QCD")        ,"QCD"                 ,"F");
         
         xframe_data.addObject(legend);
         xframe_data_fail.addObject(legend);
