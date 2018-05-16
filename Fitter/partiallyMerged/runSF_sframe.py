@@ -6,13 +6,14 @@ import time
 import math
 from WTopScalefactorProducer.Fitter.tdrstyle import *
 from WTopScalefactorProducer.Fitter.CMS_lumi import *
-from WTopScalefactorProducer.Skimmer.genEv import getGenEvents
+from WTopScalefactorProducer.Skimmer.getGenEv import getGenEv
 setTDRStyle()
 
 from ROOT import *
 
 parser = OptionParser()
 
+# "jetAK8_softDrop_mass","jetAK8_softDrop_mass_unCorr","jetAK8_chs_softdrop_mass","jetAK8_chs_pruned_mass"
 # --- Tagging options
 parser.add_option('--tagger', action="store",type="string",dest="tagger",default="jetAK8_tau21", help="Name of tagger variable (tau32/tau21/ddt)")
 parser.add_option('--massvar', action="store",type="string",dest="massvar",default="jetAK8_softDrop_mass", help="Name of mass variable to fit")
@@ -145,15 +146,15 @@ def doFitsToMatchedTT():
 		
 	ttMC_fitter = initialiseFits("em", options.sample, options.minX, options.maxX, workspace4fit_)
 	
-	ttMC_fitter.get_mj_dataset(ttMC_fitter.file_TTbar_mc,"_TTbar_realW")
-	ttMC_fitter.get_mj_dataset(ttMC_fitter.file_TTbar_mc,"_TTbar_fakeW")
+	ttMC_fitter.get_mj_dataset(ttMC_fitter.list_file_TTbar_mc,"_TTbar_realW")
+	ttMC_fitter.get_mj_dataset(ttMC_fitter.list_file_TTbar_mc,"_TTbar_fakeW")
 	
 	from WTopScalefactorProducer.Fitter.fitutils import fit_mj_single_MC
 	
-	fit_mj_single_MC(ttMC_fitter.workspace4fit_,ttMC_fitter.file_TTbar_mc,"_TTbar_realW",ttMC_fitter.mj_shape["TTbar_realW"],ttMC_fitter.channel,ttMC_fitter.wtagger_label)
-	fit_mj_single_MC(ttMC_fitter.workspace4fit_,ttMC_fitter.file_TTbar_mc,"_TTbar_realW_failtau2tau1cut",ttMC_fitter.mj_shape["TTbar_realW_fail"],ttMC_fitter.channel,ttMC_fitter.wtagger_label)
+	fit_mj_single_MC(ttMC_fitter.workspace4fit_,ttMC_fitter.file_TTbar_mc,"_TTbar_realW",ttMC_fitter.mj_shape["TTbar_realW_MC"],ttMC_fitter.channel,ttMC_fitter.wtagger_label)
+	fit_mj_single_MC(ttMC_fitter.workspace4fit_,ttMC_fitter.file_TTbar_mc,"_TTbar_realW_failtau2tau1cut",ttMC_fitter.mj_shape["TTbar_realW_fail_MC"],ttMC_fitter.channel,ttMC_fitter.wtagger_label)
 	fit_mj_single_MC(ttMC_fitter.workspace4fit_,ttMC_fitter.file_TTbar_mc,"_TTbar_fakeW",ttMC_fitter.mj_shape["TTbar_fakeW"],ttMC_fitter.channel,ttMC_fitter.wtagger_label)
-	fit_mj_single_MC(ttMC_fitter.workspace4fit_,ttMC_fitter.file_TTbar_mc,"_TTbar_fakeW_failtau2tau1cut",ttMC_fitter.mj_shape["TTbar_fakeW_fail"],ttMC_fitter.channel,ttMC_fitter.wtagger_label)
+	fit_mj_single_MC(ttMC_fitter.workspace4fit_,ttMC_fitter.file_TTbar_mc,"_TTbar_fakeW_failtau2tau1cut",ttMC_fitter.mj_shape["TTbar_fakeW_fail_MC"],ttMC_fitter.channel,ttMC_fitter.wtagger_label)
 	
 	print "Finished fitting matched tt MC! Plots can be found in plots_*_MCfits. Printing workspace:"
 	workspace4fit_.Print()
@@ -505,10 +506,14 @@ class initialiseFits:
       self.mj_shape = {}
       
       # Fit functions for matched tt MC
+      self.mj_shape["TTbar_fakeW_fail_MC"] = "ErfExp_ttbar_failtau2tau1cut_fitMC"  
+      self.mj_shape["TTbar_realW_fail_MC"] = "GausErfExp_ttbar_failtau2tau1cut_fitMC"
+      self.mj_shape["TTbar_realW_MC"]      = "GausErfExp_ttbar_fitMC" #before "2Gaus_ttbar"
+       
       self.mj_shape["TTbar_realW"]      = "GausErfExp_ttbar" #before "2Gaus_ttbar"
       self.mj_shape["TTbar_realW_fail"] = "GausErfExp_ttbar_failtau2tau1cut" #before "GausChebychev_ttbar_failtau2tau1cut"
       self.mj_shape["TTbar_fakeW"]      = "ErfExp_ttbar"
-      self.mj_shape["TTbar_fakeW_fail"] = "ErfExp_ttbar_failtau2tau1cut"      
+      self.mj_shape["TTbar_fakeW_fail"] = "ErfExp_ttbar_failtau2tau1cut"   
       if options.tagger.find("ddt")!=-1 or options.tagger.find("DDT")!=-1 :
         self.mj_shape["TTbar_fakeW"]      = "GausErfExp_ttbar"
         self.mj_shape["TTbar_fakeW_fail"] = "GausErfExp_ttbar_failtau2tau1cut"
@@ -597,7 +602,7 @@ class initialiseFits:
         
 
       # Directory and input files
-      self.file_Directory         = "/scratch/thaarres/samples2017_v2/"
+      self.file_Directory         = "/scratch/thaarres/wtagsf_2017jecv6/"
       postfix = ""
           
       self.file_data              = "SingleMuon.root"
@@ -608,14 +613,13 @@ class initialiseFits:
       self.file_TTbar_mc          = "TT.root"
       self.file_pseudodata        = "pseudodata_weighted.root"
       
-      self.list_file_data       = ["SingleMuon.root"]
-      self.list_file_QCD_mc     = ["QCD_Pt_1000to1400_TuneCP5_13TeV_pythia8.root","QCD_Pt_1400to1800_TuneCP5_13TeV_pythia8.root","QCD_Pt_170to300_TuneCP5_13TeV_pythia8.root","QCD_Pt_1800to2400_TuneCP5_13TeV_pythia8.root","QCD_Pt_2400to3200_TuneCP5_13TeV_pythia8.root","QCD_Pt_3200toInf_TuneCP5_13TeV_pythia8.root","QCD_Pt_470to600_TuneCP5_13TeV_pythia8.root","QCD_Pt_600to800_TuneCP5_13TeV_pythia8.root","QCD_Pt_800to1000_TuneCP5_13TeV_pythia8.root"]
-      self.list_file_STop_mc    = ["ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8.root","ST_t-channel_antitop_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8.root","ST_t-channel_top_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8.root","ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8.root","ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8.root"]
+      self.list_file_QCD_mc     = ["QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8.root","QCD_HT100to200_TuneCP5_13TeV-madgraph-pythia8.root","QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8.root","QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8.root","QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8.root","QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8.root"]
+      self.list_file_STop_mc    = ["ST_s-channel_4f_leptonDecays_TuneCP5_PSweights_13TeV-amcatnlo-pythia8.root","ST_t-channel_antitop_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8.root","ST_t-channel_top_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8.root","ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8.root","ST_tW_top_5f_inclusiveDecays_TuneCP5_PSweights_13TeV-powheg-pythia8.root"]
+      self.list_file_data       = ["SingleMuon_Run2017B-17Nov2017-v1.root","SingleMuon_Run2017C-17Nov2017-v1.root","SingleMuon_Run2017D-17Nov2017-v1.root","SingleMuon_Run2017E-17Nov2017-v1.root","SingleMuon_Run2017F-17Nov2017-v1.root"]
+      self.list_file_TTbar_mc   = ["TTTo2L2Nu_TuneCP5_PSweights_13TeV-powheg-pythia8.root","TTToHadronic_TuneCP5_PSweights_13TeV-powheg-pythia8.root","TTToSemiLeptonic_TuneCP5_PSweights_13TeV-powheg-pythia8.root"]
+      self.list_file_WJets_mc   = ["W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root","W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root","W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root","W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
       self.list_file_VV_mc      = ["WW_TuneCP5_13TeV-pythia8.root","WZ_TuneCP5_13TeV-pythia8.root","ZZ_TuneCP5_13TeV-pythia8.root"]
-      self.list_file_WJets_mc   = ["W1JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root","W2JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root","W3JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root","W4JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root"]
-      self.list_file_TTbar_mc   = ["TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.root","TTToHadronic_TuneCP5_PSweights_13TeV-powheg-pythia8.root","TTToSemiLeptonic_TuneCP5_PSweights_13TeV-powheg-pythia8.root"]
-      self.list_file_pseudodata = self.list_file_QCD_mc  + self.list_file_STop_mc + self.list_file_VV_mc   + self.list_file_WJets_mc + self.list_file_TTbar_mc
-
+      self.list_file_pseudodata =  self.list_file_QCD_mc + self.list_file_STop_mc + self.list_file_VV_mc   + self.list_file_WJets_mc + self.list_file_TTbar_mc
       # self.list_file_data              = ["SingleMuon.root"]
 #       self.list_file_WJets_mc           = ["WJetsToLNu.root"]
 #       self.list_file_VV_mc             = ["VV.root"]
@@ -638,15 +642,16 @@ class initialiseFits:
 
       
       #Color pallett for plots
+      fillcolor = [434,613,633,414]
       self.color_palet = {}
       self.color_palet["data"]              = 1
-      self.color_palet["WJets"]             = 2
-      self.color_palet["VV"]                = 4
-      self.color_palet["QCD"]               = 5
-      self.color_palet["STop"]              = 7
-      self.color_palet["TTbar"]             = 210
-      self.color_palet["TTbar_realW"]       = 210
-      self.color_palet["TTbar_fakeW"]       = 419
+      self.color_palet["WJets"]             = 633
+      self.color_palet["VV"]                = 613
+      self.color_palet["QCD"]               = 797
+      self.color_palet["STop"]              = 434
+      self.color_palet["TTbar"]             = 414
+      self.color_palet["TTbar_realW"]       = 414
+      self.color_palet["TTbar_fakeW"]       = 415
       self.color_palet["Signal"]            = 1
       self.color_palet["Uncertainty"]       = 1
       self.color_palet["Other_Backgrounds"] = 1    
@@ -672,7 +677,7 @@ class initialiseFits:
  			self.get_mj_dataset(self.list_file_STop_mc,"_STop")
  			self.get_mj_dataset(self.list_file_WJets_mc,"_WJets")
  			self.get_mj_dataset(self.list_file_VV_mc,"_VV")
- 			self.get_mj_dataset(self.list_file_VV_mc,"_QCD")
+ 			self.get_mj_dataset(self.list_file_QCD_mc,"_QCD")
  			if options.fitMC: return
  			self.get_mj_dataset(self.list_file_TTbar_mc,"_TTbar")
  			self.get_mj_dataset(self.list_file_TTbar_mc,"_TTbar_realW")
@@ -878,7 +883,7 @@ class initialiseFits:
             continue
           
           if options.tagger.find("ddt")==-1 and options.tagger.find("DDT")==-1: wtagger = getattr(treeIn,options.tagger)
-          else: wtagger = treeIn.jetAK8_tau21+(0.082*rt.TMath.Log((treeIn.jetAK8_softDrop_mass*treeIn.jetAK8_softDrop_mass)/treeIn.jetAK8_pt))
+          else: wtagger = treeIn.jetAK8_tau21+(0.079*rt.TMath.Log((treeIn.jetAK8_softDrop_mass*treeIn.jetAK8_softDrop_mass)/treeIn.jetAK8_pt))
 			
           discriminantCut = 0
           if wtagger <= options.tau2tau1cutHP: # HP
@@ -897,9 +902,9 @@ class initialiseFits:
           if not TString(label).Contains("data"):
 
               tmp_scale_to_lumi = treeIn.eventWeightLumi*lumi ## weigth for xs and lumi
-              tmp_event_weight  = treeWeight*getattr(treeIn,"normGenWeight")*getattr(treeIn,"puWeight")*treeIn.eventWeightLumi*lumi
+              tmp_event_weight  = treeWeight*treeIn.normGenWeight*treeIn.puWeight*treeIn.topWeight*treeIn.eventWeightLumi*lumi
 
-              tmp_event_weight4fit = treeWeight*getattr(treeIn,"normGenWeight")*getattr(treeIn,"puWeight") #Missing b-tag weight and Vtg weight
+              tmp_event_weight4fit = treeWeight*treeIn.normGenWeight*treeIn.puWeight*treeIn.topWeight
               tmp_event_weight4fit = tmp_event_weight4fit*treeIn.eventWeightLumi/tmp_scale_to_lumi    
               
 			  
