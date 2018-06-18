@@ -40,49 +40,49 @@ if not options.MC :
         dhists[h.GetName()] = h
 
 
-mcFile = ROOT.TFile("./94XMCsamples/TTToSemiLeptonic-9X4NanoAOD_V0-fullyMerged.root")
+mcFile = ROOT.TFile("./fullyMerged_hists_TTToSemiLeptonic.root")
 #get histos to plot
 mhists = {}
 
 titles = [
 
-['h_lep0pt' , '$P_{T}$ Lepton (GeV) '],
+['h_lep0pt' , 'P_{T} Lepton (GeV) '],
 ['h_lep0eta' , '\eta  Lepton'],
 ['h_lep0phi' , '\phi Lepton'],
-['h_hadToppt' , 'AK8 Jet Pt (GeV)'],
+['h_hadToppt' , 'AK8 Jet P_{T} (GeV)'],
 ['h_hadTopeta' , 'AK8 Jet \eta'],
 ['h_hadTopphi' , 'AK8 Jet \phi'],
 ['h_hadTopmass' , 'AK8 Jet Ungroomed mass (GeV)'],
-['h_WcandSubjetpt' , 'AK8 Soft Drop Subjet 0 Pt (GeV)'],
+['h_WcandSubjetpt' , 'AK8 Soft Drop Subjet 0 P_{T} (GeV)'],
 ['h_WcandSubjeteta' , 'AK8 Soft Drop Subjet 0 \eta'],
 ['h_WcandSubjetphi' , 'AK8 Soft Drop Subjet 0 \phi '],
 ['h_WcandSubjetmass' , 'AK8 Soft Drop Subjet 0 mass (GeV)'],
-['h_WcandSubjettau21' , 'AK8 Soft Drop Subjet 0 \tau_{\frac{2}{1}}'],
-['h_WcandSubjetpt_ptbin0' , ' Jet Soft Drop mass (GeV)'],
-['h_WcandSubjetpt' , 'AK8 Soft Drop Subjet 0 Pt (GeV)'],
+['h_WcandSubjettau21' , 'AK8 Soft Drop Subjet 0 #tau_{#frac{2}{1}}'],
+['h_WcandSubjetpt_ptbin0' , ' Jet Soft Drop Mass (GeV)'],
+['h_WcandSubjetpt' , 'AK8 Soft Drop Subjet 0 P_{T} (GeV)'],
 ['h_WcandSubjeteta_ptbin0' , 'AK8 Soft Drop Subjet 0 \eta'],
 ['h_WcandSubjetphi_ptbin0' , 'AK8 Soft Drop Subjet 0 \phi '],
 ['h_WcandSubjetmass_ptbin0' , 'AK8 Soft Drop Subjet 0 Mass (GeV)'],
-['h_WcandSubjettau21_ptbin0' , 'AK8 Soft Drop Subjet 0 \tau_{\frac{2}{1}}'],
-['h_WcandSubjetpt_ptbin1' , 'AK8 Soft Drop Subjet 0 Pt (GeV)'],
+['h_WcandSubjettau21_ptbin0' , 'AK8 Soft Drop Subjet 0 #tau_{#frac{2}{1}}'],
+['h_WcandSubjetpt_ptbin1' , 'AK8 Soft Drop Subjet 0 P_{T} (GeV)'],
 ['h_WcandSubjeteta_ptbin1' , 'AK8 Soft Drop Subjet 0 \eta'],
 ['h_WcandSubjetphi_ptbin1' , 'AK8 Soft Drop Subjet 0 \phi '],
 ['h_WcandSubjetmass_ptbin1' , 'AK8 Soft Drop Subjet 0 Mass (GeV)'],
-['h_WcandSubjettau21_ptbin1' , 'AK8 Soft Drop Subjet 0 \tau_{\frac{2}{1}}'],
-['h_WcandSubjetpt_ptbin2' , 'AK8 Soft Drop Subjet 0 Pt (GeV)'],
+['h_WcandSubjettau21_ptbin1' , 'AK8 Soft Drop Subjet 0 #tau_{#frac{2}{1}}'],
+['h_WcandSubjetpt_ptbin2' , 'AK8 Soft Drop Subjet 0 P_{T} (GeV)'],
 ['h_WcandSubjeteta_ptbin2' , 'AK8 Soft Drop Subjet 0 \eta'],
 ['h_WcandSubjetphi_ptbin2' , 'AK8 Soft Drop Subjet 0 \phi '],
 ['h_WcandSubjetmass_ptbin2' , 'AK8 Soft Drop Subjet 0 Mass (GeV)'],
-['h_WcandSubjettau21_ptbin2' , 'AK8 Soft Drop Subjet 0 \tau_{\frac{2}{1}}'],
-['h_Wleppt' , 'Leptonic W Pt ()GeV'],
+['h_WcandSubjettau21_ptbin2' , 'AK8 Soft Drop Subjet 0 #tau_{#frac{2}{1}}'],
+['h_Wleppt' , 'Leptonic W P_{T} (GeV)'],
 ['h_Wlepeta' , 'Leptonic W \eta'],
 ['h_Wlepphi' , 'Leptonic W \phi '],
 ['h_Wlepmass' , 'Leptonic W Mass ( GeV)'],
-['h_matchedAK8Subjetpt' , 'Gen Matched AK8 Soft Drop Subjet 0 Pt (GeV)'],
+['h_matchedAK8Subjetpt' , 'Gen Matched AK8 Soft Drop Subjet 0 P_{T} (GeV)'],
 ['h_matchedAK8Subjeteta' , 'Gen Matched AK8 Soft Drop Subjet 0 \eta'],
 ['h_matchedAK8Subjetphi' , 'Gen Matched AK8 Soft Drop Subjet 0 \phi'],
 ['h_matchedAK8Subjetmass' , 'Gen Matched AK8 Soft Drop Subjet 0 Mass (GeV)'],
-['h_unmatchedAK8Subjetpt' , 'UnMatched AK8 Soft Drop Subjet 0 Pt (GeV) '],
+['h_unmatchedAK8Subjetpt' , 'UnMatched AK8 Soft Drop Subjet 0 P_{T} (GeV) '],
 ['h_unmatchedAK8Subjeteta' , 'UnMatched AK8 Soft Drop Subjet 0 \eta '],
 ['h_unmatchedAK8Subjetphi' , 'UnMatched AK8 Soft Drop Subjet 0 \phi'],
 ['h_unmatchedAK8Subjetmass' , 'UnMatched AK8 Soft Drop Subjet 0 Mass (GeV) '],
@@ -175,6 +175,6 @@ if options.MC :
         #    rangexs = [-5,5]
 
         #print "Now plotting histogram {} with x range {}".format(name, rangexs)
-        newcan = printPlot("default", "fullymerged_plots", xtitle, name ,rangexs, y_max_scale, data , hist[0], Stack ) 
+        newcan = printPlot("NANO07feb", "fullymerged_plots", xtitle, name ,rangexs, y_max_scale, data , hist[0], Stack ) 
         cans.append(newcan)
 

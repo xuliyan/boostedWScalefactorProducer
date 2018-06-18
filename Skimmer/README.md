@@ -18,6 +18,15 @@ Submit with:
 ```
 python submit_all.py -c Pset_nanoSkim.py -d DirectoryName -f listOfDatasets.txt
 ```  
+
+To make JMAR Skims (Loose skim with >=1 AK8 Jet with Pt > 200 GeV and >=1 Lepton ):(Skim these to create the files we need)
+```
+cd crab/JMARskim
+ln -s $CMSSW_BASE/src/PhysicsTools/NanoAODTools/scripts/haddnano.py .
+python  submit_all_uif.py  -c  PSet.py -d June5_nanoskim-JetsAndLepton  -f test94X_DY_madgraph.txt
+ 
+```
+
 ## Running with qsub
 To submit with qsyb go to directory Skimmer/qsub
 
