@@ -7,13 +7,14 @@ from WTopScalefactorProducer.Fitter.CMS_lumi import *
 
 from WTopScalefactorProducer.Fitter.makepdf import MakeExtendedModel,change_dataset_to_histpdf,fixParameters,makeTTbarModel
 
-CMS_lumi.lumi_13TeV = "41.4 fb^{-1}(2017)"
+CMS_lumi.lumi_13TeV = "36.5 fb^{-1}(2016)"
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Preliminary"
 CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 iPos = 11
 if( iPos==0 ): CMS_lumi.relPosX = 0.12
 iPeriod = 4
+# iPeriod = 40 #2016
 
 def getCanvas():
 	H_ref = 600
@@ -156,7 +157,7 @@ def fit_mj_single_MC(workspace,fileName,label, model,channel, wtagger_label):
 	workspace.var("rrv_number"+label+"_"+channel+"_mj").setVal(workspace.var("rrv_number"+label+"_"+channel+"_mj").getVal()*workspace.var("rrv_scale_to_lumi"+label+"_"+channel).getVal())
 	workspace.var("rrv_number"+label+"_"+channel+"_mj").setError(workspace.var("rrv_number"+label+"_"+channel+"_mj").getError()*workspace.var("rrv_scale_to_lumi"+label+"_"+channel).getVal())
                                                                                                           
-def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constraintlist_data, constraintlist_MC, channel,wtagger):
+def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constraintlist_data, constraintlist_MC, channel,wtagger,peak):
   
   LPttScalefactor = workspace.var("LP_tt_scalefactor").getVal()
   ttScalefactor   = workspace.var("tt_scalefactor").getVal()
@@ -257,10 +258,10 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
   model_VV_fail    = fixParameters(workspace,"_VV"+label+"_failtau2tau1cut"   ,channel)
   model_WJets_fail = fixParameters(workspace,"_WJets"+label+"_failtau2tau1cut",channel)
   
-  model_bkg_TotalMC        = MakeExtendedModel(workspace,"_bkg_TotalMC"+label,mj_shape["bkg_mc"],"_mj",channel,wtagger,constraintlist_MC)
-  model_bkg_TotalMC_fail   = MakeExtendedModel(workspace,"_bkg_TotalMC"+label+"_failtau2tau1cut",mj_shape["bkg_mc_fail"],"_mj",channel,wtagger,constraintlist_MC)
-  model_ttbar_TotalMC      = makeTTbarModel(workspace,"_ttbar_TotalMC"+label,mj_shape["signal_mc"],channel,wtagger,constraintlist_MC ) 
-  model_ttbar_TotalMC_fail = makeTTbarModel(workspace,"_ttbar_TotalMC"+label+"_failtau2tau1cut",mj_shape["signal_mc_fail"],channel,wtagger,constraintlist_MC)                                                                                                                      
+  model_bkg_TotalMC        = MakeExtendedModel(workspace,"_bkg_TotalMC"+label,mj_shape["bkg_mc"],"_mj",channel,wtagger,constraintlist_MC,peak)
+  model_bkg_TotalMC_fail   = MakeExtendedModel(workspace,"_bkg_TotalMC"+label+"_failtau2tau1cut",mj_shape["bkg_mc_fail"],"_mj",channel,wtagger,constraintlist_MC,peak)
+  model_ttbar_TotalMC      = makeTTbarModel(workspace,"_ttbar_TotalMC"+label                   ,mj_shape["signal_mc"]     ,channel,wtagger,constraintlist_MC,peak ) 
+  model_ttbar_TotalMC_fail = makeTTbarModel(workspace,"_ttbar_TotalMC"+label+"_failtau2tau1cut",mj_shape["signal_mc_fail"],channel,wtagger,constraintlist_MC,peak)                                                                                                                      
   model_TotalMC            = rt.RooAddPdf(("model_TotalMC"+label+"_"+channel),("model_TotalMC"+label+"_"+channel),rt.RooArgList(model_ttbar_TotalMC,model_bkg_TotalMC,model_STop,model_VV,model_WJets))
   model_TotalMC_fail       = rt.RooAddPdf(("model_TotalMC"+label+"_"+"failtau2tau1cut"+"_"+channel),("model_TotalMC"+label+"_"+"failtau2tau1cut"+"_"+channel),rt.RooArgList(model_ttbar_TotalMC_fail,model_bkg_TotalMC_fail,model_STop_fail,model_VV_fail,model_WJets_fail))
  
@@ -268,10 +269,10 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
   getattr(workspace,'import')(model_TotalMC)
   
 
-  model_bkg_data         =  MakeExtendedModel(workspace,"_bkg_data"  +label                    ,mj_shape["bkg_data"],"_mj",channel,wtagger,constraintlist_data)                 
-  model_bkg_data_fail    =  MakeExtendedModel(workspace,"_bkg_data"  +label+"_failtau2tau1cut" ,mj_shape["bkg_data_fail"],"_mj",channel,wtagger,constraintlist_data)     
-  model_ttbar_data       =  makeTTbarModel   (workspace,"_ttbar_data"+label                    ,mj_shape["signal_data"]     ,channel,wtagger,constraintlist_data)   
-  model_ttbar_data_fail  =  makeTTbarModel   (workspace,"_ttbar_data"+label+"_failtau2tau1cut" ,mj_shape["signal_data_fail"],channel,wtagger,constraintlist_data)
+  model_bkg_data         =  MakeExtendedModel(workspace,"_bkg_data"  +label                    ,mj_shape["bkg_data"],"_mj",channel,wtagger,constraintlist_data,peak)                 
+  model_bkg_data_fail    =  MakeExtendedModel(workspace,"_bkg_data"  +label+"_failtau2tau1cut" ,mj_shape["bkg_data_fail"],"_mj",channel,wtagger,constraintlist_data,peak)     
+  model_ttbar_data       =  makeTTbarModel   (workspace,"_ttbar_data"+label                    ,mj_shape["signal_data"]     ,channel,wtagger,constraintlist_data,peak)   
+  model_ttbar_data_fail  =  makeTTbarModel   (workspace,"_ttbar_data"+label+"_failtau2tau1cut" ,mj_shape["signal_data_fail"],channel,wtagger,constraintlist_data,peak)
   model_data      = rt.RooAddPdf("model_data"+label+"_"+channel,"model_data"+label+"_"+channel  , rt.RooArgList(model_ttbar_data ,model_bkg_data ,model_STop ,model_VV ,model_WJets ) )
   model_data_fail = rt.RooAddPdf("model_data"+label+"_failtau2tau1cut_"+channel,"model_data"+label+"_failtau2tau1cut_"+channel, rt.RooArgList(model_ttbar_data_fail,model_bkg_data_fail,model_STop_fail,model_VV_fail,model_WJets_fail) )
   
@@ -280,7 +281,7 @@ def ScaleFactorTTbarControlSampleFit(workspace, mj_shape, color_palet, constrain
   getattr(workspace,'import')(model_data)
   getattr(workspace,'import')(model_data_fail)
 
-def DrawScaleFactorTTbarControlSample(xtitle,workspace, color_palet, label, channel, wtagger, ca8_ungroomed_pt_min, ca8_ungroomed_pt_max, sample):
+def DrawScaleFactorTTbarControlSample(xtitle,workspace, color_palet, label, channel, wtagger, ptmin, ptmax, sample,outname):
   
         ttScalefactor = workspace.var("tt_scalefactor").getVal()
         print ""
@@ -399,6 +400,11 @@ def DrawScaleFactorTTbarControlSample(xtitle,workspace, color_palet, label, chan
         rrv_sigma_gaus_data   =workspace.var("rrv_sigma1_gaus_ttbar_data_em_mj")
         rrv_mean_gaus_TotalMC =workspace.var("rrv_mean1_gaus_ttbar_TotalMC_em_mj")
         rrv_sigma_gaus_TotalMC=workspace.var("rrv_sigma1_gaus_ttbar_TotalMC_em_mj")
+        
+        tl_bin  = rt.TLatex(0.70,0.40, ("%i GeV < p_{T} < %i GeV")%(ptmin,ptmax) )
+        tl_bin.SetNDC()
+        tl_bin.SetTextSize(0.03)
+        xframe_data.addObject(tl_bin)
 
         if rrv_mean_gaus_TotalMC:
             tl_MC_mean  = rt.TLatex(0.75,0.62, ("#mu_{MC } = %3.2f #pm %2.2f")%(rrv_mean_gaus_TotalMC.getVal(), rrv_mean_gaus_TotalMC.getError()) );
@@ -438,18 +444,19 @@ def DrawScaleFactorTTbarControlSample(xtitle,workspace, color_palet, label, chan
         xframe_data.Draw()
         CMS_lumi(c1, iPeriod, iPos)
         c1.Update()
-        c1.SaveAs("plots/pass.png")
-        c1.SaveAs("plots/pass.pdf")
-        c1.SaveAs("plots/pass.C")
-        c1.SaveAs("plots/pass.root")
+        outname = "plots/%s_"%outname
+        c1.SaveAs(outname+"pass.png")
+        c1.SaveAs(outname+"pass.pdf")
+        c1.SaveAs(outname+"pass.C")
+        c1.SaveAs(outname+"pass.root")
         c1.cd()
         xframe_data_fail.Draw()
         CMS_lumi(c1, iPeriod, iPos)
         c1.Update()
-        c1.SaveAs("plots/fail.png")
-        c1.SaveAs("plots/fail.pdf")
-        c1.SaveAs("plots/fail.C")
-        c1.SaveAs("plots/fail.root")
+        c1.SaveAs(outname+"fail.png")
+        c1.SaveAs(outname+"fail.pdf")
+        c1.SaveAs(outname+"fail.C")
+        c1.SaveAs(outname+"fail.root")
         
         
                 # # #signal window
