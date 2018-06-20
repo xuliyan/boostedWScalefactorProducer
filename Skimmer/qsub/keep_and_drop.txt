@@ -1,7 +1,18 @@
-keep *
-drop IsoTrack*
-drop Photon*
-drop TrigObj*
-drop SoftActivity*
-drop GenVisTau*
-drop Tau*
+drop *
+keep Electron*
+keep Muon*
+keep Jet*
+keep FatJet*
+keep SubJet*
+keep LHE*
+keep GenJet*
+keep MET*
+keep genWeight*
+keep luminosityBlock*
+keep run*
+keep PV*
+keep HLT_IsoMu27*
+keep HLT_Mu50*
+keep HLT_Mu55*
+keep HLT_Ele*_CaloIdVT_GsfTrkIdT*
+
