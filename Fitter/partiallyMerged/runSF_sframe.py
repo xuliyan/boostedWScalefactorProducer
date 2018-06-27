@@ -4,6 +4,7 @@ import sys
 import os
 import time
 import math
+import csv
 from WTopScalefactorProducer.Fitter.tdrstyle import *
 from WTopScalefactorProducer.Fitter.CMS_lumi import *
 from WTopScalefactorProducer.Skimmer.getGenEv import getGenEv
@@ -22,9 +23,10 @@ parser.add_option('--HP', action="store", type="float",dest="tau2tau1cutHP",defa
 parser.add_option('--LP', action="store", type="float",dest="tau2tau1cutLP",default=0.75)
 parser.add_option('--minX', action="store", type="float",dest="minX",default=50. , help="Lower mass cut")
 parser.add_option('--maxX', action="store", type="float",dest="maxX",default=130., help="Upper mass cut")
-parser.add_option('--pTmin', action="store", type="float",dest="pTmin",default=200., help="Lower pT cut")
-parser.add_option('--pTmax', action="store", type="float",dest="pTmax",default=5000., help="Upper pT cut")
+parser.add_option('--ptmin', action="store", type="float",dest="pTmin",default=200., help="Lower pT cut")
+parser.add_option('--ptmax', action="store", type="float",dest="pTmax",default=5000., help="Upper pT cut")
 parser.add_option('--workspace', action="store",type="string",dest="workspace",default="workspace", help="Name of workspace")
+parser.add_option('--peak', action="store",type="string",dest="peak",default="W", help='Which peak to fit? W / t / Wt')
 
 # --- Personal infile settings
 parser.add_option('--sample', action="store",type="string",dest="sample",default="powheg", help='Which tt sample is used')
@@ -70,7 +72,7 @@ def getLegend():
   return legend
 
 def getPavetext():
-  addInfo = TPaveText(0.2510112,0.2066292,0.4202143,0.3523546,"NDC")
+  addInfo = TPaveText(0.7010112,0.3566292,0.7902143,0.4023546,"NDC")
   addInfo.SetFillColor(0)
   addInfo.SetLineColor(0)
   addInfo.SetFillStyle(0)
@@ -102,13 +104,16 @@ def drawFrameGetChi2(variable,fitResult,dataset,pdfModel,isData):
     if(isData): dataset.plotOn(frame,RooFit.DataError(RooAbsData.Poisson),RooFit.Name(dataset.GetName ()))
     else: dataset.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.Name(dataset.GetName ()))
     c1.cd()
+    frame.GetYaxis().SetNdivisions(203);
+    frame.GetXaxis().SetNdivisions(202);
     frame.GetYaxis().SetTitleSize(0.05)
-    frame.GetYaxis().SetTitleOffset(0.90)
+    frame.GetYaxis().SetTitleOffset(1.35)
     frame.SetName("mjjFit")
-    frame.GetYaxis().SetTitle("Events")
+    frame.GetYaxis().SetTitle("A.U")
     frame.GetXaxis().SetTitle(title)
     frame.Draw()
     frame.SetMinimum(0.)
+    frame.SetMaximum(2900.)
     legend = getLegend()
     if(isData): legend.AddEntry(frame.findObject(dataset.GetName ()),"CMS data","lpe")
     else: legend.AddEntry(frame.findObject(dataset.GetName ()),"Total MC","lpe")
@@ -127,9 +132,11 @@ def drawFrameGetChi2(variable,fitResult,dataset,pdfModel,isData):
     addInfo.AddText("#chi^{2}/nDOF = %.3f"%chi2)
     addInfo.Draw()
     c1.Update()
-    cname = pdfModel.GetName()
+    cname = pdfModel.GetName()+"_"+options.workspace.replace(".root","")
     c1.SaveAs("plots/%s_%s.png"%(cname,options.sample))
     c1.SaveAs("plots/%s_%s.C"%(cname,options.sample))
+    c1.SaveAs("plots/%s_%s.root"%(cname,options.sample))
+    c1.SaveAs("plots/%s_%s.pdf"%(cname,options.sample))
     return chi2
     
 def getSF():
@@ -268,19 +275,25 @@ def GetWtagScalefactors(workspace,fitter):
     
     print " \\begin{table}[htbp]"
     print "    \centering"
-    print "    \\begin{tabular}{lccc}"
+    print "    \\begin{tabular}{|lccc|}"
     print "    \hline"
-    print "    $\\tau_{21} < %.2f$ & m [GeV]           & $\sigma$~[GeV]     & W-tag efficiency\\\\"   %(options.tau2tau1cutHP)
+    print "    & m [GeV]           & $\sigma$~[GeV]     & W-tag efficiency\\\\"
+    print "    $\\tau_{21} < %.2f$ & &&\\\\ \hline"   %(options.tau2tau1cutHP)
     print "    \hline"                                                                        
-    print "    Data            & %.2f$\pm$ %.2f~GeV   & %.2f $\pm$ %.2f~GeV & %.2f $\pm$ %.2f\\\\"  %(rrv_mean_data_em.getVal(),rrv_mean_data_em.getError(),rrv_sigma_data_em.getVal(),rrv_sigma_data_em.getError(),rrv_eff_data_em.getVal(),rrv_eff_data_em.getError())
-    print "    Simulation      & %.2f$\pm$ %.2f~GeV   & %.2f $\pm$ %.2f~GeV & %.2f $\pm$ %.2f\\\\"  %(rrv_mean_MC_em.getVal(),rrv_mean_MC_em.getError(),rrv_sigma_MC_em.getVal(),rrv_sigma_MC_em.getError(),rrv_eff_MC_em.getVal(),rrv_eff_MC_em.getError())
+    print "    Data            & %.3f$\pm$ %.3f~GeV   & %.3f $\pm$ %.3f~GeV & %.3f $\pm$ %.3f\\\\"  %(rrv_mean_data_em.getVal(),rrv_mean_data_em.getError(),rrv_sigma_data_em.getVal(),rrv_sigma_data_em.getError(),rrv_eff_data_em.getVal(),rrv_eff_data_em.getError())
+    print "    Simulation      & %.3f$\pm$ %.3f~GeV   & %.3f $\pm$ %.3f~GeV & %.3f $\pm$ %.3f\\\\"  %(rrv_mean_MC_em.getVal(),rrv_mean_MC_em.getError(),rrv_sigma_MC_em.getVal(),rrv_sigma_MC_em.getError(),rrv_eff_MC_em.getVal(),rrv_eff_MC_em.getError())
     print "    \hline"                                                                        
-    print "    Data/simulation & %.3f$\pm$ %.3f       & %.2f $\pm$ %.2f     & %.2f $\pm$ %.2f\\\\"  %(rrv_mean_data_em.getVal()/rrv_mean_MC_em.getVal()  ,  mean_sf_error,rrv_sigma_data_em.getVal()/rrv_sigma_MC_em.getVal(),  sigma_sf_error,rrv_eff_data_em.getVal()/rrv_eff_MC_em.getVal()    ,  eff_sf_error)
+    print "    Data/simulation & %.3f$\pm$ %.3f       & %.3f $\pm$ %.3f     & %.3f $\pm$ %.3f\\\\"  %(rrv_mean_data_em.getVal()/rrv_mean_MC_em.getVal()  ,  mean_sf_error,rrv_sigma_data_em.getVal()/rrv_sigma_MC_em.getVal(),  sigma_sf_error,rrv_eff_data_em.getVal()/rrv_eff_MC_em.getVal()    ,  eff_sf_error)
+    print "    \hline"
+    print "    $%.2f < \\tau_{21} < %.2f$ & &&\\\\ \hline"   %(options.tau2tau1cutHP,options.tau2tau1cutLP)
+    print "    \hline"                                                                        
+    print "    Data            &    &  & %.3f $\pm$ %.3f\\\\"  %(tmpq_eff_data_em_LP,tmpq_eff_data_em_LP_err)
+    print "    Simulation      &    &  & %.3f $\pm$ %.3f\\\\"  %(tmpq_eff_MC_em_LP,tmpq_eff_MC_em_LP_err)
+    print "    \hline"                                                                        
+    print "    Data/simulation &    &   & %.3f $\pm$ %.3f\\\\"  %(pureq_wtagger_sf_em_LP,pureq_wtagger_sf_em_LP_err)
     print "    \hline"
     print "    \end{tabular}"
     print " \end{table}"
-    
-    
     
     
     #Write results to file
@@ -299,12 +312,12 @@ def GetWtagScalefactors(workspace,fitter):
     fitter.file_out_ttbar_control.write("\n")
     fitter.file_out_ttbar_control.write("\nHP W-tag eff+SF     %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(rrv_eff_data_em.getVal(),rrv_eff_data_em.getError(),rrv_eff_MC_em.getVal(),rrv_eff_MC_em.getError(), rrv_eff_data_em.getVal()/rrv_eff_MC_em.getVal(),  eff_sf_error))
     fitter.file_out_ttbar_control.write("\n")
-    # fitter.file_out_ttbar_control.write("\n-----------------------------------------------------------------------------------------------------------------------------")
-  #   fitter.file_out_ttbar_control.write("\n                                EXTREME FAIL                               ")
-  #   fitter.file_out_ttbar_control.write("\n-----------------------------------------------------------------------------------------------------------------------------")
-  #   fitter.file_out_ttbar_control.write("\nParameter                     Data                          Simulation                          Data/Simulation")
-  #   fitter.file_out_ttbar_control.write("\nExtreme fail eff+SF     %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(eff_data_em_extremefail,eff_data_em_extremefail_error,eff_MC_em_extremefail,eff_MC_em_extremefail_error, eff_SF_extremefail, eff_SF_extremefail_error))
-  #   fitter.file_out_ttbar_control.write("\n-----------------------------------------------------------------------------------------------------------------------------")
+      # fitter.file_out_ttbar_control.write("\n-----------------------------------------------------------------------------------------------------------------------------")
+    #   fitter.file_out_ttbar_control.write("\n                                EXTREME FAIL                               ")
+    #   fitter.file_out_ttbar_control.write("\n-----------------------------------------------------------------------------------------------------------------------------")
+    #   fitter.file_out_ttbar_control.write("\nParameter                     Data                          Simulation                          Data/Simulation")
+    #   fitter.file_out_ttbar_control.write("\nExtreme fail eff+SF     %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(eff_data_em_extremefail,eff_data_em_extremefail_error,eff_MC_em_extremefail,eff_MC_em_extremefail_error, eff_SF_extremefail, eff_SF_extremefail_error))
+    #   fitter.file_out_ttbar_control.write("\n-----------------------------------------------------------------------------------------------------------------------------")
     fitter.file_out_ttbar_control.write("\n                                    LP                                     ")
     fitter.file_out_ttbar_control.write("\n-----------------------------------------------------------------------------------------------------------------------------")
     fitter.file_out_ttbar_control.write("\n")
@@ -313,13 +326,99 @@ def GetWtagScalefactors(workspace,fitter):
     fitter.file_out_ttbar_control.write("\nLP W-tag eff+SF (wo/ext fail)         %0.3f +/- %0.3f                  %0.3f +/- %0.3f                        %0.3f +/- %0.3f" %(tmpq_eff_data_em_LP,tmpq_eff_data_em_LP_err,tmpq_eff_MC_em_LP,tmpq_eff_MC_em_LP_err,pureq_wtagger_sf_em_LP,pureq_wtagger_sf_em_LP_err))
     fitter.file_out_ttbar_control.write("\n")
     fitter.file_out_ttbar_control.write("\n-----------------------------------------------------------------------------------------------------------------------------")
+    fitter.file_out_ttbar_control.write("\n \\begin{table}[htbp]"                                                   )
+    fitter.file_out_ttbar_control.write("\n    \centering"                                                          )
+    fitter.file_out_ttbar_control.write("\n    \\begin{tabular}{|lccc|}"                                            )
+    fitter.file_out_ttbar_control.write("\n    \hline"                                                              )
+    fitter.file_out_ttbar_control.write("\n    & m [GeV]           & $\sigma$~[GeV]     & W-tag efficiency\\\\"     )
+    fitter.file_out_ttbar_control.write("\n    $\\tau_{21} < %.2f$ & &&\\\\ \hline"   %(options.tau2tau1cutHP)      )
+    fitter.file_out_ttbar_control.write("\n    \hline"                                                                                                                                                                                                                                                                                           )
+    fitter.file_out_ttbar_control.write("\n    Data            & %.3f$\pm$ %.3f~GeV   & %.3f $\pm$ %.3f~GeV & %.3f $\pm$ %.3f\\\\"  %(rrv_mean_data_em.getVal(),rrv_mean_data_em.getError(),rrv_sigma_data_em.getVal(),rrv_sigma_data_em.getError(),rrv_eff_data_em.getVal(),rrv_eff_data_em.getError())                                          )
+    fitter.file_out_ttbar_control.write("\n    Simulation      & %.3f$\pm$ %.3f~GeV   & %.3f $\pm$ %.3f~GeV & %.3f $\pm$ %.3f\\\\"  %(rrv_mean_MC_em.getVal(),rrv_mean_MC_em.getError(),rrv_sigma_MC_em.getVal(),rrv_sigma_MC_em.getError(),rrv_eff_MC_em.getVal(),rrv_eff_MC_em.getError())                                                      )
+    fitter.file_out_ttbar_control.write("\n    \hline"                                                                                                                                                                                                                                                                                            )
+    fitter.file_out_ttbar_control.write("\n    Data/simulation & %.3f$\pm$ %.3f       & %.3f $\pm$ %.3f     & %.3f $\pm$ %.3f\\\\"  %(rrv_mean_data_em.getVal()/rrv_mean_MC_em.getVal()  ,  mean_sf_error,rrv_sigma_data_em.getVal()/rrv_sigma_MC_em.getVal(),  sigma_sf_error,rrv_eff_data_em.getVal()/rrv_eff_MC_em.getVal()    ,  eff_sf_error))
+    fitter.file_out_ttbar_control.write("\n    \hline"                                                                                                                                                                                                                                                                                            )
+    fitter.file_out_ttbar_control.write("\n    $%.2f < \\tau_{21} < %.2f$ & &&\\\\ \hline"   %(options.tau2tau1cutHP,options.tau2tau1cutLP)                                                                                                                                                                                                       )
+    fitter.file_out_ttbar_control.write("\n    \hline"                                                                                                                                                                                                                                                                                            )
+    fitter.file_out_ttbar_control.write("\n    Data            &    &  & %.3f $\pm$ %.3f\\\\"  %(tmpq_eff_data_em_LP,tmpq_eff_data_em_LP_err)                                                                                                                                                                                                     )
+    fitter.file_out_ttbar_control.write("\n    Simulation      &    &  & %.3f $\pm$ %.3f\\\\"  %(tmpq_eff_MC_em_LP,tmpq_eff_MC_em_LP_err)                                                                                                                                                                                                         )
+    fitter.file_out_ttbar_control.write("\n    \hline"                                                                                                                                                                                                                                                                                            )
+    fitter.file_out_ttbar_control.write("\n    Data/simulation &    &   & %.3f $\pm$ %.3f\\\\"  %(pureq_wtagger_sf_em_LP,pureq_wtagger_sf_em_LP_err)                                                                                                                                                                                              )
+    fitter.file_out_ttbar_control.write("\n    \hline"                                                                                                                                                                                                                                                                                            )
+    fitter.file_out_ttbar_control.write("\n    \end{tabular}"                                                                                                                                                                                                                                                                                     )
+    fitter.file_out_ttbar_control.write("\n \end{table}")
+    
+    
+    if options.peak == "Wt":
+
+        rrv_mean_MC_em  = workspace.var("rrv_mean2_gaus_ttbar_TotalMC_failtau2tau1cut_em_mj") 
+        rrv_sigma_MC_em = workspace.var("rrv_sigma2_gaus_ttbar_TotalMC_failtau2tau1cut_em_mj")
+
+        rrv_mean_data_em  = workspace.var("rrv_mean2_gaus_ttbar_data_failtau2tau1cut_em_mj")
+        rrv_sigma_data_em = workspace.var("rrv_sigma2_gaus_ttbar_data_failtau2tau1cut_em_mj")
+        
+        wtagger_mean_shift_em     = rrv_mean_data_em.getVal()-rrv_mean_MC_em.getVal()
+        wtagger_mean_shift_err_em = (rrv_mean_data_em.getError()**2 + rrv_mean_MC_em.getError()**2)**0.5
+
+        wtagger_sigma_enlarge_em     = rrv_sigma_data_em.getVal()/rrv_sigma_MC_em.getVal()
+        wtagger_sigma_enlarge_err_em = ((rrv_sigma_data_em.getError()/rrv_sigma_data_em.getVal())**2 + (rrv_sigma_MC_em.getError()/rrv_sigma_MC_em.getVal())**2 )**0.5* wtagger_sigma_enlarge_em
+
+        mean_sf_error  = (rrv_mean_data_em.getVal()/rrv_mean_MC_em.getVal())   * ( (rrv_mean_data_em.getError()/rrv_mean_data_em.getVal())**2   +  (rrv_mean_MC_em.getError() /rrv_mean_MC_em.getVal())**2    )**0.5
+        sigma_sf_error = (rrv_sigma_data_em.getVal()/rrv_sigma_MC_em.getVal()) * ( (rrv_sigma_data_em.getError()/rrv_sigma_data_em.getVal())**2 +  (rrv_sigma_MC_em.getError()/rrv_sigma_MC_em.getVal())**2   )**0.5
+        print "FOR TOP:"
+        print " \\begin{table}[htbp]"
+        print "    \centering"
+        print "    \\begin{tabular}{|lcc|}"
+        print "    \hline"
+        print "    & $m_{top}$ [GeV]           & $\sigma_{top}$~[GeV]\\\\"
+        print "    $\\tau_{21} < %.2f$ & &\\\\ \hline"   %(options.tau2tau1cutHP)
+        print "    \hline"                                                                        
+        print "    Data            & %.3f$\pm$ %.3f~GeV   & %.3f $\pm$ %.3f~GeV \\\\"  %(rrv_mean_data_em.getVal(),rrv_mean_data_em.getError(),rrv_sigma_data_em.getVal(),rrv_sigma_data_em.getError())
+        print "    Simulation      & %.3f$\pm$ %.3f~GeV   & %.3f $\pm$ %.3f~GeV \\\\"  %(rrv_mean_MC_em.getVal(),rrv_mean_MC_em.getError(),rrv_sigma_MC_em.getVal(),rrv_sigma_MC_em.getError())
+        print "    \hline"                                                                                                                                             
+        print "    Data/simulation & %.3f$\pm$ %.3f       & %.3f $\pm$ %.3f\\\\"  %(rrv_mean_data_em.getVal()/rrv_mean_MC_em.getVal()  ,  mean_sf_error,rrv_sigma_data_em.getVal()/rrv_sigma_MC_em.getVal(),  sigma_sf_error)
+        print "    \hline"
+        print "    \end{tabular}"
+        print " \end{table}"
+        
+        fitter.file_out_ttbar_control.write("\n FOR TOP:")
+        fitter.file_out_ttbar_control.write("\n \\begin{table}[htbp]"                                                                                                                                                                   )
+        fitter.file_out_ttbar_control.write("\n    \centering"                                                                                                                                                                          )
+        fitter.file_out_ttbar_control.write("\n    \\begin{tabular}{|lcc|}"                                                                                                                                                            )
+        fitter.file_out_ttbar_control.write("\n    \hline"                                                                                                                                                                              )
+        fitter.file_out_ttbar_control.write("\n    & $m_{top}$ [GeV]           & $\sigma_{top}$~[GeV]\\\\"                                                                                                                              )
+        fitter.file_out_ttbar_control.write("\n    $\\tau_{21} < %.2f$ & &\\\\ \hline"   %(options.tau2tau1cutHP)                                                                                                                       )
+        fitter.file_out_ttbar_control.write("\n    \hline"                                                                                                                                                                              )
+        fitter.file_out_ttbar_control.write("\n    Data            & %.3f$\pm$ %.3f~GeV   & %.3f $\pm$ %.3f~GeV \\\\"  %(rrv_mean_data_em.getVal(),rrv_mean_data_em.getError(),rrv_sigma_data_em.getVal(),rrv_sigma_data_em.getError()) )
+        fitter.file_out_ttbar_control.write("\n    Simulation      & %.3f$\pm$ %.3f~GeV   & %.3f $\pm$ %.3f~GeV \\\\"  %(rrv_mean_MC_em.getVal(),rrv_mean_MC_em.getError(),rrv_sigma_MC_em.getVal(),rrv_sigma_MC_em.getError())         )
+        fitter.file_out_ttbar_control.write("\n    \hline"                                                                                                                                                                              )
+        fitter.file_out_ttbar_control.write("    Data/simulation & %.3f$\pm$ %.3f       & %.3f $\pm$ %.3f\\\\"  %(rrv_mean_data_em.getVal()/rrv_mean_MC_em.getVal()  ,  mean_sf_error,rrv_sigma_data_em.getVal()/rrv_sigma_MC_em.getVal(),  sigma_sf_error))
+        fitter.file_out_ttbar_control.write("    \hline")
+        fitter.file_out_ttbar_control.write("\n    \end{tabular}")
+        fitter.file_out_ttbar_control.write("\n \end{table}")
+        
+    
+    
+    
+    
+   
+    
+    
+    
+    
+    csvf = open("bin%i_%i_%s.csv"%(options.pTmin,options.pTmax,options.workspace.replace("workspace","").replace(".root","")),'wb')
+    writer = csv.writer(csvf)
+    
+    writer.writerow(["ptmin","ptmax","sf","err"])
+    writer.writerows([[options.pTmin,options.pTmax, rrv_eff_data_em.getVal()/rrv_eff_MC_em.getVal(),  eff_sf_error]])
+    csvf.close()
      
 class doWtagFits:
     def __init__(self):
         if options.doWS: 
         	self.workspace4fit_  = RooWorkspace("workspace4fit_","workspace4fit_")
         else:
-        	f = TFile(options.workspace+".root")
+        	f = TFile(options.workspace.replace(".root","")+".root")
         	self.workspace4fit_  = f.Get("workspace4fit_")
         self.boostedW_fitter_em = initialiseFits("em", options.sample, options.minX, options.maxX, self.workspace4fit_ )    # Define all shapes to be used for Mj, define regions (SB,signal) and input files. 
         self.boostedW_fitter_em.get_datasets_fit_minor_bkg()                                            # Loop over intrees to create datasets om Mj and fit the single MCs.
@@ -480,7 +579,7 @@ class doWtagFits:
         
         # draw the final fit results
         from WTopScalefactorProducer.Fitter.fitutils import DrawScaleFactorTTbarControlSample
-        DrawScaleFactorTTbarControlSample(options.xtitle,self.workspace4fit_,self.boostedW_fitter_em.color_palet,"","em",self.boostedW_fitter_em.wtagger_label,self.boostedW_fitter_em.AK8_pt_min,self.boostedW_fitter_em.AK8_pt_max,options.sample)
+        DrawScaleFactorTTbarControlSample(options.xtitle,self.workspace4fit_,self.boostedW_fitter_em.color_palet,"","em",self.boostedW_fitter_em.wtagger_label,self.boostedW_fitter_em.AK8_pt_min,self.boostedW_fitter_em.AK8_pt_max,options.sample,options.workspace)
        
         # Get W-tagging scalefactor and efficiencies
         GetWtagScalefactors(self.workspace4fit_,self.boostedW_fitter_em)
@@ -527,6 +626,10 @@ class initialiseFits:
       self.mj_shape["QCD_fail"]           = "ErfExp"
       self.mj_shape["STop"]               = "ErfExpGaus_sp"       
       self.mj_shape["STop_fail"]          = "ErfExpGaus_sp"  
+      
+    
+
+
           
       # if (options.tau2tau1cutHP==0.60):
  #        self.mj_shape["VV_fail"]     = "Exp"
@@ -542,24 +645,29 @@ class initialiseFits:
       # Fit functions used in simultaneous fit of pass and fail categories
       self.mj_shape["bkg_mc_fail"]          = "ErfExp_ttbar_failtau2tau1cut"
       self.mj_shape["bkg_data_fail"]        = "ErfExp_ttbar_failtau2tau1cut"
-
+      
       self.mj_shape["signal_mc_fail"]       = "GausErfExp_ttbar_failtau2tau1cut" #Before GausChebychev_ttbar_failtau2tau1cut
       self.mj_shape["signal_data_fail"]     = "GausErfExp_ttbar_failtau2tau1cut"
+      self.mj_shape["signal_data"]          = "GausErfExp_ttbar" #Before 2Gaus_ttbar
+      self.mj_shape["signal_mc"]            = "GausErfExp_ttbar"
 
       self.mj_shape["bkg_data"]             = "ErfExp_ttbar"
       self.mj_shape["bkg_mc"]               = "ErfExp_ttbar"
 
-      self.mj_shape["signal_data"]          = "GausErfExp_ttbar" #Before 2Gaus_ttbar
-      self.mj_shape["signal_mc"]            = "GausErfExp_ttbar"
-      
-      if options.tagger.find("ddt")!=-1 or options.tagger.find("DDT")!=-1 :
-        self.mj_shape["bkg_mc_fail"]          = "ErfExp_ttbar_failtau2tau1cut"
-        self.mj_shape["bkg_data_fail"]        = "ErfExp_ttbar_failtau2tau1cut"
-        self.mj_shape["bkg_data"]             = "ErfExp_ttbar"
-        self.mj_shape["bkg_mc"]               = "ErfExp_ttbar"
+
+      # if options.tagger.find("ddt")!=-1 or options.tagger.find("DDT")!=-1 :
+      #   self.mj_shape["bkg_mc_fail"]          = "ErfExp_ttbar_failtau2tau1cut_ddt"
+      #   self.mj_shape["bkg_data_fail"]        = "ErfExp_ttbar_failtau2tau1cut_ddt"
+      #   self.mj_shape["bkg_data"]             = "ErfExp_ttbar"
+      #   self.mj_shape["bkg_mc"]               = "ErfExp_ttbar"
 
 
-      
+      if options.peak == "Wt" :
+         self.mj_shape["TTbar_realW_fail_MC"]  = "Gaus2ErfExp_ttbar_failtau2tau1cut_fitMC"
+         self.mj_shape["TTbar_realW_fail"]     = "Gaus2ErfExp_ttbar_failtau2tau1cut" #before "GausChebychev_ttbar_failtau2tau1cut" 
+         self.mj_shape["signal_mc_fail"]       = "Gaus2ErfExp_ttbar_failtau2tau1cut" #Before GausChebychev_ttbar_failtau2tau1cut
+         self.mj_shape["signal_data_fail"]     = "Gaus2ErfExp_ttbar_failtau2tau1cut"
+         
       # # #TESTS USING OLD METHOD, EG ADDING TWO ADDITIONAL FIT FUNCTIONS
 #       self.mj_shape["signal_data"]          = "2Gaus_ttbar"
 #       self.mj_shape["signal_mc"]            = "2Gaus_ttbar"
@@ -661,11 +769,11 @@ class initialiseFits:
    
       # Out .txt file with final SF numbers
       self.file_ttbar_control_txt = "WtaggingSF_%s.txt"%(options.workspace.replace("workspace","").replace(".root",""))
-      self.file_out_ttbar_control = open(self.file_ttbar_control_txt,"w")
+      self.file_out_ttbar_control = open(self.file_ttbar_control_txt.replace("__","_"),"w")
                                                                                                                                                             
     def get_datasets_fit_minor_bkg(self):
 		
-		filename = options.workspace+".root"
+		filename = options.workspace.replace(".root","")+".root"
 		print "Checking if workspace exists, if not, produce " ,filename
 		try: os.stat(filename)
 		except: options.doWS = True
@@ -727,7 +835,7 @@ class initialiseFits:
         
       #Construct pass/fail models (fix minor backgrounds, create sim. fit total PDFS)
       from WTopScalefactorProducer.Fitter.fitutils import ScaleFactorTTbarControlSampleFit
-      ScaleFactorTTbarControlSampleFit(self.workspace4fit_,self.mj_shape,self.color_palet,self.constrainslist_data,self.constrainslist_mc,self.channel,self.wtagger_label)
+      ScaleFactorTTbarControlSampleFit(self.workspace4fit_,self.mj_shape,self.color_palet,self.constrainslist_data,self.constrainslist_mc,self.channel,self.wtagger_label,options.peak)
      
       #Get data/MC scalefactors
       rrv_scale_number                      = self.workspace4fit_.var("rrv_scale_number_TTbar_STop_VV_WJets").getVal()
@@ -795,7 +903,7 @@ class initialiseFits:
         self.file_out_ttbar_control.write("wtagger_eff_MC         = %s       \n"%(wtagger_eff_MC ))
         self.file_out_ttbar_control.write("wtagger_eff_data       = %s       \n"%(wtagger_eff_data ))
         self.file_out_ttbar_control.write("wtagger_eff_reweight   = %s +/- %s\n"%(wtagger_eff_reweight, wtagger_eff_reweight_err))
-            
+ 
     # Loop over trees
     def get_mj_dataset(self,in_file_name, label, jet_mass=options.massvar,lumi=lumi): 
       
