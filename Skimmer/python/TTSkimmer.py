@@ -88,6 +88,14 @@ class TTbar_SemiLep(Module):
          self.out.branch("SelectedJet_eta",  "F")
          self.out.branch("SelectedJet_mass", "F")
          self.out.branch("SelectedLepton_pt",  "F")
+         self.out.branch("SelectedSubJet_softDrop_mass",  "F")
+         self.out.branch("SelectedSubJet_tau32",  "F")
+         self.out.branch("SelectedSubJet_tau21",  "F")
+         self.out.branch("SelectedSubJet_tau21_ddt",  "F")
+         self.out.branch("SelectedSubJet_tau21_ddt_retune",  "F")
+         self.out.branch("SelectedSubJet_pt",   "F")
+         self.out.branch("SelectedSubJet_eta",  "F")
+         self.out.branch("SelectedSubJet_mass", "F")
          self.out.branch("Wlep_type",  "I")
          self.out.branch("W_pt",  "F")
          self.out.branch("MET",  "F")
@@ -290,12 +298,12 @@ class TTbar_SemiLep(Module):
                 recoAK8Groomed[reco] = recosubjets[reco.subJetIdx1].p4() + recosubjets[reco.subJetIdx2].p4()
                 if recosubjets[reco.subJetIdx1].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() >  recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M()
-                    WHadreco = recosubjets[reco.subJetIdx1].p4()
+                    WHadreco = recosubjets[reco.subJetIdx1]
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
                         self.SJ0isW = 1
                 if recosubjets[reco.subJetIdx2].p4().M() > maxrecoSJmass and recosubjets[reco.subJetIdx1].p4().M() < recosubjets[reco.subJetIdx2].p4().M() :
                     maxrecoSJmass = recosubjets[reco.subJetIdx1].p4().M()
-                    WHadreco = recosubjets[reco.subJetIdx2].p4()
+                    WHadreco = recosubjets[reco.subJetIdx2]
                     if recosubjets[reco.subJetIdx1].btagCSVV2 >  self.minBDisc  or recosubjets[reco.subJetIdx2].btagCSVV2 >  self.minBDisc :
                         self.SJ0isW = 0
                 if isMC and WHadreco != None and self.SJ0isW >= 0 :
@@ -303,7 +311,7 @@ class TTbar_SemiLep(Module):
                     for q in realqs:
                         gen_4v = ROOT.TLorentzVector()
                         gen_4v.SetPtEtaPhiM(q.pt,q.eta,q.phi,q.mass)
-                        dR = WHadreco.DeltaR(gen_4v)
+                        dR = WHadreco.p4().DeltaR(gen_4v)
                         if dR < 0.6: self.matchedSJ = 1
             else :
                 recoAK8Groomed[reco] = None
@@ -327,6 +335,12 @@ class TTbar_SemiLep(Module):
         self.out.fillBranch("SelectedJet_eta",  recoAK8[0].eta)
         self.out.fillBranch("SelectedJet_mass",  recoAK8[0].mass)
         self.out.fillBranch("SelectedLepton_pt", lepton.Pt())
+        if  WHadreco != None : 
+            self.out.fillBranch("SelectedSubJet_softDrop_mass",  WHadreco.mass)
+            self.out.fillBranch("SelectedSubJet_pt",   WHadreco.pt)
+            self.out.fillBranch("SelectedSubJet_eta",  WHadreco.eta)
+            self.out.fillBranch("SelectedSubJet_mass",  WHadreco.mass)
+
         if recoAK8[0].tau1 > 0.0: 
           tau21 = recoAK8[0].tau2/recoAK8[0].tau1
         else:
@@ -339,6 +353,21 @@ class TTbar_SemiLep(Module):
         else:
           tau32 = -1.     
         self.out.fillBranch("SelectedJet_tau32",tau32)
+        if  WHadreco != None :
+            if WHadreco.tau1 > 0.0:
+              sjtau21 = WHadreco.tau2/WHadreco.tau1
+            else:
+              sjtau21 = -1.
+            self.out.fillBranch("SelectedSubJet_tau21",sjtau21)
+            self.out.fillBranch("SelectedSubJet_tau21_ddt", sjtau21+0.063*ROOT.TMath.Log(WHadreco.mass**2/WHadreco.pt))
+            self.out.fillBranch("SelectedSubJet_tau21_ddt_retune", sjtau21+0.082*ROOT.TMath.Log(WHadreco.mass**2/WHadreco.pt))
+            if WHadreco.tau2 > 0.0:
+              sjtau32 = WHadreco.tau3/WHadreco.tau2
+            else:
+              sjtau32 = -1.
+            self.out.fillBranch("SelectedJet_tau32",sjtau32)
+
+
         self.out.fillBranch("passedMETfilters",passedMETFilters)
 
         return True
