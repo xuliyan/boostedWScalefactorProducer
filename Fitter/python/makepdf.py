@@ -103,13 +103,17 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
                     # err = abs(0.10*value)
                     if label.find('fail')!=-1:              
                         print "FAIL FIT: Importing variable - ", line
-                        if line.find('rrv_c_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj'     )!=-1: rrv_c_ErfExp      = RooRealVar('rrv_c_ErfExp'     + label+"_"+channel+spectrum ,'rrv_c_ErfExp'     + label+"_"+channel+spectrum  ,value, value-err, value+err )
-                        if line.find('rrv_offset_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj')!=-1: rrv_offset_ErfExp = RooRealVar('rrv_offset_ErfExp'+ label+"_"+channel+spectrum ,'rrv_offset_ErfExp'+ label+"_"+channel+spectrum  ,value, value-err, value+err )
-                        if line.find('rrv_width_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj' )!=-1: rrv_width_ErfExp  = RooRealVar('rrv_width_ErfExp' + label+"_"+channel+spectrum ,'rrv_width_ErfExp' + label+"_"+channel+spectrum  ,value, value-err, value+err )
+                        if line.find('rrv_c_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj'     )!=-1: rrv_c_ErfExp      = RooRealVar('rrv_c_ErfExp'     + label+"_"+channel+spectrum ,'rrv_c_ErfExp'     + label+"_"+channel+spectrum  ,value)#, value-err, value+err )
+                        if line.find('rrv_offset_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj')!=-1: rrv_offset_ErfExp = RooRealVar('rrv_offset_ErfExp'+ label+"_"+channel+spectrum ,'rrv_offset_ErfExp'+ label+"_"+channel+spectrum  ,value)#, value-err, value+err )
+                        if line.find('rrv_width_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj' )!=-1: rrv_width_ErfExp  = RooRealVar('rrv_width_ErfExp' + label+"_"+channel+spectrum ,'rrv_width_ErfExp' + label+"_"+channel+spectrum  ,value)#, value-err, value+err )
                     else:
-                        if line.find('rrv_c_ErfExp_TTbar_fakeW_em_mj'     )!=-1: rrv_c_ErfExp      = RooRealVar('rrv_c_ErfExp'     + label+"_"+channel+spectrum ,'rrv_c_ErfExp'     + label+"_"+channel+spectrum  ,value , value-err, value+err )
-                        if line.find('rrv_offset_ErfExp_TTbar_fakeW_em_mj')!=-1: rrv_offset_ErfExp = RooRealVar('rrv_offset_ErfExp'+ label+"_"+channel+spectrum ,'rrv_offset_ErfExp'+ label+"_"+channel+spectrum  ,value , value-err, value+err )
-                        if line.find('rrv_width_ErfExp_TTbar_fakeW_em_mj' )!=-1: rrv_width_ErfExp  = RooRealVar('rrv_width_ErfExp' + label+"_"+channel+spectrum ,'rrv_width_ErfExp' + label+"_"+channel+spectrum  ,value , value-err, value+err )
+                        if line.find('rrv_c_ErfExp_TTbar_fakeW_em_mj'     )!=-1: rrv_c_ErfExp      = RooRealVar('rrv_c_ErfExp'     + label+"_"+channel+spectrum ,'rrv_c_ErfExp'     + label+"_"+channel+spectrum  ,value)# , value-err, value+err )
+                        if line.find('rrv_offset_ErfExp_TTbar_fakeW_em_mj')!=-1: rrv_offset_ErfExp = RooRealVar('rrv_offset_ErfExp'+ label+"_"+channel+spectrum ,'rrv_offset_ErfExp'+ label+"_"+channel+spectrum  ,value)# , value-err, value+err )
+                        if line.find('rrv_width_ErfExp_TTbar_fakeW_em_mj' )!=-1: rrv_width_ErfExp  = RooRealVar('rrv_width_ErfExp' + label+"_"+channel+spectrum ,'rrv_width_ErfExp' + label+"_"+channel+spectrum  ,value)# , value-err, value+err )
+                        if wsname.find("2017")!=-1:
+                           if line.find('rrv_c_ErfExp_TTbar_fakeW_em_mj'     )!=-1: rrv_c_ErfExp      = RooRealVar('rrv_c_ErfExp'     + label+"_"+channel+spectrum ,'rrv_c_ErfExp'     + label+"_"+channel+spectrum  ,value)# , value-err, value+err )
+                           if line.find('rrv_offset_ErfExp_TTbar_fakeW_em_mj')!=-1: rrv_offset_ErfExp = RooRealVar('rrv_offset_ErfExp'+ label+"_"+channel+spectrum ,'rrv_offset_ErfExp'+ label+"_"+channel+spectrum  ,value)# , value-err, value+err )
+                           if line.find('rrv_width_ErfExp_TTbar_fakeW_em_mj' )!=-1: rrv_width_ErfExp  = RooRealVar('rrv_width_ErfExp' + label+"_"+channel+spectrum ,'rrv_width_ErfExp' + label+"_"+channel+spectrum  ,value)# , value-err, value+err )
         
         model_pdf     = ROOT.RooErfExpPdf("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum ,rrv_x,rrv_c_ErfExp,rrv_offset_ErfExp,rrv_width_ErfExp)
         # gaus1         = addConstraint(workspace,rrv_c_ErfExp,rrv_c_ErfExp.getVal(),rrv_c_ErfExp.getError(),constraint)
@@ -277,8 +281,8 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
                    name  = line.split(" ")[0]
                    value = float(line.split(" ")[1])
                    err   = abs(float(line.split(" ")[2]))
-                   # if err == 0: err = abs(value*.10)
-                   # err = abs(0.20*value)
+                   if err == 0: err = abs(value*.10)
+                   err = abs(0.20*value)
                    if label.find('fail')!=-1:            
                        if line.find('rrv_mean1_gaus_TTbar_realW_failtau2tau1cut_em_mj'  )!=-1: rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"  + label +"_"+channel+spectrum ,"rrv_mean1_gaus"  + label +"_"+channel+spectrum ,value , value-2, value+2 )
                        if line.find('rrv_sigma1_gaus_TTbar_realW_failtau2tau1cut_em_mj' )!=-1: rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus" + label +"_"+channel+spectrum ,"rrv_sigma1_gaus" + label +"_"+channel+spectrum ,value , value-1, value+1 )
@@ -287,12 +291,12 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
                        if line.find('rrv_alpha2_TTbar_realW_failtau2tau1cut_em_mj'      )!=-1: rrv_alpha2       = RooRealVar("rrv_alpha2"      + label +"_"+channel+spectrum ,"rrv_alpha2"      + label +"_"+channel+spectrum ,value , value*0.8, value*1.2 )
                        if line.find('rrv_sign2_TTbar_realW_failtau2tau1cut_em_mj'       )!=-1: rrv_sign2        = RooRealVar("rrv_sign2"       + label +"_"+channel+spectrum ,"rrv_sign2"       + label +"_"+channel+spectrum ,value , value*0.8, value*1.2 )
                        if wsname.find("ddt")!=-1:
-                           if line.find('rrv_mean1_gaus_TTbar_realW_failtau2tau1cut_em_mj'  )!=-1: rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"  + label +"_"+channel+spectrum ,"rrv_mean1_gaus"  + label +"_"+channel+spectrum ,value, value-5, value+5)
-                           if line.find('rrv_sigma1_gaus_TTbar_realW_failtau2tau1cut_em_mj' )!=-1: rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus" + label +"_"+channel+spectrum ,"rrv_sigma1_gaus" + label +"_"+channel+spectrum ,value, value-5, value+5)
-                           if line.find('rrv_alpha1_TTbar_realW_failtau2tau1cut_em_mj'      )!=-1: rrv_alpha1       = RooRealVar("rrv_alpha1"      + label +"_"+channel+spectrum ,"rrv_alpha1"      + label +"_"+channel+spectrum ,value, value*0.8, value*1.2 )
-                           if line.find('rrv_sign1_TTbar_realW_failtau2tau1cut_em_mj'       )!=-1: rrv_sign1        = RooRealVar("rrv_sign1"       + label +"_"+channel+spectrum ,"rrv_sign1"       + label +"_"+channel+spectrum ,value, value*0.8, value*1.2 )
-                           if line.find('rrv_alpha2_TTbar_realW_failtau2tau1cut_em_mj'      )!=-1: rrv_alpha2       = RooRealVar("rrv_alpha2"      + label +"_"+channel+spectrum ,"rrv_alpha2"      + label +"_"+channel+spectrum ,value, value*0.8, value*1.2 )
-                           if line.find('rrv_sign2_TTbar_realW_failtau2tau1cut_em_mj'       )!=-1: rrv_sign2        = RooRealVar("rrv_sign2"       + label +"_"+channel+spectrum ,"rrv_sign2"       + label +"_"+channel+spectrum ,value, value*0.8, value*1.2 )
+                           if line.find('rrv_mean1_gaus_TTbar_realW_failtau2tau1cut_em_mj'  )!=-1: rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"  + label +"_"+channel+spectrum ,"rrv_mean1_gaus"  + label +"_"+channel+spectrum ,value, value-4, value+4)
+                           if line.find('rrv_sigma1_gaus_TTbar_realW_failtau2tau1cut_em_mj' )!=-1: rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus" + label +"_"+channel+spectrum ,"rrv_sigma1_gaus" + label +"_"+channel+spectrum ,value, value-2, value+2)
+                           if line.find('rrv_alpha1_TTbar_realW_failtau2tau1cut_em_mj'      )!=-1: rrv_alpha1       = RooRealVar("rrv_alpha1"      + label +"_"+channel+spectrum ,"rrv_alpha1"      + label +"_"+channel+spectrum ,value, value-err, value+err )
+                           if line.find('rrv_sign1_TTbar_realW_failtau2tau1cut_em_mj'       )!=-1: rrv_sign1        = RooRealVar("rrv_sign1"       + label +"_"+channel+spectrum ,"rrv_sign1"       + label +"_"+channel+spectrum ,value, value-err, value+err )
+                           if line.find('rrv_alpha2_TTbar_realW_failtau2tau1cut_em_mj'      )!=-1: rrv_alpha2       = RooRealVar("rrv_alpha2"      + label +"_"+channel+spectrum ,"rrv_alpha2"      + label +"_"+channel+spectrum ,value, value-err, value+err )
+                           if line.find('rrv_sign2_TTbar_realW_failtau2tau1cut_em_mj'       )!=-1: rrv_sign2        = RooRealVar("rrv_sign2"       + label +"_"+channel+spectrum ,"rrv_sign2"       + label +"_"+channel+spectrum ,value, value-err, value+err )
                        
                    else:
                        if line.find('rrv_mean1_gaus_TTbar_realW_em_mj'  )!=-1: rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"  + label +"_"+channel+spectrum ,"rrv_mean1_gaus"  + label +"_"+channel+spectrum ,value , value-2, value+2 )
@@ -302,13 +306,19 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
                        if line.find('rrv_alpha2_TTbar_realW_em_mj'      )!=-1: rrv_alpha2       = RooRealVar("rrv_alpha2"      + label +"_"+channel+spectrum ,"rrv_alpha2"      + label +"_"+channel+spectrum ,value , value*0.8, value*1.2 )
                        if line.find('rrv_sign2_TTbar_realW_em_mj'       )!=-1: rrv_sign2        = RooRealVar("rrv_sign2"       + label +"_"+channel+spectrum ,"rrv_sign2"       + label +"_"+channel+spectrum ,value , value*0.8, value*1.2 )
                        if wsname.find("ddt")!=-1:
-                           if line.find('rrv_mean1_gaus_TTbar_realW_em_mj'  )!=-1: rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"  + label +"_"+channel+spectrum ,"rrv_mean1_gaus"  + label +"_"+channel+spectrum ,value , value-5 , value+5)
-                           if line.find('rrv_sigma1_gaus_TTbar_realW_em_mj' )!=-1: rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus" + label +"_"+channel+spectrum ,"rrv_sigma1_gaus" + label +"_"+channel+spectrum ,value , value-5 , value+5 )
-                           if line.find('rrv_alpha1_TTbar_realW_em_mj'      )!=-1: rrv_alpha1       = RooRealVar("rrv_alpha1"      + label +"_"+channel+spectrum ,"rrv_alpha1"      + label +"_"+channel+spectrum ,value , value*0.8, value*1.2 )
-                           if line.find('rrv_sign1_TTbar_realW_em_mj'       )!=-1: rrv_sign1        = RooRealVar("rrv_sign1"       + label +"_"+channel+spectrum ,"rrv_sign1"       + label +"_"+channel+spectrum ,value , value*0.8, value*1.2 )
-                           if line.find('rrv_alpha2_TTbar_realW_em_mj'      )!=-1: rrv_alpha2       = RooRealVar("rrv_alpha2"      + label +"_"+channel+spectrum ,"rrv_alpha2"      + label +"_"+channel+spectrum ,value , value*0.8, value*1.2 )
-                           if line.find('rrv_sign2_TTbar_realW_em_mj'       )!=-1: rrv_sign2        = RooRealVar("rrv_sign2"       + label +"_"+channel+spectrum ,"rrv_sign2"       + label +"_"+channel+spectrum ,value , value*0.8, value*1.2 )
-                           
+                           if line.find('rrv_mean1_gaus_TTbar_realW_em_mj'  )!=-1: rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"  + label +"_"+channel+spectrum ,"rrv_mean1_gaus"  + label +"_"+channel+spectrum ,value , value-10 , value+10)
+                           if line.find('rrv_sigma1_gaus_TTbar_realW_em_mj' )!=-1: rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus" + label +"_"+channel+spectrum ,"rrv_sigma1_gaus" + label +"_"+channel+spectrum ,value , value-15 , value+15 )
+                           if line.find('rrv_alpha1_TTbar_realW_em_mj'      )!=-1: rrv_alpha1       = RooRealVar("rrv_alpha1"      + label +"_"+channel+spectrum ,"rrv_alpha1"      + label +"_"+channel+spectrum ,value , value*0.5, value*1.5 )
+                           if line.find('rrv_sign1_TTbar_realW_em_mj'       )!=-1: rrv_sign1        = RooRealVar("rrv_sign1"       + label +"_"+channel+spectrum ,"rrv_sign1"       + label +"_"+channel+spectrum ,value , value*0.5, value*1.5 )
+                           if line.find('rrv_alpha2_TTbar_realW_em_mj'      )!=-1: rrv_alpha2       = RooRealVar("rrv_alpha2"      + label +"_"+channel+spectrum ,"rrv_alpha2"      + label +"_"+channel+spectrum ,value , value*0.5, value*1.5 )
+                           if line.find('rrv_sign2_TTbar_realW_em_mj'       )!=-1: rrv_sign2        = RooRealVar("rrv_sign2"       + label +"_"+channel+spectrum ,"rrv_sign2"       + label +"_"+channel+spectrum ,value , value*0.5, value*1.5 )
+                           if wsname.find("2017")!=-1:
+                              if line.find('rrv_mean1_gaus_TTbar_realW_em_mj'  )!=-1: rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"  + label +"_"+channel+spectrum ,"rrv_mean1_gaus"  + label +"_"+channel+spectrum ,value , value-3 , value+3)
+                              if line.find('rrv_sigma1_gaus_TTbar_realW_em_mj' )!=-1: rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus" + label +"_"+channel+spectrum ,"rrv_sigma1_gaus" + label +"_"+channel+spectrum ,value , value-2 , value+2 )
+                              # if line.find('rrv_alpha1_TTbar_realW_em_mj'      )!=-1: rrv_alpha1       = RooRealVar("rrv_alpha1"      + label +"_"+channel+spectrum ,"rrv_alpha1"      + label +"_"+channel+spectrum ,value , value*0.5, value*1.5 )
+                              # if line.find('rrv_sign1_TTbar_realW_em_mj'       )!=-1: rrv_sign1        = RooRealVar("rrv_sign1"       + label +"_"+channel+spectrum ,"rrv_sign1"       + label +"_"+channel+spectrum ,value , value*0.5, value*1.5 )
+                              # if line.find('rrv_alpha2_TTbar_realW_em_mj'      )!=-1: rrv_alpha2       = RooRealVar("rrv_alpha2"      + label +"_"+channel+spectrum ,"rrv_alpha2"      + label +"_"+channel+spectrum ,value , value*0.5, value*1.5 )
+                              # if line.find('rrv_sign2_TTbar_realW_em_mj'       )!=-1: rrv_sign2        = RooRealVar("rrv_sign2"       + label +"_"+channel+spectrum ,"rrv_sign2"       + label +"_"+channel+spectrum ,value , value*0.5, value*1.5 )
 
         model_pdf       = ROOT.RooDoubleCrystalBall("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum, rrv_x, rrv_mean1_gaus, rrv_sigma1_gaus, rrv_alpha1, rrv_sign1, rrv_alpha2, rrv_sign2)
 
@@ -359,7 +369,7 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
                    name  = line.split(" ")[0]
                    value = float(line.split(" ")[1])
                    err   = abs(float(line.split(" ")[2]))
-                   # err = abs(0.20*value)
+                   err = abs(0.50*value)
                    if line.find('rrv_frac_TTbar_realW_failtau2tau1cut_em_mj'        )!=-1: rrv_frac         = RooRealVar("rrv_frac"         + label +"_"+channel+spectrum ,"rrv_frac"         + label +"_"+channel+spectrum  ,value   , value-err, value+err )
                    if line.find('rrv_mean2_gaus_TTbar_realW_failtau2tau1cut_em_mj'  )!=-1: rrv_mean2_gaus   = RooRealVar("rrv_mean2_gaus"  + label +"_"+channel+spectrum ,"rrv_mean2_gaus"  + label +"_"+channel+spectrum ,value , value*0.8, value*1.2 )
                    if line.find('rrv_sigma2_gaus_TTbar_realW_failtau2tau1cut_em_mj' )!=-1: rrv_sigma2_gaus  = RooRealVar("rrv_sigma2_gaus" + label +"_"+channel+spectrum ,"rrv_sigma2_gaus" + label +"_"+channel+spectrum ,value , value*0.8, value*1.2 )
@@ -371,8 +381,8 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
                        if line.find('rrv_alpha2_TTbar_realW_failtau2tau1cut_em_mj'      )!=-1: rrv_alpha2       = RooRealVar("rrv_alpha2"      + label +"_"+channel+spectrum ,"rrv_alpha2"      + label +"_"+channel+spectrum ,value , value-err, value+err )
                        if line.find('rrv_sign2_TTbar_realW_failtau2tau1cut_em_mj'       )!=-1: rrv_sign2        = RooRealVar("rrv_sign2"       + label +"_"+channel+spectrum ,"rrv_sign2"       + label +"_"+channel+spectrum ,value , value-err, value+err )
                    else:
-                       if line.find('rrv_mean1_gaus_TTbar_realW_em_mj'  )!=-1: rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"  + label +"_"+channel+spectrum ,"rrv_mean1_gaus"  + label +"_"+channel+spectrum ,value , value*0.8, value*1.2 )
-                       if line.find('rrv_sigma1_gaus_TTbar_realW_em_mj' )!=-1: rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus" + label +"_"+channel+spectrum ,"rrv_sigma1_gaus" + label +"_"+channel+spectrum ,value , value*0.8, value*1.2 )
+                       if line.find('rrv_mean1_gaus_TTbar_realW_em_mj'  )!=-1: rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"  + label +"_"+channel+spectrum ,"rrv_mean1_gaus"  + label +"_"+channel+spectrum ,value , value*0.9, value*1.1 )
+                       if line.find('rrv_sigma1_gaus_TTbar_realW_em_mj' )!=-1: rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus" + label +"_"+channel+spectrum ,"rrv_sigma1_gaus" + label +"_"+channel+spectrum ,value , value*0.5, value*1.5 )
                        if line.find('rrv_alpha1_TTbar_realW_em_mj'      )!=-1: rrv_alpha1       = RooRealVar("rrv_alpha1"      + label +"_"+channel+spectrum ,"rrv_alpha1"      + label +"_"+channel+spectrum ,value , value-err, value+err )
                        if line.find('rrv_sign1_TTbar_realW_em_mj'       )!=-1: rrv_sign1        = RooRealVar("rrv_sign1"       + label +"_"+channel+spectrum ,"rrv_sign1"       + label +"_"+channel+spectrum ,value , value-err, value+err )
                        if line.find('rrv_alpha2_TTbar_realW_em_mj'      )!=-1: rrv_alpha2       = RooRealVar("rrv_alpha2"      + label +"_"+channel+spectrum ,"rrv_alpha2"      + label +"_"+channel+spectrum ,value , value-err, value+err )
@@ -417,11 +427,11 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
                    name  = line.split(" ")[0]
                    value = float(line.split(" ")[1])
                    err   = abs(float(line.split(" ")[2]))
-                   # err = abs(0.20*value)
+                   err = abs(0.20*value)
                    if label.find('fail')!=-1:            
-                       if line.find('rrv_c_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj'     )!=-1: rrv_c_ErfExp      = RooRealVar('rrv_c_ErfExp'     + label+"_"+channel+spectrum ,'rrv_c_ErfExp'     + label+"_"+channel+spectrum  ,value     , value-5*err, value+5*err )
-                       if line.find('rrv_offset_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj')!=-1: rrv_offset_ErfExp = RooRealVar('rrv_offset_ErfExp'+ label+"_"+channel+spectrum ,'rrv_offset_ErfExp'+ label+"_"+channel+spectrum  ,value     , value-5*err, value+5*err )
-                       if line.find('rrv_width_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj' )!=-1: rrv_width_ErfExp  = RooRealVar('rrv_width_ErfExp' + label+"_"+channel+spectrum ,'rrv_width_ErfExp' + label+"_"+channel+spectrum  ,value     , value-5*err, value+5*err )                      
+                       if line.find('rrv_c_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj'     )!=-1: rrv_c_ErfExp      = RooRealVar('rrv_c_ErfExp'     + label+"_"+channel+spectrum ,'rrv_c_ErfExp'     + label+"_"+channel+spectrum  ,value     , value-err, value+err )
+                       if line.find('rrv_offset_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj')!=-1: rrv_offset_ErfExp = RooRealVar('rrv_offset_ErfExp'+ label+"_"+channel+spectrum ,'rrv_offset_ErfExp'+ label+"_"+channel+spectrum  ,value     , value-err, value+err )
+                       if line.find('rrv_width_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj' )!=-1: rrv_width_ErfExp  = RooRealVar('rrv_width_ErfExp' + label+"_"+channel+spectrum ,'rrv_width_ErfExp' + label+"_"+channel+spectrum  ,value     , value-err, value+err )                      
                        if line.find('rrv_mean1_gaus_TTbar_fakeW_failtau2tau1cut_em_mj'   )!=-1: rrv_mean1_gaus    = RooRealVar("rrv_mean1_gaus"   + label +"_"+channel+spectrum ,"rrv_mean1_gaus"   + label +"_"+channel+spectrum  ,value   , value*0.5, value*1.5 )
                        if line.find('rrv_sigma1_gaus_TTbar_fakeW_failtau2tau1cut_em_mj'  )!=-1: rrv_sigma1_gaus   = RooRealVar("rrv_sigma1_gaus"  + label +"_"+channel+spectrum ,"rrv_sigma1_gaus"  + label +"_"+channel+spectrum  ,value   , value*0.5, value*1.5 )
                        if line.find('rrv_frac_TTbar_fakeW_failtau2tau1cut_em_mj'         )!=-1: rrv_frac          = RooRealVar("rrv_frac"         + label +"_"+channel+spectrum ,"rrv_frac"         + label +"_"+channel+spectrum  ,value   , value*0.5, value*1.5 )
@@ -429,9 +439,9 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
                        if line.find('rrv_c_ErfExp_TTbar_fakeW_em_mj'     )!=-1: rrv_c_ErfExp      = RooRealVar('rrv_c_ErfExp'     + label +"_"+channel+spectrum ,'rrv_c_ErfExp'     + label +"_"+channel+spectrum  ,value   , value-err, value+err )
                        if line.find('rrv_offset_ErfExp_TTbar_fakeW_em_mj')!=-1: rrv_offset_ErfExp = RooRealVar('rrv_offset_ErfExp'+ label +"_"+channel+spectrum ,'rrv_offset_ErfExp'+ label +"_"+channel+spectrum  ,value   , value-err, value+err )
                        if line.find('rrv_width_ErfExp_TTbar_fakeW_em_mj' )!=-1: rrv_width_ErfExp  = RooRealVar('rrv_width_ErfExp' + label +"_"+channel+spectrum ,'rrv_width_ErfExp' + label +"_"+channel+spectrum  ,value   , value-err, value+err )
-                       if line.find('rrv_mean1_gaus_TTbar_fakeW_em_mj'   )!=-1: rrv_mean1_gaus    = RooRealVar("rrv_mean1_gaus"   + label +"_"+channel+spectrum ,"rrv_mean1_gaus"   + label +"_"+channel+spectrum  ,value   , value*0.5, value*1.5 )
-                       if line.find('rrv_sigma1_gaus_TTbar_fakeW_em_mj'  )!=-1: rrv_sigma1_gaus   = RooRealVar("rrv_sigma1_gaus"  + label +"_"+channel+spectrum ,"rrv_sigma1_gaus"  + label +"_"+channel+spectrum  ,value   , value*0.5, value*1.5 )
-                       if line.find('rrv_frac_TTbar_fakeW_em_mj'         )!=-1: rrv_frac          = RooRealVar("rrv_frac"         + label +"_"+channel+spectrum ,"rrv_frac"         + label +"_"+channel+spectrum  ,value   , value*0.5, value*1.5 )
+                       if line.find('rrv_mean1_gaus_TTbar_fakeW_em_mj'   )!=-1: rrv_mean1_gaus    = RooRealVar("rrv_mean1_gaus"   + label +"_"+channel+spectrum ,"rrv_mean1_gaus"   + label +"_"+channel+spectrum  ,value   , value*0.8, value*1.2 )
+                       if line.find('rrv_sigma1_gaus_TTbar_fakeW_em_mj'  )!=-1: rrv_sigma1_gaus   = RooRealVar("rrv_sigma1_gaus"  + label +"_"+channel+spectrum ,"rrv_sigma1_gaus"  + label +"_"+channel+spectrum  ,value   , value*0.8, value*1.2 )
+                       if line.find('rrv_frac_TTbar_fakeW_em_mj'         )!=-1: rrv_frac          = RooRealVar("rrv_frac"         + label +"_"+channel+spectrum ,"rrv_frac"         + label +"_"+channel+spectrum  ,value   , value*0.8, value*1.2 )
                        
             gaus1 = RooGaussian("gaus1"+label+"_"+channel+spectrum ,"gaus1"+label+"_"+channel+spectrum ,rrv_x,rrv_mean1_gaus,rrv_sigma1_gaus)
             rrv_frac.setConstant(ROOT.kTRUE)
@@ -488,7 +498,10 @@ def makeTTbarModel(workspace,label, model,channel, wtagger, constraint=[],peak="
      info =""
      if label.find("_ttbar_data")!=-1 and label.find("fail")==-1:
          rrv_number_total = RooRealVar("rrv_number_total_ttbar_data"+info+"_"+channel,"rrv_number_total_ttbar_data"+info+"_"+channel,500,0.,1e10)
-         eff_ttbar = RooRealVar("eff_ttbar_data"+info+"_"+channel,"eff_ttbar_data"+info+"_"+channel,effS,effS*0.8,effS*1.20)
+         #eff_ttbar = RooRealVar("eff_ttbar_data"+info+"_"+channel,"eff_ttbar_data"+info+"_"+channel,effS,effS*0.7,effS*1.3)
+         eff_ttbar = RooRealVar("eff_ttbar_data"+info+"_"+channel,"eff_ttbar_data"+info+"_"+channel,effS,0.,1.)
+         if wsname.find("2017")!=-1: eff_ttbar = RooRealVar("eff_ttbar_data"+info+"_"+channel,"eff_ttbar_data"+info+"_"+channel,effS,effS*0.8,effS*1.2)
+         
          rrv_number = RooFormulaVar("rrv_number"+label+"_"+channel+spectrum, "@0*@1", RooArgList(eff_ttbar,rrv_number_total))
 
      elif label.find("_ttbar_data")!=-1 and label.find("fail")!=-1:
@@ -498,7 +511,10 @@ def makeTTbarModel(workspace,label, model,channel, wtagger, constraint=[],peak="
          
      elif label.find("_ttbar_TotalMC")!=-1 and label.find("fail")==-1:
          rrv_number_total = RooRealVar("rrv_number_total_ttbar_TotalMC"+info+"_"+channel,"rrv_number_total_ttbar_TotalMC"+info+"_"+channel,500,0.,1e10)
-         eff_ttbar = RooRealVar("eff_ttbar_TotalMC"+info+"_"+channel,"eff_ttbar_TotalMC"+info+"_"+channel,effS,effS*0.8,effS*1.20)
+         #eff_ttbar = RooRealVar("eff_ttbar_TotalMC"+info+"_"+channel,"eff_ttbar_TotalMC"+info+"_"+channel,effS,effS*0.7,effS*1.3)
+         eff_ttbar = RooRealVar("eff_ttbar_TotalMC"+info+"_"+channel,"eff_ttbar_TotalMC"+info+"_"+channel,effS,0.,1.)
+         if wsname.find("2017")!=-1: eff_ttbar = RooRealVar("eff_ttbar_TotalMC"+info+"_"+channel,"eff_ttbar_TotalMC"+info+"_"+channel,effS,effS*0.8,effS*1.2)
+         
          rrv_number = RooFormulaVar("rrv_number"+label+"_"+channel+spectrum, "@0*@1", RooArgList(eff_ttbar,rrv_number_total))
          
      elif label.find("_ttbar_TotalMC")!=-1 and label.find("fail")!=-1:

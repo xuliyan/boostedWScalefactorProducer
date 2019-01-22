@@ -8,7 +8,7 @@ else:
   infile = ["root://cms-xrd-global.cern.ch//store/mc/RunIIFall17NanoAOD/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/00000/0686D954-B442-E811-9AB3-0CC47AD98BC2.root"]
 
 if len(sys.argv)>2: outputDir = sys.argv[2]
-else: outputDir = "TEST"	
+else: outputDir = "Samples"	
 
 if len(sys.argv)>3: name = sys.argv[3]
 else: name = "test.root"

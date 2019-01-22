@@ -33,9 +33,10 @@ parser.add_option('--sample', action="store",type="string",dest="sample",default
 parser.add_option('--treename', action="store",type="string",dest="intree",default="tree", help='name of in tree')
 
 # --- Fitting options
+parser.add_option('--topPt', action='store_true', dest='topPt', default=False, help='Use top pt reweighting')
 parser.add_option('--fitTT', action='store_true', dest='fitTT', default=False, help='Only do ttbar fits')
 parser.add_option('--fitMC', action='store_true', dest='fitMC', default=False, help='Only do MC fits')
-parser.add_option('--doBinned',dest="doBinnedFit", default=True, action="store_true", help="Do binned instead of unbinned fit")
+parser.add_option('--doBinned',dest="doBinnedFit", default=False, action="store_true", help="Do binned instead of unbinned fit")
 
 # --- Running options
 parser.add_option('-b', action='store_true', dest='noX', default=False, help='no X11 windows')
@@ -681,13 +682,13 @@ class initialiseFits:
       
       
       
-      self.file_Directory       = "/mnt/t3nfs01/data01/shome/thaarres/2017/Treemaker/TreeAnalyzer/Output/HaddedOutput/reweighted/"
+      self.file_Directory       = "/mnt/t3nfs01/data01/shome/thaarres/2017/Treemaker/TreeAnalyzer/Output/HaddedOutput/reweighted_topPt/"#"/mnt/t3nfs01/data01/shome/thaarres/2017/Treemaker/TreeAnalyzer/Output/HaddedOutput/reweighted/"
       self.list_file_STop_mc    = ["ST_s-channel_4f_leptonDecays_TuneCP5_PSweights_13TeV-amcatnlo-pythia8_0000.root","ST_t-channel_antitop_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8_0000.root","ST_t-channel_top_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8_0000.root","ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_0000.root","ST_tW_top_5f_inclusiveDecays_TuneCP5_PSweights_13TeV-powheg-pythia8_0000.root"]
       self.list_file_data       = ["SingleMuon.root"]
       self.list_file_TTbar_mc   = ["TTTo2L2Nu_TuneCP5_PSweights_13TeV-powheg-pythia8.root","TTToHadronic_TuneCP5_PSweights_13TeV-powheg-pythia8.root","TTToSemiLeptonic_TuneCP5_PSweights_13TeV-powheg-pythia8.root"]
       self.list_file_WJets_mc   = ["W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root","W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_0000.root","W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_0000.root","W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_0000.root"]
       self.list_file_VV_mc      = ["WW_TuneCP5_13TeV-pythia8_0000.root","WZ_TuneCP5_13TeV-pythia8_0000.root","ZZ_TuneCP5_13TeV-pythia8_0000.root"]
-      self.list_file_QCD_mc     = ["thaarres_QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8.root"]
+      # self.list_file_QCD_mc     = ["thaarres_QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8.root"]
       # self.list_file_TTbar_mc   = ["thaarres_TTJets_SingleLeptFromT_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
       if options.sample.find("amcnlo")!=-1: 
           self.list_file_TTbar_mc   = ["thaarres_TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8.root"]
@@ -720,7 +721,7 @@ class initialiseFits:
       ## self.list_file_TTbar_mc   = ["TTTo2L2Nu_TuneCP5_PSweights_13TeV-powheg-pythia8.root","TTToHadronic_TuneCP5_PSweights_13TeV-powheg-pythia8.root","TTToSemiLeptonic_WspTgt150_TuneCUETP8M2T4_13TeV-powheg-pythia8.root"]
       #self.list_file_WJets_mc   = ["W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root","W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root","W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root","W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
       #self.list_file_VV_mc      = ["WW_TuneCP5_13TeV-pythia8.root","WZ_TuneCP5_13TeV-pythia8.root","ZZ_TuneCP5_13TeV-pythia8.root"]
-      self.list_file_pseudodata =  self.list_file_QCD_mc + self.list_file_STop_mc + self.list_file_VV_mc   + self.list_file_WJets_mc + self.list_file_TTbar_mc
+      self.list_file_pseudodata =  self.list_file_STop_mc + self.list_file_VV_mc   + self.list_file_WJets_mc + self.list_file_TTbar_mc
       # self.list_file_data              = ["SingleMuon.root"]
 #       self.list_file_WJets_mc           = ["WJetsToLNu.root"]
 #       self.list_file_VV_mc             = ["VV.root"]
@@ -778,7 +779,7 @@ class initialiseFits:
             self.get_mj_dataset(self.list_file_STop_mc,"_STop")
             self.get_mj_dataset(self.list_file_WJets_mc,"_WJets")
             self.get_mj_dataset(self.list_file_VV_mc,"_VV")
-            self.get_mj_dataset(self.list_file_QCD_mc,"_QCD")
+            # self.get_mj_dataset(self.list_file_QCD_mc,"_QCD")
             if options.fitMC: return
             self.get_mj_dataset(self.list_file_TTbar_mc,"_TTbar")
             self.get_mj_dataset(self.list_file_TTbar_mc,"_TTbar_realW")
@@ -813,8 +814,8 @@ class initialiseFits:
             fit_mj_single_MC(self.workspace4fit_,self.file_WJets_mc,"_WJets_failtau2tau1cut",self.mj_shape["WJets_fail"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))       
             fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV",self.mj_shape["VV"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
             fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV_failtau2tau1cut",self.mj_shape["VV_fail"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
-            fit_mj_single_MC(self.workspace4fit_,self.file_QCD_mc,"_QCD",self.mj_shape["QCD"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
-            fit_mj_single_MC(self.workspace4fit_,self.file_QCD_mc,"_QCD_failtau2tau1cut",self.mj_shape["QCD_fail"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
+            # fit_mj_single_MC(self.workspace4fit_,self.file_QCD_mc,"_QCD",self.mj_shape["QCD"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
+            # fit_mj_single_MC(self.workspace4fit_,self.file_QCD_mc,"_QCD_failtau2tau1cut",self.mj_shape["QCD_fail"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
         
         else:
             
@@ -825,8 +826,8 @@ class initialiseFits:
             fit_mj_single_MC(self.workspace4fit_,self.file_WJets_mc,"_WJets_failtau2tau1cut",self.mj_shape["WJets_fail"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))           
             fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV",self.mj_shape["VV"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
             fit_mj_single_MC(self.workspace4fit_,self.file_VV_mc,"_VV_failtau2tau1cut",self.mj_shape["VV_fail"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
-            fit_mj_single_MC(self.workspace4fit_,self.file_QCD_mc,"_QCD",self.mj_shape["QCD"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
-            fit_mj_single_MC(self.workspace4fit_,self.file_QCD_mc,"_QCD_failtau2tau1cut",self.mj_shape["QCD_fail"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
+            # fit_mj_single_MC(self.workspace4fit_,self.file_QCD_mc,"_QCD",self.mj_shape["QCD"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
+            # fit_mj_single_MC(self.workspace4fit_,self.file_QCD_mc,"_QCD_failtau2tau1cut",self.mj_shape["QCD_fail"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
             
     def get_sim_fit_components(self):
       # self.print_yields()
@@ -1022,10 +1023,17 @@ class initialiseFits:
 
               tmp_scale_to_lumi = treeIn.eventWeightLumi*lumi ## weigth for xs and lumi
               # tmp_event_weight  = treeWeight*treeIn.normGenWeight*treeIn.puWeight*treeIn.eventWeightLumi*treeIn.topWeight*lumi*SF#*treeIn.muTrigWeight*treeIn.muIsoWeight
-              tmp_event_weight  = treeWeight*treeIn.normGenWeight*treeIn.puWeight*treeIn.eventWeightLumi*lumi*SF # no topPt
-
+              if options.topPt:
+                tmp_event_weight  = treeWeight*treeIn.normGenWeight*treeIn.puWeight*treeIn.topWeight*treeIn.eventWeightLumi*lumi*SF
+              else:             
+                tmp_event_weight  = treeWeight*treeIn.normGenWeight*treeIn.puWeight*treeIn.eventWeightLumi*lumi*SF # no topPt
+              
               # tmp_event_weight4fit = treeWeight*treeIn.normGenWeight*treeIn.puWeight*treeIn.topWeight*SF#*treeIn.muTrigWeight*treeIn.muIsoWeight
-              tmp_event_weight4fit = treeWeight*treeIn.normGenWeight*treeIn.puWeight*SF # no topPt
+              if options.topPt: 
+                tmp_event_weight4fit = treeWeight*treeIn.normGenWeight*treeIn.puWeight*treeIn.topWeight*SF
+              else:
+                tmp_event_weight4fit = treeWeight*treeIn.normGenWeight*treeIn.puWeight*SF # no topPt
+              
               tmp_event_weight4fit = tmp_event_weight4fit*treeIn.eventWeightLumi/tmp_scale_to_lumi    
               
               
