@@ -23,24 +23,26 @@ if len(sys.argv)>4:
 else:
 	chunck = ""  
 
+# HLT_Mu50&&nMuon>0&&Muon_pt[0]>55.&&Muon_pfRelIso03_chg[0]<0.15&&Muon_highPtId>1&&nFatJet>0&&FatJet_pt>200
+
 if infile[0].find("SingleMuon")!=-1:
   channel = "mu"
   print "Processing a Single Muon dataset file..."
-  p=PostProcessor(outputDir, infile,"nFatJet>0&&FatJet_msoftdrop>30&&FatJet_pt>200&&MET_sumEt>40&&nMuon>0&&HLT_Mu50" ,"keep_and_drop.txt",
+  p=PostProcessor(outputDir, infile,"HLT_Mu50&&nMuon>0&&Muon_pt[0]>55.&&fabs(Muon_eta[0])<2.4&&Muon_highPtId[0]>=2&&Muon_isPFcand[0]==1&&Muon_pfIsoId[0]>=2&&nFatJet>0&&FatJet_pt[0]>200&&fabs(FatJet_eta[0])<2.5" ,"",
                     modules=[Skimmer(channel)],provenance=False,fwkJobReport=False)
                    # jsonInput='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PromptReco/Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON.txt')
                    
 elif infile[0].find("SingleElectron")!=-1:
   channel = "el"
   print "Processing a Single Electron dataset file..."
-  p=PostProcessor(outputDir, infile,"nFatJet>0&&FatJet_msoftdrop>30&&FatJet_pt>200&&MET_sumEt>40&&nElectron>0&&HLT_Ele115_CaloIdVT_GsfTrkIdT" ,"keep_and_drop.txt",
+  p=PostProcessor(outputDir, infile,"" ,"",
                     modules=[Skimmer(channel)],provenance=False,fwkJobReport=False)
                     # jsonInput='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PromptReco/Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON.txt')
 
 else:
   print "Processing MC..."
   channel = "mu"
-  p=PostProcessor(outputDir, infile,"nFatJet>0&&FatJet_msoftdrop>30&&FatJet_pt>200&&MET_sumEt>40&&((nElectron>0&&HLT_Ele115_CaloIdVT_GsfTrkIdT)||(nMuon>0&&HLT_Mu50))" ,"keep_and_drop.txt",
+  p=PostProcessor(outputDir, infile,"HLT_Mu50&&nMuon>0&&Muon_pt[0]>55.&&fabs(Muon_eta[0])<2.4&&Muon_highPtId[0]>=2&&Muon_isPFcand[0]==1&&Muon_pfIsoId[0]>=2&&nFatJet>0&&FatJet_pt[0]>200&&fabs(FatJet_eta[0])<2.5" ,"",
                     modules=[Skimmer(channel)],provenance=False,fwkJobReport=False)
 p.run()
 print "DONE"
