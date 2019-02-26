@@ -25,29 +25,41 @@ def getXsec(sample):
   elif sample.find( "TTToSemiLeptonic"                     ) !=-1 : return  831.76*0.3272*0.6741*2.;
   elif sample.find( "TTTo2L2Nu"                            ) !=-1 : return  831.76*0.3272*0.3272;
   elif sample.find( "TT_Tune"                              ) !=-1 : return  831.76;
+  elif sample.find("WJetsToLNu_HT-70To100"                 ) !=-1 : return 1270.*1.21    ;
   elif sample.find("WJetsToLNu_HT-100To200"                ) !=-1 : return 1347*1.21    ;
   elif sample.find("WJetsToLNu_HT-200To400"                ) !=-1 : return 360*1.21     ;
   elif sample.find("WJetsToLNu_HT-400To600"                ) !=-1 : return 48.9*1.21    ;
   elif sample.find("WJetsToLNu_HT-600To800"                ) !=-1 : return 12.08*1.21   ;
   elif sample.find("WJetsToLNu_HT-800To1200"               ) !=-1 : return 5.26*1.21    ;
   elif sample.find("WJetsToLNu_HT-1200To2500"              ) !=-1 : return 1.33*1.21    ;
-  elif sample.find("WJetsToLNu_HT-70To100"                 ) !=-1 : return 1270.*1.21    ;
   elif sample.find("WJetsToLNu_HT-2500ToInf"               ) !=-1 : return 0.03089*1.21 ;
-  elif sample.find( "WJetsToLNu_TuneCUETP8M1"              ) !=-1 : return 50380.0*1.22 ;
-  elif sample.find( "W1JetsToLNu_TuneCUETP8M1"             ) !=-1 : return 9644.5*1.22 ;
-  elif sample.find( "W2JetsToLNu_TuneCUETP8M1"             ) !=-1 : return 3144.5*1.22 ;
-  elif sample.find( "W3JetsToLNu_TuneCUETP8M1"             ) !=-1 : return  954.8*1.22 ;
-  elif sample.find( "W4JetsToLNu_TuneCUETP8M1"             ) !=-1 : return  485.6*1.22 ;
+  elif sample.find("WJetsToLNu_TuneCUETP8M1"               ) !=-1 : return 50380.0*1.22 ;
+  elif sample.find("W1JetsToLNu_TuneCUETP8M1"              ) !=-1 : return 9644.5*1.22 ;
+  elif sample.find("W2JetsToLNu_TuneCUETP8M1"              ) !=-1 : return 3144.5*1.22 ;
+  elif sample.find("W3JetsToLNu_TuneCUETP8M1"              ) !=-1 : return  954.8*1.22 ;
+  elif sample.find("W4JetsToLNu_TuneCUETP8M1"              ) !=-1 : return  485.6*1.22 ;
   elif sample.find("WW_Tune"                               ) !=-1 : return 118.7        ;
   elif sample.find("WZ_Tune"                               ) !=-1 : return 47.13        ;
   elif sample.find("ZZ_Tune"                               ) !=-1 : return 16.5         ;
+  elif sample.find("WWTo1L1Nu2Q"                           ) !=-1 : return 50.0         ;
+  elif sample.find("WWTo2L2Nu"                             ) !=-1 : return 12.18         ;
+  elif sample.find("WZTo1L1Nu2Q"                           ) !=-1 : return 10.7         ;
+  elif sample.find("WZTo2L2Q"                              ) !=-1 : return 5.60        ;
+  elif sample.find("WZTo2Q2Nu"                             ) !=-1 : return 6.49         ;
+  elif sample.find("ZZTo2L2Q"                              ) !=-1 : return 3.22         ;
+  elif sample.find("ZZTo2Q2Nu"                             ) !=-1 : return 4.04         ;
+  elif sample.find("ZZTo2L2Nu"                             ) !=-1 : return 0.564         ;
+  elif sample.find("ST_s-channel_top_leptonDecays"         ) !=-1 : return 3.36;
+  elif sample.find("ST_s-channel_antitop_leptonDecays"     ) !=-1 : return 3.36;
   elif sample.find("ST_s-channel_4f_leptonDecays"          ) !=-1 : return 11.36*0.3272 ;
   elif sample.find("ST_t-channel_top_4f_leptonDecays"      ) !=-1 : return 136.02*0.322 ;
   elif sample.find("ST_t-channel_antitop_4f_leptonDecays"  ) !=-1 : return 80.95*0.322  ;
   elif sample.find("ST_t-channel_antitop_4f_inclusiveDecays") !=-1 : return 136.02      ;
   elif sample.find("ST_t-channel_top_4f_inclusiveDecays"   ) !=-1 : return 80.95        ;
   elif sample.find("ST_tW_antitop_5f_inclusiveDecays"      ) !=-1 : return 35.6         ;
-  elif sample.find("ST_tW_top_5f_inclusiveDecays_"         ) !=-1 : return 35.6         ;
+  elif sample.find("ST_tW_top_5f_inclusiveDecays"          ) !=-1 : return 35.6         ;
+  elif sample.find("ST_tW_top_5f_NoFullyHadronicDecays"    ) !=-1 : return 35.6*0.322   ;
+  elif sample.find("ST_tW_antitop_5f_NoFullyHadronicDecays") !=-1 : return 35.6*0.322   ;
   elif sample.find("SingleMuon")!=-1  or sample.find("SingleElectron") !=-1 or sample.find("JetHT") !=-1 or sample.find("data") !=-1 : return 1.
   else:
 	  print "Cross section not defined for this sample!!"
@@ -55,10 +67,38 @@ def getXsec(sample):
 
 
 
+def getNev(sample):
+  if sample.find( "TTToSemiLeptonic"                     ) !=-1 : return  43732445;
+  elif sample.find( "TTTo2L2Nu"                            ) !=-1 : return  9000000;
+  elif sample.find("WJetsToLNu_HT-100To200"                ) !=-1 : return 35778081    ;
+  elif sample.find("WJetsToLNu_HT-200To400"                ) !=-1 : return 21250517     ;
+  elif sample.find("WJetsToLNu_HT-400To600"                ) !=-1 : return 14313274    ;
+  elif sample.find("WJetsToLNu_HT-600To800"                ) !=-1 : return 21709087   ;
+  elif sample.find("WJetsToLNu_HT-800To1200"               ) !=-1 : return 20432728    ;
+  elif sample.find("WJetsToLNu_HT-1200To2500"              ) !=-1 : return 20258624    ;
+  elif sample.find("WJetsToLNu_HT-2500ToInf"               ) !=-1 : return 21495421 ;
+  elif sample.find("WWTo1L1Nu2Q"                           ) !=-1 : return 5054286   ;
+  elif sample.find("WZTo1L1Nu2Q"                           ) !=-1 : return 19086373   ;
+  elif sample.find("WZTo2L2Q"                              ) !=-1 : return 27582164   ;
+  elif sample.find("ZZTo2L2Q"                              ) !=-1 : return 27757211   ;
+  elif sample.find("ST_s-channel_top_leptonDecays"         ) !=-1 : return 6898000;
+  elif sample.find("ST_s-channel_antitop_leptonDecays"     ) !=-1 : return 2953000;
+  elif sample.find("ST_t-channel_antitop_4f_inclusiveDecays") !=-1 : return 3675910      ;
+  elif sample.find("ST_t-channel_top_4f_inclusiveDecays"   ) !=-1 : return 5982064        ;
+  elif sample.find("ST_tW_top_5f_NoFullyHadronicDecays"    ) !=-1 : return 4955102   ;
+  elif sample.find("ST_tW_antitop_5f_NoFullyHadronicDecays") !=-1 : return 5635539   ;
+  elif sample.find("SingleMuon")!=-1  or sample.find("SingleElectron") !=-1 or sample.find("JetHT") !=-1 or sample.find("data") !=-1 : return 1.
+  else:
+	  print "Number of events not defined for this sample!!"
+	  return 0
 
+def getSF(sample):
+  if sample.find("WJetsToLNu_HT"                ) !=-1 : return 1.34    ;
+  else:
+	  return 1.
 
-
-
+def getLumi(sample):
+  return 59970.
 
 
 

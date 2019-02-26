@@ -19,18 +19,21 @@ def drawTH1(tree,var,weight,bins,min,max,titlex = "",titley = "",units = "",draw
   
 def getGenEv (infilename,verbose="True"):
   file = rt.TFile(infilename, 'READ')
-  tree = file.Get('Runs')
-  event = tree.GetEntry(0)
-  try:
-    LHEScaleSumw = tree.LHEScaleSumw[0]
-    LHEScale = "LHEScaleSumw[0]"
-  except:
-    LHEScaleSumw = 1
-    LHEScale = "1."
-  print "LHEScale is %s = %f " %(LHEScale,LHEScaleSumw)
-  h  =  drawTH1(tree,"genEventSumw","%s"%LHEScale,1,0,0)
+  tree = file.Get('Events')
+#  event = tree.GetEntry(0)
+#  try:
+#    LHEScaleSumw = tree.LHEScaleSumw[0]
+#    LHEScale = "LHEScaleSumw[0]"
+#  except:
+#    LHEScaleSumw = 1
+#    LHEScale = "1."
+#  print "LHEScale is %s = %f " %(LHEScale,LHEScaleSumw)
+#  h  =  drawTH1(tree,"genEventSumw","%s"%LHEScale,1,0,0)
+#  genEV = h.GetMean()*h.GetEntries()
+#  if verbose: print "File = %s   gen events = %i" %(infilename,genEV)
+
+  h  =  drawTH1(tree,"lheweight","1",3,-1.5,1.5)
   genEV = h.GetMean()*h.GetEntries()
-  if verbose: print "File = %s   gen events = %i" %(infilename,genEV)
   return genEV
 
 # if __name__ == "__main__":
