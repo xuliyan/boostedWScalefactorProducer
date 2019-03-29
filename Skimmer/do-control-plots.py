@@ -9,6 +9,9 @@ from time import sleep
 ROOT.gROOT.SetBatch(True)
 lumi = 59970. #*0.024
 
+ttbarSF = 1.
+wjetsSF = 1.
+
 CMS_lumi.lumi_13TeV = "%.1f fb^{-1} (2018)" % lumi
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Preliminary"
@@ -22,13 +25,13 @@ plotdir = "plots/"
 #cut = "(SelectedJet_tau21_ddt_retune<0.57)"
 #cut = "(abs(dr_LepJet)>1.5708&&abs(dphi_MetJet)>2.&&abs(dphi_WJet)>2&&Wlep_type==0&&SelectedJet_tau21<0.40)"
 #cut = "(1==1)"
-cut = "(HLT_Mu50&&nMuon>0&&Muon_pt[0]>55.&&abs(Muon_eta[0])<2.4&&Muon_pfRelIso03_all[0]<0.01&&Muon_highPtId>1&&FatJet_jetId>1&&abs(dr_LepJet)>1.5708&&abs(dphi_MetJet)>1.5708&&maxAK4CSV>0.8484)" #&&abs(dphi_WJet)>2&&Wlep_type==0
-vars = ["SelectedJet_softDrop_mass","SelectedJet_tau21", "SelectedJet_tau21_ddt", "SelectedJet_tau21_ddt_retune","FatJet_pt[0]","FatJet_eta[0]","FatJet_phi[0]","FatJet_tau1[0]","FatJet_tau2[0]","FatJet_tau3[0]","FatJet_mass[0]","FatJet_msoftdrop[0]","MET_sumEt[0]","Muon_pt[0]","Muon_eta[0]","Muon_phi[0]","Muon_pfRelIso03_chg[0]","maxAK4CSV","nFatJet", "nJet", "nMuon","W_pt","fabs(dphi_WJet)","fabs(dphi_MetJet)","fabs(dphi_LepJet)","dr_LepJet"] #Pileup_nPU
-vars = ["PV_npvs", "MET_pt"]
+cut = "(abs(dr_LepJet)>1.5708&&abs(dphi_MetJet)>1.5708&&Muon_pfIsoId[0]>=4&&maxAK4CSV>0.8484)" #&&abs(dphi_WJet)>2&&Wlep_type==0
+vars = ["SelectedJet_softDrop_mass","SelectedJet_tau21", "SelectedJet_tau21_ddt", "SelectedJet_tau21_ddt_retune","FatJet_pt[0]","FatJet_eta[0]","FatJet_phi[0]","FatJet_tau1[0]","FatJet_tau2[0]","FatJet_tau3[0]","FatJet_mass[0]","FatJet_msoftdrop[0]","MET_sumEt[0]","Muon_pt[0]","Muon_eta[0]","Muon_phi[0]","Muon_pfRelIso03_all[0]","maxAK4CSV","nFatJet", "nJet", "nMuon","W_pt","MET_pt","fabs(dphi_WJet)","fabs(dphi_MetJet)","fabs(dphi_LepJet)","dr_LepJet"] #Pileup_nPU
+#vars = ["maxAK4CSV", "FatJet_pt[0]", "Muon_pt[0]", "Muon_pfRelIso03_all[0]", "W_pt"]
 #vars = ["SelectedJet_softDrop_mass","SelectedJet_tau21", "SelectedJet_tau21_ddt", "SelectedJet_tau21_ddt_retune"]
 
 #Data infile
-datas   = ["SingleMuon.root"]
+datas   = ["SingleMuon-Run2018A.root", "SingleMuon-Run2018B.root", "SingleMuon-Run2018C.root", "SingleMuon-Run2018D.root"]
 
 #MC infiles
 bkgs = []
@@ -45,6 +48,13 @@ bkgs.append(TTs)
 legs=["Single Top (2017)","VV (2017)","W+jets (2017)", "TT (2017)"]
 fillcolor = [432,600,632,417]
 
+
+def getTreeWeight(filename):
+  xSec = getXsec(filename)
+  xSF  = getSF(filename)
+  genEv = getNev(filename)
+  LEQ = float(xSec)*float(xSF)*lumi/float(genEv)
+  return LEQ
 
 #def setTreeWeight(filename):
 #  print "For = ", filename
@@ -64,11 +74,8 @@ def setTreeWeight(filename):
   file = ROOT.TFile(dir+filename, 'UPDATE')
   treeE = file.Get('Events')
   event = treeE.GetEntry(0)
-  xSec = getXsec(filename)
-  xSF  = getSF(filename)
-  genEv = getNev(filename)
-  LEQ = float(xSec)*float(xSF)*lumi/float(genEv)
-  treeE.SetWeight(LEQ)
+  weight = getTreeWeight(filename)
+  treeE.SetWeight(weight)
   treeE.AutoSave()
   print "Tree weight is now: " ,treeE.GetWeight()
   
@@ -113,12 +120,16 @@ def getCanvas():
   return canvas, legend, addInfo
   	
 def drawTH1(id,tree,var,cuts,bins,min,max,fillcolor,titlex = "",units = "",drawStyle = "HIST",lumi="%s"%lumi):
-  h = ROOT.TH1D("tmpTH1","",bins,min,max)
+  h = ROOT.TH1D("tmpTH1_%s" % id,"",bins,min,max)
   h.Sumw2()
   h.SetFillColor(fillcolor)
   if units=="": h.GetXaxis().SetTitle(titlex)
   else: h.GetXaxis().SetTitle(titlex+ " ["+units+"]")
-  tree.Draw(var+">>tmpTH1","("+cuts+")","goff")
+  tree.Draw(var+">>tmpTH1_%s" % id,"("+cuts+")*eventweightlumi","goff")
+  
+  if not "data" in id:
+      if "W+jets" in legs[int(id)]: h.Scale(wjetsSF)
+      if "TT" in legs[int(id)]: h.Scale(ttbarSF)
 #  corrString='1'
 #  if id.find("data")==-1:
 #    corrString = corrString+"*(genWeight)"
@@ -151,7 +162,8 @@ def doCP(cutL,postfix=""):
     if var.find("nJet")!=-1: minx=-0.5; maxx=19.5; bins=20; unit = "";
     if var.find("nFatJet")!=-1: minx=-0.5; maxx=9.5; bins=10; unit = "";
     if var.find("nMuon")!=-1: minx=-0.5; maxx=4.5; bins=5; unit = "";
-    if var.find("W_pt")!=-1: minx=0.; maxx=1000.; bins=100; unit = "";
+    if var.find("W_pt")!=-1: minx=0.; maxx=2000.; bins=100; unit = "";
+    if var.find("W_mass")!=-1: minx=0.; maxx=200.; bins=200; unit = "";
     if var.find("dphi_")!=-1: minx=0; maxx=3.15; bins=30; unit = "";
     if var.find("dr_")!=-1: minx=0; maxx=5; bins=25; unit = "";
     if var.find("npvs")!=-1: minx=0; maxx=80; bins=80; unit = "";
@@ -168,6 +180,8 @@ def doCP(cutL,postfix=""):
     datahist = drawTH1("data",treeD,var,cutsData,bins,minx,maxx,1,var.replace("_", " ").replace("[0]", "").replace("FatJet", "AK8 jet"),unit,"HIST","1")
     datahist.SetName("data")
     legend.AddEntry(datahist,"Data (2018)","LEP")
+    tmpfile={}
+    tmphist={}
     hists=[]
     stack = ROOT.THStack("stack","")
     dataint		= datahist.Integral(0, datahist.GetNbinsX()+1)
@@ -175,12 +189,21 @@ def doCP(cutL,postfix=""):
     for i,bg in enumerate(bkgs):
       tree = ROOT.TChain("Events")
       name = bg[0]
+      hist = None
       print "Name is: ", name
-      for file in bg:
+      for j, file in enumerate(bg):
         print "Using file: ", ROOT.TString(dir+file)
-        setTreeWeight(file)
+        #setTreeWeight(file)
         fileIn_name = ROOT.TString(dir+file)  
         tree.Add(fileIn_name.Data())
+#        tmpfile[file] = ROOT.TFile(fileIn_name.Data(), 'READ')
+#        tmptree = tmpfile[file].Get("Events")
+#        tmphist[file] = drawTH1(str(i),tmptree,var,cutL,bins,minx,maxx,fillcolor[i],var.replace("_", " ").replace("[0]", "").replace("FatJet", "AK8 jet"),unit,"HIST")
+#        tmphist[file].Scale(getTreeWeight(fileIn_name.Data()))
+#        if hist==None: hist = tmphist[file]
+#        else: hist.Add(tmphist[file])
+        
+        
       hist = drawTH1(str(i),tree,var,cutL,bins,minx,maxx,fillcolor[i],var.replace("_", " ").replace("[0]", "").replace("FatJet", "AK8 jet"),unit,"HIST")
       legend.AddEntry(hist,legs[i],"F")
       hist.SetFillColor(fillcolor[i])
@@ -197,7 +220,7 @@ def doCP(cutL,postfix=""):
 #    print "DATA/MC" ,scale
     canvas.cd()
     datahist.GetYaxis().SetRangeUser(0, datahist.GetMaximum()*1.6);
-    if var in ["FatJet_pt[0]","Muon_pt[0]","Muon_pfRelIso03_chg[0]","Muon_pfRelIso03_all[0]"]:
+    if var in ["FatJet_pt[0]","Muon_pt[0]","W_pt","Muon_pfRelIso03_chg[0]","Muon_pfRelIso03_all[0]"]:
     	datahist.GetYaxis().SetRangeUser(0.1, datahist.GetMaximum()*1000);
     	canvas.SetLogy()
     datahist.Draw("ME")
@@ -217,8 +240,8 @@ def doCP(cutL,postfix=""):
     print "-"*20
     print "Ratio data/bkg", "\t", dataint/sum(backint)
     print "\n"
-    b = 2
-    print "Scale factor for", legs[i], (dataint - sum([x for i, x in enumerate(backint) if i!=b] )) / backint[b]
+    b = 3
+    print "Scale factor for", legs[i], (dataint - sum([x for i, x in enumerate(backint) if not i==b] )) / backint[b]
     
     sleep(10)
 

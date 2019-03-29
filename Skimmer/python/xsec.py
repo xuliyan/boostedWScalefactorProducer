@@ -25,14 +25,14 @@ def getXsec(sample):
   elif sample.find( "TTToSemiLeptonic"                     ) !=-1 : return  831.76*0.3272*0.6741*2.;
   elif sample.find( "TTTo2L2Nu"                            ) !=-1 : return  831.76*0.3272*0.3272;
   elif sample.find( "TT_Tune"                              ) !=-1 : return  831.76;
-  elif sample.find("WJetsToLNu_HT-70To100"                 ) !=-1 : return 1270.*1.21    ;
-  elif sample.find("WJetsToLNu_HT-100To200"                ) !=-1 : return 1347*1.21    ;
-  elif sample.find("WJetsToLNu_HT-200To400"                ) !=-1 : return 360*1.21     ;
-  elif sample.find("WJetsToLNu_HT-400To600"                ) !=-1 : return 48.9*1.21    ;
-  elif sample.find("WJetsToLNu_HT-600To800"                ) !=-1 : return 12.08*1.21   ;
-  elif sample.find("WJetsToLNu_HT-800To1200"               ) !=-1 : return 5.26*1.21    ;
-  elif sample.find("WJetsToLNu_HT-1200To2500"              ) !=-1 : return 1.33*1.21    ;
-  elif sample.find("WJetsToLNu_HT-2500ToInf"               ) !=-1 : return 0.03089*1.21 ;
+  elif sample.find("WJetsToLNu_HT-70To100"                 ) !=-1 : return 1372.*1.22    ;
+  elif sample.find("WJetsToLNu_HT-100To200"                ) !=-1 : return 1345*1.22    ;
+  elif sample.find("WJetsToLNu_HT-200To400"                ) !=-1 : return 359.7*1.22     ;
+  elif sample.find("WJetsToLNu_HT-400To600"                ) !=-1 : return 48.91*1.22    ;
+  elif sample.find("WJetsToLNu_HT-600To800"                ) !=-1 : return 12.05*1.22   ;
+  elif sample.find("WJetsToLNu_HT-800To1200"               ) !=-1 : return 5.501*1.22    ;
+  elif sample.find("WJetsToLNu_HT-1200To2500"              ) !=-1 : return 1.329*1.22    ;
+  elif sample.find("WJetsToLNu_HT-2500ToInf"               ) !=-1 : return 0.03216*1.22 ;
   elif sample.find("WJetsToLNu_TuneCUETP8M1"               ) !=-1 : return 50380.0*1.22 ;
   elif sample.find("W1JetsToLNu_TuneCUETP8M1"              ) !=-1 : return 9644.5*1.22 ;
   elif sample.find("W2JetsToLNu_TuneCUETP8M1"              ) !=-1 : return 3144.5*1.22 ;
@@ -70,6 +70,7 @@ def getXsec(sample):
 def getNev(sample):
   if sample.find( "TTToSemiLeptonic"                     ) !=-1 : return  43732445;
   elif sample.find( "TTTo2L2Nu"                            ) !=-1 : return  9000000;
+  elif sample.find("WJetsToLNu_HT-70To100"                 ) !=-1 : return 35778081    ;
   elif sample.find("WJetsToLNu_HT-100To200"                ) !=-1 : return 35778081    ;
   elif sample.find("WJetsToLNu_HT-200To400"                ) !=-1 : return 21250517     ;
   elif sample.find("WJetsToLNu_HT-400To600"                ) !=-1 : return 14313274    ;
@@ -93,7 +94,14 @@ def getNev(sample):
 	  return 0
 
 def getSF(sample):
-  if sample.find("WJetsToLNu_HT"                ) !=-1 : return 1.34    ;
+  if sample.find("WJetsToLNu_HT-70To100"                 ) !=-1 : return 1.26    ;
+  elif sample.find("WJetsToLNu_HT-100To200"                ) !=-1 : return 1.26    ;
+  elif sample.find("WJetsToLNu_HT-200To400"                ) !=-1 : return 1.48     ;
+  elif sample.find("WJetsToLNu_HT-400To600"                ) !=-1 : return 1.26    ;
+  elif sample.find("WJetsToLNu_HT-600To800"                ) !=-1 : return 1.03   ;
+  elif sample.find("WJetsToLNu_HT-800To1200"               ) !=-1 : return 1.05    ;
+  elif sample.find("WJetsToLNu_HT-1200To2500"              ) !=-1 : return 0.77    ;
+  elif sample.find("WJetsToLNu_HT-2500ToInf"               ) !=-1 : return 0.77 ;
   else:
 	  return 1.
 
