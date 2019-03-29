@@ -1,4 +1,4 @@
-job="Skimmed_2019_02_23/"
+job="Skimmed_2019_03_20/"
 dir="/scratch/zucchett/Ntuple/WSF/"
 
 
@@ -10,7 +10,7 @@ for s in $job/*
 do
     name=$(basename $s)
     echo Adding $name
-    python checkFiles.py $job/$name/
+    python checkFiles.py $job/$name/ -d
     haddnano.py $dir/$name.root $job/$name/*.root
 done
 

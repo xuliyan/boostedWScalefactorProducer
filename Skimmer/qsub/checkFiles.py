@@ -6,19 +6,34 @@ import ROOT
 
 pattern = "Wprime"
 if len(sys.argv) > 1: pattern = sys.argv[1]
-		
+delFiles  = True if '-d' in sys.argv else False
+isVerbose = True if '-v' in sys.argv else False
+
+
+nFiles = 0
+nGoods = 0
+nFails = 0
+
 filelist = glob.glob(pattern+'*.root')
 # filelist = glob.glob('/scratch/thaarres/SUBSTRUCTURE/LOLAoutput/*.root')
 
 for file in filelist:
-	f = ROOT.TFile(file, "read")
-	if not f.GetListOfKeys().Contains("Runs"):
+  nFiles += 1
+  f = ROOT.TFile(file, "read")
+  if not f.GetListOfKeys().Contains("Runs"):
   # if not f.GetListOfKeys().Contains("tree"):
-	    print "FILE IS BUGGY. WILL REMOVE!"
-	    cmd = 'rm %s' %file
-	    print 'Going to execute: ' , cmd
-	    print "Remember to resubmit %s , job number %s" %(pattern,file.split("_")[2])
-	    os.system(cmd)
-	else:
-		continue
-		print "FILE IS GOOD, KEEPING IT"	
+      nFails += 1
+      cmd = 'rm %s' %file
+      if isVerbose: print "FILE IS BUGGY. WILL REMOVE!"
+      if isVerbose: print "Remember to resubmit %s" %(pattern)
+      
+      if isVerbose: print 'Going to execute: ' , cmd
+      if delFiles: os.system(cmd)
+      
+          
+  else:
+    nGoods += 1
+    if isVerbose: print "FILE IS GOOD, KEEPING IT"
+    continue
+
+
