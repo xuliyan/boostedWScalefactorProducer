@@ -11,7 +11,7 @@ timestamp =  now.strftime("%Y_%m_%d")
 queue = "all.q"
 #queue = "long.q"
 #queue = "short.q"
-nfilesperjob = 5
+nfilesperjob = 1
 
 def split_seq(iterable, size):
     it = iter(iterable)
@@ -38,7 +38,8 @@ def getFileList(name):
   return files
 
 def createLists(dataset, name):
-  cmd='das_client --limit=0 --query="file dataset=%s"'%(dataset,)
+  instance="prod/phys03"
+  cmd='das_client --limit=0 --query="file dataset=%s"'%(dataset)
   print "Executing ",cmd
   cmd_out = getoutput( cmd )
   tmpList = cmd_out.split(os.linesep)
@@ -109,6 +110,8 @@ if __name__ == "__main__":
     "/ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIIFall17NanoAODv4-PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/NANOAODSIM", #27757211
   ]
   patternsWJets = [ #/WJetsToLNu_HT*/*Fall17NanoAODv4*Nano14Dec2018*/NANOAODSIM
+  #das_client --limit=0 --query="file dataset=WJetsToLNu_HT-70To100_TuneCP5_13TeV-madgraphMLM-pythia8"
+#    "/WJetsToLNu_HT-70To100_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17NanoAODv4-PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/NANOAODSIM", #
     "/WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17NanoAODv4-PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/NANOAODSIM", #35778081
     "/WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17NanoAODv4-PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/NANOAODSIM", #21250517
     "/WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17NanoAODv4-PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/NANOAODSIM", #14313274
@@ -125,7 +128,8 @@ if __name__ == "__main__":
     if sys.argv[1].find("ST")!=-1:    patterns = patternsST    
     if sys.argv[1].find("VV")!=-1:    patterns = patternsVV    
     if sys.argv[1].find("WJets")!=-1: patterns = patternsWJets 
-    if sys.argv[1].find("ALL")!=-1:   patterns = patternsTT+patternsST+patternsVV+patternsWJets+patternsData
+    if sys.argv[1].find("mc")!=-1:    patterns = patternsTT+patternsST+patternsVV+patternsWJets
+    if sys.argv[1].find("all")!=-1:   patterns = patternsTT+patternsST+patternsVV+patternsWJets+patternsData
   
     print 'Location of input files',  patterns
   else:
@@ -147,41 +151,42 @@ if __name__ == "__main__":
       for pattern in patterns:
         name = pattern.split("/")[1].replace("/","") + ("-" + pattern.split("/")[2].split("-")[0] if 'Run201' in pattern else "")
         createLists(pattern, name)
+  else:
   
-  for pattern in patterns:
-    name = pattern.split("/")[1].replace("/","") + ("-" + pattern.split("/")[2].split("-")[0] if 'Run201' in pattern else "")
-    try:
-      files = getFileList(name)
-    except:
-      exit()
-      files = getFileListDAS(pattern)
-    
-#    print "FILELIST = ", files
-    print "creating job file " ,'joblist%s.txt'%name
-    jobList = 'joblist%s.txt'%name
-    jobs = open(jobList, 'w')
-    nChunks = 0
-    outfolder = out+name
-    try: os.stat(outfolder)
-    except: os.mkdir(outfolder)
-    try: os.stat(outfolder+'/logs/')
-    except: os.mkdir(outfolder+'/logs/')
-    
-    filelists = list(split_seq(files, nfilesperjob))
-    
-    print "Creating", len(filelists), "jobs each with files:", [len(x) for x in filelists]
-    for f in filelists:
-      #print "FILES = ",f
-      createJobs(f,outfolder,name,nChunks)
-      nChunks = nChunks+1
-    
-    jobs.close()
-#    submit = raw_input("Do you also want to submit the jobs to the batch system? [y/n]")
-    submit = 'y'
-    if submit == 'y' or submit=='Y':
-      submitJobs(jobList,nChunks, outfolder, batchSystem)
-    else:
-      print "Not submitting jobs"
+    for pattern in patterns:
+      name = pattern.split("/")[1].replace("/","") + ("-" + pattern.split("/")[2].split("-")[0] if 'Run201' in pattern else "")
+      try:
+        files = getFileList(name)
+      except:
+        exit()
+        files = getFileListDAS(pattern)
+      
+  #    print "FILELIST = ", files
+      print "creating job file " ,'joblist%s.txt'%name
+      jobList = 'joblist%s.txt'%name
+      jobs = open(jobList, 'w')
+      nChunks = 0
+      outfolder = out+name
+      try: os.stat(outfolder)
+      except: os.mkdir(outfolder)
+      try: os.stat(outfolder+'/logs/')
+      except: os.mkdir(outfolder+'/logs/')
+      
+      filelists = list(split_seq(files, nfilesperjob))
+      
+      print "Creating", len(filelists), "jobs each with files:", [len(x) for x in filelists]
+      for f in filelists:
+        #print "FILES = ",f
+        createJobs(f,outfolder,name,nChunks)
+        nChunks = nChunks+1
+      
+      jobs.close()
+  #    submit = raw_input("Do you also want to submit the jobs to the batch system? [y/n]")
+      submit = 'y'
+      if submit == 'y' or submit=='Y':
+        submitJobs(jobList,nChunks, outfolder, batchSystem)
+      else:
+        print "Not submitting jobs"
     
     
     
