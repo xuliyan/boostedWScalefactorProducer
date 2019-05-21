@@ -17,7 +17,7 @@ Submit with:
 python submit_qsub_official.py [ TT | ST | VV | Wjets | data ] outfolder
 ```  
 
-The first time, run with option ```-d``` to create the filelists from DAS
+The first time, run with option ```-c``` as second argument to create the filelists from DAS
 
 Also remember to perform VOMS login: ```voms-proxy-init --voms cms --valid 48:00```
 
