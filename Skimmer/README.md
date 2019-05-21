@@ -6,10 +6,22 @@ First you need to produce your input files by skimming nanoAOD samples.
 
 For local skimming tests, the syntax is (remember to change infile!):
 ```
- python crab/crab_script_SFs.py 
+ python doSkim.py
 ```
 
-## Running with crab
+## Running with qsub
+To submit batch jobs go to directory Skimmer/qsub
+
+Submit with:
+```
+python submit_qsub_official.py [ TT | ST | VV | Wjets | data ] outfolder
+```  
+
+The first time, run with option ```-d``` to create the filelists from DAS
+
+Also remember to perform VOMS login: ```voms-proxy-init --voms cms --valid 48:00```
+
+## Running with crab (obsolete)
 To submit with crab go to directory Skimmer/crab and source crab3 if you have not already done so
 ```
 source /cvmfs/cms.cern.ch/crab3/crab.sh
@@ -27,14 +39,7 @@ python  submit_all_uif.py  -c  PSet.py -d June5_nanoskim-JetsAndLepton  -f test9
  
 ```
 
-## Running with qsub
-To submit with qsyb go to directory Skimmer/qsub
 
-Submit with:
-```
-python submit_qsub.py [ TT | ST | VV | Wjets | data ] outfolder
-```  
-(This is submitting process_nanoAOD.py,rather sync with A.)
 ## Running outside of CMSSW (only require python2.7 and ROOT)
 ```
 cd PhysicsTools/NanoAODTools/
