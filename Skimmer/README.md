@@ -10,7 +10,7 @@ For local skimming tests, the syntax is (remember to change infile!):
 ```
 
 ## Running with qsub
-To submit batch jobs go to directory Skimmer/qsub
+To submit batch jobs go to directory ```Skimmer/qsub```
 
 Submit with:
 ```
