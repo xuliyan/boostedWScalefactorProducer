@@ -15,7 +15,6 @@ nGoods = 0
 nFails = 0
 
 filelist = glob.glob(pattern+'*.root')
-# filelist = glob.glob('/scratch/thaarres/SUBSTRUCTURE/LOLAoutput/*.root')
 
 for file in filelist:
   nFiles += 1
@@ -36,4 +35,4 @@ for file in filelist:
     if isVerbose: print "FILE IS GOOD, KEEPING IT"
     continue
 
-
+print "Results for", pattern, ":", nFails, "/", nFiles, "failed,", nGoods, "/", nFiles, "are good"
