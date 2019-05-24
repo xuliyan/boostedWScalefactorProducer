@@ -35,4 +35,4 @@ for file in filelist:
     if isVerbose: print "FILE IS GOOD, KEEPING IT"
     continue
 
-print "Results for", pattern, ":", nFails, "/", nFiles, "failed,", nGoods, "/", nFiles, "are good"
+print "Results for", pattern, ":", nFails, "/", nFiles, "failed,", nGoods, "/", nFiles, "are valid"

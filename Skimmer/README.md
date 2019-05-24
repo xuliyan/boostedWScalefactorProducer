@@ -21,6 +21,12 @@ The first time, run with option ```-c``` as second argument to create the fileli
 
 Also remember to perform VOMS login: ```voms-proxy-init --voms cms --valid 48:00```
 
+Once the jobs are finished (the command ```source checkJobs.sh``` indicated the number of jobs running), the output can be checked with the ```resubmit_jobs.py``` script:
+```
+python resubmit_jobs.py outfolder
+```
+If there is one or more faild jobs, the directory can be cleaned and the failed jobs resubmitted by adding the option ```-r``` to the previous command.
+
 ## Running with crab (obsolete)
 To submit with crab go to directory Skimmer/crab and source crab3 if you have not already done so
 ```
