@@ -7,7 +7,23 @@ Repository for fitting W-tagging scalefactors in a semi-leptonic ttbar enriched 
 WTopScalefactorProducer/Skimmer : Start here. Produce samples.
 WTopScalefactorProducer/Fitter  : Based on output from above, run script mainBLABLA.sh to compute fully- and partially-merged W-tagging scalfactors as well as statistically combining the two
 
-## installation instructions
+## installation instructions for CMSSW_10_2_X
+Setup CMSSW and get nanoAOD packages
+```
+cmsrel CMSSW_10_2_6
+cd CMSSW_10_2_6/src
+cmsenv
+
+git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
+scram b
+
+cd $CMSSW_base/src
+git clone git@github.com:BoostedScalefactors/WTopScalefactorProducer.git
+cd WTopScalefactorProducer
+```
+
+
+## installation instructions for CMSSW_9_4_X [obsolete]
 Setup CMSSW and get nanoAOD packages
 ```
 cmsrel CMSSW_9_4_2
@@ -37,7 +53,7 @@ git checkout -b amaster remotes/ash/amaster
 
 ```
 
-## getting the code
+To get the code
 
 ```
 cd $CMSSW_base/src

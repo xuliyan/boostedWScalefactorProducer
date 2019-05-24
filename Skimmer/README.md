@@ -27,7 +27,7 @@ python resubmit_jobs.py outfolder
 ```
 If there is one or more faild jobs, the directory can be cleaned and the failed jobs resubmitted by adding the option ```-r``` to the previous command.
 
-## Running with crab (obsolete)
+## Running with crab [obsolete]
 To submit with crab go to directory Skimmer/crab and source crab3 if you have not already done so
 ```
 source /cvmfs/cms.cern.ch/crab3/crab.sh
@@ -46,7 +46,7 @@ python  submit_all_uif.py  -c  PSet.py -d June5_nanoskim-JetsAndLepton  -f test9
 ```
 
 
-## Running outside of CMSSW (only require python2.7 and ROOT)
+## Running outside of CMSSW (only require python2.7 and ROOT) [obsolete]
 ```
 cd PhysicsTools/NanoAODTools/
 (JUST ONCE:)
