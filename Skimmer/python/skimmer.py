@@ -269,8 +269,8 @@ class Skimmer(Module):
         if isMC:
             if event.LHEWeight_originalXWGTUP < 0.: lheweight = -1.
             puweight = self.puWeightTool.getWeight(event.Pileup_nTrueInt)
-            btagweight = event.btagWeight_CSVV2
-            eventweights = lheweight * self.xs * self.lumi / self.nEv * btagweight #* puweight
+            btagweight = event.btagWeight_CSVV2 if not event.btagWeight_CSVV2==0 else 1.
+            eventweights = lheweight * self.xs * self.lumi / self.nEv * btagweight if self.nEv > 0 else 0. #* puweight
             
             ### Look at generator level particles
             ### find events where :

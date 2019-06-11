@@ -28,21 +28,22 @@ else:
 if infile[0].find("SingleMuon")!=-1:
   channel = "mu"
   print "Processing a Single Muon dataset file..."
-  p=PostProcessor(outputDir, infile,"" ,"",
+  p=PostProcessor(outputDir, infile, None, None,
                     modules=[Skimmer(channel)],provenance=False,fwkJobReport=False,
-                    jsonInput='/work/zucchett/CMSSW_10_2_6/src/WTopScalefactorProducer/Skimmer/python/JSON/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt')
+                    jsonInput='/work/zucchett/CMSSW_10_2_6/src/WTopScalefactorProducer/Skimmer/python/JSON/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt',
+                    )
                    
 elif infile[0].find("SingleElectron")!=-1:
   channel = "el"
   print "Processing a Single Electron dataset file..."
-  p=PostProcessor(outputDir, infile,"" ,"",
+  p=PostProcessor(outputDir, infile, None, None,
                     modules=[Skimmer(channel)],provenance=False,fwkJobReport=False)
                     # jsonInput='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PromptReco/Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON.txt')
 
 else:
   print "Processing MC..."
   channel = "mu"
-  p=PostProcessor(outputDir, infile,"" ,"",
+  p=PostProcessor(outputDir, infile, None, None,
                     modules=[Skimmer(channel)],provenance=False,fwkJobReport=False)
 p.run()
 print "DONE"

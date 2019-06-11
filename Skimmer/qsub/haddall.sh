@@ -1,5 +1,5 @@
-job="Skimmed_2019_03_20/"
-dir="/scratch/zucchett/Ntuple/WSF/"
+job=$1
+dir=$2 #"/scratch/zucchett/Ntuple/WSF/"
 
 
 #haddnano.py $dir/SingleMuon_Run2018.root $job/SingleMuon/*.root
