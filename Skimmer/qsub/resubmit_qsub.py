@@ -51,10 +51,10 @@ for sample in os.listdir(pattern):
               
       else:
         nGoods += 1
-        if isVerbose: print "FILE IS GOOD, KEEPING IT"
+        #if isVerbose: print "FILE IS GOOD, KEEPING IT"
         continue
 
-    if isResubmit:
+    if isResubmit and nFails > 0:
         subCmd = 'qsub -q %s -t 1-%d -o %s/logs/ %s %s' %("all.q",nFails,pattern+"/"+jobName,'psibatch_runner.sh',resubFile)
         if isVerbose: print 'Going to execute: ' , subCmd
         os.system(subCmd)
