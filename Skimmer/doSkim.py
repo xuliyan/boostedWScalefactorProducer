@@ -23,14 +23,14 @@ else: chunck = ""
 if infile[0].find("SingleMuon")!=-1:
   channel = "mu"
   print "Processing a Single Muon dataset file..."
-  p=PostProcessor(outputDir, infile,"" ,"",
+  p=PostProcessor(outputDir, infile, None, None,
                     modules=[Skimmer(channel)],provenance=False,fwkJobReport=False,
                     jsonInput='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/PromptReco/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt')
                    
 elif infile[0].find("SingleElectron")!=-1:
   channel = "el"
   print "Processing a Single Electron dataset file..."
-  p=PostProcessor(outputDir, infile,"" ,"",
+  p=PostProcessor(outputDir, infile, None, None,
                     modules=[Skimmer(channel)],provenance=False,fwkJobReport=False,
                     jsonInput='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/PromptReco/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt')
                     
