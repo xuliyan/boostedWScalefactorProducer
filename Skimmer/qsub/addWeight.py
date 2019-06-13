@@ -2,7 +2,7 @@
 
 import os, multiprocessing, math
 from array import array
-from ROOT import TFile, TH1, TH1D, TF1, TLorentzVector
+from ROOT import TFile, TObject, TH1, TH1D, TF1, TLorentzVector
 from WTopScalefactorProducer.Skimmer.xsec import getXsec, getNev, getSF, getLumi
 
 import optparse
@@ -58,10 +58,10 @@ def processFile(sample_name, verbose=False):
         genH.Sumw2()
         runTree.Draw("genEventSumw>>genH_%s" % sample, "", "goff")
         genEv = genH.GetMean()*genH.GetEntries()
-
+        
         # Cross section
         XS = getXsec(sample)
-        SF = getSF(sample)
+        #SF = getSF(sample)
         
         Leq = LUMI*XS/genEv if genEv > 0 else 0.
 
@@ -90,14 +90,14 @@ def processFile(sample_name, verbose=False):
         
         # Weights
         if isMC:
-            eventweightlumi[0] = Leq * tree.LHEWeight_originalXWGTUP * tree.btagweight #tree.puweight
+            eventweightlumi[0] = Leq * tree.lheweight * tree.btagweight #tree.puweight
         else:
             eventweightlumi[0] = 1.
             
         # Fill the branches
         eventweightlumiBranch.Fill()
 
-    tree.Write()
+    tree.Write("", TObject.kOverwrite)
     if verbose: print ' '
         
     treeFile.Close() 
