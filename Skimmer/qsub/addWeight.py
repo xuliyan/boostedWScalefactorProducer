@@ -56,7 +56,8 @@ def processFile(sample_name, verbose=False):
 
         genH = TH1D("genH_%s" % sample, "", 1, 0, 0)
         genH.Sumw2()
-        runTree.Draw("genEventSumw>>genH_%s" % sample, "", "goff")
+        #runTree.Draw("genEventSumw>>genH_%s" % sample, "", "goff")
+        runTree.Draw("genEventCount>>genH_%s" % sample, "", "goff")
         genEv = genH.GetMean()*genH.GetEntries()
         
         # Cross section
