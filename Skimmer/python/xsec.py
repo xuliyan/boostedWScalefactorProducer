@@ -68,34 +68,6 @@ def getXsec(sample):
 	  print "Cross section not defined for this sample!!"
 	  return 0
 
-
-
-def getNev(sample):
-  if sample.find( "TTToSemiLeptonic"                     ) !=-1 : return  43732445;
-  elif sample.find( "TTTo2L2Nu"                            ) !=-1 : return  9000000;
-  elif sample.find("WJetsToLNu_HT-70To100"                 ) !=-1 : return 35778081    ;
-  elif sample.find("WJetsToLNu_HT-100To200"                ) !=-1 : return 35778081    ;
-  elif sample.find("WJetsToLNu_HT-200To400"                ) !=-1 : return 21250517     ;
-  elif sample.find("WJetsToLNu_HT-400To600"                ) !=-1 : return 14313274    ;
-  elif sample.find("WJetsToLNu_HT-600To800"                ) !=-1 : return 21709087   ;
-  elif sample.find("WJetsToLNu_HT-800To1200"               ) !=-1 : return 20432728    ;
-  elif sample.find("WJetsToLNu_HT-1200To2500"              ) !=-1 : return 20258624    ;
-  elif sample.find("WJetsToLNu_HT-2500ToInf"               ) !=-1 : return 21495421 ;
-  elif sample.find("WWTo1L1Nu2Q"                           ) !=-1 : return 5054286   ;
-  elif sample.find("WZTo1L1Nu2Q"                           ) !=-1 : return 19086373   ;
-  elif sample.find("WZTo2L2Q"                              ) !=-1 : return 27582164   ;
-  elif sample.find("ZZTo2L2Q"                              ) !=-1 : return 27757211   ;
-  elif sample.find("ST_s-channel_top_leptonDecays"         ) !=-1 : return 6898000;
-  elif sample.find("ST_s-channel_antitop_leptonDecays"     ) !=-1 : return 2953000;
-  elif sample.find("ST_t-channel_antitop_4f_inclusiveDecays") !=-1 : return 3675910      ;
-  elif sample.find("ST_t-channel_top_4f_inclusiveDecays"   ) !=-1 : return 5982064        ;
-  elif sample.find("ST_tW_top_5f_NoFullyHadronicDecays"    ) !=-1 : return 4955102   ;
-  elif sample.find("ST_tW_antitop_5f_NoFullyHadronicDecays") !=-1 : return 5635539   ;
-  elif sample.find("SingleMuon")!=-1  or sample.find("SingleElectron") !=-1 or sample.find("JetHT") !=-1 or sample.find("data") !=-1 : return 1.
-  else:
-	  print "Number of events not defined for this sample!!"
-	  return 0
-
 def getSF(sample):
   if sample.find("WJetsToLNu_HT-70To100"                 ) !=-1 : return 1.26    ;
   elif sample.find("WJetsToLNu_HT-100To200"                ) !=-1 : return 1.26    ;
