@@ -10,7 +10,7 @@ cmsText     = "CMS";
 cmsTextFont   = 61  
 
 writeExtraText = True
-extraText   = "Preliminary"
+extraText   = ""
 extraTextFont = 52 
 
 lumiTextSize     = 0.8
@@ -24,10 +24,9 @@ relPosY    = 0.035
 relExtraDY = 1.2
 
 extraOverCmsTextSize  = 0.76
-
-lumi_13TeV = "60.0 fb^{-1}"
 lumi_13TeV_2017 = "41.4 fb^{-1}"
 lumi_13TeV_2016 = "35.9 fb^{-1}"
+lumi_13TeV = "60.0 fb^{-1}"
 lumi_8TeV  = "19.7 fb^{-1}" 
 lumi_7TeV  = "5.1 fb^{-1}"
 lumi_sqrtS = ""

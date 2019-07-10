@@ -7,7 +7,7 @@ import math
 import csv
 from WTopScalefactorProducer.Fitter.tdrstyle import *
 from WTopScalefactorProducer.Fitter.CMS_lumi import *
-from WTopScalefactorProducer.Skimmer.getGenEv import getGenEv
+
 setTDRStyle()
 
 from ROOT import *
@@ -16,7 +16,7 @@ parser = OptionParser()
 
 # "jetAK8_softDrop_mass","jetAK8_softDrop_mass_unCorr","jetAK8_chs_softdrop_mass","jetAK8_chs_pruned_mass"
 # --- Tagging options
-parser.add_option('--tagger', action="store",type="string",dest="tagger",default="SelectedJet_tau21", help="Name of tagger variable (tau32/tau21/ddt)")
+parser.add_option('--tagger', action="store",type="string",dest="tagger",default="SelectedJet_tau21_ddt_retune", help="Name of tagger variable (tau32/tau21/ddt)")
 parser.add_option('--massvar', action="store",type="string",dest="massvar",default="SelectedJet_softDrop_mass", help="Name of mass variable to fit")
 parser.add_option('--xtitle', action="store",type="string",dest="xtitle",default="Corrected PUPPI softdrop mass (GeV)", help="x axis title of mass variable to fit")
 parser.add_option('--HP', action="store", type="float",dest="tau2tau1cutHP",default=0.35)
@@ -24,7 +24,7 @@ parser.add_option('--LP', action="store", type="float",dest="tau2tau1cutLP",defa
 parser.add_option('--minX', action="store", type="float",dest="minX",default=50. , help="Lower mass cut")
 parser.add_option('--maxX', action="store", type="float",dest="maxX",default=130., help="Upper mass cut")
 parser.add_option('--ptmin', action="store", type="float",dest="pTmin",default=200., help="Lower pT cut")
-parser.add_option('--ptmax', action="store", type="float",dest="pTmax",default=5000., help="Upper pT cut")
+parser.add_option('--ptmax', action="store", type="float",dest="pTmax",default=10000., help="Upper pT cut")
 parser.add_option('--workspace', action="store",type="string",dest="workspace",default="workspace", help="Name of workspace")
 parser.add_option('--peak', action="store",type="string",dest="peak",default="W", help='Which peak to fit? W / t / Wt')
 
@@ -57,6 +57,7 @@ iPeriod = 4
 
 gStyle.SetOptTitle(0)
 RooMsgService.instance().setGlobalKillBelow(RooFit.FATAL)
+RooMsgService.instance().setSilentMode(True)
 
 if options.noX: gROOT.SetBatch(True)
 
@@ -173,7 +174,7 @@ def doFitsToMC():
     boostedW_fitter_em = initialiseFits("em", options.sample, options.minX, options.maxX, workspace4fit_)
     boostedW_fitter_em.get_datasets_fit_minor_bkg()
     print "Finished fitting MC! Plots can be found in plots_*_MCfits. Printing workspace:"
-    workspace4fit_.Print()
+#    workspace4fit_.Print()
                     
 def GetWtagScalefactors(workspace,fitter):
 
@@ -421,7 +422,7 @@ class doWtagFits:
         self.boostedW_fitter_em = initialiseFits("em", options.sample, options.minX, options.maxX, self.workspace4fit_ )    # Define all shapes to be used for Mj, define regions (SB,signal) and input files. 
         self.boostedW_fitter_em.get_datasets_fit_minor_bkg()                                            # Loop over intrees to create datasets om Mj and fit the single MCs.
        
-        print "Printing workspace:"; self.workspace4fit_ .Print(); print ""
+#        print "Printing workspace:"; self.workspace4fit_ .Print(); print ""
         workspace4fit_ = self.workspace4fit_
         self.boostedW_fitter_em.get_sim_fit_components()     
         
@@ -510,14 +511,14 @@ class doWtagFits:
         constrainslist_data_em = []
         for i in range(len(self.boostedW_fitter_em.constrainslist_data)):
             constrainslist_data_em.append(self.boostedW_fitter_em.constrainslist_data[i])
-            print self.boostedW_fitter_em.constrainslist_data[i]
+            
         pdfconstrainslist_data_em = RooArgSet("pdfconstrainslist_data_em")
         for i in range(len(constrainslist_data_em)):
           pdfconstrainslist_data_em.add(self.workspace4fit_.pdf(constrainslist_data_em[i]) )
           pdfconstrainslist_data_em.Print()
 
         print " Perform simultaneous fit to data"
-        rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.Strategy(2),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
+        rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE),RooFit.PrintLevel(-1), RooFit.Minimizer("Minuit"),RooFit.Strategy(0), RooFit.ExternalConstraints(pdfconstrainslist_data_em))
 #        if options.doBinnedFit:
 #          rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
 #          # rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
@@ -560,7 +561,7 @@ class doWtagFits:
           pdfconstrainslist_TotalMC_em.add(self.workspace4fit_.pdf(constrainslist_TotalMC_em[i]) )
 
         # Perform simoultaneous fit to MC
-        rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.Strategy(2),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em)) #RooFit.SumW2Error(kTRUE),
+        rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE),RooFit.PrintLevel(-1), RooFit.Minimizer("Minuit"),RooFit.Strategy(0), RooFit.SumW2Error(kFALSE), RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))
 #        if options.doBinnedFit:
 #          rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))--> Removing due to unexected behaviour. See https://root.cern.ch/phpBB3/viewtopic.php?t=16917, https://root.cern.ch/phpBB3/viewtopic.php?t=16917
 #          # rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))
@@ -609,13 +610,48 @@ class initialiseFits:
       
       # Fit functions for matched tt MC
 
+###      self.mj_shape["TTbar_realW_fail_MC"] = "GausErfExp_ttbar_failtau2tau1cut_fitMC"
+###      self.mj_shape["TTbar_realW_MC"]      = "GausErfExp_ttbar_fitMC" #before "2Gaus_ttbar"
+###      
+####      self.mj_shape["TTbar_realW_fail_MC"]  = "DoubleCB_ttbar_failtau2tau1cut_fitMC"                       
+####      self.mj_shape["TTbar_realW_MC"]       = "DoubleCB_ttbar_fitMC"                                       
+###      self.mj_shape["TTbar_fakeW_fail_MC"]  = "ErfExp_ttbar_failtau2tau1cut_fitMC"                         
+###      self.mj_shape["TTbar_fakeW_MC"]       = "GausErfExp_ttbar_fitMC"                                         
+###                                                                                                           
+###      # Use the same fit functions in data                                                                 
+###      self.mj_shape["bkg_data_fail"]        = self.mj_shape["TTbar_fakeW_fail_MC"].replace("_fitMC","")    
+###      self.mj_shape["signal_data_fail"]     = self.mj_shape["TTbar_realW_fail_MC"].replace("_fitMC","")    
+###      self.mj_shape["signal_data"]          = self.mj_shape["TTbar_realW_MC"].replace("_fitMC","")         
+###      self.mj_shape["bkg_data"]             = self.mj_shape["TTbar_fakeW_MC"].replace("_fitMC","")         
+###                                                                                                           
+###      # ... and in MC                                                                                      
+###      self.mj_shape["bkg_mc_fail"]          = self.mj_shape["TTbar_fakeW_fail_MC"].replace("_fitMC","")    
+###      self.mj_shape["signal_mc_fail"]       = self.mj_shape["TTbar_realW_fail_MC"].replace("_fitMC","")    
+###      self.mj_shape["signal_mc"]            = self.mj_shape["TTbar_realW_MC"].replace("_fitMC","")         
+###      self.mj_shape["bkg_mc"]               = self.mj_shape["TTbar_fakeW_MC"].replace("_fitMC","")         
+### 
+###      # Fit functions for minor backgrounds
+###      self.mj_shape["VV"]                   = "ExpGaus"
+###      self.mj_shape["VV_fail"]              = "Exp"
+###      self.mj_shape["WJets"]                = "ErfExp"
+###      self.mj_shape["WJets_fail"]           = "ErfExp"
+###      self.mj_shape["QCD"]                  = "ErfExp"
+###      self.mj_shape["QCD_fail"]             = "ErfExp"
+###      self.mj_shape["STop"]                 = "ErfExpGaus_sp"       
+###      self.mj_shape["STop_fail"]            = "ExpGaus"  
+
+
       self.mj_shape["TTbar_realW_fail_MC"] = "Gaus2ErfExp_ttbar_failtau2tau1cut_fitMC"
       self.mj_shape["TTbar_realW_MC"]      = "Gaus2ErfExp_ttbar_fitMC" #before "2Gaus_ttbar"
       
-#      self.mj_shape["TTbar_realW_fail_MC"]  = "DoubleCB_ttbar_failtau2tau1cut_fitMC"                       
-#      self.mj_shape["TTbar_realW_MC"]       = "DoubleCB_ttbar_fitMC"                                       
-      self.mj_shape["TTbar_fakeW_fail_MC"]  = "ErfExp_ttbar_failtau2tau1cut_fitMC"                         
-      self.mj_shape["TTbar_fakeW_MC"]       = "ErfExp_ttbar_fitMC"                                         
+      self.mj_shape["TTbar_realW_fail_MC"]  = "DoubleSidedCB_ttbar_failtau2tau1cut_fitMC"
+      self.mj_shape["TTbar_realW_MC"]       = "DoubleSidedCB_ttbar_fitMC"
+      
+#      self.mj_shape["TTbar_realW_fail_MC"] = "GausErfExp_ttbar_failtau2tau1cut_fitMC"
+#      self.mj_shape["TTbar_realW_MC"]      = "GausErfExp_ttbar_fitMC"
+      
+      self.mj_shape["TTbar_fakeW_fail_MC"]  = "ErfExp_ttbar_failtau2tau1cut_fitMC"
+      self.mj_shape["TTbar_fakeW_MC"]       = "ErfExp_ttbar_fitMC"
                                                                                                            
       # Use the same fit functions in data                                                                 
       self.mj_shape["bkg_data_fail"]        = self.mj_shape["TTbar_fakeW_fail_MC"].replace("_fitMC","")    
@@ -638,7 +674,7 @@ class initialiseFits:
       self.mj_shape["QCD_fail"]             = "ErfExp"
       self.mj_shape["STop"]                 = "ErfExpGaus_sp"       
       self.mj_shape["STop_fail"]            = "ErfExpGaus_sp"  
-       
+      
       #Need to add a second gauss when fitting top 
       if options.peak == "Wt" :
          self.mj_shape["STop_fail"]              = "Gaus2ErfExp"  
@@ -687,12 +723,13 @@ class initialiseFits:
       
       
       self.file_Directory       = "/scratch/zucchett/Ntuple/WSF/"
-      self.list_file_STop_mc    = ["ST_t-channel_antitop_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8.root", "ST_t-channel_top_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8.root", "ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.root", "ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.root"]
       self.list_file_data       = ["SingleMuon-Run2018A.root", "SingleMuon-Run2018B.root", "SingleMuon-Run2018C.root", "SingleMuon-Run2018D.root"]
       self.list_file_TTbar_mc   = ["TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8.root", "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.root"]
-      self.list_file_WJets_mc   = ["WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
-      self.list_file_VV_mc      = ["WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8.root", "WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8.root", "ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8.root"]
-      # self.list_file_QCD_mc     = ["thaarres_QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8.root","thaarres_QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8.root"]
+      self.list_file_WJets_mc   = ["WJetsToLNu_HT-70To100_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
+      self.list_file_STop_mc    = ["ST_t-channel_antitop_5f_TuneCP5_13TeV-powheg-pythia8.root", "ST_t-channel_top_5f_TuneCP5_13TeV-powheg-pythia8.root", "ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.root", "ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.root"]
+      self.list_file_VV_mc      = ["WW_TuneCP5_13TeV-pythia8.root", "WZ_TuneCP5_13TeV-pythia8.root", "ZZ_TuneCP5_13TeV-pythia8.root"]
+      #self.list_file_QCD_mc     = 
+#      self.list_file_WJets_mc  += ["QCD_HT500to700_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8.root"] #"QCD_HT100to200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT200to300_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT300to500_TuneCP5_13TeV-madgraphMLM-pythia8.root", 
       # self.list_file_TTbar_mc   = ["thaarres_TTJets_SingleLeptFromT_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
 #      if options.sample.find("amcnlo")!=-1: 
 #          self.list_file_TTbar_mc   = ["thaarres_TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8.root"]
@@ -853,18 +890,18 @@ class initialiseFits:
     def print_yields(self):
 
         # Print dataset yields in the signal region
-        print ""
-        print ""
-        print ""
-        self.workspace4fit_.var("rrv_number_dataset_signal_region_data_"    +self.channel+"_mj").Print()
-        self.workspace4fit_.var("rrv_number_dataset_signal_region_VV_"      +self.channel+"_mj").Print()
-        self.workspace4fit_.var("rrv_number_dataset_signal_region_WJets_"  +self.channel+"_mj").Print()
-        self.workspace4fit_.var("rrv_number_dataset_signal_region_QCD_"     +self.channel+"_mj").Print()
-        self.workspace4fit_.var("rrv_number_dataset_signal_region_STop_"    +self.channel+"_mj").Print()
-        self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbar_"   +self.channel+"_mj").Print()
-        print ""
-        print ""
-        print ""
+#        print ""
+#        print ""
+#        print ""
+#        self.workspace4fit_.var("rrv_number_dataset_signal_region_data_"    +self.channel+"_mj").Print()
+#        self.workspace4fit_.var("rrv_number_dataset_signal_region_VV_"      +self.channel+"_mj").Print()
+#        self.workspace4fit_.var("rrv_number_dataset_signal_region_WJets_"  +self.channel+"_mj").Print()
+#        self.workspace4fit_.var("rrv_number_dataset_signal_region_QCD_"     +self.channel+"_mj").Print()
+#        self.workspace4fit_.var("rrv_number_dataset_signal_region_STop_"    +self.channel+"_mj").Print()
+#        self.workspace4fit_.var("rrv_number_dataset_signal_region_TTbar_"   +self.channel+"_mj").Print()
+#        print ""
+#        print ""
+#        print ""
 
         number_dataset_signal_region_data_mj                      = self.workspace4fit_.var("rrv_number_dataset_signal_region_data_"+self.channel+"_mj").getVal()
         number_dataset_signal_region_error2_data_mj               = self.workspace4fit_.var("rrv_number_dataset_signal_region_error2_data_"+self.channel+"_mj").getVal()
@@ -985,16 +1022,10 @@ class initialiseFits:
       for i in range(treeIn.GetEntries()):
           if i % 5000 == 0: print "iEntry: ",i
           event = treeIn.GetEntry(i)
-          if not (treeIn.Wlep_type==0): continue
-          if not (treeIn.HLT_Mu50==1): continue
-          if not (treeIn.Muon_pfIsoId[0]>=4): continue
-#          if not (treeIn.SelectedMuon_iso<0.10): continue
           if not (treeIn.SelectedJet_pt > self.AK8_pt_min): continue
           if not (treeIn.SelectedJet_pt < self.AK8_pt_max): continue
-          if not math.fabs(treeIn.dr_LepJet)>1.5708:continue
-          if not math.fabs(treeIn.dphi_MetJet)>1.5708:continue
+          if not (treeIn.passedMETfilters):continue
           if not (treeIn.maxAK4CSV>0.8484):continue
-          if not (treeIn.W_pt>200) :continue
 
           if getattr(treeIn, jet_mass) > rrv_mass_j.getMax() and getattr(treeIn, jet_mass)< rrv_mass_j.getMin() : continue
           
@@ -1132,7 +1163,7 @@ class initialiseFits:
       rrv_number_extremefail.setError(TMath.Sqrt(rdataset_extremefailtau2tau1cut_mj.sumEntries()))
       getattr(self.workspace4fit_,"import")(rrv_number_extremefail)
 
-      rrv_number_extremefail.Print()
+#      rrv_number_extremefail.Print()
  #
       # getattr(self.workspace4fit_,"import")(rrv_number_pass)
     #   getattr(self.workspace4fit_,"import")(rrv_number_before)
