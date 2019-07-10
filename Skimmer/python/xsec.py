@@ -55,10 +55,12 @@ def getXsec(sample):
   elif sample.find("ST_s-channel_4f_leptonDecays"          ) !=-1 : return 11.36*0.3272 ;
   elif sample.find("ST_t-channel_top_4f_leptonDecays"      ) !=-1 : return 136.02*0.322 ;
   elif sample.find("ST_t-channel_antitop_4f_leptonDecays"  ) !=-1 : return 80.95*0.322  ;
-  elif sample.find("ST_t-channel_antitop_4f_inclusiveDecays") !=-1 : return 136.02      ;
-  elif sample.find("ST_t-channel_antitop_4f_InclusiveDecays") !=-1 : return 136.02      ;
-  elif sample.find("ST_t-channel_top_4f_inclusiveDecays"   ) !=-1 : return 80.95        ;
-  elif sample.find("ST_t-channel_top_4f_InclusiveDecays"   ) !=-1 : return 80.95        ;
+  elif sample.find("ST_t-channel_antitop_4f_inclusiveDecays") !=-1 : return 80.95       ;
+  elif sample.find("ST_t-channel_antitop_4f_InclusiveDecays") !=-1 : return 80.95       ;
+  elif sample.find("ST_t-channel_top_4f_inclusiveDecays"   ) !=-1 : return 136.02       ;
+  elif sample.find("ST_t-channel_top_4f_InclusiveDecays"   ) !=-1 : return 136.02       ;
+  elif sample.find("ST_t-channel_top_5f"                   ) !=-1 : return 136.02       ;
+  elif sample.find("ST_t-channel_antitop_5f"               ) !=-1 : return 80.95        ;
   elif sample.find("ST_tW_antitop_5f_inclusiveDecays"      ) !=-1 : return 35.6         ;
   elif sample.find("ST_tW_top_5f_inclusiveDecays"          ) !=-1 : return 35.6         ;
   elif sample.find("ST_tW_top_5f_NoFullyHadronicDecays"    ) !=-1 : return 35.6*0.322   ;

@@ -3,7 +3,7 @@
 import os, multiprocessing, math
 from array import array
 from ROOT import TFile, TObject, TH1, TH1D, TF1, TLorentzVector
-from WTopScalefactorProducer.Skimmer.xsec import getXsec, getNev, getSF, getLumi
+from WTopScalefactorProducer.Skimmer.xsec import getXsec, getSF, getLumi
 
 import optparse
 usage = 'usage: %prog [options]'

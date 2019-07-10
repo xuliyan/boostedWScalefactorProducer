@@ -2,7 +2,6 @@ import ROOT,sys
 from WTopScalefactorProducer.Fitter.tdrstyle import *
 from WTopScalefactorProducer.Fitter.CMS_lumi import *
 from WTopScalefactorProducer.Skimmer.getGenEv import getGenEv
-from WTopScalefactorProducer.Skimmer.xsec import getXsec, getNev, getSF
 setTDRStyle()
 from time import sleep
 
@@ -20,33 +19,41 @@ iPos = 11
 if( iPos==0 ): CMS_lumi.relPosX = 0.12
 iPeriod = 4 #iPeriod = 0 for simulation-only plots
 
-dir = "/scratch/zucchett/Ntuple/WSF/"
-plotdir = "plots/"
+
 #cut = "(SelectedJet_tau21_ddt_retune<0.57)"
 #cut = "(abs(dr_LepJet)>1.5708&&abs(dphi_MetJet)>2.&&abs(dphi_WJet)>2&&Wlep_type==0&&SelectedJet_tau21<0.40)"
 #cut = "(1==1)"
-cut = "(abs(dr_LepJet)>1.5708&&abs(dphi_MetJet)>1.5708&&Muon_pfIsoId[0]>=4&&maxAK4CSV>0.8484)" #&&abs(dphi_WJet)>2&&Wlep_type==0
-vars = ["SelectedJet_softDrop_mass","SelectedJet_tau21", "SelectedJet_tau21_ddt", "SelectedJet_tau21_ddt_retune","FatJet_pt[0]","FatJet_eta[0]","FatJet_phi[0]","FatJet_tau1[0]","FatJet_tau2[0]","FatJet_tau3[0]","FatJet_mass[0]","FatJet_msoftdrop[0]","MET_sumEt[0]","Muon_pt[0]","Muon_eta[0]","Muon_phi[0]","Muon_pfRelIso03_all[0]","maxAK4CSV","nFatJet", "nJet", "nMuon","W_pt","MET_pt","fabs(dphi_WJet)","fabs(dphi_MetJet)","fabs(dphi_LepJet)","dr_LepJet"] #Pileup_nPU
-#vars = ["maxAK4CSV", "FatJet_pt[0]", "Muon_pt[0]", "Muon_pfRelIso03_all[0]", "W_pt"]
-#vars = ["SelectedJet_softDrop_mass","SelectedJet_tau21", "SelectedJet_tau21_ddt", "SelectedJet_tau21_ddt_retune"]
+#cut = "(passedMETfilters&&abs(dr_LepJet)>1.5708&&abs(dphi_MetJet)>1.5708&&Muon_highPtId[0]>=2&&Muon_isPFcand[0]&&Muon_pfIsoId[0]>=6&&W_pt>150.&&maxAK4CSV<0.8484)"
+cut = "(passedMETfilters&&maxAK4CSV>0.8484)" # && SelectedJet_softDrop_mass > 50. && SelectedJet_softDrop_mass < 130. && SelectedJet_pt > 200. && SelectedJet_pt < 10000.)"
+vars = ["SelectedJet_softDrop_mass","SelectedJet_tau21", "SelectedJet_tau21_ddt", "SelectedJet_tau21_ddt_retune","FatJet_pt[0]","FatJet_eta[0]","FatJet_phi[0]","FatJet_tau1[0]","FatJet_tau2[0]","FatJet_tau3[0]","FatJet_mass[0]","FatJet_msoftdrop[0]","Muon_pt[0]","Muon_eta[0]","Muon_phi[0]","Muon_pfRelIso03_all[0]","maxAK4CSV","nFatJet", "nJet", "nMuon","PV_npvs","W_pt","MET_pt","fabs(dphi_WJet)","fabs(dphi_MetJet)","fabs(dphi_LepJet)","dr_LepJet"]
+vars = [ "SelectedJet_tau21", "FatJet_pt[0]", "Muon_pt[0]", "Muon_pfRelIso03_all[0]", "W_pt", ]
+vars += ["SelectedJet_softDrop_mass","SelectedJet_tau21", "SelectedJet_tau21_ddt", "SelectedJet_tau21_ddt_retune"]
 
 #Data infile
 datas   = ["SingleMuon-Run2018A.root", "SingleMuon-Run2018B.root", "SingleMuon-Run2018C.root", "SingleMuon-Run2018D.root"]
 
 #MC infiles
 bkgs = []
-STs   = ["ST_t-channel_antitop_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8.root", "ST_t-channel_top_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8.root", "ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.root", "ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.root"]
+STs   = ["ST_t-channel_antitop_5f_TuneCP5_13TeV-powheg-pythia8.root", "ST_t-channel_top_5f_TuneCP5_13TeV-powheg-pythia8.root", "ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.root", "ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.root"]
+VVs   = ["WW_TuneCP5_13TeV-pythia8.root", "WZ_TuneCP5_13TeV-pythia8.root", "ZZ_TuneCP5_13TeV-pythia8.root"]
 TTs   = ["TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8.root", "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.root"]
-WJs   = ["WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
-VVs   = ["WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8.root", "WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8.root", "ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8.root"] #"WWTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8.root", 
+#WJs   = ["WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
+WJs   = ["WJetsToLNu_HT-70To100_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
+#QCDs = ["QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
+QCDs = ["QCD_HT100to200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT200to300_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT300to500_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT500to700_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
+
+bkgs.append(QCDs)
 bkgs.append(STs)
 bkgs.append(VVs)
 bkgs.append(WJs)
 bkgs.append(TTs)
 
+dir = "/scratch/zucchett/Ntuple/WSF/"
+plotdir = "plots/" if "maxAK4CSV>" in cut else "plotsWCR/"
+
 #For drawing
-legs=["Single Top (2017)","VV (2017)","W+jets (2017)", "TT (2017)"]
-fillcolor = [432,600,632,417]
+legs=["QCD", "Single Top","VV","W+jets", "TT"]
+fillcolor = [921,432,600,632,417]
 
 
 def getTreeWeight(filename):
@@ -177,7 +184,7 @@ def doCP(cutL,postfix=""):
     
     cutsData ='*'.join([cutL]) #,"(passedMETfilters==1)"])
     cutsData ='*'.join([cutL])
-    datahist = drawTH1("data",treeD,var,cutsData,bins,minx,maxx,1,var.replace("_", " ").replace("[0]", "").replace("FatJet", "AK8 jet"),unit,"HIST","1")
+    datahist = drawTH1("data",treeD,var,cutsData,bins,minx,maxx,1,var.replace("_", " ").replace("[0]", "").replace("FatJet", "AK8 jet").replace("pt", "p_{T}"),unit,"HIST","1")
     datahist.SetName("data")
     legend.AddEntry(datahist,"Data (2018)","LEP")
     tmpfile={}
@@ -204,7 +211,7 @@ def doCP(cutL,postfix=""):
 #        else: hist.Add(tmphist[file])
         
         
-      hist = drawTH1(str(i),tree,var,cutL,bins,minx,maxx,fillcolor[i],var.replace("_", " ").replace("[0]", "").replace("FatJet", "AK8 jet"),unit,"HIST")
+      hist = drawTH1(str(i),tree,var,cutL,bins,minx,maxx,fillcolor[i],var.replace("_", " ").replace("[0]", "").replace("FatJet", "AK8 jet").replace("pt", "p_{T}"),unit,"HIST")
       legend.AddEntry(hist,legs[i],"F")
       hist.SetFillColor(fillcolor[i])
       backint[i] = hist.Integral(0, hist.GetNbinsX()+1)
@@ -240,8 +247,8 @@ def doCP(cutL,postfix=""):
     print "-"*20
     print "Ratio data/bkg", "\t", dataint/sum(backint)
     print "\n"
-    b = 3
-    print "Scale factor for", legs[i], (dataint - sum([x for i, x in enumerate(backint) if not i==b] )) / backint[b]
+    b = 4
+    print "Scale factor for", legs[b], (dataint - sum([x for i, x in enumerate(backint) if not i==b] )) / backint[b]
     
     sleep(10)
 

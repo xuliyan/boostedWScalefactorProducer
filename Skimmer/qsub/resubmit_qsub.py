@@ -8,7 +8,7 @@ pattern = "Wprime"
 if len(sys.argv) > 1: pattern = sys.argv[1]
 isVerbose = True if '-v' in sys.argv else False
 isResubmit = True if '-r' in sys.argv else False
-
+isDelete = True if '-d' in sys.argv else False
 
 nTotalFiles = 0
 nTotalGoods = 0
@@ -41,12 +41,13 @@ for sample in os.listdir(pattern):
           if isVerbose: print "Remember to resubmit %s" %(sample)
           
           if isVerbose: print 'Going to execute: ' , cmd
-          if isResubmit: os.system(cmd)
-          jobs = open("joblist"+jobName+".txt", "r").read().splitlines()
-          jobFailed = [x for x in jobs if file.split('/')[2].split('_')[0] in x][0]
-          if len(jobFailed) > 0:
-              with open(resubFile, "a") as f:
-                  f.write(jobFailed+"\n")
+          if isResubmit or isDelete: os.system(cmd)
+          if isResubmit:
+              jobs = open("joblist"+jobName+".txt", "r").read().splitlines()
+              jobFailed = [x for x in jobs if file.split('/')[2].split('_')[0] in x][0]
+              if len(jobFailed) > 0:
+                  with open(resubFile, "a") as f:
+                      f.write(jobFailed+"\n")
                   
               
       else:

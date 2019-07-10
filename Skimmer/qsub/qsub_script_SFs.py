@@ -30,7 +30,7 @@ if infile[0].find("SingleMuon")!=-1:
   print "Processing a Single Muon dataset file..."
   p=PostProcessor(outputDir, infile, None, None,
                     modules=[Skimmer(channel)],provenance=False,fwkJobReport=False,
-                    jsonInput='/work/zucchett/CMSSW_10_2_6/src/WTopScalefactorProducer/Skimmer/python/JSON/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt',
+                    jsonInput='/work/zucchett/WTagging/CMSSW_10_2_6/src/WTopScalefactorProducer/Skimmer/python/JSON/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt',
                     )
                    
 elif infile[0].find("SingleElectron")!=-1:

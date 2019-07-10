@@ -86,11 +86,6 @@ class Skimmer(Module):
         
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
          self.out = wrappedOutputTree
-         self.out.branch("dr_LepJet",  "F")
-         self.out.branch("dphi_LepJet",  "F")
-         self.out.branch("dphi_LepMet",  "F")
-         self.out.branch("dphi_MetJet",  "F")
-         self.out.branch("dphi_WJet"  ,  "F")
          self.out.branch("SelectedJet_softDrop_mass",  "F")
          self.out.branch("SelectedJet_tau42",  "F")
          self.out.branch("SelectedJet_tau41",  "F")
@@ -106,11 +101,17 @@ class Skimmer(Module):
          self.out.branch("Wlep_type",  "I")
          self.out.branch("W_pt",  "F")
          self.out.branch("W_mass",  "F")
+         self.out.branch("dr_LepJet",  "F")
+         self.out.branch("dphi_LepJet",  "F")
+         self.out.branch("dphi_LepMet",  "F")
+         self.out.branch("dphi_MetJet",  "F")
+         self.out.branch("dphi_WJet"  ,  "F")
          self.out.branch("maxAK4CSV",  "F")
          self.out.branch("minJetMetDPhi",  "F")
+         self.out.branch("HT_HEM1516",  "F")
+         self.out.branch("genmatchedAK8",  "I")
          self.out.branch("genmatchedAK8Subjet",  "I")
          self.out.branch("AK8Subjet0isMoreMassive",  "I")
-         self.out.branch("genmatchedAK8",  "I")
          self.out.branch("passedMETfilters",  "I")
          self.out.branch("lheweight",  "F")
          self.out.branch("puweight",  "F")
@@ -142,7 +143,7 @@ class Skimmer(Module):
             
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
-        print "-"
+        
         puweight = 1.
         lheweight = 1.
         btagweight = 1.
@@ -175,7 +176,7 @@ class Skimmer(Module):
 #        electrons.sort(key=lambda x:x.pt,reverse=True)
 
         if not len(muons) > 0 or not muons[0].pt > 55. or not abs(muons[0].eta) < 2.4: return False
-        if not muons[0].highPtId >= 2 or not muons[0].isPFcand or not muons[0].pfIsoId >= 4: return False
+        if not muons[0].highPtId >= 2 or not muons[0].isPFcand or not muons[0].pfIsoId >= 6: return False
         
         self.Vlep_type = -1
         lepton = ROOT.TLorentzVector()
@@ -201,12 +202,13 @@ class Skimmer(Module):
         # Add filters https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#Moriond_2018
         passedMETFilters = False
         try:
-          if event.Flag_BadChargedCandidateFilter and event.Flag_BadPFMuonFilter and event.Flag_EcalDeadCellTriggerPrimitiveFilter and event.Flag_HBHENoiseFilter and event.Flag_HBHENoiseIsoFilter and event.Flag_METFilters and event.Flag_ecalBadCalibFilter and event.Flag_globalTightHalo2016Filter and event.Flag_goodVertices:
+          if event.Flag_goodVertices and event.Flag_globalTightHalo2016Filter and event.Flag_BadPFMuonFilter and event.Flag_EcalDeadCellTriggerPrimitiveFilter and event.Flag_HBHENoiseFilter and event.Flag_HBHENoiseIsoFilter and event.Flag_eeBadScFilter and event.Flag_ecalBadCalibFilter: #and event.Flag_BadChargedCandidateFilter
             passedMETFilters = True
         except:
            passedMETFilters = False
           # if not passedMETFilters: return False
 
+        #if not passedMETFilters: return False
         
         # Apply MET cut    
         met = Object(event, "MET")
@@ -226,7 +228,7 @@ class Skimmer(Module):
         WcandLep = lepton + neutrino
         
         if not WcandLep.Pt() >= self.minWPt: return False
-
+        
         # Find fat jet
         FatJets = list(Collection(event, "FatJet"))
         recoAK8 = [ x for x in FatJets ] # if x.p4().Perp() > self.minJetPt and  abs(x.p4().Eta()) < self.maxJetEta and x.msoftdrop > 30. and x.tau1 > 0. and x.tau2 > 0.]
@@ -253,11 +255,25 @@ class Skimmer(Module):
         dR_jetlep = jetAK8_4v.DeltaR(lepton )
         if abs(dR_jetlep) < self.mindRLepJet : return False
 
-
+        # Angular separation cuts
+        if not dR_jetlep > 1.5708: return False
+        if not abs(jetAK8_4v.DeltaPhi(MET)) > 1.5708: return False
+        
+        HT_HEM1516 = 0.
+        for j in Jets:
+            if j.eta > -3.0 and j.eta < -1.3 and j.phi > -1.57 and j.phi < -0.87:
+                HT_HEM1516 += j.pt
 
         # Gen
+        self.isW = 0
+        self.matchedJ = 0
+        self.matchedSJ = 0
+        
         if isMC:
-            if event.LHEWeight_originalXWGTUP < 0.: lheweight = -1.
+            try:
+                if event.LHEWeight_originalXWGTUP < 0.: lheweight = -1.
+            except:
+                pass
             puweight = self.puWeightTool.getWeight(event.Pileup_nTrueInt)
             btagweight = event.btagWeight_CSVV2 if not event.btagWeight_CSVV2==0 else 1.
             
@@ -365,8 +381,8 @@ class Skimmer(Module):
                 WHadreco = None
         
         # now fill branches
-        self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)
         self.out.fillBranch("genmatchedAK8",  self.isW)
+        self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)
         self.out.fillBranch("AK8Subjet0isMoreMassive", self.SJ0isW )
         self.out.fillBranch("puweight", puweight )
         self.out.fillBranch("btagweight", btagweight )
@@ -382,6 +398,7 @@ class Skimmer(Module):
         self.out.fillBranch("W_mass", WcandLep.M() )
         self.out.fillBranch("maxAK4CSV", maxAK4CSV )
         self.out.fillBranch("minJetMetDPhi", minJetMetDPhi )
+        self.out.fillBranch("HT_HEM1516", HT_HEM1516 )
         self.out.fillBranch("SelectedJet_softDrop_mass",  recoAK8[0].msoftdrop)
         self.out.fillBranch("SelectedJet_pt",   recoAK8[0].pt)
         self.out.fillBranch("SelectedJet_eta",  recoAK8[0].eta)
@@ -411,7 +428,7 @@ class Skimmer(Module):
         
         self.nEvent += 1
         if self.nEvent % 1000 == 0: print "Filled event", self.nEvent
-
+        
         return True
 
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
