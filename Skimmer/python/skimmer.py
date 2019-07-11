@@ -107,6 +107,7 @@ class Skimmer(Module):
          self.out.branch("dphi_MetJet",  "F")
          self.out.branch("dphi_WJet"  ,  "F")
          self.out.branch("maxAK4CSV",  "F")
+         self.out.branch("subMaxAK4CSV",  "F")
          self.out.branch("minJetMetDPhi",  "F")
          self.out.branch("HT_HEM1516",  "F")
          self.out.branch("genmatchedAK8",  "I")
@@ -246,10 +247,20 @@ class Skimmer(Module):
         recoAK4 = [ x for x in Jets if x.p4().Perp() > self.minAK4Pt and abs(x.p4().Eta()) < self.maxJetEta and jetAK8_4v.DeltaR(x.p4())>1.0] #x.btagCSVV2 > self.minBDisc
 #        if len(recoAK4) < 1: return False
         
-        # max AK4 CSV
-        maxAK4CSV = max([ x.btagCSVV2 for x in recoAK4]) if len(recoAK4) > 1 else -1.
+        # max and second max AK4 CSV
+        bTagValues = [ x.btagCSVV2 for x in recoAK4]
+        maxAK4CSV = -1.
+        subMaxAK4CSV = -1.
+
+        if len(bTagValues) >= 1 : 
+          maxAK4CSV = max(bTagValues)
+
+        if len(bTagValues) >= 2 : 
+          bTagValues.remove(maxAK4CSV)
+          subMaxAK4CSV = max(bTagValues) # max([ x.btagCSVV2 for x in [z for z in recoAK4 if z != maxAK4CSV]])
+          
         
-        minJetMetDPhi = min([ abs(x.p4().DeltaPhi(MET)) for x in recoAK4]) if len(recoAK4) > 1 else -1.
+        minJetMetDPhi = min([ abs(x.p4().DeltaPhi(MET)) for x in recoAK4]) if len(recoAK4) >= 1 else -1.
         
         # No lepton overlap
         dR_jetlep = jetAK8_4v.DeltaR(lepton )
@@ -397,6 +408,7 @@ class Skimmer(Module):
         self.out.fillBranch("W_pt", WcandLep.Pt() )
         self.out.fillBranch("W_mass", WcandLep.M() )
         self.out.fillBranch("maxAK4CSV", maxAK4CSV )
+        self.out.fillBranch("subMaxAK4CSV", subMaxAK4CSV )
         self.out.fillBranch("minJetMetDPhi", minJetMetDPhi )
         self.out.fillBranch("HT_HEM1516", HT_HEM1516 )
         self.out.fillBranch("SelectedJet_softDrop_mass",  recoAK8[0].msoftdrop)
