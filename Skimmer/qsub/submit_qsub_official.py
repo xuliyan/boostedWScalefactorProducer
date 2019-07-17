@@ -92,6 +92,12 @@ if __name__ == "__main__":
     "/SingleMuon/Run2018B-Nano14Dec2018-v1/NANOAOD", #119918017
     "/SingleMuon/Run2018C-Nano14Dec2018-v1/NANOAOD", #110032072
     "/SingleMuon/Run2018D-Nano14Dec2018_ver2-v1/NANOAOD", #506468530
+    "/EGamma/Run2018C-Nano14Dec2018-v1/NANOAOD", #147743605
+    "/EGamma/Run2018B-Nano14Dec2018-v1/NANOAOD", #153822427
+    "/EGamma/Run2018A-Nano14Dec2018-v1/NANOAOD", #327859407
+    #"/EGamma/Run2018D-22Jan2019_Nano14Dec2018-v1/NANOAOD", #467026162737
+    "/EGamma/Run2018D-Nano14Dec2018_ver2-v1/NANOAOD", # 735614895
+
   ]
   patternsTT    = [
     "/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18NanoAODv4-Nano14Dec2018_102X_upgrade2018_realistic_v16-v1/NANOAODSIM", #43732445

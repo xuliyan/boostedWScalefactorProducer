@@ -97,7 +97,7 @@ class Skimmer(Module):
          self.out.branch("SelectedJet_eta",  "F")
          self.out.branch("SelectedJet_mass", "F")
          self.out.branch("SelectedLepton_pt",  "F")
-         self.out.branch("SelectedMuon_iso",  "F")
+         self.out.branch("SelectedLepton_iso",  "F")
          self.out.branch("Wlep_type",  "I")
          self.out.branch("W_pt",  "F")
          self.out.branch("W_mass",  "F")
@@ -151,55 +151,113 @@ class Skimmer(Module):
         isMC = (event.run == 1)
 
         # Preselections: HLT_Mu50&&nMuon>0&&Muon_pt[0]>55.&&fabs(Muon_eta[0])<2.4&&Muon_highPtId[0]>=2&&Muon_isPFcand[0]==1&&Muon_pfIsoId[0]>=4&&nFatJet>0&&FatJet_pt[0]>200&&fabs(FatJet_eta[0])<2.5
-        if not event.HLT_Mu50: return False
-        if not event.nMuon > 0: return False
-        if not event.nFatJet > 0: return False
+        if not (event.HLT_Mu50 or event.HLT_Ele35_WPTight_Gsf): return False
+        if not (event.nMuon > 0 or event.nElectron > 0): return False 
+        if not event.nFatJet > 0: return False                                  #?
 
+        
         # Find high-pT lepton, veto additional leptons, check trigger
         allmuons = Collection(event, "Muon")
         allelectrons = Collection(event, "Electron")
-        if self.chan == "mu":
-          triggerMu = event.HLT_Mu50
-          triggerEl = 0
-        elif self.chan == "el":
-          triggerEl = event.HLT_Ele115_CaloIdVT_GsfTrkIdT
-          triggerMu = 0
-        elif self.chan == "elmu":
-          triggerEl = event.HLT_Ele115_CaloIdVT_GsfTrkIdT
-          triggerMu = event.HLT_Mu50
-        else:
+
+        # Here we make some loose selections for each category 
+        electrons = [x for x in allelectrons if x.cutBased_HEEP and x.pt > 35 and ( abs(x.eta) < 1.44 or ( abs(x.eta) > 1.56 and abs(x.eta) < 2.5 ) )]   #loose pt cut for veto 
+        muons     = [x for x in allmuons if x.pt > 20 and x.highPtId > 1 and abs(x.p4().Eta()) < self.maxMuEta and x.pfIsoId >= 2] #loose pt cut for veto
+
+        
+        # Ordening the loosely selected categories according to Pt 
+        muons.sort(key=lambda x:x.pt,reverse=True)
+        electrons.sort(key=lambda x:x.pt,reverse=True)
+
+        #electrons = [x for x in allelectrons if x.pt > self.minElpt and abs(x.eta) < self.maxElEta and x.cutBased >=4 ]   #loose pt cut for veto 
+        #muons     = [x for x in allmuons if x.pt > self.minMupt and abs(x.eta) < self.maxMuEta and x.highPtId > 2 and x.pfIsoId >= 6 x.isPFcand ] #loose pt cut for veto
+
+
+        # Check if the muon or electron with highest Pt passes the tight selection (additional cuts to the loose selection)
+        electronTight = len(electrons) > 0 and electrons[0].pt > 55. and electrons[0].cutBased >= 4  #and abs(electrons[0].eta) < 2.5 and not (abs(electrons[0].eta) > 1.44 and abs(electrons[0].eta) < 1.56)
+        muonTight = len(muons) > 0 and muons[0].pt > 55. and abs(muons[0].eta) < 2.4  and muons[0].highPtId >= 2 and muons[0].isPFcand and muons[0].pfIsoId >= 6
+
+
+        # Select only one muon 
+#        if self.chan == "mu":
+#          triggerMu = event.HLT_Mu50
+#          triggerEl = 0
+#        elif self.chan == "el":
+#          triggerEl = event.HLT_Ele35_WPTight_Gsf
+#          triggerMu = 0
+#        elif self.chan == "elmu":
+#          triggerEl = event.HLT_Ele35_WPTight_Gsf
+#          triggerMu = event.HLT_Mu50
+#        else:
+#          print "Channel not defined! Skipping"
+#          return False
+
+        possibleChannels = ["mu", "el", "elmu"]
+
+        if self.chan not in possibleChannels : 
           print "Channel not defined! Skipping"
+          print "Please select a channel in the following: "
+          print possibleChannels
           return False
 
-#        electrons = [x for x in allelectrons if x.cutBased_HEEP and x.pt > 35 ]	 #loose pt cut for veto 
-        muons     = [x for x in allmuons if x.pt > 20 and x.highPtId > 1 and abs(x.p4().Eta()) < self.maxMuEta and x.pfIsoId >= 2] #loose pt cut for veto
-        muons    .sort(key=lambda x:x.pt,reverse=True)
-#        electrons.sort(key=lambda x:x.pt,reverse=True)
-
-        if not len(muons) > 0 or not muons[0].pt > 55. or not abs(muons[0].eta) < 2.4: return False
-        if not muons[0].highPtId >= 2 or not muons[0].isPFcand or not muons[0].pfIsoId >= 6: return False
         
+        # We require one and only one tight muon and no electron (loose) or one and only one tight electron and no (loose) muon 
         self.Vlep_type = -1
         lepton = ROOT.TLorentzVector()
-        if len(allelectrons) + len(allmuons) >= 1:
-          if len(allmuons) >= 1:
-            if triggerMu == 0: return False
-            self.Vlep_type = 0
-            lepton = allmuons[0].p4()
-            if len(allmuons) >= 2: Z = (allmuons[0].p4() + allmuons[1].p4()).M()
-           
-          elif len(allelectrons) >= 1:
-            if triggerEl == 0: return False
-            self.Vlep_type = 1
-            lepton = allelectrons[0].p4()
-            if len(allelectrons) >= 2: Z = allelectrons[0].p4() + allelectrons[1].p4()
-            
-        else: 
-          return False
-        
         iso = 0.
-        if self.chan.find("mu")!=-1:
-          iso = allmuons[0].pfRelIso03_all
+
+        if muonTight and len(muons) == 1 and len(electrons) == 0 :  # There is one tight muon and no other loose electron or muon 
+          if self.chan.find("mu") == -1 : 
+            return False
+          triggerMu = event.HLT_Mu50
+          triggerEl = 0
+          self.Vlep_type = 0
+          lepton = muons[0].p4()
+          iso = muons[0].pfRelIso03_all
+
+
+        if electronTight and len(electrons) == 1 and len(muons) == 0 :  # There is a tight electron and no other loose muon or electron
+          if self.chan.find("el") == -1 : 
+            return False
+          triggerEl = event.HLT_Ele35_WPTight_Gsf
+          triggerMu = 0
+          self.Vlep_type = 1
+          lepton = electrons[0].p4()
+          iso = electrons[0].pfRelIso03_all
+
+        else : 
+          return False 
+
+
+
+        
+#        self.Vlep_type = -1
+#        lepton = ROOT.TLorentzVector()
+#        if len(allelectrons) + len(allmuons) >= 1:
+#          if len(allmuons) >= 1:
+#            if triggerMu == 0: return False
+#            self.Vlep_type = 0
+#            lepton = allmuons[0].p4()
+#            if len(allmuons) >= 2: Z = (allmuons[0].p4() + allmuons[1].p4()).M()
+#           
+#          elif len(allelectrons) >= 1:
+#            if triggerEl == 0: return False
+#            self.Vlep_type = 1
+#            lepton = allelectrons[0].p4()
+#            if len(allelectrons) >= 2: Z = allelectrons[0].p4() + allelectrons[1].p4()
+#            
+#        else: 
+#          return False
+
+#        # We want only one good muon or one good electron 
+#        if len(muons) + len(electrons) != 1 : return False
+        
+#        iso = 0.
+#        isoElectron = 0. 
+#        if self.chan.find("mu")!=-1:
+#          iso = allmuons[0].pfRelIso03_all
+#        if self.chan.find("el")!=-1:
+#          isoElectron = allElectrons[0].pfRelIso03_all
         # Add filters https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#Moriond_2018
         passedMETFilters = False
         try:
@@ -416,7 +474,7 @@ class Skimmer(Module):
         self.out.fillBranch("SelectedJet_eta",  recoAK8[0].eta)
         self.out.fillBranch("SelectedJet_mass",  recoAK8[0].mass)
         self.out.fillBranch("SelectedLepton_pt", lepton.Pt())
-        self.out.fillBranch("SelectedMuon_iso",  iso)
+        self.out.fillBranch("SelectedLepton_iso",  iso)
         if recoAK8[0].tau1 > 0.0: 
           tau21 = recoAK8[0].tau2/recoAK8[0].tau1
           tau41 = recoAK8[0].tau4/recoAK8[0].tau1

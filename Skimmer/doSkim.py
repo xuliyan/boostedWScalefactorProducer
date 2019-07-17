@@ -31,16 +31,23 @@ if infile[0].find("SingleMuon")!=-1:
                     modules=[Skimmer(channel)],provenance=False,fwkJobReport=False,
                     jsonInput='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/PromptReco/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt')
                    
-elif infile[0].find("SingleElectron")!=-1:
+elif infile[0].find("EGamma")!=-1:
   channel = "el"
   print "Processing a Single Electron dataset file..."
+  p=PostProcessor(outputDir, infile, None, None,
+                    modules=[Skimmer(channel)],provenance=False,fwkJobReport=False,
+                    jsonInput='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/PromptReco/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt')
+                  
+elif infile[0].find("SemiLeptonic")!=-1:
+  channel = "elmu"
+  print "Processing a Muon and Electron dataset file..."
   p=PostProcessor(outputDir, infile, None, None,
                     modules=[Skimmer(channel)],provenance=False,fwkJobReport=False,
                     jsonInput='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/PromptReco/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt')
                     
 else:
   print "Processing MC..."
-  channel = "mu"
+  channel = "elmu"
   p=PostProcessor(outputDir, infile, "" ,"",
                     modules=[Skimmer(channel)],provenance=False,fwkJobReport=False)
 p.run()
