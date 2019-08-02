@@ -160,6 +160,7 @@ def fit_mj_single_MC(workspace,fileName,label, model,channel, wtagger_label,wsna
     # from time import sleep
     # sleep(100)
     c1.SaveAs("plots/MCfits/"+label+"_"+wsname+".png")
+    c1.SaveAs("plots/MCfits/"+label+"_"+wsname+".pdf")
 
     # TODO # draw_canvas_with_pull(mplot,mplot_pull,rt.RooArgList(*parameters_list),"plots/MCfits/",label+fileName,model,channel,0,0,GetLumi())
     workspace.var("rrv_number"+label+"_"+channel+"_mj").setVal(workspace.var("rrv_number"+label+"_"+channel+"_mj").getVal()*workspace.var("rrv_scale_to_lumi"+label+"_"+channel).getVal())
@@ -547,3 +548,4 @@ def DrawScaleFactorTTbarControlSample(xtitle,workspace, color_palet, label, chan
                 #   leg_data_fail=legend4Plot(xframe_data_fail,0,1,0.18)
                 #   xframe_data_fail.addObject(leg_data_fail)
                 
+
