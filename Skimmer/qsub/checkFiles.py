@@ -36,3 +36,4 @@ for file in filelist:
     continue
 
 print "Results for", pattern, ":", nFails, "/", nFiles, "failed,", nGoods, "/", nFiles, "are valid"
+

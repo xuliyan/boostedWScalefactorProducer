@@ -38,3 +38,13 @@ The only files you will need to edit except the runSF.py steering script are:
 ```
 The output is a txt file with all the numbers you need, which are also printed on the sceen. The last print out is a table in LateX format for simple copy/paste
 into .tex files
+
+Commands used for current fitting:
+
+```
+python runSF_nanoAOD.py -b --doBinned --workspace workspace_tau21_0p35 --HP 0.35 --LP 0.75
+
+python runSF_nanoAOD.py -b --doBinned --workspace workspace_tau21ddt_0p43 --HP 0.43 --LP 0.79
+```
+
+

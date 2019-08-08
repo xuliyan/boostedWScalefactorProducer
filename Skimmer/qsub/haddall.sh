@@ -1,3 +1,4 @@
+
 job=$1
 dir=$2 #"/scratch/zucchett/Ntuple/WSF/"
 
@@ -39,3 +40,4 @@ done
 #haddnano.py /scratch/thaarres/NANO_06feb/WW_TuneCP5_13TeV-pythia8.root WW_TuneCP5_13TeV-pythia8/*.root
 #haddnano.py /scratch/thaarres/NANO_06feb/WZ_TuneCP5_13TeV-pythia8.root WZ_TuneCP5_13TeV-pythia8/*.root
 #haddnano.py /scratch/thaarres/NANO_06feb/ZZ_TuneCP5_13TeV-pythia8.root ZZ_TuneCP5_13TeV-pythia8/*.root
+

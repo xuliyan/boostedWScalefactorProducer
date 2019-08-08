@@ -17,7 +17,7 @@ iPeriod = 4
 # iPeriod = 40 #2016
 
 def getCanvas():
-    H_ref = 800
+    H_ref = 600
     W_ref = 800
     W = W_ref
     H  = H_ref
@@ -102,9 +102,9 @@ def fit_mj_single_MC(workspace,fileName,label, model,channel, wtagger_label,wsna
     constraint_list = []
     
     model_pdf = MakeExtendedModel(workspace,label,model,"_mj",channel,wtagger_label,constraint_list,"W",wsname)
-    rfresult = model_pdf.fitTo(rdataset_mj,rt.RooFit.Save(1),rt.RooFit.SumW2Error(rt.kTRUE),rt.RooFit.Extended(rt.kTRUE), rt.RooFit.Minimizer("Minuit2"),rt.RooFit.Strategy(0),rt.RooFit.Verbose(rt.kFALSE))
-    rfresult = model_pdf.fitTo(rdataset_mj,rt.RooFit.Save(1),rt.RooFit.SumW2Error(rt.kTRUE),rt.RooFit.Extended(rt.kTRUE), rt.RooFit.Minimizer("Minuit2"),rt.RooFit.Strategy(2),rt.RooFit.Verbose(rt.kFALSE))
-    rfresult = model_pdf.fitTo(rdataset_mj,rt.RooFit.Save(1),rt.RooFit.SumW2Error(rt.kTRUE),rt.RooFit.Extended(rt.kTRUE), rt.RooFit.Minimizer("Minuit2"),rt.RooFit.Strategy(2),rt.RooFit.Verbose(rt.kFALSE))
+    rfresult = model_pdf.fitTo(rdataset_mj,rt.RooFit.Save(1),rt.RooFit.SumW2Error(rt.kTRUE),rt.RooFit.Extended(rt.kTRUE), rt.RooFit.Minimizer("Minuit2"),rt.RooFit.Verbose(rt.kFALSE))
+    rfresult = model_pdf.fitTo(rdataset_mj,rt.RooFit.Save(1),rt.RooFit.SumW2Error(rt.kTRUE),rt.RooFit.Extended(rt.kTRUE), rt.RooFit.Minimizer("Minuit2"),rt.RooFit.Verbose(rt.kFALSE))
+    rfresult = model_pdf.fitTo(rdataset_mj,rt.RooFit.Save(1),rt.RooFit.SumW2Error(rt.kTRUE),rt.RooFit.Extended(rt.kTRUE), rt.RooFit.Minimizer("Minuit2"),rt.RooFit.Verbose(rt.kFALSE))
     print "";rfresult.Print();print "";
     getattr(workspace,'import')(rfresult)
     
@@ -123,14 +123,13 @@ def fit_mj_single_MC(workspace,fileName,label, model,channel, wtagger_label,wsna
     mplot.GetYaxis().SetRangeUser(0,mplot.GetMaximum()*1.2)
     rdataset_mj.plotOn(mplot,rt.RooFit.MarkerSize(1.5),rt.RooFit.DataError(rt.RooAbsData.SumW2),rt.RooFit.XErrorSize(0),rt.RooFit.Invisible())
   
-    #model_pdf.plotOn(mplot,rt.RooFit.Name(model),rt.RooFit.VisualizeError(rfresult, 1, False),rt.RooFit.FillColor(920),rt.RooFit.LineColor(920),rt.RooFit.FillStyle(1001),rt.RooFit.DrawOption("FL")) 
-    model_pdf.plotOn(mplot,rt.RooFit.Name(model))
     model_pdf.plotOn(mplot,rt.RooFit.Name( "Gaussian comp."   ),rt.RooFit.Components("gaus*"),rt.RooFit.LineStyle(rt.kDashed),rt.RooFit.LineColor(rt.kRed+3))
     model_pdf.plotOn(mplot,rt.RooFit.Name( "Gaussian comp. 1" ),rt.RooFit.Components("gaus1*"),rt.RooFit.LineStyle(rt.kDashed),rt.RooFit.LineColor(rt.kRed+3))
     model_pdf.plotOn(mplot,rt.RooFit.Name( "Gaussian comp. 2" ),rt.RooFit.Components("gaus2*"),rt.RooFit.LineStyle(rt.kDashed),rt.RooFit.LineColor(rt.kRed+4))
     model_pdf.plotOn(mplot,rt.RooFit.Name( "ErfExp comp." ),rt.RooFit.Components("erfExp*"),rt.RooFit.LineStyle(rt.kDashed),rt.RooFit.LineColor(rt.kRed+3))
     model_pdf.plotOn(mplot,rt.RooFit.Name( "Exp. comp." ),rt.RooFit.Components("exp*"),rt.RooFit.LineStyle(rt.kDashed),rt.RooFit.LineColor(rt.kRed+2))
     model_pdf.plotOn(mplot,rt.RooFit.Name( "Chebychev comp." ),rt.RooFit.Components("cheb*"),rt.RooFit.LineStyle(rt.kDashed),rt.RooFit.LineColor(rt.kRed+3))
+    model_pdf.plotOn(mplot,rt.RooFit.Name((model) )) 
 
     rdataset_mj.plotOn(mplot,rt.RooFit.MarkerSize(1.),rt.RooFit.Name( (label) ), rt.RooFit.DataError(rt.RooAbsData.SumW2), rt.RooFit.XErrorSize(1))
     leg1 = getLegend(mplot,channel)
@@ -550,3 +549,4 @@ def DrawScaleFactorTTbarControlSample(xtitle,workspace, color_palet, label, chan
                 #   leg_data_fail=legend4Plot(xframe_data_fail,0,1,0.18)
                 #   xframe_data_fail.addObject(leg_data_fail)
                 
+

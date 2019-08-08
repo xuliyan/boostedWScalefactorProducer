@@ -7,16 +7,25 @@ import math
 import csv
 from WTopScalefactorProducer.Fitter.tdrstyle import *
 from WTopScalefactorProducer.Fitter.CMS_lumi import *
+<<<<<<< HEAD
 
+=======
+from WTopScalefactorProducer.Skimmer.getGenEv import getGenEv
+>>>>>>> 29a288e002b325940b49a1fbef5979e61a1471ae
 setTDRStyle()
 
 from ROOT import *
 
 parser = OptionParser()
 
+<<<<<<< HEAD
 # "jetAK8_softDrop_mass","jetAK8_softDrop_mass_unCorr","jetAK8_chs_softdrop_mass","jetAK8_chs_pruned_mass"
 # --- Tagging options
 parser.add_option('--tagger', action="store",type="string",dest="tagger",default="SelectedJet_tau21_ddt_retune", help="Name of tagger variable (tau32/tau21/ddt)")
+=======
+# --- Tagging options
+parser.add_option('--tagger', action="store",type="string",dest="tagger",default="SelectedJet_tau21", help="Name of tagger variable (tau32/tau21/ddt)")
+>>>>>>> 29a288e002b325940b49a1fbef5979e61a1471ae
 parser.add_option('--massvar', action="store",type="string",dest="massvar",default="SelectedJet_softDrop_mass", help="Name of mass variable to fit")
 parser.add_option('--xtitle', action="store",type="string",dest="xtitle",default="Corrected PUPPI softdrop mass (GeV)", help="x axis title of mass variable to fit")
 parser.add_option('--HP', action="store", type="float",dest="tau2tau1cutHP",default=0.35)
@@ -436,7 +445,6 @@ class doWtagFits:
 
         #Importing fit variables
         rrv_mass_j = workspace4fit_.var("rrv_mass_j")
-#        rrv_mass_j.setMin(40.)
         rrv_weight = RooRealVar("rrv_weight","rrv_weight",0. ,10000000.)
         
         #-------------IMPORT DATA-------------
@@ -511,20 +519,20 @@ class doWtagFits:
         constrainslist_data_em = []
         for i in range(len(self.boostedW_fitter_em.constrainslist_data)):
             constrainslist_data_em.append(self.boostedW_fitter_em.constrainslist_data[i])
-            
+            print self.boostedW_fitter_em.constrainslist_data[i]
         pdfconstrainslist_data_em = RooArgSet("pdfconstrainslist_data_em")
         for i in range(len(constrainslist_data_em)):
           pdfconstrainslist_data_em.add(self.workspace4fit_.pdf(constrainslist_data_em[i]) )
           pdfconstrainslist_data_em.Print()
 
         print " Perform simultaneous fit to data"
-        rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE),RooFit.PrintLevel(-1), RooFit.Minimizer("Minuit"),RooFit.Strategy(0), RooFit.ExternalConstraints(pdfconstrainslist_data_em))
+        rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit"),RooFit.Strategy(0),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
 #        if options.doBinnedFit:
-#          rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
+#          rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
 #          # rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
 #          # rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
 #        else:
-#          rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
+#          rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
 #          # rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
 #          # rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
         
@@ -551,7 +559,6 @@ class doWtagFits:
         simPdf_TotalMC.addPdf(model_TotalMC_em,"em_pass")
         simPdf_TotalMC.addPdf(model_TotalMC_fail_em,"em_fail")
         
-
         #Import Gaussian constraints  for fixed paramters to propagate error to likelihood
         constrainslist_TotalMC_em =[]
         for i in range(len(self.boostedW_fitter_em.constrainslist_mc)):
@@ -561,12 +568,12 @@ class doWtagFits:
           pdfconstrainslist_TotalMC_em.add(self.workspace4fit_.pdf(constrainslist_TotalMC_em[i]) )
 
         # Perform simoultaneous fit to MC
-        rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE),RooFit.PrintLevel(-1), RooFit.Minimizer("Minuit"),RooFit.Strategy(0), RooFit.SumW2Error(kFALSE), RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))
+        rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit"),RooFit.Strategy(0), RooFit.SumW2Error(kFALSE), RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))
 #        if options.doBinnedFit:
-#          rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))--> Removing due to unexected behaviour. See https://root.cern.ch/phpBB3/viewtopic.php?t=16917, https://root.cern.ch/phpBB3/viewtopic.php?t=16917
+#          rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit"), RooFit.SumW2Error(kTRUE), RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))--> Removing due to unexected behaviour. See https://root.cern.ch/phpBB3/viewtopic.php?t=16917, https://root.cern.ch/phpBB3/viewtopic.php?t=16917
 #          # rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))
 #        else:
-#          rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))
+#          rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit"), RooFit.SumW2Error(kTRUE), RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))
 #          # rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))
         
         getattr(workspace4fit_,'import')(combData_TotalMC_plot)
@@ -609,49 +616,13 @@ class initialiseFits:
       self.mj_shape = {}
       
       # Fit functions for matched tt MC
-
-###      self.mj_shape["TTbar_realW_fail_MC"] = "GausErfExp_ttbar_failtau2tau1cut_fitMC"
-###      self.mj_shape["TTbar_realW_MC"]      = "GausErfExp_ttbar_fitMC" #before "2Gaus_ttbar"
-###      
-####      self.mj_shape["TTbar_realW_fail_MC"]  = "DoubleCB_ttbar_failtau2tau1cut_fitMC"                       
-####      self.mj_shape["TTbar_realW_MC"]       = "DoubleCB_ttbar_fitMC"                                       
-###      self.mj_shape["TTbar_fakeW_fail_MC"]  = "ErfExp_ttbar_failtau2tau1cut_fitMC"                         
-###      self.mj_shape["TTbar_fakeW_MC"]       = "GausErfExp_ttbar_fitMC"                                         
-###                                                                                                           
-###      # Use the same fit functions in data                                                                 
-###      self.mj_shape["bkg_data_fail"]        = self.mj_shape["TTbar_fakeW_fail_MC"].replace("_fitMC","")    
-###      self.mj_shape["signal_data_fail"]     = self.mj_shape["TTbar_realW_fail_MC"].replace("_fitMC","")    
-###      self.mj_shape["signal_data"]          = self.mj_shape["TTbar_realW_MC"].replace("_fitMC","")         
-###      self.mj_shape["bkg_data"]             = self.mj_shape["TTbar_fakeW_MC"].replace("_fitMC","")         
-###                                                                                                           
-###      # ... and in MC                                                                                      
-###      self.mj_shape["bkg_mc_fail"]          = self.mj_shape["TTbar_fakeW_fail_MC"].replace("_fitMC","")    
-###      self.mj_shape["signal_mc_fail"]       = self.mj_shape["TTbar_realW_fail_MC"].replace("_fitMC","")    
-###      self.mj_shape["signal_mc"]            = self.mj_shape["TTbar_realW_MC"].replace("_fitMC","")         
-###      self.mj_shape["bkg_mc"]               = self.mj_shape["TTbar_fakeW_MC"].replace("_fitMC","")         
-### 
-###      # Fit functions for minor backgrounds
-###      self.mj_shape["VV"]                   = "ExpGaus"
-###      self.mj_shape["VV_fail"]              = "Exp"
-###      self.mj_shape["WJets"]                = "ErfExp"
-###      self.mj_shape["WJets_fail"]           = "ErfExp"
-###      self.mj_shape["QCD"]                  = "ErfExp"
-###      self.mj_shape["QCD_fail"]             = "ErfExp"
-###      self.mj_shape["STop"]                 = "ErfExpGaus_sp"       
-###      self.mj_shape["STop_fail"]            = "ExpGaus"  
-
-
-      self.mj_shape["TTbar_realW_fail_MC"] = "Gaus2ErfExp_ttbar_failtau2tau1cut_fitMC"
-      self.mj_shape["TTbar_realW_MC"]      = "Gaus2ErfExp_ttbar_fitMC" #before "2Gaus_ttbar"
+      #self.mj_shape["TTbar_realW_fail_MC"] = "GausErfExp_ttbar_failtau2tau1cut_fitMC"
+      #self.mj_shape["TTbar_realW_MC"]      = "GausErfExp_ttbar_fitMC" #before "2Gaus_ttbar"
       
-      self.mj_shape["TTbar_realW_fail_MC"]  = "DoubleSidedCB_ttbar_failtau2tau1cut_fitMC"
-      self.mj_shape["TTbar_realW_MC"]       = "DoubleSidedCB_ttbar_fitMC"
-      
-#      self.mj_shape["TTbar_realW_fail_MC"] = "GausErfExp_ttbar_failtau2tau1cut_fitMC"
-#      self.mj_shape["TTbar_realW_MC"]      = "GausErfExp_ttbar_fitMC"
-      
-      self.mj_shape["TTbar_fakeW_fail_MC"]  = "ErfExp_ttbar_failtau2tau1cut_fitMC"
-      self.mj_shape["TTbar_fakeW_MC"]       = "ErfExp_ttbar_fitMC"
+      self.mj_shape["TTbar_realW_fail_MC"]  = "DoubleSidedCB_ttbar_failtau2tau1cut_fitMC"                       
+      self.mj_shape["TTbar_realW_MC"]       = "DoubleSidedCB_ttbar_fitMC"                                       
+      self.mj_shape["TTbar_fakeW_fail_MC"]  = "ErfExp_ttbar_failtau2tau1cut_fitMC"                         
+      self.mj_shape["TTbar_fakeW_MC"]       = "ErfExp_ttbar_fitMC"                                         
                                                                                                            
       # Use the same fit functions in data                                                                 
       self.mj_shape["bkg_data_fail"]        = self.mj_shape["TTbar_fakeW_fail_MC"].replace("_fitMC","")    
@@ -674,7 +645,7 @@ class initialiseFits:
       self.mj_shape["QCD_fail"]             = "ErfExp"
       self.mj_shape["STop"]                 = "ErfExpGaus_sp"       
       self.mj_shape["STop_fail"]            = "ErfExpGaus_sp"  
-      
+       
       #Need to add a second gauss when fitting top 
       if options.peak == "Wt" :
          self.mj_shape["STop_fail"]              = "Gaus2ErfExp"  
@@ -1196,6 +1167,7 @@ class initialiseFits:
       getattr(self.workspace4fit_,"import")(rdataset4fit_failtau2tau1cut_mj)
       getattr(self.workspace4fit_,"import")(rdataset_extremefailtau2tau1cut_mj)
       getattr(self.workspace4fit_,"import")(rdataset4fit_extremefailtau2tau1cut_mj)
+      
 
 ### Start  main
 if __name__ == '__main__':
@@ -1213,4 +1185,5 @@ if __name__ == '__main__':
     else:
         print 'Getting W-tagging scalefactor for %s sample for n-subjettiness < %.2f' %(channel,options.tau2tau1cutHP) #I am actually not doing a simoultaneous fit. So..... change this
         getSF()
+
 
