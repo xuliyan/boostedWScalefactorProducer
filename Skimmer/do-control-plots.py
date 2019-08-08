@@ -33,9 +33,7 @@ vars += ["Electron_eta[0]", "Electron_phi[0]", "Electron_pt[0]", "Electron_pfRel
 
 
 #Data infile
-datas   = ["SingleMuon-Run2018A.root", "SingleMuon-Run2018B.root", "SingleMuon-Run2018C.root", "SingleMuon-Run2018D.root"]
-datasel = ["EGamma-Run2018A.root", "EGamma-Run2018B.root", "EGamma-Run2018C.root", "EGamma-Run2018D.root"]
-datas += datasel
+datas   = ["SingleMuon-Run2018A.root", "SingleMuon-Run2018B.root", "SingleMuon-Run2018C.root", "SingleMuon-Run2018D.root", "EGamma-Run2018A.root", "EGamma-Run2018B.root", "EGamma-Run2018C.root", "EGamma-Run2018D.root"]
 
 #MC infiles
 bkgs = []
@@ -54,7 +52,7 @@ bkgs.append(WJs)
 bkgs.append(TTs)
 
 dir = "/work/mhuwiler/data/WScaleFactors/added/" #"/scratch/zucchett/Ntuple/WSF/"
-outdirname = "newselectionElectronfinal"
+outdirname = ""
 
 plotdirname = "plots/"+outdirname+"/plots/"
 plotdirnameWCR = "plots/"+outdirname+"/plotsWCR"

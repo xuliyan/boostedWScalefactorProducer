@@ -14,7 +14,7 @@ else:
   ]
 
 if len(sys.argv)>2: outputDir = sys.argv[2]
-else: outputDir = "Samples"	
+else: outputDir = "TEST"	
 
 if len(sys.argv)>3: name = sys.argv[3]
 else: name = "test.root"

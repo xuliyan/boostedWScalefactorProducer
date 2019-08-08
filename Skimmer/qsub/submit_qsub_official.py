@@ -22,7 +22,12 @@ def split_seq(iterable, size):
     while item:
         yield item
         item = list(itertools.islice(it, size))
-        
+
+# Other possible definition
+#def split_seq(seq,size):
+#    """ Split up seq in pieces of size """
+#    return [seq[i:i+size] for i in range(0, len(seq), size)]
+
 def getFileListDAS(dataset,instance="prod/phys03",run=-1):
   cmd='das_client --limit=0 --query="file dataset=%s instance=%s"'%(dataset,instance)
 #  cmd='das_client --limit=0 --query="file dataset=%s"'%(dataset,)
@@ -95,7 +100,6 @@ if __name__ == "__main__":
     "/EGamma/Run2018C-Nano14Dec2018-v1/NANOAOD", #147743605
     "/EGamma/Run2018B-Nano14Dec2018-v1/NANOAOD", #153822427
     "/EGamma/Run2018A-Nano14Dec2018-v1/NANOAOD", #327859407
-    #"/EGamma/Run2018D-22Jan2019_Nano14Dec2018-v1/NANOAOD", #467026162737
     "/EGamma/Run2018D-Nano14Dec2018_ver2-v1/NANOAOD", # 735614895
 
   ]
@@ -172,7 +176,8 @@ if __name__ == "__main__":
         name = pattern.split("/")[1].replace("/","") + ("-" + pattern.split("/")[2].split("-")[0] if 'Run201' in pattern else "")
         createLists(pattern, name)
   else:
-  
+
+    numberOfJobs = 0
     for pattern in patterns:
       name = pattern.split("/")[1].replace("/","") + ("-" + pattern.split("/")[2].split("-")[0] if 'Run201' in pattern else "")
       try:
@@ -199,8 +204,15 @@ if __name__ == "__main__":
         #print "FILES = ",f
         createJobs(f,outfolder,name,nChunks)
         nChunks = nChunks+1
+
+        numberOfJobs+=1
       
       jobs.close()
+
+      with open("jobCount.txt", "w") as jobCountFile: # putting this here (with w) so that it writes the correct total number of jobs submitted even if the script doesn't run until the end.
+        print numberOfJobs
+        jobCountFile.write("{0}".format(numberOfJobs))
+
   #    submit = raw_input("Do you also want to submit the jobs to the batch system? [y/n]")
       submit = 'y'
       if submit == 'y' or submit=='Y':

@@ -40,7 +40,7 @@ class Skimmer(Module):
     def __init__(self, Channel):
         self.chan = Channel
         self.writeHistFile = True
-        self.verbose = True
+        self.verbose = False
     def beginJob(self, histFile, histDirName):
         Module.beginJob(self, histFile, histDirName)
         # self.addObject( ROOT.TH1F('nGenEv',   'nGenEv',   3, 0, 3) )
@@ -78,9 +78,6 @@ class Skimmer(Module):
 
         self.nEvent = 0
 
-        #if (debug): 
-        with open("/work/mhuwiler/software/CMSSW_10_2_6/src/WTopScalefactorProducer/Skimmer/SkimmerOutput.txt", "w") as file: 
-          pass 
         
     def endJob(self):
         Module.endJob(self)
@@ -147,12 +144,7 @@ class Skimmer(Module):
             
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
-        debug=False
-        #print self.nEvent
 
-        #if (debug): debugfile = open("/work/mhuwiler/software/CMSSW_10_2_6/src/WTopScalefactorProducer/Skimmer/SkimmerOutput.txt", "a")
-
-        
         puweight = 1.
         lheweight = 1.
         btagweight = 1.
@@ -177,28 +169,10 @@ class Skimmer(Module):
         muons.sort(key=lambda x:x.pt,reverse=True)
         electrons.sort(key=lambda x:x.pt,reverse=True)
 
-        #electrons = [x for x in allelectrons if x.pt > self.minElpt and abs(x.eta) < self.maxElEta and x.cutBased >=4 ]   #loose pt cut for veto 
-        #muons     = [x for x in allmuons if x.pt > self.minMupt and abs(x.eta) < self.maxMuEta and x.highPtId > 2 and x.pfIsoId >= 6 x.isPFcand ] #loose pt cut for veto
-
-
         # Check if the muon or electron with highest Pt passes the tight selection (additional cuts to the loose selection)
         electronTight = len(electrons) > 0 and electrons[0].pt > 55. and electrons[0].cutBased >= 4  #and abs(electrons[0].eta) < 2.5 and not (abs(electrons[0].eta) > 1.44 and abs(electrons[0].eta) < 1.56)
         muonTight = len(muons) > 0 and muons[0].pt > 55. and abs(muons[0].eta) < 2.4  and muons[0].highPtId >= 2 and muons[0].isPFcand and muons[0].pfIsoId >= 6
 
-
-        # Select only one muon 
-#        if self.chan == "mu":
-#          triggerMu = event.HLT_Mu50
-#          triggerEl = 0
-#        elif self.chan == "el":
-#          triggerEl = event.HLT_Ele35_WPTight_Gsf
-#          triggerMu = 0
-#        elif self.chan == "elmu":
-#          triggerEl = event.HLT_Ele35_WPTight_Gsf
-#          triggerMu = event.HLT_Mu50
-#        else:
-#          print "Channel not defined! Skipping"
-#          return False
 
         possibleChannels = ["mu", "el", "elmu"]
 
@@ -208,13 +182,7 @@ class Skimmer(Module):
           print possibleChannels
           return False
 
-        if (debug): 
-          msg =  "Allmuons: {}   Allelectrons: {}  muons: {}   electrons: {}   MuonTight: {}   ElectronTight: {}  ".format(len(allmuons), len(allelectrons), len(muons), len(electrons), int(muonTight), int(electronTight))
-          #print msg
-
-
-        if (debug): muonselect = False
-        if (debug): electronselect = False
+        
         # We require one and only one tight muon and no electron (loose) or one and only one tight electron and no (loose) muon 
         self.Vlep_type = -1
         lepton = ROOT.TLorentzVector()
@@ -228,7 +196,6 @@ class Skimmer(Module):
           self.Vlep_type = 0
           lepton = muons[0].p4()
           iso = muons[0].pfRelIso03_all
-          if (debug): muonselect = True
 
         elif (electronTight and (len(electrons) == 1) and (len(muons) == 0)) :  # There is a tight electron and no other loose muon or electron
           if self.chan.find("el") == -1 : 
@@ -238,45 +205,11 @@ class Skimmer(Module):
           self.Vlep_type = 1
           lepton = electrons[0].p4()
           iso = electrons[0].pfRelIso03_all
-          if (debug): electronselect=True
 
         else : 
           return False 
 
-        if (debug): 
-          #print "Allmuons: {}   Allelectrons: {}  muons: {}   electrons: {}   MuonTight: {}   ElectronTight: {}   MuonSelect: {}  Electronselect: {}  LeptonType: {} ".format(len(allmuons), len(allelectrons), len(muons), len(electrons), int(muonTight), int(electronTight), int(muonselect), int(electronselect), self.Vlep_type)
-          msg += "MuonSelect: {}  Electronselect: {}  LeptonType: {} ".format(int(muonselect), int(electronselect), self.Vlep_type)
-          #print msg
 
-
-#        self.Vlep_type = -1
-#        lepton = ROOT.TLorentzVector()
-#        if len(allelectrons) + len(allmuons) >= 1:
-#          if len(allmuons) >= 1:
-#            if triggerMu == 0: return False
-#            self.Vlep_type = 0
-#            lepton = allmuons[0].p4()
-#            if len(allmuons) >= 2: Z = (allmuons[0].p4() + allmuons[1].p4()).M()
-#           
-#          elif len(allelectrons) >= 1:
-#            if triggerEl == 0: return False
-#            self.Vlep_type = 1
-#            lepton = allelectrons[0].p4()
-#            if len(allelectrons) >= 2: Z = allelectrons[0].p4() + allelectrons[1].p4()
-#            
-#        else: 
-#          return False
-
-#        # We want only one good muon or one good electron 
-#        if len(muons) + len(electrons) != 1 : return False
-        
-#        iso = 0.
-#        isoElectron = 0. 
-#        if self.chan.find("mu")!=-1:
-#          iso = allmuons[0].pfRelIso03_all
-#        if self.chan.find("el")!=-1:
-#          isoElectron = allElectrons[0].pfRelIso03_all
-        # Add filters https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#Moriond_2018
         passedMETFilters = False
         try:
           if event.Flag_goodVertices and event.Flag_globalTightHalo2016Filter and event.Flag_BadPFMuonFilter and event.Flag_EcalDeadCellTriggerPrimitiveFilter and event.Flag_HBHENoiseFilter and event.Flag_HBHENoiseIsoFilter and event.Flag_eeBadScFilter and event.Flag_ecalBadCalibFilter: #and event.Flag_BadChargedCandidateFilter
@@ -309,9 +242,9 @@ class Skimmer(Module):
         # Find fat jet
         FatJets = list(Collection(event, "FatJet"))
         recoAK8 = [ x for x in FatJets ] # if x.p4().Perp() > self.minJetPt and  abs(x.p4().Eta()) < self.maxJetEta and x.msoftdrop > 30. and x.tau1 > 0. and x.tau2 > 0.]
-        if not len(recoAK8) > 0 or not recoAK8[0].pt > 200. or not abs(recoAK8[0].eta) < 2.5: return False
 #        recoAK8.sort(key=lambda x:x.msoftdrop,reverse=True)
         recoAK8.sort(key=lambda x:x.pt,reverse=True)
+        if not len(recoAK8) > 0 or not recoAK8[0].pt > 200. or not abs(recoAK8[0].eta) < 2.5: return False
 
         jetAK8_4v = ROOT.TLorentzVector()
         #jetAK8_4v.SetPtEtaPhiM(recoAK8[0].pt,recoAK8[0].eta,recoAK8[0].phi,recoAK8[0].mass)
@@ -518,12 +451,6 @@ class Skimmer(Module):
         if self.nEvent % 1000 == 0: print "Filled event", self.nEvent
         
         
-        if (debug): 
-          debugfile = open("/work/mhuwiler/software/CMSSW_10_2_6/src/WTopScalefactorProducer/Skimmer/SkimmerOutput.txt", "a")
-          debugfile.write(msg+"\n")
-          debugfile.close()
-
-        #if (debug): print "Made full selection loop "
         return True
 
 
