@@ -7,25 +7,15 @@ import math
 import csv
 from WTopScalefactorProducer.Fitter.tdrstyle import *
 from WTopScalefactorProducer.Fitter.CMS_lumi import *
-<<<<<<< HEAD
-
-=======
 from WTopScalefactorProducer.Skimmer.getGenEv import getGenEv
->>>>>>> 29a288e002b325940b49a1fbef5979e61a1471ae
 setTDRStyle()
 
 from ROOT import *
 
 parser = OptionParser()
 
-<<<<<<< HEAD
-# "jetAK8_softDrop_mass","jetAK8_softDrop_mass_unCorr","jetAK8_chs_softdrop_mass","jetAK8_chs_pruned_mass"
-# --- Tagging options
-parser.add_option('--tagger', action="store",type="string",dest="tagger",default="SelectedJet_tau21_ddt_retune", help="Name of tagger variable (tau32/tau21/ddt)")
-=======
 # --- Tagging options
 parser.add_option('--tagger', action="store",type="string",dest="tagger",default="SelectedJet_tau21", help="Name of tagger variable (tau32/tau21/ddt)")
->>>>>>> 29a288e002b325940b49a1fbef5979e61a1471ae
 parser.add_option('--massvar', action="store",type="string",dest="massvar",default="SelectedJet_softDrop_mass", help="Name of mass variable to fit")
 parser.add_option('--xtitle', action="store",type="string",dest="xtitle",default="Corrected PUPPI softdrop mass (GeV)", help="x axis title of mass variable to fit")
 parser.add_option('--HP', action="store", type="float",dest="tau2tau1cutHP",default=0.35)
