@@ -212,13 +212,13 @@ class Skimmer(Module):
 
         passedMETFilters = False
         try:
-          if event.Flag_goodVertices and event.Flag_globalTightHalo2016Filter and event.Flag_BadPFMuonFilter and event.Flag_EcalDeadCellTriggerPrimitiveFilter and event.Flag_HBHENoiseFilter and event.Flag_HBHENoiseIsoFilter and event.Flag_eeBadScFilter and event.Flag_ecalBadCalibFilter: #and event.Flag_BadChargedCandidateFilter
+          if event.Flag_goodVertices and event.Flag_globalSuperTightHalo2016Filter and event.Flag_BadPFMuonFilter and event.Flag_EcalDeadCellTriggerPrimitiveFilter and event.Flag_HBHENoiseFilter and event.Flag_HBHENoiseIsoFilter and (isMC or event.Flag_eeBadScFilter) and event.Flag_ecalBadCalibFilterV2:
             passedMETFilters = True
         except:
            passedMETFilters = False
-          # if not passedMETFilters: return False
+          # if not passedMETFilters: return FalseThe MET filters are out of date. In particular, you shouldn't be applying the BadChargedCandidateFilter. Also, tou should be using the globalSuperTightHalo2016Filter instead of globalTightHalo2016Filter (both are in nanoAOD), the eeBadScFilter should be applied to data, and we believe you should use the ecalBadCalibFilterV2 instead of ecalBadCalibFilter.
 
-        #if not passedMETFilters: return False
+        if not passedMETFilters: return False
         
         # Apply MET cut    
         met = Object(event, "MET")
