@@ -117,6 +117,7 @@ class Skimmer(Module):
          self.out.branch("passedMETfilters",  "I")
          self.out.branch("lheweight",  "F")
          self.out.branch("puweight",  "F")
+         self.out.branch("topweight",  "F")
          self.out.branch("btagweight",  "F")
 
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
@@ -148,6 +149,7 @@ class Skimmer(Module):
 
         puweight = 1.
         lheweight = 1.
+        topweight = 1.
         btagweight = 1.
         isMC = (event.run == 1)
 
@@ -290,7 +292,6 @@ class Skimmer(Module):
         self.isWqq = 0
         self.matchedJ = 0
         self.matchedSJ = 0
-        self.topWeight = 0.
         
         if isMC:
             try:
@@ -312,6 +313,8 @@ class Skimmer(Module):
             TWdaus =  [x for x in gens if x.pt>1 and  0<abs(x.pdgId)<4]
             Tdaus =  [x for x in gens if x.pt>1 and (abs(x.pdgId)==5  or  abs(x.pdgId)==24 )]
             Tmoms =  [x for x in gens if x.pt>1 and abs(x.pdgId)==6]
+            Top =  [x for x in gens if x.pdgId==6]
+            AntiTop =  [x for x in gens if x.pdgId==-6]
             
             realVs = []
             realVdaus = []
@@ -344,7 +347,11 @@ class Skimmer(Module):
                     except:
                       continue  
             
-            
+            if len(Top)>0 and len(AntiTop)>0:
+                topSF = math.exp(0.0615 - 0.0005 * Top[0].pt)
+                antitopSF = math.exp(0.0615 - 0.0005 * AntiTop[0].pt)
+                topweight = math.sqrt(topSF*antitopSF)
+                
         
         # Check if matched to genW and genW daughters
         #for partially merged:
@@ -421,6 +428,7 @@ class Skimmer(Module):
         self.out.fillBranch("AK8Subjet0isMoreMassive", self.SJ0isW )
         self.out.fillBranch("puweight", puweight )
         self.out.fillBranch("btagweight", btagweight )
+        self.out.fillBranch("topweight", topweight )
         self.out.fillBranch("lheweight", lheweight )
         self.out.fillBranch("passedMETfilters", passedMETFilters)
         self.out.fillBranch("dr_LepJet"  , abs(dR_jetlep))
