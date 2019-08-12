@@ -111,6 +111,7 @@ class Skimmer(Module):
          self.out.branch("minJetMetDPhi",  "F")
          self.out.branch("HT_HEM1516",  "F")
          self.out.branch("genmatchedAK8",  "I")
+         self.out.branch("genmatchedAK8Quarks",  "I")
          self.out.branch("genmatchedAK8Subjet",  "I")
          self.out.branch("AK8Subjet0isMoreMassive",  "I")
          self.out.branch("passedMETfilters",  "I")
@@ -216,7 +217,7 @@ class Skimmer(Module):
             passedMETFilters = True
         except:
            passedMETFilters = False
-          # if not passedMETFilters: return FalseThe MET filters are out of date. In particular, you shouldn't be applying the BadChargedCandidateFilter. Also, tou should be using the globalSuperTightHalo2016Filter instead of globalTightHalo2016Filter (both are in nanoAOD), the eeBadScFilter should be applied to data, and we believe you should use the ecalBadCalibFilterV2 instead of ecalBadCalibFilter.
+          # if not passedMETFilters: return False
 
         if not passedMETFilters: return False
         
@@ -286,8 +287,10 @@ class Skimmer(Module):
 
         # Gen
         self.isW = 0
+        self.isWqq = 0
         self.matchedJ = 0
         self.matchedSJ = 0
+        self.topWeight = 0.
         
         if isMC:
             try:
@@ -308,7 +311,7 @@ class Skimmer(Module):
 
             TWdaus =  [x for x in gens if x.pt>1 and  0<abs(x.pdgId)<4]
             Tdaus =  [x for x in gens if x.pt>1 and (abs(x.pdgId)==5  or  abs(x.pdgId)==24 )]
-            Tmoms =  [x for x in gens if x.pt>10 and abs(x.pdgId)==6]
+            Tmoms =  [x for x in gens if x.pt>1 and abs(x.pdgId)==6]
             
             realVs = []
             realVdaus = []
@@ -340,15 +343,26 @@ class Skimmer(Module):
                         realqs.append(gdau)    
                     except:
                       continue  
-        
+            
+            
         
         # Check if matched to genW and genW daughters
         #for partially merged:
         self.isW = 0
+        self.isWqq = 0
         if isMC == False:
             genjets = [None] * len(recoAK8)
 
-        else :          
+        else :
+          # simple gen matching
+          for V in Wmoms:
+            gen_4v = ROOT.TLorentzVector()
+            gen_4v.SetPtEtaPhiM(V.pt,V.eta,V.phi,V.mass)
+            dR = jetAK8_4v.DeltaR(gen_4v)
+            if dR < 0.8: self.isW = 1
+
+          
+          # standard gen matching
           for V in realVs:
             gen_4v = ROOT.TLorentzVector()
             gen_4v.SetPtEtaPhiM(V.pt,V.eta,V.phi,V.mass)
@@ -361,8 +375,8 @@ class Skimmer(Module):
                 dR = jetAK8_4v.DeltaR(gen_4v)
                 if dR < 0.8: 
                   nDau +=1                 
-              if nDau >1: self.isW = 1
-              else: self.isW = 0
+                  self.isWqq = 1
+
        
         #for fully merged:
         self.SJ0isW = -1
@@ -402,6 +416,7 @@ class Skimmer(Module):
         
         # now fill branches
         self.out.fillBranch("genmatchedAK8",  self.isW)
+        self.out.fillBranch("genmatchedAK8Quarks",  self.isWqq)
         self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)
         self.out.fillBranch("AK8Subjet0isMoreMassive", self.SJ0isW )
         self.out.fillBranch("puweight", puweight )
