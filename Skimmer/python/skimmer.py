@@ -164,8 +164,8 @@ class Skimmer(Module):
         allelectrons = Collection(event, "Electron")
 
         # Here we make some loose selections for each category 
-        electrons = [x for x in allelectrons if x.cutBased_HEEP and x.pt > 35. and ( abs(x.eta) < 1.44 or ( abs(x.eta) > 1.56 and abs(x.eta) < 2.5 ) )]   #loose pt cut for veto 
-        muons     = [x for x in allmuons if x.pt > 20. and x.highPtId > 1 and abs(x.eta) < self.maxMuEta and x.pfIsoId >= 2] #loose pt cut for veto
+        electrons = [x for x in allelectrons if x.pt > 10. and x.cutBased and ( abs(x.eta) < 1.44 or ( abs(x.eta) > 1.56 and abs(x.eta) < 2.5 ) )] #loose pt cut for veto 
+        muons     = [x for x in allmuons if x.pt > 10. and x.looseId and abs(x.eta) < self.maxMuEta and x.pfIsoId >= 2] #loose pt cut for veto
 
         
         # Ordening the loosely selected categories according to Pt 
@@ -174,7 +174,7 @@ class Skimmer(Module):
 
         # Check if the muon or electron with highest Pt passes the tight selection (additional cuts to the loose selection)
         electronTight = len(electrons) > 0 and electrons[0].pt > 55. and electrons[0].cutBased >= 4  #and abs(electrons[0].eta) < 2.5 and not (abs(electrons[0].eta) > 1.44 and abs(electrons[0].eta) < 1.56)
-        muonTight = len(muons) > 0 and muons[0].pt > 55. and abs(muons[0].eta) < 2.4  and muons[0].highPtId >= 2 and muons[0].isPFcand and muons[0].pfIsoId >= 6
+        muonTight = len(muons) > 0 and muons[0].pt > 55. and abs(muons[0].eta) < self.maxMuEta  and muons[0].highPtId >= 2 and muons[0].isPFcand and muons[0].pfIsoId >= 6
 
 
         possibleChannels = ["mu", "el", "elmu"]
@@ -251,7 +251,7 @@ class Skimmer(Module):
 
         jetAK8_4v = ROOT.TLorentzVector()
         #jetAK8_4v.SetPtEtaPhiM(recoAK8[0].pt,recoAK8[0].eta,recoAK8[0].phi,recoAK8[0].mass)
-        jetAK8_4v.SetPtEtaPhiM(FatJets[0].pt,FatJets[0].eta,FatJets[0].phi,FatJets[0].mass)
+        jetAK8_4v.SetPtEtaPhiM(recoAK8[0].pt,recoAK8[0].eta,recoAK8[0].phi,recoAK8[0].mass)
         
         
         #Check for additional b-jet in the event, apply CSV later!
