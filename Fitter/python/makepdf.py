@@ -453,24 +453,34 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
     
     
     if model.find("DoubleSidedCB")!=-1:
-        gauslabel = label.replace("_failtau2tau1cut", "") if not 'ddt_0p43' in wsname else label
-        taillabel = label.replace("_failtau2tau1cut", "")
-        rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"+gauslabel+"_"+channel+spectrum,"rrv_mean1_gaus"+label+"_"+channel+spectrum, 89., 75., 100.) # 89., 75., 100.
-        rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus"+gauslabel+"_"+channel+spectrum,"rrv_sigma1_gaus"+label+"_"+channel+spectrum, 9., 4., 20.) # 9., 1., 20.
-        rrv_alpha1  = RooRealVar("rrv_alpha1"+taillabel+"_"  +channel+spectrum, "rrv_alpha1"+label+"_"  +channel+spectrum, 0.5, 0.1, 10.) # 0.5, 0.1, 10.
-        rrv_sign1   = RooRealVar("rrv_sign1" +taillabel+"_"  +channel+spectrum, "rrv_sign1" +label+"_"  +channel+spectrum, 2, 1, 5.) # 2, 1, 5.
-        rrv_alpha2  = RooRealVar("rrv_alpha2"+taillabel+"_"  +channel+spectrum, "rrv_alpha2"+label+"_"  +channel+spectrum, 1., 0.1, 10.) # 1., 0.1, 10.
-        rrv_sign2   = RooRealVar("rrv_sign2" +taillabel+"_"  +channel+spectrum, "rrv_sign2" +label+"_"  +channel+spectrum, 2, 1, 10.) # 2, 1, 10.
-        if 'ddt_0p43' in wsname:
-            rrv_alpha1.setVal(4.); rrv_alpha1.setMin(2.5); rrv_alpha2.setVal(4.); rrv_alpha2.setMin(3.0);
-#        model_pdf   = RooGaussian("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum, rrv_x, rrv_mean1_gaus, rrv_sigma1_gaus)
-#        model_pdf   = ROOT.RooCBShape("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum, rrv_x, rrv_mean1_gaus, rrv_sigma1_gaus, rrv_alpha1, rrv_sign1); tmp=rrv_alpha1.getMax();rrv_alpha1.setMax(-rrv_alpha1.getMin());rrv_alpha1.setMin(-tmp);rrv_alpha1.setVal(-rrv_alpha1.getVal())
+        isfinal = ("_TotalMC" in label or "_data" in label)
+        freelabel, corrlabel = label, label.replace("_failtau2tau1cut", "")
+        rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"+(corrlabel if not 'ddt' in wsname else freelabel)+"_"+channel+spectrum,"rrv_mean1_gaus"+label+"_"+channel+spectrum, 89., 80., 100.) # 89., 75., 100.
+        rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus"+(corrlabel if not 'ddt' in wsname else corrlabel)+"_"+channel+spectrum,"rrv_sigma1_gaus"+label+"_"+channel+spectrum, 8., 5., 20.) # 9., 1., 20.
+        rrv_alpha1  = RooRealVar("rrv_alpha1"+corrlabel+"_"  +channel+spectrum, "rrv_alpha1"+label+"_"  +channel+spectrum, 0.5, 0.1, 10.) # 0.5, 0.1, 10.
+        rrv_alpha2  = RooRealVar("rrv_alpha2"+corrlabel+"_"  +channel+spectrum, "rrv_alpha2"+label+"_"  +channel+spectrum, 1.0, 0.1, 10.) # 1., 0.1, 10.
+        rrv_sign1   = RooRealVar("rrv_sign1" +corrlabel+"_"  +channel+spectrum, "rrv_sign1" +label+"_"  +channel+spectrum, 0.2, 0.01, 5.) # 2, 1, 5.
+        rrv_sign2   = RooRealVar("rrv_sign2" +corrlabel+"_"  +channel+spectrum, "rrv_sign2" +label+"_"  +channel+spectrum, 0.2, 0.01, 10.) # 2, 1, 10.
+        # small sign values mean high tails. 1 is left, 2 is right.
+        if isfinal:
+            rrv_sign1.setMin(0.1); rrv_sign2.setMin(0.1);
+            if 'ddt' in wsname:
+                rrv_alpha1.setVal(2.8); rrv_alpha1.setMin(2.5); rrv_alpha2.setVal(2.8); rrv_alpha2.setMin(0.5);
+                if 'topShower' in wsname:
+                    rrv_alpha1.setVal(4.); rrv_alpha1.setMin(3.); rrv_alpha2.setVal(4.); rrv_alpha2.setMin(3.);
+            else:
+                if 'topShower' in wsname:
+                    rrv_sigma1_gaus.SetName("rrv_sigma1_gaus"+freelabel+"_"+channel+spectrum)
+                    rrv_alpha1.setVal(3.); rrv_alpha1.setMin(2.5); rrv_alpha2.setVal(3.); rrv_alpha2.setMin(2.5);
         model_pdf   = ROOT.RooDoubleCrystalBall("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum, rrv_x, rrv_mean1_gaus, rrv_sigma1_gaus, rrv_alpha1, rrv_sign1, rrv_alpha2, rrv_sign2)
+#        model_pdf   = ROOT.RooCBShape("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum, rrv_x, rrv_mean1_gaus, rrv_sigma1_gaus, rrv_alpha1, rrv_sign1); tmp=rrv_alpha1.getMax();rrv_alpha1.setMax(-rrv_alpha1.getMin());rrv_alpha1.setMin(-tmp);rrv_alpha1.setVal(-rrv_alpha1.getVal())
+        if 'bias' in wsname:
+            model_pdf   = RooGaussian("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum, rrv_x, rrv_mean1_gaus, rrv_sigma1_gaus)
     
     if model == "ErfExp_ttbar" or model == "ErfExp_ttbar_ddt" or model == "ErfExp_ttbar_failtau2tau1cut" or model == "ErfExp_ttbar_failtau2tau1cut_fitMC" or model == "ErfExp_ttbar_failtau2tau1cut_ddt" or model == "ErfExp_ttbar_fitMC":
         rrv_offset_ErfExp = RooRealVar("rrv_offset_ErfExp"+label+"_"+channel+spectrum ,"rrv_offset_ErfExp"+label+"_"+channel+spectrum, 90, 10, 200) # 90, 10, 200
-        rrv_width_ErfExp  = RooRealVar("rrv_width_ErfExp" +label+"_"+channel+spectrum ,"rrv_width_ErfExp" +label+"_"+channel+spectrum, 40, 25, 100) # 40, 25, 100
-        rrv_c_ErfExp  = RooRealVar("rrv_c_ErfExp"  +label+"_"+channel+spectrum ,"rrv_c_ErfExp"     +label+"_"+channel+spectrum, -0.03, -0.1, 0.) # -0.04, -1, 0.
+        rrv_width_ErfExp  = RooRealVar("rrv_width_ErfExp" +label+"_"+channel+spectrum ,"rrv_width_ErfExp" +label+"_"+channel+spectrum, 40, 25, 300) # 40, 25, 100
+        rrv_c_ErfExp  = RooRealVar("rrv_c_ErfExp"  +label+"_"+channel+spectrum ,"rrv_c_ErfExp"     +label+"_"+channel+spectrum, -0.03, -1., 0.) # -0.04, -1, 0.
         model_pdf     = ROOT.RooErfExpPdf("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum ,rrv_x,rrv_c_ErfExp,rrv_offset_ErfExp,rrv_width_ErfExp)
     
     

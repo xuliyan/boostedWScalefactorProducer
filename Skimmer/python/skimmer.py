@@ -111,11 +111,13 @@ class Skimmer(Module):
          self.out.branch("minJetMetDPhi",  "F")
          self.out.branch("HT_HEM1516",  "F")
          self.out.branch("genmatchedAK8",  "I")
+         self.out.branch("genmatchedAK8Quarks",  "I")
          self.out.branch("genmatchedAK8Subjet",  "I")
          self.out.branch("AK8Subjet0isMoreMassive",  "I")
          self.out.branch("passedMETfilters",  "I")
          self.out.branch("lheweight",  "F")
          self.out.branch("puweight",  "F")
+         self.out.branch("topweight",  "F")
          self.out.branch("btagweight",  "F")
 
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
@@ -147,6 +149,7 @@ class Skimmer(Module):
 
         puweight = 1.
         lheweight = 1.
+        topweight = 1.
         btagweight = 1.
         isMC = (event.run == 1)
 
@@ -161,8 +164,8 @@ class Skimmer(Module):
         allelectrons = Collection(event, "Electron")
 
         # Here we make some loose selections for each category 
-        electrons = [x for x in allelectrons if x.cutBased_HEEP and x.pt > 35. and ( abs(x.eta) < 1.44 or ( abs(x.eta) > 1.56 and abs(x.eta) < 2.5 ) )]   #loose pt cut for veto 
-        muons     = [x for x in allmuons if x.pt > 20. and x.highPtId > 1 and abs(x.eta) < self.maxMuEta and x.pfIsoId >= 2] #loose pt cut for veto
+        electrons = [x for x in allelectrons if x.pt > 10. and x.cutBased and ( abs(x.eta) < 1.44 or ( abs(x.eta) > 1.56 and abs(x.eta) < 2.5 ) )] #loose pt cut for veto 
+        muons     = [x for x in allmuons if x.pt > 10. and x.looseId and abs(x.eta) < self.maxMuEta and x.pfIsoId >= 2] #loose pt cut for veto
 
         
         # Ordening the loosely selected categories according to Pt 
@@ -171,7 +174,7 @@ class Skimmer(Module):
 
         # Check if the muon or electron with highest Pt passes the tight selection (additional cuts to the loose selection)
         electronTight = len(electrons) > 0 and electrons[0].pt > 55. and electrons[0].cutBased >= 4  #and abs(electrons[0].eta) < 2.5 and not (abs(electrons[0].eta) > 1.44 and abs(electrons[0].eta) < 1.56)
-        muonTight = len(muons) > 0 and muons[0].pt > 55. and abs(muons[0].eta) < 2.4  and muons[0].highPtId >= 2 and muons[0].isPFcand and muons[0].pfIsoId >= 6
+        muonTight = len(muons) > 0 and muons[0].pt > 55. and abs(muons[0].eta) < self.maxMuEta  and muons[0].highPtId >= 2 and muons[0].isPFcand and muons[0].pfIsoId >= 6
 
 
         possibleChannels = ["mu", "el", "elmu"]
@@ -212,13 +215,13 @@ class Skimmer(Module):
 
         passedMETFilters = False
         try:
-          if event.Flag_goodVertices and event.Flag_globalTightHalo2016Filter and event.Flag_BadPFMuonFilter and event.Flag_EcalDeadCellTriggerPrimitiveFilter and event.Flag_HBHENoiseFilter and event.Flag_HBHENoiseIsoFilter and event.Flag_eeBadScFilter and event.Flag_ecalBadCalibFilter: #and event.Flag_BadChargedCandidateFilter
+          if event.Flag_goodVertices and event.Flag_globalSuperTightHalo2016Filter and event.Flag_BadPFMuonFilter and event.Flag_EcalDeadCellTriggerPrimitiveFilter and event.Flag_HBHENoiseFilter and event.Flag_HBHENoiseIsoFilter and (isMC or event.Flag_eeBadScFilter) and event.Flag_ecalBadCalibFilterV2:
             passedMETFilters = True
         except:
            passedMETFilters = False
           # if not passedMETFilters: return False
 
-        #if not passedMETFilters: return False
+        if not passedMETFilters: return False
         
         # Apply MET cut    
         met = Object(event, "MET")
@@ -248,7 +251,7 @@ class Skimmer(Module):
 
         jetAK8_4v = ROOT.TLorentzVector()
         #jetAK8_4v.SetPtEtaPhiM(recoAK8[0].pt,recoAK8[0].eta,recoAK8[0].phi,recoAK8[0].mass)
-        jetAK8_4v.SetPtEtaPhiM(FatJets[0].pt,FatJets[0].eta,FatJets[0].phi,FatJets[0].mass)
+        jetAK8_4v.SetPtEtaPhiM(recoAK8[0].pt,recoAK8[0].eta,recoAK8[0].phi,recoAK8[0].mass)
         
         
         #Check for additional b-jet in the event, apply CSV later!
@@ -286,6 +289,7 @@ class Skimmer(Module):
 
         # Gen
         self.isW = 0
+        self.isWqq = 0
         self.matchedJ = 0
         self.matchedSJ = 0
         
@@ -308,7 +312,9 @@ class Skimmer(Module):
 
             TWdaus =  [x for x in gens if x.pt>1 and  0<abs(x.pdgId)<4]
             Tdaus =  [x for x in gens if x.pt>1 and (abs(x.pdgId)==5  or  abs(x.pdgId)==24 )]
-            Tmoms =  [x for x in gens if x.pt>10 and abs(x.pdgId)==6]
+            Tmoms =  [x for x in gens if x.pt>1 and abs(x.pdgId)==6]
+            Top =  [x for x in gens if x.pdgId==6]
+            AntiTop =  [x for x in gens if x.pdgId==-6]
             
             realVs = []
             realVdaus = []
@@ -340,15 +346,30 @@ class Skimmer(Module):
                         realqs.append(gdau)    
                     except:
                       continue  
-        
+            
+            if len(Top)>0 and len(AntiTop)>0:
+                topSF = math.exp(0.0615 - 0.0005 * Top[0].pt)
+                antitopSF = math.exp(0.0615 - 0.0005 * AntiTop[0].pt)
+                topweight = math.sqrt(topSF*antitopSF)
+                
         
         # Check if matched to genW and genW daughters
         #for partially merged:
         self.isW = 0
+        self.isWqq = 0
         if isMC == False:
             genjets = [None] * len(recoAK8)
 
-        else :          
+        else :
+          # simple gen matching
+          for V in Wmoms:
+            gen_4v = ROOT.TLorentzVector()
+            gen_4v.SetPtEtaPhiM(V.pt,V.eta,V.phi,V.mass)
+            dR = jetAK8_4v.DeltaR(gen_4v)
+            if dR < 0.8: self.isW = 1
+
+          
+          # standard gen matching
           for V in realVs:
             gen_4v = ROOT.TLorentzVector()
             gen_4v.SetPtEtaPhiM(V.pt,V.eta,V.phi,V.mass)
@@ -361,8 +382,8 @@ class Skimmer(Module):
                 dR = jetAK8_4v.DeltaR(gen_4v)
                 if dR < 0.8: 
                   nDau +=1                 
-              if nDau >1: self.isW = 1
-              else: self.isW = 0
+                  self.isWqq = 1
+
        
         #for fully merged:
         self.SJ0isW = -1
@@ -402,10 +423,12 @@ class Skimmer(Module):
         
         # now fill branches
         self.out.fillBranch("genmatchedAK8",  self.isW)
+        self.out.fillBranch("genmatchedAK8Quarks",  self.isWqq)
         self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)
         self.out.fillBranch("AK8Subjet0isMoreMassive", self.SJ0isW )
         self.out.fillBranch("puweight", puweight )
         self.out.fillBranch("btagweight", btagweight )
+        self.out.fillBranch("topweight", topweight )
         self.out.fillBranch("lheweight", lheweight )
         self.out.fillBranch("passedMETfilters", passedMETFilters)
         self.out.fillBranch("dr_LepJet"  , abs(dR_jetlep))
