@@ -42,9 +42,13 @@ into .tex files
 Commands used for current fitting:
 
 ```
-python runSF_nanoAOD.py -b --doBinned --workspace workspace_tau21_0p35 --HP 0.35 --LP 0.75
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21 --workspace workspace_tau21_0p35_0p75 --HP 0.35 --LP 0.75 --doWS &
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21 --workspace workspace_tau21_0p35_0p75_topPt --HP 0.35 --LP 0.75 --topPt --doWS &
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21 --workspace workspace_tau21_0p35_0p75_topShower --HP 0.35 --LP 0.75 --topShower --doWS &
 
-python runSF_nanoAOD.py -b --doBinned --workspace workspace_tau21ddt_0p43 --HP 0.43 --LP 0.79
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21_ddt_retune --workspace workspace_tau21ddt_0p43_0p79 --HP 0.43 --LP 0.79 --doWS &
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21_ddt_retune --workspace workspace_tau21ddt_0p43_0p79_topPt --HP 0.43 --LP 0.79 --topPt --doWS &
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21_ddt_retune --workspace workspace_tau21ddt_0p43_0p79_topShower --HP 0.43 --LP 0.79 --topShower --doWS &
 ```
 
 
