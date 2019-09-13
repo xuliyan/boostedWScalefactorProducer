@@ -154,7 +154,7 @@ class Skimmer(Module):
         isMC = (event.run == 1)
 
         # Preselections: HLT_Mu50&&nMuon>0&&Muon_pt[0]>55.&&fabs(Muon_eta[0])<2.4&&Muon_highPtId[0]>=2&&Muon_isPFcand[0]==1&&Muon_pfIsoId[0]>=4&&nFatJet>0&&FatJet_pt[0]>200&&fabs(FatJet_eta[0])<2.5
-        if not (event.HLT_Mu50 or event.HLT_Ele35_WPTight_Gsf): return False
+        if not (event.HLT_Mu50 or (event.HLT_Ele32_WPTight_Gsf or event.HLT_Ele35_WPTight_Gsf or event.HLT_Ele40_WPTight_Gsf or event.HLT_Ele115_CaloIdVT_GsfTrkIdT)): return False
         if not (event.nMuon > 0 or event.nElectron > 0): return False 
         if not event.nFatJet > 0: return False                                  #?
 
@@ -164,9 +164,8 @@ class Skimmer(Module):
         allelectrons = Collection(event, "Electron")
 
         # Here we make some loose selections for each category 
-        electrons = [x for x in allelectrons if x.pt > 10. and x.cutBased and ( abs(x.eta) < 1.44 or ( abs(x.eta) > 1.56 and abs(x.eta) < 2.5 ) )] #loose pt cut for veto 
+        electrons = [x for x in allelectrons if x.pt > 10. and x.cutBased >= 2 and ( abs(x.eta) < 1.44 or ( abs(x.eta) > 1.56 and abs(x.eta) < 2.5 ) )] #loose pt cut for veto 
         muons     = [x for x in allmuons if x.pt > 10. and x.looseId and abs(x.eta) < self.maxMuEta and x.pfIsoId >= 2] #loose pt cut for veto
-
         
         # Ordening the loosely selected categories according to Pt 
         muons.sort(key=lambda x:x.pt,reverse=True)
@@ -192,19 +191,19 @@ class Skimmer(Module):
         iso = 0.
 
         if (muonTight and (len(muons) == 1) and (len(electrons) == 0)) :  # There is one tight muon and no other loose electron or muon 
-          if self.chan.find("mu") == -1 : 
-            return False
           triggerMu = event.HLT_Mu50
           triggerEl = 0
+          if not triggerMu or self.chan.find("mu") == -1 : 
+            return False
           self.Vlep_type = 0
           lepton = muons[0].p4()
           iso = muons[0].pfRelIso03_all
 
         elif (electronTight and (len(electrons) == 1) and (len(muons) == 0)) :  # There is a tight electron and no other loose muon or electron
-          if self.chan.find("el") == -1 : 
-            return False
-          triggerEl = event.HLT_Ele35_WPTight_Gsf
+          triggerEl = (event.HLT_Ele32_WPTight_Gsf or event.HLT_Ele35_WPTight_Gsf or event.HLT_Ele40_WPTight_Gsf or event.HLT_Ele115_CaloIdVT_GsfTrkIdT)
           triggerMu = 0
+          if not triggerEl or self.chan.find("el") == -1 : 
+            return False
           self.Vlep_type = 1
           lepton = electrons[0].p4()
           iso = electrons[0].pfRelIso03_all
