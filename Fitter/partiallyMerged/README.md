@@ -44,11 +44,26 @@ Commands used for current fitting:
 ```
 python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21 --workspace workspace_tau21_0p35_0p75 --HP 0.35 --LP 0.75 --doWS &
 python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21 --workspace workspace_tau21_0p35_0p75_topPt --HP 0.35 --LP 0.75 --topPt --doWS &
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21 --workspace workspace_tau21_0p35_0p75_topGen --HP 0.35 --LP 0.75 --topGen --doWS &
 python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21 --workspace workspace_tau21_0p35_0p75_topShower --HP 0.35 --LP 0.75 --topShower --doWS &
+
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21 --workspace workspace_tau21_0p45_0p75 --HP 0.45 --LP 0.75 --doWS &
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21 --workspace workspace_tau21_0p45_0p75_topPt --HP 0.45 --LP 0.75 --topPt --doWS &
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21 --workspace workspace_tau21_0p45_0p75_topGen --HP 0.45 --LP 0.75 --topGen --doWS &
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21 --workspace workspace_tau21_0p45_0p75_topShower --HP 0.45 --LP 0.75 --topShower --doWS &
+
 
 python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21_ddt_retune --workspace workspace_tau21ddt_0p43_0p79 --HP 0.43 --LP 0.79 --doWS &
 python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21_ddt_retune --workspace workspace_tau21ddt_0p43_0p79_topPt --HP 0.43 --LP 0.79 --topPt --doWS &
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21_ddt_retune --workspace workspace_tau21ddt_0p43_0p79_topGen --HP 0.43 --LP 0.79 --topGen --doWS &
 python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21_ddt_retune --workspace workspace_tau21ddt_0p43_0p79_topShower --HP 0.43 --LP 0.79 --topShower --doWS &
+
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21_ddt_retune --workspace workspace_tau21ddt_0p43_0p82 --HP 0.43 --LP 0.82 --doWS &
+
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21_ddt_retune --workspace workspace_tau21ddt_0p50_0p80 --HP 0.50 --LP 0.80 --doWS &
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21_ddt_retune --workspace workspace_tau21ddt_0p50_0p80_topPt --HP 0.50 --LP 0.80 --topPt --doWS &
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21_ddt_retune --workspace workspace_tau21ddt_0p50_0p80_topGen --HP 0.50 --LP 0.80 --topGen --doWS &
+python runSF_nanoAOD.py -b --doBinned --tagger SelectedJet_tau21_ddt_retune --workspace workspace_tau21ddt_0p50_0p80_topShower --HP 0.50 --LP 0.80 --topShower --doWS &
 ```
 
 

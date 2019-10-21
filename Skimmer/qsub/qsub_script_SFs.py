@@ -28,16 +28,16 @@ else:
 if infile[0].find("SingleMuon")!=-1:
   channel = "mu"
   print "Processing a Single Muon dataset file..."
-  p=PostProcessor(outputDir, infile, "HLT_Mu50 && nMuon>0 && Muon_pt[0]>55. && nFatJet>0", None,
+  p=PostProcessor(outputDir, infile, None, None, #"HLT_Mu50 && nMuon>0 && Muon_pt[0]>55. && nFatJet>0"
                     modules=[Skimmer(channel)],provenance=False,fwkJobReport=False,
                     jsonInput='/work/zucchett/WTagging/CMSSW_10_2_6/src/WTopScalefactorProducer/Skimmer/python/JSON/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt',
                     )
-                   
-elif infile[0].find("SingleElectron")!=-1:
+
+elif infile[0].find("EGamma")!=-1:
   channel = "el"
   print "Processing a Single Electron dataset file..."
-  p=PostProcessor(outputDir, infile, "(event.HLT_Ele32_WPTight_Gsf || event.HLT_Ele35_WPTight_Gsf || event.HLT_Ele40_WPTight_Gsf || HLT_Ele115_CaloIdVT_GsfTrkIdT) && nElectron>0 && Electron_pt[0]>55. && nFatJet>0", None,
-                    modules=[Skimmer(channel)],provenance=False,fwkJobReport=False)
+  p=PostProcessor(outputDir, infile, None, None, #"(event.HLT_Ele32_WPTight_Gsf || event.HLT_Ele35_WPTight_Gsf || event.HLT_Ele40_WPTight_Gsf || HLT_Ele115_CaloIdVT_GsfTrkIdT) && nElectron>0 && Electron_pt[0]>55. && nFatJet>0"
+                    modules=[Skimmer(channel)],provenance=False,fwkJobReport=False,
                     jsonInput='/work/zucchett/WTagging/CMSSW_10_2_6/src/WTopScalefactorProducer/Skimmer/python/JSON/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt',
                     )
 
