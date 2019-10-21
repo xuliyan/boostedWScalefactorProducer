@@ -91,7 +91,7 @@ def processFile(sample_name, verbose=False):
         
         # Weights
         if isMC:
-            eventweightlumi[0] = Leq * tree.lheweight * tree.btagweight #tree.puweight
+            eventweightlumi[0] = Leq * tree.lheweight * tree.btagweight * tree.triggerweight #tree.puweight
         else:
             eventweightlumi[0] = 1.
             
