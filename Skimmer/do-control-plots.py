@@ -26,7 +26,7 @@ iPeriod = 4 #iPeriod = 0 for simulation-only plots
 #cut = "(1==1)"
 #cut = "(passedMETfilters&&abs(dr_LepJet)>1.5708&&abs(dphi_MetJet)>1.5708&&Muon_highPtId[0]>=2&&Muon_isPFcand[0]&&Muon_pfIsoId[0]>=6&&W_pt>150.&&maxAK4CSV<0.8484)"
 cut = "(maxAK4CSV>0.8484&&Wlep_type==0)" # && SelectedJet_softDrop_mass > 50. && SelectedJet_softDrop_mass < 130. && SelectedJet_pt > 200. && SelectedJet_pt < 10000.)"
-vars = ["SelectedJet_softDrop_mass","SelectedJet_tau21", "SelectedJet_tau21_ddt", "SelectedJet_tau21_ddt_retune","FatJet_pt[0]","FatJet_eta[0]","FatJet_phi[0]","FatJet_tau1[0]","FatJet_tau2[0]","FatJet_tau3[0]","FatJet_mass[0]","FatJet_msoftdrop[0]","SelectedLepton_pt","SelectedLepton_iso","maxAK4CSV","nFatJet", "nJet", "nMuon","PV_npvs","W_pt","MET_pt","fabs(dphi_WJet)","fabs(dphi_MetJet)","fabs(dphi_LepJet)","dr_LepJet"]
+vars = ["SelectedJet_softDrop_mass","SelectedJet_tau21", "SelectedJet_tau21_ddt", "SelectedJet_tau21_ddt_retune", "FatJet_pt[0]","FatJet_eta[0]","FatJet_phi[0]","FatJet_tau1[0]","FatJet_tau2[0]","FatJet_tau3[0]","FatJet_mass[0]","FatJet_msoftdrop[0]","SelectedLepton_pt","SelectedLepton_iso","maxAK4CSV","nFatJet", "nJet", "nMuon","PV_npvs","W_pt","MET_pt","fabs(dphi_WJet)","fabs(dphi_MetJet)","fabs(dphi_LepJet)","dr_LepJet"]
 #vars = ["SelectedJet_tau21", "FatJet_pt[0]", "W_pt", "SelectedJet_softDrop_mass","SelectedJet_tau21", "SelectedJet_tau21_ddt", "SelectedJet_tau21_ddt_retune"] 
 #vars += [ "Muon_pt[0]", "Muon_pfRelIso03_all[0]" ]
 #vars += ["Electron_eta[0]", "Electron_phi[0]", "Electron_pt[0]", "Electron_pfRelIso03_all[0]"]
@@ -52,17 +52,15 @@ bkgs.append(VVs)
 bkgs.append(WJs)
 bkgs.append(TTs)
 
-dir = "/scratch/zucchett/Ntuple/WSF/v5/" #"/work/mhuwiler/data/WScaleFactors/added/"
-outdirname = ""
+dir = "/scratch/zucchett/Ntuple/WSF/" #"/work/mhuwiler/data/WScaleFactors/added/"
 
-plotdirname = "plots/"+outdirname+"/plots/"
-plotdirnameWCR = "plots/"+outdirname+"/plotsWCR/"
-if not os.path.isdir(plotdirname) : os.system('mkdir -p '+plotdirname)
-if not os.path.isdir(plotdirnameWCR) : os.system('mkdir -p '+plotdirnameWCR)
-plotdir = plotdirname if "maxAK4CSV>" in cut else plotdirnameWCR #"plots/" if "maxAK4CSV>" in cut else "plotsWCR/"
+plotdir = "plots/"
+if "maxAK4CSV<" in cut: plotdir = "plots/WCR/"
+if 'herwig' in TTs[0]: plotdir = "plots/Herwig/"
+if not os.path.isdir(plotdir) : os.system('mkdir -p '+plotdir)
 
 #For drawing
-legs=["QCD", "Single Top","VV","W+jets", "TT"]
+legs=["QCD", "Single Top","VV","W+jets", "TT" if not 'herwig' in TTs[0] else 'TT Herwig']
 fillcolor = [921,432,600,632,417]
 
 

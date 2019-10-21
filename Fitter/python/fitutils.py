@@ -65,6 +65,30 @@ def getLegend(mplot,channel,x1=0.62,x2=0.7,y1=0.92,y2=0.9):
     theLeg.SetTextFont(42)
 
     return theLeg       
+
+
+def pdfDSCBtoGAUS(ws, sample):
+    rrv_alpha1 = ws.var("rrv_alpha1_ttbar_"+sample+"_em_mj")
+    rrv_alpha2 = ws.var("rrv_alpha2_ttbar_"+sample+"_em_mj")
+#    rrv_sign1 = ws.var("rrv_sign1_ttbar_"+sample+"_em_mj")
+#    rrv_sign2 = ws.var("rrv_sign2_ttbar_"+sample+"_em_mj")
+    
+    if not rrv_alpha1==None:
+        rrv_alpha1.setVal(4.5); rrv_alpha1.setMin(4.); rrv_alpha1.setMax(5.)
+    if not rrv_alpha2==None:
+        rrv_alpha2.setVal(4.5); rrv_alpha2.setMin(4.); rrv_alpha2.setMax(5.)
+
+def pdfGAUStoDSCB(ws, sample):
+    rrv_alpha1 = ws.var("rrv_alpha1_ttbar_"+sample+"_em_mj")
+    rrv_alpha2 = ws.var("rrv_alpha2_ttbar_"+sample+"_em_mj")
+#    rrv_sign1 = ws.var("rrv_sign1_ttbar_"+sample+"_em_mj")
+#    rrv_sign2 = ws.var("rrv_sign2_ttbar_"+sample+"_em_mj")
+    
+    if not rrv_alpha1==None:
+        rrv_alpha1.setVal(1.); rrv_alpha1.setMin(0.1); rrv_alpha1.setMax(5.)
+    if not rrv_alpha2==None:
+        rrv_alpha2.setVal(1.); rrv_alpha2.setMin(0.1); rrv_alpha2.setMax(5.)
+
     
 def doTTscalefactor(workspace,channel):
 
@@ -152,15 +176,16 @@ def fit_mj_single_MC(workspace,fileName,label, model,channel, wtagger_label,wsna
     cs = getPavetext()
     cs.AppendPad("same")
     mplot.addObject(cs)
-    try: os.stat("plots/MCfits/") 
-    except: os.makedirs("plots/MCfits/")
     c1 = getCanvas()
     mplot.Draw()
     # leg1.Draw("same")
     # from time import sleep
     # sleep(100)
-    c1.SaveAs("plots/MCfits/"+label+"_"+wsname+".png")
-    c1.SaveAs("plots/MCfits/"+label+"_"+wsname+".pdf")
+    dirname = "plots/"+wsname.replace('workspace_', '')
+    if not os.path.exists(dirname): os.makedirs(dirname)
+    if not os.path.exists(dirname+"/MCfits"): os.makedirs(dirname+"/MCfits")
+    c1.SaveAs(dirname+"/MCfits/"+label.replace('_', '', 1)+".png")
+    c1.SaveAs(dirname+"/MCfits/"+label.replace('_', '', 1)+".pdf")
 
     # TODO # draw_canvas_with_pull(mplot,mplot_pull,rt.RooArgList(*parameters_list),"plots/MCfits/",label+fileName,model,channel,0,0,GetLumi())
     workspace.var("rrv_number"+label+"_"+channel+"_mj").setVal(workspace.var("rrv_number"+label+"_"+channel+"_mj").getVal()*workspace.var("rrv_scale_to_lumi"+label+"_"+channel).getVal())
@@ -502,7 +527,7 @@ def DrawScaleFactorTTbarControlSample(xtitle,workspace, color_palet, label, chan
         xframe_data_fail.GetYaxis().SetRangeUser(1e-2,xframe_data_fail.GetMaximum()*1.5);
         
         legend = getLegend(xframe_data,"em",0.3885213,0.6640827,0.9774937,0.8992248)
-        legend.AddEntry(xframe_data.findObject("data")       ,"CMS data"            ,"PLE"); 
+        legend.AddEntry(xframe_data.findObject("data")       ,"Data"                ,"PLE"); 
         legend.AddEntry(xframe_data.findObject("TTbar_fakeW"),"t#bar{t} (unmerged)" ,"F");
         legend.AddEntry(xframe_data.findObject("Data fit")   ,"Data fit"            ,"L");
         legend.AddEntry(xframe_data.findObject("STop")       ,"Single top"          ,"F");
@@ -520,19 +545,19 @@ def DrawScaleFactorTTbarControlSample(xtitle,workspace, color_palet, label, chan
         xframe_data.Draw()
         CMS_lumi(c1, iPeriod, iPos)
         c1.Update()
-        outname = "plots/%s_"%outname
-        c1.SaveAs(outname+"pass.png")
-        c1.SaveAs(outname+"pass.pdf")
-        c1.SaveAs(outname+"pass.C")
-        c1.SaveAs(outname+"pass.root")
+        dirname = "plots/"+outname.replace('workspace_', '')
+        c1.SaveAs(dirname+"/pass.png")
+        c1.SaveAs(dirname+"/pass.pdf")
+        c1.SaveAs(dirname+"/pass.C")
+        c1.SaveAs(dirname+"/pass.root")
         c1.cd()
         xframe_data_fail.Draw()
         CMS_lumi(c1, iPeriod, iPos)
         c1.Update()
-        c1.SaveAs(outname+"fail.png")
-        c1.SaveAs(outname+"fail.pdf")
-        c1.SaveAs(outname+"fail.C")
-        c1.SaveAs(outname+"fail.root")
+        c1.SaveAs(dirname+"/fail.png")
+        c1.SaveAs(dirname+"/fail.pdf")
+        c1.SaveAs(dirname+"/fail.C")
+        c1.SaveAs(dirname+"/fail.root")
         
         
                 # # #signal window

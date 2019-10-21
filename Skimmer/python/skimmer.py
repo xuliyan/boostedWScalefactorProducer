@@ -119,11 +119,30 @@ class Skimmer(Module):
          self.out.branch("puweight",  "F")
          self.out.branch("topweight",  "F")
          self.out.branch("btagweight",  "F")
+         self.out.branch("triggerweight",  "F")
 
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         print "File closed successfully"
         pass
 
+    def getSimplifiedElectronTriggerSF2018(self, pt, eta):
+        # /work/pbaertsc/heavy_resonance/NanoTreeProducer/CorrectionTools/leptonEfficiencies/ElectronPOG/Run2018/Ele115orEle35_SF_2018.root
+        # Ratio ELE_DATA and ELE_MC
+        if pt < 120:
+            if eta > -0.9: return 0.97
+            else: return 0.90
+        elif pt > 500 and abs(eta) > 0.9 and abs(eta) < 1.7: return 0.95
+        else: return 0.98
+
+    def getSimplifiedMuonTriggerSF2018(self, pt, eta):
+        # https://gitlab.cern.ch/cms-muonPOG/MuonReferenceEfficiencies/blob/master/EfficienciesStudies/2018_trigger/theJSONfile_2018Data_AfterMuonHLTUpdate.json
+        # "Mu50_OR_OldMu100_OR_TkMu100_PtEtaBins"
+        if pt < 200: #"pt:[120.0,200.0]"
+            if abs(eta) > 2.1: return 0.85
+            else: return 0.93
+        else: #"pt:[300.0,1200.0]"
+            if abs(eta) > 2.1: return 0.82
+            else: return 0.89
 
     def getSubjets(self, p4, subjets, dRmax=0.8):
         ret = []
@@ -151,10 +170,11 @@ class Skimmer(Module):
         lheweight = 1.
         topweight = 1.
         btagweight = 1.
+        triggerweight = 1.
         isMC = (event.run == 1)
 
         # Preselections: HLT_Mu50&&nMuon>0&&Muon_pt[0]>55.&&fabs(Muon_eta[0])<2.4&&Muon_highPtId[0]>=2&&Muon_isPFcand[0]==1&&Muon_pfIsoId[0]>=4&&nFatJet>0&&FatJet_pt[0]>200&&fabs(FatJet_eta[0])<2.5
-        if not (event.HLT_Mu50 or event.HLT_Ele35_WPTight_Gsf): return False
+        if not (event.HLT_Mu50 or (event.HLT_Ele32_WPTight_Gsf or event.HLT_Ele35_WPTight_Gsf or event.HLT_Ele40_WPTight_Gsf or event.HLT_Ele115_CaloIdVT_GsfTrkIdT)): return False
         if not (event.nMuon > 0 or event.nElectron > 0): return False 
         if not event.nFatJet > 0: return False                                  #?
 
@@ -164,9 +184,8 @@ class Skimmer(Module):
         allelectrons = Collection(event, "Electron")
 
         # Here we make some loose selections for each category 
-        electrons = [x for x in allelectrons if x.pt > 10. and x.cutBased and ( abs(x.eta) < 1.44 or ( abs(x.eta) > 1.56 and abs(x.eta) < 2.5 ) )] #loose pt cut for veto 
+        electrons = [x for x in allelectrons if x.pt > 10. and x.cutBased >= 2 and ( abs(x.eta) < 1.44 or ( abs(x.eta) > 1.56 and abs(x.eta) < 2.5 ) )] #loose pt cut for veto 
         muons     = [x for x in allmuons if x.pt > 10. and x.looseId and abs(x.eta) < self.maxMuEta and x.pfIsoId >= 2] #loose pt cut for veto
-
         
         # Ordening the loosely selected categories according to Pt 
         muons.sort(key=lambda x:x.pt,reverse=True)
@@ -174,7 +193,7 @@ class Skimmer(Module):
 
         # Check if the muon or electron with highest Pt passes the tight selection (additional cuts to the loose selection)
         electronTight = len(electrons) > 0 and electrons[0].pt > 55. and electrons[0].cutBased >= 4  #and abs(electrons[0].eta) < 2.5 and not (abs(electrons[0].eta) > 1.44 and abs(electrons[0].eta) < 1.56)
-        muonTight = len(muons) > 0 and muons[0].pt > 55. and abs(muons[0].eta) < self.maxMuEta  and muons[0].highPtId >= 2 and muons[0].isPFcand and muons[0].pfIsoId >= 6
+        muonTight = len(muons) > 0 and muons[0].pt > 55. and abs(muons[0].eta) < self.maxMuEta and muons[0].highPtId >= 2 and muons[0].isPFcand and muons[0].pfIsoId >= 6
 
 
         possibleChannels = ["mu", "el", "elmu"]
@@ -191,23 +210,23 @@ class Skimmer(Module):
         lepton = ROOT.TLorentzVector()
         iso = 0.
 
-        if (muonTight and (len(muons) == 1) and (len(electrons) == 0)) :  # There is one tight muon and no other loose electron or muon 
-          if self.chan.find("mu") == -1 : 
-            return False
+        if ("mu" in self.chan and muonTight and (len(muons) == 1) and (len(electrons) == 0)) :  # There is one tight muon and no other loose electron or muon 
           triggerMu = event.HLT_Mu50
           triggerEl = 0
+          #if not triggerMu: return False
           self.Vlep_type = 0
           lepton = muons[0].p4()
           iso = muons[0].pfRelIso03_all
+          if isMC: triggerweight = self.getSimplifiedMuonTriggerSF2018(muons[0].pt, muons[0].eta)
 
-        elif (electronTight and (len(electrons) == 1) and (len(muons) == 0)) :  # There is a tight electron and no other loose muon or electron
-          if self.chan.find("el") == -1 : 
-            return False
-          triggerEl = event.HLT_Ele35_WPTight_Gsf
+        elif ("el" in self.chan and electronTight and (len(electrons) == 1) and (len(muons) == 0)) :  # There is a tight electron and no other loose muon or electron
+          triggerEl = (event.HLT_Ele32_WPTight_Gsf or event.HLT_Ele35_WPTight_Gsf or event.HLT_Ele40_WPTight_Gsf or event.HLT_Ele115_CaloIdVT_GsfTrkIdT)
           triggerMu = 0
+          #if not triggerEl: return False
           self.Vlep_type = 1
           lepton = electrons[0].p4()
           iso = electrons[0].pfRelIso03_all
+          if isMC: triggerweight = self.getSimplifiedElectronTriggerSF2018(electrons[0].pt, electrons[0].eta)
 
         else : 
           return False 
@@ -428,6 +447,7 @@ class Skimmer(Module):
         self.out.fillBranch("AK8Subjet0isMoreMassive", self.SJ0isW )
         self.out.fillBranch("puweight", puweight )
         self.out.fillBranch("btagweight", btagweight )
+        self.out.fillBranch("triggerweight", triggerweight )
         self.out.fillBranch("topweight", topweight )
         self.out.fillBranch("lheweight", lheweight )
         self.out.fillBranch("passedMETfilters", passedMETFilters)

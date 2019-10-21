@@ -33,7 +33,8 @@ parser.add_option('--treename', action="store",type="string",dest="intree",defau
 
 # --- Fitting options
 parser.add_option('--topPt', action='store_true', dest='topPt', default=False, help='Use top pt reweighting')
-parser.add_option('--topShower', action='store_true', dest='topShower', default=False, help='Use alternate top sample with different shower algorithm')
+parser.add_option('--topGen', action='store_true', dest='topGen', default=False, help='Use alternate top sample with different generator algorithm (aMC@NLO)')
+parser.add_option('--topShower', action='store_true', dest='topShower', default=False, help='Use alternate top sample with different shower algorithm (HERWIG7)')
 parser.add_option('--fitTT', action='store_true', dest='fitTT', default=False, help='Only do ttbar fits')
 parser.add_option('--fitMC', action='store_true', dest='fitMC', default=False, help='Only do MC fits')
 parser.add_option('--doBinned',dest="doBinnedFit", default=False, action="store_true", help="Do binned instead of unbinned fit")
@@ -138,11 +139,11 @@ def drawFrameGetChi2(variable,fitResult,dataset,pdfModel,isData):
     addInfo.AddText("#chi^{2}/nDOF = %.3f"%chi2)
     addInfo.Draw()
     c1.Update()
-    cname = pdfModel.GetName()+"_"+options.workspace.replace(".root","")
-    c1.SaveAs("plots/%s_%s.png"%(cname,options.sample))
-    c1.SaveAs("plots/%s_%s.C"%(cname,options.sample))
-    c1.SaveAs("plots/%s_%s.root"%(cname,options.sample))
-    c1.SaveAs("plots/%s_%s.pdf"%(cname,options.sample))
+    dirname = "plots/"+options.workspace.replace('workspace_', '')
+    c1.SaveAs(dirname+"/"+pdfModel.GetName()+".png")
+    c1.SaveAs(dirname+"/"+pdfModel.GetName()+".pdf")
+    c1.SaveAs(dirname+"/"+pdfModel.GetName()+".root")
+    c1.SaveAs(dirname+"/"+pdfModel.GetName()+".C")
     return chi2
     
 def getSF():
@@ -167,7 +168,7 @@ def doFitsToMatchedTT():
         
 def doFitsToMC():
     if options.doWS: 
-        workspace4fit_ = RooWorkspace("workspace4fit_","workspace4fit_")
+        workspace4fit_ = RooWorkspace("workspace4fit_",options.workspace)
     else:
         f = TFile("workspace.root")
         workspace4fit_ = f.Get("workspace4fit_")
@@ -415,10 +416,11 @@ def GetWtagScalefactors(workspace,fitter):
 class doWtagFits:
     def __init__(self):
         if options.doWS: 
-            self.workspace4fit_  = RooWorkspace("workspace4fit_","workspace4fit_")
+            self.workspace4fit_  = RooWorkspace("workspace4fit_",options.workspace)
         else:
             f = TFile(options.workspace.replace(".root","")+".root")
             self.workspace4fit_  = f.Get("workspace4fit_")
+            self.workspace4fit_.SetTitle(options.workspace) #FIXME
         self.boostedW_fitter_em = initialiseFits("em", options.sample, options.minX, options.maxX, self.workspace4fit_ )    # Define all shapes to be used for Mj, define regions (SB,signal) and input files. 
         self.boostedW_fitter_em.get_datasets_fit_minor_bkg()                                            # Loop over intrees to create datasets om Mj and fit the single MCs.
        
@@ -516,8 +518,14 @@ class doWtagFits:
           pdfconstrainslist_data_em.add(self.workspace4fit_.pdf(constrainslist_data_em[i]) )
           pdfconstrainslist_data_em.Print()
 
+        from WTopScalefactorProducer.Fitter.fitutils import pdfDSCBtoGAUS, pdfGAUStoDSCB
+
         print " Perform simultaneous fit to data"
+        pdfDSCBtoGAUS(self.workspace4fit_, "data")
         rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit"),RooFit.Strategy(0),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
+        pdfGAUStoDSCB(self.workspace4fit_, "data")
+        rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit"),RooFit.Strategy(0),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
+        
 #        if options.doBinnedFit:
 #          rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
 #          # rfresult_data = simPdf_data.fitTo(combData_data,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_data_em))
@@ -559,7 +567,11 @@ class doWtagFits:
           pdfconstrainslist_TotalMC_em.add(self.workspace4fit_.pdf(constrainslist_TotalMC_em[i]) )
 
         # Perform simoultaneous fit to MC
+        pdfDSCBtoGAUS(self.workspace4fit_, "TotalMC")
         rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit"),RooFit.Strategy(0), RooFit.SumW2Error(kFALSE), RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))
+        pdfGAUStoDSCB(self.workspace4fit_, "TotalMC")
+        rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit"),RooFit.Strategy(0), RooFit.SumW2Error(kFALSE), RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))
+        
 #        if options.doBinnedFit:
 #          rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit"), RooFit.SumW2Error(kTRUE), RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))--> Removing due to unexected behaviour. See https://root.cern.ch/phpBB3/viewtopic.php?t=16917, https://root.cern.ch/phpBB3/viewtopic.php?t=16917
 #          # rfresult_TotalMC = simPdf_TotalMC.fitTo(combData_TotalMC,RooFit.Save(kTRUE),RooFit.Verbose(kFALSE), RooFit.Minimizer("Minuit2"),RooFit.ExternalConstraints(pdfconstrainslist_TotalMC_em))#, RooFit.SumW2Error(kTRUE))
@@ -688,6 +700,7 @@ class initialiseFits:
       self.list_file_data       = ["SingleMuon-Run2018A.root", "SingleMuon-Run2018B.root", "SingleMuon-Run2018C.root", "SingleMuon-Run2018D.root"]
       self.list_file_TTbar_mc   = ["TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8.root", "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.root"]
       if options.topShower: self.list_file_TTbar_mc   = ["TT_TuneCH3_13TeV-powheg-herwig7.root"]
+      if options.topGen: self.list_file_TTbar_mc   = ["TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8.root"]
       self.list_file_WJets_mc   = ["WJetsToLNu_HT-70To100_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
       self.list_file_STop_mc    = ["ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-madgraph-pythia8.root", "ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8.root", "ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8.root", "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8.root", "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8.root"] #["ST_t-channel_antitop_5f_TuneCP5_13TeV-powheg-pythia8.root", "ST_t-channel_top_5f_TuneCP5_13TeV-powheg-pythia8.root", "ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.root", "ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.root"]
       self.list_file_VV_mc      = ["WW_TuneCP5_13TeV-pythia8.root", "WZ_TuneCP5_13TeV-pythia8.root", "ZZ_TuneCP5_13TeV-pythia8.root"]
@@ -1089,8 +1102,8 @@ class initialiseFits:
               rdataset_beforetau2tau1cut_mj.add(RooArgSet(rrv_mass_j),tmp_event_weight)
               rdataset4fit_beforetau2tau1cut_mj.add(RooArgSet(rrv_mass_j),tmp_event_weight4fit)
           
-          # 1 minus HP category (LP+extreme fail)   
-          if (discriminantCut==1 or discriminantCut==0) and (rrv_mass_j.getMin() < tmp_jet_mass < rrv_mass_j.getMax()):
+          # 1 minus HP category (LP)   
+          if (discriminantCut==1) and (rrv_mass_j.getMin() < tmp_jet_mass < rrv_mass_j.getMax()):
   
               rrv_mass_j.setVal(tmp_jet_mass)
 
