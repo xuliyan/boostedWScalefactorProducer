@@ -66,30 +66,47 @@ def createLists(dataset, name):
 
 
 
-def createJobs(f, outfolder,name,nchunks):
+def CreateHTCondorFile(submitfilename, argumentfilename, queuename="testmatch"): # 1 week: nextweek, 3 days: testmatch
+  print "Making HTCondor submit file... "
+  # Setting the parameters in the model file
+  with open("./submitfileslibrary/SubmitCondor.sh", 'r') as submitfilemodel:
+    submitfile = open(submitfilename, 'w')
+    submitfile.write(submitfilemodel.read().replace("[executable]", "executablecondor.sh").replace("[arguments]", argumentfilename).replace("[queue]", queuename))
+    submitfile.close()
+  os.system("cp ./submitfileslibrary/executablecondor.sh . ")
+
+
+
+def createJobs(jobfile, f, outfolder,name,nchunks, gridEngine):
   infiles = []
   for files in f:
     infiles.append("root://cms-xrd-global.cern.ch/"+files)
-  cmd = 'python qsub_script_SFs.py %s %s %s %i \n'%(','.join(infiles), outfolder,name,nchunks)
+  #cmd = 'python qsub_script_SFs.py %s %s %s %i \n'%(','.join(infiles), outfolder,name,nchunks)
+  if gridEngine == "HTCondor": 
+    cmd = '%s %s %s %i, %s \n'%(','.join(infiles), outfolder,name,nchunks, outfolder)
+  #CreateHTCondorFile(submitfilename, os.path.basename(jobfile.name))
   #print cmd
-  jobs.write(cmd)
+  jobfile.write(cmd)
   return 1
 
-def submitJobs(jobList, nchunks, outfolder, batchSystem):
+def submitJobs(jobList, nchunks, outfolder, submitfilename, gridEngine):
     print 'Reading joblist'
     jobListName = jobList
     #print jobList
 #    subCmd = 'qsub -t 1-%s -o logs nafbatch_runner_GEN.sh %s' %(nchunks,jobListName)
-    subCmd = 'qsub -q %s -t 1-%s -o %s/logs/ %s %s' %(queue,nchunks,outfolder,batchSystem,jobListName)
+    #subCmd = 'qsub -q %s -t 1-%s -o %s/logs/ %s %s' %(queue,nchunks,outfolder,submitfilename,jobListName)
+    if gridEngine=="HTCondor": 
+      subCmd = 'condor_submit {}'.format(submitfilename)
     print 'Going to submit', nchunks, 'jobs with', subCmd
-    os.system(subCmd)
+    #os.system(subCmd)
 
     return 1
 
 
 if __name__ == "__main__":
+  gridengine = "HTCondor"
   out = "Skimmed_%s/"%timestamp
-  batchSystem = 'psibatch_runner.sh'
+  submitFileName = 'SubmitCondorProd.sh' #'psibatch_runner.sh'
   createlists = False
 
   patternsData  = [
@@ -188,7 +205,7 @@ if __name__ == "__main__":
       
   #    print "FILELIST = ", files
       print "creating job file " ,'joblist%s.txt'%name
-      jobList = 'joblist%s.txt'%name
+      jobList = "arguments.txt" #'joblist%s.txt'%name
       jobs = open(jobList, 'w')
       nChunks = 0
       outfolder = out+name
@@ -198,11 +215,14 @@ if __name__ == "__main__":
       except: os.mkdir(outfolder+'/logs/')
       
       filelists = list(split_seq(files, nfilesperjob))
+
+      if gridengine == "HTCondor": 
+        CreateHTCondorFile(submitFileName, jobList)
       
       print "Creating", len(filelists), "jobs each with files:", [len(x) for x in filelists]
       for f in filelists:
         #print "FILES = ",f
-        createJobs(f,outfolder,name,nChunks)
+        createJobs(jobs, f,outfolder,name,nChunks, gridengine)
         nChunks = nChunks+1
 
         numberOfJobs+=1
@@ -216,7 +236,7 @@ if __name__ == "__main__":
   #    submit = raw_input("Do you also want to submit the jobs to the batch system? [y/n]")
       submit = 'y'
       if submit == 'y' or submit=='Y':
-        submitJobs(jobList,nChunks, outfolder, batchSystem)
+        submitJobs(jobList,nChunks, outfolder, submitFileName, gridengine)
       else:
         print "Not submitting jobs"
     
