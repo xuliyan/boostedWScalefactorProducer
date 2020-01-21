@@ -103,7 +103,7 @@ def submitJobs(jobList, nchunks, outfolder, submitfilename, gridEngine):
       subCmd = 'sbatch --array=1-%d %s %s' %(nchunks, submitfilename, jobListName)
 
     print 'Going to submit', nchunks, 'jobs with', subCmd
-    #os.system(subCmd)
+    os.system(subCmd)
 
     return 1
 
