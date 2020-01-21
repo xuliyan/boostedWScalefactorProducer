@@ -80,9 +80,10 @@ def submitJobs(jobList, nchunks, outfolder, batchSystem):
     jobListName = jobList
     #print jobList
 #    subCmd = 'qsub -t 1-%s -o logs nafbatch_runner_GEN.sh %s' %(nchunks,jobListName)
-    subCmd = 'qsub -q %s -t 1-%s -o %s/logs/ %s %s' %(queue,nchunks,outfolder,batchSystem,jobListName)
+    #subCmd = 'qsub -q %s -t 1-%s -o %s/logs/ %s %s' %(queue,nchunks,outfolder,batchSystem,jobListName)
+    subCmd = 'sbatch --array=1-%d SlurmSubmit.sh %s' %(nchunks, jobListName)
     print 'Going to submit', nchunks, 'jobs with', subCmd
-    os.system(subCmd)
+    #os.system(subCmd)
 
     return 1
 
