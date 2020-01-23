@@ -21,30 +21,36 @@ else:
 if len(sys.argv)>4:
 	 chunck = sys.argv[4]
 else:
-	chunck = ""  
+	chunck = ""
+
+filename= "_part{}_Skim".format(chunck)  # name.replace(".root", "")+"_part{}".format(chunck)
 
 # HLT_Mu50&&nMuon>0&&Muon_pt[0]>55.&&Muon_pfRelIso03_chg[0]<0.15&&Muon_highPtId>1&&nFatJet>0&&FatJet_pt>200
+
+jsonfile='../python/JSON/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
 
 if infile[0].find("SingleMuon")!=-1:
   channel = "mu"
   print "Processing a Single Muon dataset file..."
   p=PostProcessor(outputDir, infile, None, None, #"HLT_Mu50 && nMuon>0 && Muon_pt[0]>55. && nFatJet>0"
-                    modules=[Skimmer(channel)],provenance=False,fwkJobReport=False,
-                    jsonInput='/work/zucchett/WTagging/CMSSW_10_2_6/src/WTopScalefactorProducer/Skimmer/python/JSON/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt',
+                    modules=[Skimmer(channel),],provenance=False,fwkJobReport=False, postfix=filename, 
+                    jsonInput=jsonfile,
                     )
 
 elif infile[0].find("EGamma")!=-1:
   channel = "el"
   print "Processing a Single Electron dataset file..."
   p=PostProcessor(outputDir, infile, None, None, #"(event.HLT_Ele32_WPTight_Gsf || event.HLT_Ele35_WPTight_Gsf || event.HLT_Ele40_WPTight_Gsf || HLT_Ele115_CaloIdVT_GsfTrkIdT) && nElectron>0 && Electron_pt[0]>55. && nFatJet>0"
-                    modules=[Skimmer(channel)],provenance=False,fwkJobReport=False,
-                    jsonInput='/work/zucchett/WTagging/CMSSW_10_2_6/src/WTopScalefactorProducer/Skimmer/python/JSON/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt',
+                    modules=[Skimmer(channel)],provenance=False,fwkJobReport=False, postfix=filename, 
+                    jsonInput=jsonfile,
                     )
 
 else:
-  print "Processing MC..."
+  print "Processing Electron and muon dataset files..."
   channel = "elmu"
   p=PostProcessor(outputDir, infile, None, None,
-                    modules=[Skimmer(channel)],provenance=False,fwkJobReport=False)
+                    modules=[Skimmer(channel)],provenance=False,fwkJobReport=False, postfix=filename, 
+                    jsonInput=jsonfile,
+)
 p.run()
 print "DONE"
