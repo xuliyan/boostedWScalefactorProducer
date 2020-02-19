@@ -1016,8 +1016,8 @@ class initialiseFits:
 #          except:
 #            print "WARNING: no genmatchedAK8 in tree", treeIn.GetName()
           
-          if TString(label).Contains("realW") and not treeIn.genmatchedAK8: continue
-          if TString(label).Contains("fakeW") and treeIn.genmatchedAK8: continue
+          if TString(label).Contains("realW") and not treeIn.genmatchedAK82017: continue
+          if TString(label).Contains("fakeW") and treeIn.genmatchedAK82017: continue
           
           if options.tagger.find("ddt")==-1 and options.tagger.find("DDT")==-1: 
               wtagger = getattr(treeIn,options.tagger)
