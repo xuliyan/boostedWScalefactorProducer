@@ -1091,7 +1091,7 @@ class initialiseFits:
              combData_p_f.add(RooArgSet(rrv_mass_j,category_p_f),tmp_event_weight)
           
           # TOTAL category (no Tau21 )
-          if (discriminantCut == 2 or discriminantCut == 1 or discriminantCut == 0) and (rrv_mass_j.getMin() < tmp_jet_mass < rrv_mass_j.getMax())
+          if (discriminantCut == 2 or discriminantCut == 1 or discriminantCut == 0) and (rrv_mass_j.getMin() < tmp_jet_mass < rrv_mass_j.getMax()): 
               rrv_mass_j.setVal(tmp_jet_mass)
 
               if tmp_jet_mass >= self.mj_signal_min and tmp_jet_mass <self.mj_signal_max :
