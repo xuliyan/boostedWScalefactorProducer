@@ -109,7 +109,7 @@ def submitJobs(jobList, nchunks, outfolder, submitfilename, gridEngine):
 
 
 if __name__ == "__main__":
-  gridengine = "HTCondor" #"HTCondor", "SGD"
+  gridengine = "Slurm" #"HTCondor", "SGD"
   out = "Skimmed_%s/"%timestamp
   
   if gridengine=="SGD": 
