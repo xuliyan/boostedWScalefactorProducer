@@ -113,6 +113,7 @@ class Skimmer(Module):
          self.out.branch("genmatchedAK8",  "I")
          self.out.branch("genmatchedAK8Quarks",  "I")
          self.out.branch("genmatchedAK8Subjet",  "I")
+         self.out.branch("genmatchedAK82017",  "I")
          self.out.branch("AK8Subjet0isMoreMassive",  "I")
          self.out.branch("passedMETfilters",  "I")
          self.out.branch("lheweight",  "F")
@@ -376,10 +377,28 @@ class Skimmer(Module):
         #for partially merged:
         self.isW = 0
         self.isWqq = 0
+        self.isW2017 = 0
         if isMC == False:
             genjets = [None] * len(recoAK8)
 
         else :
+          # legacy 2017 gen matching 
+          for V in realVs:
+            gen_4v = ROOT.TLorentzVector()
+            gen_4v.SetPtEtaPhiM(V.pt,V.eta,V.phi,V.mass)
+            dR = jetAK8_4v.DeltaR(gen_4v)
+            if dR < 0.8: 
+              nDau = 0
+              for v in realVdaus:
+                gen_4v = ROOT.TLorentzVector()
+                gen_4v.SetPtEtaPhiM(v.pt,v.eta,v.phi,v.mass)
+                dR = jetAK8_4v.DeltaR(gen_4v)
+                if dR < 0.8: 
+                  nDau +=1                 
+              if nDau >1: self.isW2017 = 1
+              else: self.isW2017 = 0
+
+          
           # simple gen matching
           for V in Wmoms:
             gen_4v = ROOT.TLorentzVector()
@@ -402,7 +421,7 @@ class Skimmer(Module):
                 if dR < 0.8: 
                   nDau +=1                 
                   self.isWqq = 1
-
+          
        
         #for fully merged:
         self.SJ0isW = -1
@@ -443,6 +462,7 @@ class Skimmer(Module):
         # now fill branches
         self.out.fillBranch("genmatchedAK8",  self.isW)
         self.out.fillBranch("genmatchedAK8Quarks",  self.isWqq)
+        self.out.fillBranch("genmatchedAK82017",  self.isW2017)
         self.out.fillBranch("genmatchedAK8Subjet", self.matchedSJ)
         self.out.fillBranch("AK8Subjet0isMoreMassive", self.SJ0isW )
         self.out.fillBranch("puweight", puweight )
