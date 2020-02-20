@@ -46,11 +46,11 @@ elif infile[0].find("EGamma")!=-1:
                     )
 
 else:
-  print "Processing Electron and muon dataset files..."
+  print "Processing MC dataset files..."
   channel = "elmu"
   p=PostProcessor(outputDir, infile, None, None,
                     modules=[Skimmer(channel)],provenance=False,fwkJobReport=False, postfix=filename, 
-                    jsonInput=jsonfile,
+                    #jsonInput=jsonfile,
 )
 p.run()
 print "DONE"

@@ -28,7 +28,7 @@ echo "Going to execute" $TaskCmd
 eval $TaskCmd
 
 Joblist=$1
-TaskCmd=$(cat $JobList | sed ''${SLURM_JOB_ID}'q;d')
+TaskCmd=$(cat $JobList | sed ''${SLURM_ARRAY_TASK_ID}'q;d')
 
 eval $TaskCmd
 
