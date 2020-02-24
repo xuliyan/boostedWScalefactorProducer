@@ -696,7 +696,7 @@ class initialiseFits:
       
       
       
-      self.file_Directory       = "/scratch/zucchett/Ntuple/WSF/v5/"
+      self.file_Directory       = "/work/mhuwiler/data/WScaleFactors/Mergeddefinition2017/"
       self.list_file_data       = ["SingleMuon-Run2018A.root", "SingleMuon-Run2018B.root", "SingleMuon-Run2018C.root", "SingleMuon-Run2018D.root"]
       self.list_file_TTbar_mc   = ["TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8.root", "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.root"]
       if options.topShower: self.list_file_TTbar_mc   = ["TT_TuneCH3_13TeV-powheg-herwig7.root"]
