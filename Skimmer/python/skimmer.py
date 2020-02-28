@@ -264,10 +264,10 @@ class Skimmer(Module):
         
         # Find fat jet
         FatJets = list(Collection(event, "FatJet"))
-        recoAK8 = [ x for x in FatJets ] # if x.p4().Perp() > self.minJetPt and  abs(x.p4().Eta()) < self.maxJetEta and x.msoftdrop > 30. and x.tau1 > 0. and x.tau2 > 0.]
+        recoAK8 = [ x for x in FatJets if x.p4().Perp() > self.minJetPt and  abs(x.p4().Eta()) < self.maxJetEta and x.msoftdrop > 30. and x.tau1 > 0. and x.tau2 > 0.]
 #        recoAK8.sort(key=lambda x:x.msoftdrop,reverse=True)
         recoAK8.sort(key=lambda x:x.pt,reverse=True)
-        if not len(recoAK8) > 0 or not recoAK8[0].pt > 200. or not abs(recoAK8[0].eta) < 2.5: return False
+        if not len(recoAK8) > 0: return False
 
         jetAK8_4v = ROOT.TLorentzVector()
         #jetAK8_4v.SetPtEtaPhiM(recoAK8[0].pt,recoAK8[0].eta,recoAK8[0].phi,recoAK8[0].mass)
@@ -332,7 +332,7 @@ class Skimmer(Module):
 
             TWdaus =  [x for x in gens if x.pt>1 and  0<abs(x.pdgId)<4]
             Tdaus =  [x for x in gens if x.pt>1 and (abs(x.pdgId)==5  or  abs(x.pdgId)==24 )]
-            Tmoms =  [x for x in gens if x.pt>1 and abs(x.pdgId)==6]
+            Tmoms =  [x for x in gens if x.pt>10 and abs(x.pdgId)==6] 
             Top =  [x for x in gens if x.pdgId==6]
             AntiTop =  [x for x in gens if x.pdgId==-6]
             
@@ -349,7 +349,7 @@ class Skimmer(Module):
               for dau in Wdaus:
                 for mom in Wmoms:
                   try:
-                    if mom == Wmoms[dau.genPartIdxMother]: 
+                    if mom == gens[dau.genPartIdxMother]: 
                       realVs.append(mom)
                       realVdaus.append(dau)    
                   except:
@@ -360,7 +360,7 @@ class Skimmer(Module):
                 for dau in Tdaus:
                   for mom in Tmoms:
                     try:
-                      if mom == Tmoms[dau.genPartIdxMother] and dau == Tdaus[gdau.genPartIdxMother]: 
+                      if mom == gens[dau.genPartIdxMother] and dau == gens[gdau.genPartIdxMother]: 
                         realTs.append(mom)
                         realWs.append(dau)
                         realqs.append(gdau)    
