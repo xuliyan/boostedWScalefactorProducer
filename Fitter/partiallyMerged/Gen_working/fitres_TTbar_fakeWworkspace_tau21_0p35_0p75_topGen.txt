@@ -1,0 +1,6 @@
+\begin{tabular}{lc}
+$\verb+rrv_c_ErfExp_TTbar_fakeW_em_mj+ $ & $ -0.0267\pm 0.001$\\
+$\verb+rrv_number_TTbar_fakeW_em_mj+ $ & $  13414\pm 50$\\
+$\verb+rrv_offset_ErfExp_TTbar_fakeW_em_mj+ $ & $  81\pm 1$\\
+$\verb+rrv_width_ErfExp_TTbar_fakeW_em_mj+ $ & $  26.2\pm 0.4$\\
+\end{tabular}

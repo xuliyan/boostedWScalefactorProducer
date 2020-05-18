@@ -1,0 +1,6 @@
+\begin{tabular}{lc}
+$\verb+rrv_c_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj+ $ & $ -0.0394\pm 0.003$\\
+$\verb+rrv_number_TTbar_fakeW_failtau2tau1cut_em_mj+ $ & $  11615\pm 59$\\
+$\verb+rrv_offset_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj+ $ & $  63\pm 6$\\
+$\verb+rrv_width_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj+ $ & $  36\pm 4$\\
+\end{tabular}

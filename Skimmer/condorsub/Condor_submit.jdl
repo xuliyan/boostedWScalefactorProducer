@@ -1,0 +1,14 @@
+universe                = vanilla
+executable              = Skimmer_condor.sh
+arguments               = QCD_HT100to200_TuneCP5_13TeV-madgraph-pythia8.txt $(Process)
+should_transfer_files   = YES
+transfer_input_files    = transfer.tgz
+transfer_output_files   = _condor_stderr, _condor_stdout
+when_to_transfer_output = ON_EXIT
+output                  = Condor_output/Condor_job.$(Cluster).$(Process).out
+error                   = Condor_error/Condor_job.$(Cluster).$(Process).err
+log                     = Condor_log/Condor_job.$(Cluster).log
+request_cpus            = 2
+request_memory          = 4 GB
+
+queue 6

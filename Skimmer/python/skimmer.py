@@ -4,8 +4,8 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection,Object
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.tools import *
-from WTopScalefactorProducer.Skimmer.PileupWeightTool import *
-from WTopScalefactorProducer.Skimmer.variables import recoverNeutrinoPz
+from boostedWScalefactorProducer.Skimmer.PileupWeightTool import *
+from boostedWScalefactorProducer.Skimmer.variables import recoverNeutrinoPz
 
 import math
 import random
@@ -74,7 +74,7 @@ class Skimmer(Module):
         #dPhi (leading AK8 jet, leptonic W) >2
         #self.minDPhiWJet = 2.  
         
-        self.puWeightTool = PileupWeightTool(yearMC=2018, yearData=2018) #FIXME
+        self.puWeightTool = PileupWeightTool(yearMC=2017, yearData=2017) #FIXME
 
         self.nEvent = 0
 
@@ -126,8 +126,8 @@ class Skimmer(Module):
         print "File closed successfully"
         pass
 
-    def getSimplifiedElectronTriggerSF2018(self, pt, eta):
-        # /work/pbaertsc/heavy_resonance/NanoTreeProducer/CorrectionTools/leptonEfficiencies/ElectronPOG/Run2018/Ele115orEle35_SF_2018.root
+    def getSimplifiedElectronTriggerSF2017(self, pt, eta):
+        # /work/pbaertsc/heavy_resonance/NanoTreeProducer/CorrectionTools/leptonEfficiencies/ElectronPOG/Run2017/Ele115orEle35_SF_2017.root
         # Ratio ELE_DATA and ELE_MC
         if pt < 120:
             if eta > -0.9: return 0.97
@@ -135,15 +135,18 @@ class Skimmer(Module):
         elif pt > 500 and abs(eta) > 0.9 and abs(eta) < 1.7: return 0.95
         else: return 0.98
 
-    def getSimplifiedMuonTriggerSF2018(self, pt, eta):
-        # https://gitlab.cern.ch/cms-muonPOG/MuonReferenceEfficiencies/blob/master/EfficienciesStudies/2018_trigger/theJSONfile_2018Data_AfterMuonHLTUpdate.json
+    def getSimplifiedMuonTriggerSF2017(self, pt, eta):
+        # https://gitlab.cern.ch/cms-muonPOG/MuonReferenceEfficiencies/blob/master/EfficienciesStudies/2017_trigger/theJSONfile_2017Data_AfterMuonHLTUpdate.json
         # "Mu50_OR_OldMu100_OR_TkMu100_PtEtaBins"
         if pt < 200: #"pt:[120.0,200.0]"
-            if abs(eta) > 2.1: return 0.85
-            else: return 0.93
+            if abs(eta) > 2.1: return 0.8011
+            elif abs(eta) > 0.9: return 0.888
+            else: return 0.919
         else: #"pt:[300.0,1200.0]"
-            if abs(eta) > 2.1: return 0.82
-            else: return 0.89
+            if abs(eta) > 2.1: return 0.782
+            elif abs(eta) > 1.2: return 0.882
+            elif abs(eta) > 0.9: return 0.865
+            else: return 0.902      
 
     def getSubjets(self, p4, subjets, dRmax=0.8):
         ret = []
@@ -175,7 +178,7 @@ class Skimmer(Module):
         isMC = (event.run == 1)
 
         # Preselections: HLT_Mu50&&nMuon>0&&Muon_pt[0]>55.&&fabs(Muon_eta[0])<2.4&&Muon_highPtId[0]>=2&&Muon_isPFcand[0]==1&&Muon_pfIsoId[0]>=4&&nFatJet>0&&FatJet_pt[0]>200&&fabs(FatJet_eta[0])<2.5
-        if not (event.HLT_Mu50 or (event.HLT_Ele32_WPTight_Gsf or event.HLT_Ele35_WPTight_Gsf or event.HLT_Ele40_WPTight_Gsf or event.HLT_Ele115_CaloIdVT_GsfTrkIdT)): return False
+        if not (event.HLT_Mu50 or (event.HLT_Ele35_WPTight_Gsf or event.HLT_Ele40_WPTight_Gsf)): return False
         if not (event.nMuon > 0 or event.nElectron > 0): return False 
         if not event.nFatJet > 0: return False                                  #?
 
@@ -185,7 +188,7 @@ class Skimmer(Module):
         allelectrons = Collection(event, "Electron")
 
         # Here we make some loose selections for each category 
-        electrons = [x for x in allelectrons if x.pt > 10. and x.cutBased >= 2 and ( abs(x.eta) < 1.44 or ( abs(x.eta) > 1.56 and abs(x.eta) < 2.5 ) )] #loose pt cut for veto 
+        electrons = [x for x in allelectrons if x.pt > 10. and x.cutBased and ( abs(x.eta) < 1.44 or ( abs(x.eta) > 1.56 and abs(x.eta) < 2.5 ) )] #loose pt cut for veto 
         muons     = [x for x in allmuons if x.pt > 10. and x.looseId and abs(x.eta) < self.maxMuEta and x.pfIsoId >= 2] #loose pt cut for veto
         
         # Ordening the loosely selected categories according to Pt 
@@ -194,7 +197,7 @@ class Skimmer(Module):
 
         # Check if the muon or electron with highest Pt passes the tight selection (additional cuts to the loose selection)
         electronTight = len(electrons) > 0 and electrons[0].pt > 55. and electrons[0].cutBased >= 4  #and abs(electrons[0].eta) < 2.5 and not (abs(electrons[0].eta) > 1.44 and abs(electrons[0].eta) < 1.56)
-        muonTight = len(muons) > 0 and muons[0].pt > 55. and abs(muons[0].eta) < self.maxMuEta and muons[0].highPtId >= 2 and muons[0].isPFcand and muons[0].pfIsoId >= 6
+        muonTight = len(muons) > 0 and muons[0].pt > 55. and abs(muons[0].eta) < self.maxMuEta and muons[0].highPtId >= 2 and muons[0].isPFcand and muons[0].pfIsoId >= 5
 
 
         possibleChannels = ["mu", "el", "elmu"]
@@ -218,16 +221,16 @@ class Skimmer(Module):
           self.Vlep_type = 0
           lepton = muons[0].p4()
           iso = muons[0].pfRelIso03_all
-          if isMC: triggerweight = self.getSimplifiedMuonTriggerSF2018(muons[0].pt, muons[0].eta)
+          if isMC: triggerweight = self.getSimplifiedMuonTriggerSF2017(muons[0].pt, muons[0].eta)
 
         elif ("el" in self.chan and electronTight and (len(electrons) == 1) and (len(muons) == 0)) :  # There is a tight electron and no other loose muon or electron
-          triggerEl = (event.HLT_Ele32_WPTight_Gsf or event.HLT_Ele35_WPTight_Gsf or event.HLT_Ele40_WPTight_Gsf or event.HLT_Ele115_CaloIdVT_GsfTrkIdT)
+          triggerEl = (event.HLT_Ele35_WPTight_Gsf or event.HLT_Ele40_WPTight_Gsf)
           triggerMu = 0
           #if not triggerEl: return False
           self.Vlep_type = 1
           lepton = electrons[0].p4()
           iso = electrons[0].pfRelIso03_all
-          if isMC: triggerweight = self.getSimplifiedElectronTriggerSF2018(electrons[0].pt, electrons[0].eta)
+          if isMC: triggerweight = self.getSimplifiedElectronTriggerSF2017(electrons[0].pt, electrons[0].eta)
 
         else : 
           return False 
@@ -327,8 +330,12 @@ class Skimmer(Module):
             ###    OR
             ### a Top decays to W + b (Type 2 - fully merged top quark)
             gens = Collection(event, "GenPart")
+            for x in gens:
+              print x.pdgId, x.pt
             Wdaus =  [x for x in gens if x.pt>1 and 0<abs(x.pdgId)<9]
             Wmoms =  [x for x in gens if x.pt>10 and abs(x.pdgId)==24]
+            print "Wdaus entry: ", len(Wdaus)
+            print "Wmoms entry: ", len(Wmoms)
 
             TWdaus =  [x for x in gens if x.pt>1 and  0<abs(x.pdgId)<4]
             Tdaus =  [x for x in gens if x.pt>1 and (abs(x.pdgId)==5  or  abs(x.pdgId)==24 )]
@@ -383,6 +390,8 @@ class Skimmer(Module):
 
         else :
           # legacy 2017 gen matching 
+          print "realVs entries: ", len(realVs)
+          print "realVdaus entries: ", len(realVdaus)
           for V in realVs:
             gen_4v = ROOT.TLorentzVector()
             gen_4v.SetPtEtaPhiM(V.pt,V.eta,V.phi,V.mass)

@@ -1,0 +1,9 @@
+\begin{tabular}{lc}
+$\verb+rrv_alpha1_TTbar_realW_em_mj+ $ & $  1.44\pm 0.02$\\
+$\verb+rrv_alpha2_TTbar_realW_em_mj+ $ & $  1.36\pm 0.03$\\
+$\verb+rrv_mean1_gaus_TTbar_realW_em_mj+ $ & $  87.79\pm 0.04$\\
+$\verb+rrv_number_TTbar_realW_em_mj+ $ & $  15207\pm 52$\\
+$\verb+rrv_sigma1_gaus_TTbar_realW_em_mj+ $ & $  8.95\pm 0.06$\\
+$\verb+rrv_sign1_TTbar_realW_em_mj+ $ & $  20.00\pm 0.04$\\
+$\verb+rrv_sign2_TTbar_realW_em_mj+ $ & $  4.8\pm 0.5$\\
+\end{tabular}

@@ -3,7 +3,7 @@
 from ROOT import TFile
 #from ScaleFactorTool import ensureTFile
 
-path = '$CMSSW_BASE/src/WTopScalefactorProducer/Skimmer/python/pileup/'
+path = '$CMSSW_BASE/src/boostedWScalefactorProducer/Skimmer/python/pileup/'
 
 class PileupWeightTool:
     

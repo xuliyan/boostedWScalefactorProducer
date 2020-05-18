@@ -1,0 +1,5 @@
+\begin{tabular}{lc}
+$\verb+rrv_mean1_gaus_TTbar_realW_em_mj+ $ & $  88.03\pm 0.02$\\
+$\verb+rrv_number_TTbar_realW_em_mj+ $ & $  19509\pm 42$\\
+$\verb+rrv_sigma1_gaus_TTbar_realW_em_mj+ $ & $  11.07\pm 0.02$\\
+\end{tabular}

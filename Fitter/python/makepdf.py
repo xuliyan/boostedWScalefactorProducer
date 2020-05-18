@@ -103,10 +103,10 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
                     err   = abs(float(line.split(" ")[2]))
                     # err = abs(0.10*value)
                     if label.find('fail')!=-1:              
-                        print "FAIL FIT: Importing variable - ", line
-                        if line.find('rrv_c_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj'     )!=-1: rrv_c_ErfExp      = RooRealVar('rrv_c_ErfExp'     + label+"_"+channel+spectrum ,'rrv_c_ErfExp'     + label+"_"+channel+spectrum  ,value)#, value-err, value+err )
-                        if line.find('rrv_offset_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj')!=-1: rrv_offset_ErfExp = RooRealVar('rrv_offset_ErfExp'+ label+"_"+channel+spectrum ,'rrv_offset_ErfExp'+ label+"_"+channel+spectrum  ,value)#, value-err, value+err )
-                        if line.find('rrv_width_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj' )!=-1: rrv_width_ErfExp  = RooRealVar('rrv_width_ErfExp' + label+"_"+channel+spectrum ,'rrv_width_ErfExp' + label+"_"+channel+spectrum  ,value)#, value-err, value+err )
+                        print "Importing variable - ", line
+                        if line.find('rrv_c_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj'     )!=-1: rrv_c_ErfExp      = RooRealVar('rrv_c_ErfExp'     + label+"_"+channel+spectrum ,'rrv_c_ErfExp'     + label+"_"+channel+spectrum  ,value, -5,0)
+                        if line.find('rrv_offset_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj')!=-1: rrv_offset_ErfExp = RooRealVar('rrv_offset_ErfExp'+ label+"_"+channel+spectrum ,'rrv_offset_ErfExp'+ label+"_"+channel+spectrum  ,value, 60,90)
+                        if line.find('rrv_width_ErfExp_TTbar_fakeW_failtau2tau1cut_em_mj' )!=-1: rrv_width_ErfExp  = RooRealVar('rrv_width_ErfExp' + label+"_"+channel+spectrum ,'rrv_width_ErfExp' + label+"_"+channel+spectrum  ,value, 20,60)
                     else:
                         if line.find('rrv_c_ErfExp_TTbar_fakeW_em_mj'     )!=-1: rrv_c_ErfExp      = RooRealVar('rrv_c_ErfExp'     + label+"_"+channel+spectrum ,'rrv_c_ErfExp'     + label+"_"+channel+spectrum  ,value)# , value-err, value+err )
                         if line.find('rrv_offset_ErfExp_TTbar_fakeW_em_mj')!=-1: rrv_offset_ErfExp = RooRealVar('rrv_offset_ErfExp'+ label+"_"+channel+spectrum ,'rrv_offset_ErfExp'+ label+"_"+channel+spectrum  ,value)# , value-err, value+err )
@@ -117,6 +117,13 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
                            if line.find('rrv_width_ErfExp_TTbar_fakeW_em_mj' )!=-1: rrv_width_ErfExp  = RooRealVar('rrv_width_ErfExp' + label+"_"+channel+spectrum ,'rrv_width_ErfExp' + label+"_"+channel+spectrum  ,value)# , value-err, value+err )
         
         model_pdf     = ROOT.RooErfExpPdf("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum ,rrv_x,rrv_c_ErfExp,rrv_offset_ErfExp,rrv_width_ErfExp)
+        
+        
+    # if model == "ErfExp_ttbar" or model == "ErfExp_ttbar_ddt" or model == "ErfExp_ttbar_failtau2tau1cut" or model == "ErfExp_ttbar_failtau2tau1cut_fitMC" or model == "ErfExp_ttbar_failtau2tau1cut_ddt" or model == "ErfExp_ttbar_fitMC":
+        # rrv_offset_ErfExp = RooRealVar("rrv_offset_ErfExp"+label+"_"+channel+spectrum ,"rrv_offset_ErfExp"+label+"_"+channel+spectrum, 90, 10, 200) # 90, 10, 200
+        # rrv_width_ErfExp  = RooRealVar("rrv_width_ErfExp" +label+"_"+channel+spectrum ,"rrv_width_ErfExp" +label+"_"+channel+spectrum, 40, 10, 300) # 40, 25, 100
+        # rrv_c_ErfExp  = RooRealVar("rrv_c_ErfExp"  +label+"_"+channel+spectrum ,"rrv_c_ErfExp"     +label+"_"+channel+spectrum, -0.03, -1., 0.) # -0.04, -1, 0.
+        # model_pdf     = ROOT.RooErfExpPdf("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum ,rrv_x,rrv_c_ErfExp,rrv_offset_ErfExp,rrv_width_ErfExp)
         
 #        if "fail" in model:
 #            gaus1 = addConstraint(workspace,rrv_c_ErfExp,rrv_c_ErfExp.getVal(),rrv_c_ErfExp.getError(),constraint)
@@ -455,12 +462,12 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
     if model.find("DoubleSidedCB")!=-1:
         isfinal = ("_TotalMC" in label or "_data" in label)
         freelabel, corrlabel = label, label.replace("_failtau2tau1cut", "")
-        rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"+freelabel+"_"+channel+spectrum,"rrv_mean1_gaus"+label+"_"+channel+spectrum, 89., 80., 100.) # 89., 75., 100.
-        rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus"+freelabel+"_"+channel+spectrum,"rrv_sigma1_gaus"+label+"_"+channel+spectrum, 8., 5., 20.) # 9., 1., 20.
-        rrv_alpha1  = RooRealVar("rrv_alpha1"+corrlabel+"_"  +channel+spectrum, "rrv_alpha1"+label+"_"  +channel+spectrum, 0.5, 0.1, 10.) # 0.5, 0.1, 10.
-        rrv_alpha2  = RooRealVar("rrv_alpha2"+corrlabel+"_"  +channel+spectrum, "rrv_alpha2"+label+"_"  +channel+spectrum, 1.0, 0.1, 10.) # 1., 0.1, 10.
-        rrv_sign1   = RooRealVar("rrv_sign1" +corrlabel+"_"  +channel+spectrum, "rrv_sign1" +label+"_"  +channel+spectrum, 0.2, 0.01, 5.) # 2, 1, 5.
-        rrv_sign2   = RooRealVar("rrv_sign2" +corrlabel+"_"  +channel+spectrum, "rrv_sign2" +label+"_"  +channel+spectrum, 0.2, 0.01, 10.) # 2, 1, 10.
+        rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"+freelabel+"_"+channel+spectrum,"rrv_mean1_gaus"+label+"_"+channel+spectrum, 85., 80., 100.) # 89., 75., 100.
+        rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus"+freelabel+"_"+channel+spectrum,"rrv_sigma1_gaus"+label+"_"+channel+spectrum, 8., 0., 20.) # 9., 1., 20.
+        rrv_alpha1  = RooRealVar("rrv_alpha1"+corrlabel+"_"  +channel+spectrum, "rrv_alpha1"+label+"_"  +channel+spectrum, 1.0, 0.1, 2.) # 0.5, 0.1, 10.
+        rrv_alpha2  = RooRealVar("rrv_alpha2"+corrlabel+"_"  +channel+spectrum, "rrv_alpha2"+label+"_"  +channel+spectrum, 1.0, 0.1, 2.) # 1., 0.1, 10.
+        rrv_sign1   = RooRealVar("rrv_sign1" +corrlabel+"_"  +channel+spectrum, "rrv_sign1" +label+"_"  +channel+spectrum, 15, 0.1, 20.) # 2, 1, 5.
+        rrv_sign2   = RooRealVar("rrv_sign2" +corrlabel+"_"  +channel+spectrum, "rrv_sign2" +label+"_"  +channel+spectrum, 6.7, 0.01, 10.) # 2, 1, 10.
         
         # small sign values mean high tails. 1 is left, 2 is right.
         if isfinal:
@@ -478,15 +485,22 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
                 rrv_alpha1.setVal(5.); rrv_alpha2.setVal(5.); rrv_alpha1.setMin(4.5); rrv_alpha2.setMin(4.5); rrv_sign1.setMin(0.2); rrv_sign2.setMin(0.2);
             if 'ddt_0p50_0p80' in wsname and 'topShower' in wsname:
                 rrv_alpha1.setVal(5.); rrv_alpha2.setVal(5.); rrv_alpha1.setMin(4.5); rrv_alpha2.setMin(4.5);
+                
+        if("_ttbar_TotalMC" in label and "_failtau2tau1cut" in label):
+          print "========================================================================================================"
+          print "=============================== changing initial parameters for fail ttbar=============================="
+          freelabel, corrlabel = label, label.replace("_failtau2tau1cut", "")
+          rrv_mean1_gaus   = RooRealVar("rrv_mean1_gaus"+freelabel+"_"+channel+spectrum,"rrv_mean1_gaus"+label+"_"+channel+spectrum, 80., 75., 100.) # 89., 75., 100.
+          rrv_sigma1_gaus  = RooRealVar("rrv_sigma1_gaus"+freelabel+"_"+channel+spectrum,"rrv_sigma1_gaus"+label+"_"+channel+spectrum, 4., 0., 20.) # 9., 1., 20.
+          rrv_alpha1  = RooRealVar("rrv_alpha1"+corrlabel+"_"  +channel+spectrum, "rrv_alpha1"+label+"_"  +channel+spectrum, 10.0, 5, 20) # 0.5, 0.1, 10.
+          rrv_alpha2  = RooRealVar("rrv_alpha2"+corrlabel+"_"  +channel+spectrum, "rrv_alpha2"+label+"_"  +channel+spectrum, 10.0, 5, 20) # 1., 0.1, 10.
+          rrv_sign1   = RooRealVar("rrv_sign1" +corrlabel+"_"  +channel+spectrum, "rrv_sign1" +label+"_"  +channel+spectrum, 15, 0.1, 20.) # 2, 1, 5.
+          rrv_sign2   = RooRealVar("rrv_sign2" +corrlabel+"_"  +channel+spectrum, "rrv_sign2" +label+"_"  +channel+spectrum, 6.7, 0.01, 10.) # 2, 1, 10.
+                 
+                
         model_pdf   = ROOT.RooDoubleCrystalBall("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum, rrv_x, rrv_mean1_gaus, rrv_sigma1_gaus, rrv_alpha1, rrv_sign1, rrv_alpha2, rrv_sign2)
         if 'bias' in wsname:
             model_pdf   = RooGaussian("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum, rrv_x, rrv_mean1_gaus, rrv_sigma1_gaus)
-    
-    if model == "ErfExp_ttbar" or model == "ErfExp_ttbar_ddt" or model == "ErfExp_ttbar_failtau2tau1cut" or model == "ErfExp_ttbar_failtau2tau1cut_fitMC" or model == "ErfExp_ttbar_failtau2tau1cut_ddt" or model == "ErfExp_ttbar_fitMC":
-        rrv_offset_ErfExp = RooRealVar("rrv_offset_ErfExp"+label+"_"+channel+spectrum ,"rrv_offset_ErfExp"+label+"_"+channel+spectrum, 90, 10, 200) # 90, 10, 200
-        rrv_width_ErfExp  = RooRealVar("rrv_width_ErfExp" +label+"_"+channel+spectrum ,"rrv_width_ErfExp" +label+"_"+channel+spectrum, 40, 25, 300) # 40, 25, 100
-        rrv_c_ErfExp  = RooRealVar("rrv_c_ErfExp"  +label+"_"+channel+spectrum ,"rrv_c_ErfExp"     +label+"_"+channel+spectrum, -0.03, -1., 0.) # -0.04, -1, 0.
-        model_pdf     = ROOT.RooErfExpPdf("model_pdf"+label+"_"+channel+spectrum,"model_pdf"+label+"_"+channel+spectrum ,rrv_x,rrv_c_ErfExp,rrv_offset_ErfExp,rrv_width_ErfExp)
     
     
     getattr(workspace,'import')(model_pdf)
@@ -495,7 +509,7 @@ def MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label, channel,constra
 def MakeExtendedModel(workspace, label, model,spectrum, channel, wtagger_label,constraint,peak="W",wsname=""):
     
     print "Making extended model with name: " , "model"+label+"_"+channel+spectrum
-    rrv_number = RooRealVar("rrv_number"+label+"_"+channel+spectrum,"rrv_number"+label+"_"+channel+spectrum,500.,0.,1e5)
+    rrv_number = RooRealVar("rrv_number"+label+"_"+channel+spectrum,"rrv_number"+label+"_"+channel+spectrum,1000.,0.,1e10)
     model_pdf = MakeGeneralPdf(workspace,label,model,spectrum,wtagger_label,channel,constraint,peak,wsname)
 
     model_extended = RooExtendPdf("model"+label+"_"+channel+spectrum,"model"+label+"_"+channel+spectrum,model_pdf, rrv_number)
@@ -508,6 +522,7 @@ def fixParameters(workspace,label,channel,fix=1):
     name = "rdataset%s_%s_mj"%(label,channel)
     rdataset_General_mj = workspace.data(name)
     model_General = workspace.pdf("model"+label+"_"+channel+"_mj")
+    print "=================Processing fixParameters function for", "model"+label,"========================="
     rdataset_General_mj.Print()
     model_General.Print()
     

@@ -1,0 +1,5 @@
+\begin{tabular}{lc}
+$\verb+rrv_mean1_gaus_TTbar_realW_failtau2tau1cut_em_mj+ $ & $  87.55\pm 0.06$\\
+$\verb+rrv_number_TTbar_realW_failtau2tau1cut_em_mj+ $ & $  11069\pm 32$\\
+$\verb+rrv_sigma1_gaus_TTbar_realW_failtau2tau1cut_em_mj+ $ & $  17.95\pm 0.05$\\
+\end{tabular}

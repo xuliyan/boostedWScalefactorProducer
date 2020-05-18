@@ -5,9 +5,9 @@ import os
 import time
 import math
 import csv
-from WTopScalefactorProducer.Fitter.tdrstyle import *
-from WTopScalefactorProducer.Fitter.CMS_lumi import *
-from WTopScalefactorProducer.Skimmer.getGenEv import getGenEv
+from boostedWScalefactorProducer.Fitter.tdrstyle import *
+from boostedWScalefactorProducer.Fitter.CMS_lumi import *
+from boostedWScalefactorProducer.Fitter.LumiWeight import *
 setTDRStyle()
 
 from ROOT import *
@@ -110,7 +110,7 @@ def drawFrameGetChi2(variable,fitResult,dataset,pdfModel,isData):
     else: dataset.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.Name(dataset.GetName ()))
     c1.cd()
     frame.GetYaxis().SetNdivisions(203);
-    frame.GetXaxis().SetNdivisions(202);
+    frame.GetXaxis().SetNdivisions(210);
     frame.GetYaxis().SetTitleSize(0.05)
     frame.GetYaxis().SetTitleOffset(1.35)
     frame.SetName("mjjFit")
@@ -157,7 +157,7 @@ def doFitsToMatchedTT():
     ttMC_fitter = initialiseFits("em", options.sample, options.minX, options.maxX, workspace4fit_)
         
         
-    from WTopScalefactorProducer.Fitter.fitutils import fit_mj_single_MC
+    from boostedWScalefactorProducer.Fitter.fitutils import fit_mj_single_MC
     
     fit_mj_single_MC(ttMC_fitter.workspace4fit_,ttMC_fitter.file_TTbar_mc,"_TTbar_realW",ttMC_fitter.mj_shape["TTbar_realW_MC"],ttMC_fitter.channel,ttMC_fitter.wtagger_label,options.workspace.replace(".root",""))
     fit_mj_single_MC(ttMC_fitter.workspace4fit_,ttMC_fitter.file_TTbar_mc,"_TTbar_realW_failtau2tau1cut",ttMC_fitter.mj_shape["TTbar_realW_fail_MC"],ttMC_fitter.channel,ttMC_fitter.wtagger_label,options.workspace.replace(".root",""))
@@ -426,7 +426,7 @@ class doWtagFits:
        
 #        print "Printing workspace:"; self.workspace4fit_ .Print(); print ""
         workspace4fit_ = self.workspace4fit_
-        self.boostedW_fitter_em.get_sim_fit_components()     
+        self.boostedW_fitter_em.get_sim_fit_components()   ## here function  ScaleFactorTTbarControlSampleFit is called, where fixParameters function is called inside  
         
         print "Define categories:"
 
@@ -518,7 +518,7 @@ class doWtagFits:
           pdfconstrainslist_data_em.add(self.workspace4fit_.pdf(constrainslist_data_em[i]) )
           pdfconstrainslist_data_em.Print()
 
-        from WTopScalefactorProducer.Fitter.fitutils import pdfDSCBtoGAUS, pdfGAUStoDSCB
+        from boostedWScalefactorProducer.Fitter.fitutils import pdfDSCBtoGAUS, pdfGAUStoDSCB
 
         print " Perform simultaneous fit to data"
         pdfDSCBtoGAUS(self.workspace4fit_, "data")
@@ -592,7 +592,7 @@ class doWtagFits:
         print ""; print rfresult_TotalMC.Print(); print ""
         
         # draw the final fit results
-        from WTopScalefactorProducer.Fitter.fitutils import DrawScaleFactorTTbarControlSample
+        from boostedWScalefactorProducer.Fitter.fitutils import DrawScaleFactorTTbarControlSample
         DrawScaleFactorTTbarControlSample(options.xtitle,self.workspace4fit_,self.boostedW_fitter_em.color_palet,"","em",self.boostedW_fitter_em.wtagger_label,self.boostedW_fitter_em.AK8_pt_min,self.boostedW_fitter_em.AK8_pt_max,options.sample,options.workspace)
        
         # Get W-tagging scalefactor and efficiencies
@@ -623,7 +623,9 @@ class initialiseFits:
       #self.mj_shape["TTbar_realW_MC"]      = "GausErfExp_ttbar_fitMC" #before "2Gaus_ttbar"
       
       self.mj_shape["TTbar_realW_fail_MC"]  = "DoubleSidedCB_ttbar_failtau2tau1cut_fitMC"                       
-      self.mj_shape["TTbar_realW_MC"]       = "DoubleSidedCB_ttbar_fitMC"                                       
+      self.mj_shape["TTbar_realW_MC"]       = "DoubleSidedCB_ttbar_fitMC"     
+      #self.mj_shape["TTbar_realW_fail_MC"]  = "Gaussian_ttbar_failtau2tau1cut_fitMC"                       
+      #self.mj_shape["TTbar_realW_MC"]       = "Gaussian_ttbar_fitMC"         
       self.mj_shape["TTbar_fakeW_fail_MC"]  = "ErfExp_ttbar_failtau2tau1cut_fitMC"                         
       self.mj_shape["TTbar_fakeW_MC"]       = "ErfExp_ttbar_fitMC"                                         
                                                                                                            
@@ -696,27 +698,14 @@ class initialiseFits:
       
       
       
-      self.file_Directory       = "/work/mhuwiler/data/WScaleFactors/Mergeddefinition2017/"
-      self.list_file_data       = ["SingleMuon-Run2018A.root", "SingleMuon-Run2018B.root", "SingleMuon-Run2018C.root", "SingleMuon-Run2018D.root"]
+      self.file_Directory       = "/uscms_data/d3/xyan/WTagging/Final_23/"
+      self.list_file_data       = ["SingleMuon.root"]
       self.list_file_TTbar_mc   = ["TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8.root", "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.root"]
       if options.topShower: self.list_file_TTbar_mc   = ["TT_TuneCH3_13TeV-powheg-herwig7.root"]
       if options.topGen: self.list_file_TTbar_mc   = ["TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8.root"]
       self.list_file_WJets_mc   = ["WJetsToLNu_HT-70To100_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8.root", "WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
-      self.list_file_STop_mc    = ["ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-madgraph-pythia8.root", "ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8.root", "ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8.root", "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8.root", "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8.root"] #["ST_t-channel_antitop_5f_TuneCP5_13TeV-powheg-pythia8.root", "ST_t-channel_top_5f_TuneCP5_13TeV-powheg-pythia8.root", "ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.root", "ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.root"]
+      self.list_file_STop_mc    = ["ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8.root", "ST_t-channel_antitop_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8.root", "ST_t-channel_top_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8.root", "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8.root", "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8.root"]
       self.list_file_VV_mc      = ["WW_TuneCP5_13TeV-pythia8.root", "WZ_TuneCP5_13TeV-pythia8.root", "ZZ_TuneCP5_13TeV-pythia8.root"]
-      #self.list_file_QCD_mc     = 
-#      self.list_file_WJets_mc  += ["QCD_HT500to700_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8.root"] #"QCD_HT100to200_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT200to300_TuneCP5_13TeV-madgraphMLM-pythia8.root", "QCD_HT300to500_TuneCP5_13TeV-madgraphMLM-pythia8.root", 
-      # self.list_file_TTbar_mc   = ["thaarres_TTJets_SingleLeptFromT_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
-#      if options.sample.find("amcnlo")!=-1: 
-#          self.list_file_TTbar_mc   = ["thaarres_TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8.root"]
-#      if options.sample.find("tune16")!=-1: 
-#          self.list_file_TTbar_mc   = ["thaarres_TTToSemiLeptonic_WspTgt150_TuneCUETP8M2T4_13TeV-powheg-pythia8.root"]
-  
-      
-      
-      
-      # Directory and input files
-      # self.file_Directory         = "/mnt/t3nfs01/data01/shome/thaarres/2017/Treemaker/TreeAnalyzer/Output/HaddedOutput/reweighted/"
       postfix = ""
           
       self.file_data              = "SingleMuon.root"
@@ -726,26 +715,7 @@ class initialiseFits:
       self.file_STop_mc           = "ST.root"
       self.file_TTbar_mc          = "TT.root"
       self.file_pseudodata        = "pseudodata_weighted.root"
-      
-      #self.list_file_QCD_mc     = ["QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8.root","QCD_HT100to200_TuneCP5_13TeV-madgraph-pythia8.root","QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8.root","QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8.root","QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8.root","QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8.root"]
-      #self.list_file_STop_mc    = ["ST_s-channel_4f_leptonDecays_TuneCP5_PSweights_13TeV-amcatnlo-pythia8.root","ST_t-channel_antitop_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8.root","ST_t-channel_top_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8.root","ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8.root","ST_tW_top_5f_inclusiveDecays_TuneCP5_PSweights_13TeV-powheg-pythia8.root"]
-      #self.list_file_data       = ["SingleMuon_Run2017B-17Nov2017-v1.root","SingleMuon_Run2017C-17Nov2017-v1.root","SingleMuon_Run2017D-17Nov2017-v1.root","SingleMuon_Run2017E-17Nov2017-v1.root","SingleMuon_Run2017F-17Nov2017-v1.root"]
-      #self.list_file_TTbar_mc   = ["TTTo2L2Nu_TuneCP5_PSweights_13TeV-powheg-pythia8.root","TTToHadronic_TuneCP5_PSweights_13TeV-powheg-pythia8.root","TTToSemiLeptonic_TuneCP5_PSweights_13TeV-powheg-pythia8.root"]
-      #if options.sample.find("tune16")!=-1:
-      #    self.list_file_TTbar_mc   = ["TTTo2L2Nu_TuneCP5_PSweights_13TeV-powheg-pythia8.root","TTToHadronic_TuneCP5_PSweights_13TeV-powheg-pythia8.root","TTToSemiLeptonic_WspTgt150_TuneCUETP8M2T4_13TeV-powheg-pythia8.root"]
-      #    
-      #    
-      ## self.list_file_TTbar_mc   = ["TTTo2L2Nu_TuneCP5_PSweights_13TeV-powheg-pythia8.root","TTToHadronic_TuneCP5_PSweights_13TeV-powheg-pythia8.root","TTToSemiLeptonic_WspTgt150_TuneCUETP8M2T4_13TeV-powheg-pythia8.root"]
-      #self.list_file_WJets_mc   = ["W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root","W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root","W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root","W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8.root"]
-      #self.list_file_VV_mc      = ["WW_TuneCP5_13TeV-pythia8.root","WZ_TuneCP5_13TeV-pythia8.root","ZZ_TuneCP5_13TeV-pythia8.root"]
-      self.list_file_pseudodata =  self.list_file_STop_mc + self.list_file_VV_mc   + self.list_file_WJets_mc + self.list_file_TTbar_mc
-      # self.list_file_data              = ["SingleMuon.root"]
-#       self.list_file_WJets_mc           = ["WJetsToLNu.root"]
-#       self.list_file_VV_mc             = ["VV.root"]
-#       self.list_file_QCD_mc            = ["QCD.root"]
-#       self.list_file_STop_mc           = ["ST.root"]
-#       self.list_file_TTbar_mc          = ["TT.root"]
-#       self.list_file_pseudodata        = ["tmp_TT.root","WJetsToLNu.root","VV.root","QCD.root","ST.root"]#"pseudodata_weighted.root"    #Important! ROOT tree containing all backgrounds added together (tt+singleT+VV+Wjets). Used for fit to total MC
+      self.list_file_pseudodata   =  self.list_file_STop_mc + self.list_file_VV_mc + self.list_file_WJets_mc + self.list_file_TTbar_mc
       
 
       # Define Tau21 WP
@@ -802,7 +772,7 @@ class initialiseFits:
             self.get_mj_dataset(self.list_file_TTbar_mc,"_TTbar_realW")
             self.get_mj_dataset(self.list_file_TTbar_mc,"_TTbar_fakeW")
             self.get_mj_dataset(self.list_file_data,"_data")
-            from WTopScalefactorProducer.Fitter.fitutils import doTTscalefactor
+            from boostedWScalefactorProducer.Fitter.fitutils import doTTscalefactor
             ttSF = doTTscalefactor(self.workspace4fit_,self.channel)
 #            for f in self.list_file_TTbar_mc:
 #              fname  = rt.TString(self.file_Directory+"/"+f)
@@ -817,7 +787,7 @@ class initialiseFits:
             
             self.workspace4fit_.writeToFile(filename)
             
-            from WTopScalefactorProducer.Fitter.fitutils import fit_mj_single_MC
+            from boostedWScalefactorProducer.Fitter.fitutils import fit_mj_single_MC
             
             #First fit to gen level variables
             fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbar_realW",self.mj_shape["TTbar_realW_MC"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
@@ -836,7 +806,12 @@ class initialiseFits:
         
         else:
             
-            from WTopScalefactorProducer.Fitter.fitutils import fit_mj_single_MC
+            from boostedWScalefactorProducer.Fitter.fitutils import fit_mj_single_MC
+            fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbar_realW",self.mj_shape["TTbar_realW_MC"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
+            fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbar_realW_failtau2tau1cut",self.mj_shape["TTbar_realW_fail_MC"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
+            fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbar_fakeW",self.mj_shape["TTbar_fakeW_MC"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
+            fit_mj_single_MC(self.workspace4fit_,self.file_TTbar_mc,"_TTbar_fakeW_failtau2tau1cut",self.mj_shape["TTbar_fakeW_fail_MC"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
+            
             fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STop"                        ,self.mj_shape["STop"],self.channel,self.wtagger_label,options.workspace.replace(".root","")) 
             fit_mj_single_MC(self.workspace4fit_,self.file_STop_mc,"_STop_failtau2tau1cut"        ,self.mj_shape["STop_fail"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))          
             fit_mj_single_MC(self.workspace4fit_,self.file_WJets_mc,"_WJets",self.mj_shape["WJets"],self.channel,self.wtagger_label,options.workspace.replace(".root",""))
@@ -852,7 +827,7 @@ class initialiseFits:
       self.constrainslist_mc   = []
         
       #Construct pass/fail models (fix minor backgrounds, create sim. fit total PDFS)
-      from WTopScalefactorProducer.Fitter.fitutils import ScaleFactorTTbarControlSampleFit
+      from boostedWScalefactorProducer.Fitter.fitutils import ScaleFactorTTbarControlSampleFit
       ScaleFactorTTbarControlSampleFit(self.workspace4fit_,self.mj_shape,self.color_palet,self.constrainslist_data,self.constrainslist_mc,self.channel,self.wtagger_label,options.peak,options.workspace.replace(".root",""))
      
       #Get data/MC scalefactors
@@ -925,7 +900,7 @@ class initialiseFits:
     # Loop over trees
     def get_mj_dataset(self,in_file_name, label, jet_mass=options.massvar,lumi=lumi): 
       
-      print "Using mass variable " ,jet_mass
+      print "Using mass variable " ,jet_mass, "and processing: ", label
     
       treeIn = TChain(options.intree)
       for f in in_file_name:
@@ -994,9 +969,23 @@ class initialiseFits:
       SF = 1.0
 #      if label.find("QCD")!=-1: 
 #          SF = 0.697187387981
-      
+        
+      def time_convert(sec):
+        mins = sec // 60
+        sec = sec % 60
+        hours = mins // 60
+        mins = mins % 60
+        print("Time remainning = {0}:{1}:{2}".format(int(hours),int(mins),sec))
+        
+      start_time = time.time()
+      remain_time = -99                 
       for i in range(treeIn.GetEntries()):
-          if i % 5000 == 0: print "iEntry: ",i
+          if i % 50000 == 0: 
+            print "iEntry: ",i
+            current_time = time.time()
+            ave_speed = (current_time - start_time) / (i+1)
+            remain_time = (treeIn.GetEntries() - i) * ave_speed                
+            time_convert(remain_time)                                      
           event = treeIn.GetEntry(i)
           if not (treeIn.SelectedJet_pt > self.AK8_pt_min): continue
           if not (treeIn.SelectedJet_pt < self.AK8_pt_max): continue
@@ -1016,8 +1005,10 @@ class initialiseFits:
 #          except:
 #            print "WARNING: no genmatchedAK8 in tree", treeIn.GetName()
           
-          if TString(label).Contains("realW") and not treeIn.genmatchedAK82017: continue
-          if TString(label).Contains("fakeW") and treeIn.genmatchedAK82017: continue
+          # if TString(label).Contains("realW") and not treeIn.genmatchedAK82017: continue
+          # if TString(label).Contains("fakeW") and treeIn.genmatchedAK82017: continue
+          if TString(label).Contains("realW") and not treeIn.genmatchedAK8: continue
+          if TString(label).Contains("fakeW") and treeIn.genmatchedAK8: continue
           
           if options.tagger.find("ddt")==-1 and options.tagger.find("DDT")==-1: 
               wtagger = getattr(treeIn,options.tagger)
@@ -1163,7 +1154,9 @@ class initialiseFits:
       getattr(self.workspace4fit_,"import")(rrv_number_dataset_sb_hi_mj)
       getattr(self.workspace4fit_,"import")(combData_p_f)
 
-      print "N_rdataset_mj: "
+      print "===================================================================================================================================="
+      print "This is doing: ",label," weight sum pass is: ", rdataset_mj.sumEntries(), "weight sum fail is: ", rdataset_failtau2tau1cut_mj.sumEntries()
+      
       getattr(self.workspace4fit_,"import")(rdataset_mj)
       getattr(self.workspace4fit_,"import")(rdataset4fit_mj)
       getattr(self.workspace4fit_,"import")(rdataset_beforetau2tau1cut_mj)
@@ -1190,5 +1183,3 @@ if __name__ == '__main__':
     else:
         print 'Getting W-tagging scalefactor for %s sample for n-subjettiness < %.2f' %(channel,options.tau2tau1cutHP) #I am actually not doing a simoultaneous fit. So..... change this
         getSF()
-
-
